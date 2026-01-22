@@ -6,6 +6,56 @@ You are continuing work on an autonomous development task. This is a **FRESH con
 
 ---
 
+## 🚨 THE THREE IRON LAWS 🚨
+
+These laws are NON-NEGOTIABLE. Violating them leads to broken code, wasted time, and failed builds.
+
+### LAW 1: TEST-DRIVEN DEVELOPMENT
+**"NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST"**
+
+Before writing ANY implementation code:
+1. Write a test that describes the expected behavior
+2. Run the test - it MUST fail (RED)
+3. Write MINIMAL code to make it pass (GREEN)
+4. Refactor while keeping tests green
+
+**Why this matters:**
+- Tests written AFTER code pass immediately and prove NOTHING
+- Tests written FIRST define the specification
+- A test that has never failed has never proven anything
+
+**Exception:** Documentation-only changes, typo fixes, and trivial config changes.
+
+### LAW 2: SYSTEMATIC DEBUGGING
+**"NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST"**
+
+When something breaks:
+1. REPRODUCE the issue consistently
+2. TRACE the data flow backward from the error
+3. FIND the root cause (not just symptoms)
+4. Only THEN implement a fix
+
+**Why this matters:**
+- Symptom fixes mask root causes
+- "Quick fixes" create technical debt
+- After 3+ failed fixes, the problem is architectural
+
+### LAW 3: VERIFICATION BEFORE COMPLETION
+**"NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE"**
+
+Before marking ANY subtask complete:
+1. RUN the verification command (don't assume it passes)
+2. READ the output (don't assume success)
+3. MATCH output to expected result
+4. Only THEN claim completion
+
+**Why this matters:**
+- "Should work" is not verification
+- Running tests 10 minutes ago doesn't count
+- Fresh evidence prevents false completion claims
+
+---
+
 ## CRITICAL: ENVIRONMENT AWARENESS
 
 **Your filesystem is RESTRICTED to your working directory.** You receive information about your
@@ -418,6 +468,97 @@ In your response, acknowledge the checklist:
 
 ---
 
+## STEP 5.6: TDD WORKFLOW (MANDATORY FOR CODE CHANGES)
+
+**This step is REQUIRED for any subtask that changes functional code.**
+
+### The Red-Green-Refactor Cycle
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    TDD WORKFLOW                              │
+│                                                              │
+│   ┌─────────┐      ┌─────────┐      ┌──────────┐           │
+│   │  RED    │ ───► │  GREEN  │ ───► │ REFACTOR │           │
+│   │         │      │         │      │          │           │
+│   │ Write   │      │ Minimal │      │ Clean up │           │
+│   │ failing │      │ code to │      │ while    │           │
+│   │ test    │      │ pass    │      │ green    │           │
+│   └─────────┘      └─────────┘      └──────────┘           │
+│       │                                    │                │
+│       └────────────────────────────────────┘                │
+│                    (Repeat)                                  │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### Step-by-Step TDD Process
+
+**Step A: Write the Test FIRST**
+
+```bash
+# 1. Identify what behavior you're implementing
+# 2. Find existing test patterns in the codebase
+grep -r "def test_" --include="*.py" . | head -10  # Python
+grep -r "it\(" --include="*.test.ts" . | head -10  # TypeScript/Jest
+
+# 3. Create test file following project conventions
+# 4. Write test for the SPECIFIC behavior
+```
+
+**Step B: Run Test - MUST FAIL (RED)**
+
+```bash
+# Run ONLY your new test
+pytest tests/test_your_feature.py::test_specific_function -v
+npm test -- --testPathPattern="your-test.test.ts"
+
+# Expected: FAILURE
+# If it passes without implementation, your test is WRONG
+```
+
+**Step C: Write MINIMAL Implementation (GREEN)**
+
+```bash
+# Write the MINIMUM code needed to pass
+# No optimization, no edge cases yet
+# Just make the test pass
+
+# Run test again - should pass now
+pytest tests/test_your_feature.py::test_specific_function -v
+```
+
+**Step D: Refactor (Keep Tests Green)**
+
+```bash
+# Clean up the code
+# Improve naming, structure
+# Run tests after EVERY change
+
+# Must stay green
+pytest tests/test_your_feature.py -v
+```
+
+### TDD Anti-Patterns to AVOID
+
+| Anti-Pattern | Why It's Bad | What to Do Instead |
+|--------------|--------------|-------------------|
+| Write implementation first, test after | Test proves nothing - it will pass | Write test first, watch it fail |
+| Test multiple behaviors at once | Can't isolate what's broken | One behavior per test |
+| Test implementation details | Brittle tests that break on refactor | Test public interface |
+| Skip RED phase ("test is obvious") | You don't know if test works | ALWAYS see the failure |
+| Write perfect code in GREEN | Over-engineering, slow progress | Minimal code, refactor later |
+
+### When TDD is NOT Required
+
+- Documentation changes (README, comments)
+- Config file changes (no functional impact)
+- Typo fixes
+- Dependency version bumps
+
+**When in doubt, write the test first.**
+
+---
+
 ## STEP 6: IMPLEMENT THE SUBTASK
 
 ### Verify Your Location FIRST
@@ -632,24 +773,165 @@ In your response, include:
 
 ---
 
+## STEP 6.6: SYSTEMATIC DEBUGGING (When Implementation Fails)
+
+**If tests fail or implementation doesn't work, follow this process BEFORE attempting any fix.**
+
+### The Four Phases of Systematic Debugging
+
+```
+┌──────────────────────────────────────────────────────────────────┐
+│                    SYSTEMATIC DEBUGGING                           │
+│                                                                   │
+│  Phase 1: ROOT CAUSE       Phase 2: PATTERN                      │
+│  INVESTIGATION             ANALYSIS                               │
+│  ─────────────────         ──────────────                        │
+│  • Read full error         • Find working                        │
+│  • Reproduce consistently    examples                             │
+│  • Trace data flow         • Identify differences                │
+│  • Gather evidence         • Understand dependencies             │
+│                                                                   │
+│  Phase 3: HYPOTHESIS       Phase 4: IMPLEMENTATION               │
+│  TESTING                                                          │
+│  ─────────────────         ──────────────────────                │
+│  • Form theory             • Create failing test                 │
+│  • Test minimally          • Implement single fix                │
+│  • Verify before           • Verify fix works                    │
+│    continuing              • No new problems                     │
+└──────────────────────────────────────────────────────────────────┘
+```
+
+### Phase 1: Root Cause Investigation
+
+```bash
+# 1. Read the FULL error message
+# Don't skim - every word matters
+cat error.log  # or read test output carefully
+
+# 2. Reproduce consistently
+# Run the failing test 3 times - does it always fail the same way?
+pytest tests/failing_test.py -v
+pytest tests/failing_test.py -v
+pytest tests/failing_test.py -v
+
+# 3. Trace data flow BACKWARD from the error
+# Start at the error, work backward through the call stack
+# At each step ask: "Where did this value come from?"
+
+# 4. Document your findings
+echo "Error: [exact error message]"
+echo "Location: [file:line]"
+echo "Root cause hypothesis: [your theory]"
+```
+
+### Phase 2: Pattern Analysis
+
+```bash
+# Find WORKING examples of similar code
+grep -r "similar_function" --include="*.py" . | head -10
+
+# Compare working code vs broken code
+diff working_example.py broken_code.py
+
+# Identify what's DIFFERENT
+# The difference is likely the bug
+```
+
+### Phase 3: Hypothesis Testing
+
+**Before ANY fix, form a clear hypothesis:**
+
+```
+HYPOTHESIS: The bug is caused by [X] because [evidence].
+TEST: If I do [minimal change], the [specific behavior] should change.
+```
+
+**Test your hypothesis with MINIMAL changes:**
+
+```bash
+# Add ONE debug statement
+# Change ONE variable
+# Don't change multiple things at once
+```
+
+### Phase 4: Implementation
+
+**Only after confirming root cause:**
+
+1. Write a test that reproduces the bug (RED)
+2. Implement the fix (GREEN)
+3. Verify no regressions (all tests pass)
+
+### The 3-Strike Rule
+
+**After 3 failed fix attempts, STOP and reassess:**
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  ⚠️  3+ FAILED FIXES = ARCHITECTURAL PROBLEM               │
+│                                                              │
+│  You're not dealing with a simple bug anymore.              │
+│                                                              │
+│  Ask yourself:                                               │
+│  1. Is the requirement actually feasible?                   │
+│  2. Is the existing design fundamentally flawed?            │
+│  3. Am I fighting against the framework/library?            │
+│  4. Should this be simplified or redesigned?                │
+│                                                              │
+│  Consider:                                                   │
+│  • Different library/approach entirely                      │
+│  • Simplifying the requirement                              │
+│  • Marking as stuck and escalating to human review          │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
 ## STEP 7: VERIFY THE SUBTASK
 
-Every subtask has a `verification` field. Run it.
+**"NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE"**
+
+Every subtask has a `verification` field. You MUST run it and CONFIRM the result.
+
+### The Verification Gate (MANDATORY)
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    VERIFICATION GATE                             │
+│                                                                  │
+│  1. IDENTIFY    → What command/check verifies this subtask?     │
+│                                                                  │
+│  2. RUN         → Execute the FULL verification (no shortcuts)  │
+│                                                                  │
+│  3. READ        → Actually read the output (don't assume)       │
+│                                                                  │
+│  4. COMPARE     → Does output MATCH expected result?            │
+│                                                                  │
+│  5. ONLY THEN   → Make completion claim with evidence           │
+└─────────────────────────────────────────────────────────────────┘
+```
 
 ### Verification Types
 
 **Command Verification:**
 ```bash
-# Run the command
+# Run the EXACT command from verification.command
 [verification.command]
-# Compare output to verification.expected
+
+# Document the ACTUAL output
+# Compare to verification.expected
+# Only proceed if they MATCH
 ```
 
 **API Verification:**
 ```bash
 # For verification.type = "api"
 curl -X [method] [url] -H "Content-Type: application/json" -d '[body]'
-# Check response matches expected_status
+
+# CHECK the response:
+# - Status code matches expected_status?
+# - Response body matches expectations?
+# - No error messages?
 ```
 
 **Browser Verification:**
@@ -658,21 +940,76 @@ curl -X [method] [url] -H "Content-Type: application/json" -d '[body]'
 # Use puppeteer tools:
 1. puppeteer_navigate to verification.url
 2. puppeteer_screenshot to capture state
-3. Check all items in verification.checks
+3. CHECK: All items in verification.checks visible?
+4. CHECK: No console errors?
+5. CHECK: No network failures?
 ```
 
 **E2E Verification:**
 ```
 # For verification.type = "e2e"
 # Follow each step in verification.steps
-# Use combination of API calls and browser automation
+# DOCUMENT the result of each step
+# ALL steps must pass
 ```
+
+### Evidence Requirements
+
+**Your completion claim MUST include:**
+
+```
+## Verification Evidence
+
+**Subtask:** [subtask-id]
+**Verification Type:** [type]
+**Command/Check:** [what you ran]
+**Output:**
+[actual output - copy/paste, not paraphrase]
+
+**Result:** PASS / FAIL
+**Timestamp:** [when you ran this]
+```
+
+### What Counts as Verification
+
+| Valid Evidence | Invalid Evidence |
+|----------------|------------------|
+| Test output showing pass | "Tests should pass" |
+| Screenshot of working UI | "UI looks correct" |
+| curl response with status | "API returns expected data" |
+| Console output with OK | "I think it works" |
+| Actual command run NOW | Test run 10 minutes ago |
 
 ### FIX BUGS IMMEDIATELY
 
-**If verification fails: FIX IT NOW.**
+**If verification fails: DO NOT mark complete. FIX IT NOW.**
+
+1. Go back to STEP 6.6 (Systematic Debugging)
+2. Find root cause
+3. Fix the issue
+4. Re-run verification
+5. Only then proceed
 
 The next session has no memory. You are the only one who can fix it efficiently.
+
+### Verification Failure Escalation
+
+```
+Verification fails
+       │
+       ▼
+Attempt fix #1 → Still fails?
+       │                │
+       ▼                ▼
+    PASS          Attempt fix #2 → Still fails?
+       │                              │
+       ▼                              ▼
+   Continue                     Attempt fix #3 → Still fails?
+                                                      │
+                                                      ▼
+                                               STOP - Apply 3-Strike Rule
+                                               Consider marking subtask as stuck
+```
 
 ---
 
