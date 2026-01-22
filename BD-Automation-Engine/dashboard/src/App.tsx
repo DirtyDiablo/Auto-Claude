@@ -18,6 +18,7 @@ import { PastPerformance } from './pages/PastPerformance';
 import { PrimeOrgChart } from './pages/PrimeOrgChart';
 import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
 import { PlacementsPage } from './pages/PlacementsPage';
+import CallIntelligence from './pages/CallIntelligence';
 import { useNotionDashboard } from './hooks/useNotionData';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
@@ -225,6 +226,8 @@ function App() {
         return <ContactOrgChartPage loading={loading} />;
       case 'placements':
         return <PlacementsPage loading={loading} />;
+      case 'callintelligence':
+        return <CallIntelligence />;
       case 'settings':
         return (
           <Settings

@@ -1,0 +1,30 @@
+{
+  "exportDate": "2026-01-22T16:53:18.034584",
+  "totalCallNotes": 50710,
+  "uniqueContacts": 26010,
+  "totalPrimes": 31,
+  "totalPrograms": 30,
+  "gapPrograms": 3,
+  "gapContacts": 100,
+  "topPrimes": [
+    "CACI",
+    "GDIT",
+    "LMCO",
+    "LEIDOS",
+    "AWS"
+  ],
+  "topLocations": [
+    "AFB",
+    "Japan",
+    "Korea",
+    "Meade",
+    "Colorado Springs"
+  ],
+  "actionBreakdown": {
+    "Left Message": 26095,
+    "Outbound Call": 12196,
+    "Prescreen": 9503,
+    "Other": 1737,
+    "Email": 1179
+  }
+}
