@@ -24,6 +24,21 @@ import type { AppSettings } from '../../shared/types/settings';
 import { getOAuthModeClearVars } from './env-utils';
 import { getAugmentedEnv } from '../env-utils';
 import { getToolInfo } from '../cli-tool-manager';
+import { killProcessGracefully } from '../platform';
+
+/**
+ * Type for supported CLI tools
+ */
+type CliTool = 'claude' | 'gh';
+
+/**
+ * Mapping of CLI tools to their environment variable names
+ * This ensures type safety - tools cannot be mismatched with env vars.
+ */
+const CLI_TOOL_ENV_MAP: Readonly<Record<CliTool, string>> = {
+  claude: 'CLAUDE_CLI_PATH',
+  gh: 'GITHUB_CLI_PATH'
+} as const;
 
 
 function deriveGitBashPath(gitExePath: string): string | null {
