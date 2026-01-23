@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { DataFreshness } from './components/DataFreshness';
 import { ExecutiveSummary } from './pages/ExecutiveSummary';
 import { JobIntelligence } from './pages/JobIntelligence';
 import { JobsPipeline } from './pages/JobsPipeline';
@@ -253,6 +254,7 @@ function App() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
       <main className="flex-1 overflow-hidden">{renderContent()}</main>
+      <DataFreshness />
     </div>
   );
 }
