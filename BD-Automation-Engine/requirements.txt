@@ -65,8 +65,36 @@ pytest-cov>=4.1.0
 # ipython>=8.12.0
 # jupyter>=1.0.0
 
-# For Qdrant vector database
-# qdrant-client>=1.6.0
+# ============================================
+# VECTOR DATABASE & EMBEDDINGS (Engine 8)
+# ============================================
+qdrant-client>=1.7.0
+sentence-transformers>=2.2.0
+
+# ============================================
+# DOCUMENT PROCESSING (Engine 8)
+# ============================================
+docling>=0.1.0
+python-magic-bin>=0.4.14  # Windows-compatible magic
+
+# ============================================
+# RAG FRAMEWORK (Engine 8)
+# ============================================
+llama-index>=0.10.0
+llama-index-vector-stores-qdrant>=0.1.0
+llama-index-llms-anthropic>=0.1.0
+llama-index-embeddings-huggingface>=0.1.0
+
+# ============================================
+# API SERVER (Engine 8)
+# ============================================
+fastapi>=0.109.0
+uvicorn>=0.27.0
+
+# ============================================
+# FILE WATCHING (Engine 8)
+# ============================================
+watchdog>=3.0.0
 
 # For advanced scheduling
 # schedule>=1.2.0
