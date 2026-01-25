@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useProjectStore } from '../../../stores/project-store';
 import { checkTaskRunning, isIncompleteHumanReview, getTaskProgress, useTaskStore, loadTasks } from '../../../stores/task-store';
-import type { Task, TaskLogs, TaskLogPhase, WorktreeStatus, WorktreeDiff, MergeConflict, MergeStats, GitConflictInfo } from '../../../../shared/types';
+import type { Task, TaskLogs, TaskLogPhase, WorktreeStatus, WorktreeDiff, MergeConflict, MergeStats, GitConflictInfo, ImageAttachment } from '../../../../shared/types';
 
 /**
  * Validates task subtasks structure to prevent infinite loops during resume.
@@ -50,6 +50,7 @@ export interface UseTaskDetailOptions {
 
 export function useTaskDetail({ task }: UseTaskDetailOptions) {
   const [feedback, setFeedback] = useState('');
+  const [feedbackImages, setFeedbackImages] = useState<ImageAttachment[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [isUserScrolledUp, setIsUserScrolledUp] = useState(false);
@@ -106,23 +107,39 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
   useEffect(() => {
     let timeoutId: NodeJS.Timeout | undefined;
 
-    // IMPORTANT: If execution phase is 'complete' or 'failed', the task is NOT stuck.
-    // It means the process has finished and status update is pending.
-    // This prevents false-positive "stuck" indicators when the process exits normally.
-    const isPhaseTerminal = executionPhase === 'complete' || executionPhase === 'failed';
-    if (isPhaseTerminal) {
+    // IMPORTANT: Check !isActiveTask FIRST before any phase checks
+    // This ensures hasCheckedRunning is always reset when task stops,
+    // even if the task stops while in 'planning' phase
+    if (!isActiveTask) {
+      setIsStuck(false);
+      setHasCheckedRunning(false);
+      return;
+    }
+
+    // Task is active from here on
+
+    // 'planning' phase: Skip stuck check but don't set hasCheckedRunning
+    // (allows stuck detection when task transitions to 'coding')
+    if (executionPhase === 'planning') {
+      setIsStuck(false);
+      return;
+    }
+
+    // Terminal phases: Task finished, no more stuck checks needed
+    if (executionPhase === 'complete' || executionPhase === 'failed') {
       setIsStuck(false);
       setHasCheckedRunning(true);
       return;
     }
 
-    if (isActiveTask && !hasCheckedRunning) {
+    // Active task in coding/validation phase - check if stuck
+    if (!hasCheckedRunning) {
       // Wait 2 seconds before checking - gives process time to spawn and register
       timeoutId = setTimeout(() => {
         checkTaskRunning(task.id).then((actuallyRunning) => {
           // Double-check the phase in case it changed while waiting
           const latestPhase = task.executionProgress?.phase;
-          if (latestPhase === 'complete' || latestPhase === 'failed') {
+          if (latestPhase === 'complete' || latestPhase === 'failed' || latestPhase === 'planning') {
             setIsStuck(false);
           } else {
             setIsStuck(!actuallyRunning);
@@ -130,9 +147,6 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
           setHasCheckedRunning(true);
         });
       }, 2000);
-    } else if (!isActiveTask) {
-      setIsStuck(false);
-      setHasCheckedRunning(false);
     }
 
     return () => {
@@ -160,6 +174,11 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
       setIsUserScrolledUp(false);
     }
   }, [activeTab]);
+
+  // Reset feedback images when task changes to prevent image leakage between tasks
+  useEffect(() => {
+    setFeedbackImages([]);
+  }, [task.id]);
 
   // Load worktree status when task is in human_review
   useEffect(() => {
@@ -255,6 +274,26 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
     });
   }, []);
 
+  // Add a feedback image
+  const addFeedbackImage = useCallback((image: ImageAttachment) => {
+    setFeedbackImages(prev => [...prev, image]);
+  }, []);
+
+  // Add multiple feedback images at once
+  const addFeedbackImages = useCallback((images: ImageAttachment[]) => {
+    setFeedbackImages(prev => [...prev, ...images]);
+  }, []);
+
+  // Remove a feedback image by ID
+  const removeFeedbackImage = useCallback((imageId: string) => {
+    setFeedbackImages(prev => prev.filter(img => img.id !== imageId));
+  }, []);
+
+  // Clear all feedback images
+  const clearFeedbackImages = useCallback(() => {
+    setFeedbackImages([]);
+  }, []);
+
   // Track if we've already loaded preview for this task to prevent infinite loops
   const hasLoadedPreviewRef = useRef<string | null>(null);
 
@@ -266,16 +305,58 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
     }
   }, [task.id]);
 
-  // Load merge preview (conflict detection)
+  // Load merge preview (conflict detection) and refresh worktree status
   const loadMergePreview = useCallback(async () => {
     setIsLoadingPreview(true);
+    // Clear any previous workspace error before loading
+    setWorkspaceError(null);
+
     try {
-      const result = await window.electronAPI.mergeWorktreePreview(task.id);
-      if (result.success && result.data?.preview) {
-        setMergePreview(result.data.preview);
+      // Fetch both merge preview and updated worktree status in parallel
+      // This ensures the branch information (currentProjectBranch) is refreshed
+      // when the user clicks the refresh button after switching branches locally
+      // Use Promise.allSettled to handle partial failures - if one API call fails,
+      // the other's result is still processed rather than being discarded
+      const [previewResult, statusResult] = await Promise.allSettled([
+        window.electronAPI.mergeWorktreePreview(task.id),
+        window.electronAPI.getWorktreeStatus(task.id)
+      ]);
+
+      const errors: string[] = [];
+
+      // Process merge preview result if fulfilled
+      if (previewResult.status === 'fulfilled') {
+        const result = previewResult.value;
+        if (result.success && result.data?.preview) {
+          setMergePreview(result.data.preview);
+        } else if (!result.success && result.error) {
+          errors.push(`Merge preview: ${result.error}`);
+        }
+      } else {
+        console.error('[useTaskDetail] Failed to load merge preview:', previewResult.reason);
+        errors.push('Failed to load merge preview');
+      }
+
+      // Update worktree status with fresh branch information if fulfilled
+      if (statusResult.status === 'fulfilled') {
+        const result = statusResult.value;
+        if (result.success && result.data) {
+          setWorktreeStatus(result.data);
+        } else if (!result.success && result.error) {
+          errors.push(`Worktree status: ${result.error}`);
+        }
+      } else {
+        console.error('[useTaskDetail] Failed to load worktree status:', statusResult.reason);
+        errors.push('Failed to load worktree status');
+      }
+
+      // Set workspace error if any API calls failed
+      if (errors.length > 0) {
+        setWorkspaceError(errors.join('; '));
       }
     } catch (err) {
-      console.error('[useTaskDetail] Failed to load merge preview:', err);
+      console.error('[useTaskDetail] Unexpected error in loadMergePreview:', err);
+      setWorkspaceError('An unexpected error occurred while loading workspace information');
     } finally {
       hasLoadedPreviewRef.current = task.id;
       setIsLoadingPreview(false);
@@ -404,6 +485,7 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
   return {
     // State
     feedback,
+    feedbackImages,
     isSubmitting,
     activeTab,
     isUserScrolledUp,
@@ -447,6 +529,7 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
 
     // Setters
     setFeedback,
+    setFeedbackImages,
     setIsSubmitting,
     setActiveTab,
     setIsUserScrolledUp,
@@ -482,6 +565,10 @@ export function useTaskDetail({ task }: UseTaskDetailOptions) {
     handleLogsScroll,
     togglePhase,
     loadMergePreview,
+    addFeedbackImage,
+    addFeedbackImages,
+    removeFeedbackImage,
+    clearFeedbackImages,
     handleReviewAgain,
     reloadPlanForIncompleteTask,
   };

@@ -1,6 +1,9 @@
 import type * as pty from '@lydell/node-pty';
 import type { BrowserWindow } from 'electron';
-import type { TerminalWorktreeConfig } from '../../shared/types';
+import type { TerminalWorktreeConfig, WindowsShellType } from '../../shared/types';
+
+// Re-export WindowsShellType for backwards compatibility
+export type { WindowsShellType } from '../../shared/types';
 
 /**
  * Terminal process tracking
@@ -19,6 +22,12 @@ export interface TerminalProcess {
   worktreeConfig?: TerminalWorktreeConfig;
   /** Whether this terminal has a pending Claude resume that should be triggered on activation */
   pendingClaudeResume?: boolean;
+  /** Whether Claude was invoked with --dangerously-skip-permissions (YOLO mode) */
+  dangerouslySkipPermissions?: boolean;
+  /** Shell type for Windows (affects command chaining syntax) */
+  shellType?: WindowsShellType;
+  /** Whether this terminal is waiting for Claude onboarding to complete (login flow) */
+  awaitingOnboardingComplete?: boolean;
 }
 
 /**
@@ -44,6 +53,18 @@ export interface OAuthTokenEvent {
   success: boolean;
   message?: string;
   detectedAt: string;
+  /** If true, user should complete onboarding in terminal before closing */
+  needsOnboarding?: boolean;
+}
+
+/**
+ * Onboarding complete event data
+ * Sent when Claude Code shows its ready state after login/onboarding
+ */
+export interface OnboardingCompleteEvent {
+  terminalId: string;
+  profileId?: string;
+  detectedAt: string;
 }
 
 /**
@@ -67,3 +88,15 @@ export interface TerminalOperationResult {
  * Window getter function type
  */
 export type WindowGetter = () => BrowserWindow | null;
+
+/**
+ * Terminal info for profile change operations
+ */
+export interface TerminalProfileChangeInfo {
+  id: string;
+  cwd: string;
+  projectPath?: string;
+  claudeSessionId?: string;
+  claudeProfileId?: string;
+  isClaudeMode: boolean;
+}

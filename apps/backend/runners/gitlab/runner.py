@@ -91,7 +91,7 @@ def get_config(args) -> GitLabRunnerConfig:
         config_path = Path(args.project_dir) / ".auto-claude" / "gitlab" / "config.json"
         if config_path.exists():
             try:
-                with open(config_path) as f:
+                with open(config_path, encoding="utf-8") as f:
                     data = json.load(f)
                     project = data.get("project", "")
                     instance_url = data.get("instance_url", instance_url)
@@ -270,7 +270,7 @@ def main():
     parser.add_argument(
         "--model",
         type=str,
-        default="claude-sonnet-4-20250514",
+        default="claude-sonnet-4-5-20250929",
         help="AI model to use",
     )
     parser.add_argument(
