@@ -6,80 +6,80 @@
     "category": "Defense Prime",
     "total_jobs": 135,
     "total_placements": 209,
-    "total_contacts": 213,
+    "total_contacts": 33,
     "top_contacts": [
       {
-        "name": "Dexter Smith",
-        "score": 43,
-        "tier": "C - Engaged"
-      },
-      {
         "name": "Ebenezer Akumatey",
-        "score": 43,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "ANGELLO QUILCAT",
-        "score": 43,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "James Booker",
-        "score": 43,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Michael Bowles",
-        "score": 43,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Sanu Adebo",
-        "score": 43,
-        "tier": "C - Engaged"
+        "score": 63,
+        "tier": "B - High Value"
       },
       {
         "name": "Laurie Kunnath",
-        "score": 33,
-        "tier": "C - Engaged"
+        "score": 53,
+        "tier": "B - High Value"
       },
       {
         "name": "Angela McManus",
-        "score": 33,
-        "tier": "C - Engaged"
+        "score": 53,
+        "tier": "B - High Value"
       },
       {
         "name": "Chad Beleele",
-        "score": 33,
-        "tier": "C - Engaged"
+        "score": 53,
+        "tier": "B - High Value"
       },
       {
         "name": "Timothy Cox",
-        "score": 33,
-        "tier": "C - Engaged"
+        "score": 53,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Rojan DiNicola",
+        "score": 53,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "DeAnna Maes",
+        "score": 53,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Tracy Ostransky",
+        "score": 53,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Dexter Smith",
+        "score": 53,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Kevin Crawford",
+        "score": 53,
+        "tier": "B - High Value"
       }
     ],
     "programs": [
-      "Intelligence Systems Enterprise Operations",
-      "DIA Infrastructure Services Ops",
-      "DIA IT Sustainment & Enterprise Ops",
-      "DIA IT Sustainment & Enterprise Ops (Task Order)",
-      "Defense Health Agency Modernization / MHS GENESIS",
-      "Global Network Operations (DISA GSM-O II)",
-      "SSA IT Support Services Contract",
-      "DIA IT Sustainment & Engineering Office",
-      "Global Solutions Management \u2013 Operations II",
-      "NGEN-R \u2014 Enterprise Network Program",
-      "Global Service Mgmt \u2013 Ops II (variant)",
-      "MHS GENESIS / Leidos Partnership for Defense Health",
-      "Navy Enterprise Service Desk",
-      "DISA GSM-O II (Surge Staffing Focus)",
-      "DIA IT Sustainment (ISEO)",
-      "DISA GSM-O II",
+      "Global Service Management \u2013 Operations II",
+      "Defense Enclave Services",
+      "DTRA IT Modernization / Support Services",
       "NGEN-R SMIT (Already normalized \u2014 link-only reference row)",
+      "DIA Information Systems Engineering Office",
+      "Global Service Mgmt \u2013 Ops II (variant)",
+      "SSA IT Support Services Contract",
+      "Defense Enclave Services \u2013 Fourth Estate IT Consolidation",
+      "DISA GSM-O II",
+      "Marine Corps Enterprise Network",
+      "Global Network Operations (DISA GSM-O II)",
       "DIA ISEO",
-      "DIA SITE III",
-      "Global Network Operations II (PTS Subcontract)"
+      "Integrated Strategic & Expeditionary Operations (DIA ISEO variant)",
+      "DIA ISEO (IT Sustainment for DIA)",
+      "DISA GSM-O II (Surge Staffing Focus)",
+      "NGEN-R SMIT \u2013 Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",
+      "Defense Health Agency Modernization / MHS GENESIS",
+      "DISA Global Service Mgmt \u2013 Ops II",
+      "Army ALTESS Cloud Hosting",
+      "DTRA IT Support Services"
     ],
     "program_count": 42,
     "is_defense_prime": true,
@@ -92,57 +92,57 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 111,
-    "total_contacts": 108,
+    "total_contacts": 68,
     "top_contacts": [
       {
+        "name": "David Riffe",
+        "score": 62,
+        "tier": "B - High Value"
+      },
+      {
         "name": "IAN ELMER",
-        "score": 52,
+        "score": 62,
         "tier": "B - High Value"
       },
       {
         "name": "Dylan Jones",
-        "score": 52,
+        "score": 62,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "DANIEL TUTTLE",
+        "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Tavin Howard",
+        "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "EFREN HERNANDEZ",
+        "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Braulio Rivera Gonzalez",
+        "score": 57,
         "tier": "B - High Value"
       },
       {
         "name": "Manuel Hernandez",
-        "score": 47,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "David Riffe",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "DANIEL TUTTLE",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Tavin Howard",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Charles Brown",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "EFREN HERNANDEZ",
-        "score": 37,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Braulio Rivera Gonzalez",
-        "score": 37,
-        "tier": "C - Engaged"
+        "score": 57,
+        "tier": "B - High Value"
       },
       {
         "name": "Frank Finney",
-        "score": 37,
-        "tier": "C - Engaged"
+        "score": 52,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Daniel Dunevant",
+        "score": 52,
+        "tier": "B - High Value"
       }
     ],
     "programs": [],
@@ -157,57 +157,57 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 111,
-    "total_contacts": 109,
+    "total_contacts": 67,
     "top_contacts": [
       {
+        "name": "David Riffe",
+        "score": 62,
+        "tier": "B - High Value"
+      },
+      {
         "name": "IAN ELMER",
-        "score": 52,
+        "score": 62,
         "tier": "B - High Value"
       },
       {
         "name": "Dylan Jones",
-        "score": 52,
+        "score": 62,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "DANIEL TUTTLE",
+        "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Tavin Howard",
+        "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "EFREN HERNANDEZ",
+        "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Braulio Rivera Gonzalez",
+        "score": 57,
         "tier": "B - High Value"
       },
       {
         "name": "Manuel Hernandez",
-        "score": 47,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "David Riffe",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "DANIEL TUTTLE",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Tavin Howard",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Charles Brown",
-        "score": 42,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "EFREN HERNANDEZ",
-        "score": 37,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Braulio Rivera Gonzalez",
-        "score": 37,
-        "tier": "C - Engaged"
+        "score": 57,
+        "tier": "B - High Value"
       },
       {
         "name": "Frank Finney",
-        "score": 37,
-        "tier": "C - Engaged"
+        "score": 52,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Daniel Dunevant",
+        "score": 52,
+        "tier": "B - High Value"
       }
     ],
     "programs": [],
@@ -222,79 +222,79 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 72,
-    "total_contacts": 73,
+    "total_contacts": 17,
     "top_contacts": [
       {
         "name": "Ivan Milovidov",
-        "score": 48,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Jarrett Early",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "Ryan Welch",
-        "score": 43,
-        "tier": "C - Engaged"
+        "score": 63,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Jarrett Early",
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Perry Franklin",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Robert  Davis",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Zachary Roy",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Hussein Amro",
-        "score": 33,
-        "tier": "C - Engaged"
+        "score": 53,
+        "tier": "B - High Value"
       },
       {
         "name": "Saman Retta",
-        "score": 33,
+        "score": 48,
         "tier": "C - Engaged"
       },
       {
         "name": "Daniel Amoh",
-        "score": 33,
+        "score": 48,
         "tier": "C - Engaged"
       },
       {
         "name": "ISREAL NTUNGFOR",
-        "score": 33,
+        "score": 48,
         "tier": "C - Engaged"
       }
     ],
     "programs": [
-      "Peraton NARSIL \u2013 Advanced System Intelligence",
-      "DIMS (Peraton)",
-      "CAAC (Peraton)",
-      "ARCYBER Information Advantage / Mission Support (general)",
-      "Defense Cyber Crime Center",
-      "CBP Enterprise IT Support",
-      "DFAS Enterprise Support",
-      "DC3 Cyber Crime Center \u2013 Secondary Row",
-      "Peraton ARCYBER Information Advantage Enterprise",
       "CMS Enterprise Cloud Infrastructure Services",
-      "JGLASS II \u2013 Shared Services",
-      "DFAS Enterprise IT Support \u2013 Secondary Row",
-      "Data Center & Cloud Optimization",
-      "GRASP (Raytheon/Peraton)",
-      "NASA Space Network Evolution",
-      "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
+      "NASA SENSE (Space Comms & Tracking)",
       "SITEC III \u2013 Enterprise Operations & Maintenance",
+      "Peraton NARSIL \u2013 Advanced System Intelligence",
+      "DFAS Enterprise IT Support \u2013 Secondary Row",
+      "Peraton ARCYBER Information Advantage Enterprise",
+      "DIMS (Peraton)",
+      "ARCYBER Information Advantage / Mission Support (general)",
+      "CBP Enterprise IT Support",
+      "JGLASS II \u2013 Shared Services",
+      "DC3 Cyber Crime Center \u2013 Secondary Row",
+      "Defense Cyber Crime Center",
+      "DFAS Enterprise Support",
+      "Data Center & Cloud Optimization",
+      "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
+      "GRASP (Raytheon/Peraton)",
       "DC3 \u2013 Defense Cyber Crime Center",
-      "NASA SENSE (Space Comms & Tracking)"
+      "CAAC (Peraton)",
+      "NASA Space Network Evolution"
     ],
     "program_count": 19,
     "is_defense_prime": true,
@@ -307,57 +307,57 @@
     "category": "Technology",
     "total_jobs": 0,
     "total_placements": 61,
-    "total_contacts": 61,
+    "total_contacts": 35,
     "top_contacts": [
       {
-        "name": "Beckham De La Torre",
-        "score": 53,
+        "name": "Isaac Lopez",
+        "score": 63,
         "tier": "B - High Value"
       },
       {
-        "name": "Isaac Lopez",
-        "score": 43,
-        "tier": "C - Engaged"
+        "name": "Rolando Flores",
+        "score": 63,
+        "tier": "B - High Value"
       },
       {
-        "name": "Rolando Flores",
-        "score": 43,
-        "tier": "C - Engaged"
+        "name": "Beckham De La Torre",
+        "score": 63,
+        "tier": "B - High Value"
       },
       {
         "name": "Ricardo Navarro",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Johnathan Gaytan",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Noel Ruiz",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Giovanni Garcia",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Beto Garcia",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
         "name": "Daniel Castillo",
-        "score": 38,
-        "tier": "C - Engaged"
+        "score": 58,
+        "tier": "B - High Value"
       },
       {
-        "name": "Rodrigo Gutierrez",
-        "score": 33,
-        "tier": "C - Engaged"
+        "name": "Matthew Reyes",
+        "score": 53,
+        "tier": "B - High Value"
       }
     ],
     "programs": [
@@ -374,7 +374,7 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 31,
-    "total_contacts": 30,
+    "total_contacts": 4,
     "top_contacts": [
       {
         "name": "Jacob Mathews",
@@ -395,36 +395,6 @@
         "name": "Dwight Hartage",
         "score": 27,
         "tier": "D - Developing"
-      },
-      {
-        "name": "Bruce Blair",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jose Sandoval",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Sean Rogers",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jeremy Henderson",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Lawrence Nicholas",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jonathan Gordon",
-        "score": 22,
-        "tier": "D - Developing"
       }
     ],
     "programs": [],
@@ -439,7 +409,7 @@
     "category": "Retail",
     "total_jobs": 0,
     "total_placements": 19,
-    "total_contacts": 17,
+    "total_contacts": 3,
     "top_contacts": [
       {
         "name": "Emmett Drake",
@@ -454,41 +424,6 @@
       {
         "name": "Nathaniel Scott",
         "score": 27,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Anil Ponnala",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Terrence White",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jefferson Smith",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Al Thomas",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Ramone Henriques",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Vanessa Shorter",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Wanda Gilchrist",
-        "score": 22,
         "tier": "D - Developing"
       }
     ],
@@ -524,7 +459,7 @@
     "category": "Retail",
     "total_jobs": 0,
     "total_placements": 19,
-    "total_contacts": 17,
+    "total_contacts": 3,
     "top_contacts": [
       {
         "name": "Emmett Drake",
@@ -540,41 +475,6 @@
         "name": "Nathaniel Scott",
         "score": 27,
         "tier": "D - Developing"
-      },
-      {
-        "name": "Anil Ponnala",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Terrence White",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jefferson Smith",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Al Thomas",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Ramone Henriques",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Vanessa Shorter",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Wanda Gilchrist",
-        "score": 22,
-        "tier": "D - Developing"
       }
     ],
     "programs": [],
@@ -589,57 +489,57 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 13,
-    "total_contacts": 15,
+    "total_contacts": 11,
     "top_contacts": [
       {
         "name": "Malcolm MacFarlane",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "Anthony Chandler",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "Michael Mckee",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "Gon Wang",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "TERESEA BRANSON",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "Timothy Sobczynski",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "TIM NGUYEN",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "Anthony Lane",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
         "name": "EVAN COFFIELD",
-        "score": 48,
-        "tier": "C - Engaged"
+        "score": 68,
+        "tier": "B - High Value"
       },
       {
-        "name": "Jim Doty",
-        "score": 23,
-        "tier": "D - Developing"
+        "name": "Erika Henkel",
+        "score": 38,
+        "tier": "C - Engaged"
       }
     ],
     "programs": [
@@ -656,59 +556,8 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 12,
-    "total_contacts": 12,
-    "top_contacts": [
-      {
-        "name": "SYBIL INGRAM",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "DOROTHY FERGUSON",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Tanisha Kelley",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Toyin Ademokun",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Guiffre Kilgren",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Phillip Lewis",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Christopher Harper",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Patrick Frison",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Marty Williams",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Leonard Carter",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": true,
@@ -721,57 +570,12 @@
     "category": "Manufacturing",
     "total_jobs": 0,
     "total_placements": 12,
-    "total_contacts": 11,
+    "total_contacts": 1,
     "top_contacts": [
       {
         "name": "Kevin Johnson",
-        "score": 28,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Dominic Davis",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jeremy Thomas",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Dexter Maxwell",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Brad Hasty",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "David Bass",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Gregory Cundy",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Dale Lanham",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jeremy Keymon",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Max Hertz",
-        "score": 18,
-        "tier": "D - Developing"
+        "score": 43,
+        "tier": "C - Engaged"
       }
     ],
     "programs": [],
@@ -786,49 +590,8 @@
     "category": "Technology",
     "total_jobs": 0,
     "total_placements": 8,
-    "total_contacts": 8,
-    "top_contacts": [
-      {
-        "name": "LAQUITTA LASTRAPE",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Chad Williams",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Da-Verne Evans",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Timothy Havens",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Glenn Felton",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Justin Churchey",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Gary Smith",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "SHAWNA DURRANT",
-        "score": 22,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -886,37 +649,12 @@
     "category": "Technology",
     "total_jobs": 0,
     "total_placements": 5,
-    "total_contacts": 6,
+    "total_contacts": 1,
     "top_contacts": [
       {
-        "name": "Tim Coker",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Terry Young",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Pietto Vasco",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Joe Balestrine",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "SAI CHARAN",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
         "name": "Christian Nassif",
-        "score": 12,
-        "tier": "E - New/Inactive"
+        "score": 27,
+        "tier": "D - Developing"
       }
     ],
     "programs": [],
@@ -931,27 +669,17 @@
     "category": "Transportation",
     "total_jobs": 0,
     "total_placements": 4,
-    "total_contacts": 4,
+    "total_contacts": 2,
     "top_contacts": [
       {
         "name": "Nathan Jacobi",
-        "score": 43,
-        "tier": "C - Engaged"
+        "score": 63,
+        "tier": "B - High Value"
       },
       {
         "name": "Carl Ausmees",
-        "score": 28,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "NAYERE HESS",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Rakesh Duguri",
-        "score": 23,
-        "tier": "D - Developing"
+        "score": 43,
+        "tier": "C - Engaged"
       }
     ],
     "programs": [],
@@ -1006,8 +734,13 @@
     "category": "Research",
     "total_jobs": 0,
     "total_placements": 4,
-    "total_contacts": 5,
+    "total_contacts": 4,
     "top_contacts": [
+      {
+        "name": "Place  Holder",
+        "score": 28,
+        "tier": "D - Developing"
+      },
       {
         "name": "Aaron Fricko",
         "score": 27,
@@ -1022,16 +755,6 @@
         "name": "Benjamin Shrom",
         "score": 27,
         "tier": "D - Developing"
-      },
-      {
-        "name": "David Blunk",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Place  Holder",
-        "score": 13,
-        "tier": "E - New/Inactive"
       }
     ],
     "programs": [],
@@ -1071,29 +794,8 @@
     "category": "Transportation",
     "total_jobs": 0,
     "total_placements": 4,
-    "total_contacts": 4,
-    "top_contacts": [
-      {
-        "name": "Bryan Roach",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Terry Hill",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Michael Allen",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Steven Fance",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1106,21 +808,11 @@
     "category": "Utilities",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
+    "total_contacts": 1,
     "top_contacts": [
       {
         "name": "Zackary O'Connor",
         "score": 27,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Jerome Henderson",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Alyson Nesnick",
-        "score": 22,
         "tier": "D - Developing"
       }
     ],
@@ -1136,24 +828,8 @@
     "category": "Education",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
-    "top_contacts": [
-      {
-        "name": "Claude Weaver",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Matthew Harris",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Marcus Tillmon",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1166,21 +842,11 @@
     "category": "Transportation",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
+    "total_contacts": 1,
     "top_contacts": [
       {
         "name": "Brad Roberts",
         "score": 27,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Dwayne Buff",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Marty Hart",
-        "score": 22,
         "tier": "D - Developing"
       }
     ],
@@ -1196,24 +862,8 @@
     "category": "Manufacturing",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
-    "top_contacts": [
-      {
-        "name": "Alan Guthrie",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Joshua Clabo",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Gary Howard",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1226,45 +876,29 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
-    "top_contacts": [
-      {
-        "name": "Michael Zawislak",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Clark Reinholtz",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "NAWEED HASHIMI",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [
-      "Sentinel GBSD",
-      "Command and Control, Battle Management & Communications (MDA)",
-      "Army Integrated Battle Command System",
-      "GMD Weapon System (Ground C2)",
-      "Integrated Situational Awareness Tool Environment",
-      "Sentinel Program Cybersecurity Core",
-      "Joint Tactical Ground Stations",
-      "Sentinel / GBSD",
-      "Basic Ordering Agreement (NG Staff Augmentation)",
-      "Global Command and Control System \u2013 Joint",
-      "Ground Based Strategic Deterrent / Sentinel",
+      "BOA (Northrop Surge)",
+      "Sentinel ICBM / GBSD",
+      "Integrated Situational Awareness Environment",
+      "MDA Tactical Embedded Systems",
+      "Joint Tactical Ground Station System",
       "Integrated Situational Awareness / Cyber Program",
-      "Intelligence Systems Infrastructure Tools & Enhancements",
-      "Business Operations & Analytics",
-      "NGI \u2013 Next Generation Interceptor",
-      "Basic Ordering Agreement (NG BOA)",
+      "GMD Weapon System Modernization",
+      "Joint Tactical Ground Station",
+      "Next-Gen OPIR (Ground + Payload)",
       "NASA ETIS III",
-      "BOA (General Staff Augmentation)",
-      "Sentinel GBSD (LGM-35A)",
-      "Integrated Situational Awareness Environment"
+      "Joint Tactical Ground Stations",
+      "Command and Control, Battle Management & Communications (MDA)",
+      "Integrated Situational Awareness Tool Environment (Intel Cyber)",
+      "Intelligence Systems Infrastructure Tools & Enhancements",
+      "Basic Ordering Agreement (NG BOA)",
+      "Ground-Based Strategic Deterrent (Sentinel)",
+      "Sentinel GBSD",
+      "Business Operations & Analytics",
+      "Integrated Digital Engineering Environment",
+      "NextGen GEO (Network/Ops)"
     ],
     "program_count": 43,
     "is_defense_prime": true,
@@ -1281,12 +915,12 @@
     "top_contacts": [
       {
         "name": "Ian de Vocht",
-        "score": 37,
-        "tier": "C - Engaged"
+        "score": 52,
+        "tier": "B - High Value"
       },
       {
         "name": "DAVID VITTER",
-        "score": 32,
+        "score": 47,
         "tier": "C - Engaged"
       },
       {
@@ -1307,24 +941,8 @@
     "category": "Retail",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
-    "top_contacts": [
-      {
-        "name": "Inge Jones",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Christopher Keller",
-        "score": 18,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Beverly Hale",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1337,24 +955,8 @@
     "category": "HR Services",
     "total_jobs": 0,
     "total_placements": 3,
-    "total_contacts": 3,
-    "top_contacts": [
-      {
-        "name": "Joseph Billington",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Marshall Major",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "JARVIS TALLEY",
-        "score": 22,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1397,19 +999,8 @@
     "category": "Healthcare IT",
     "total_jobs": 0,
     "total_placements": 2,
-    "total_contacts": 2,
-    "top_contacts": [
-      {
-        "name": "Bruce Payne",
-        "score": 23,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "DACHIEU TCHIENGANG",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1422,19 +1013,8 @@
     "category": "Transportation",
     "total_jobs": 0,
     "total_placements": 2,
-    "total_contacts": 2,
-    "top_contacts": [
-      {
-        "name": "Catrina Lee",
-        "score": 22,
-        "tier": "D - Developing"
-      },
-      {
-        "name": "Michael Flinn",
-        "score": 22,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1447,14 +1027,8 @@
     "category": "Manufacturing",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "Zachary Norman",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1467,14 +1041,8 @@
     "category": "Media/Telecom",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "Jason Longoria",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1491,7 +1059,7 @@
     "top_contacts": [
       {
         "name": "MAURICE WILLIAMS",
-        "score": 33,
+        "score": 48,
         "tier": "C - Engaged"
       }
     ],
@@ -1507,30 +1075,24 @@
     "category": "Defense Prime",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "ALEXIS TURNER",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [
-      "Command & Control, Battle Mgmt & Comms",
-      "Conventional Prompt Strike",
-      "Command and Control, Battle Management, Communications",
-      "C2BMC (Command & Control, Battle Mgmt, Comms)",
-      "Conventional Prompt Strike \u2013 Secondary Row",
-      "Navy Aegis Combat System Modernization",
-      "F-35 Sustainment",
-      "Aegis Ballistic Missile Defense / Aegis Program",
-      "Next-Gen GEO OPIR",
-      "Multi-Mission Command & Control",
-      "PAC-3 (Consolidated)",
-      "Air Force GIS Program (Lockheed Martin)",
       "PAC-3 MSE (Deep Detail Variant; Consolidated)",
+      "F-35 Sustainment",
+      "Conventional Prompt Strike \u2013 Secondary Row",
+      "Air Force GIS Program (Lockheed Martin)",
+      "Conventional Prompt Strike",
+      "Next-Gen GEO OPIR",
+      "Command and Control, Battle Management, Communications",
+      "Multi-Mission Command & Control",
+      "Command & Control, Battle Mgmt & Comms",
+      "PAC-3 (Consolidated)",
+      "Aegis Ballistic Missile Defense / Aegis Program",
       "Basic Ordering Agreement (Lockheed Martin)",
-      "PAC-3 Missile Segment Enhancement (Deep Detail Variant)"
+      "Navy Aegis Combat System Modernization",
+      "PAC-3 Missile Segment Enhancement (Deep Detail Variant)",
+      "C2BMC (Command & Control, Battle Mgmt, Comms)"
     ],
     "program_count": 15,
     "is_defense_prime": true,
@@ -1543,14 +1105,8 @@
     "category": "Construction",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "Matt Quinn",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1563,14 +1119,8 @@
     "category": "Consulting",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "Joe Jaworski",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1583,14 +1133,8 @@
     "category": "Technology",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "Shubham Shubham Pawar",
-        "score": 23,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,
@@ -1625,14 +1169,8 @@
     "category": "HR Services",
     "total_jobs": 0,
     "total_placements": 1,
-    "total_contacts": 1,
-    "top_contacts": [
-      {
-        "name": "Idania Chavis",
-        "score": 18,
-        "tier": "D - Developing"
-      }
-    ],
+    "total_contacts": 0,
+    "top_contacts": [],
     "programs": [],
     "program_count": 0,
     "is_defense_prime": false,

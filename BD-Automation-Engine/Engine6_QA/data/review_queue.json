@@ -132,5 +132,224 @@
     ],
     "original_program": "Corporate HQ",
     "reviewed": false
+  },
+  {
+    "job_id": "https://example.com/job1",
+    "added_at": "2026-01-23T11:11:55.842939",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "High clearance requires verification"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "data_quality",
+      "severity": "low",
+      "description": "Moderate confidence 50.0% - verification recommended",
+      "recommended_fix": "Quick review - validate program match makes sense",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job2",
+    "added_at": "2026-01-23T11:11:55.846010",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "AF DCGS - Langley",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job3",
+    "added_at": "2026-01-23T11:11:55.848837",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "Corporate HQ",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job1",
+    "added_at": "2026-01-23T11:15:31.008158",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "High clearance requires verification"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "data_quality",
+      "severity": "low",
+      "description": "Moderate confidence 50.0% - verification recommended",
+      "recommended_fix": "Quick review - validate program match makes sense",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job2",
+    "added_at": "2026-01-23T11:15:31.012649",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "AF DCGS - Langley",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job3",
+    "added_at": "2026-01-23T11:15:31.017010",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "Corporate HQ",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job1",
+    "added_at": "2026-01-23T11:18:36.091696",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "High clearance requires verification"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "data_quality",
+      "severity": "low",
+      "description": "Moderate confidence 50.0% - verification recommended",
+      "recommended_fix": "Quick review - validate program match makes sense",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job2",
+    "added_at": "2026-01-23T11:18:36.095296",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "AF DCGS - Langley",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job3",
+    "added_at": "2026-01-23T11:18:36.098431",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "Corporate HQ",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "2550702591424",
+    "added_at": "2026-01-23T13:33:50.147885",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "missing_data",
+      "severity": "medium",
+      "description": "Missing required fields: Security Clearance, Location, Prime Contractor",
+      "recommended_fix": "Data enrichment - fetch from source or request manual input",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "2550702545280",
+    "added_at": "2026-01-23T13:33:50.154275",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "AF DCGS - Langley",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "2550702797760",
+    "added_at": "2026-01-23T13:33:50.160958",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold"
+    ],
+    "original_program": "Next Generation Interceptor",
+    "reviewed": false,
+    "root_cause": {
+      "type": "missing_data",
+      "severity": "medium",
+      "description": "Missing required fields: Security Clearance, Location, Prime Contractor",
+      "recommended_fix": "Data enrichment - fetch from source or request manual input",
+      "auto_fixable": true
+    }
   }
 ]

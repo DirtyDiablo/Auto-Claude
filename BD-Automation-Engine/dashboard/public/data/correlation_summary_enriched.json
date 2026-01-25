@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-01-21T23:42:45.817855",
+  "generated_at": "2026-01-23T13:36:12.728257",
   "data_sources": {
     "dashboard": {
       "jobs": 968,
@@ -10,7 +10,7 @@
       "placements": 616,
       "contacts": 10000,
       "primes": 41,
-      "activities": 40375
+      "activities": 404715
     },
     "federal_programs": 423
   },
@@ -23,12 +23,11 @@
   "contact_metrics": {
     "total_scored_contacts": 5000,
     "tier_distribution": {
-      "B - High Value": 3,
-      "C - Engaged": 104,
-      "D - Developing": 2169,
-      "E - New/Inactive": 2724
+      "B - High Value": 64,
+      "C - Engaged": 2298,
+      "D - Developing": 2638
     },
-    "avg_score": 14.9
+    "avg_score": 28.8
   },
   "program_metrics": {
     "total_programs": 423,
