@@ -99,3 +99,36 @@ watchdog>=3.0.0
 # For advanced scheduling
 # schedule>=1.2.0
 # apscheduler>=3.10.0
+
+# ============================================
+# BD INTELLIGENCE HUB - ENHANCED RAG STACK
+# ============================================
+
+# Memory Layer
+mem0ai>=0.1.0
+
+# Knowledge Graph
+lightrag-hku>=0.1.0
+
+# Hybrid Retrieval
+rank-bm25>=0.2.2
+
+# Semantic Caching
+redis>=5.0.0
+
+# Document Processing
+# docling>=0.1.0  # Already included above
+
+# Web Scraping
+firecrawl-py>=0.0.1
+crawl4ai>=0.2.0
+
+# Multi-Agent Orchestration
+crewai>=0.30.0
+
+# Evaluation Framework
+ragas>=0.1.0
+datasets>=2.16.0
+
+# Hugging Face Transformers (for CrossEncoder reranking)
+transformers>=4.35.0
