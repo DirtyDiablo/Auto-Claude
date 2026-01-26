@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    from fastapi import FastAPI, HTTPException, Query
+    from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
     from fastapi.middleware.cors import CORSMiddleware
     from pydantic import BaseModel, Field
     import uvicorn
@@ -563,17 +563,130 @@ async def ingest_contact(data: ContactInput):
 @app.post("/ingest/jobs")
 async def ingest_jobs(jobs: List[JobInput]):
     """Ingest multiple jobs (for Data-Scraper)."""
-    count = 0
+    # Convert JobInput to dicts for indexing
+    job_dicts = []
     for job in jobs:
-        await graph.insert_document(
-            f"JOB: {job.title} at {job.company}\n"
-            f"Location: {job.location}\n"
-            f"Clearance: {job.clearance}\n"
-            f"Description: {job.description}"
-        )
-        count += 1
-    memory.add_scrape_result("jobs", f"Ingested {count} jobs", count)
-    return {"success": True, "count": count}
+        job_dicts.append({
+            "title": job.title,
+            "company": job.company,
+            "location": job.location,
+            "clearance": job.clearance,
+            "description": job.description[:2000] if job.description else "",
+            "indexed_at": datetime.now().isoformat()
+        })
+
+    # Use the vector store's index_jobs method
+    indexed, errors = store.index_jobs(job_dicts)
+
+    # Log to memory (optional, may fail)
+    try:
+        memory.add_scrape_result("jobs", f"Ingested {indexed} jobs", indexed)
+    except Exception as e:
+        logger.warning(f"Memory logging failed: {e}")
+
+    return {"success": True, "count": indexed, "errors": errors}
+
+
+@app.post("/ingest/scraper-batch")
+async def ingest_scraper_batch(
+    jobs_json: UploadFile = File(None, description="standardized_jobs JSON file"),
+    intel_report: UploadFile = File(None, description="BD Intelligence Report .md file"),
+    excel_file: UploadFile = File(None, description="BD Job Openings .xlsx file")
+):
+    """
+    Batch ingest from Data-Scraper.
+    Accepts any combination of:
+    - standardized_jobs_*.json - Full job data
+    - BD_Intelligence_Report_*.md - Intel report
+    - BD_Job_Openings_*.xlsx - Excel workbook
+    """
+    results = {"success": True, "ingested": {}}
+
+    # Process JSON jobs file
+    if jobs_json:
+        try:
+            content = await jobs_json.read()
+            jobs = json.loads(content.decode('utf-8'))
+            # Convert to job dicts with all enriched fields
+            job_dicts = []
+            for job in jobs:
+                job_dicts.append({
+                    "job_id": job.get('job_id', ''),
+                    "title": job.get('title', ''),
+                    "company": job.get('company', ''),
+                    "location": job.get('location', ''),
+                    "location_normalized": job.get('location_normalized', ''),
+                    "clearance": job.get('clearance_required', ''),
+                    "clearance_level": job.get('clearance_level', ''),
+                    "bd_priority_score": job.get('bd_priority_score', 0),
+                    "bd_priority_tier": job.get('bd_priority_tier', ''),
+                    "mapped_program": job.get('mapped_program', ''),
+                    "program_confidence": job.get('program_confidence', 0),
+                    "likely_prime": job.get('likely_prime', ''),
+                    "likely_agency": job.get('likely_agency', ''),
+                    "source_url": job.get('source_url', ''),
+                    "date_posted": job.get('date_posted', ''),
+                    "date_scraped": job.get('date_scraped', ''),
+                    "description": job.get('description', '')[:2000],
+                    "indexed_at": datetime.now().isoformat()
+                })
+            # Use vector store's index_jobs method
+            indexed, errors = store.index_jobs(job_dicts)
+            results["ingested"]["jobs"] = indexed
+            if errors:
+                results["ingested"]["job_errors"] = errors
+            logger.info(f"Ingested {indexed} jobs from JSON")
+            try:
+                memory.add_scrape_result("jobs", f"Batch ingested {indexed} jobs", indexed)
+            except Exception as me:
+                logger.warning(f"Memory logging failed: {me}")
+        except Exception as e:
+            results["ingested"]["jobs_error"] = str(e)
+            logger.error(f"Jobs JSON error: {e}")
+
+    # Process Intel Report (.md)
+    if intel_report:
+        try:
+            content = await intel_report.read()
+            report_text = content.decode('utf-8')
+            indexed, errors = store.index_documents([{
+                "title": intel_report.filename,
+                "type": "intel_report",
+                "content": report_text[:10000],
+                "indexed_at": datetime.now().isoformat()
+            }])
+            results["ingested"]["intel_report"] = intel_report.filename
+            logger.info(f"Ingested intel report: {intel_report.filename}")
+        except Exception as e:
+            results["ingested"]["intel_report_error"] = str(e)
+            logger.error(f"Intel report error: {e}")
+
+    # Process Excel file (.xlsx)
+    if excel_file:
+        try:
+            import pandas as pd
+            import io
+            content = await excel_file.read()
+            df = pd.read_excel(io.BytesIO(content))
+            # Store as document with summary
+            summary = f"Excel workbook: {excel_file.filename}\n"
+            summary += f"Rows: {len(df)}, Columns: {len(df.columns)}\n"
+            summary += f"Columns: {', '.join(df.columns.tolist())}\n"
+            indexed, errors = store.index_documents([{
+                "title": excel_file.filename,
+                "type": "excel_workbook",
+                "content": summary,
+                "row_count": len(df),
+                "column_count": len(df.columns),
+                "indexed_at": datetime.now().isoformat()
+            }])
+            results["ingested"]["excel"] = {"filename": excel_file.filename, "rows": len(df)}
+            logger.info(f"Ingested Excel: {excel_file.filename} ({len(df)} rows)")
+        except Exception as e:
+            results["ingested"]["excel_error"] = str(e)
+            logger.error(f"Excel error: {e}")
+
+    return results
 
 
 # =========================================
