@@ -524,6 +524,80 @@ async def memory_stats():
     return memory.get_stats()
 
 
+@app.get("/memory/contact/{contact_name}")
+async def get_contact_context(contact_name: str):
+    """Get full context for a contact (interactions + memories)."""
+    try:
+        from Engine8_Knowledge.scripts.memory_system import get_memory_system
+        system = get_memory_system()
+        return system.get_contact_context(contact_name)
+    except Exception as e:
+        # Fallback to existing memory layer
+        return {
+            "interactions": [],
+            "memories": memory.get_context(f"contact {contact_name}", 10)
+        }
+
+
+@app.get("/memory/program/{program_name}")
+async def get_program_context(program_name: str):
+    """Get full context for a program (insights + memories)."""
+    try:
+        from Engine8_Knowledge.scripts.memory_system import get_memory_system
+        system = get_memory_system()
+        return system.get_program_context(program_name)
+    except Exception as e:
+        # Fallback to existing memory layer
+        return {
+            "insights": [],
+            "memories": memory.get_context(f"program {program_name}", 10)
+        }
+
+
+# =========================================
+# RAG ROUTER ENDPOINTS
+# =========================================
+
+@app.get("/rag/router")
+async def rag_router_query(
+    q: str = Query(..., description="Query"),
+    strategy: str = Query("auto", description="Strategy: auto, lightrag, bm25, hybrid"),
+    limit: int = Query(10, description="Max results"),
+    collection: str = Query("bd_knowledge", description="Collection")
+):
+    """RAG query with strategy selection."""
+    try:
+        from Engine8_Knowledge.scripts.rag_router import get_rag_router, RetrievalStrategy
+        rag_router = get_rag_router()
+        result = await rag_router.retrieve(q, RetrievalStrategy(strategy), limit, collection)
+        return {
+            "strategy": result.strategy,
+            "query": result.query,
+            "results": result.results,
+            "count": result.count,
+            "strategies_used": result.strategies_used
+        }
+    except Exception as e:
+        logger.error(f"RAG router error: {e}")
+        return {"error": str(e), "query": q}
+
+
+@app.get("/rag/analyze")
+async def analyze_query_strategy(q: str = Query(..., description="Query to analyze")):
+    """Analyze query to recommend optimal strategy."""
+    try:
+        from Engine8_Knowledge.scripts.rag_router import get_rag_router
+        rag_router = get_rag_router()
+        strategy = rag_router.analyze_query(q)
+        return {
+            "query": q,
+            "recommended_strategy": strategy.value,
+            "available_strategies": rag_router.get_available_strategies()
+        }
+    except Exception as e:
+        return {"error": str(e), "query": q}
+
+
 # =========================================
 # INGEST ENDPOINTS
 # =========================================
