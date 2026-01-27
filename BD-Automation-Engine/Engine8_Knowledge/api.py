@@ -469,6 +469,189 @@ async def analyze_network(company: str = Query(..., description="Company name"))
 
 
 # =========================================
+# BD KNOWLEDGE GRAPH ENDPOINTS
+# =========================================
+
+# Import BD Knowledge Graph
+try:
+    from Engine8_Knowledge.graph.bd_knowledge_graph import (
+        get_knowledge_graph as get_bd_graph,
+        BDKnowledgeGraph,
+        ENTITY_TYPES,
+        RELATIONSHIP_TYPES
+    )
+    BD_GRAPH_AVAILABLE = True
+except ImportError as e:
+    BD_GRAPH_AVAILABLE = False
+    logger.warning(f"BD Knowledge Graph not available: {e}")
+
+# Initialize BD Graph (lazy)
+_bd_graph = None
+
+def get_bd_knowledge_graph():
+    global _bd_graph
+    if _bd_graph is None and BD_GRAPH_AVAILABLE:
+        _bd_graph = get_bd_graph()
+    return _bd_graph
+
+
+@app.get("/bdgraph/program/{program_name}")
+async def bdgraph_program_ecosystem(program_name: str):
+    """
+    Get full ecosystem for a program.
+    Returns primes, subs, contacts, jobs, locations, required skills.
+    """
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    result = bg.get_program_ecosystem(program_name)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+
+    return result
+
+
+@app.get("/bdgraph/contact/{contact_name}")
+async def bdgraph_contact_network(contact_name: str):
+    """
+    Get contact's professional network.
+    Returns employer, programs, manages, managed_by, connections.
+    """
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    result = bg.get_contact_network(contact_name)
+    if "error" in result:
+        raise HTTPException(status_code=404, detail=result["error"])
+
+    return result
+
+
+@app.get("/bdgraph/teaming/{from_contractor}/{to_program}")
+async def bdgraph_teaming_path(from_contractor: str, to_program: str, max_depth: int = 4):
+    """
+    Find teaming path from a contractor to a program.
+    Uses BFS to find shortest relationship path.
+    """
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    path = bg.find_teaming_path(from_contractor, to_program, max_depth)
+    return {"from": from_contractor, "to": to_program, "path": path}
+
+
+@app.get("/bdgraph/query")
+async def bdgraph_query(q: str = Query(..., description="Natural language query")):
+    """
+    Natural language query against the BD knowledge graph.
+    Examples:
+    - "Who works on AF DCGS?"
+    - "What programs does GDIT prime on?"
+    - "Who is the prime on DCGS-A?"
+    """
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    results = bg.query(q)
+    return {"query": q, "results": results}
+
+
+@app.get("/bdgraph/search")
+async def bdgraph_search(
+    q: str = Query(..., description="Search query"),
+    entity_type: Optional[str] = Query(None, description="Filter by entity type"),
+    limit: int = Query(20, description="Max results")
+):
+    """Search entities in the BD knowledge graph."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    results = bg.search_entities(q, entity_type, limit)
+    return {"query": q, "entity_type": entity_type, "results": [e.to_dict() for e in results]}
+
+
+@app.post("/bdgraph/entity")
+async def bdgraph_add_entity(
+    entity_type: str = Query(..., description=f"Entity type: {list(ENTITY_TYPES.keys()) if BD_GRAPH_AVAILABLE else []}"),
+    name: str = Query(..., description="Entity name"),
+    properties: Optional[str] = Query(None, description="JSON properties")
+):
+    """Add an entity to the BD knowledge graph."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    props = json.loads(properties) if properties else {}
+    entity = bg.add_entity(entity_type, name, props)
+    return {"success": True, "entity": entity.to_dict()}
+
+
+@app.post("/bdgraph/relationship")
+async def bdgraph_add_relationship(
+    from_entity: str = Query(..., description="Source entity (ID or name)"),
+    rel_type: str = Query(..., description=f"Relationship type"),
+    to_entity: str = Query(..., description="Target entity (ID or name)"),
+    confidence: float = Query(1.0, description="Confidence score 0-1")
+):
+    """Add a relationship between entities."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    try:
+        rel = bg.add_relationship(from_entity, rel_type, to_entity, confidence=confidence)
+        return {"success": True, "relationship": rel.to_dict()}
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/bdgraph/stats")
+async def bdgraph_stats():
+    """Get BD knowledge graph statistics."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        return {"available": False, "error": "BD Knowledge Graph not available"}
+
+    stats = bg.get_stats()
+    stats["available"] = True
+    return stats
+
+
+@app.post("/bdgraph/populate")
+async def bdgraph_populate_from_store():
+    """
+    Populate the BD knowledge graph from the vector store.
+    Loads programs, contacts, jobs and infers relationships.
+    """
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    if not store:
+        raise HTTPException(status_code=503, detail="Vector store not initialized")
+
+    bg.populate_from_vector_store(store)
+    return {"success": True, "stats": bg.get_stats()}
+
+
+@app.get("/bdgraph/types")
+async def bdgraph_list_types():
+    """List available entity and relationship types."""
+    if not BD_GRAPH_AVAILABLE:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    return {
+        "entity_types": ENTITY_TYPES,
+        "relationship_types": {k: {"from": v[0], "to": v[1]} for k, v in RELATIONSHIP_TYPES.items()}
+    }
+
+
+# =========================================
 # MEMORY ENDPOINTS
 # =========================================
 
@@ -977,6 +1160,195 @@ async def index_collection(collection: str):
         raise
     except Exception as e:
         logger.error(f"Indexing error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================
+# CREWAI AGENT ENDPOINTS
+# =========================================
+
+# Import CrewAI workflows
+try:
+    from Engine8_Knowledge.agents.workflows import (
+        get_workflows,
+        analyze_program as run_analyze_program,
+        prepare_outreach as run_prepare_outreach,
+        generate_weekly_intel as run_weekly_intel
+    )
+    from Engine8_Knowledge.agents.bd_agents import get_bd_agent_team, CREWAI_AVAILABLE
+    CREWAI_WORKFLOWS_AVAILABLE = True
+except ImportError as e:
+    CREWAI_WORKFLOWS_AVAILABLE = False
+    CREWAI_AVAILABLE = False
+    logger.warning(f"CrewAI workflows not available: {e}")
+
+
+class ProgramAnalysisRequest(BaseModel):
+    program_name: str = Field(..., description="Name of the program to analyze")
+
+
+class OutreachPrepRequest(BaseModel):
+    contact_name: str = Field(..., description="Name of the contact")
+
+
+class AgentStatusResponse(BaseModel):
+    crewai_available: bool
+    langchain_anthropic_available: bool
+    agents_initialized: bool
+    agent_count: int
+
+
+@app.get("/agents/status")
+async def get_agent_status():
+    """Get status of CrewAI agents."""
+    if not CREWAI_WORKFLOWS_AVAILABLE:
+        return AgentStatusResponse(
+            crewai_available=False,
+            langchain_anthropic_available=False,
+            agents_initialized=False,
+            agent_count=0
+        )
+
+    team = get_bd_agent_team()
+    return AgentStatusResponse(
+        crewai_available=CREWAI_AVAILABLE,
+        langchain_anthropic_available=True,  # If we got here, it's available
+        agents_initialized=team.available,
+        agent_count=4 if team.available else 0
+    )
+
+
+@app.post("/agents/analyze-program")
+async def api_analyze_program(
+    request: ProgramAnalysisRequest = None,
+    program_name: str = Query(None, description="Program name (alternative to body)")
+):
+    """
+    Analyze a federal program and generate a BD playbook.
+
+    Uses 4 agents in sequence:
+    1. Research Agent - Gathers program intelligence
+    2. Analyst Agent - Scores the opportunity
+    3. Strategy Agent - Develops approach
+    4. Writer Agent - Generates playbook
+
+    Returns a complete BD playbook with talking points and priority contacts.
+    """
+    if not CREWAI_WORKFLOWS_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic"
+        )
+
+    # Get program name from body or query param
+    name = request.program_name if request else program_name
+    if not name:
+        raise HTTPException(status_code=400, detail="program_name is required")
+
+    try:
+        result = await run_analyze_program(name)
+
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
+
+        return {
+            "success": True,
+            "program": name,
+            "playbook": result.get("playbook"),
+            "talking_points": result.get("talking_points", []),
+            "opportunity_score": result.get("opportunity_score", 0),
+            "priority_contacts": result.get("priority_contacts", [])
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Program analysis error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/agents/prepare-outreach")
+async def api_prepare_outreach(
+    request: OutreachPrepRequest = None,
+    contact_name: str = Query(None, description="Contact name (alternative to body)")
+):
+    """
+    Prepare outreach materials for a contact.
+
+    Uses 4 agents in sequence:
+    1. Research Agent - Gets contact context
+    2. Analyst Agent - Finds relevant opportunities
+    3. Strategy Agent - Determines approach
+    4. Writer Agent - Generates outreach materials
+
+    Returns call script, email template, and LinkedIn message.
+    """
+    if not CREWAI_WORKFLOWS_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic"
+        )
+
+    # Get contact name from body or query param
+    name = request.contact_name if request else contact_name
+    if not name:
+        raise HTTPException(status_code=400, detail="contact_name is required")
+
+    try:
+        result = await run_prepare_outreach(name)
+
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
+
+        return {
+            "success": True,
+            "contact": name,
+            "call_script": result.get("call_script"),
+            "email_template": result.get("email_template"),
+            "linkedin_message": result.get("linkedin_message")
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Outreach prep error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/agents/weekly-intel")
+async def api_weekly_intel():
+    """
+    Generate weekly BD intelligence report.
+
+    Uses 4 agents in sequence:
+    1. Research Agent - Scans for new opportunities
+    2. Analyst Agent - Identifies hot programs
+    3. Strategy Agent - Prioritizes actions
+    4. Writer Agent - Generates executive briefing
+
+    Returns hot programs, action items, and executive summary.
+    """
+    if not CREWAI_WORKFLOWS_AVAILABLE:
+        raise HTTPException(
+            status_code=503,
+            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic"
+        )
+
+    try:
+        result = await run_weekly_intel()
+
+        if not result.get("success"):
+            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
+
+        return {
+            "success": True,
+            "executive_summary": result.get("executive_summary"),
+            "hot_programs": result.get("hot_programs", []),
+            "new_opportunities": result.get("new_opportunities", []),
+            "action_items": result.get("action_items", [])
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Weekly intel error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
