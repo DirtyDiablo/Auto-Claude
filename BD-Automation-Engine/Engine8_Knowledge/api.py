@@ -49,6 +49,22 @@ from Engine8_Knowledge.agents.contact_finder_agent import ContactFinderAgent
 from Engine8_Knowledge.agents.bd_strategy_agent import BDStrategyAgent
 from Engine8_Knowledge.agents.crewai_orchestrator import get_orchestrator
 
+# Import new module routers
+try:
+    from Engine8_Knowledge.processors.routes import router as document_router
+    DOCUMENT_PROCESSOR_AVAILABLE = True
+except ImportError as e:
+    DOCUMENT_PROCESSOR_AVAILABLE = False
+    logger.warning(f"Document processor not available: {e}")
+
+try:
+    from Engine8_Knowledge.retrieval.routes import router as pageindex_router
+    from Engine8_Knowledge.retrieval.ultra_rag_routes import router as ultrarag_router
+    RETRIEVAL_ROUTERS_AVAILABLE = True
+except ImportError as e:
+    RETRIEVAL_ROUTERS_AVAILABLE = False
+    logger.warning(f"Retrieval routers not available: {e}")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BDKnowledgeAPI')
@@ -248,6 +264,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include module routers
+if DOCUMENT_PROCESSOR_AVAILABLE:
+    app.include_router(document_router)
+    logger.info("Document processor routes enabled: /documents/*")
+
+if RETRIEVAL_ROUTERS_AVAILABLE:
+    app.include_router(pageindex_router)
+    app.include_router(ultrarag_router)
+    logger.info("Retrieval routes enabled: /pageindex/*, /ultrarag/*")
 
 
 # =========================================
