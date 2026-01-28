@@ -24,10 +24,17 @@ def get_ultra_rag() -> BDUltraRAG:
     """Get or create UltraRAG instance."""
     global _ultra_rag
     if _ultra_rag is None:
+        # Get absolute path for PageIndex database
+        import os
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        db_path = os.path.join(base_dir, "data", "page_index.db")
+
         # Initialize with PageIndex if available
         try:
-            page_index = PageIndex(db_path="data/page_index.db")
-        except:
+            page_index = PageIndex(db_path=db_path)
+            print(f"[OK] UltraRAG PageIndex loaded: {page_index.stats()}")
+        except Exception as e:
+            print(f"[WARN] PageIndex init failed: {e}")
             page_index = None
 
         _ultra_rag = BDUltraRAG(

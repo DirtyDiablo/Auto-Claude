@@ -98,7 +98,8 @@ class BDUltraRAG:
             except Exception as e:
                 print(f"BM25 search error: {e}")
 
-        if strategy == "pageindex" and self.page_index:
+        # PageIndex: use for "pageindex" strategy OR as fallback for "hybrid" when no other results
+        if self.page_index and (strategy == "pageindex" or (strategy == "hybrid" and len(results) == 0)):
             # PageIndex search
             try:
                 page_results = self.page_index.search(query, top_k=top_k)

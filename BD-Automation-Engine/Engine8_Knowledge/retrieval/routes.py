@@ -23,7 +23,12 @@ _page_rag = None
 def get_page_index() -> PageIndex:
     global _page_index
     if _page_index is None:
-        _page_index = PageIndex(db_path="data/page_index.db")
+        # Use absolute path relative to this module
+        import os
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        db_path = os.path.join(base_dir, "data", "page_index.db")
+        _page_index = PageIndex(db_path=db_path)
+        print(f"[OK] PageIndex loaded from: {db_path}")
     return _page_index
 
 
