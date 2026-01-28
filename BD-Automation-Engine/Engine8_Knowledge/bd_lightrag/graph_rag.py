@@ -93,36 +93,67 @@ class BDGraphRAG:
         )
 
         self.llm_provider = llm_provider
-        self._initialized = True
+        self._initialized = False  # Will be True after async init
+        self._storage_initialized = False
+
+    async def initialize(self):
+        """Initialize async storages. Must be called before use."""
+        # Debug to file
+        import os
+        debug_file = os.path.join(self.working_dir, "debug_init.log")
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] initialize() called, _storage_initialized: {self._storage_initialized}\n")
+
+        if not self._storage_initialized:
+            try:
+                with open(debug_file, "a") as f:
+                    f.write(f"[{__import__('datetime').datetime.now()}] Calling rag.initialize_storages()...\n")
+
+                await self.rag.initialize_storages()
+                self._storage_initialized = True
+                self._initialized = True
+
+                with open(debug_file, "a") as f:
+                    f.write(f"[{__import__('datetime').datetime.now()}] LightRAG storages initialized OK\n")
+            except Exception as e:
+                with open(debug_file, "a") as f:
+                    f.write(f"[{__import__('datetime').datetime.now()}] ERROR: {e}\n")
+                    import traceback
+                    f.write(traceback.format_exc())
+                raise
 
     def _get_llm_func(self, provider: str):
         """Get LLM function based on provider."""
+        from functools import partial
+
         if provider == "openai":
             from lightrag.llm.openai import openai_complete_if_cache
-            return openai_complete_if_cache
+            # Must use partial to pre-bind model name
+            return partial(openai_complete_if_cache, "gpt-4o-mini")
         elif provider == "anthropic":
             # Custom Anthropic wrapper
             return self._anthropic_complete
         elif provider == "ollama":
             from lightrag.llm.ollama import ollama_model_complete
-            return ollama_model_complete
+            return partial(ollama_model_complete, "llama3.2")
         else:
             # Fallback to OpenAI
             from lightrag.llm.openai import openai_complete_if_cache
-            return openai_complete_if_cache
+            return partial(openai_complete_if_cache, "gpt-4o-mini")
 
     def _get_embedding_func(self, model_name: str):
         """Get embedding function using sentence-transformers."""
         try:
+            import numpy as np
             from sentence_transformers import SentenceTransformer
             from lightrag.base import EmbeddingFunc
 
             model = SentenceTransformer(model_name)
             embedding_dim = model.get_sentence_embedding_dimension()
 
-            async def embed_texts(texts: List[str]) -> List[List[float]]:
+            async def embed_texts(texts: List[str]):
                 embeddings = model.encode(texts, convert_to_numpy=True)
-                return embeddings.tolist()
+                return np.array(embeddings)  # Return numpy array, not list
 
             return EmbeddingFunc(
                 embedding_dim=embedding_dim,
@@ -174,6 +205,20 @@ class BDGraphRAG:
         Returns:
             Dict with insertion stats
         """
+        # Debug to file
+        import os
+        debug_file = os.path.join(self.working_dir, "debug_insert.log")
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] insert_documents called, _storage_initialized: {self._storage_initialized}\n")
+
+        # Ensure storages are initialized before inserting
+        if not self._storage_initialized:
+            with open(debug_file, "a") as f:
+                f.write(f"[{__import__('datetime').datetime.now()}] Calling initialize from insert_documents...\n")
+            await self.initialize()
+            with open(debug_file, "a") as f:
+                f.write(f"[{__import__('datetime').datetime.now()}] After initialize, _storage_initialized: {self._storage_initialized}\n")
+
         inserted = 0
         errors = []
 

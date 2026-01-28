@@ -37,20 +37,31 @@ class EntityRequest(BaseModel):
     text: str
 
 
-def get_graph_rag() -> BDGraphRAG:
-    """Get or create BDGraphRAG instance."""
+async def get_graph_rag() -> BDGraphRAG:
+    """Get or create BDGraphRAG instance (async to ensure storage init)."""
     global _graph_rag
+    print(f"[DEBUG] get_graph_rag called, _graph_rag is None: {_graph_rag is None}")
+
     if _graph_rag is None:
         # Get absolute path for working directory
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         working_dir = os.path.join(base_dir, "data", "lightrag")
 
+        print(f"[DEBUG] Creating BDGraphRAG at: {working_dir}")
         _graph_rag = BDGraphRAG(
             working_dir=working_dir,
             use_qdrant=False,  # Use NanoVectorDB for simplicity
             llm_provider="openai"
         )
-        print(f"[OK] LightRAG initialized at: {working_dir}")
+        print(f"[OK] LightRAG created at: {working_dir}")
+
+    # Ensure storages are initialized
+    print(f"[DEBUG] _storage_initialized: {_graph_rag._storage_initialized}")
+    if not _graph_rag._storage_initialized:
+        print("[DEBUG] Calling initialize()...")
+        await _graph_rag.initialize()
+        print("[DEBUG] initialize() completed")
+
     return _graph_rag
 
 
@@ -62,6 +73,17 @@ def get_entity_extractor() -> BDEntityExtractor:
     return _entity_extractor
 
 
+@router.get("/test-write")
+async def test_write():
+    """Test endpoint to verify file writing works."""
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    debug_file = os.path.join(base_dir, "data", "test_write.log")
+    with open(debug_file, "a") as f:
+        f.write(f"[{__import__('datetime').datetime.now()}] test-write called\n")
+    return {"status": "wrote to file", "path": debug_file}
+
+
 @router.post("/insert")
 async def insert_documents(request: InsertRequest):
     """
@@ -70,8 +92,19 @@ async def insert_documents(request: InsertRequest):
     Documents are processed for entity extraction and indexed
     for graph-based reasoning.
     """
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    debug_file = os.path.join(base_dir, "data", "debug_route.log")
+
     try:
-        rag = get_graph_rag()
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] /insert called\n")
+
+        rag = await get_graph_rag()
+
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] Got rag, _storage_initialized: {rag._storage_initialized}\n")
+
         extractor = get_entity_extractor()
 
         # Optionally enrich documents with entity metadata
@@ -79,9 +112,20 @@ async def insert_documents(request: InsertRequest):
         if request.enrich_entities:
             documents = [extractor.enrich_document(doc) for doc in documents]
 
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] Calling insert_documents with {len(documents)} docs\n")
+
         result = await rag.insert_documents(documents, request.metadata)
+
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] Result: {result}\n")
+
         return result
     except Exception as e:
+        with open(debug_file, "a") as f:
+            f.write(f"[{__import__('datetime').datetime.now()}] ERROR: {e}\n")
+            import traceback
+            f.write(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -97,7 +141,7 @@ async def query_graph(request: QueryRequest):
     - naive: Simple vector search without graph reasoning
     """
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
 
         # Parse mode
         try:
@@ -135,7 +179,7 @@ async def get_entity(entity_name: str):
     from the knowledge graph.
     """
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
         extractor = get_entity_extractor()
 
         # First check if it's a known entity
@@ -162,7 +206,7 @@ async def get_relationships(contractor: Optional[str] = None):
     Otherwise returns major teaming relationships across all contractors.
     """
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
         relationships = rag.get_contractor_relationships(contractor)
 
         return {
@@ -182,7 +226,7 @@ async def get_program_contractors(program_name: str):
     on the specified program.
     """
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
         result = rag.get_program_contractors(program_name)
         return result
     except Exception as e:
@@ -198,7 +242,7 @@ async def find_teaming_path(contractor1: str, contractor2: str):
     shared programs, teaming arrangements, or partnerships.
     """
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
         result = rag.find_teaming_path(contractor1, contractor2)
         return result
     except Exception as e:
@@ -260,7 +304,7 @@ async def get_known_entities():
 async def lightrag_stats():
     """Get LightRAG statistics."""
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
         return rag.stats()
     except Exception as e:
         return {"error": str(e), "initialized": False}
@@ -270,7 +314,7 @@ async def lightrag_stats():
 async def lightrag_status():
     """Check LightRAG status and configuration."""
     try:
-        rag = get_graph_rag()
+        rag = await get_graph_rag()
         stats = rag.stats()
         return {
             "status": "ready" if stats.get("initialized") else "initializing",
