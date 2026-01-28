@@ -49,6 +49,10 @@ from Engine8_Knowledge.agents.contact_finder_agent import ContactFinderAgent
 from Engine8_Knowledge.agents.bd_strategy_agent import BDStrategyAgent
 from Engine8_Knowledge.agents.crewai_orchestrator import get_orchestrator
 
+# Configure logging early so imports can use logger
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger('BDKnowledgeAPI')
+
 # Import new module routers
 try:
     from Engine8_Knowledge.processors.routes import router as document_router
@@ -72,9 +76,14 @@ except ImportError as e:
     LIGHTRAG_AVAILABLE = False
     logger.warning(f"LightRAG router not available: {e}")
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDKnowledgeAPI')
+try:
+    from streaming.streaming_api import router as streaming_router, include_streaming_router
+    STREAMING_AVAILABLE = True
+except ImportError as e:
+    STREAMING_AVAILABLE = False
+    logger.warning(f"Streaming router not available: {e}")
+
+# Logger already configured above
 
 # =========================================
 # CONFIGURATION
@@ -285,6 +294,10 @@ if RETRIEVAL_ROUTERS_AVAILABLE:
 if LIGHTRAG_AVAILABLE:
     app.include_router(lightrag_router)
     logger.info("LightRAG routes enabled: /lightrag/*")
+
+if STREAMING_AVAILABLE:
+    app.include_router(streaming_router)
+    logger.info("Streaming routes enabled: /streaming/*")
 
 
 # =========================================
