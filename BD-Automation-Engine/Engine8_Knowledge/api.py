@@ -83,6 +83,13 @@ except ImportError as e:
     STREAMING_AVAILABLE = False
     logger.warning(f"Streaming router not available: {e}")
 
+try:
+    from memory.routes import router as memory_router
+    MEMORY_AVAILABLE = True
+except ImportError as e:
+    MEMORY_AVAILABLE = False
+    logger.warning(f"Memory router not available: {e}")
+
 # Logger already configured above
 
 # =========================================
@@ -298,6 +305,10 @@ if LIGHTRAG_AVAILABLE:
 if STREAMING_AVAILABLE:
     app.include_router(streaming_router)
     logger.info("Streaming routes enabled: /streaming/*")
+
+if MEMORY_AVAILABLE:
+    app.include_router(memory_router)
+    logger.info("Memory routes enabled: /memory/*")
 
 
 # =========================================

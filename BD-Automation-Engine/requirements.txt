@@ -132,3 +132,4 @@ datasets>=2.16.0
 
 # Hugging Face Transformers (for CrossEncoder reranking)
 transformers>=4.35.0
+httpx>=0.25.0
