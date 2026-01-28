@@ -65,6 +65,13 @@ except ImportError as e:
     RETRIEVAL_ROUTERS_AVAILABLE = False
     logger.warning(f"Retrieval routers not available: {e}")
 
+try:
+    from Engine8_Knowledge.lightrag.routes import router as lightrag_router
+    LIGHTRAG_AVAILABLE = True
+except ImportError as e:
+    LIGHTRAG_AVAILABLE = False
+    logger.warning(f"LightRAG router not available: {e}")
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BDKnowledgeAPI')
@@ -274,6 +281,10 @@ if RETRIEVAL_ROUTERS_AVAILABLE:
     app.include_router(pageindex_router)
     app.include_router(ultrarag_router)
     logger.info("Retrieval routes enabled: /pageindex/*, /ultrarag/*")
+
+if LIGHTRAG_AVAILABLE:
+    app.include_router(lightrag_router)
+    logger.info("LightRAG routes enabled: /lightrag/*")
 
 
 # =========================================
