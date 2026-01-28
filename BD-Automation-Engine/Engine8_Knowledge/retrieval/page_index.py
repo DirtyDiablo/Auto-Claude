@@ -147,7 +147,7 @@ class PageIndex:
                query: str,
                top_k: int = 5,
                document_filter: Optional[str] = None,
-               min_score: float = 0.0) -> List[RetrievalResult]:
+               min_score: float = -100.0) -> List[RetrievalResult]:
         """
         Search for pages matching the query.
 
