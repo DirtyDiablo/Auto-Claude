@@ -95,6 +95,7 @@ BD-Automation-Engine/
 │   ├── api.py                # FastAPI server (:8100)
 │   └── data/qdrant/          # Vector database (8,447 records)
 ├── mcp/knowledge-mcp-server/ # MCP server for Claude Code
+├── dify_integration/         # Dify visual AI orchestration bridges
 ├── docs/                     # Documentation
 ├── n8n/                      # Workflow definitions
 ├── services/                 # Integration services
@@ -207,6 +208,57 @@ python Engine8_Knowledge/scripts/vector_store.py --search "DCGS analyst" --colle
 
 ---
 
+## Dify Integration (Visual AI Orchestration)
+
+Dify provides a **visual AI workflow builder** that complements your existing stack.
+
+### What Dify Adds
+- **Visual AI Workflow Builder** - Drag-drop instead of code
+- **Prompt IDE** - A/B test prompts without deployments
+- **LLMOps Monitoring** - Token usage, latency, quality metrics
+- **200+ LLM Support** - Switch Claude ↔ GPT ↔ Llama visually
+- **Team Access** - Non-technical BD team can build simple apps
+
+### Starting Dify
+```bash
+# Clone and start Dify (requires ~6GB RAM)
+git clone https://github.com/langgenius/dify.git
+cd dify/docker
+cp .env.example .env
+# Add ANTHROPIC_API_KEY and OPENAI_API_KEY to .env
+docker compose up -d
+# Access: http://localhost:3000
+```
+
+### Bridge Components (`dify_integration/`)
+| Bridge | Purpose |
+|--------|---------|
+| `DifyQdrantBridge` | Search your 8,447+ Qdrant vectors from Dify |
+| `DifyCrewAIBridge` | Invoke BD agents from Dify apps |
+| `DifyN8NBridge` | Trigger n8n workflows from Dify |
+| `BDDifyApps` | Pre-built app templates |
+
+### Pre-Built App Templates
+- **BD Research Chat** - Research assistant using indexed documents
+- **Call Prep Generator** - Generate call briefs using CrewAI agents
+- **Pipeline Controller** - Natural language control of n8n workflows
+- **Outreach Drafter** - Draft personalized BD messages
+- **Program Analyzer** - Multi-agent program analysis
+- **Competitor Intel** - Research competitors
+
+### API Endpoints (when Knowledge API is running)
+Dify-compatible endpoints at `/dify/*`:
+- `/dify/knowledge/search` - External knowledge search
+- `/dify/knowledge/rag` - RAG queries
+- `/dify/agents/invoke` - Invoke BD agents
+- `/dify/n8n/trigger/{workflow}` - Trigger n8n workflows
+
+### Documentation
+- `dify_integration/README.md` - Complete setup guide
+- `dify_integration/tools_config.py` - 34 external tools
+
+---
+
 ## Current Task Status
 
 - ✅ Engine 1: Apify Scraper (configured)
@@ -217,4 +269,5 @@ python Engine8_Knowledge/scripts/vector_store.py --search "DCGS analyst" --colle
 - 🔄 Engine 6: QA & Alerts (in progress)
 - ✅ Engine 7: Bullhorn ETL (complete)
 - ✅ Engine 8: AI Knowledge System (complete)
+- ✅ Dify Integration: Visual AI Orchestration (complete)
 - 🔜 Full Pipeline Integration (next)

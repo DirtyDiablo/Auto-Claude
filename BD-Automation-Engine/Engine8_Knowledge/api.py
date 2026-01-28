@@ -90,6 +90,15 @@ except ImportError as e:
     MEMORY_AVAILABLE = False
     logger.warning(f"Memory router not available: {e}")
 
+try:
+    from dify_integration.dify_qdrant_bridge import create_dify_knowledge_router
+    from dify_integration.dify_crewai_bridge import create_dify_agents_router
+    from dify_integration.dify_n8n_bridge import create_dify_n8n_router
+    DIFY_INTEGRATION_AVAILABLE = True
+except ImportError as e:
+    DIFY_INTEGRATION_AVAILABLE = False
+    logger.warning(f"Dify integration not available: {e}")
+
 # Logger already configured above
 
 # =========================================
@@ -309,6 +318,12 @@ if STREAMING_AVAILABLE:
 if MEMORY_AVAILABLE:
     app.include_router(memory_router)
     logger.info("Memory routes enabled: /memory/*")
+
+if DIFY_INTEGRATION_AVAILABLE:
+    app.include_router(create_dify_knowledge_router(), prefix="/dify")
+    app.include_router(create_dify_agents_router(), prefix="/dify")
+    app.include_router(create_dify_n8n_router(), prefix="/dify")
+    logger.info("Dify integration routes enabled: /dify/*")
 
 
 # =========================================
