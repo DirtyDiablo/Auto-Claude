@@ -66,7 +66,7 @@ except ImportError as e:
     logger.warning(f"Retrieval routers not available: {e}")
 
 try:
-    from Engine8_Knowledge.lightrag.routes import router as lightrag_router
+    from Engine8_Knowledge.bd_lightrag.routes import router as lightrag_router
     LIGHTRAG_AVAILABLE = True
 except ImportError as e:
     LIGHTRAG_AVAILABLE = False
