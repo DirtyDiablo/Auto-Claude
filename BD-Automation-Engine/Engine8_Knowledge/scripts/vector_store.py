@@ -571,6 +571,48 @@ class BDKnowledgeStore:
             if str(r.id) != item_id
         ][:limit]
 
+    def get_all(
+        self,
+        collection: str,
+        limit: int = 10000,
+        offset: int = 0
+    ) -> List[SearchResult]:
+        """
+        Retrieve all items from a collection.
+
+        Args:
+            collection: Collection name.
+            limit: Maximum items to return.
+            offset: Number of items to skip.
+
+        Returns:
+            List of SearchResult objects with all payloads.
+        """
+        if collection not in self.configs:
+            raise ValueError(f"Unknown collection: {collection}")
+
+        # Use scroll to get all points
+        results = []
+        scroll_result = self.client.scroll(
+            collection_name=collection,
+            limit=limit,
+            offset=offset,
+            with_payload=True,
+            with_vectors=False
+        )
+
+        points = scroll_result[0]  # First element is the list of points
+
+        return [
+            SearchResult(
+                id=str(p.id),
+                score=1.0,  # No score for direct retrieval
+                payload=p.payload,
+                collection=collection
+            )
+            for p in points
+        ]
+
     # =========================================
     # CROSS-REFERENCE METHODS
     # =========================================

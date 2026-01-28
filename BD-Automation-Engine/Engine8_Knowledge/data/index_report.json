@@ -1,0 +1,82 @@
+{
+  "generated_at": "2026-01-28T02:56:19.814209",
+  "results": [
+    {
+      "collection": "jobs",
+      "source": "dashboard/jobs_enriched.json",
+      "total_items": 4,
+      "indexed": 4,
+      "errors": 0,
+      "duration_seconds": 3.763957,
+      "timestamp": "2026-01-28T02:35:16.722576"
+    },
+    {
+      "collection": "contacts",
+      "source": "dashboard/contacts_classified.json",
+      "total_items": 7337,
+      "indexed": 7337,
+      "errors": 0,
+      "duration_seconds": 1093.448137,
+      "timestamp": "2026-01-28T02:53:30.170970"
+    },
+    {
+      "collection": "programs",
+      "source": "dashboard/programs_enriched.json",
+      "total_items": 401,
+      "indexed": 401,
+      "errors": 0,
+      "duration_seconds": 53.540501,
+      "timestamp": "2026-01-28T02:54:23.726589"
+    },
+    {
+      "collection": "documents",
+      "source": "dashboard/past_performance.json",
+      "total_items": 205,
+      "indexed": 205,
+      "errors": 0,
+      "duration_seconds": 67.997157,
+      "timestamp": "2026-01-28T02:55:31.724889"
+    },
+    {
+      "collection": "activities",
+      "source": "dashboard/call_notes_*.json",
+      "total_items": 500,
+      "indexed": 500,
+      "errors": 0,
+      "duration_seconds": 48.086527,
+      "timestamp": "2026-01-28T02:56:19.812118"
+    }
+  ],
+  "stats": {
+    "jobs": {
+      "vectors_count": 4,
+      "indexed_vectors_count": 0,
+      "points_count": 4,
+      "status": "GREEN"
+    },
+    "contacts": {
+      "vectors_count": 7337,
+      "indexed_vectors_count": 0,
+      "points_count": 7337,
+      "status": "GREEN"
+    },
+    "programs": {
+      "vectors_count": 401,
+      "indexed_vectors_count": 0,
+      "points_count": 401,
+      "status": "GREEN"
+    },
+    "documents": {
+      "vectors_count": 205,
+      "indexed_vectors_count": 0,
+      "points_count": 205,
+      "status": "GREEN"
+    },
+    "activities": {
+      "vectors_count": 500,
+      "indexed_vectors_count": 0,
+      "points_count": 500,
+      "status": "GREEN"
+    }
+  }
+}
