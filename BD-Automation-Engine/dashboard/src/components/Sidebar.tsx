@@ -21,6 +21,10 @@ import {
   UserCheck,
   FileSpreadsheet,
   Phone,
+  Search,
+  Bot,
+  Brain,
+  Activity,
 } from 'lucide-react';
 import type { TabId } from '../types';
 
@@ -34,8 +38,14 @@ interface SidebarProps {
   onToggleCollapse: () => void;
 }
 
-const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }> }> = [
+const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }>; section?: string }> = [
   { id: 'executive', label: 'Executive Summary', icon: LayoutDashboard },
+  // Hub AI Section
+  { id: 'smartquery', label: 'Smart Query', icon: Search, section: 'Hub AI' },
+  { id: 'knowledgegraph', label: 'Knowledge Graph', icon: GitBranch, section: 'Hub AI' },
+  { id: 'agents', label: 'BD Agents', icon: Bot, section: 'Hub AI' },
+  { id: 'memory', label: 'Memory Context', icon: Brain, section: 'Hub AI' },
+  // Intelligence Section
   { id: 'intelligence', label: 'Job Intelligence', icon: Sparkles },
   { id: 'jobs', label: 'Jobs Pipeline', icon: Briefcase },
   { id: 'programs', label: 'Programs/Contracts', icon: Building2 },
@@ -45,7 +55,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'events', label: 'BD Events', icon: Calendar },
   { id: 'opportunities', label: 'BD Opportunities', icon: Target },
   { id: 'pastperformance', label: 'Past Performance', icon: Trophy },
-  { id: 'primeorgchart', label: 'Prime Org Chart', icon: GitBranch },
+  { id: 'primeorgchart', label: 'Prime Org Chart', icon: Network },
   { id: 'contactorgchart', label: 'Contact Org Chart', icon: UserCheck },
   { id: 'placements', label: 'Placements', icon: FileSpreadsheet },
   { id: 'callintelligence', label: 'Call Intelligence', icon: Phone },
@@ -53,7 +63,9 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'playbook', label: 'Daily Playbook', icon: CalendarCheck },
   { id: 'mindmap', label: 'Mind Map', icon: Network },
   { id: 'dataquality', label: 'Data Quality', icon: BarChart3 },
-  { id: 'settings', label: 'Settings', icon: Settings },
+  // System Section
+  { id: 'systemhealth', label: 'System Health', icon: Activity, section: 'System' },
+  { id: 'settings', label: 'Settings', icon: Settings, section: 'System' },
 ];
 
 export function Sidebar({

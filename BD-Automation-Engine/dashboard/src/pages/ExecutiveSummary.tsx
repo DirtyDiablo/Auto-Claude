@@ -1,6 +1,7 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle } from 'lucide-react';
+import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, XCircle, Database } from 'lucide-react';
 import type { CorrelationSummary } from '../types';
+import { useHubConnection, useHubStats } from '../hooks/useHubApi';
 
 interface ExecutiveSummaryProps {
   summary: CorrelationSummary | null;
@@ -78,6 +79,10 @@ function MatchRateCard({
 }
 
 export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
+  // Hub connection status
+  const { isConnected: hubConnected, isChecking: hubChecking } = useHubConnection();
+  const { data: hubStats } = useHubStats(60000); // Refresh every minute
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -133,6 +138,60 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
           <span className="text-sm font-medium">Live Data</span>
         </div>
       </div>
+
+      {/* Hub API Status Card */}
+      {(hubConnected || hubChecking) && (
+        <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-sm p-4 mb-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white/10">
+                <Server className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium text-white">Hub API</span>
+                  {hubChecking ? (
+                    <span className="text-xs text-slate-400">Connecting...</span>
+                  ) : hubConnected ? (
+                    <span className="flex items-center gap-1 text-xs text-green-400">
+                      <CheckCircle2 className="h-3 w-3" /> Connected
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-xs text-red-400">
+                      <XCircle className="h-3 w-3" /> Disconnected
+                    </span>
+                  )}
+                </div>
+                {hubStats && (
+                  <p className="text-xs text-slate-400">
+                    {hubStats.total_records.toLocaleString()} total records indexed
+                  </p>
+                )}
+              </div>
+            </div>
+            {hubStats && (
+              <div className="flex gap-6">
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{hubStats.collections.contacts.toLocaleString()}</p>
+                  <p className="text-xs text-slate-400">Contacts</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{hubStats.collections.programs.toLocaleString()}</p>
+                  <p className="text-xs text-slate-400">Programs</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{hubStats.collections.documents.toLocaleString()}</p>
+                  <p className="text-xs text-slate-400">Documents</p>
+                </div>
+                <div className="text-center">
+                  <p className="text-2xl font-bold text-white">{hubStats.collections.activities.toLocaleString()}</p>
+                  <p className="text-xs text-slate-400">Activities</p>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

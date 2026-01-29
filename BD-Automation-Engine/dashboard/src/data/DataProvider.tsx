@@ -16,6 +16,7 @@ import type {
 } from './types';
 import { notionAdapter } from './adapters/notionAdapter';
 import { localAdapter } from './adapters/localAdapter';
+import { hubAdapter } from './adapters/hubAdapter';
 
 // =============================================================================
 // DEFAULT VALUES
@@ -147,11 +148,25 @@ interface DataProviderProps {
 }
 
 export function DataProvider({ children, initialSource }: DataProviderProps) {
-  // Determine initial source: prefer Notion if configured, fallback to local
+  // Determine initial source: prefer Hub if available, then Notion, fallback to local
   const [dataSource, setDataSource] = useState<DataSourceType>(() => {
     if (initialSource) return initialSource;
+    // Try Hub first (will be validated async)
+    if (hubAdapter.isConfigured()) return 'hub';
     return notionAdapter.isConfigured() ? 'notion' : 'local';
   });
+
+  // Auto-detect Hub on startup
+  useEffect(() => {
+    if (dataSource === 'hub') {
+      hubAdapter.testConnection().then((connected) => {
+        if (!connected) {
+          // Hub not available, fall back to Notion or local
+          setDataSource(notionAdapter.isConfigured() ? 'notion' : 'local');
+        }
+      });
+    }
+  }, []);
 
   const [data, setData] = useState<DashboardDataState>(defaultDataState);
   const [loading, setLoading] = useState(true);
@@ -161,7 +176,14 @@ export function DataProvider({ children, initialSource }: DataProviderProps) {
 
   // Get the current adapter
   const adapter = useMemo(() => {
-    return dataSource === 'notion' ? notionAdapter : localAdapter;
+    switch (dataSource) {
+      case 'hub':
+        return hubAdapter;
+      case 'notion':
+        return notionAdapter;
+      default:
+        return localAdapter;
+    }
   }, [dataSource]);
 
   // Load data from current adapter
@@ -246,6 +268,18 @@ export function DataProvider({ children, initialSource }: DataProviderProps) {
     // Validate source is available
     if (source === 'notion' && !notionAdapter.isConfigured()) {
       setError('Notion is not configured. Please add your API token in Settings.');
+      return;
+    }
+
+    if (source === 'hub') {
+      // Test Hub connection before switching
+      hubAdapter.testConnection().then((connected) => {
+        if (connected) {
+          setDataSource(source);
+        } else {
+          setError('Hub API not available. Is the server running on localhost:8100?');
+        }
+      });
       return;
     }
 
@@ -351,9 +385,12 @@ export function useDataSource(): {
   dataSource: DataSourceType;
   sourceStatus: DataSourceStatus;
   isNotionConfigured: boolean;
+  isHubConfigured: boolean;
   switchToNotion: () => void;
   switchToLocal: () => void;
+  switchToHub: () => void;
   setNotionToken: (token: string) => void;
+  setHubUrl: (url: string) => void;
 } {
   const { dataSource, sourceStatus, switchDataSource, refresh } = useData();
 
@@ -365,9 +402,19 @@ export function useDataSource(): {
     switchDataSource('local');
   }, [switchDataSource]);
 
+  const switchToHub = useCallback(() => {
+    switchDataSource('hub');
+  }, [switchDataSource]);
+
   const setNotionToken = useCallback((token: string) => {
     notionAdapter.setToken(token);
     switchDataSource('notion');
+    refresh();
+  }, [switchDataSource, refresh]);
+
+  const setHubUrl = useCallback((url: string) => {
+    hubAdapter.setUrl(url);
+    switchDataSource('hub');
     refresh();
   }, [switchDataSource, refresh]);
 
@@ -375,9 +422,12 @@ export function useDataSource(): {
     dataSource,
     sourceStatus,
     isNotionConfigured: notionAdapter.isConfigured(),
+    isHubConfigured: hubAdapter.isConfigured(),
     switchToNotion,
     switchToLocal,
+    switchToHub,
     setNotionToken,
+    setHubUrl,
   };
 }
 

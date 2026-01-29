@@ -20,6 +20,12 @@ import { PrimeOrgChart } from './pages/PrimeOrgChart';
 import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
 import { PlacementsPage } from './pages/PlacementsPage';
 import CallIntelligence from './pages/CallIntelligence';
+// Hub AI Pages
+import { SmartQuery } from './pages/SmartQuery';
+import { KnowledgeGraph } from './pages/KnowledgeGraph';
+import { AgentPanel } from './pages/AgentPanel';
+import { MemoryContext } from './pages/MemoryContext';
+import { SystemHealth } from './pages/SystemHealth';
 import { useNotionDashboard } from './hooks/useNotionData';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
@@ -229,6 +235,17 @@ function App() {
         return <PlacementsPage loading={loading} />;
       case 'callintelligence':
         return <CallIntelligence />;
+      // Hub AI Pages
+      case 'smartquery':
+        return <SmartQuery loading={loading} />;
+      case 'knowledgegraph':
+        return <KnowledgeGraph />;
+      case 'agents':
+        return <AgentPanel />;
+      case 'memory':
+        return <MemoryContext />;
+      case 'systemhealth':
+        return <SystemHealth />;
       case 'settings':
         return (
           <Settings

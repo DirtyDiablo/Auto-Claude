@@ -146,6 +146,11 @@ export type TabId =
   | 'contactorgchart'
   | 'placements'
   | 'callintelligence'
+  | 'smartquery'
+  | 'knowledgegraph'
+  | 'agents'
+  | 'memory'
+  | 'systemhealth'
   | 'settings';
 
 export interface Tab {
