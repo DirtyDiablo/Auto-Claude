@@ -15,7 +15,9 @@ import {
   Server,
   CheckCircle2,
   XCircle,
+  Palette,
 } from 'lucide-react';
+import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import {
   setNotionToken,
   clearNotionToken,
@@ -38,6 +40,7 @@ const SECTION_COLORS: Record<string, { gradient: string; iconBg: string; iconTex
   RefreshCw: { gradient: 'from-green-500 to-emerald-500', iconBg: 'bg-gradient-to-br from-green-100 to-emerald-100', iconText: 'text-green-600' },
   Bell: { gradient: 'from-rose-500 to-pink-500', iconBg: 'bg-gradient-to-br from-rose-100 to-pink-100', iconText: 'text-rose-600' },
   Globe: { gradient: 'from-sky-500 to-blue-500', iconBg: 'bg-gradient-to-br from-sky-100 to-blue-100', iconText: 'text-sky-600' },
+  Palette: { gradient: 'from-violet-500 to-purple-500', iconBg: 'bg-gradient-to-br from-violet-100 to-purple-100', iconText: 'text-violet-600' },
   Shield: { gradient: 'from-slate-500 to-gray-500', iconBg: 'bg-gradient-to-br from-slate-100 to-gray-100', iconText: 'text-slate-600' },
 };
 
@@ -56,16 +59,16 @@ function SettingSection({
   const colors = SECTION_COLORS[iconName] || SECTION_COLORS.Shield;
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow">
       <div className={`h-1 bg-gradient-to-r ${colors.gradient}`} />
       <div className="p-6">
         <div className="flex items-start gap-4 mb-4">
-          <div className={`p-2.5 rounded-xl ${colors.iconBg}`}>
+          <div className={`p-2.5 rounded-xl ${colors.iconBg} dark:bg-opacity-20`}>
             <Icon className={`h-5 w-5 ${colors.iconText}`} />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-900">{title}</h3>
-            <p className="text-sm text-slate-500">{description}</p>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>
           </div>
         </div>
         {children}
@@ -89,7 +92,7 @@ function Toggle({
         type="button"
         onClick={() => onChange(!enabled)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          enabled ? 'bg-blue-600' : 'bg-slate-200'
+          enabled ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-600'
         }`}
       >
         <span
@@ -98,7 +101,7 @@ function Toggle({
           }`}
         />
       </button>
-      <span className="text-sm text-slate-700">{label}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
     </label>
   );
 }
@@ -106,7 +109,6 @@ function Toggle({
 export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps) {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   // Notion API configuration
   const [notionToken, setNotionTokenState] = useState('');
@@ -207,7 +209,7 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
       ];
 
   return (
-    <div className="p-6 h-full overflow-y-auto bg-slate-50">
+    <div className="p-6 h-full overflow-y-auto bg-slate-50 dark:bg-slate-900 transition-colors">
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-3 mb-2">
@@ -215,8 +217,8 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
             <Shield className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-            <p className="text-slate-500">Configure your BD Intelligence Dashboard</p>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+            <p className="text-slate-500 dark:text-slate-400">Configure your BD Intelligence Dashboard</p>
           </div>
         </div>
       </div>
@@ -536,19 +538,13 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
           </div>
         </SettingSection>
 
-        {/* Display */}
+        {/* Design System */}
         <SettingSection
-          title="Display"
-          description="Customize the dashboard appearance"
-          icon={Globe}
+          title="Design System"
+          description="Industry-specific theming powered by Design Intelligence"
+          icon={Palette}
         >
-          <div className="space-y-4">
-            <Toggle
-              enabled={darkMode}
-              onChange={setDarkMode}
-              label="Dark mode (coming soon)"
-            />
-          </div>
+          <ThemeSwitcher />
         </SettingSection>
 
         {/* About */}

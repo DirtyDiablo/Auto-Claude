@@ -260,7 +260,7 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-slate-100">
+    <div className="h-screen flex overflow-hidden bg-slate-100 dark:bg-slate-900 transition-colors">
       <Sidebar
         activeTab={activeTab}
         onTabChange={handleTabChange}

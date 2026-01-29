@@ -30,20 +30,20 @@ function StatCard({
   const isNumeric = !isNaN(numericValue);
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6 hover:shadow-md dark:hover:shadow-lg dark:hover:shadow-blue-500/5 transition-all">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500">{title}</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
           {isNumeric ? (
             <AnimatedCounter
               value={numericValue}
-              className="mt-1 text-3xl font-bold text-slate-900"
+              className="mt-1 text-3xl font-bold text-slate-900 dark:text-slate-100"
               duration={1000}
             />
           ) : (
-            <p className="mt-1 text-3xl font-bold text-slate-900">{value}</p>
+            <p className="mt-1 text-3xl font-bold text-slate-900 dark:text-slate-100">{value}</p>
           )}
-          {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
+          {subtitle && <p className="mt-1 text-sm text-slate-400 dark:text-slate-500">{subtitle}</p>}
         </div>
         <div className={`p-3 rounded-xl ${color}`}>
           <Icon className="h-6 w-6 text-white" />
@@ -65,9 +65,9 @@ function MatchRateCard({
   total: number;
 }) {
   const getColorClass = (rate: number) => {
-    if (rate >= 50) return 'text-green-600 bg-green-100';
-    if (rate >= 25) return 'text-yellow-600 bg-yellow-100';
-    return 'text-red-600 bg-red-100';
+    if (rate >= 50) return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
+    if (rate >= 25) return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
+    return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
   };
 
   const getBarColor = (rate: number) => {
@@ -77,21 +77,21 @@ function MatchRateCard({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-2">
-        <span className="text-sm font-medium text-slate-600">{title}</span>
+        <span className="text-sm font-medium text-slate-600 dark:text-slate-300">{title}</span>
         <span className={`text-sm font-bold px-2 py-0.5 rounded ${getColorClass(rate)}`}>
           {rate.toFixed(1)}%
         </span>
       </div>
-      <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+      <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-2.5 overflow-hidden">
         <div
           className={`h-2.5 rounded-full transition-all duration-1000 ease-out ${getBarColor(rate)}`}
           style={{ width: `${Math.min(rate, 100)}%` }}
         />
       </div>
       <div className="mt-2 flex items-center justify-between">
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-slate-400 dark:text-slate-500">
           <AnimatedCounter value={matched} className="font-medium" /> / {total.toLocaleString()} matched
         </p>
       </div>
@@ -145,16 +145,16 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
   }));
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 bg-slate-50 dark:bg-slate-900 min-h-full transition-colors">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Executive Summary</h1>
-          <p className="text-slate-500">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Executive Summary</h1>
+          <p className="text-slate-500 dark:text-slate-400">
             BD Intelligence Overview &bull; Generated {new Date(summary.generated_at).toLocaleDateString()}
           </p>
         </div>
-        <div className="flex items-center gap-2 text-green-600">
+        <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
           <TrendingUp className="h-5 w-5" />
           <span className="text-sm font-medium">Live Data</span>
         </div>
@@ -282,8 +282,8 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contact Tiers Pie Chart */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Contacts by Tier</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Contacts by Tier</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -301,7 +301,7 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--surface-primary)', borderColor: 'var(--color-gray-200)' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -309,15 +309,15 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
             {tierData.map((tier, index) => (
               <div key={index} className="flex items-center gap-1.5 text-sm">
                 <div className="w-3 h-3 rounded" style={{ backgroundColor: tier.color }} />
-                <span className="text-slate-600">{tier.name}</span>
+                <span className="text-slate-600 dark:text-slate-400">{tier.name}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Priority Distribution */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Jobs by Priority</h3>
+        <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Jobs by Priority</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
@@ -335,7 +335,7 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
                     <Cell key={`cell-${index}`} fill={entry.color} />
                   ))}
                 </Pie>
-                <Tooltip />
+                <Tooltip contentStyle={{ backgroundColor: 'var(--surface-primary)', borderColor: 'var(--color-gray-200)' }} />
               </PieChart>
             </ResponsiveContainer>
           </div>
@@ -343,7 +343,7 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
             {priorityData.map((item, index) => (
               <div key={index} className="flex items-center gap-1.5 text-sm">
                 <div className="w-3 h-3 rounded" style={{ backgroundColor: item.color }} />
-                <span className="text-slate-600">{item.name}: {item.value}</span>
+                <span className="text-slate-600 dark:text-slate-400">{item.name}: {item.value}</span>
               </div>
             ))}
           </div>
@@ -351,15 +351,15 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
       </div>
 
       {/* Top Programs Bar Chart */}
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Top Programs by Contact Count</h3>
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Top Programs by Contact Count</h3>
         <div className="h-64">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart data={programsData} layout="vertical" margin={{ left: 20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-              <XAxis type="number" tick={{ fill: '#64748b', fontSize: 12 }} />
-              <YAxis dataKey="name" type="category" width={150} tick={{ fill: '#64748b', fontSize: 11 }} />
-              <Tooltip />
+              <CartesianGrid strokeDasharray="3 3" className="stroke-slate-200 dark:stroke-slate-700" />
+              <XAxis type="number" tick={{ fill: 'var(--color-gray-500)', fontSize: 12 }} />
+              <YAxis dataKey="name" type="category" width={150} tick={{ fill: 'var(--color-gray-500)', fontSize: 11 }} />
+              <Tooltip contentStyle={{ backgroundColor: 'var(--surface-primary)', borderColor: 'var(--color-gray-200)' }} />
               <Bar dataKey="contacts" fill="#2563eb" radius={[0, 4, 4, 0]} name="Contacts" />
             </BarChart>
           </ResponsiveContainer>

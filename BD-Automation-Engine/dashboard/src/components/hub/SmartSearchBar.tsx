@@ -90,7 +90,7 @@ export function SmartSearchBar({
   return (
     <div className="relative">
       <form onSubmit={handleSubmit}>
-        <div className="flex items-stretch bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
+        <div className="flex items-stretch bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
           {/* Search Input */}
           <div className="flex-1 flex items-center">
             <Search className="h-5 w-5 text-slate-400 ml-4" />
@@ -102,24 +102,24 @@ export function SmartSearchBar({
               onBlur={() => setTimeout(() => setShowExamples(false), 200)}
               placeholder={placeholder}
               disabled={loading}
-              className="flex-1 px-3 py-4 text-lg border-none outline-none bg-transparent disabled:cursor-not-allowed"
+              className="flex-1 px-3 py-4 text-lg border-none outline-none bg-transparent text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 disabled:cursor-not-allowed"
             />
           </div>
 
           {/* Strategy Dropdown */}
-          <div className="relative border-l border-slate-200">
+          <div className="relative border-l border-slate-200 dark:border-slate-700">
             <button
               type="button"
               onClick={() => setShowStrategies(!showStrategies)}
-              className="h-full px-4 flex items-center gap-2 hover:bg-slate-50 transition-colors"
+              className="h-full px-4 flex items-center gap-2 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
             >
               <StrategyIcon className="h-4 w-4 text-slate-500" />
-              <span className="text-sm font-medium text-slate-700">{selectedStrategy.label}</span>
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{selectedStrategy.label}</span>
               <ChevronDown className="h-4 w-4 text-slate-400" />
             </button>
 
             {showStrategies && (
-              <div className="absolute right-0 top-full mt-1 w-64 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-20">
+              <div className="absolute right-0 top-full mt-1 w-64 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 z-20">
                 {STRATEGIES.map((s) => {
                   const Icon = s.icon;
                   return (
@@ -130,16 +130,16 @@ export function SmartSearchBar({
                         setStrategy(s.value);
                         setShowStrategies(false);
                       }}
-                      className={`w-full px-4 py-2 flex items-start gap-3 hover:bg-slate-50 transition-colors ${
-                        strategy === s.value ? 'bg-blue-50' : ''
+                      className={`w-full px-4 py-2 flex items-start gap-3 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors ${
+                        strategy === s.value ? 'bg-blue-50 dark:bg-blue-900/30' : ''
                       }`}
                     >
-                      <Icon className={`h-4 w-4 mt-0.5 ${strategy === s.value ? 'text-blue-600' : 'text-slate-400'}`} />
+                      <Icon className={`h-4 w-4 mt-0.5 ${strategy === s.value ? 'text-blue-600 dark:text-blue-400' : 'text-slate-400'}`} />
                       <div className="text-left">
-                        <p className={`text-sm font-medium ${strategy === s.value ? 'text-blue-600' : 'text-slate-700'}`}>
+                        <p className={`text-sm font-medium ${strategy === s.value ? 'text-blue-600 dark:text-blue-400' : 'text-slate-700 dark:text-slate-300'}`}>
                           {s.label}
                         </p>
-                        <p className="text-xs text-slate-500">{s.description}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400">{s.description}</p>
                       </div>
                     </button>
                   );
@@ -152,7 +152,7 @@ export function SmartSearchBar({
           <button
             type="submit"
             disabled={loading || !query.trim()}
-            className="px-6 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
+            className="px-6 bg-blue-600 text-white hover:bg-blue-700 disabled:bg-slate-300 dark:disabled:bg-slate-700 disabled:cursor-not-allowed flex items-center gap-2 transition-colors"
           >
             {loading ? (
               <Loader2 className="h-5 w-5 animate-spin" />
@@ -166,8 +166,8 @@ export function SmartSearchBar({
 
       {/* Example Queries */}
       {showExamples && !query && (
-        <div className="absolute left-0 right-0 top-full mt-2 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-10">
-          <p className="text-sm font-medium text-slate-500 mb-3 flex items-center gap-2">
+        <div className="absolute left-0 right-0 top-full mt-2 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 p-4 z-10">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-3 flex items-center gap-2">
             <Database className="h-4 w-4" />
             Example queries
           </p>
@@ -177,7 +177,7 @@ export function SmartSearchBar({
                 key={i}
                 type="button"
                 onClick={() => handleExampleClick(example)}
-                className="text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg transition-colors"
+                className="text-left px-3 py-2 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors"
               >
                 {example}
               </button>

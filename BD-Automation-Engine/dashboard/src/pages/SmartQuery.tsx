@@ -47,10 +47,10 @@ export function SmartQuery({ loading: pageLoading }: SmartQueryProps) {
   };
 
   const getConfidenceColor = (confidence: number) => {
-    if (confidence >= 0.8) return 'text-green-600 bg-green-100';
-    if (confidence >= 0.6) return 'text-yellow-600 bg-yellow-100';
-    if (confidence >= 0.4) return 'text-orange-600 bg-orange-100';
-    return 'text-red-600 bg-red-100';
+    if (confidence >= 0.8) return 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30';
+    if (confidence >= 0.6) return 'text-yellow-600 bg-yellow-100 dark:text-yellow-400 dark:bg-yellow-900/30';
+    if (confidence >= 0.4) return 'text-orange-600 bg-orange-100 dark:text-orange-400 dark:bg-orange-900/30';
+    return 'text-red-600 bg-red-100 dark:text-red-400 dark:bg-red-900/30';
   };
 
   if (pageLoading) {
@@ -62,7 +62,7 @@ export function SmartQuery({ loading: pageLoading }: SmartQueryProps) {
   }
 
   return (
-    <div className="p-6 h-full overflow-y-auto">
+    <div className="p-6 h-full overflow-y-auto bg-slate-50 dark:bg-slate-900 transition-colors">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-3 mb-2">
@@ -70,8 +70,8 @@ export function SmartQuery({ loading: pageLoading }: SmartQueryProps) {
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-slate-900">Smart Query</h1>
-            <p className="text-slate-500">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Smart Query</h1>
+            <p className="text-slate-500 dark:text-slate-400">
               Natural language search across 8,447+ BD intelligence records
             </p>
           </div>
@@ -87,10 +87,10 @@ export function SmartQuery({ loading: pageLoading }: SmartQueryProps) {
       {loading && (
         <div className="space-y-6 animate-in fade-in duration-300">
           {/* Loading skeleton for answer */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
               <div className="flex items-center gap-2">
-                <div className="h-5 w-5 rounded bg-purple-200 animate-pulse" />
+                <div className="h-5 w-5 rounded bg-purple-200 dark:bg-purple-800 animate-pulse" />
                 <Skeleton className="h-5 w-24" />
               </div>
             </div>
@@ -108,25 +108,25 @@ export function SmartQuery({ loading: pageLoading }: SmartQueryProps) {
               <div className="h-2 w-2 bg-purple-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
               <div className="h-2 w-2 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
-            <span className="text-sm text-slate-500">Analyzing your query across 8,447+ records...</span>
+            <span className="text-sm text-slate-500 dark:text-slate-400">Analyzing your query across 8,447+ records...</span>
           </div>
         </div>
       )}
 
       {/* Error State */}
       {error && !loading && (
-        <div className="mb-6 p-4 bg-red-50 rounded-xl border border-red-200 flex items-start gap-3">
+        <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800 flex items-start gap-3">
           <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
           <div className="flex-1">
-            <p className="font-medium text-red-800">Search Failed</p>
-            <p className="text-sm text-red-600">{error}</p>
+            <p className="font-medium text-red-800 dark:text-red-300">Search Failed</p>
+            <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
           </div>
           <button
             onClick={reset}
-            className="p-2 hover:bg-red-100 rounded-lg transition-colors"
+            className="p-2 hover:bg-red-100 dark:hover:bg-red-900/30 rounded-lg transition-colors"
             title="Try again"
           >
-            <RotateCcw className="h-4 w-4 text-red-600" />
+            <RotateCcw className="h-4 w-4 text-red-600 dark:text-red-400" />
           </button>
         </div>
       )}
@@ -135,8 +135,8 @@ export function SmartQuery({ loading: pageLoading }: SmartQueryProps) {
       {result && !error && !loading && (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
           {/* Answer Card */}
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-            <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-purple-50">
+          <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div className="p-4 border-b border-slate-100 dark:border-slate-700 bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Brain className="h-5 w-5 text-purple-600" />
