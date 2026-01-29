@@ -18,6 +18,9 @@ import {
   ZoomOut,
   Maximize2,
   RefreshCw,
+  Sparkles,
+  ArrowRight,
+  X,
 } from 'lucide-react';
 import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
 import { useProgramEcosystem, useContactNetwork, useTeamingPath } from '../hooks/useHubApi';
@@ -299,10 +302,15 @@ export function KnowledgeGraph() {
 
         {/* Loading */}
         {loading && (
-          <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-10">
+          <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-slate-50/95 to-blue-50/95 z-10">
             <div className="text-center">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600 mx-auto mb-2" />
-              <p className="text-slate-500">Building graph...</p>
+              <div className="relative mb-4">
+                <div className="w-16 h-16 border-4 border-blue-200 rounded-full animate-pulse" />
+                <div className="absolute inset-0 w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                <Network className="absolute inset-0 m-auto h-6 w-6 text-blue-600" />
+              </div>
+              <p className="text-slate-700 font-medium mb-1">Building Knowledge Graph...</p>
+              <p className="text-sm text-slate-500">Analyzing relationships and connections</p>
             </div>
           </div>
         )}
@@ -310,14 +318,80 @@ export function KnowledgeGraph() {
         {/* Empty State */}
         {!loading && !error && graphData.nodes.length === 0 && (
           <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
-              <Network className="h-16 w-16 text-slate-300 mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-slate-700 mb-2">No Graph Data</h3>
-              <p className="text-slate-500 max-w-md">
+            <div className="text-center max-w-lg">
+              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-500 mb-6 shadow-lg">
+                <Network className="h-10 w-10 text-white" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Explore Your Data Visually</h3>
+              <p className="text-slate-500 mb-6">
                 {viewMode === 'teaming'
                   ? 'Enter two contractors to find the relationship path between them.'
                   : `Enter a ${viewMode} name to explore its ecosystem and relationships.`}
               </p>
+
+              {/* Quick Examples */}
+              <div className="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+                <p className="text-sm font-medium text-slate-500 mb-3 flex items-center justify-center gap-2">
+                  <Sparkles className="h-4 w-4 text-amber-500" />
+                  Try these examples
+                </p>
+                <div className="flex flex-wrap gap-2 justify-center">
+                  {viewMode === 'program' && (
+                    <>
+                      <button
+                        onClick={() => { setSearchQuery('AF DCGS'); handleSearch(); }}
+                        className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm hover:bg-purple-100 transition-colors"
+                      >
+                        AF DCGS
+                      </button>
+                      <button
+                        onClick={() => { setSearchQuery('GBSD'); handleSearch(); }}
+                        className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm hover:bg-purple-100 transition-colors"
+                      >
+                        GBSD
+                      </button>
+                      <button
+                        onClick={() => { setSearchQuery('JADC2'); handleSearch(); }}
+                        className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-sm hover:bg-purple-100 transition-colors"
+                      >
+                        JADC2
+                      </button>
+                    </>
+                  )}
+                  {viewMode === 'contact' && (
+                    <>
+                      <button
+                        onClick={() => { setSearchQuery('John Smith'); }}
+                        className="px-3 py-1.5 bg-cyan-50 text-cyan-700 rounded-lg text-sm hover:bg-cyan-100 transition-colors"
+                      >
+                        John Smith
+                      </button>
+                      <button
+                        onClick={() => { setSearchQuery('Program Manager'); }}
+                        className="px-3 py-1.5 bg-cyan-50 text-cyan-700 rounded-lg text-sm hover:bg-cyan-100 transition-colors"
+                      >
+                        Program Manager
+                      </button>
+                    </>
+                  )}
+                  {viewMode === 'teaming' && (
+                    <>
+                      <button
+                        onClick={() => { setTeamingFrom('Leidos'); setTeamingTo('Northrop Grumman'); }}
+                        className="px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg text-sm hover:bg-orange-100 transition-colors flex items-center gap-1"
+                      >
+                        Leidos <ArrowRight className="h-3 w-3" /> Northrop
+                      </button>
+                      <button
+                        onClick={() => { setTeamingFrom('GDIT'); setTeamingTo('Raytheon'); }}
+                        className="px-3 py-1.5 bg-orange-50 text-orange-700 rounded-lg text-sm hover:bg-orange-100 transition-colors flex items-center gap-1"
+                      >
+                        GDIT <ArrowRight className="h-3 w-3" /> Raytheon
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -357,67 +431,99 @@ export function KnowledgeGraph() {
         )}
 
         {/* Controls */}
-        <div className="absolute bottom-4 right-4 flex flex-col gap-2">
+        <div className="absolute bottom-4 right-4 flex flex-col gap-1 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-1">
           <button
             onClick={handleZoomIn}
-            className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
+            className="p-2.5 hover:bg-slate-100 rounded-lg transition-colors group"
             title="Zoom In"
           >
-            <ZoomIn className="h-5 w-5 text-slate-600" />
+            <ZoomIn className="h-5 w-5 text-slate-500 group-hover:text-slate-700" />
           </button>
           <button
             onClick={handleZoomOut}
-            className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
+            className="p-2.5 hover:bg-slate-100 rounded-lg transition-colors group"
             title="Zoom Out"
           >
-            <ZoomOut className="h-5 w-5 text-slate-600" />
+            <ZoomOut className="h-5 w-5 text-slate-500 group-hover:text-slate-700" />
           </button>
+          <div className="h-px bg-slate-200 mx-2" />
           <button
             onClick={handleFitView}
-            className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
+            className="p-2.5 hover:bg-slate-100 rounded-lg transition-colors group"
             title="Fit to View"
           >
-            <Maximize2 className="h-5 w-5 text-slate-600" />
+            <Maximize2 className="h-5 w-5 text-slate-500 group-hover:text-slate-700" />
           </button>
           <button
             onClick={handleRefresh}
-            className="p-2 bg-white rounded-lg shadow-md hover:bg-slate-50 transition-colors"
+            className="p-2.5 hover:bg-red-50 rounded-lg transition-colors group"
             title="Reset"
           >
-            <RefreshCw className="h-5 w-5 text-slate-600" />
+            <RefreshCw className="h-5 w-5 text-slate-500 group-hover:text-red-500" />
           </button>
         </div>
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 bg-white rounded-lg shadow-md p-3">
-          <p className="text-xs font-medium text-slate-500 mb-2">Legend</p>
-          <div className="grid grid-cols-2 gap-2 text-xs">
+        <div className="absolute bottom-4 left-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-4">
+          <p className="text-xs font-semibold text-slate-700 mb-3">Node Types</p>
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs">
             {Object.entries(NODE_COLORS).slice(0, -1).map(([type, color]) => (
-              <div key={type} className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
-                <span className="capitalize text-slate-600">{type}</span>
+              <div key={type} className="flex items-center gap-2 group">
+                <div
+                  className="w-3 h-3 rounded-full shadow-sm transition-transform group-hover:scale-125"
+                  style={{ backgroundColor: color }}
+                />
+                <span className="capitalize text-slate-600 group-hover:text-slate-900">{type}</span>
               </div>
             ))}
           </div>
+          {graphData.nodes.length > 0 && (
+            <div className="mt-3 pt-3 border-t border-slate-100">
+              <p className="text-xs text-slate-500">
+                {graphData.nodes.length} nodes • {graphData.links.length} connections
+              </p>
+            </div>
+          )}
         </div>
 
         {/* Selected Node Info */}
         {selectedNode && (
-          <div className="absolute top-4 right-4 bg-white rounded-lg shadow-lg p-4 max-w-xs">
-            <div className="flex items-center gap-2 mb-2">
-              <div
-                className="w-4 h-4 rounded-full"
-                style={{ backgroundColor: selectedNode.color }}
-              />
-              <span className="font-medium text-slate-900">{selectedNode.label}</span>
+          <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-4 max-w-xs animate-in slide-in-from-right duration-300">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-10 h-10 rounded-lg flex items-center justify-center shadow-sm"
+                  style={{ backgroundColor: `${selectedNode.color}20` }}
+                >
+                  <div
+                    className="w-5 h-5 rounded-full"
+                    style={{ backgroundColor: selectedNode.color }}
+                  />
+                </div>
+                <div>
+                  <span className="font-semibold text-slate-900 block">{selectedNode.label}</span>
+                  <span className="text-sm text-slate-500 capitalize">{selectedNode.type}</span>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedNode(null)}
+                className="p-1 hover:bg-slate-100 rounded-lg transition-colors"
+              >
+                <X className="h-4 w-4 text-slate-400" />
+              </button>
             </div>
-            <p className="text-sm text-slate-500 capitalize">Type: {selectedNode.type}</p>
-            <button
-              onClick={() => setSelectedNode(null)}
-              className="mt-2 text-xs text-blue-600 hover:underline"
-            >
-              Close
-            </button>
+            <div className="mt-3 pt-3 border-t border-slate-100 flex gap-2">
+              <button
+                onClick={() => {
+                  setSearchQuery(selectedNode.label);
+                  if (selectedNode.type === 'contact') setViewMode('contact');
+                  else if (selectedNode.type === 'program') setViewMode('program');
+                }}
+                className="flex-1 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-100 transition-colors"
+              >
+                Explore
+              </button>
+            </div>
           </div>
         )}
       </div>

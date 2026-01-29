@@ -1,7 +1,9 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, XCircle, Database } from 'lucide-react';
+import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, XCircle, Database, Zap } from 'lucide-react';
 import type { CorrelationSummary } from '../types';
 import { useHubConnection, useHubStats } from '../hooks/useHubApi';
+import { AnimatedCounter, Sparkline } from '../components/ui/AnimatedCounter';
+import { SkeletonStatCard, SkeletonHubStats, SkeletonChart } from '../components/ui/Skeleton';
 
 interface ExecutiveSummaryProps {
   summary: CorrelationSummary | null;
@@ -24,12 +26,23 @@ function StatCard({
   color: string;
   subtitle?: string;
 }) {
+  const numericValue = typeof value === 'number' ? value : parseInt(value.toString(), 10);
+  const isNumeric = !isNaN(numericValue);
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-medium text-slate-500">{title}</p>
-          <p className="mt-1 text-3xl font-bold text-slate-900">{value.toLocaleString()}</p>
+          {isNumeric ? (
+            <AnimatedCounter
+              value={numericValue}
+              className="mt-1 text-3xl font-bold text-slate-900"
+              duration={1000}
+            />
+          ) : (
+            <p className="mt-1 text-3xl font-bold text-slate-900">{value}</p>
+          )}
           {subtitle && <p className="mt-1 text-sm text-slate-400">{subtitle}</p>}
         </div>
         <div className={`p-3 rounded-xl ${color}`}>
@@ -57,23 +70,31 @@ function MatchRateCard({
     return 'text-red-600 bg-red-100';
   };
 
+  const getBarColor = (rate: number) => {
+    if (rate >= 50) return 'bg-gradient-to-r from-green-400 to-green-600';
+    if (rate >= 25) return 'bg-gradient-to-r from-yellow-400 to-yellow-600';
+    return 'bg-gradient-to-r from-red-400 to-red-600';
+  };
+
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4">
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-4 hover:shadow-md transition-shadow">
       <div className="flex items-center justify-between mb-2">
         <span className="text-sm font-medium text-slate-600">{title}</span>
         <span className={`text-sm font-bold px-2 py-0.5 rounded ${getColorClass(rate)}`}>
           {rate.toFixed(1)}%
         </span>
       </div>
-      <div className="w-full bg-slate-200 rounded-full h-2">
+      <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
         <div
-          className={`h-2 rounded-full ${rate >= 50 ? 'bg-green-500' : rate >= 25 ? 'bg-yellow-500' : 'bg-red-500'}`}
+          className={`h-2.5 rounded-full transition-all duration-1000 ease-out ${getBarColor(rate)}`}
           style={{ width: `${Math.min(rate, 100)}%` }}
         />
       </div>
-      <p className="mt-2 text-xs text-slate-400">
-        {matched.toLocaleString()} / {total.toLocaleString()} matched
-      </p>
+      <div className="mt-2 flex items-center justify-between">
+        <p className="text-xs text-slate-400">
+          <AnimatedCounter value={matched} className="font-medium" /> / {total.toLocaleString()} matched
+        </p>
+      </div>
     </div>
   );
 }
@@ -140,7 +161,10 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
       </div>
 
       {/* Hub API Status Card */}
-      {(hubConnected || hubChecking) && (
+      {hubChecking && (
+        <SkeletonHubStats />
+      )}
+      {!hubChecking && hubConnected && (
         <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-xl shadow-sm p-4 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -150,17 +174,9 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-white">Hub API</span>
-                  {hubChecking ? (
-                    <span className="text-xs text-slate-400">Connecting...</span>
-                  ) : hubConnected ? (
-                    <span className="flex items-center gap-1 text-xs text-green-400">
-                      <CheckCircle2 className="h-3 w-3" /> Connected
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-1 text-xs text-red-400">
-                      <XCircle className="h-3 w-3" /> Disconnected
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1 text-xs text-green-400">
+                    <CheckCircle2 className="h-3 w-3" /> Connected
+                  </span>
                 </div>
                 {hubStats && (
                   <p className="text-xs text-slate-400">
@@ -172,19 +188,35 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
             {hubStats && (
               <div className="flex gap-6">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{hubStats.collections.contacts.toLocaleString()}</p>
+                  <AnimatedCounter
+                    value={hubStats.collections.contacts}
+                    className="text-2xl font-bold text-white"
+                    duration={1200}
+                  />
                   <p className="text-xs text-slate-400">Contacts</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{hubStats.collections.programs.toLocaleString()}</p>
+                  <AnimatedCounter
+                    value={hubStats.collections.programs}
+                    className="text-2xl font-bold text-white"
+                    duration={1000}
+                  />
                   <p className="text-xs text-slate-400">Programs</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{hubStats.collections.documents.toLocaleString()}</p>
+                  <AnimatedCounter
+                    value={hubStats.collections.documents}
+                    className="text-2xl font-bold text-white"
+                    duration={800}
+                  />
                   <p className="text-xs text-slate-400">Documents</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-white">{hubStats.collections.activities.toLocaleString()}</p>
+                  <AnimatedCounter
+                    value={hubStats.collections.activities}
+                    className="text-2xl font-bold text-white"
+                    duration={900}
+                  />
                   <p className="text-xs text-slate-400">Activities</p>
                 </div>
               </div>

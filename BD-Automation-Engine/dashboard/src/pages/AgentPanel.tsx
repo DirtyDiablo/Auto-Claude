@@ -215,8 +215,27 @@ export function AgentPanel() {
             </button>
           </div>
 
+          {/* Workflow Loading Progress */}
+          {workflowLoading && (
+            <div className="mb-4 p-4 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200">
+              <div className="flex items-center gap-3 mb-3">
+                <Loader2 className="h-5 w-5 text-amber-600 animate-spin" />
+                <span className="font-medium text-amber-900">
+                  Running {workflowLoading === 'analyze' ? 'Program Analysis' : workflowLoading === 'outreach' ? 'Outreach Preparation' : 'Weekly Intel'} Workflow...
+                </span>
+              </div>
+              <div className="w-full h-2 bg-amber-100 rounded-full overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-amber-400 to-orange-500 rounded-full animate-progress" />
+              </div>
+              <div className="mt-2 flex justify-between text-xs text-amber-600">
+                <span>Gathering data...</span>
+                <span>Multi-agent processing</span>
+              </div>
+            </div>
+          )}
+
           {/* Workflow Error */}
-          {workflowError && (
+          {workflowError && !workflowLoading && (
             <div className="mb-4 p-3 bg-red-50 rounded-lg flex items-start gap-2">
               <AlertCircle className="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
               <div>
@@ -227,8 +246,12 @@ export function AgentPanel() {
           )}
 
           {/* Workflow Result */}
-          {workflowResult && (
-            <div className="p-4 bg-slate-50 rounded-lg">
+          {workflowResult && !workflowLoading && (
+            <div className={`p-4 rounded-lg border ${
+              workflowResult.status === 'completed' ? 'bg-green-50 border-green-200' :
+              workflowResult.status === 'failed' ? 'bg-red-50 border-red-200' :
+              'bg-amber-50 border-amber-200'
+            }`}>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
                   {workflowResult.status === 'completed' ? (
@@ -238,20 +261,42 @@ export function AgentPanel() {
                   ) : (
                     <AlertCircle className="h-5 w-5 text-yellow-500" />
                   )}
-                  <span className="font-medium text-slate-900 capitalize">
-                    {workflowResult.workflow} - {workflowResult.status}
+                  <span className={`font-medium capitalize ${
+                    workflowResult.status === 'completed' ? 'text-green-900' :
+                    workflowResult.status === 'failed' ? 'text-red-900' : 'text-amber-900'
+                  }`}>
+                    {workflowResult.workflow.replace(/-/g, ' ')} - {workflowResult.status}
                   </span>
                 </div>
-                <span className="text-sm text-slate-500">
-                  {workflowResult.steps_completed}/{workflowResult.total_steps} steps •{' '}
-                  {workflowResult.execution_time.toFixed(1)}s
-                </span>
+                <div className="flex items-center gap-3">
+                  {/* Steps Progress */}
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      {Array.from({ length: workflowResult.total_steps }).map((_, i) => (
+                        <div
+                          key={i}
+                          className={`w-2 h-2 rounded-full ${
+                            i < workflowResult.steps_completed
+                              ? workflowResult.status === 'completed' ? 'bg-green-500' : 'bg-amber-500'
+                              : 'bg-slate-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-xs text-slate-500">
+                      {workflowResult.steps_completed}/{workflowResult.total_steps}
+                    </span>
+                  </div>
+                  <span className="text-sm text-slate-500">
+                    {workflowResult.execution_time.toFixed(1)}s
+                  </span>
+                </div>
               </div>
 
               {/* Result Content */}
               {workflowResult.result && (
-                <div className="bg-white rounded border border-slate-200 p-3 mt-2">
-                  <pre className="text-sm text-slate-700 whitespace-pre-wrap overflow-auto max-h-64">
+                <div className="bg-white rounded-lg border border-slate-200 p-4 mt-3">
+                  <pre className="text-sm text-slate-700 whitespace-pre-wrap overflow-auto max-h-64 font-mono">
                     {JSON.stringify(workflowResult.result, null, 2)}
                   </pre>
                 </div>

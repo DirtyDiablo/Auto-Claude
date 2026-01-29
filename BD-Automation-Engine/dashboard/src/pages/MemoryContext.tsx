@@ -20,6 +20,8 @@ import {
   FileText,
   Clock,
   ChevronRight,
+  Sparkles,
+  RotateCcw,
 } from 'lucide-react';
 import {
   useMemorySearch,
@@ -27,6 +29,7 @@ import {
   useBDInsights,
 } from '../hooks/useHubApi';
 import { hubApiClient } from '../services/hubApi';
+import { Skeleton, SkeletonText } from '../components/ui/Skeleton';
 
 type TabType = 'search' | 'entity' | 'insights' | 'contact' | 'program';
 
@@ -135,20 +138,30 @@ export function MemoryContext() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 bg-slate-100 rounded-lg p-1 mb-6 overflow-x-auto">
+      <div className="flex gap-1 bg-slate-100 rounded-xl p-1.5 mb-6 overflow-x-auto">
         {tabs.map((tab) => {
           const Icon = tab.icon;
+          const isActive = activeTab === tab.id;
+          const tabColors: Record<string, string> = {
+            search: 'from-purple-500 to-pink-500',
+            entity: 'from-blue-500 to-cyan-500',
+            insights: 'from-amber-500 to-orange-500',
+            contact: 'from-cyan-500 to-teal-500',
+            program: 'from-violet-500 to-purple-500',
+          };
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? 'bg-white text-slate-900 shadow-sm'
-                  : 'text-slate-600 hover:text-slate-900'
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm font-medium whitespace-nowrap transition-all duration-200 ${
+                isActive
+                  ? 'bg-white text-slate-900 shadow-md'
+                  : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
               }`}
             >
-              <Icon className="h-4 w-4" />
+              <div className={`p-1 rounded-md ${isActive ? `bg-gradient-to-br ${tabColors[tab.id]} text-white` : ''}`}>
+                <Icon className={`h-4 w-4 ${isActive ? '' : 'text-slate-400'}`} />
+              </div>
               {tab.label}
             </button>
           );
@@ -305,8 +318,19 @@ export function MemoryContext() {
             )}
 
             {insightsLoading ? (
-              <div className="flex items-center justify-center py-12">
-                <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+              <div className="space-y-3">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="p-4 bg-slate-50 rounded-lg animate-pulse">
+                    <div className="flex items-start gap-3">
+                      <Skeleton className="w-10 h-10 rounded-lg" />
+                      <div className="flex-1">
+                        <Skeleton className="h-4 w-24 mb-2" />
+                        <Skeleton className="h-4 w-full mb-1" />
+                        <Skeleton className="h-4 w-3/4" />
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : insights && insights.length > 0 ? (
               <div className="space-y-3">
@@ -345,9 +369,21 @@ export function MemoryContext() {
                 })}
               </div>
             ) : (
-              <div className="text-center py-12 text-slate-500">
-                <Lightbulb className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                <p>No insights available</p>
+              <div className="text-center py-12">
+                <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-amber-100 to-orange-100 mb-4">
+                  <Lightbulb className="h-8 w-8 text-amber-600" />
+                </div>
+                <h3 className="text-lg font-semibold text-slate-700 mb-2">No Insights Yet</h3>
+                <p className="text-slate-500 max-w-sm mx-auto mb-4">
+                  BD insights are generated as you interact with the system. Try searching for contacts or programs to generate insights.
+                </p>
+                <button
+                  onClick={refetchInsights}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-lg hover:bg-amber-100 transition-colors"
+                >
+                  <RotateCcw className="h-4 w-4" />
+                  Refresh Insights
+                </button>
               </div>
             )}
           </div>

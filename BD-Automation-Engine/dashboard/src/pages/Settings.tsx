@@ -31,6 +31,16 @@ interface SettingsProps {
   lastUpdated: Date | null;
 }
 
+const SECTION_COLORS: Record<string, { gradient: string; iconBg: string; iconText: string }> = {
+  Database: { gradient: 'from-blue-500 to-cyan-500', iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100', iconText: 'text-blue-600' },
+  Key: { gradient: 'from-amber-500 to-orange-500', iconBg: 'bg-gradient-to-br from-amber-100 to-orange-100', iconText: 'text-amber-600' },
+  Server: { gradient: 'from-purple-500 to-indigo-500', iconBg: 'bg-gradient-to-br from-purple-100 to-indigo-100', iconText: 'text-purple-600' },
+  RefreshCw: { gradient: 'from-green-500 to-emerald-500', iconBg: 'bg-gradient-to-br from-green-100 to-emerald-100', iconText: 'text-green-600' },
+  Bell: { gradient: 'from-rose-500 to-pink-500', iconBg: 'bg-gradient-to-br from-rose-100 to-pink-100', iconText: 'text-rose-600' },
+  Globe: { gradient: 'from-sky-500 to-blue-500', iconBg: 'bg-gradient-to-br from-sky-100 to-blue-100', iconText: 'text-sky-600' },
+  Shield: { gradient: 'from-slate-500 to-gray-500', iconBg: 'bg-gradient-to-br from-slate-100 to-gray-100', iconText: 'text-slate-600' },
+};
+
 function SettingSection({
   title,
   description,
@@ -42,18 +52,24 @@ function SettingSection({
   icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
 }) {
+  const iconName = Icon.name || 'Shield';
+  const colors = SECTION_COLORS[iconName] || SECTION_COLORS.Shield;
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-      <div className="flex items-start gap-4 mb-4">
-        <div className="p-2 rounded-lg bg-slate-100">
-          <Icon className="h-5 w-5 text-slate-600" />
+    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
+      <div className={`h-1 bg-gradient-to-r ${colors.gradient}`} />
+      <div className="p-6">
+        <div className="flex items-start gap-4 mb-4">
+          <div className={`p-2.5 rounded-xl ${colors.iconBg}`}>
+            <Icon className={`h-5 w-5 ${colors.iconText}`} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-slate-900">{title}</h3>
+            <p className="text-sm text-slate-500">{description}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-slate-900">{title}</h3>
-          <p className="text-sm text-slate-500">{description}</p>
-        </div>
+        {children}
       </div>
-      {children}
     </div>
   );
 }
@@ -191,11 +207,18 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
       ];
 
   return (
-    <div className="p-6 h-full overflow-y-auto">
+    <div className="p-6 h-full overflow-y-auto bg-slate-50">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-500">Configure your BD Intelligence Dashboard</p>
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-lg">
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
+            <p className="text-slate-500">Configure your BD Intelligence Dashboard</p>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6 max-w-3xl">
@@ -376,22 +399,48 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
         >
           <div className="space-y-4">
             {/* Connection Status */}
-            <div className={`flex items-center gap-3 p-3 rounded-lg ${hubConnected ? 'bg-green-50' : 'bg-amber-50'}`}>
-              {hubConnected ? (
-                <CheckCircle2 className="h-5 w-5 text-green-600" />
+            <div className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+              hubConnected
+                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
+                : 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200'
+            }`}>
+              {hubTesting ? (
+                <div className="relative">
+                  <div className="w-8 h-8 border-2 border-blue-200 rounded-full animate-pulse" />
+                  <div className="absolute inset-0 w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : hubConnected ? (
+                <div className="relative">
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                  <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                </div>
               ) : (
-                <AlertCircle className="h-5 w-5 text-amber-600" />
+                <XCircle className="h-8 w-8 text-amber-500" />
               )}
               <div className="flex-1">
-                <p className={`text-sm font-medium ${hubConnected ? 'text-green-800' : 'text-amber-800'}`}>
-                  {hubConnected ? 'Hub API Connected' : 'Hub API Not Connected'}
+                <p className={`text-sm font-semibold ${hubConnected ? 'text-green-800' : 'text-amber-800'}`}>
+                  {hubTesting ? 'Testing Connection...' : hubConnected ? 'Hub API Connected' : 'Hub API Not Connected'}
                 </p>
                 {hubStats && (
-                  <p className="text-xs text-green-600">
-                    {hubStats.contacts.toLocaleString()} contacts • {hubStats.programs.toLocaleString()} programs • {hubStats.total.toLocaleString()} total records
-                  </p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      {hubStats.contacts.toLocaleString()} contacts
+                    </span>
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {hubStats.programs.toLocaleString()} programs
+                    </span>
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                      {hubStats.total.toLocaleString()} total
+                    </span>
+                  </div>
                 )}
-                {!hubConnected && (
+                {!hubConnected && !hubTesting && (
                   <p className="text-xs text-amber-600">Start the Hub API server to enable AI features</p>
                 )}
               </div>

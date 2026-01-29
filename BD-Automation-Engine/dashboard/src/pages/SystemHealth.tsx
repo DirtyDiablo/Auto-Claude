@@ -5,7 +5,7 @@
  * collection stats, cache metrics, and service health.
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Activity,
   Server,
@@ -26,6 +26,8 @@ import {
   Network,
   Brain,
   Loader2,
+  TrendingUp,
+  BarChart3,
 } from 'lucide-react';
 import { SystemStatsCard } from '../components/hub/SystemStatsCard';
 import {
@@ -35,6 +37,7 @@ import {
   useHubGraphStats,
 } from '../hooks/useHubApi';
 import { getHubApiUrl } from '../services/hubApi';
+import { AnimatedCounter, Sparkline } from '../components/ui/AnimatedCounter';
 
 const REFRESH_INTERVALS = [
   { value: 0, label: 'Manual' },
@@ -57,13 +60,23 @@ export function SystemHealth() {
   const { data: graphStats, loading: graphLoading, error: graphError, refetch: refetchGraph } = useHubGraphStats();
 
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [hitRateHistory, setHitRateHistory] = useState<number[]>([]);
+  const [requestHistory, setRequestHistory] = useState<number[]>([]);
 
-  // Update last refresh time
+  // Update last refresh time and track history
   useEffect(() => {
     if (!healthLoading && !statsLoading) {
       setLastRefresh(new Date());
     }
   }, [healthLoading, statsLoading]);
+
+  // Track cache stats history
+  useEffect(() => {
+    if (cacheStats) {
+      setHitRateHistory(prev => [...prev.slice(-19), cacheStats.hit_rate * 100]);
+      setRequestHistory(prev => [...prev.slice(-19), cacheStats.total_requests]);
+    }
+  }, [cacheStats]);
 
   const handleRefreshAll = () => {
     refetchHealth();
@@ -150,13 +163,21 @@ export function SystemHealth() {
 
       {/* Connection Status Banner */}
       <div
-        className={`mb-6 p-4 rounded-xl flex items-center justify-between ${
-          isConnected ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+        className={`mb-6 p-4 rounded-xl flex items-center justify-between transition-all ${
+          isConnected
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200'
+            : 'bg-gradient-to-r from-red-50 to-rose-50 border border-red-200'
         }`}
       >
         <div className="flex items-center gap-3">
           {isConnected ? (
-            <CheckCircle2 className="h-6 w-6 text-green-600" />
+            <div className="relative">
+              <CheckCircle2 className="h-6 w-6 text-green-600" />
+              <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+              </span>
+            </div>
           ) : (
             <XCircle className="h-6 w-6 text-red-600" />
           )}
@@ -169,13 +190,22 @@ export function SystemHealth() {
             </p>
           </div>
         </div>
-        {health && isConnected && (
-          <div className={`px-3 py-1.5 rounded-lg ${getStatusBg(health.status)}`}>
-            <span className={`font-medium capitalize ${getStatusColor(health.status)}`}>
-              {health.status}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center gap-4">
+          {health && isConnected && stats && (
+            <div className="flex items-center gap-2 text-green-700">
+              <TrendingUp className="h-4 w-4" />
+              <AnimatedCounter value={stats.total_records} className="font-semibold" />
+              <span className="text-sm">records</span>
+            </div>
+          )}
+          {health && isConnected && (
+            <div className={`px-3 py-1.5 rounded-lg ${getStatusBg(health.status)}`}>
+              <span className={`font-medium capitalize ${getStatusColor(health.status)}`}>
+                {health.status}
+              </span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
@@ -290,22 +320,37 @@ export function SystemHealth() {
               </div>
             ) : cacheStats ? (
               <div className="space-y-4">
-                {/* Hit Rate */}
+                {/* Hit Rate with Sparkline */}
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-sm text-slate-600">Hit Rate</span>
-                    <span className="text-sm font-medium text-slate-900">
-                      {(cacheStats.hit_rate * 100).toFixed(1)}%
-                    </span>
+                    <div className="flex items-center gap-2">
+                      {hitRateHistory.length > 1 && (
+                        <Sparkline
+                          data={hitRateHistory}
+                          width={60}
+                          height={20}
+                          color={cacheStats.hit_rate >= 0.8 ? '#22c55e' : cacheStats.hit_rate >= 0.5 ? '#eab308' : '#ef4444'}
+                          fillColor={cacheStats.hit_rate >= 0.8 ? 'rgba(34, 197, 94, 0.1)' : cacheStats.hit_rate >= 0.5 ? 'rgba(234, 179, 8, 0.1)' : 'rgba(239, 68, 68, 0.1)'}
+                        />
+                      )}
+                      <span className={`text-sm font-medium px-2 py-0.5 rounded ${
+                        cacheStats.hit_rate >= 0.8 ? 'bg-green-100 text-green-700' :
+                        cacheStats.hit_rate >= 0.5 ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-red-100 text-red-700'
+                      }`}>
+                        {(cacheStats.hit_rate * 100).toFixed(1)}%
+                      </span>
+                    </div>
                   </div>
-                  <div className="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                  <div className="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
                     <div
-                      className={`h-full transition-all ${
+                      className={`h-full transition-all duration-500 rounded-full ${
                         cacheStats.hit_rate >= 0.8
-                          ? 'bg-green-500'
+                          ? 'bg-gradient-to-r from-green-400 to-green-600'
                           : cacheStats.hit_rate >= 0.5
-                          ? 'bg-yellow-500'
-                          : 'bg-red-500'
+                          ? 'bg-gradient-to-r from-yellow-400 to-yellow-600'
+                          : 'bg-gradient-to-r from-red-400 to-red-600'
                       }`}
                       style={{ width: `${cacheStats.hit_rate * 100}%` }}
                     />
@@ -314,16 +359,24 @@ export function SystemHealth() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-500">Total Requests</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {cacheStats.total_requests.toLocaleString()}
-                    </p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-slate-500">Total Requests</p>
+                      <BarChart3 className="h-3 w-3 text-slate-400" />
+                    </div>
+                    <AnimatedCounter
+                      value={cacheStats.total_requests}
+                      className="text-lg font-semibold text-slate-900"
+                    />
                   </div>
                   <div className="p-3 bg-slate-50 rounded-lg">
-                    <p className="text-xs text-slate-500">Cache Entries</p>
-                    <p className="text-lg font-semibold text-slate-900">
-                      {cacheStats.entries.toLocaleString()}
-                    </p>
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs text-slate-500">Cache Entries</p>
+                      <Database className="h-3 w-3 text-slate-400" />
+                    </div>
+                    <AnimatedCounter
+                      value={cacheStats.entries}
+                      className="text-lg font-semibold text-slate-900"
+                    />
                   </div>
                 </div>
 
@@ -362,17 +415,21 @@ export function SystemHealth() {
             </div>
           ) : graphStats ? (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="p-4 bg-slate-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-slate-900">
-                  {graphStats.total_nodes.toLocaleString()}
-                </p>
-                <p className="text-sm text-slate-500">Total Nodes</p>
+              <div className="p-4 bg-gradient-to-br from-cyan-50 to-blue-50 rounded-lg text-center border border-cyan-100">
+                <AnimatedCounter
+                  value={graphStats.total_nodes}
+                  className="text-2xl font-bold text-cyan-700"
+                  duration={1000}
+                />
+                <p className="text-sm text-cyan-600">Total Nodes</p>
               </div>
-              <div className="p-4 bg-slate-50 rounded-lg text-center">
-                <p className="text-2xl font-bold text-slate-900">
-                  {graphStats.total_edges.toLocaleString()}
-                </p>
-                <p className="text-sm text-slate-500">Total Edges</p>
+              <div className="p-4 bg-gradient-to-br from-purple-50 to-indigo-50 rounded-lg text-center border border-purple-100">
+                <AnimatedCounter
+                  value={graphStats.total_edges}
+                  className="text-2xl font-bold text-purple-700"
+                  duration={1000}
+                />
+                <p className="text-sm text-purple-600">Total Edges</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-lg">
                 <p className="text-xs font-medium text-slate-500 mb-2">Node Types</p>
@@ -380,7 +437,11 @@ export function SystemHealth() {
                   {Object.entries(graphStats.node_types).slice(0, 4).map(([type, count]) => (
                     <div key={type} className="flex justify-between text-sm">
                       <span className="text-slate-600 capitalize">{type}</span>
-                      <span className="font-medium text-slate-900">{(count as number).toLocaleString()}</span>
+                      <AnimatedCounter
+                        value={count as number}
+                        className="font-medium text-slate-900"
+                        duration={600}
+                      />
                     </div>
                   ))}
                 </div>
@@ -391,7 +452,11 @@ export function SystemHealth() {
                   {Object.entries(graphStats.edge_types).slice(0, 4).map(([type, count]) => (
                     <div key={type} className="flex justify-between text-sm">
                       <span className="text-slate-600 capitalize">{type}</span>
-                      <span className="font-medium text-slate-900">{(count as number).toLocaleString()}</span>
+                      <AnimatedCounter
+                        value={count as number}
+                        className="font-medium text-slate-900"
+                        duration={600}
+                      />
                     </div>
                   ))}
                 </div>
@@ -417,16 +482,18 @@ function CollectionStat({
   highlight?: boolean;
 }) {
   return (
-    <div className={`flex items-center justify-between p-2 rounded-lg ${highlight ? 'bg-blue-50' : ''}`}>
+    <div className={`flex items-center justify-between p-2 rounded-lg transition-colors hover:bg-slate-50 ${highlight ? 'bg-blue-50 hover:bg-blue-100' : ''}`}>
       <div className="flex items-center gap-2">
         <Icon className={`h-4 w-4 ${highlight ? 'text-blue-600' : 'text-slate-400'}`} />
         <span className={`text-sm ${highlight ? 'font-medium text-blue-800' : 'text-slate-600'}`}>
           {label}
         </span>
       </div>
-      <span className={`font-semibold ${highlight ? 'text-blue-900' : 'text-slate-900'}`}>
-        {value.toLocaleString()}
-      </span>
+      <AnimatedCounter
+        value={value}
+        className={`font-semibold ${highlight ? 'text-blue-900' : 'text-slate-900'}`}
+        duration={800}
+      />
     </div>
   );
 }
@@ -441,21 +508,26 @@ function ServiceStatus({
   active: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between p-2">
+    <div className={`flex items-center justify-between p-2 rounded-lg transition-colors ${
+      active ? 'hover:bg-green-50' : 'hover:bg-red-50'
+    }`}>
       <div className="flex items-center gap-2">
-        <Icon className="h-4 w-4 text-slate-400" />
+        <Icon className={`h-4 w-4 ${active ? 'text-green-500' : 'text-slate-400'}`} />
         <span className="text-sm text-slate-600">{label}</span>
       </div>
       <div className="flex items-center gap-1.5">
         {active ? (
           <>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-            <span className="text-sm text-green-600">Active</span>
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+            </span>
+            <span className="text-sm font-medium text-green-600">Active</span>
           </>
         ) : (
           <>
-            <XCircle className="h-4 w-4 text-red-500" />
-            <span className="text-sm text-red-600">Inactive</span>
+            <span className="h-2 w-2 rounded-full bg-red-500"></span>
+            <span className="text-sm font-medium text-red-600">Inactive</span>
           </>
         )}
       </div>

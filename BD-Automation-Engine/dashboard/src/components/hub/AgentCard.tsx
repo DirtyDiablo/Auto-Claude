@@ -5,8 +5,8 @@
  * execution button, response area, and confidence meter.
  */
 
-import { useState } from 'react';
-import { Bot, Send, Loader2, AlertCircle, CheckCircle2, Clock, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bot, Send, Loader2, AlertCircle, CheckCircle2, Clock, FileText, Sparkles, Zap } from 'lucide-react';
 import type { AgentResponse } from '../../services/hubApi';
 
 interface AgentCardProps {
@@ -53,17 +53,31 @@ export function AgentCard({
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+    <div className={`bg-white rounded-xl shadow-sm border overflow-hidden transition-all duration-300 ${
+      loading ? 'border-blue-300 ring-2 ring-blue-100' : 'border-slate-200 hover:shadow-md'
+    }`}>
       {/* Header */}
-      <div className="p-4 border-b border-slate-100 bg-slate-50">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-100">
-            <Icon className="h-5 w-5 text-blue-600" />
+      <div className={`p-4 border-b transition-colors duration-300 ${
+        loading ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100' : 'bg-slate-50 border-slate-100'
+      }`}>
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg transition-colors duration-300 ${
+              loading ? 'bg-blue-200 animate-pulse' : 'bg-blue-100'
+            }`}>
+              <Icon className="h-5 w-5 text-blue-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-slate-900">{title}</h3>
+              <p className="text-sm text-slate-500">{description}</p>
+            </div>
           </div>
-          <div>
-            <h3 className="font-semibold text-slate-900">{title}</h3>
-            <p className="text-sm text-slate-500">{description}</p>
-          </div>
+          {loading && (
+            <div className="flex items-center gap-1.5">
+              <span className="flex h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="text-xs text-blue-600 font-medium">Processing</span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -96,9 +110,33 @@ export function AgentCard({
       {/* Results Area */}
       <div className="p-4 min-h-[120px]">
         {loading && (
-          <div className="flex items-center justify-center h-24 text-slate-400">
-            <Loader2 className="h-6 w-6 animate-spin mr-2" />
-            <span>Agent processing...</span>
+          <div className="space-y-4">
+            {/* Progress Steps Animation */}
+            <div className="flex items-center justify-center gap-8 py-4">
+              {[
+                { icon: Sparkles, label: 'Analyzing', delay: '0ms' },
+                { icon: Zap, label: 'Reasoning', delay: '300ms' },
+                { icon: FileText, label: 'Generating', delay: '600ms' },
+              ].map((step, i) => {
+                const StepIcon = step.icon;
+                return (
+                  <div key={i} className="flex flex-col items-center gap-1">
+                    <div
+                      className="p-2 rounded-full bg-blue-50 animate-pulse"
+                      style={{ animationDelay: step.delay }}
+                    >
+                      <StepIcon className="h-4 w-4 text-blue-500" />
+                    </div>
+                    <span className="text-xs text-slate-500">{step.label}</span>
+                  </div>
+                );
+              })}
+            </div>
+            {/* Progress Bar */}
+            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="h-full bg-gradient-to-r from-blue-400 via-indigo-500 to-purple-500 rounded-full animate-progress" />
+            </div>
+            <p className="text-center text-sm text-slate-500">AI agent is processing your query...</p>
           </div>
         )}
 
