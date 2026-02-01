@@ -1,9 +1,9 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, XCircle, Database, Zap } from 'lucide-react';
+import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2 } from 'lucide-react';
 import type { CorrelationSummary } from '../types';
 import { useHubConnection, useHubStats } from '../hooks/useHubApi';
-import { AnimatedCounter, Sparkline } from '../components/ui/AnimatedCounter';
-import { SkeletonStatCard, SkeletonHubStats, SkeletonChart } from '../components/ui/Skeleton';
+import { AnimatedCounter } from '../components/ui/AnimatedCounter';
+import { SkeletonHubStats } from '../components/ui/Skeleton';
 
 interface ExecutiveSummaryProps {
   summary: CorrelationSummary | null;

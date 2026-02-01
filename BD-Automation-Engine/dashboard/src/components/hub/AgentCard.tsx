@@ -5,7 +5,7 @@
  * execution button, response area, and confidence meter.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Bot, Send, Loader2, AlertCircle, CheckCircle2, Clock, FileText, Sparkles, Zap } from 'lucide-react';
 import type { AgentResponse } from '../../services/hubApi';
 

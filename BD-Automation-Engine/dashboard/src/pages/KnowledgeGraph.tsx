@@ -22,7 +22,7 @@ import {
   ArrowRight,
   X,
 } from 'lucide-react';
-import ForceGraph2D, { ForceGraphMethods } from 'react-force-graph-2d';
+import ForceGraph2D from 'react-force-graph-2d';
 import { useProgramEcosystem, useContactNetwork, useTeamingPath } from '../hooks/useHubApi';
 
 type ViewMode = 'program' | 'contact' | 'teaming';
@@ -33,6 +33,8 @@ interface GraphNode {
   type: string;
   size?: number;
   color?: string;
+  x?: number;
+  y?: number;
 }
 
 interface GraphLink {
@@ -65,7 +67,8 @@ export function KnowledgeGraph() {
   const [graphData, setGraphData] = useState<GraphData>({ nodes: [], links: [] });
   const [selectedNode, setSelectedNode] = useState<GraphNode | null>(null);
 
-  const graphRef = useRef<ForceGraphMethods>();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const graphRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const programEcosystem = useProgramEcosystem();
@@ -126,7 +129,7 @@ export function KnowledgeGraph() {
         size: i === 0 || i === result.path.length - 1 ? 12 : 8,
       }));
 
-      const links: GraphLink[] = result.path.slice(0, -1).map((p, i) => ({
+      const links: GraphLink[] = result.path.slice(0, -1).map((_, i) => ({
         source: `node-${i}`,
         target: `node-${i + 1}`,
         label: result.path[i + 1]?.relationship,

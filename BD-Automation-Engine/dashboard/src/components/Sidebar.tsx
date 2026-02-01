@@ -25,6 +25,7 @@ import {
   Bot,
   Brain,
   Activity,
+  UserMinus,
 } from 'lucide-react';
 import type { TabId } from '../types';
 
@@ -59,6 +60,8 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'contactorgchart', label: 'Contact Org Chart', icon: UserCheck },
   { id: 'placements', label: 'Placements', icon: FileSpreadsheet },
   { id: 'callintelligence', label: 'Call Intelligence', icon: Phone },
+  // Takeover Section
+  { id: 'accounttakeover', label: 'Account Takeover', icon: UserMinus, section: 'Takeover' },
   { id: 'enrichment', label: 'Auto-Enrichment', icon: Zap },
   { id: 'playbook', label: 'Daily Playbook', icon: CalendarCheck },
   { id: 'mindmap', label: 'Mind Map', icon: Network },

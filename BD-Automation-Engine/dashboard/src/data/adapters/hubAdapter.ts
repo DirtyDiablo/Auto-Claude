@@ -102,22 +102,6 @@ function transformHubContact(result: HubSearchResult): Contact {
   };
 }
 
-function transformHubContractor(result: HubSearchResult): Contractor {
-  const meta = result.metadata as Record<string, unknown>;
-  return {
-    id: result.id,
-    name: (meta.name as string) || result.content?.slice(0, 100) || '',
-    description: (meta.description as string) || '',
-    website: (meta.website as string) || '',
-    programs: (meta.programs as string[]) || [],
-    contract_vehicles: (meta.contract_vehicles as string[]) || [],
-    locations: (meta.locations as string[]) || [],
-    capabilities: (meta.capabilities as string[]) || [],
-    job_count: (meta.job_count as number) || 0,
-    contact_count: (meta.contact_count as number) || 0,
-  };
-}
-
 // Derive contractors from programs and contacts
 function deriveContractors(programs: Program[], contacts: Contact[]): Contractor[] {
   const contractorMap = new Map<string, Contractor>();

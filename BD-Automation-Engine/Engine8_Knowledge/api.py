@@ -99,6 +99,13 @@ except ImportError as e:
     DIFY_INTEGRATION_AVAILABLE = False
     logger.warning(f"Dify integration not available: {e}")
 
+try:
+    from Engine8_Knowledge.ragflow.routes import router as ragflow_router
+    RAGFLOW_AVAILABLE = True
+except ImportError as e:
+    RAGFLOW_AVAILABLE = False
+    logger.warning(f"RAGflow integration not available: {e}")
+
 # Logger already configured above
 
 # =========================================
@@ -324,6 +331,10 @@ if DIFY_INTEGRATION_AVAILABLE:
     app.include_router(create_dify_agents_router(), prefix="/dify")
     app.include_router(create_dify_n8n_router(), prefix="/dify")
     logger.info("Dify integration routes enabled: /dify/*")
+
+if RAGFLOW_AVAILABLE:
+    app.include_router(ragflow_router)
+    logger.info("RAGflow integration routes enabled: /ragflow/*")
 
 
 # =========================================

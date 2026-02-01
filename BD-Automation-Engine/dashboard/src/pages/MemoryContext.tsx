@@ -20,7 +20,6 @@ import {
   FileText,
   Clock,
   ChevronRight,
-  Sparkles,
   RotateCcw,
 } from 'lucide-react';
 import {
@@ -29,7 +28,7 @@ import {
   useBDInsights,
 } from '../hooks/useHubApi';
 import { hubApiClient } from '../services/hubApi';
-import { Skeleton, SkeletonText } from '../components/ui/Skeleton';
+import { Skeleton } from '../components/ui/Skeleton';
 
 type TabType = 'search' | 'entity' | 'insights' | 'contact' | 'program';
 
@@ -47,6 +46,36 @@ const INSIGHT_COLORS: Record<string, string> = {
   recommendation: 'text-amber-600 bg-amber-100',
 };
 
+// Type definitions for context data
+interface ContactContextData {
+  contact: {
+    name: string;
+    title: string;
+    company: string;
+  };
+  call_history: Array<{
+    date: string;
+    notes: string;
+    outcome: string;
+  }>;
+  insights?: string[];
+}
+
+interface ProgramContextData {
+  program: {
+    name: string;
+    agency: string;
+    prime: string;
+  };
+  intel_history: Array<{
+    date: string;
+    type: string;
+    content: string;
+  }>;
+  patterns?: string[];
+  opportunities?: string[];
+}
+
 export function MemoryContext() {
   const [activeTab, setActiveTab] = useState<TabType>('search');
   const [searchQuery, setSearchQuery] = useState('');
@@ -63,11 +92,11 @@ export function MemoryContext() {
   );
 
   // Contact and program context state
-  const [contactContext, setContactContext] = useState<unknown>(null);
+  const [contactContext, setContactContext] = useState<ContactContextData | null>(null);
   const [contactLoading, setContactLoading] = useState(false);
   const [contactError, setContactError] = useState<string | null>(null);
 
-  const [programContext, setProgramContext] = useState<unknown>(null);
+  const [programContext, setProgramContext] = useState<ProgramContextData | null>(null);
   const [programLoading, setProgramLoading] = useState(false);
   const [programError, setProgramError] = useState<string | null>(null);
 
@@ -422,22 +451,22 @@ export function MemoryContext() {
                 {/* Contact Info */}
                 <div className="p-4 bg-cyan-50 rounded-lg">
                   <h3 className="font-semibold text-cyan-900 mb-1">
-                    {(contactContext as { contact: { name: string } }).contact.name}
+                    {contactContext.contact.name}
                   </h3>
                   <p className="text-cyan-700">
-                    {(contactContext as { contact: { title: string } }).contact.title} at{' '}
-                    {(contactContext as { contact: { company: string } }).contact.company}
+                    {contactContext.contact.title} at{' '}
+                    {contactContext.contact.company}
                   </p>
                 </div>
 
                 {/* Call History */}
-                {(contactContext as { call_history: unknown[] }).call_history?.length > 0 && (
+                {contactContext.call_history?.length > 0 && (
                   <div>
                     <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
                       <Clock className="h-4 w-4" /> Call History
                     </h4>
                     <div className="space-y-2">
-                      {(contactContext as { call_history: Array<{ date: string; notes: string; outcome: string }> }).call_history.map((call, i) => (
+                      {contactContext.call_history.map((call, i) => (
                         <div key={i} className="p-3 bg-slate-50 rounded-lg text-sm">
                           <div className="flex justify-between mb-1">
                             <span className="text-slate-500">{call.date}</span>
@@ -451,13 +480,13 @@ export function MemoryContext() {
                 )}
 
                 {/* Insights */}
-                {(contactContext as { insights: string[] }).insights?.length > 0 && (
+                {contactContext.insights && contactContext.insights.length > 0 && (
                   <div>
                     <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
                       <Lightbulb className="h-4 w-4" /> Insights
                     </h4>
                     <ul className="space-y-1">
-                      {(contactContext as { insights: string[] }).insights.map((insight, i) => (
+                      {contactContext.insights.map((insight, i) => (
                         <li key={i} className="flex items-start gap-2 text-slate-600">
                           <ChevronRight className="h-4 w-4 text-slate-400 mt-0.5" />
                           {insight}
@@ -504,20 +533,20 @@ export function MemoryContext() {
                 {/* Program Info */}
                 <div className="p-4 bg-purple-50 rounded-lg">
                   <h3 className="font-semibold text-purple-900 mb-1">
-                    {(programContext as { program: { name: string } }).program.name}
+                    {programContext.program.name}
                   </h3>
                   <p className="text-purple-700">
-                    {(programContext as { program: { agency: string } }).program.agency} • Prime:{' '}
-                    {(programContext as { program: { prime: string } }).program.prime}
+                    {programContext.program.agency} • Prime:{' '}
+                    {programContext.program.prime}
                   </p>
                 </div>
 
                 {/* Intel History */}
-                {(programContext as { intel_history: unknown[] }).intel_history?.length > 0 && (
+                {programContext.intel_history?.length > 0 && (
                   <div>
                     <h4 className="font-medium text-slate-900 mb-2">Intel History</h4>
                     <div className="space-y-2">
-                      {(programContext as { intel_history: Array<{ date: string; type: string; content: string }> }).intel_history.map((intel, i) => (
+                      {programContext.intel_history.map((intel, i) => (
                         <div key={i} className="p-3 bg-slate-50 rounded-lg text-sm">
                           <div className="flex justify-between mb-1">
                             <span className="text-slate-500">{intel.date}</span>
@@ -532,13 +561,13 @@ export function MemoryContext() {
 
                 {/* Patterns & Opportunities */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {(programContext as { patterns: string[] }).patterns?.length > 0 && (
+                  {programContext.patterns && programContext.patterns.length > 0 && (
                     <div>
                       <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
                         <TrendingUp className="h-4 w-4" /> Patterns
                       </h4>
                       <ul className="space-y-1">
-                        {(programContext as { patterns: string[] }).patterns.map((pattern, i) => (
+                        {programContext.patterns.map((pattern, i) => (
                           <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
                             <ChevronRight className="h-4 w-4 text-slate-400 mt-0.5" />
                             {pattern}
@@ -548,13 +577,13 @@ export function MemoryContext() {
                     </div>
                   )}
 
-                  {(programContext as { opportunities: string[] }).opportunities?.length > 0 && (
+                  {programContext.opportunities && programContext.opportunities.length > 0 && (
                     <div>
                       <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
                         <CheckCircle2 className="h-4 w-4" /> Opportunities
                       </h4>
                       <ul className="space-y-1">
-                        {(programContext as { opportunities: string[] }).opportunities.map((opp, i) => (
+                        {programContext.opportunities.map((opp, i) => (
                           <li key={i} className="flex items-start gap-2 text-slate-600 text-sm">
                             <ChevronRight className="h-4 w-4 text-green-400 mt-0.5" />
                             {opp}

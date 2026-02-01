@@ -30,11 +30,14 @@ except ImportError:
     print("Warning: qdrant-client not installed. Run: pip install qdrant-client")
 
 try:
-    from sentence_transformers import SentenceTransformer
+    import openai
     EMBEDDINGS_AVAILABLE = True
 except ImportError:
     EMBEDDINGS_AVAILABLE = False
-    print("Warning: sentence-transformers not installed. Run: pip install sentence-transformers")
+    print("Warning: openai not installed. Run: pip install openai")
+
+from dotenv import load_dotenv
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,8 +49,8 @@ logger = logging.getLogger('BDKnowledgeStore')
 
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 DEFAULT_QDRANT_PATH = PROJECT_ROOT / "Engine8_Knowledge" / "data" / "qdrant"
-DEFAULT_MODEL = "all-MiniLM-L6-v2"  # Fast, 384 dimensions
-EMBEDDING_DIMENSION = 384
+DEFAULT_MODEL = "text-embedding-3-small"  # OpenAI, 1536 dimensions
+EMBEDDING_DIMENSION = 1536
 
 
 @dataclass
@@ -133,7 +136,8 @@ class BDKnowledgeStore:
         self,
         path: Optional[str] = None,
         model_name: str = DEFAULT_MODEL,
-        in_memory: bool = False
+        in_memory: bool = False,
+        url: Optional[str] = None
     ):
         """
         Initialize the knowledge store.
@@ -142,28 +146,35 @@ class BDKnowledgeStore:
             path: Path to Qdrant data directory. Uses default if None.
             model_name: Sentence transformer model for embeddings.
             in_memory: If True, use in-memory storage (for testing).
+            url: Qdrant server URL (e.g., http://localhost:6333). If set, uses server mode.
         """
         if not QDRANT_AVAILABLE:
             raise ImportError("qdrant-client is required. Install with: pip install qdrant-client")
 
         if not EMBEDDINGS_AVAILABLE:
-            raise ImportError("sentence-transformers is required. Install with: pip install sentence-transformers")
+            raise ImportError("openai is required. Install with: pip install openai")
 
-        # Setup paths
-        self.path = Path(path) if path else DEFAULT_QDRANT_PATH
-        self.path.mkdir(parents=True, exist_ok=True)
-
-        # Initialize Qdrant client (embedded mode)
-        if in_memory:
+        # Initialize Qdrant client
+        if url:
+            # Server mode - connects to Qdrant server (supports concurrent writes)
+            # Use longer timeout (600s) for large batch operations with slow servers
+            self.client = QdrantClient(url=url, timeout=600)
+            self.path = None
+            logger.info(f"Connected to Qdrant server at: {url}")
+        elif in_memory:
             self.client = QdrantClient(":memory:")
+            self.path = None
             logger.info("Initialized Qdrant in-memory mode")
         else:
+            # Local file mode (embedded)
+            self.path = Path(path) if path else DEFAULT_QDRANT_PATH
+            self.path.mkdir(parents=True, exist_ok=True)
             self.client = QdrantClient(path=str(self.path))
             logger.info(f"Initialized Qdrant at: {self.path}")
 
-        # Initialize embedding model
-        logger.info(f"Loading embedding model: {model_name}")
-        self.encoder = SentenceTransformer(model_name)
+        # Initialize OpenAI client for embeddings
+        logger.info(f"Using OpenAI embedding model: {model_name}")
+        self.openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model_name = model_name
 
         # Collection configs
@@ -238,10 +249,18 @@ class BDKnowledgeStore:
         return stats
 
     def _generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding for text."""
-        if not text:
-            text = ""
-        return self.encoder.encode(text).tolist()
+        """Generate embedding for text using OpenAI API."""
+        if not text or not text.strip():
+            text = "empty"
+        try:
+            response = self.openai_client.embeddings.create(
+                model=self.model_name,
+                input=text
+            )
+            return response.data[0].embedding
+        except Exception as e:
+            logger.error(f"OpenAI embedding error: {e}")
+            return [0.0] * EMBEDDING_DIMENSION
 
     def _generate_text_for_embedding(self, data: Dict, config: CollectionConfig) -> str:
         """Generate concatenated text for embedding from data fields."""

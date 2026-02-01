@@ -106,8 +106,11 @@ class BDMemoryLayer:
                 }
             },
             "embedder": {
-                "provider": "huggingface",
-                "config": {"model": "sentence-transformers/all-MiniLM-L6-v2"}
+                "provider": "openai",
+                "config": {
+                    "model": "text-embedding-3-small",
+                    "api_key": os.getenv("OPENAI_API_KEY")
+                }
             },
             "vector_store": {
                 "provider": "chroma",

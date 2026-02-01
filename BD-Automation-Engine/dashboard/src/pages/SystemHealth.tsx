@@ -5,7 +5,7 @@
  * collection stats, cache metrics, and service health.
  */
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Activity,
   Server,
@@ -29,7 +29,6 @@ import {
   TrendingUp,
   BarChart3,
 } from 'lucide-react';
-import { SystemStatsCard } from '../components/hub/SystemStatsCard';
 import {
   useHubHealth,
   useHubStats,
@@ -61,7 +60,7 @@ export function SystemHealth() {
 
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [hitRateHistory, setHitRateHistory] = useState<number[]>([]);
-  const [requestHistory, setRequestHistory] = useState<number[]>([]);
+  const [_requestHistory, setRequestHistory] = useState<number[]>([]);
 
   // Update last refresh time and track history
   useEffect(() => {

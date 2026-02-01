@@ -4,18 +4,20 @@
  * Reusable loading skeleton components with shimmer animation.
  */
 
-import { ReactNode } from 'react';
+import type { ReactNode, CSSProperties } from 'react';
 
 interface SkeletonProps {
   className?: string;
   animate?: boolean;
+  style?: CSSProperties;
 }
 
 // Base skeleton with shimmer animation
-export function Skeleton({ className = '', animate = true }: SkeletonProps) {
+export function Skeleton({ className = '', animate = true, style }: SkeletonProps) {
   return (
     <div
       className={`bg-slate-200 rounded ${animate ? 'animate-pulse' : ''} ${className}`}
+      style={style}
     />
   );
 }

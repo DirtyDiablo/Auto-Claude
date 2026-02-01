@@ -20,6 +20,7 @@ import { PrimeOrgChart } from './pages/PrimeOrgChart';
 import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
 import { PlacementsPage } from './pages/PlacementsPage';
 import CallIntelligence from './pages/CallIntelligence';
+import { AccountTakeover } from './pages/AccountTakeover';
 // Hub AI Pages
 import { SmartQuery } from './pages/SmartQuery';
 import { KnowledgeGraph } from './pages/KnowledgeGraph';
@@ -235,6 +236,8 @@ function App() {
         return <PlacementsPage loading={loading} />;
       case 'callintelligence':
         return <CallIntelligence />;
+      case 'accounttakeover':
+        return <AccountTakeover />;
       // Hub AI Pages
       case 'smartquery':
         return <SmartQuery loading={loading} />;

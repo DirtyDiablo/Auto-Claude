@@ -146,6 +146,7 @@ export type TabId =
   | 'contactorgchart'
   | 'placements'
   | 'callintelligence'
+  | 'accounttakeover'
   | 'smartquery'
   | 'knowledgegraph'
   | 'agents'

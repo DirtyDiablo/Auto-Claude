@@ -5,7 +5,7 @@
  * results display with sources, and query analysis.
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Search,
   Sparkles,

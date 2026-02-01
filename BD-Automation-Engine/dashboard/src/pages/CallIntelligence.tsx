@@ -2,20 +2,17 @@ import React, { useState, useEffect } from 'react';
 import {
   Phone,
   TrendingUp,
-  TrendingDown,
   Users,
   Building2,
   MapPin,
   AlertTriangle,
   CheckCircle,
-  XCircle,
-  PhoneOff,
   Target,
   BarChart3,
   Activity,
   Clock
 } from 'lucide-react';
-import {
+import type {
   CallNotesPrime,
   CallNotesProgram,
   CallNotesContact,

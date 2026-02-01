@@ -34,11 +34,11 @@ interface UseHubQueryState<T> {
   refetch: () => Promise<void>;
 }
 
-interface UseHubMutationState<T> {
+interface UseHubMutationState<T, TArgs extends unknown[] = unknown[]> {
   data: T | null;
   loading: boolean;
   error: string | null;
-  execute: (...args: unknown[]) => Promise<T | null>;
+  execute: (...args: TArgs) => Promise<T | null>;
   reset: () => void;
 }
 
@@ -176,9 +176,7 @@ export function useHubGraphStats(): UseHubQueryState<GraphStats> {
 // HOOK: useSmartQuery
 // =============================================================================
 
-export function useSmartQuery(): UseHubMutationState<SmartQueryResult> & {
-  execute: (query: string, strategy?: SearchStrategy) => Promise<SmartQueryResult | null>;
-} {
+export function useSmartQuery(): UseHubMutationState<SmartQueryResult, [query: string, strategy?: SearchStrategy]> {
   const [data, setData] = useState<SmartQueryResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -213,9 +211,7 @@ export function useSmartQuery(): UseHubMutationState<SmartQueryResult> & {
 
 type AgentType = 'program' | 'company' | 'contact' | 'strategy';
 
-export function useHubAgent(agentType: AgentType): UseHubMutationState<AgentResponse> & {
-  execute: (query: string) => Promise<AgentResponse | null>;
-} {
+export function useHubAgent(agentType: AgentType): UseHubMutationState<AgentResponse, [query: string]> {
   const [data, setData] = useState<AgentResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -266,9 +262,7 @@ export function useHubAgent(agentType: AgentType): UseHubMutationState<AgentResp
 // HOOK: useProgramEcosystem
 // =============================================================================
 
-export function useProgramEcosystem(): UseHubMutationState<ProgramEcosystem> & {
-  execute: (programName: string) => Promise<ProgramEcosystem | null>;
-} {
+export function useProgramEcosystem(): UseHubMutationState<ProgramEcosystem, [programName: string]> {
   const [data, setData] = useState<ProgramEcosystem | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -301,9 +295,7 @@ export function useProgramEcosystem(): UseHubMutationState<ProgramEcosystem> & {
 // HOOK: useContactNetwork
 // =============================================================================
 
-export function useContactNetwork(): UseHubMutationState<ContactNetwork> & {
-  execute: (contactName: string) => Promise<ContactNetwork | null>;
-} {
+export function useContactNetwork(): UseHubMutationState<ContactNetwork, [contactName: string]> {
   const [data, setData] = useState<ContactNetwork | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -336,9 +328,7 @@ export function useContactNetwork(): UseHubMutationState<ContactNetwork> & {
 // HOOK: useTeamingPath
 // =============================================================================
 
-export function useTeamingPath(): UseHubMutationState<TeamingPath> & {
-  execute: (from: string, to: string) => Promise<TeamingPath | null>;
-} {
+export function useTeamingPath(): UseHubMutationState<TeamingPath, [from: string, to: string]> {
   const [data, setData] = useState<TeamingPath | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -371,9 +361,7 @@ export function useTeamingPath(): UseHubMutationState<TeamingPath> & {
 // HOOK: useMemorySearch
 // =============================================================================
 
-export function useMemorySearch(): UseHubMutationState<MemorySearchResult> & {
-  execute: (query: string, limit?: number) => Promise<MemorySearchResult | null>;
-} {
+export function useMemorySearch(): UseHubMutationState<MemorySearchResult, [query: string, limit?: number]> {
   const [data, setData] = useState<MemorySearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -406,9 +394,7 @@ export function useMemorySearch(): UseHubMutationState<MemorySearchResult> & {
 // HOOK: useEntityFacts
 // =============================================================================
 
-export function useEntityFacts(): UseHubMutationState<EntityFacts> & {
-  execute: (entityName: string) => Promise<EntityFacts | null>;
-} {
+export function useEntityFacts(): UseHubMutationState<EntityFacts, [entityName: string]> {
   const [data, setData] = useState<EntityFacts | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

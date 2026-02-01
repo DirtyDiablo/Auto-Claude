@@ -4,7 +4,6 @@ import {
   RefreshCw,
   Bell,
   Shield,
-  Globe,
   Check,
   ExternalLink,
   Key,
