@@ -12,7 +12,7 @@ import { AgentState } from './agent-state';
 import { AgentEvents } from './agent-events';
 import { ProcessType, ExecutionProgressData } from './types';
 import type { CompletablePhase } from '../../shared/constants/phase-protocol';
-import { detectRateLimit, createSDKRateLimitInfo, getProfileEnv, detectAuthFailure } from '../rate-limit-detector';
+import { detectRateLimit, createSDKRateLimitInfo, getBestAvailableProfileEnv, detectAuthFailure } from '../rate-limit-detector';
 import { getAPIProfileEnv } from '../services/profile';
 import { projectStore } from '../project-store';
 import { getClaudeProfileManager } from '../claude-profile-manager';
@@ -23,8 +23,8 @@ import { readSettingsFile } from '../settings-utils';
 import type { AppSettings } from '../../shared/types/settings';
 import { getOAuthModeClearVars } from './env-utils';
 import { getAugmentedEnv } from '../env-utils';
-import { getToolInfo } from '../cli-tool-manager';
-import { killProcessGracefully } from '../platform';
+import { getToolInfo, getClaudeCliPathForSdk } from '../cli-tool-manager';
+import { killProcessGracefully, isWindows } from '../platform';
 
 /**
  * Type for supported CLI tools
@@ -42,7 +42,7 @@ const CLI_TOOL_ENV_MAP: Readonly<Record<CliTool, string>> = {
 
 
 function deriveGitBashPath(gitExePath: string): string | null {
-  if (process.platform !== 'win32') {
+  if (!isWindows()) {
     return null;
   }
 
@@ -129,10 +129,53 @@ export class AgentProcessManager {
     }
   }
 
+  /**
+   * Detects and sets CLI tool path in environment variables.
+   * Common issue: CLI tools installed via Homebrew or other non-standard locations
+   * are not in subprocess PATH when app launches from Finder/Dock.
+   *
+   * For 'claude' tool specifically, uses getClaudeCliPathForSdk() which returns null
+   * for Windows .cmd files, allowing the SDK to use its bundled claude.exe instead.
+   *
+   * @param toolName - Name of the CLI tool (e.g., 'claude', 'gh')
+   * @returns Record with env var set if tool was detected
+   */
+  private detectAndSetCliPath(toolName: CliTool): Record<string, string> {
+    const env: Record<string, string> = {};
+    const envVarName = CLI_TOOL_ENV_MAP[toolName];
+    if (!process.env[envVarName]) {
+      try {
+        // For 'claude' tool, use getClaudeCliPathForSdk() which returns null for Windows .cmd files
+        // This allows the Claude Agent SDK to use its bundled claude.exe instead
+        if (toolName === 'claude') {
+          const cliPath = getClaudeCliPathForSdk();
+          if (cliPath) {
+            env[envVarName] = cliPath;
+            console.log(`[AgentProcess] Setting ${envVarName}:`, cliPath, '(source: cli-tool-manager)');
+          } else {
+            console.log(`[AgentProcess] Claude CLI is .cmd file on Windows, not setting ${envVarName} - SDK will use bundled CLI`);
+          }
+        } else {
+          // For other tools, use standard detection
+          const toolInfo = getToolInfo(toolName);
+          if (toolInfo.found && toolInfo.path) {
+            env[envVarName] = toolInfo.path;
+            console.log(`[AgentProcess] Setting ${envVarName}:`, toolInfo.path, `(source: ${toolInfo.source})`);
+          }
+        }
+      } catch (error) {
+        console.warn(`[AgentProcess] Failed to detect ${toolName} CLI path:`, error instanceof Error ? error.message : String(error));
+      }
+    }
+    return env;
+  }
+
   private setupProcessEnvironment(
     extraEnv: Record<string, string>
   ): NodeJS.ProcessEnv {
-    const profileEnv = getProfileEnv();
+    // Get best available Claude profile environment (automatically handles rate limits)
+    const profileResult = getBestAvailableProfileEnv();
+    const profileEnv = profileResult.env;
     // Use getAugmentedEnv() to ensure common tool paths (dotnet, homebrew, etc.)
     // are available even when app is launched from Finder/Dock
     const augmentedEnv = getAugmentedEnv();
@@ -140,7 +183,7 @@ export class AgentProcessManager {
     // On Windows, detect and pass git-bash path for Claude Code CLI
     // Electron can detect git via where.exe, but Python subprocess may not have the same PATH
     const gitBashEnv: Record<string, string> = {};
-    if (process.platform === 'win32' && !process.env.CLAUDE_CODE_GIT_BASH_PATH) {
+    if (isWindows() && !process.env.CLAUDE_CODE_GIT_BASH_PATH) {
       try {
         const gitInfo = getToolInfo('git');
         if (gitInfo.found && gitInfo.path) {
@@ -155,9 +198,15 @@ export class AgentProcessManager {
       }
     }
 
+    // Detect and pass CLI tool paths to Python backend
+    const claudeCliEnv = this.detectAndSetCliPath('claude');
+    const ghCliEnv = this.detectAndSetCliPath('gh');
+
     return {
       ...augmentedEnv,
       ...gitBashEnv,
+      ...claudeCliEnv,
+      ...ghCliEnv,
       ...extraEnv,
       ...profileEnv,
       PYTHONUNBUFFERED: '1',
@@ -689,40 +738,55 @@ export class AgentProcessManager {
    */
   killProcess(taskId: string): boolean {
     const agentProcess = this.state.getProcess(taskId);
-    if (agentProcess) {
-      try {
-        // Mark this specific spawn as killed so its exit handler knows to ignore
-        this.state.markSpawnAsKilled(agentProcess.spawnId);
+    if (!agentProcess) return false;
 
-        // Send SIGTERM first for graceful shutdown
-        agentProcess.process.kill('SIGTERM');
+    // Mark this specific spawn as killed so its exit handler knows to ignore
+    this.state.markSpawnAsKilled(agentProcess.spawnId);
 
-        // Force kill after timeout
-        setTimeout(() => {
-          if (!agentProcess.process.killed) {
-            agentProcess.process.kill('SIGKILL');
-          }
-        }, 5000);
+    // Use shared platform-aware kill utility
+    killProcessGracefully(agentProcess.process, {
+      debugPrefix: '[AgentProcess]',
+      debug: process.env.DEBUG === 'true' || process.env.NODE_ENV === 'development'
+    });
 
-        this.state.deleteProcess(taskId);
-        return true;
-      } catch {
-        return false;
-      }
-    }
-    return false;
+    this.state.deleteProcess(taskId);
+    return true;
   }
 
   /**
-   * Kill all running processes
+   * Kill all running processes and wait for them to exit
    */
   async killAllProcesses(): Promise<void> {
+    const KILL_TIMEOUT_MS = 10000; // 10 seconds max wait
+
     const killPromises = this.state.getRunningTaskIds().map((taskId) => {
       return new Promise<void>((resolve) => {
+        const agentProcess = this.state.getProcess(taskId);
+
+        if (!agentProcess) {
+          resolve();
+          return;
+        }
+
+        // Set up timeout to not block forever
+        const timeoutId = setTimeout(() => {
+          resolve();
+        }, KILL_TIMEOUT_MS);
+
+        // Listen for exit event if the process supports it
+        // (process.once is available on real ChildProcess objects, but may not be in test mocks)
+        if (typeof agentProcess.process.once === 'function') {
+          agentProcess.process.once('exit', () => {
+            clearTimeout(timeoutId);
+            resolve();
+          });
+        }
+
+        // Kill the process
         this.killProcess(taskId);
-        resolve();
       });
     });
+
     await Promise.all(killPromises);
   }
 

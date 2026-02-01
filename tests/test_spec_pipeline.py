@@ -18,7 +18,7 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 # Add auto-claude directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "Apps" / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent / "apps" / "backend"))
 
 # Store original modules for cleanup
 _original_modules = {}
@@ -203,10 +203,10 @@ class TestSpecOrchestratorInit:
 
             orchestrator = SpecOrchestrator(
                 project_dir=temp_dir,
-                model="claude-sonnet-4-20250514",
+                model="claude-sonnet-4-5-20250929",
             )
 
-            assert orchestrator.model == "claude-sonnet-4-20250514"
+            assert orchestrator.model == "claude-sonnet-4-5-20250929"
 
 
 class TestCreateSpecDir:

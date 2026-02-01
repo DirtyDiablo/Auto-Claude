@@ -4,6 +4,13 @@
  */
 
 // ============================================
+// Terminal Timing Constants
+// ============================================
+
+/** Delay for DOM updates before terminal operations (refit, resize) */
+export const TERMINAL_DOM_UPDATE_DELAY_MS = 50;
+
+// ============================================
 // UI Scale Constants
 // ============================================
 
@@ -50,7 +57,9 @@ export const DEFAULT_APP_SETTINGS = {
   // Language preference (default to English)
   language: 'en' as const,
   // Anonymous error reporting (Sentry) - enabled by default to help improve the app
-  sentryEnabled: true
+  sentryEnabled: true,
+  // Auto-name Claude terminals based on initial message (enabled by default)
+  autoNameClaudeTerminals: true
 };
 
 // ============================================
@@ -88,6 +97,7 @@ export const AUTO_BUILD_PATHS = {
   SPEC_FILE: 'spec.md',
   QA_REPORT: 'qa_report.md',
   BUILD_PROGRESS: 'build-progress.txt',
+  GENERATION_PROGRESS: 'generation_progress.json',
   CONTEXT: 'context.json',
   REQUIREMENTS: 'requirements.json',
   ROADMAP_FILE: 'roadmap.json',

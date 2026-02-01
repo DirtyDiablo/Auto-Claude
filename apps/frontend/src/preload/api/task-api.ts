@@ -13,12 +13,13 @@ import type {
   SupportedIDE,
   SupportedTerminal,
   WorktreeCreatePROptions,
-  WorktreeCreatePRResult
+  WorktreeCreatePRResult,
+  ImageAttachment
 } from '../../shared/types';
 
 export interface TaskAPI {
   // Task Operations
-  getTasks: (projectId: string) => Promise<IPCResult<Task[]>>;
+  getTasks: (projectId: string, options?: { forceRefresh?: boolean }) => Promise<IPCResult<Task[]>>;
   createTask: (
     projectId: string,
     title: string,
@@ -35,7 +36,8 @@ export interface TaskAPI {
   submitReview: (
     taskId: string,
     approved: boolean,
-    feedback?: string
+    feedback?: string,
+    images?: ImageAttachment[]
   ) => Promise<IPCResult>;
   updateTaskStatus: (
     taskId: string,
@@ -83,8 +85,8 @@ export interface TaskAPI {
 
 export const createTaskAPI = (): TaskAPI => ({
   // Task Operations
-  getTasks: (projectId: string): Promise<IPCResult<Task[]>> =>
-    ipcRenderer.invoke(IPC_CHANNELS.TASK_LIST, projectId),
+  getTasks: (projectId: string, options?: { forceRefresh?: boolean }): Promise<IPCResult<Task[]>> =>
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_LIST, projectId, options),
 
   createTask: (
     projectId: string,
@@ -112,9 +114,10 @@ export const createTaskAPI = (): TaskAPI => ({
   submitReview: (
     taskId: string,
     approved: boolean,
-    feedback?: string
+    feedback?: string,
+    images?: ImageAttachment[]
   ): Promise<IPCResult> =>
-    ipcRenderer.invoke(IPC_CHANNELS.TASK_REVIEW, taskId, approved, feedback),
+    ipcRenderer.invoke(IPC_CHANNELS.TASK_REVIEW, taskId, approved, feedback, images),
 
   updateTaskStatus: (
     taskId: string,

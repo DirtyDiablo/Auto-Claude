@@ -642,12 +642,79 @@ export function ClaudeCodeStatusBadge({ className }: ClaudeCodeStatusBadgeProps)
                 "navigation:claudeCode.updateWarningDescription",
                 "Updating will close all running Claude Code sessions. Any unsaved work in those sessions may be lost. Make sure to save your work before proceeding."
               )}
+              <span className="block mt-2 font-semibold text-foreground">
+                {t(
+                  "navigation:claudeCode.updateWarningTerminalNote",
+                  "A terminal window will open to run the installation command. Please wait for the installation to complete before continuing."
+                )}
+              </span>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>{t("common:cancel", "Cancel")}</AlertDialogCancel>
             <AlertDialogAction onClick={performInstall}>
-              {t("navigation:claudeCode.updateAnyway", "Update Anyway")}
+              {t("navigation:claudeCode.updateAnyway", "Open Terminal & Update")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Version rollback warning dialog */}
+      <AlertDialog open={showRollbackWarning} onOpenChange={setShowRollbackWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("navigation:claudeCode.rollbackWarningTitle", "Switch to version {{version}}?", {
+                version: selectedVersion,
+              })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                "navigation:claudeCode.rollbackWarningDescription",
+                "Switching versions will close all running Claude Code sessions. Any unsaved work in those sessions may be lost. Make sure to save your work before proceeding."
+              )}
+              <span className="block mt-2 font-semibold text-foreground">
+                {t(
+                  "navigation:claudeCode.rollbackWarningTerminalNote",
+                  "A terminal window will open to run the installation command. Please wait for the installation to complete before continuing."
+                )}
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedVersion(null)}>
+              {t("common:cancel", "Cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={performVersionSwitch}>
+              {t("navigation:claudeCode.switchAnyway", "Open Terminal & Switch")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Path change warning dialog */}
+      <AlertDialog open={showPathChangeWarning} onOpenChange={setShowPathChangeWarning}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {t("navigation:claudeCode.pathChangeWarningTitle", "Switch CLI installation?")}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {t(
+                "navigation:claudeCode.pathChangeWarningDescription",
+                "Switching CLI installations will use a different Claude Code binary. Any running sessions will continue using the previous installation until restarted."
+              )}
+              <span className="block mt-2 font-mono text-xs break-all">
+                {selectedInstallation}
+              </span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setSelectedInstallation(null)}>
+              {t("common:cancel", "Cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={performPathSwitch}>
+              {t("navigation:claudeCode.switchInstallationConfirm", "Switch")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

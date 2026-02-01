@@ -4,7 +4,6 @@ import {
   RefreshCw,
   Bell,
   Shield,
-  Globe,
   Check,
   ExternalLink,
   Key,
@@ -12,7 +11,12 @@ import {
   Eye,
   EyeOff,
   Loader2,
+  Server,
+  CheckCircle2,
+  XCircle,
+  Palette,
 } from 'lucide-react';
+import { ThemeSwitcher } from '../components/ThemeSwitcher';
 import {
   setNotionToken,
   clearNotionToken,
@@ -20,12 +24,24 @@ import {
   fetchJobs,
   fetchPrograms,
 } from '../services/notionApi';
+import { hubApiClient, getHubApiUrl, setHubApiUrl } from '../services/hubApi';
 
 interface SettingsProps {
   onRefresh: () => void;
   isRefreshing: boolean;
   lastUpdated: Date | null;
 }
+
+const SECTION_COLORS: Record<string, { gradient: string; iconBg: string; iconText: string }> = {
+  Database: { gradient: 'from-blue-500 to-cyan-500', iconBg: 'bg-gradient-to-br from-blue-100 to-cyan-100', iconText: 'text-blue-600' },
+  Key: { gradient: 'from-amber-500 to-orange-500', iconBg: 'bg-gradient-to-br from-amber-100 to-orange-100', iconText: 'text-amber-600' },
+  Server: { gradient: 'from-purple-500 to-indigo-500', iconBg: 'bg-gradient-to-br from-purple-100 to-indigo-100', iconText: 'text-purple-600' },
+  RefreshCw: { gradient: 'from-green-500 to-emerald-500', iconBg: 'bg-gradient-to-br from-green-100 to-emerald-100', iconText: 'text-green-600' },
+  Bell: { gradient: 'from-rose-500 to-pink-500', iconBg: 'bg-gradient-to-br from-rose-100 to-pink-100', iconText: 'text-rose-600' },
+  Globe: { gradient: 'from-sky-500 to-blue-500', iconBg: 'bg-gradient-to-br from-sky-100 to-blue-100', iconText: 'text-sky-600' },
+  Palette: { gradient: 'from-violet-500 to-purple-500', iconBg: 'bg-gradient-to-br from-violet-100 to-purple-100', iconText: 'text-violet-600' },
+  Shield: { gradient: 'from-slate-500 to-gray-500', iconBg: 'bg-gradient-to-br from-slate-100 to-gray-100', iconText: 'text-slate-600' },
+};
 
 function SettingSection({
   title,
@@ -38,18 +54,24 @@ function SettingSection({
   icon: React.ComponentType<{ className?: string }>;
   children: React.ReactNode;
 }) {
+  const iconName = Icon.name || 'Shield';
+  const colors = SECTION_COLORS[iconName] || SECTION_COLORS.Shield;
+
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
-      <div className="flex items-start gap-4 mb-4">
-        <div className="p-2 rounded-lg bg-slate-100">
-          <Icon className="h-5 w-5 text-slate-600" />
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden hover:shadow-md transition-shadow">
+      <div className={`h-1 bg-gradient-to-r ${colors.gradient}`} />
+      <div className="p-6">
+        <div className="flex items-start gap-4 mb-4">
+          <div className={`p-2.5 rounded-xl ${colors.iconBg} dark:bg-opacity-20`}>
+            <Icon className={`h-5 w-5 ${colors.iconText}`} />
+          </div>
+          <div>
+            <h3 className="font-semibold text-slate-900 dark:text-slate-100">{title}</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{description}</p>
+          </div>
         </div>
-        <div>
-          <h3 className="font-semibold text-slate-900">{title}</h3>
-          <p className="text-sm text-slate-500">{description}</p>
-        </div>
+        {children}
       </div>
-      {children}
     </div>
   );
 }
@@ -69,7 +91,7 @@ function Toggle({
         type="button"
         onClick={() => onChange(!enabled)}
         className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-          enabled ? 'bg-blue-600' : 'bg-slate-200'
+          enabled ? 'bg-blue-600' : 'bg-slate-200 dark:bg-slate-600'
         }`}
       >
         <span
@@ -78,7 +100,7 @@ function Toggle({
           }`}
         />
       </button>
-      <span className="text-sm text-slate-700">{label}</span>
+      <span className="text-sm text-slate-700 dark:text-slate-300">{label}</span>
     </label>
   );
 }
@@ -86,7 +108,6 @@ function Toggle({
 export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps) {
   const [autoRefresh, setAutoRefresh] = useState(false);
   const [notifications, setNotifications] = useState(true);
-  const [darkMode, setDarkMode] = useState(false);
 
   // Notion API configuration
   const [notionToken, setNotionTokenState] = useState('');
@@ -95,10 +116,46 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
   const [isTesting, setIsTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ success: boolean; message: string; jobCount?: number; programCount?: number } | null>(null);
 
+  // Hub API state
+  const [hubUrl, setHubUrl] = useState(getHubApiUrl());
+  const [hubConnected, setHubConnected] = useState(false);
+  const [hubTesting, setHubTesting] = useState(false);
+  const [hubStats, setHubStats] = useState<{ contacts: number; programs: number; total: number } | null>(null);
+
   // Check if Notion is configured on mount
   useEffect(() => {
     setIsConfigured(isNotionConfigured());
+    // Test Hub connection on mount
+    testHubConnection();
   }, []);
+
+  // Test Hub API connection
+  const testHubConnection = async () => {
+    setHubTesting(true);
+    try {
+      const connected = await hubApiClient.testConnection();
+      setHubConnected(connected);
+      if (connected) {
+        const stats = await hubApiClient.getStats();
+        setHubStats({
+          contacts: stats.collections.contacts,
+          programs: stats.collections.programs,
+          total: stats.total_records,
+        });
+      }
+    } catch {
+      setHubConnected(false);
+      setHubStats(null);
+    } finally {
+      setHubTesting(false);
+    }
+  };
+
+  // Save Hub URL
+  const handleSaveHubUrl = () => {
+    setHubApiUrl(hubUrl);
+    testHubConnection();
+  };
 
   // Save Notion token
   const handleSaveToken = () => {
@@ -151,11 +208,18 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
       ];
 
   return (
-    <div className="p-6 h-full overflow-y-auto">
+    <div className="p-6 h-full overflow-y-auto bg-slate-50 dark:bg-slate-900 transition-colors">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Settings</h1>
-        <p className="text-slate-500">Configure your BD Intelligence Dashboard</p>
+      <div className="mb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <div className="p-2.5 rounded-xl bg-gradient-to-br from-slate-700 to-slate-900 shadow-lg">
+            <Shield className="h-6 w-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Settings</h1>
+            <p className="text-slate-500 dark:text-slate-400">Configure your BD Intelligence Dashboard</p>
+          </div>
+        </div>
       </div>
 
       <div className="space-y-6 max-w-3xl">
@@ -328,6 +392,110 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
           )}
         </SettingSection>
 
+        {/* Hub API Configuration */}
+        <SettingSection
+          title="Hub API Configuration"
+          description="Connect to the BD Intelligence Hub API for AI-powered features"
+          icon={Server}
+        >
+          <div className="space-y-4">
+            {/* Connection Status */}
+            <div className={`flex items-center gap-3 p-4 rounded-xl border transition-all ${
+              hubConnected
+                ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200'
+                : 'bg-gradient-to-r from-amber-50 to-orange-50 border-amber-200'
+            }`}>
+              {hubTesting ? (
+                <div className="relative">
+                  <div className="w-8 h-8 border-2 border-blue-200 rounded-full animate-pulse" />
+                  <div className="absolute inset-0 w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin" />
+                </div>
+              ) : hubConnected ? (
+                <div className="relative">
+                  <CheckCircle2 className="h-8 w-8 text-green-500" />
+                  <span className="absolute -top-0.5 -right-0.5 flex h-3 w-3">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                  </span>
+                </div>
+              ) : (
+                <XCircle className="h-8 w-8 text-amber-500" />
+              )}
+              <div className="flex-1">
+                <p className={`text-sm font-semibold ${hubConnected ? 'text-green-800' : 'text-amber-800'}`}>
+                  {hubTesting ? 'Testing Connection...' : hubConnected ? 'Hub API Connected' : 'Hub API Not Connected'}
+                </p>
+                {hubStats && (
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-green-500" />
+                      {hubStats.contacts.toLocaleString()} contacts
+                    </span>
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                      {hubStats.programs.toLocaleString()} programs
+                    </span>
+                    <span className="text-xs text-green-600 flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-teal-500" />
+                      {hubStats.total.toLocaleString()} total
+                    </span>
+                  </div>
+                )}
+                {!hubConnected && !hubTesting && (
+                  <p className="text-xs text-amber-600">Start the Hub API server to enable AI features</p>
+                )}
+              </div>
+            </div>
+
+            {/* Hub URL Input */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Hub API URL
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={hubUrl}
+                  onChange={(e) => setHubUrl(e.target.value)}
+                  placeholder="http://127.0.0.1:8100"
+                  className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+                <button
+                  onClick={handleSaveHubUrl}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+
+            {/* Test Connection Button */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={testHubConnection}
+                disabled={hubTesting}
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 text-slate-700 hover:bg-slate-200 transition-colors disabled:opacity-50"
+              >
+                {hubTesting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <RefreshCw className="h-4 w-4" />
+                )}
+                {hubTesting ? 'Testing...' : 'Test Connection'}
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-500 space-y-1">
+              <p className="font-medium">To start the Hub API server:</p>
+              <ol className="list-decimal list-inside ml-2 space-y-1">
+                <li>Navigate to the Engine8_Knowledge directory</li>
+                <li>Run: <code className="bg-slate-100 px-1 rounded">python api.py</code></li>
+                <li>The API will start on port 8100</li>
+              </ol>
+            </div>
+          </div>
+        </SettingSection>
+
         {/* Auto Refresh */}
         <SettingSection
           title="Data Refresh"
@@ -369,19 +537,13 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
           </div>
         </SettingSection>
 
-        {/* Display */}
+        {/* Design System */}
         <SettingSection
-          title="Display"
-          description="Customize the dashboard appearance"
-          icon={Globe}
+          title="Design System"
+          description="Industry-specific theming powered by Design Intelligence"
+          icon={Palette}
         >
-          <div className="space-y-4">
-            <Toggle
-              enabled={darkMode}
-              onChange={setDarkMode}
-              label="Dark mode (coming soon)"
-            />
-          </div>
+          <ThemeSwitcher />
         </SettingSection>
 
         {/* About */}

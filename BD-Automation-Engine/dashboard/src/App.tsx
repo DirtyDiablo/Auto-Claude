@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Sidebar } from './components/Sidebar';
+import { DataFreshness } from './components/DataFreshness';
 import { ExecutiveSummary } from './pages/ExecutiveSummary';
 import { JobIntelligence } from './pages/JobIntelligence';
 import { JobsPipeline } from './pages/JobsPipeline';
@@ -18,6 +19,14 @@ import { PastPerformance } from './pages/PastPerformance';
 import { PrimeOrgChart } from './pages/PrimeOrgChart';
 import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
 import { PlacementsPage } from './pages/PlacementsPage';
+import CallIntelligence from './pages/CallIntelligence';
+import { AccountTakeover } from './pages/AccountTakeover';
+// Hub AI Pages
+import { SmartQuery } from './pages/SmartQuery';
+import { KnowledgeGraph } from './pages/KnowledgeGraph';
+import { AgentPanel } from './pages/AgentPanel';
+import { MemoryContext } from './pages/MemoryContext';
+import { SystemHealth } from './pages/SystemHealth';
 import { useNotionDashboard } from './hooks/useNotionData';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
@@ -225,6 +234,21 @@ function App() {
         return <ContactOrgChartPage loading={loading} />;
       case 'placements':
         return <PlacementsPage loading={loading} />;
+      case 'callintelligence':
+        return <CallIntelligence />;
+      case 'accounttakeover':
+        return <AccountTakeover />;
+      // Hub AI Pages
+      case 'smartquery':
+        return <SmartQuery loading={loading} />;
+      case 'knowledgegraph':
+        return <KnowledgeGraph />;
+      case 'agents':
+        return <AgentPanel />;
+      case 'memory':
+        return <MemoryContext />;
+      case 'systemhealth':
+        return <SystemHealth />;
       case 'settings':
         return (
           <Settings
@@ -239,7 +263,7 @@ function App() {
   };
 
   return (
-    <div className="h-screen flex overflow-hidden bg-slate-100">
+    <div className="h-screen flex overflow-hidden bg-slate-100 dark:bg-slate-900 transition-colors">
       <Sidebar
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -250,6 +274,7 @@ function App() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
       <main className="flex-1 overflow-hidden">{renderContent()}</main>
+      <DataFreshness />
     </div>
   );
 }

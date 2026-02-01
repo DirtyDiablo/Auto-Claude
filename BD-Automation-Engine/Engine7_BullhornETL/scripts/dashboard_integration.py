@@ -459,16 +459,50 @@ def create_correlation_summary(bullhorn_data, federal_programs, existing_data):
 
 
 def save_dashboard_files(data_dict):
-    """Save all dashboard JSON files."""
+    """Save all dashboard JSON files with freshness metadata."""
     print("\nSaving Dashboard Files...")
 
     DASHBOARD_DATA_DIR.mkdir(parents=True, exist_ok=True)
 
+    # Track file metadata for freshness
+    file_metadata = {}
+    timestamp = datetime.now().isoformat()
+
     for filename, data in data_dict.items():
         filepath = DASHBOARD_DATA_DIR / f"{filename}.json"
+        json_content = json.dumps(data, indent=2, default=str)
         with open(filepath, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, default=str)
-        print(f"  Saved: {filepath.name} ({len(json.dumps(data, default=str)) // 1024}KB)")
+            f.write(json_content)
+
+        # Track metadata
+        size_bytes = len(json_content)
+        record_count = len(data) if isinstance(data, list) else \
+                       sum(len(v.get('contacts', [])) for v in data.get('tiers', {}).values()) if 'tiers' in data else \
+                       len(data.get('data', [])) if 'data' in data else 1
+
+        file_metadata[filename] = {
+            'filename': f"{filename}.json",
+            'size_bytes': size_bytes,
+            'record_count': record_count
+        }
+        print(f"  Saved: {filepath.name} ({size_bytes // 1024}KB, {record_count} records)")
+
+    # Create data_freshness.json for dashboard UI
+    import os
+    freshness = {
+        'last_updated': timestamp,
+        'pipeline_run_id': os.getenv('PIPELINE_RUN_ID', datetime.now().strftime('%Y%m%d_%H%M%S')),
+        'files': file_metadata,
+        'sources': {
+            'bullhorn_db': str(ENGINE7_DB),
+            'federal_programs_csv': str(ENGINE2_PROGRAMS)
+        }
+    }
+
+    freshness_path = DASHBOARD_DATA_DIR / 'data_freshness.json'
+    with open(freshness_path, 'w', encoding='utf-8') as f:
+        json.dump(freshness, f, indent=2)
+    print(f"  Saved: data_freshness.json (freshness metadata)")
 
 
 def run_integration():

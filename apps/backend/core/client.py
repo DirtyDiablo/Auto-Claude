@@ -24,6 +24,11 @@ import time
 from pathlib import Path
 from typing import Any
 
+from core.platform import (
+    is_windows,
+    validate_cli_path,
+)
+
 logger = logging.getLogger(__name__)
 
 # =============================================================================
@@ -420,7 +425,11 @@ from agents.tools_pkg import (
 )
 from claude_agent_sdk import ClaudeAgentOptions, ClaudeSDKClient
 from claude_agent_sdk.types import HookMatcher
-from core.auth import get_sdk_env_vars, require_auth_token
+from core.auth import (
+    get_sdk_env_vars,
+    require_auth_token,
+    validate_token_not_encrypted,
+)
 from linear_updater import is_linear_enabled
 from prompts_pkg.project_context import detect_project_capabilities, load_project_index
 from security import bash_security_hook
@@ -788,7 +797,14 @@ def create_client(
        (see security.py for ALLOWED_COMMANDS)
     4. Tool filtering - Each agent type only sees relevant tools (prevents misuse)
     """
+    # Get OAuth token - Claude CLI handles token lifecycle internally
     oauth_token = require_auth_token()
+
+    # Validate token is not encrypted before passing to SDK
+    # Encrypted tokens (enc:...) should have been decrypted by require_auth_token()
+    # If we still have an encrypted token here, it means decryption failed or was skipped
+    validate_token_not_encrypted(oauth_token)
+
     # Ensure SDK can access it via its expected env var
     os.environ["CLAUDE_CODE_OAUTH_TOKEN"] = oauth_token
 
@@ -798,7 +814,7 @@ def create_client(
     # Debug: Log git-bash path detection on Windows
     if "CLAUDE_CODE_GIT_BASH_PATH" in sdk_env:
         logger.info(f"Git Bash path found: {sdk_env['CLAUDE_CODE_GIT_BASH_PATH']}")
-    elif platform.system() == "Windows":
+    elif is_windows():
         logger.warning("Git Bash path not detected on Windows!")
 
     # Check if Linear integration is enabled
@@ -948,7 +964,7 @@ def create_client(
 
     # Write settings to a file in the project directory
     settings_file = project_dir / ".claude_settings.json"
-    with open(settings_file, "w") as f:
+    with open(settings_file, "w", encoding="utf-8") as f:
         json.dump(security_settings, f, indent=2)
 
     print(f"Security settings: {settings_file}")
@@ -1126,7 +1142,12 @@ def create_client(
     }
 
     # Add CLI path if found (helps SDK find Claude Code in non-standard locations)
-    if cli_path:
+    # Priority: 1. CLAUDE_CLI_PATH env var, 2. find_claude_cli() detection
+    env_cli_path = os.environ.get("CLAUDE_CLI_PATH")
+    if env_cli_path and validate_cli_path(env_cli_path):
+        options_kwargs["cli_path"] = env_cli_path
+        logger.info(f"Using CLAUDE_CLI_PATH override: {env_cli_path}")
+    elif cli_path:
         options_kwargs["cli_path"] = cli_path
 
     # Add structured output format if specified

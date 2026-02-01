@@ -58,7 +58,6 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
   const {
     prs,
     isLoading,
-    isLoadingMore,
     isLoadingPRDetails,
     error,
     selectedPRNumber,
@@ -77,8 +76,8 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
     postComment,
     mergePR,
     assignPR,
+    markReviewPosted,
     refresh,
-    loadMore,
     isConnected,
     repoFullName,
     getReviewStateForPR,
@@ -140,10 +139,11 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
   );
 
   const handlePostComment = useCallback(
-    async (body: string) => {
+    async (body: string): Promise<boolean> => {
       if (selectedPRNumber) {
-        await postComment(selectedPRNumber, body);
+        return await postComment(selectedPRNumber, body);
       }
+      return false;
     },
     [selectedPRNumber, postComment]
   );
@@ -172,6 +172,10 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
     }
     return null;
   }, [selectedProjectId, selectedPRNumber]);
+
+  const handleMarkReviewPosted = useCallback(async (prNumber: number) => {
+    await markReviewPosted(prNumber);
+  }, [markReviewPosted]);
 
   // Not connected state
   if (!isConnected) {
@@ -228,12 +232,10 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
               prs={filteredPRs}
               selectedPRNumber={selectedPRNumber}
               isLoading={isLoading}
-              isLoadingMore={isLoadingMore}
               hasMore={hasMore}
               error={error}
               getReviewStateForPR={getReviewStateForPR}
               onSelectPR={selectPR}
-              onLoadMore={loadMore}
             />
           </div>
         }
@@ -259,6 +261,7 @@ export function GitHubPRs({ onOpenSettings, isActive = false }: GitHubPRsProps) 
               onMergePR={handleMergePR}
               onAssignPR={handleAssignPR}
               onGetLogs={handleGetLogs}
+              onMarkReviewPosted={handleMarkReviewPosted}
             />
           ) : (
             <EmptyState message={t("prReview.selectPRToView")} />

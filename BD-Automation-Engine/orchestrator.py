@@ -10,6 +10,7 @@ Engines:
 4. Engine4_Briefing - BD briefing document generation
 5. Engine5_Scoring - BD priority scoring
 6. Engine6_QA - Quality assurance and feedback loop
+7. Engine7_BullhornETL - Bullhorn CRM ETL and dashboard data export
 
 Usage:
     python orchestrator.py --input data/jobs.json --full-pipeline
@@ -73,6 +74,9 @@ class OrchestratorConfig:
     run_briefings: bool = True
     run_scoring: bool = True
     run_qa: bool = True
+    run_bullhorn: bool = True
+    export_dashboard: bool = True
+    run_knowledge: bool = True  # Engine 8: Knowledge indexing
 
     # Filters
     hot_leads_only: bool = False
@@ -213,6 +217,30 @@ def import_engines():
         logger.info("Engine6_QA loaded successfully")
     except ImportError as e:
         logger.warning(f"Engine6_QA not available: {e}")
+
+    # Engine 7: Bullhorn ETL & Dashboard Integration
+    try:
+        from Engine7_BullhornETL.run_pipeline import run_full_pipeline as run_bullhorn_pipeline
+        from Engine7_BullhornETL.scripts.dashboard_integration import run_integration as run_dashboard_export
+        engines['bullhorn'] = {
+            'run_pipeline': run_bullhorn_pipeline,
+            'run_dashboard_export': run_dashboard_export,
+        }
+        logger.info("Engine7_BullhornETL loaded successfully")
+    except ImportError as e:
+        logger.warning(f"Engine7_BullhornETL not available: {e}")
+
+    # Engine 8: Knowledge Management (Vector DB + Semantic Search)
+    try:
+        from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
+        from Engine8_Knowledge.scripts.indexer import BDIndexer
+        engines['knowledge'] = {
+            'BDKnowledgeStore': BDKnowledgeStore,
+            'BDIndexer': BDIndexer,
+        }
+        logger.info("Engine8_Knowledge loaded successfully")
+    except ImportError as e:
+        logger.warning(f"Engine8_Knowledge not available: {e}")
 
     return engines
 
@@ -528,7 +556,7 @@ class BDOrchestrator:
         print(f"Test Mode: {self.config.test_mode}")
 
         # Stage 1: Ingest
-        print(f"\n[1/8] INGESTING JOBS...")
+        print(f"\n[1/11] INGESTING JOBS...")
         try:
             with open(input_file, 'r', encoding='utf-8') as f:
                 jobs = json.load(f)
@@ -544,7 +572,7 @@ class BDOrchestrator:
             return self._error_result(errors, start_time)
 
         # Stage 2-4: Program Mapping Pipeline
-        print(f"\n[2/8] RUNNING PROGRAM MAPPING PIPELINE...")
+        print(f"\n[2/11] RUNNING PROGRAM MAPPING PIPELINE...")
         if 'mapping' in self.engines and self.config.run_mapping:
             try:
                 pipeline_config = self.engines['mapping']['PipelineConfig'](
@@ -565,7 +593,7 @@ class BDOrchestrator:
             print("  Skipped (engine not available)")
 
         # Stage 5: BD Scoring
-        print(f"\n[3/8] CALCULATING BD SCORES...")
+        print(f"\n[3/11] CALCULATING BD SCORES...")
         if 'scoring' in self.engines and self.config.run_scoring:
             try:
                 scored_jobs = self.engines['scoring']['score_batch'](jobs)
@@ -585,7 +613,7 @@ class BDOrchestrator:
         print(f"  Tiers: Hot={len(hot_leads)}, Warm={len(warm_leads)}, Cold={len(cold_leads)}")
 
         # Stage 6: QA Evaluation
-        print(f"\n[4/8] RUNNING QA EVALUATION...")
+        print(f"\n[4/11] RUNNING QA EVALUATION...")
         qa_approved = 0
         qa_needs_review = 0
         if 'qa' in self.engines and self.config.run_qa:
@@ -601,7 +629,7 @@ class BDOrchestrator:
             print("  Skipped (engine not available)")
 
         # Stage 7: Generate Briefings
-        print(f"\n[5/8] GENERATING BRIEFINGS...")
+        print(f"\n[5/11] GENERATING BRIEFINGS...")
         briefings = []
         briefings_to_process = hot_leads if self.config.hot_leads_only else jobs
         if 'briefings' in self.engines and self.config.run_briefings and briefings_to_process:
@@ -620,7 +648,7 @@ class BDOrchestrator:
             print("  Skipped (no hot leads or engine not available)")
 
         # Stage 8: Export
-        print(f"\n[6/8] EXPORTING RESULTS...")
+        print(f"\n[6/11] EXPORTING RESULTS...")
         export_files = {}
         if 'mapping' in self.engines:
             try:
@@ -637,8 +665,8 @@ class BDOrchestrator:
                 errors.append(f"Export error: {e}")
                 logger.error(f"Export error: {e}")
 
-        # Stage 9: Webhook Delivery
-        print(f"\n[7/8] DELIVERING TO WEBHOOKS...")
+        # Stage 7: Webhook Delivery
+        print(f"\n[7/11] DELIVERING TO WEBHOOKS...")
         if self.config.send_webhook:
             self.webhook_delivery.deliver_jobs(jobs)
             if hot_leads:
@@ -646,12 +674,69 @@ class BDOrchestrator:
         else:
             print("  Skipped (webhooks disabled)")
 
-        # Stage 10: Email Notifications
-        print(f"\n[8/8] SENDING NOTIFICATIONS...")
+        # Stage 8: Email Notifications
+        print(f"\n[8/11] SENDING NOTIFICATIONS...")
         if self.config.send_email and hot_leads:
             self.email_notifier.send_hot_lead_alert(hot_leads, briefings)
         else:
             print("  Skipped (email disabled or no hot leads)")
+
+        # Stage 9: Bullhorn ETL
+        print(f"\n[9/11] RUNNING BULLHORN ETL...")
+        if 'bullhorn' in self.engines and self.config.run_bullhorn:
+            try:
+                self.engines['bullhorn']['run_pipeline']()
+                print(f"  Bullhorn ETL completed")
+            except Exception as e:
+                errors.append(f"Bullhorn ETL error: {e}")
+                logger.error(f"Bullhorn ETL error: {e}")
+        else:
+            print("  Skipped (engine not available or disabled)")
+
+        # Stage 10: Dashboard Export with Verification
+        print(f"\n[10/11] EXPORTING DASHBOARD DATA...")
+        if 'bullhorn' in self.engines and self.config.export_dashboard:
+            try:
+                self.engines['bullhorn']['run_dashboard_export']()
+                print(f"  Dashboard export completed")
+
+                # VERIFICATION: Check all required files were created
+                dashboard_dir = PROJECT_ROOT / 'dashboard' / 'public' / 'data'
+                required_files = [
+                    'past_performance.json',
+                    'prime_org_chart.json',
+                    'contact_org_chart.json',
+                    'program_org_chart.json',
+                    'placements.json',
+                    'correlation_summary_enriched.json'
+                ]
+                missing_files = [f for f in required_files if not (dashboard_dir / f).exists()]
+                if missing_files:
+                    error_msg = f"Dashboard export incomplete: missing {missing_files}"
+                    errors.append(error_msg)
+                    logger.warning(error_msg)
+                else:
+                    logger.info("Dashboard data verified: all 6 files present")
+                    print(f"  Verified: all {len(required_files)} dashboard files present")
+            except Exception as e:
+                errors.append(f"Dashboard export error: {e}")
+                logger.error(f"Dashboard export error: {e}")
+        else:
+            print("  Skipped (engine not available or disabled)")
+
+        # Stage 11: Knowledge Indexing (Engine 8)
+        print(f"\n[11/11] INDEXING KNOWLEDGE BASE...")
+        if 'knowledge' in self.engines and self.config.run_knowledge:
+            try:
+                indexer = self.engines['knowledge']['BDIndexer']()
+                indexer.index_all()
+                print(f"  Knowledge base indexed successfully")
+                logger.info("Engine8_Knowledge indexing completed")
+            except Exception as e:
+                errors.append(f"Knowledge indexing error: {e}")
+                logger.error(f"Knowledge indexing error: {e}")
+        else:
+            print("  Skipped (engine not available or disabled)")
 
         # Calculate duration
         duration = (datetime.now() - start_time).total_seconds()
@@ -778,6 +863,9 @@ Examples:
     parser.add_argument('--no-briefings', action='store_true', help='Skip briefing generation')
     parser.add_argument('--no-scoring', action='store_true', help='Skip BD scoring')
     parser.add_argument('--no-qa', action='store_true', help='Skip QA evaluation')
+    parser.add_argument('--no-bullhorn', action='store_true', help='Skip Bullhorn ETL')
+    parser.add_argument('--no-dashboard-export', action='store_true', help='Skip dashboard data export')
+    parser.add_argument('--no-knowledge', action='store_true', help='Skip knowledge base indexing')
 
     # Notifications
     parser.add_argument('--email', action='store_true', help='Send email notifications')
@@ -801,6 +889,9 @@ Examples:
         run_briefings=not args.no_briefings,
         run_scoring=not args.no_scoring,
         run_qa=not args.no_qa,
+        run_bullhorn=not args.no_bullhorn,
+        export_dashboard=not args.no_dashboard_export,
+        run_knowledge=not args.no_knowledge,
         send_email=args.email,
         send_webhook=not args.no_webhook,
         schedule_enabled=args.schedule,

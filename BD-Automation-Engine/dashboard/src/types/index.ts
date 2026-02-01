@@ -145,6 +145,13 @@ export type TabId =
   | 'primeorgchart'
   | 'contactorgchart'
   | 'placements'
+  | 'callintelligence'
+  | 'accounttakeover'
+  | 'smartquery'
+  | 'knowledgegraph'
+  | 'agents'
+  | 'memory'
+  | 'systemhealth'
   | 'settings';
 
 export interface Tab {
@@ -292,6 +299,95 @@ export interface Placement {
   bill_rate: number;
   spread: number;
   margin_percent: number;
+}
+
+// =============================================================================
+// CALL NOTES INTELLIGENCE TYPES
+// =============================================================================
+
+// Prime mentions from call notes
+export interface CallNotesPrime {
+  name: string;
+  mentionCount: number;
+  sampleNotes: Array<{
+    about: string;
+    note: string;
+    date: string;
+  }>;
+  activityLevel: 'High' | 'Medium' | 'Low';
+}
+
+// Program mentions from call notes
+export interface CallNotesProgram {
+  name: string;
+  mentionCount: number;
+  isGapProgram: boolean;
+  sampleNotes: Array<{
+    about: string;
+    note: string;
+    date: string;
+  }>;
+  status: 'Needs Attention' | 'Active';
+}
+
+// Contact activity from call notes
+export interface CallNotesContact {
+  name: string;
+  totalInteractions: number;
+  positiveInteractions: number;
+  negativeInteractions: number;
+  noAnswerCount: number;
+  engagementScore: number;
+  tier: 'A' | 'B' | 'C' | 'D' | 'E';
+  primesAssociated: string[];
+  programsAssociated: string[];
+  isGapContact: boolean;
+  lastInteractionDate: string;
+  lastStatus: string;
+}
+
+// Location intelligence
+export interface CallNotesLocation {
+  name: string;
+  mentionCount: number;
+  category: string;
+}
+
+// Gap analysis
+export interface CallNotesGapAnalysis {
+  gapPrograms: Array<{
+    name: string;
+    reason: string;
+    recommendation: string;
+  }>;
+  gapContactsByStatus: Record<string, number>;
+  totalGapContacts: number;
+}
+
+// Call notes statistics
+export interface CallNotesStats {
+  totalNotes: number;
+  uniqueContacts: number;
+  actionDistribution: Record<string, number>;
+  statusDistribution: Record<string, number>;
+  dailyActivity: Array<{
+    date: string;
+    count: number;
+  }>;
+}
+
+// Call notes summary
+export interface CallNotesSummary {
+  exportDate: string;
+  totalCallNotes: number;
+  uniqueContacts: number;
+  totalPrimes: number;
+  totalPrograms: number;
+  gapPrograms: number;
+  gapContacts: number;
+  topPrimes: string[];
+  topLocations: string[];
+  actionBreakdown: Record<string, number>;
 }
 
 // Enriched Correlation Summary

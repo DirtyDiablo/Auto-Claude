@@ -11,7 +11,7 @@ import type { Job, Program, Contact, Contractor, CorrelationSummary } from '../t
 // DATA SOURCE TYPES
 // =============================================================================
 
-export type DataSourceType = 'notion' | 'local';
+export type DataSourceType = 'notion' | 'local' | 'hub';
 
 export interface DataSourceStatus {
   type: DataSourceType;
@@ -182,4 +182,45 @@ export interface ProgramFilters {
   prime?: string;
   priority?: string;
   hasJobs?: boolean;
+}
+
+// =============================================================================
+// HUB API TYPES
+// =============================================================================
+
+export interface HubApiConfig {
+  baseUrl: string;
+  timeout?: number;
+}
+
+export interface HubSearchResult {
+  id: string;
+  collection: string;
+  score: number;
+  content: string;
+  metadata: Record<string, unknown>;
+}
+
+export interface HubStats {
+  collections: {
+    contacts: number;
+    programs: number;
+    documents: number;
+    activities: number;
+    jobs: number;
+  };
+  total_records: number;
+  last_updated: string;
+}
+
+export interface HubHealth {
+  status: 'healthy' | 'degraded' | 'unhealthy';
+  version: string;
+  uptime: number;
+  services: {
+    qdrant: boolean;
+    memory: boolean;
+    graph: boolean;
+    agents: boolean;
+  };
 }
