@@ -990,8 +990,36 @@ The SDK will run invoked agents in parallel automatically.
             # Log agents invoked with clear formatting
             self._log_agents_invoked(agents_from_output)
 
+            # Process finding validations to filter out false positives
+            dismissed_finding_ids: set[str] = set()
+            confirmed_count = 0
+            needs_human_count = 0
+
+            if result.finding_validations:
+                for validation in result.finding_validations:
+                    if validation.validation_status == "dismissed_false_positive":
+                        dismissed_finding_ids.add(validation.finding_id)
+                    elif validation.validation_status == "confirmed_valid":
+                        confirmed_count += 1
+                    elif validation.validation_status == "needs_human_review":
+                        needs_human_count += 1
+
+                safe_print(
+                    f"[ParallelOrchestrator] Finding validation: {len(dismissed_finding_ids)} dismissed, "
+                    f"{confirmed_count} confirmed, {needs_human_count} need human review",
+                    flush=True,
+                )
+
             # Convert structured findings to PRReviewFinding objects
+            # Filter out findings that were dismissed as false positives
             for f in result.findings:
+                # Skip findings that the validator dismissed
+                if f.id in dismissed_finding_ids:
+                    logger.info(
+                        f"[ParallelOrchestrator] Filtered finding {f.id}: dismissed as false positive"
+                    )
+                    continue
+
                 finding = self._create_finding_from_structured(f)
                 findings.append(finding)
 

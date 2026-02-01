@@ -291,21 +291,30 @@ class ParallelFollowupReviewer:
         return "\n\n".join(lines)
 
     def _format_ai_reviews(self, context: FollowupReviewContext) -> str:
-        """Format AI bot reviews and comments for the prompt."""
+        """Format AI bot reviews and comments for the prompt.
+
+        Note: ai_bot_comments_since_review contains BOTH AI comments AND AI reviews
+        (combined in context_gatherer.py). We detect if an item is a review vs comment
+        by checking for the 'state' field (reviews have APPROVED, CHANGES_REQUESTED, etc.).
+        """
         ai_content = []
 
-        # AI bot comments
-        for comment in context.ai_bot_comments_since_review[:10]:
-            author = comment.get("user", {}).get("login", "unknown")
-            body = comment.get("body", "")[:500]
-            ai_content.append(f"**{author}** (comment):\n{body}")
+        # AI bot comments and reviews are combined in ai_bot_comments_since_review
+        # Reviews have a 'state' field, comments don't
+        for item in context.ai_bot_comments_since_review[:15]:
+            author = item.get("user", {}).get("login", "unknown")
+            body = item.get("body", "")
 
-        # Formal PR reviews from AI tools
-        for review in context.pr_reviews_since_review[:5]:
-            author = review.get("user", {}).get("login", "unknown")
-            body = review.get("body", "")[:1000]
-            state = review.get("state", "unknown")
-            ai_content.append(f"**{author}** ({state}):\n{body}")
+            # Check if this is a formal review (has state) or a comment
+            state = item.get("state")
+            if state:
+                # This is a formal PR review from an AI tool
+                body = body[:1000]
+                ai_content.append(f"**{author}** ({state}):\n{body}")
+            else:
+                # This is a comment from an AI tool
+                body = body[:500]
+                ai_content.append(f"**{author}** (comment):\n{body}")
 
         if not ai_content:
             return "No AI tool feedback since last review."

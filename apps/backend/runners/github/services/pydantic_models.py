@@ -441,6 +441,15 @@ class ParallelOrchestratorResponse(BaseModel):
     findings: list[ParallelOrchestratorFinding] = Field(
         default_factory=list, description="All findings from synthesis"
     )
+    # Finding validations from finding-validator agent (catches false positives in initial review)
+    finding_validations: list["FindingValidationResult"] = Field(
+        default_factory=list,
+        description=(
+            "Validation results for findings. The finding-validator agent re-investigates "
+            "each finding to confirm it's a real issue, not a false positive. "
+            "Findings with validation_status='dismissed_false_positive' should be removed."
+        ),
+    )
     agent_agreement: AgentAgreement = Field(
         default_factory=AgentAgreement,
         description="Information about agent agreement on findings",
@@ -650,3 +659,7 @@ class FindingValidationResponse(BaseModel):
             "how many dismissed, how many need human review"
         )
     )
+
+
+# Rebuild models with forward references now that all classes are defined
+ParallelOrchestratorResponse.model_rebuild()
