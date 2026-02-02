@@ -23,6 +23,11 @@ from .program_intel_agent import ProgramIntelAgent
 from .company_research_agent import CompanyResearchAgent
 from .contact_finder_agent import ContactFinderAgent
 from .bd_strategy_agent import BDStrategyAgent
+# New Phase 4 agents
+from .contact_classifier_agent import ContactClassifierAgent
+from .scraper_monitor_agent import ScraperMonitorAgent
+from .quality_assurance_agent import QualityAssuranceAgent
+from .analytics_agent import AnalyticsAgent
 
 
 @dataclass
@@ -38,10 +43,16 @@ class FallbackOrchestrator:
     """Fallback orchestration when CrewAI unavailable."""
 
     def __init__(self):
+        # Original 4 agents
         self.program_agent = ProgramIntelAgent()
         self.company_agent = CompanyResearchAgent()
         self.contact_agent = ContactFinderAgent()
         self.strategy_agent = BDStrategyAgent()
+        # New Phase 4 agents
+        self.classifier_agent = ContactClassifierAgent()
+        self.scraper_agent = ScraperMonitorAgent()
+        self.qa_agent = QualityAssuranceAgent()
+        self.analytics_agent = AnalyticsAgent()
 
     async def run_workflow(self, workflow: str, query: str) -> OrchestrationResult:
         results = []
@@ -153,6 +164,11 @@ class BDCrewOrchestrator:
         self._company_agent = CompanyResearchAgent()
         self._contact_agent = ContactFinderAgent()
         self._strategy_agent = BDStrategyAgent()
+        # New Phase 4 agents
+        self._classifier_agent = ContactClassifierAgent()
+        self._scraper_agent = ScraperMonitorAgent()
+        self._qa_agent = QualityAssuranceAgent()
+        self._analytics_agent = AnalyticsAgent()
 
     def _init_fallback(self):
         """Initialize fallback orchestration."""
@@ -286,6 +302,142 @@ class BDCrewOrchestrator:
             results=[{"agent": agent, "output": result.content}],
             final_output=result.content,
             agents_used=[agent]
+        )
+
+    # ===== NEW PHASE 4 WORKFLOWS =====
+
+    async def classify_contacts_workflow(self, contacts: List[Dict]) -> OrchestrationResult:
+        """Classify a batch of contacts."""
+        result = await self._classifier_agent.process(
+            "Classify contacts",
+            context={"contacts": contacts}
+        )
+
+        return OrchestrationResult(
+            success=True,
+            workflow="classify_contacts",
+            results=[{"agent": "contact_classifier", "output": result.content}],
+            final_output=result.content,
+            agents_used=["contact_classifier"]
+        )
+
+    async def analyze_scrape_workflow(
+        self,
+        jobs: List[Dict],
+        scraper_name: str = "unknown"
+    ) -> OrchestrationResult:
+        """Analyze job scraper results."""
+        result = await self._scraper_agent.process(
+            "Analyze scrape",
+            context={"jobs": jobs, "scraper_name": scraper_name}
+        )
+
+        return OrchestrationResult(
+            success=True,
+            workflow="analyze_scrape",
+            results=[{"agent": "scraper_monitor", "output": result.content}],
+            final_output=result.content,
+            agents_used=["scraper_monitor"]
+        )
+
+    async def quality_check_workflow(
+        self,
+        records: List[Dict],
+        collection_type: str = "contacts"
+    ) -> OrchestrationResult:
+        """Run quality assurance on data."""
+        result = await self._qa_agent.process(
+            "Check quality",
+            context={"records": records, "collection_type": collection_type}
+        )
+
+        return OrchestrationResult(
+            success=True,
+            workflow="quality_check",
+            results=[{"agent": "quality_assurance", "output": result.content}],
+            final_output=result.content,
+            agents_used=["quality_assurance"]
+        )
+
+    async def generate_analytics_workflow(
+        self,
+        jobs: List[Dict] = None,
+        programs: List[Dict] = None,
+        contacts: List[Dict] = None,
+        period: str = "weekly"
+    ) -> OrchestrationResult:
+        """Generate analytics report."""
+        result = await self._analytics_agent.process(
+            "Generate report",
+            context={
+                "jobs": jobs or [],
+                "programs": programs or [],
+                "contacts": contacts or [],
+                "period": period,
+            }
+        )
+
+        return OrchestrationResult(
+            success=True,
+            workflow="analytics",
+            results=[{"agent": "analytics", "output": result.content}],
+            final_output=result.content,
+            agents_used=["analytics"]
+        )
+
+    async def full_intelligence_workflow(
+        self,
+        query: str,
+        jobs: List[Dict] = None,
+        contacts: List[Dict] = None
+    ) -> OrchestrationResult:
+        """
+        Full intelligence workflow using all 8 agents.
+
+        1. Classify contacts
+        2. Analyze job scrapes
+        3. Quality check data
+        4. Run standard capture strategy
+        5. Generate analytics summary
+        """
+        results = []
+        agents_used = []
+
+        # Step 1: Classify contacts if provided
+        if contacts:
+            classify_result = await self._classifier_agent.process(
+                "Classify", context={"contacts": contacts}
+            )
+            results.append({"agent": "contact_classifier", "output": classify_result.content})
+            agents_used.append("contact_classifier")
+
+        # Step 2: Analyze jobs if provided
+        if jobs:
+            scrape_result = await self._scraper_agent.process(
+                "Analyze", context={"jobs": jobs}
+            )
+            results.append({"agent": "scraper_monitor", "output": scrape_result.content})
+            agents_used.append("scraper_monitor")
+
+        # Step 3: Run capture strategy
+        strategy_result = await self.capture_strategy_workflow(query)
+        results.extend(strategy_result.results)
+        agents_used.extend(strategy_result.agents_used)
+
+        # Step 4: Generate analytics
+        analytics_result = await self._analytics_agent.process(
+            "Generate report",
+            context={"jobs": jobs or [], "contacts": contacts or []}
+        )
+        results.append({"agent": "analytics", "output": analytics_result.content})
+        agents_used.append("analytics")
+
+        return OrchestrationResult(
+            success=True,
+            workflow="full_intelligence",
+            results=results,
+            final_output=analytics_result.content,
+            agents_used=list(set(agents_used))
         )
 
 

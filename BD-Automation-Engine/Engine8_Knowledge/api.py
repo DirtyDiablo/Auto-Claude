@@ -106,6 +106,14 @@ except ImportError as e:
     RAGFLOW_AVAILABLE = False
     logger.warning(f"RAGflow integration not available: {e}")
 
+# Import unified API endpoints
+try:
+    from api.unified_endpoints import router as unified_router
+    UNIFIED_API_AVAILABLE = True
+except ImportError as e:
+    UNIFIED_API_AVAILABLE = False
+    logger.warning(f"Unified API endpoints not available: {e}")
+
 # Logger already configured above
 
 # =========================================
@@ -335,6 +343,10 @@ if DIFY_INTEGRATION_AVAILABLE:
 if RAGFLOW_AVAILABLE:
     app.include_router(ragflow_router)
     logger.info("RAGflow integration routes enabled: /ragflow/*")
+
+if UNIFIED_API_AVAILABLE:
+    app.include_router(unified_router)
+    logger.info("Unified API v2 routes enabled: /api/v2/*")
 
 
 # =========================================

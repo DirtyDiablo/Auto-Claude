@@ -65,7 +65,7 @@
             {
               "id": "config-apify-token",
               "name": "apifyToken",
-              "value": "apify_api_n32KFOBo74tTXNi1nEH8nuaMMgrmRc15XrzS",
+              "value": "${APIFY_API_TOKEN}",
               "type": "string"
             },
             {

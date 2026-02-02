@@ -19,7 +19,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.apify.com/v2/acts/apify~puppeteer-scraper/run-sync-get-dataset-items?token=apify_api_n32KFOBo74tTXNi1nEH8nuaMMgrmRc15XrzS",
+        "url": "https://api.apify.com/v2/acts/apify~puppeteer-scraper/run-sync-get-dataset-items?token=${APIFY_API_TOKEN}",
         "sendHeaders": true,
         "specifyHeaders": "json",
         "jsonHeaders": "{\n  \"Content-Type\": \"application/json\"\n}\n\n",
@@ -73,7 +73,7 @@
     {
       "parameters": {
         "method": "POST",
-        "url": "https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync?token=apify_api_8tZJaGxvs9ZkkfFXV5eaqEOCDHpGln2TnJno",
+        "url": "https://api.apify.com/v2/acts/compass~google-maps-extractor/run-sync?token=${APIFY_API_TOKEN}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [

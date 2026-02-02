@@ -7,7 +7,7 @@
         "httpMethod": [
           "POST"
         ],
-        "path": "https://api.apify.com/v2/acts/apify~puppeteer-scraper/run-sync-get-dataset-items?token=apify_api_n32KFOBo74tTXNi1nEH8nuaMMgrmRc15XrzS",
+        "path": "https://api.apify.com/v2/acts/apify~puppeteer-scraper/run-sync-get-dataset-items?token=${APIFY_API_TOKEN}",
         "authentication": "headerAuth",
         "options": {
           "responseData": "allEntries"
