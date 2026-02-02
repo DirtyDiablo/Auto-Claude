@@ -1,0 +1,46 @@
+program_name,total_mentions,companies,unique_contacts,contacts_list,locations,roles_mentioned
+JDAM,2,['Boeing'],2,"['Darren  Workman', 'Thomas Mantia']","['Texas', 'Huntsville', 'Missouri', 'Berkeley', 'St. Louis']","['Model Based', 'Cameo', 'Structures', 'Requirements', 'Engineering Manager']"
+SDB,2,['Boeing'],2,"['Darren  Workman', 'Thomas Mantia']","['Texas', 'Huntsville', 'Missouri', 'Berkeley', 'St. Louis']","['Model Based', 'Cameo', 'Structures', 'Requirements', 'Engineering Manager']"
+SLS,17,"['Boeing', 'SAIC', 'Raytheon', 'General Dynamics', 'L3Harris']",11,"['Erika Henkel', 'Sarah Weis', 'Jamie  Velotta', 'Jason Keuhl', 'Stephen ""Steve""  DeWalt', 'Jonathan Whitehead', 'Jessica  Jones', 'Ken  McCormick', 'Casey  Thompson', 'Steven Capes', 'Dana Dunavant']","['Georgia', 'Alabama', 'Huntsville']","['Analyst', 'Analytical Engineer', 'Structures', 'Integration', 'Python', 'Reliability Engineer', 'Program Manager', 'Propulsion', 'Electrical Engineer', 'DOORS', 'Engineering Manager', 'Avionics']"
+NASA,23,"['Leidos', 'Boeing', 'General Dynamics', 'Peraton']",17,"['Thomas  Axberg ', 'John Allie', 'Melodey Lawson', 'Heath Campbell', 'Brian Lynn', 'Kenneth Merenda', 'Cheryl  Pierce', 'Jason Marquith', 'Janae Jones', 'Jennifer Michael', 'Ken  McCormick', 'Jonathan Gallegos ', 'Casey  Thompson', 'Richard Hoffman', 'Fred Nail', 'Dana Dunavant', 'Ray Hunnicutt']","['Alabama', 'Huntsville', 'Colorado Springs', 'Virginia', 'Georgia']","['Analyst', 'Analytical Engineer', 'Structures', 'Integration', 'Requirements', 'Reliability Engineer', 'Systems Engineer', 'Program Manager', 'Manufacturing Engineer', 'DOORS', 'Software Engineer']"
+F-15,5,['Boeing'],5,"['Darren  Workman', 'John Donjoian ', 'Ken  McCormick', 'Amber Rist', 'Dana Dunavant']","['Texas', 'Huntsville', 'Alabama', 'St. Louis', 'Georgia']","['Analyst', 'Cameo', 'Structures', 'Requirements', 'Engineering Manager']"
+GBU,1,['Boeing'],1,['John Donjoian '],[],"['Engineering Manager', 'Requirements', 'Cameo']"
+B-52,3,['Boeing'],3,"['Ken  McCormick', 'Dana Dunavant', 'Amber Rist']","['Georgia', 'Alabama', 'Huntsville']","['Analyst', 'Engineering Manager', 'Structures']"
+F-16,2,[],2,"['Edward Balunas', 'James (jim) Upchurch']",[],['Avionics']
+IDIQ,10,"['SAIC', 'CACI', 'Leidos', 'Lockheed Martin', 'General Dynamics', 'Northrop Grumman', 'Peraton']",9,"['Tom Morlan', 'Edward Balunas', 'Molly Magrab', 'Jason Marquith', 'Dipa Dayal', 'Kenneth  Hirlinger ', 'michael berning', 'Bradley Mallare', 'Cheryl  Pierce']",['Arlington'],"['Analyst', 'Integration', 'Requirements', 'MBSE', 'DevOps', 'Avionics']"
+F-22,1,['Lockheed Martin'],1,['Fred Davis'],['Dallas'],['Program Manager']
+NSA,5,"['Leidos', 'Peraton', 'Raytheon']",3,"['Dick Amott', 'Mark Shay', 'Jack Allen']","['Denver', 'Dallas', 'DC', 'Luke']","['Test Engineer', 'Requirements', 'Java', 'Systems Engineer', 'Engineering Manager']"
+NRO,3,['Raytheon'],2,"['Jack Allen', 'Richard Feldes']","['Dallas', 'DC']",['Technical Lead']
+NGA,2,"['Deloitte', 'Raytheon']",2,"['Chris Ward', 'Jack Allen']","['Dallas', 'DC']",[]
+GPS,4,"['Deloitte', 'Raytheon']",4,"['Jesse Morritt', 'Derek Roy', 'Colton Vaughn', 'Andrew  Barrett ']",[],['SW']
+Patriot,4,"['SAIC', 'Northrop Grumman', 'Raytheon']",4,"['Jesse Morritt', 'Steve Bramlett', 'John Bagby', 'Matthew Davis']",['Huntsville'],"['FSR', 'Requirements', 'FSE']"
+OASIS,2,"['Leidos', 'CACI']",2,"['Chris Henry', 'Steven  Watkins ']",[],[]
+WGS,4,['Boeing'],4,"['Tina  Kwong-To', 'Stephen Caskey', 'David  Vohs', 'David  Barningham']","['Colorado Springs', 'DC']","['Test Engineer', 'Integration', 'Requirements', 'MBSE', 'Java', 'Systems Engineer', 'Program Manager', 'Cybersecurity', 'Engineering Manager']"
+Space Force,23,"['SAIC', 'Boeing', 'Lockheed Martin', 'General Dynamics', 'Northrop Grumman', 'Booz Allen', 'Deloitte', 'Peraton']",15,"['Tom Morlan', 'Mickey Addison', 'joel  Hawkins', 'Peter  Lambert', 'Michael Evans', 'Joshua Silver', 'Clark Knutson', 'Amanda Kreminski', 'Jason Marquith', 'Tim  King', 'David  Vohs', 'Pat Ernst', 'Stephen  Bolish', 'Erica Westendorf', 'Bradley Mallare']","['Colorado Springs', 'DC', 'Huntsville']","['Analyst', 'SW', 'Integration', 'MBSE', 'Program Manager', 'DevOps', 'Field Service', 'Cybersecurity']"
+IBCS,50,"['SAIC', 'CACI', 'General Dynamics', 'Northrop Grumman', 'Peraton']",16,"['Steve Bramlett', 'John Bagby', 'Amber Parker', 'Dennis Miller ', 'Brian  Arabinko ', 'Joe  Wethington', 'Asheesh  Kumar ', 'Robert  Mason ', 'Roy Llamas ', 'Robert Akers', 'Wes  Brown', 'Tim  Speece ', 'Norris  Petty ', 'Timothy  Greene', 'Ryne Osborne', 'Bob  Peters']",['Huntsville'],"['FSE', 'FSR', 'Integration', 'Requirements', 'Cybersecurity']"
+WSMR,9,"['SAIC', 'Northrop Grumman']",3,"['Steve Bramlett', 'John Bagby', 'Timothy  Greene']",['Huntsville'],"['FSR', 'Requirements', 'FSE']"
+BOA,17,"['Lockheed Martin', 'General Dynamics', 'Northrop Grumman']",7,"['joel  Hawkins', 'Timothy ""Tim"" Payne ', 'Scott  Harlow ', 'Clark Knutson', 'Mikeal  Jacob', 'Austin  Echols', 'Jeff Dionne']",[],"['Analyst', 'SW', 'Python', 'Java', 'DevOps', 'Engineering Manager']"
+MDA,18,"['SAIC', 'Lockheed Martin', 'Leidos', 'General Dynamics', 'Northrop Grumman']",13,"['Weei Loo', 'Damien Rivera', 'Matt  Simmons', 'Timothy ""Tim"" Payne ', 'Sarah Braddy  ', 'Len Daws ', 'Loren Roach', 'Scott  Harlow ', 'Mikeal  Jacob', 'Joshua Silver', 'Sean  Black', 'Jason Bryant', 'Justin Blakeway']","['Hill AFB', 'DC']","['Integration', 'MBSE', 'SW']"
+Sentinel,19,"['Lockheed Martin', 'BAE Systems', 'Northrop Grumman', 'Raytheon']",12,"['Brian Henson', 'Christopher  Ozkan', 'Philip  Couch ', 'Larry Myers', 'Sal  Haro ', 'Jeff Irtenkauf', 'Todd Rockefeller', 'Carlos Cruz', 'Erick Chewakin', 'Janette  Donohue', 'Alex  Kenney', 'Nicholas Sady']","['Colorado Springs', 'San Diego', 'Georgia', 'Huntsville']","['FSR', 'Requirements', 'Avionics', 'Engineering Manager']"
+PMS,5,"['Lockheed Martin', 'BAE Systems', 'Northrop Grumman']",5,"['Matt Flynn', 'Joe  Wethington', 'Rachel Wyatt', 'Matthew Alexander', 'Alex  Kenney']",['Huntsville'],['SW']
+WISLA,9,"['SAIC', 'Northrop Grumman']",6,"['Steve Bramlett', 'John Bagby', 'Dennis Miller ', 'Joe  Wethington', 'Timothy  Greene', 'Ryne Osborne']",['Huntsville'],['FSR']
+Minuteman,2,"['BAE Systems', 'Northrop Grumman']",2,"['Erick Chewakin', 'Jeff Irtenkauf']","['Colorado Springs', 'Huntsville']",['Engineering Manager']
+DIA,1,['General Dynamics'],1,['Robyn Moses'],[],"['Engineering Manager', 'Requirements']"
+Aegis,15,"['Lockheed Martin', 'SAIC', 'Leidos']",12,"['Weei Loo', 'John Allie', 'Brett Ziller', 'Heath Campbell', 'Daniel  Miller', 'Brian Schmidt ', 'Suzanne Jacobson ', 'Peter Hack ', 'David Nutting', 'Ray Hunnicutt', 'Jennifer Bellotti', 'Chandra Marshall']","['Virginia', 'San Diego', 'Huntsville']","['Site Lead', 'SW', 'Integration', 'Requirements', 'MBSE', 'HW']"
+THAAD,7,"['Lockheed Martin', 'Northrop Grumman', 'Raytheon']",4,"['Matthew Davis', 'Abigail Capano', 'Thomas Owen', 'Patrick Moise']",[],['SW']
+PEO,2,"['Lockheed Martin', 'Raytheon']",2,"['Stephen Graham', 'Jonathon  Beckerman']",['Texas'],['SW']
+OPIR,1,['Lockheed Martin'],1,['Zach  Quinones'],[],['SW']
+AMRAAM,1,['Lockheed Martin'],1,['Brian  DeGennaro'],[],['Requirements']
+DDG,1,"['Northrop Grumman', 'CACI']",1,['Steven Tuck'],['Tinker'],[]
+DARPA,16,"['General Dynamics', 'Northrop Grumman']",16,"['Pamela  McComas ', 'Peggy Jordan', 'Jason Rice', 'Michelle Leiner', 'Melissa Caldwell', 'Sole Kincer', 'Heather Herron', 'Lori  Henderson', 'Corey Martin', 'Cynthia  Nusbaum', 'Dave Archer', 'Lucy Edwards', 'David  Risnear ', 'Mark Trudel', 'Ryan Rossignol', 'Richard  Breeden ']","['Virginia', 'Alabama']","['Program Manager', 'Requirements', 'SW']"
+Abrams,1,['Deloitte'],1,['Devon Clark'],[],[]
+SDA,11,"['Lockheed Martin', 'Deloitte', 'Northrop Grumman']",3,"['Tim  King', 'Barb Moyer', 'Thomas  Axberg ']",['Colorado Springs'],"['Systems Engineer', 'Requirements', 'Python']"
+CIA,1,['Deloitte'],1,['Jeff  Janies'],[],[]
+NAVAIR,1,['Deloitte'],1,['Stacy Fawcett'],['San Diego'],[]
+ICBM,1,['BAE Systems'],1,['Richard Allen'],[],['Systems Engineer']
+GBSD,1,['BAE Systems'],1,['Jason Broach'],[],['Program Manager']
+GWAC,3,['General Dynamics'],3,"['Tonya Barefoot', 'Frank  Demaria', 'Robert Shumate ']",[],"['Analyst', 'Systems Engineer']"
+Alliant,3,['General Dynamics'],3,"['Tonya Barefoot', 'Frank  Demaria', 'Robert Shumate ']",[],"['Analyst', 'Systems Engineer']"
+MLRS,1,['SAIC'],1,['Keshia  Neerhof'],[],['Software Engineer']
+Bradley,4,['Northrop Grumman'],4,"['Tom Morlan', 'William  Kolacy', 'kevin Mooney', 'Bradley Mallare']",[],"['DevOps', 'MBSE']"
+HBTSS,1,['Northrop Grumman'],1,['Michael  Florio '],[],[]

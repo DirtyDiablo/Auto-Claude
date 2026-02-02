@@ -1,0 +1,191 @@
+================================================================================
+BULLHORN NOTES ACTIVITY REPORTS - RAW EXTRACTED DATA
+Colton Scurry and Carter Scurry Related Notes
+================================================================================
+
+================================================================================
+FILE 1: Notes Activity Report.XLS (Period: 08/01/2025 to 01/21/2026)
+================================================================================
+
+--- COLTON SCURRY AUTHORED NOTE ---
+
+CACI - BIM TO3
+
+All contractors will start by EOY. No guidance on DD254 or survey yet.
+
+Colton Scurry
+
+--- FOLLOWING NOTES NEAR COLTON SCURRY ENTRY ---
+
+Neil Pennington
+NGC: inSITE
+want to move forward with Jeremy from last week. Jeremy has other opportunities and wants to consider. taking too long to make decisions.
+
+Tod Ostrander
+NGC: inSITE
+offer for Jarred.
+
+Royce Cross
+NGC: inSITE
+deciding if he can afford AFSIM MBSE after candidate came down 30k from offer?? paul Barltett doing. how do we have a candidate where his non-negotiable was $170k, too expensive and now he is considering $140k to convert??
+
+Megan Lipps
+NGC: payroll for San Diego team. referral from Paul Johnson, my contractor need to confirm $177/hour bill rate.
+
+Tonya Barefoot
+GDIT: MAINES
+Tag up with Tonya. has a need for a backfill for lupin who quit after 2 weeks. getting with Dawn to get her availability but needed to touch base with rose to get it approved. Danny also has x2 network engineers for his role local to Cary. 1 offer and accept and another interview on Friday. payroll referral did not get job.
+
+--- COLTON VAUGHN REFERENCE (DIFFERENT PERSON) ---
+
+Jesse Morritt
+RTX - Midsjay (MALD-J) and TTNT Radio's
+
+Jesse Coached wrestling for a bit and now does it one day a week. He also gets up at 3:30-4am.
+
+Was Previously on GPS-OCX but said the program was an odd duck so they used subcontractors often. He said he still knows one guy over there, Colton Vaughn, said we could reach out. Jumped to Collins Aerospace 3 years ago and has been on this program since.
+
+Not a fan of Leased labor and would be willing to work around it but currently doesn't have an immediate need for us. He said there will be a lot coming up over the next few months/years through 2030. They have a medium volume but the radio's go on planes, ships, and some ground vehicles.
+potential collaboration in the future with patriot missiles/ iron dome. wouldn't verify that however.
+Manages about 15 people out of cedar rapids remotely (Jesse is based in Aurora)
+End of Q1 he will have a clear scope & runout dates, but wanted me to follow up the first week of the year. Appointment set for the 3rd of January.
+
+--- COLTON VAUGHN CONTACT NOTE ---
+
+Colton Vaughn
+RTX - Referred from Jesse Morritt
+
+Left GPS-OCX 2 months ago and was able to refer us to Matt Johnson and Christy Parrack
+
+Colton is currently supporting the Pacific Program on the supply chain side. They send Antennas and Raydomes? to Japan. Viasat supplies the antennas.
+
+Other programs M2C2, Vail, Rushmore
+
+================================================================================
+FILE 2: Notes Activity Report (3).XLS (Period: 01/01/2023 to 01/01/2024)
+================================================================================
+
+--- "SAT ON COLTON MEETING" REFERENCES ---
+
+Austin Gilliland
+sat on colton meeting
+Northrop Grumman: C-RAM
+
+Tag up with Austin. just got to fully staffed for the engineering side but said that Dane Modeste has some needs for FSR's. Dane is out in Poland and i have a tag up with him on the 27th and added Austin to the call. supposedly the supplier they use right now provides training specific to the program which is why they use them heavily
+
+---
+
+Joseph Szabo
+sat on colton meeting
+Northrop Grumman: BOA
+
+Tag up with Jose. program startup. Question for us. Some snaphew that happened. How we figured it out. Pre-mature interviews. onboarding with Brian. Trent Daltons Team. Even before with HBTSS. trying to get them on and something that happened. Lesson learned. if Scott asks. For what it is worth, we have had good discussions and advanced program side of the house. let's get us on and any hiccups. try to play ball.
+
+Discussion: Where is she moving? Tanya Wilkerson. Prescreens with Taneal. talk to time and scoot and all that.
+
+Either way, make it work. glad to have us come on.
+
+Where is she going? any concerns. reach out to Taneal. Always work with GSC folks and any conversations.
+
+Head count: contract awarded on the 15th. baselining going on. question mark on where we are at. picture will become clear and all program and business management. growth etc. Initial Push. had quite a lot of folks and pipeline. gvt wants to put in a MOD this fiscal year which may need a number. towards staffing.
+
+Free piece of advice: a lot of discussion and headache on invoicing/teammates providing invoicing. if any area of concentration. Plus up with experience team on our house. Known thing we are looking for and GSC invoicing. This is a big area of improvement.
+
+Touch points next month.
+
+---
+
+Jordan Burns
+sat on Colton meeting
+Northrop Grumman:
+
+went to glacier national park in Montana. drove back. flew to Ohio to wedding. 14 hours. PM for ground segment for HBTSS and TR1K. 2 open up on both programs.
+
+HBTSS: Richard worked for us and same program. he is now moved over to the MFOV team. their lead just left NGC and looking to backfill. T3-T4 engineer with SW development. C++, Python and little bit of Java.
+
+Most development is done, later stages of integration and test. has abilities to dissolved and resolved the deficiencies of the system. supporting this and resolving bugs.
+
+on contract through Feb. follow on effort as well to their support.
+
+Travel? fill it from either the springs or boulder. testing efforts to CO Springs. another team supporting on the ground test support. taking phone calls and what not.
+
+Back-end testing part of the program. heavy duty is done. there is a SME SW dev so this person would be going towards them towards guidance. within the issue.
+
+Perfect. 6-hire.
+
+must have C++, experience, must have self-starter, highly motivated operating with very little direction.
+
+Any kind of testing experience would be good. C++ is the main. both can sit in CO springs or Boulder. between the two. Preferred CO springs. 52%. 40% split. SME sits in boulder. leaning towards boulder. CO. springs.
+
+in order to convert full time, must have a bachelors.
+
+Start. fill whenever. submitted req. on the functional side. Tim is tracking.
+
+Open to. make is kind of windows. That.
+
+typically, it is one round. with Taneal, pre-screen. Caroline belter took over functional reports. she might be functional manager for new hires.
+
+sending over a few time slots later today. All work is all secret level. can maintain a TS.
+
+Testing is at Schriever. Reporting to Schriever or primary location would be COCO5 with occasional travel.
+
+--- "COLTON'S NOTES" REFERENCES ---
+
+Gregg Clark
+GDIT - MTCCS
+See Colton's notes?
+
+---
+
+GDIT - Army Training
+See coltons notes.
+
+================================================================================
+CARTER SCURRY REFERENCES (RELATED PERSON)
+================================================================================
+
+Brian Lemmings
+Set up lunch meeting for May 10th at Ted's Montana Grill in East Cobb.
+I used to work with him and am looking to continue the working relationship.
+Had TEAMS Meeting with Scott today. Carter Scurry was also on the call.
+
+---
+
+Anthony Smith
+Refer to Brian Lemmings on meeting notes from today. TEAMS Meeting - Carter Scurry joined the meeting.
+
+Sekar is the owner of Enterprise Applications and several other niche applications.
+
+His division is broken into 2 parts.
+1) ISODUS (sp?) system - an Enterprise Application over 15 different departments, involves innovation, SAP and SalesForce with 1,500 users. Helping them expand their footprint with every system implemented and for new integrations.
+2) Content Management Space - now their Enterprise Application is silo'd into 2 spaces A) Long Term Strategy B) Replacing Current Systems --> this is where he said he'll use potential resources such as Product Owners, Developers (Java, .NET and Integration (TIBCO) and won't need these resources until 2024.
+
+He's over 3 Managers (Integrations) and also leads a team 12 Salesforce Integration Developers.
+
+Sekar said he would check in with his colleagues to see if they have any hiring needs now and would make introductions, and we set reoccurring meetings for every 2 months.
+
+---
+
+April Martinez
+AT&T - April Martinez - Associate Director, Project Manager (Resource Manager, National Security and Defense) - Brian Liberatore (Dir. of Tech. at AT&T) referral - TEAMS Meeting, Weds., 8/30 at 10:30am
+
+Since she's Resource Manager over Nat'l Security and Defense, I brought Carter Scurry onto the call because I believe she's all Federal/Govt
+
+AT&T - Doug Chandler - Associate Director of Network Engineering - Follow up meeting (From April's meeting with Braner) scheduled for Monday, September 11th at Noon.
+
+He lives in Peachtree City, GA - so we're meeting for lunch at Pascal's Bistro.
+
+---
+
+AT&T - April Martinez - Resource Manager - Capabilities Call via Teams Meeting - Carter Scurry is joining the call because I'm almost certain she's Federal/Govt.
+
+---
+
+Juan Holguin
+GDIT -Senior Program Manager - SCITES
+
+Meeting with Juan on Friday (1/27) at 9:00 AM EST w/ @Carter Scurry @Logan Hornback and @Christian Kennedy
+
+================================================================================
+END OF EXTRACTED NOTES
+================================================================================

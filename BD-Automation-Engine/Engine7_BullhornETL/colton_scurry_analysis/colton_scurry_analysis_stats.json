@@ -1,0 +1,145 @@
+{
+  "total_notes": 2687,
+  "unique_contacts": 1183,
+  "unique_companies": 16,
+  "unique_programs": 45,
+  "date_range": {
+    "earliest": "2024-07-23 00:00:00",
+    "latest": "2026-01-21 00:00:00"
+  },
+  "top_companies": [
+    {
+      "company_name": "Leidos",
+      "total_mentions": 670
+    },
+    {
+      "company_name": "General Dynamics",
+      "total_mentions": 537
+    },
+    {
+      "company_name": "Northrop Grumman",
+      "total_mentions": 262
+    },
+    {
+      "company_name": "Lockheed Martin",
+      "total_mentions": 207
+    },
+    {
+      "company_name": "Deloitte",
+      "total_mentions": 141
+    },
+    {
+      "company_name": "SAIC",
+      "total_mentions": 115
+    },
+    {
+      "company_name": "Peraton",
+      "total_mentions": 102
+    },
+    {
+      "company_name": "Boeing",
+      "total_mentions": 71
+    },
+    {
+      "company_name": "BAE Systems",
+      "total_mentions": 66
+    },
+    {
+      "company_name": "Raytheon",
+      "total_mentions": 56
+    }
+  ],
+  "top_programs": [
+    {
+      "program_name": "IBCS",
+      "total_mentions": 50
+    },
+    {
+      "program_name": "NASA",
+      "total_mentions": 23
+    },
+    {
+      "program_name": "Space Force",
+      "total_mentions": 23
+    },
+    {
+      "program_name": "Sentinel",
+      "total_mentions": 19
+    },
+    {
+      "program_name": "MDA",
+      "total_mentions": 18
+    },
+    {
+      "program_name": "SLS",
+      "total_mentions": 17
+    },
+    {
+      "program_name": "BOA",
+      "total_mentions": 17
+    },
+    {
+      "program_name": "DARPA",
+      "total_mentions": 16
+    },
+    {
+      "program_name": "Aegis",
+      "total_mentions": 15
+    },
+    {
+      "program_name": "SDA",
+      "total_mentions": 11
+    }
+  ],
+  "status_distribution": {
+    "New Lead": 2070,
+    "Active": 488,
+    "New Contact": 85,
+    "Former Candidate": 19,
+    "Placed": 13,
+    "Passive": 1
+  },
+  "action_types": {
+    "Appointment": 2534,
+    "Client Visit": 153
+  },
+  "authors": {
+    "Colton Scurry": 401,
+    "Matt Capelluto": 225,
+    "Logan Hornback": 217,
+    "Tyler Holmes": 206,
+    "Matt Gullette": 205,
+    "Jesse Kane": 195,
+    "Kevin Testerman": 183,
+    "Mike Huerkamp": 154,
+    "Trevor Newell": 119,
+    "Justin Howard": 87,
+    "Ethan Dial": 76,
+    "Clay Failor": 73,
+    "Kevin Chavez": 61,
+    "Emma Davis": 60,
+    "Emily Hoppe": 59,
+    "Steph Sullivan": 49,
+    "Natasha Clark": 35,
+    "Andreas Rodriguez": 34,
+    "Andy Wilson": 32,
+    "Trey Kelly": 31,
+    "Colin Broder": 26,
+    "Matt Catanzano": 26,
+    "Trevor Watson": 22,
+    "Garrett Seckler": 18,
+    "George Maranville": 18,
+    "Will Apple": 16,
+    "Drew Oxley": 16,
+    "Brad Glaser": 9,
+    "Ryan Whitmire": 6,
+    "Jackson Denson": 6,
+    "Jay Watson": 6,
+    "Brandon Braner": 5,
+    "Brendan English": 3,
+    "Jackson Buice": 3,
+    "Tanner Windom": 2,
+    "Vince Casey": 2,
+    "Zach Adauto": 1
+  }
+}

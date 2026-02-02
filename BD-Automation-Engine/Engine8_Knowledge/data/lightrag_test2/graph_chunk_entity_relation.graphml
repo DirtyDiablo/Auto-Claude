@@ -1,0 +1,97 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"><key id="d13" for="edge" attr.name="truncate" attr.type="string"/>
+<key id="d12" for="edge" attr.name="created_at" attr.type="long"/>
+<key id="d11" for="edge" attr.name="file_path" attr.type="string"/>
+<key id="d10" for="edge" attr.name="source_id" attr.type="string"/>
+<key id="d9" for="edge" attr.name="keywords" attr.type="string"/>
+<key id="d8" for="edge" attr.name="description" attr.type="string"/>
+<key id="d7" for="edge" attr.name="weight" attr.type="double"/>
+<key id="d6" for="node" attr.name="truncate" attr.type="string"/>
+<key id="d5" for="node" attr.name="created_at" attr.type="long"/>
+<key id="d4" for="node" attr.name="file_path" attr.type="string"/>
+<key id="d3" for="node" attr.name="source_id" attr.type="string"/>
+<key id="d2" for="node" attr.name="description" attr.type="string"/>
+<key id="d1" for="node" attr.name="entity_type" attr.type="string"/>
+<key id="d0" for="node" attr.name="entity_id" attr.type="string"/>
+<graph edgedefault="undirected"><node id="GDIT">
+  <data key="d0">GDIT</data>
+  <data key="d1">organization</data>
+  <data key="d2">GDIT is a major defense contractor involved in various defense-related programs.</data>
+  <data key="d3">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d4">unknown_source</data>
+  <data key="d5">1769619303</data>
+  <data key="d6"></data>
+</node>
+<node id="Falls Church">
+  <data key="d0">Falls Church</data>
+  <data key="d1">location</data>
+  <data key="d2">Falls Church is the city in Virginia where GDIT is headquartered.</data>
+  <data key="d3">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d4">unknown_source</data>
+  <data key="d5">1769619303</data>
+  <data key="d6"></data>
+</node>
+<node id="Virginia">
+  <data key="d0">Virginia</data>
+  <data key="d1">location</data>
+  <data key="d2">Virginia is the state where Falls Church is located and serving as the headquarters for GDIT.</data>
+  <data key="d3">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d4">unknown_source</data>
+  <data key="d5">1769619303</data>
+  <data key="d6"></data>
+</node>
+<node id="DCGS">
+  <data key="d0">DCGS</data>
+  <data key="d1">concept</data>
+  <data key="d2">DCGS (Distributed Common Ground System) is one of the defense programs that GDIT engages in.</data>
+  <data key="d3">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d4">unknown_source</data>
+  <data key="d5">1769619303</data>
+  <data key="d6"></data>
+</node>
+<node id="ISR Programs">
+  <data key="d0">ISR Programs</data>
+  <data key="d1">concept</data>
+  <data key="d2">ISR (Intelligence, Surveillance, and Reconnaissance) programs are areas of defense work undertaken by GDIT.</data>
+  <data key="d3">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d4">unknown_source</data>
+  <data key="d5">1769619303</data>
+  <data key="d6"></data>
+</node>
+<edge source="GDIT" target="Falls Church">
+  <data key="d7">1.0</data>
+  <data key="d8">GDIT is headquartered in Falls Church, Virginia.</data>
+  <data key="d9">headquarters,organization location</data>
+  <data key="d10">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d11">unknown_source</data>
+  <data key="d12">1769619304</data>
+  <data key="d13"></data>
+</edge>
+<edge source="GDIT" target="Virginia">
+  <data key="d7">1.0</data>
+  <data key="d8">GDIT operates in Virginia, being based in Falls Church.</data>
+  <data key="d9">organization location,state</data>
+  <data key="d10">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d11">unknown_source</data>
+  <data key="d12">1769619304</data>
+  <data key="d13"></data>
+</edge>
+<edge source="GDIT" target="DCGS">
+  <data key="d7">1.0</data>
+  <data key="d8">GDIT works on the DCGS program as part of its defense-related activities.</data>
+  <data key="d9">defense programs,operational focus</data>
+  <data key="d10">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d11">unknown_source</data>
+  <data key="d12">1769619304</data>
+  <data key="d13"></data>
+</edge>
+<edge source="GDIT" target="ISR Programs">
+  <data key="d7">1.0</data>
+  <data key="d8">GDIT is involved in ISR programs, part of their defense contracting work.</data>
+  <data key="d9">defense programs,operational focus</data>
+  <data key="d10">chunk-d240356c80564792fdfb39499f2a4ade</data>
+  <data key="d11">unknown_source</data>
+  <data key="d12">1769619304</data>
+  <data key="d13"></data>
+</edge>
+</graph></graphml>
