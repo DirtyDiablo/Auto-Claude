@@ -1,0 +1,444 @@
+{
+  "jobs": [
+    {
+      "Job Title/Position": "Senior Network Engineer - DCGS",
+      "Date Posted": "2025-01-10",
+      "Location": "San Diego, CA",
+      "Position Overview": "Support the Air Force Distributed Common Ground System (DCGS) program in a senior network engineering role. Responsible for designing, implementing, and maintaining network infrastructure supporting ISR operations. Work with cross-functional teams to ensure 24/7 network availability.",
+      "Security Clearance": "TS/SCI",
+      "Project Duration": "Contract",
+      "Prime Contractor": "BAE Systems",
+      "Technologies": [
+        "Cisco",
+        "Juniper",
+        "VMware NSX",
+        "Linux"
+      ],
+      "Source URL": "https://example.com/job/sample-001",
+      "Program Hints": [
+        "DCGS"
+      ],
+      "Client Hints": [
+        "Air Force"
+      ],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "TS/SCI",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Support the Air Force Distributed Common Ground System (DCGS) program in a senior network engineering role.",
+        "Responsible for designing, implementing, and maintaining network infrastructure supporting ISR operations.",
+        "Work with cross-functional teams to ensure 24/7 network availability."
+      ],
+      "Required Qualifications": [
+        "Support the Air Force Distributed Common Ground System (DCGS) program in a senior network engineering role.",
+        "Responsible for designing, implementing, and maintaining network infrastructure supporting ISR operations.",
+        "Work with cross-functional teams to ensure 24/7 network availability."
+      ],
+      "Scrape Date": "2025-01-11T06:00:00Z",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "AF DCGS",
+        "match_confidence": 0.5,
+        "match_type": "fuzzy",
+        "bd_priority_score": 100,
+        "priority_tier": "Hot",
+        "signals": [
+          "Location match: AF DCGS - PACAF",
+          "Location match: Navy Marine Corps Intranet (legacy)",
+          "Location match: NGEN-R — Enterprise Network Program",
+          "'dcgs' in title",
+          "DCGS keyword: 'dcgs'",
+          "DB match (3 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "AF DCGS",
+      "Match Confidence": 0.5,
+      "Match Type": "fuzzy",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 95,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 25,
+          "program_boost": 0,
+          "location_boost": 10,
+          "confidence_boost": 10,
+          "recency_boost": 0,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 95
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "High-value cleared position - prioritize",
+          "San Diego/PACAF - critical understaffed site"
+        ]
+      },
+      "BD Priority Score": 95,
+      "Priority Tier": "Hot",
+      "_metadata": {
+        "exported_at": "2026-01-12T14:24:19.920826",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    },
+    {
+      "Job Title/Position": "Intelligence Analyst",
+      "Date Posted": "2025-01-08",
+      "Location": "Hampton, VA",
+      "Position Overview": "Provide intelligence analysis support to the 480th ISR Wing at Langley AFB. Conduct all-source analysis, prepare intelligence products, and brief senior leadership. Support ISR mission planning and execution.",
+      "Security Clearance": "TS/SCI w/ CI Poly",
+      "Project Duration": "Contract",
+      "Prime Contractor": "GDIT",
+      "Technologies": [
+        "DCGS",
+        "Analyst Notebook",
+        "Palantir"
+      ],
+      "Source URL": "https://example.com/job/sample-002",
+      "Program Hints": [],
+      "Client Hints": [],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "TS/SCI w/ CI Poly",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Provide intelligence analysis support to the 480th ISR Wing at Langley AFB.",
+        "Conduct all-source analysis, prepare intelligence products, and brief senior leadership.",
+        "Support ISR mission planning and execution."
+      ],
+      "Required Qualifications": [
+        "Provide intelligence analysis support to the 480th ISR Wing at Langley AFB.",
+        "Conduct all-source analysis, prepare intelligence products, and brief senior leadership.",
+        "Support ISR mission planning and execution."
+      ],
+      "Scrape Date": "2025-01-11T06:00:00Z",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "AF DCGS - Langley",
+        "match_confidence": 0.2,
+        "match_type": "inferred",
+        "bd_priority_score": 89,
+        "priority_tier": "Hot",
+        "signals": [
+          "Location match: AF DCGS - Langley",
+          "'isr' in description",
+          "DCGS keyword: '480th'",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "AF DCGS - Langley",
+      "Match Confidence": 0.2,
+      "Match Type": "inferred",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 99,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 30,
+          "program_boost": 10,
+          "location_boost": 5,
+          "confidence_boost": 4,
+          "recency_boost": 0,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 99
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "High-value cleared position - prioritize",
+          "DCGS program alignment - leverage existing relationships"
+        ]
+      },
+      "BD Priority Score": 99,
+      "Priority Tier": "Hot",
+      "_metadata": {
+        "exported_at": "2026-01-12T14:24:19.920843",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    },
+    {
+      "Job Title/Position": "DevSecOps Engineer",
+      "Date Posted": "2025-01-05",
+      "Location": "Dayton, OH",
+      "Position Overview": "Join our team supporting NASIC at Wright-Patterson AFB. Implement DevSecOps pipelines, automate testing and deployment, and maintain CI/CD infrastructure. Experience with Platform One and DoD software factories preferred.",
+      "Security Clearance": "Top Secret",
+      "Project Duration": "Permanent",
+      "Prime Contractor": "Leidos",
+      "Technologies": [
+        "Kubernetes",
+        "GitLab",
+        "Terraform",
+        "Ansible"
+      ],
+      "Source URL": "https://example.com/job/sample-003",
+      "Program Hints": [
+        "Platform One"
+      ],
+      "Client Hints": [],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "Top Secret",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Join our team supporting NASIC at Wright-Patterson AFB.",
+        "Implement DevSecOps pipelines, automate testing and deployment, and maintain CI/CD infrastructure.",
+        "Experience with Platform One and DoD software factories preferred."
+      ],
+      "Required Qualifications": [
+        "Join our team supporting NASIC at Wright-Patterson AFB.",
+        "Implement DevSecOps pipelines, automate testing and deployment, and maintain CI/CD infrastructure.",
+        "Experience with Platform One and DoD software factories preferred."
+      ],
+      "Scrape Date": "2025-01-11T06:00:00Z",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "AF DCGS - Wright-Patt",
+        "match_confidence": 0.2,
+        "match_type": "inferred",
+        "bd_priority_score": 69,
+        "priority_tier": "Warm",
+        "signals": [
+          "Location match: AF DCGS - Wright-Patt",
+          "'nasic' in description",
+          "DB match (3 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "AF DCGS - Wright-Patt",
+      "Match Confidence": 0.2,
+      "Match Type": "inferred",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 84,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 15,
+          "program_boost": 10,
+          "location_boost": 5,
+          "confidence_boost": 4,
+          "recency_boost": 0,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 84
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "DCGS program alignment - leverage existing relationships"
+        ]
+      },
+      "BD Priority Score": 84,
+      "Priority Tier": "Hot",
+      "_metadata": {
+        "exported_at": "2026-01-12T14:24:19.920853",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    },
+    {
+      "Job Title/Position": "Program Manager",
+      "Date Posted": "2025-01-03",
+      "Location": "Fort Belvoir, VA",
+      "Position Overview": "Lead program management activities for Army intelligence systems. Manage cost, schedule, and technical performance. Interface with government customers and coordinate across contractor teams.",
+      "Security Clearance": "TS/SCI",
+      "Project Duration": "Permanent",
+      "Prime Contractor": "SAIC",
+      "Technologies": [],
+      "Source URL": "https://example.com/job/sample-004",
+      "Program Hints": [],
+      "Client Hints": [
+        "Army"
+      ],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "TS/SCI",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Lead program management activities for Army intelligence systems.",
+        "Manage cost, schedule, and technical performance.",
+        "Interface with government customers and coordinate across contractor teams."
+      ],
+      "Required Qualifications": [
+        "Lead program management activities for Army intelligence systems.",
+        "Manage cost, schedule, and technical performance.",
+        "Interface with government customers and coordinate across contractor teams."
+      ],
+      "Scrape Date": "2025-01-11T06:00:00Z",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "Army DCGS-A",
+        "match_confidence": 0.3,
+        "match_type": "inferred",
+        "bd_priority_score": 81,
+        "priority_tier": "Hot",
+        "signals": [
+          "Location match: Army DCGS-A",
+          "Location match: Defense Enclave Services (DoDNet)",
+          "Location match: DLA J6 Enterprise Technology Services",
+          "Location match: DLA J6 Enterprise Technology Services 2.0",
+          "Location match: DTRA IT Modernization / Support Services",
+          "Location match: J6 Enterprise Technology Services (DLA JETS)",
+          "Location match: DTRA IT Support Modernization",
+          "Location match: INSCOM IT Support Services III",
+          "Location match: DTRA Integrated IT Support Services",
+          "Location match: DTRA IAC-MAC Research & Analysis",
+          "Location match: DTRA IT Support Services",
+          "'army intelligence' in description",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "Army DCGS-A",
+      "Match Confidence": 0.3,
+      "Match Type": "inferred",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 89,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 25,
+          "program_boost": 8,
+          "location_boost": 0,
+          "confidence_boost": 6,
+          "recency_boost": 0,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 89
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "High-value cleared position - prioritize"
+        ]
+      },
+      "BD Priority Score": 89,
+      "Priority Tier": "Hot",
+      "_metadata": {
+        "exported_at": "2026-01-12T14:24:19.920861",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    },
+    {
+      "Job Title/Position": "Cyber Security Engineer",
+      "Date Posted": "2025-01-01",
+      "Location": "Fort Meade, MD",
+      "Position Overview": "Support NSA cyber operations in a security engineering role. Design and implement security controls, conduct vulnerability assessments, and support accreditation activities.",
+      "Security Clearance": "TS/SCI w/ Full Scope Poly",
+      "Project Duration": "Contract",
+      "Prime Contractor": "ManTech",
+      "Technologies": [
+        "SIEM",
+        "IDS/IPS",
+        "Splunk",
+        "Python"
+      ],
+      "Source URL": "https://example.com/job/sample-005",
+      "Program Hints": [],
+      "Client Hints": [
+        "NSA"
+      ],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "TS/SCI w/ Full Scope Poly",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Support NSA cyber operations in a security engineering role.",
+        "Design and implement security controls, conduct vulnerability assessments, and support accreditation activities."
+      ],
+      "Required Qualifications": [
+        "Support NSA cyber operations in a security engineering role.",
+        "Design and implement security controls, conduct vulnerability assessments, and support accreditation activities."
+      ],
+      "Scrape Date": "2025-01-11T06:00:00Z",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "partial",
+      "_validation_errors": [
+        "Key Responsibilities should have at least 3 items",
+        "Required Qualifications should have at least 3 items"
+      ],
+      "_mapping": {
+        "program_name": "NSA Programs",
+        "match_confidence": 0.2,
+        "match_type": "inferred",
+        "bd_priority_score": 89,
+        "priority_tier": "Hot",
+        "signals": [
+          "Location match: NSA/USCYBERCOM Programs",
+          "Location match: Integrated Base Defense Security System",
+          "Location match: INSCOM IT Support Services (current TO iteration)",
+          "Location match: DoD Cloud Computing Program Office Support (CCPO / ATAT)",
+          "Location match: Air & Space Cyber Conference Programs",
+          "Location match: DISA GSM-O II (Surge Staffing Focus)",
+          "Location match: Defense Satellite Communications Modernization",
+          "'nsa' in description",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "NSA Programs",
+      "Match Confidence": 0.2,
+      "Match Type": "inferred",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 89,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 35,
+          "program_boost": 0,
+          "location_boost": 0,
+          "confidence_boost": 4,
+          "recency_boost": 0,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 89
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "High-value cleared position - prioritize"
+        ]
+      },
+      "BD Priority Score": 89,
+      "Priority Tier": "Hot",
+      "_metadata": {
+        "exported_at": "2026-01-12T14:24:19.920871",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    }
+  ],
+  "metadata": {
+    "total_jobs": 5,
+    "exported_at": "2026-01-12T14:24:19.920872",
+    "tiers": {
+      "hot": 4,
+      "warm": 1,
+      "cold": 0
+    }
+  }
+}

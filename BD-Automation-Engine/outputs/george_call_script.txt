@@ -1,0 +1,113 @@
+
+================================================================================
+GEORGE MARANVILLE - BD CALL SCRIPT
+Prime Technical Services - Approved GDIT Supplier
+================================================================================
+
+CSV TEMPLATE FIELDS (use these in mail merge or copy from CSV):
+- {FIRST_NAME}         - Contact's first name
+- {FULL_NAME}          - Contact's full name
+- {COMPANY_NAME}       - GDIT
+- {OPEN_JOB_TITLE}     - The open job title
+- {JOB_LOCATION}       - Location of the job
+- {PROGRAM_NAME}       - GDIT Program name (JUSTIFIED, MPCO, etc.)
+- {CONTACT_TITLE_SHORT} - Contact's title (abbreviated)
+
+================================================================================
+PHONE SCRIPT - OPENING
+================================================================================
+
+"Hi {FIRST_NAME}, this is George Maranville with Prime Tech.
+
+I'm a portfolio manager for {COMPANY_NAME}. Some of my {OPEN_JOB_TITLE}
+contractors in {JOB_LOCATION} have been getting calls about this role,
+and I was reaching out as an approved GDIT supplier to let you know -
+if you're struggling to find the right talent, we can be of service
+to you immediately."
+
+[PAUSE - Let them respond]
+
+================================================================================
+IF THEY'RE INTERESTED / HAVE NEEDS
+================================================================================
+
+"Great! We've got several {OPEN_JOB_TITLE} candidates with active clearances
+who are currently wrapping up projects. They're specifically interested in
+{PROGRAM_NAME} work in the {JOB_LOCATION} area.
+
+What's the timeline looking like on your end? Are you looking to fill this
+in the next few weeks, or is there flexibility?"
+
+================================================================================
+IF THEY'RE NOT THE RIGHT PERSON
+================================================================================
+
+"I understand. Who would be the right person to speak with about staffing
+needs for {PROGRAM_NAME}? I want to make sure I'm connecting with the
+right hiring manager."
+
+================================================================================
+QUALIFYING QUESTIONS
+================================================================================
+
+1. "How urgent is this {OPEN_JOB_TITLE} need for {PROGRAM_NAME}?"
+
+2. "Are there any specific skills or certifications you're looking for
+   beyond what's in the posting?"
+
+3. "What's been the biggest challenge filling this role so far?"
+
+4. "Is there budget flexibility, or is the rate locked in?"
+
+================================================================================
+CLOSE
+================================================================================
+
+"I've got a couple of strong candidates I can send over today. What's
+the best email to send their profiles to?
+
+And {FIRST_NAME}, if these don't work out, I'd like to stay in touch -
+we're always building our bench for {COMPANY_NAME} programs. Is there
+a good time for a quick follow-up call next week?"
+
+================================================================================
+VOICEMAIL
+================================================================================
+
+"Hi {FIRST_NAME}, this is George Maranville with Prime Tech - we're an
+approved GDIT supplier.
+
+I'm calling about your {OPEN_JOB_TITLE} opening in {JOB_LOCATION}. Some
+of my contractors have mentioned this role, and I wanted to reach out
+directly to see if we can help you fill it quickly.
+
+Give me a call back at [YOUR NUMBER] or shoot me an email at
+gmaranville@primetechservices.com.
+
+Thanks!"
+
+================================================================================
+EMAIL FOLLOW-UP
+================================================================================
+
+Subject: {OPEN_JOB_TITLE} - {JOB_LOCATION} - Prime Tech Can Help
+
+Hi {FIRST_NAME},
+
+I'm George Maranville with Prime Technical Services - an approved GDIT
+staffing supplier.
+
+I noticed your {OPEN_JOB_TITLE} opening in {JOB_LOCATION} and wanted to
+reach out directly. We have several cleared candidates specifically
+looking for {PROGRAM_NAME} opportunities who could be a great fit.
+
+Would you have 10 minutes this week to discuss your requirements?
+
+Best regards,
+George Maranville
+Portfolio Manager
+Prime Technical Services
+[PHONE]
+gmaranville@primetechservices.com
+
+================================================================================

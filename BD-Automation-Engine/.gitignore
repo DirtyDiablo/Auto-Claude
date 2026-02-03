@@ -71,10 +71,6 @@ Thumbs.db
 *.log
 logs/
 
-# Output directories (may contain sensitive data)
-outputs/
-output/
-
 # Temporary files
 tmp/
 temp/

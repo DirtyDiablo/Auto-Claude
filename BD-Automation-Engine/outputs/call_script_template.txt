@@ -1,0 +1,114 @@
+
+================================================================================
+BD CALL SCRIPT TEMPLATE
+================================================================================
+
+Use the following template fields from the CSV (columns at the end of each row):
+- {FIRST_NAME} - Contact's first name
+- {COMPANY} - Contact's company (e.g., GDIT)
+- {JOB_TITLE_SHORT} - Abbreviated job title
+- {LOCATION_SHORT} - City/location
+- {CLEARANCE_LEVEL} - Security clearance level
+- {PROGRAM_NAME} - Associated program name
+- {ROLE_TYPE} - Type of role (Engineering, Analysis, etc.)
+
+================================================================================
+OPENING SCRIPT
+================================================================================
+
+"Hi {FIRST_NAME}, this is [YOUR NAME] with Prime Technical Services.
+
+I'm reaching out because we're currently supporting some {ROLE_TYPE} positions
+in {LOCATION_SHORT} and your background at {COMPANY} caught my attention.
+
+Do you have a quick moment?"
+
+[IF YES, CONTINUE. IF NO, ASK FOR BETTER TIME]
+
+================================================================================
+VALUE PROPOSITION
+================================================================================
+
+"We're working with a client on their {PROGRAM_NAME} program who needs
+{JOB_TITLE_SHORT} talent with {CLEARANCE_LEVEL} clearance.
+
+Based on your experience at {COMPANY}, you seem like you could be a great fit -
+or might know someone who would be interested.
+
+The role is in {LOCATION_SHORT} and offers competitive compensation."
+
+================================================================================
+QUALIFYING QUESTIONS
+================================================================================
+
+1. "Are you currently happy in your role at {COMPANY}, or are you open to
+   exploring new opportunities?"
+
+2. "Is your {CLEARANCE_LEVEL} clearance still active?"
+
+3. "Would the {LOCATION_SHORT} area work for you, or are you looking for
+   something closer to home?"
+
+4. "What's most important to you in your next role - compensation, growth
+   opportunities, or the type of work?"
+
+================================================================================
+CLOSE / NEXT STEPS
+================================================================================
+
+[IF INTERESTED]
+"Great! I'd love to tell you more about this opportunity. Can I send you the
+full job description? What's the best email to reach you at?"
+
+[IF NOT INTERESTED BUT REFERRAL POSSIBLE]
+"I understand. Would you happen to know anyone in your network who might be
+interested in {ROLE_TYPE} opportunities in {LOCATION_SHORT}?"
+
+[IF NOT INTERESTED]
+"No problem at all, {FIRST_NAME}. I appreciate your time. Would it be okay if
+I kept you in mind for future opportunities that might be a better fit?"
+
+================================================================================
+VOICEMAIL SCRIPT
+================================================================================
+
+"Hi {FIRST_NAME}, this is [YOUR NAME] with Prime Technical Services.
+
+I'm reaching out about a {JOB_TITLE_SHORT} opportunity in {LOCATION_SHORT}
+that I think would be a great fit for your background at {COMPANY}.
+
+If you're open to hearing more, please give me a call back at [YOUR NUMBER]
+or shoot me an email at [YOUR EMAIL].
+
+Thanks, and I hope to hear from you soon!"
+
+================================================================================
+EMAIL TEMPLATE
+================================================================================
+
+Subject: {JOB_TITLE_SHORT} Opportunity in {LOCATION_SHORT} - {CLEARANCE_LEVEL} Cleared
+
+Hi {FIRST_NAME},
+
+I came across your profile and was impressed by your experience at {COMPANY}.
+I'm currently working with a client on their {PROGRAM_NAME} program who is
+looking for {ROLE_TYPE} professionals.
+
+The role:
+- Position: {JOB_TITLE_SHORT}
+- Location: {LOCATION_SHORT}
+- Clearance: {CLEARANCE_LEVEL}
+- Type: Contract (potential conversion)
+
+Given your background, I thought this might be of interest to you - or you
+might know someone in your network who would be a great fit.
+
+Would you be open to a quick 10-minute call this week to discuss?
+
+Best regards,
+[YOUR NAME]
+Prime Technical Services
+[YOUR PHONE]
+[YOUR EMAIL]
+
+================================================================================

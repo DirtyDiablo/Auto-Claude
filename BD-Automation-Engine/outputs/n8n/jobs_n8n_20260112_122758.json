@@ -1,0 +1,435 @@
+{
+  "jobs": [
+    {
+      "Job Title/Position": "Senior Systems Engineer - DCGS",
+      "Date Posted": "2026-01-10",
+      "Location": "San Diego, CA",
+      "Position Overview": "Support the Air Force Distributed Common Ground System (AF DCGS) program. Work on ISR data processing, full-motion video exploitation, and multi-INT fusion capabilities. Experience with C4ISR systems required.",
+      "Security Clearance": "TS/SCI",
+      "Prime Contractor": "GDIT",
+      "Technologies": [
+        "Python",
+        "C++",
+        "Linux",
+        "Docker",
+        "Kubernetes"
+      ],
+      "Source URL": "https://jobs.example.com/12345",
+      "Program Hints": [
+        "DCGS"
+      ],
+      "Client Hints": [
+        "Air Force"
+      ],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "TS/SCI",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Support the Air Force Distributed Common Ground System (AF DCGS) program.",
+        "Work on ISR data processing, full-motion video exploitation, and multi-INT fusion capabilities.",
+        "Experience with C4ISR systems required."
+      ],
+      "Required Qualifications": [
+        "Support the Air Force Distributed Common Ground System (AF DCGS) program.",
+        "Work on ISR data processing, full-motion video exploitation, and multi-INT fusion capabilities.",
+        "Experience with C4ISR systems required."
+      ],
+      "Scrape Date": "",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "AF DCGS",
+        "match_confidence": 0.5,
+        "match_type": "fuzzy",
+        "bd_priority_score": 100,
+        "priority_tier": "Hot",
+        "signals": [
+          "Location match: AF DCGS - PACAF",
+          "Location match: Navy Marine Corps Intranet (legacy)",
+          "Location match: NGEN-R — Enterprise Network Program",
+          "'dcgs' in title",
+          "DCGS keyword: 'dcgs'",
+          "DB match (3 keywords)",
+          "DB match (1 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "AF DCGS",
+      "Match Confidence": 0.5,
+      "Match Type": "fuzzy",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 100,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 25,
+          "program_boost": 0,
+          "location_boost": 10,
+          "confidence_boost": 10,
+          "recency_boost": 10,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 100
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "High-value cleared position - prioritize",
+          "San Diego/PACAF - critical understaffed site"
+        ]
+      },
+      "BD Priority Score": 100,
+      "Priority Tier": "Hot",
+      "_contacts": {
+        "contacts": [
+          {
+            "name": "Michael Bernard",
+            "title": "Senior Director, Strategic Talent Programs",
+            "company": "",
+            "email": "bernard@gdls.com",
+            "phone": "(313) 407-1585",
+            "linkedin": "https://www.linkedin.com/in/michael-bernard-9521b01",
+            "location": "San Diego, California",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Brandon Bishop",
+            "title": "Site Lead Senior Training Specialist",
+            "company": "",
+            "email": "brandon.bishop@gdit.com",
+            "phone": "(310) 849-3451",
+            "linkedin": "https://www.linkedin.com/in/brandon-bishop-a3395644",
+            "location": "San Diego, California",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Douglas Cabacungan",
+            "title": "Project Manager",
+            "company": "",
+            "email": "douglas.cabacungan@gdit.com",
+            "phone": "(619) 920-7911",
+            "linkedin": "https://www.linkedin.com/in/doug-cabacungan-4942659",
+            "location": "San Diego, California",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Bernard Cramp",
+            "title": "Senior Project Manager, Surface Ship Post Delivery Support",
+            "company": "",
+            "email": "bernard.cramp@gd-ms.com",
+            "phone": "(703) 263-7307 / (703) 946-5617",
+            "linkedin": "https://www.linkedin.com/in/barneycramp",
+            "location": "San Diego, California",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Matthew Daly",
+            "title": "Program Manager",
+            "company": "",
+            "email": "matthew.daly@gd-ms.com",
+            "phone": "(619) 260-0977 / (619) 577-2983",
+            "linkedin": "https://www.linkedin.com/in/matt-daly-60224631",
+            "location": "San Diego, California",
+            "program": "",
+            "bd_priority": ""
+          }
+        ],
+        "count": 5,
+        "lookup_method": "program:AF DCGS | company:GDIT | location:San Diego, CA | location_fallback:San Diego, CA"
+      },
+      "_briefing": {
+        "generated": true,
+        "path": "outputs\\BD_Briefings\\AF DCGS_Senior Systems Engineer - DCGS_Briefing.md",
+        "generated_at": "2026-01-12T12:27:58.555234"
+      },
+      "_qa": {
+        "status": "needs_review",
+        "confidence": 0.5,
+        "review_reasons": [
+          "Confidence 50% below auto-approve threshold",
+          "High clearance (TS/SCI) requires verification"
+        ]
+      },
+      "_metadata": {
+        "exported_at": "2026-01-12T12:27:58.675501",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    },
+    {
+      "Job Title/Position": "Intelligence Analyst",
+      "Date Posted": "2026-01-09",
+      "Location": "Fort Meade, MD",
+      "Position Overview": "Provide intelligence analysis support for NSA/CYBERCOM operations. Analyze SIGINT data and produce intelligence reports. Experience with IC databases and tools required.",
+      "Security Clearance": "TS/SCI w/ CI Poly",
+      "Prime Contractor": "Lockheed Martin",
+      "Technologies": [
+        "SIGINT",
+        "Intelligence Tools",
+        "Report Writing"
+      ],
+      "Source URL": "https://jobs.example.com/67890",
+      "Program Hints": [],
+      "Client Hints": [
+        "NSA",
+        "CYBERCOM"
+      ],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "TS/SCI w/ CI Poly",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Provide intelligence analysis support for NSA/CYBERCOM operations.",
+        "Analyze SIGINT data and produce intelligence reports.",
+        "Experience with IC databases and tools required."
+      ],
+      "Required Qualifications": [
+        "Provide intelligence analysis support for NSA/CYBERCOM operations.",
+        "Analyze SIGINT data and produce intelligence reports.",
+        "Experience with IC databases and tools required."
+      ],
+      "Scrape Date": "",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "NSA Programs",
+        "match_confidence": 0.2,
+        "match_type": "inferred",
+        "bd_priority_score": 89,
+        "priority_tier": "Hot",
+        "signals": [
+          "Location match: NSA/USCYBERCOM Programs",
+          "Location match: Defense Satellite Communications Modernization",
+          "Location match: Integrated Base Defense Security System",
+          "Location match: DoD Cloud Computing Program Office Support (CCPO / ATAT)",
+          "Location match: DISA GSM-O II (Surge Staffing Focus)",
+          "Location match: INSCOM IT Support Services (current TO iteration)",
+          "Location match: Air & Space Cyber Conference Programs",
+          "'sigint' in description",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)",
+          "DB match (1 keywords)"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "NSA Programs",
+      "Match Confidence": 0.2,
+      "Match Type": "inferred",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 94,
+        "tier": "Hot",
+        "tier_emoji": "🔥",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 30,
+          "program_boost": 0,
+          "location_boost": 0,
+          "confidence_boost": 4,
+          "recency_boost": 10,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 94
+        },
+        "recommendations": [
+          "Immediate outreach recommended - Hot opportunity",
+          "Escalate to BD leadership for review",
+          "High-value cleared position - prioritize"
+        ]
+      },
+      "BD Priority Score": 94,
+      "Priority Tier": "Hot",
+      "_contacts": {
+        "contacts": [],
+        "count": 0,
+        "lookup_method": "company:Lockheed Martin | location:Fort Meade, MD | location_fallback:Fort Meade, MD"
+      },
+      "_briefing": {
+        "generated": true,
+        "path": "outputs\\BD_Briefings\\NSA Programs_Intelligence Analyst_Briefing.md",
+        "generated_at": "2026-01-12T12:27:58.556822"
+      },
+      "_qa": {
+        "status": "needs_review",
+        "confidence": 0.2,
+        "review_reasons": [
+          "Low confidence 20%",
+          "High clearance (TS/SCI w/ CI Poly) requires verification"
+        ]
+      },
+      "_metadata": {
+        "exported_at": "2026-01-12T12:27:58.675569",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    },
+    {
+      "Job Title/Position": "Software Developer",
+      "Date Posted": "2026-01-08",
+      "Location": "Herndon, VA",
+      "Position Overview": "Develop software solutions for federal government clients. Full-stack development using modern frameworks. Agile methodology experience preferred.",
+      "Security Clearance": "Secret",
+      "Prime Contractor": "Booz Allen Hamilton",
+      "Technologies": [
+        "React",
+        "Node.js",
+        "AWS",
+        "PostgreSQL"
+      ],
+      "Source URL": "https://jobs.example.com/11111",
+      "Program Hints": [],
+      "Client Hints": [],
+      "Contract Vehicle Hints": [],
+      "Clearance Level Parsed": "Secret",
+      "Certifications Required": [],
+      "Key Responsibilities": [
+        "Develop software solutions for federal government clients.",
+        "Full-stack development using modern frameworks.",
+        "Agile methodology experience preferred."
+      ],
+      "Required Qualifications": [
+        "Develop software solutions for federal government clients.",
+        "Full-stack development using modern frameworks.",
+        "Agile methodology experience preferred."
+      ],
+      "Scrape Date": "",
+      "Processing Date": "2026-01-12",
+      "Validation Status": "valid",
+      "_validation_errors": [],
+      "_mapping": {
+        "program_name": "Corporate HQ",
+        "match_confidence": 0.15,
+        "match_type": "inferred",
+        "bd_priority_score": 58,
+        "priority_tier": "Warm",
+        "signals": [
+          "Location match: Corporate HQ",
+          "Location match: EVMS - Earned Value Management Systems"
+        ],
+        "secondary_candidates": []
+      },
+      "Matched Program": "Corporate HQ",
+      "Match Confidence": 0.15,
+      "Match Type": "inferred",
+      "Secondary Programs": [],
+      "_scoring": {
+        "bd_score": 68,
+        "tier": "Warm",
+        "tier_emoji": "🟡",
+        "score_breakdown": {
+          "base_score": 50,
+          "clearance_boost": 5,
+          "program_boost": 0,
+          "location_boost": 0,
+          "confidence_boost": 3,
+          "recency_boost": 10,
+          "pain_point_boost": 0,
+          "tier_multiplier": 1.0,
+          "final_score": 68
+        },
+        "recommendations": [
+          "Add to weekly follow-up queue",
+          "Gather additional intelligence before outreach"
+        ]
+      },
+      "BD Priority Score": 68,
+      "Priority Tier": "Warm",
+      "_contacts": {
+        "contacts": [
+          {
+            "name": "Juan Castro",
+            "title": "Counterintelligence Director, Security",
+            "company": "",
+            "email": "juan.castro@gdit.com",
+            "phone": "(703) 793-9393",
+            "linkedin": "https://www.linkedin.com/in/juan-castro-08437b27",
+            "location": "Herndon, Virginia",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Muhammad Chughtai",
+            "title": "Director, Operations Supply Chain Management (SAP)",
+            "company": "",
+            "email": "muhammad.chughtai@gdit.com",
+            "phone": "(410) 733-2896",
+            "linkedin": "https://www.linkedin.com/in/muhammad-chughtai-577aa8182",
+            "location": "Herndon, Virginia",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Johnathan Duncan",
+            "title": "Vice President, Defense Intelligence, Ihsd",
+            "company": "",
+            "email": "jduncan@gdeb.com",
+            "phone": "(414) 510-8074",
+            "linkedin": "https://www.linkedin.com/in/jpduncan",
+            "location": "Herndon, Virginia",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Matthew Hiebert",
+            "title": "Senior Director, Defense Agencies Growth",
+            "company": "",
+            "email": "matthew.hiebert@gdit.com",
+            "phone": "(801) 920-6977",
+            "linkedin": "https://www.linkedin.com/in/matthewlhendrickson",
+            "location": "Herndon, Virginia",
+            "program": "",
+            "bd_priority": ""
+          },
+          {
+            "name": "Rose Janke",
+            "title": "Director, Recruiting Defense",
+            "company": "",
+            "email": "rose.janke@gdit.com",
+            "phone": "(571) 205-3185",
+            "linkedin": "https://www.linkedin.com/in/rose-janke-5745a17",
+            "location": "Herndon, Virginia",
+            "program": "",
+            "bd_priority": ""
+          }
+        ],
+        "count": 5,
+        "lookup_method": "program:Corporate HQ | location:Herndon, VA | location_fallback:Herndon, VA"
+      },
+      "_briefing": {
+        "generated": true,
+        "path": "outputs\\BD_Briefings\\Corporate HQ_Software Developer_Briefing.md",
+        "generated_at": "2026-01-12T12:27:58.662434"
+      },
+      "_qa": {
+        "status": "needs_review",
+        "confidence": 0.15,
+        "review_reasons": [
+          "Low confidence 15%"
+        ]
+      },
+      "_metadata": {
+        "exported_at": "2026-01-12T12:27:58.675612",
+        "export_format": "n8n",
+        "schema_version": "2.0"
+      }
+    }
+  ],
+  "metadata": {
+    "total_jobs": 3,
+    "exported_at": "2026-01-12T12:27:58.675622",
+    "tiers": {
+      "hot": 2,
+      "warm": 1,
+      "cold": 0
+    }
+  }
+}

@@ -1,0 +1,21 @@
+Priority,Company,Location,State,Job Titles,Keywords/Programs,Clearance Level,Expected Contacts,Notes
+1,Leidos,Huntsville,AL,Program Manager; Deputy Program Manager; Site Lead; Site Manager; Capture Manager; Staffing Manager,IRES; MDA; Missile Defense; AMCOM,TS/SCI,50-75,Largest gap - 48 jobs need Leidos contacts
+1,Leidos,Colorado Springs,CO,Program Manager; Site Lead; Space Program Manager; Capture Manager,Space; MDA; IRES; Ground Systems,TS/SCI,30-50,Space Force and MDA programs
+1,Boeing,Huntsville,AL,GMD Program Manager; Missile Defense Lead; Site Manager; Engineering Director; Staffing Lead,GMD; Ground-based Midcourse; Missile Defense,TS/SCI,20-30,9 GMD jobs identified
+1,Northrop Grumman,Colorado Springs,CO,Program Manager; Space Systems Lead; Capture Manager; Site Manager,Sentinel; GBSD; Space Systems,TS/SCI,25-40,Space and strategic programs
+1,Northrop Grumman,Huntsville,AL,Program Manager; Missile Defense Lead; Engineering Manager,MDA; Defense; ISR,TS/SCI,20-30,MDA support programs
+2,Lockheed Martin,Huntsville,AL,Program Manager; Missiles & Fire Control Lead; Site Manager; Capture Manager,Missiles; Fire Control; Army; MDA,TS/SCI,20-30,8 jobs identified as Lockheed
+2,GDIT,Norfolk,VA,Program Manager; Navy Program Lead; Site Manager; Staffing Manager,Navy; NGEN; Fleet; NOB,Secret,25-40,Navy Hampton Roads programs
+2,GDIT,Hampton,VA,Program Manager; DCGS Lead; Site Manager; Engineering Manager,DCGS; AF DCGS; ISR,TS/SCI,15-25,AF DCGS Langley support
+2,SAIC,Huntsville,AL,Program Manager; Site Lead; Capture Manager; Staffing Manager,Army; MDA; AMCOM; Redstone,Secret,20-30,Army programs support
+2,Raytheon,Tucson,AZ,Program Manager; RMD Lead; Site Manager; Engineering Manager,Missiles; RMD; Weapons Systems,Secret,15-25,Raytheon Missiles & Defense
+3,General Dynamics Electric Boat,Kings Bay,GA,Program Manager; Submarine Program Lead; Site Manager; Shipyard Manager,Submarine; Trident; SSBN; Navy,Secret,20-Oct,Submarine programs - new territory
+3,Leidos,San Diego,CA,Program Manager; NIWC Lead; Site Manager; Navy Program Manager,NIWC; SPAWAR; Navy; Fleet,Secret,20-30,Navy West Coast programs
+3,Leidos,Reston,VA,Program Manager; DISA Lead; Site Manager; Capture Manager,DISA; DoDIN; Enterprise IT,TS/SCI,25-35,DISA enterprise programs
+3,BAE Systems,Norfolk,VA,Program Manager; Navy Systems Lead; Site Manager; Engineering Director,Navy; Ship Systems; Fleet,Secret,15-25,Navy ship systems
+3,Peraton,Reston,VA,Program Manager; IC Lead; Site Manager; Capture Manager,Intelligence; IC; NGA; NSA,TS/SCI,20-30,IC programs
+4,Booz Allen,Colorado Springs,CO,Program Manager; Space Consultant; Site Lead,Space Force; MDA; NORAD,TS/SCI,15-20,Space consulting
+4,CACI,Huntsville,AL,Program Manager; Army Lead; Site Manager,Army; AMCOM; Redstone,Secret,15-20,Army IT programs
+4,L3Harris,Colorado Springs,CO,Program Manager; Space Systems Lead; Site Manager,Space; Satellite; Ground Systems,TS/SCI,15-20,Space communications
+4,HII (Huntington Ingalls),Norfolk,VA,Program Manager; Shipyard Lead; Site Manager,Navy; Shipyard; Ship Repair,Secret,15-25,Newport News Shipbuilding
+4,Dynetics,Huntsville,AL,Program Manager; Defense Lead; Site Manager,Army; MDA; Defense,Secret,15-Oct,Huntsville defense programs
