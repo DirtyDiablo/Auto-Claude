@@ -98,3 +98,7 @@ token.json
 # Auto Claude data directory
 .auto-claude/
 tmpclaude-*
+# Temp/runtime files
+*.lock
+*.pdf
+nul
