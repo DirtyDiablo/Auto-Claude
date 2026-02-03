@@ -9,6 +9,17 @@ from datetime import datetime
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
+# Import retry utilities
+try:
+    from utils.llm_retry import anthropic_retry
+    from utils.logging_config import get_logger
+    logger = get_logger(__name__)
+except ImportError:
+    import logging
+    logger = logging.getLogger(__name__)
+    def anthropic_retry(func):
+        return func
+
 load_dotenv()
 
 

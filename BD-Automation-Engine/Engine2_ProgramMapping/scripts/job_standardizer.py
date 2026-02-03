@@ -20,6 +20,16 @@ try:
 except ImportError:
     HAS_ANTHROPIC = False
 
+# Import retry utilities
+try:
+    from utils.llm_retry import anthropic_retry
+    HAS_RETRY = True
+except ImportError:
+    HAS_RETRY = False
+    # Fallback no-op decorator
+    def anthropic_retry(func):
+        return func
+
 
 # ============================================
 # SCHEMA DEFINITION (20+ Field Schema)
@@ -326,6 +336,7 @@ def normalize_clearance(clearance: str) -> str:
 # LLM EXTRACTION
 # ============================================
 
+@anthropic_retry
 def standardize_job_with_llm(
     preprocessed_job: Dict,
     api_key: Optional[str] = None
