@@ -81,7 +81,8 @@ class SemanticCache:
                 self.redis = redis.from_url(redis_url)
                 self.redis.ping()
                 self.backend = "redis"
-            except:
+            except (ConnectionError, OSError) as e:
+                logger.warning("redis_connection_failed, falling back to memory: %s", e)
                 self.redis = InMemoryCache()
                 self.backend = "memory"
         else:
@@ -91,7 +92,8 @@ class SemanticCache:
         if SENTENCE_TRANSFORMERS_AVAILABLE:
             try:
                 self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
-            except:
+            except Exception as e:
+                logger.warning("sentence_transformer_load_failed: %s", e)
                 self.embedder = None
         else:
             self.embedder = None

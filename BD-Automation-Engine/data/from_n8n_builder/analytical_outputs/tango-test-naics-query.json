@@ -1,0 +1,283 @@
+{
+    "count": 82213040,
+    "next": "http://tango.makegov.com/api/contracts/?naics_code=541511&limit=3&sort=-total_contract_value&cursor=WyIyMDI2LTAxLTE4IiwgImZkMDhkMTU1LTk2NWYtNTdkYS05OWEyLTQ5ZjA5ODEyOTRiZCJd",
+    "previous": null,
+    "cursor": "WyIyMDI2LTAxLTE4IiwgImZkMDhkMTU1LTk2NWYtNTdkYS05OWEyLTQ5ZjA5ODEyOTRiZCJd",
+    "previous_cursor": null,
+    "results": [
+        {
+            "award_date": "2026-01-18",
+            "award_type": {
+                "code": "A",
+                "description": "BPA Call"
+            },
+            "awarding_office": {
+                "office_code": "47QSSC",
+                "office_name": "GSA/FAS/GSS/QSCB, SUPPLY CHAIN MANAGEMENT CONTRACTING DIVISION",
+                "agency_code": "4732",
+                "agency_name": "Federal Acquisition Service",
+                "department_code": 47,
+                "department_name": "General Services Administration"
+            },
+            "base_and_exercised_options_value": 773.64,
+            "description": "FAN, CIRCULATING, COLUMN, ELECTRIC OSCILLATING",
+            "fiscal_year": 2026,
+            "funding_office": {
+                "office_code": "47QSSC",
+                "office_name": "GSA/FAS/GSS/QSCB, SUPPLY CHAIN MANAGEMENT CONTRACTING DIVISION",
+                "agency_code": "4732",
+                "agency_name": "Federal Acquisition Service",
+                "department_code": 47,
+                "department_name": "General Services Administration"
+            },
+            "key": "CONT_AWD_47QSSC26F2XPC_4732_47QSHA21A000D_4732",
+            "legislative_mandates": {
+                "clinger_cohen_act_planning": {
+                    "code": "N",
+                    "description": "No"
+                },
+                "construction_wage_rate_requirements": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "employment_eligibility_verification": null,
+                "interagency_contracting_authority": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "labor_standards": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "materials_supplies_articles_equipment": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "other_statutory_authority": null,
+                "service_contract_inventory": null
+            },
+            "naics_code": 423710,
+            "obligated": 773.64,
+            "parent_award": {
+                "awarding_office": {
+                    "office_code": "47QSHA",
+                    "office_name": "GSA/FAS HEARTLAND ACQUISITION CENTE",
+                    "agency_code": "4732",
+                    "agency_name": "Federal Acquisition Service",
+                    "department_code": 47,
+                    "department_name": "General Services Administration"
+                },
+                "description": null,
+                "idv_type": "E",
+                "key": "CONT_IDV_47QSHA21A000D_4732",
+                "piid": "47QSHA21A000D"
+            },
+            "period_of_performance": {
+                "start_date": "2026-01-18",
+                "current_end_date": "2026-01-26",
+                "ultimate_completion_date": "2026-01-26"
+            },
+            "piid": "47QSSC26F2XPC",
+            "place_of_performance": {
+                "country_code": "USA",
+                "country_name": "UNITED STATES",
+                "state_code": "MI",
+                "state_name": "MICHIGAN",
+                "city_name": "WARREN",
+                "zip_code": "48091"
+            },
+            "psc_code": "5120",
+            "recipient": {
+                "uei": "MF46EHTMKJJ5",
+                "display_name": "WRIGHT TOOL COMPANY, LLC"
+            },
+            "set_aside": null,
+            "solicitation_identifier": null,
+            "subawards_summary": null,
+            "total_contract_value": 773.64
+        },
+        {
+            "award_date": "2026-01-18",
+            "award_type": {
+                "code": "A",
+                "description": "BPA Call"
+            },
+            "awarding_office": {
+                "office_code": "47QSSC",
+                "office_name": "GSA/FAS/GSS/QSCB, SUPPLY CHAIN MANAGEMENT CONTRACTING DIVISION",
+                "agency_code": "4732",
+                "agency_name": "Federal Acquisition Service",
+                "department_code": 47,
+                "department_name": "General Services Administration"
+            },
+            "base_and_exercised_options_value": 28.68,
+            "description": "SOCKET, SOCKET WRENCH: IAW THE AMERICAN SOCIETY OF MECHANICAL ENGINEERS (ASME) B107.5M-2002. TYPE I: SOCKETS, SINGLE (6-POINT) CLASS 1: REGULAR LENGTH SQUARE DRIVE SZ: 1/2 INCH WRENCHING OPENING: 19 MM OVERALL LENGTH: 1-37/64 INCHES MATERIAL: STEEL C",
+            "fiscal_year": 2026,
+            "funding_office": {
+                "office_code": "47QSSC",
+                "office_name": "GSA/FAS/GSS/QSCB, SUPPLY CHAIN MANAGEMENT CONTRACTING DIVISION",
+                "agency_code": "4732",
+                "agency_name": "Federal Acquisition Service",
+                "department_code": 47,
+                "department_name": "General Services Administration"
+            },
+            "key": "CONT_AWD_47QSSC26F2XR7_4732_47QSHA21A000D_4732",
+            "legislative_mandates": {
+                "clinger_cohen_act_planning": {
+                    "code": "N",
+                    "description": "No"
+                },
+                "construction_wage_rate_requirements": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "employment_eligibility_verification": null,
+                "interagency_contracting_authority": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "labor_standards": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "materials_supplies_articles_equipment": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "other_statutory_authority": null,
+                "service_contract_inventory": null
+            },
+            "naics_code": 423710,
+            "obligated": 28.68,
+            "parent_award": {
+                "awarding_office": {
+                    "office_code": "47QSHA",
+                    "office_name": "GSA/FAS HEARTLAND ACQUISITION CENTE",
+                    "agency_code": "4732",
+                    "agency_name": "Federal Acquisition Service",
+                    "department_code": 47,
+                    "department_name": "General Services Administration"
+                },
+                "description": null,
+                "idv_type": "E",
+                "key": "CONT_IDV_47QSHA21A000D_4732",
+                "piid": "47QSHA21A000D"
+            },
+            "period_of_performance": {
+                "start_date": "2026-01-18",
+                "current_end_date": "2026-01-23",
+                "ultimate_completion_date": "2026-01-23"
+            },
+            "piid": "47QSSC26F2XR7",
+            "place_of_performance": {
+                "country_code": "USA",
+                "country_name": "UNITED STATES",
+                "state_code": "MI",
+                "state_name": "MICHIGAN",
+                "city_name": "WARREN",
+                "zip_code": "48091"
+            },
+            "psc_code": "5120",
+            "recipient": {
+                "uei": "MF46EHTMKJJ5",
+                "display_name": "WRIGHT TOOL COMPANY, LLC"
+            },
+            "set_aside": null,
+            "solicitation_identifier": null,
+            "subawards_summary": null,
+            "total_contract_value": 28.68
+        },
+        {
+            "award_date": "2026-01-18",
+            "award_type": {
+                "code": "A",
+                "description": "BPA Call"
+            },
+            "awarding_office": {
+                "office_code": "47QSWA",
+                "office_name": "GSA/FAS SCIENTFC,TEMP SVCS,ADINT",
+                "agency_code": "4732",
+                "agency_name": "Federal Acquisition Service",
+                "department_code": 47,
+                "department_name": "General Services Administration"
+            },
+            "base_and_exercised_options_value": 880.7,
+            "description": "CLOTH,CLEANING",
+            "fiscal_year": 2026,
+            "funding_office": {
+                "office_code": "47QSWA",
+                "office_name": "GSA/FAS SCIENTFC,TEMP SVCS,ADINT",
+                "agency_code": "4732",
+                "agency_name": "Federal Acquisition Service",
+                "department_code": 47,
+                "department_name": "General Services Administration"
+            },
+            "key": "CONT_AWD_47QSWA26F0ENS_4732_47QSWA23A001F_4732",
+            "legislative_mandates": {
+                "clinger_cohen_act_planning": {
+                    "code": "N",
+                    "description": "No"
+                },
+                "construction_wage_rate_requirements": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "employment_eligibility_verification": null,
+                "interagency_contracting_authority": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "labor_standards": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "materials_supplies_articles_equipment": {
+                    "code": "X",
+                    "description": "Not Applicable"
+                },
+                "other_statutory_authority": null,
+                "service_contract_inventory": null
+            },
+            "naics_code": 325611,
+            "obligated": 880.7,
+            "parent_award": {
+                "awarding_office": {
+                    "office_code": "47QSWA",
+                    "office_name": "GSA/FAS SCIENTFC,TEMP SVCS,ADINT",
+                    "agency_code": "4732",
+                    "agency_name": "Federal Acquisition Service",
+                    "department_code": 47,
+                    "department_name": "General Services Administration"
+                },
+                "description": "OTHER THAN SCHEDULE",
+                "idv_type": "E",
+                "key": "CONT_IDV_47QSWA23A001F_4732",
+                "piid": "47QSWA23A001F"
+            },
+            "period_of_performance": {
+                "start_date": "2026-01-18",
+                "current_end_date": "2026-01-24",
+                "ultimate_completion_date": "2026-01-24"
+            },
+            "piid": "47QSWA26F0ENS",
+            "place_of_performance": {
+                "country_code": "USA",
+                "country_name": "UNITED STATES",
+                "state_code": "MS",
+                "state_name": "MISSISSIPPI",
+                "city_name": "TUPELO",
+                "zip_code": "38803"
+            },
+            "psc_code": "7920",
+            "recipient": {
+                "uei": "WMG1PZNR26H3",
+                "display_name": "RITE-KEM, INC."
+            },
+            "set_aside": null,
+            "solicitation_identifier": null,
+            "subawards_summary": null,
+            "total_contract_value": 880.7
+        }
+    ],
+    "count_type": "approximate"
+}

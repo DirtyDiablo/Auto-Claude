@@ -13,6 +13,9 @@ RESUME CAPABILITY:
 
 import sys
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 import sqlite3
 import time
 import uuid
@@ -134,7 +137,8 @@ def main():
             already_indexed = info.points_count
             print(f"\n[2/6] RESUMING: Collection has {already_indexed:,} points")
             print(f"  Progress: {json.dumps(progress, indent=2)}")
-        except:
+        except Exception as e:
+            logger.debug("collection_resume_failed: %s", e)
             print(f"\n[2/6] No existing collection found, starting fresh...")
             qdrant.create_collection(
                 collection_name=COLLECTION_NAME,
@@ -147,7 +151,8 @@ def main():
         try:
             qdrant.delete_collection(COLLECTION_NAME)
             print(f"  Deleted existing collection.")
-        except:
+        except Exception as e:
+            logger.debug("collection_delete_skipped: %s", e)
             print(f"  No existing collection to delete.")
 
         qdrant.create_collection(

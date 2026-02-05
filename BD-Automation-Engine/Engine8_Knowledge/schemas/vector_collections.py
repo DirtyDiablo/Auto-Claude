@@ -232,7 +232,8 @@ class EnhancedQdrantStore:
                     "vectors": info.vectors_count,
                     "points": info.points_count
                 }
-            except:
+            except Exception as e:
+                logger.warning("collection_stats_failed for %s: %s", name, e)
                 stats[name] = {"vectors": 0, "points": 0}
 
         return stats

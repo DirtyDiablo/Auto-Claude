@@ -1,0 +1,149 @@
+{
+  "name": "Scraper - Completion Webhook",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "scraper-complete",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process scraper completion notification\nconst body = $input.first().json.body;\n\nconst result = {\n  event: 'scraper_completed',\n  source: body.source || 'unknown',\n  jobs_found: body.jobs_found || 0,\n  jobs_synced: body.jobs_synced || 0,\n  duration_seconds: body.duration_seconds || 0,\n  errors: body.errors || [],\n  timestamp: new Date().toISOString()\n};\n\n// Determine if we should alert\nresult.should_alert = body.errors?.length > 0 || body.jobs_found === 0;\nresult.alert_severity = body.errors?.length > 0 ? 'error' : 'warning';\n\nreturn { json: result };"
+      },
+      "id": "process-notification",
+      "name": "Process Notification",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8100/memory/add",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: 'Scraper ' + $json.source + ' completed: ' + $json.jobs_synced + ' jobs synced', memory_type: 'scrape_result' }) }}",
+        "options": {}
+      },
+      "id": "record-memory",
+      "name": "Record in Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Process Notification').first().json.should_alert }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-should-alert",
+      "name": "Should Alert?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://primetech.app.n8n.cloud/webhook/slack-alert",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: 'Scraper ' + $('Process Notification').first().json.source + ' issue: ' + ($('Process Notification').first().json.errors.length > 0 ? $('Process Notification').first().json.errors.join(', ') : 'No jobs found'), severity: $('Process Notification').first().json.alert_severity }) }}",
+        "options": {}
+      },
+      "id": "send-alert",
+      "name": "Send Alert",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "status",
+              "value": "processed"
+            }
+          ]
+        }
+      },
+      "id": "set-response",
+      "name": "Set Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1050, 400]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Process Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Notification": {
+      "main": [
+        [
+          {
+            "node": "Record in Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record in Hub": {
+      "main": [
+        [
+          {
+            "node": "Should Alert?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Alert?": {
+      "main": [
+        [
+          {
+            "node": "Send Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Set Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["scraper", "webhook", "notification", "production"]
+}

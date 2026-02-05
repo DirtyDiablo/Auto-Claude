@@ -13,6 +13,9 @@ import json
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 # New files to analyze (dated Jan 22)
 NEW_FILES = [
@@ -178,8 +181,8 @@ class CallNotesAnalyzer:
                         try:
                             value = xlrd.xldate_as_datetime(value, workbook.datemode)
                             value = value.strftime('%Y-%m-%d %H:%M:%S')
-                        except:
-                            pass
+                        except (ValueError, OverflowError) as e:
+                            logger.debug("xlrd_date_conversion_failed", extra={"error": str(e)})
 
                     row_data[header] = value
 

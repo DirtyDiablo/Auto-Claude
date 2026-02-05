@@ -270,7 +270,9 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing BD Intelligence Hub API...")
 
     # Initialize existing components
-    store = BDKnowledgeStore()
+    # Use Qdrant server if URL is set, otherwise use local storage
+    qdrant_url = os.getenv('QDRANT_URL')
+    store = BDKnowledgeStore(url=qdrant_url)
     store.initialize_collections()
     rag_engine = BDRAGEngine(vector_store=store)
     indexer = BDIndexer(store=store)
@@ -330,9 +332,12 @@ if STREAMING_AVAILABLE:
     app.include_router(streaming_router)
     logger.info("Streaming routes enabled: /streaming/*")
 
-if MEMORY_AVAILABLE:
-    app.include_router(memory_router)
-    logger.info("Memory routes enabled: /memory/*")
+# Supermemory router disabled - using local Mem0-based memory endpoints instead
+# The Supermemory API (api.supermemory.ai) returns 404 errors
+# if MEMORY_AVAILABLE:
+#     app.include_router(memory_router)
+#     logger.info("Memory routes enabled: /memory/*")
+logger.info("Using local Mem0 memory endpoints (Supermemory disabled)")
 
 if DIFY_INTEGRATION_AVAILABLE:
     app.include_router(create_dify_knowledge_router(), prefix="/dify")

@@ -1,0 +1,104 @@
+{
+    "count": 1,
+    "next": null,
+    "previous": null,
+    "cursor": null,
+    "previous_cursor": null,
+    "results": [
+        {
+            "award_date": "2019-08-29",
+            "award_type": {
+                "code": "C",
+                "description": "Delivery Order"
+            },
+            "awarding_office": {
+                "office_code": "FA8075",
+                "office_name": "FA8075  774 ESS",
+                "agency_code": "5700",
+                "agency_name": "Department of the Air Force",
+                "department_code": 97,
+                "department_name": "Department of Defense"
+            },
+            "base_and_exercised_options_value": 321513710.0,
+            "description": "JOINT TRAINING SYNTHETIC ENVIRONMENT JOINT STAFF J-7 DEPUTY DIRECTOR JOINT TRAINING ENVIRONMENT ARCHITECTURE DIVISION",
+            "fiscal_year": 2019,
+            "funding_office": {
+                "office_code": "M95450",
+                "office_name": "COMMANDER",
+                "agency_code": "1700",
+                "agency_name": "Department of the Navy",
+                "department_code": 97,
+                "department_name": "Department of Defense"
+            },
+            "key": "CONT_AWD_FA807519FA029_9700_FA807518D0011_9700",
+            "legislative_mandates": {
+                "clinger_cohen_act_planning": {
+                    "code": "N",
+                    "description": "No"
+                },
+                "construction_wage_rate_requirements": {
+                    "code": "N",
+                    "description": "No"
+                },
+                "employment_eligibility_verification": null,
+                "interagency_contracting_authority": {
+                    "code": "A",
+                    "description": "Economy Act"
+                },
+                "labor_standards": {
+                    "code": "N",
+                    "description": "No"
+                },
+                "materials_supplies_articles_equipment": {
+                    "code": "Y",
+                    "description": "Yes"
+                },
+                "other_statutory_authority": null,
+                "service_contract_inventory": null
+            },
+            "naics_code": 541715,
+            "obligated": 316952144.93999994,
+            "parent_award": {
+                "awarding_office": {
+                    "office_code": "FA8075",
+                    "office_name": "FA8075  774 ESS",
+                    "agency_code": "5700",
+                    "agency_name": "Department of the Air Force",
+                    "department_code": 97,
+                    "department_name": "Department of Defense"
+                },
+                "description": "INFORMATION ANALYSIS CENTER MULTIPLE AWARD CONTRACT",
+                "idv_type": "B",
+                "key": "CONT_IDV_FA807518D0011_9700",
+                "piid": "FA807518D0011"
+            },
+            "period_of_performance": {
+                "start_date": "2019-08-29",
+                "current_end_date": "2024-09-30",
+                "ultimate_completion_date": "2024-09-30"
+            },
+            "piid": "FA807519FA029",
+            "place_of_performance": {
+                "country_code": "USA",
+                "country_name": "UNITED STATES",
+                "state_code": "VA",
+                "state_name": "VIRGINIA",
+                "city_name": "QUANTICO",
+                "zip_code": "22134"
+            },
+            "psc_code": "AZ12",
+            "recipient": {
+                "uei": "V9KKND8S1KJ3",
+                "display_name": "MANTECH TSG-2 JOINT VENTURE"
+            },
+            "set_aside": null,
+            "solicitation_identifier": "FA807517R0001",
+            "subawards_summary": {
+                "count": 144,
+                "total_amount": 82967626.84
+            },
+            "total_contract_value": 321513710.0
+        }
+    ],
+    "count_type": "approximate"
+}

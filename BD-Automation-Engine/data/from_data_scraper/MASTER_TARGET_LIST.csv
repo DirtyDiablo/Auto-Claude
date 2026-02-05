@@ -1,0 +1,176 @@
+type,name,company,value,details,action,priority
+RECOMPETE,NASA,THE JOHNS HOPKINS UNIVERSITY APPLIED PHYSICS LABORATORY LLC,894500235.0,"PIID: NNN10AA08T, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DISA,"PHOENIX AIR GROUP, INC.",418325383.8,"PIID: 19AQMM19F3103, Ends: 2026-02-28 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DARPA,THE JOHNS HOPKINS UNIVERSITY APPLIED PHYSICS LABORATORY LLC,202144148.0,"PIID: HR001125F0008, Ends: 2026-02-15 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,AFRICOM,"CACI NSS, LLC",194034792.11,"PIID: 47QFCA20F0002, Ends: 2026-01-28 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,CIO-SP3,A SQUARE GROUP LLC,163875230.64,"PIID: 75FCMC22F0024, Ends: 2026-02-14 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,EIS,OSHKOSH DEFENSE LLC,145605062.0,"PIID: W912CH24F0085, Ends: 2026-02-17 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,GBSD,M. A. MORTENSON COMPANY,110807226.53,"PIID: W9123822C0006, Ends: 2026-02-20 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DEOS,"GENERAL DYNAMICS INFORMATION TECHNOLOGY, INC.",90923781.67,"PIID: 47QFSA21F0023, Ends: 2026-03-04 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DARPA,BAE SYSTEMS INFORMATION & ELECTRONIC SYSTEMS INTEGRATION INC,68101726.12,"PIID: N6523623C8008, Ends: 2026-01-25 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,CYBERCOM,BOOZ ALLEN HAMILTON INC,56216719.85,"PIID: W15P7T24F0004, Ends: 2026-02-18 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,CENTCOM,MICROTECHNOLOGIES LLC,51188836.57,"PIID: FA489024C0035, Ends: 2026-03-02 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,NGA,GULFSTREAM AEROSPACE CORPORATION,49968292.52,"PIID: FA813425F3003, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ABMS,SCIENCE APPLICATIONS INTERNATIONAL CORPORATION,39505515.18,"PIID: FA861222FB004, Ends: 2026-03-12 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ABMS,"LEIDOS, INC.",38912950.85,"PIID: FA861222FB003, Ends: 2026-03-12 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,SOCOM,CIPHER TECH SOLUTIONS INC,35331354.48,"PIID: H9240420F0203, Ends: 2026-02-16 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,EUCOM,"KBR SERVICES, LLC",31370156.97,"PIID: W52P1J19F0358, Ends: 2026-03-02 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,Orion,SIERRA SPACE CORP,27273827.87,"PIID: 80HQTR17C0009, Ends: 2026-03-20 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,OASIS,"MODERN TECHNOLOGY SOLUTIONS, INC.",23709798.01,"PIID: W58RGZ24F0003, Ends: 2026-03-12 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,CENTCOM,THE RED GATE GROUP LTD,21818075.05,"PIID: FA481421F0191, Ends: 2026-02-28 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,INDOPACOM,"BEAM DISTRIBUTING, INC.",21421086.33,"PIID: 47QSWC24F0138, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,INSCOM,"EMPOWER AI, INC.",21383340.15,"PIID: W91RUS23F0250, Ends: 2026-03-10 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DEOS,"GENERAL DYNAMICS INFORMATION TECHNOLOGY, INC.",21048583.89,"PIID: 47QFSA23F0020, Ends: 2026-03-09 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,SLS,"PREVAILANCE, INC.",18618829.21,"PIID: N6134022C0007, Ends: 2026-02-17 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,JLTV,AM GENERAL LLC,16715845.57,"PIID: W912CH25F0160, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ABMS,SCITEC INC,14034534.98,"PIID: FA861224FB004, Ends: 2026-02-06 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,JLTV,AM GENERAL LLC,13022087.5,"PIID: W912CH25F0006, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,Zero Trust,"FOUR POINTS TECHNOLOGY, L.L.C.",10168775.1,"PIID: 1605TB24F00035, Ends: 2026-02-28 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ABMS,LOCKHEED MARTIN CORPORATION,9345187.62,"PIID: FA861224FB003, Ends: 2026-02-04 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,CIO-SP3,"DLH, LLC",8496725.76,"PIID: 75N98025C00014, Ends: 2026-02-26 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,Zero Trust,"KONIAG IT SYSTEMS, LLC",8275290.18,"PIID: HQ003425CE074, Ends: 2026-03-05 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DISA,INDRASOFT INC.,5982136.0,"PIID: HC104725F6220, Ends: 2026-03-14 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DARPA,"STRATEGIC ANALYSIS, INC.",5953228.13,"PIID: N6523622F3032, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,SOUTHCOM,OBERA LLC,4817459.52,"PIID: FA489024F0158, Ends: 2026-02-14 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,EUCOM,OBERA LLC,4786525.51,"PIID: FA489024F0170, Ends: 2026-03-15 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,AFRICOM,OBERA LLC,4786525.51,"PIID: FA489024F0170, Ends: 2026-03-15 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,JLTV,AM GENERAL LLC,4219138.91,"PIID: W912CH25F0003, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,STRATCOM,"STRATCOMM, INC.",3937067.68,"PIID: 28321325FR0630001, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,OASIS,SNA INTERNATIONAL LLC,3643165.38,"PIID: 70RSAT21FR0000157, Ends: 2026-02-10 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,SOUTHCOM,"MARTINEZ SERVICES, INC.",3351083.73,"PIID: W9127824F0230, Ends: 2026-03-10 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,DIA,"TEAM CARNEY, INC.",3020766.17,"PIID: 140D0422F0243, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,CH-53K,NORTHROP GRUMMAN SYSTEMS CORPORATION,3007920.64,"PIID: FA857621F0006, Ends: 2026-02-28 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,NGA,CARAHSOFT TECHNOLOGY CORP,2843443.0,"PIID: W912DQ17C7002, Ends: 2026-03-07 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ECMA,WORLD WIDE TECHNOLOGY LLC,2689880.0,"PIID: W519TC25F0094, Ends: 2026-01-27 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,JLTV,GOVERNMENT SCIENTIFIC SOURCE INC,2105239.79,"PIID: 47QFNA24F0089, Ends: 2026-02-06 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,MQ-25,AVIATION SYSTEMS ENGINEERING COMPANY INC,1220077.48,"PIID: N0018922F0154, Ends: 2026-02-02 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,SPACECOM,THE CNA CORPORATION,800000.0,"PIID: N0001424FT113, Ends: 2026-02-07 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,NSA,"SIERRA NEVADA COMPANY, LLC",533265.57,"PIID: FA703723F0015, Ends: 2026-02-20 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ECMA,"ORACLE AMERICA, INC",520150.0,"PIID: W519TC25FA006, Ends: 2026-03-12 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,AFRICOM,ATT MOBILITY LLC,154115.45,"PIID: HC108421FA597, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+RECOMPETE,ECMO,"GETINGE USA SALES, LLC",105246.53,"PIID: 36C24825N1061, Ends: 2026-01-31 00:00:00",PURSUE - Contract ending soon (CRITICAL - 90 days),CRITICAL
+PROGRAM,MDA,HUMANA GOVERNMENT BUSINESS INC,92324962266.68,"Contracts: 50, Bullhorn mentions: 2",PROSPECT - Low activity program with high value,HIGH
+CONTACT,LEMAR COPELAND,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Abobaker Mohamed Elfadli,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,JANNISE DAVIS,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Louis Filip,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Ross Jamison,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Quinn McKinsey,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Heiko Schwarz,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,WILLIAM HOLLAND,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Adam Roth,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Frank Yang,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,PARKER DELBENE,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Kyle Hilkin,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Tony Wilson,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Nolan Lenard,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Tanner Jordan,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,James Harris,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Michael Klamm,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Andrew Adams,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jack Burrell-Cowan,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Emily O'Hanlon,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Pamela Wolf Anonymous267633,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Michael Aumock,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Christopher Cabrera,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Ross Maunders,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Test Test,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,MATTEUS CAMACHO,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Qadre Holloway,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Daniel Lee Anonymous1178861,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,CHORDARYUS BILLINGSLEY,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Larry Gowers,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,OMAR ASHRY,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Tony Brace,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Khan Hossain,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Marcus DeGagne,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Gigi Amlani,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,COLEMAN SELLERS,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Domequez Cook,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jim Lee,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Mark Rhoades,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,David Henley,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,JOSHUA AUDU,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jose Velasquez-Principe,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,RAFIL MANHAL,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,William Hill,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,ZACHARY HILL,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Colin Phelps,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Samuel Myers,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Natalie Dailey,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Xavier Jones,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Tarrylon Toney,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Rey Libongco,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jason Murphree,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jon Perreault,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Daniel Cantele,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Dhruv Patel,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Joel Darr,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,ROBERT HOFER Anonymous1407413,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,ABDELKARIM BADRI,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Kaibeh Johnson,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,TYLER VAREKA,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Hunter Hill,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Marc JENKINS,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Braxton Babbidge,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Richard Kennedy,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jason Gonella,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Alexander Rockwell,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Christopher Stough-Brown,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Sam Hay,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Thomas Turner,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Stephen Butler,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,DOMINIC POMPEO,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,DOMINIQUE BURGESS,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,John Tidball,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,James Kelly,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Daniel Shrider,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jordan Jefferson,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,MARK SCALISE,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Gale Satre,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Najeebullah Lakanwall,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Matthew Schultz,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Charles Fletcher,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Felix Hawthorne,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Brett Manis,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Benjamin Werth,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,SEAN DAFTER,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,FREDERICK WIERSIG,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,WILLIAM ROBINSON,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Elizabeth Barrios,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,John Cammett,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Derek Odom,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Sean Krause,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,JESSE KNOPF,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Jose Asberry,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,James Wilson,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Kris Sybrant,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Robert Bell,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Logan Clark,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Anthony Rojas,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+CONTACT,Marc Spangler,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 3",CALL - Low touch contact at major prime,HIGH
+CONTACT,Eric Watson Anonymous1862692,LOCKHEED MARTIN,48066473048.89,"Title: nan, Visits: 2",CALL - Low touch contact at major prime,HIGH
+PROGRAM,Orion,LOCKHEED MARTIN CORP,22096022675.83,"Contracts: 42, Bullhorn mentions: 4",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,V-22,BELL BOEING JOINT PROJECT OFFICE,13226488798.57,"Contracts: 50, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,GBSD,NORTHROP GRUMMAN SYSTEMS CORP,11636220988.640001,"Contracts: 51, Bullhorn mentions: 3",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,CH-53K,SIKORSKY AIRCRAFT CORPORATION,10937860725.85,"Contracts: 29, Bullhorn mentions: 2",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,EUCOM,"KBR SERVICES, LLC",4093446368.6000004,"Contracts: 55, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,DARPA,LOCKHEED MARTIN CORPORATION,3726974466.75,"Contracts: 59, Bullhorn mentions: 2",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,SEWP,"V3GATE, LLC",2429097139.32,"Contracts: 31, Bullhorn mentions: 3",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,MQ-25,THE BOEING COMPANY,2105550567.05,"Contracts: 25, Bullhorn mentions: 5",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,E-7,SCIENCE APPLICATIONS INTERNATIONAL CORPORATION,1844002603.85,"Contracts: 20, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,NRO,"UNITED LAUNCH SERVICES, LLC",1781248905.31,"Contracts: 47, Bullhorn mentions: 1",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,AFRICOM,"FLUOR INTERCONTINENTAL, INC",1559181546.29,"Contracts: 52, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,STRATCOM,"HDR ARCHITECTURE, INC.",1156512372.89,"Contracts: 57, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,ABMS,SCIENCE APPLICATIONS INTERNATIONAL CORPORATION,1040437942.5699999,"Contracts: 58, Bullhorn mentions: 4",PROSPECT - Low activity program with high value,HIGH
+PROGRAM,SOUTHCOM,HENSEL PHELPS CONSTRUCTION CO,913830385.9399999,"Contracts: 57, Bullhorn mentions: 2",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,SPACECOM,"IST RESEARCH, LLC",894106473.41,"Contracts: 38, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,CIO-SP3,"OPTUMSERVE TECHNOLOGY SERVICES, INC.",832835421.66,"Contracts: 30, Bullhorn mentions: 2",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,CYBERCOM,SCIENCE APPLICATIONS INTERNATIONAL CORPORATION,634131685.25,"Contracts: 41, Bullhorn mentions: 2",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,GPS OCX,RAYTHEON COMPANY,404643866.51,"Contracts: 7, Bullhorn mentions: 3",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,TRANSCOM,SIKICH CPA LLC,327445453.56,"Contracts: 58, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,Zero Trust,BOOZ ALLEN HAMILTON INC,227588681.78,"Contracts: 30, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,JADC2,LUMBEE TRIBE ENTERPRISES LLC,30278877.84,"Contracts: 21, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,VC-25B,HERMEUS CORP,24045834.0,"Contracts: 2, Bullhorn mentions: 1",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,CMMC,"GENERAL DYNAMICS MISSION SYSTEMS, INC.",17657788.94,"Contracts: 18, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,MEDIUM
+PROGRAM,NGAD,"LEIDOS, INC.",11388406.5,"Contracts: 25, Bullhorn mentions: 0",PROSPECT - Low activity program with high value,MEDIUM

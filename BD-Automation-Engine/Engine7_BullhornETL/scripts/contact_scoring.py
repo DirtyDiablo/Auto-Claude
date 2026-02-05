@@ -6,6 +6,7 @@ Scores contacts based on activity, placements, relationship strength, and recenc
 import sqlite3
 import json
 import csv
+import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -85,8 +86,8 @@ def calculate_contact_score(contact_data: dict) -> dict:
             score += recency_score
             if recency_score > 0:
                 factors.append(f"Recent activity ({days_ago} days ago): +{recency_score}")
-        except:
-            pass
+        except ValueError as e:
+            logging.debug("date_parse_failed for last_activity: %s", e)
 
     # Relationship diversity score (max 10 points)
     prime_count = contact_data.get('prime_count', 0)

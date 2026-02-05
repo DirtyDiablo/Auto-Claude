@@ -342,8 +342,8 @@ def should_skip_file(file_path: Path) -> bool:
         if size_mb > MAX_FILE_SIZE_MB:
             logger.warning(f"Skipping large file ({size_mb:.1f}MB): {file_path.name}")
             return True
-    except:
-        pass
+    except OSError as e:
+        logger.debug("file_stat_failed: %s", e)
     return False
 
 
@@ -699,7 +699,8 @@ class FullBDIndexer:
             # Get file size
             try:
                 size_mb = file_path.stat().st_size / (1024 * 1024)
-            except:
+            except OSError as e:
+                logger.debug("file_stat_failed: %s", e)
                 size_mb = 0
 
             if suffix == '.json':
@@ -825,7 +826,8 @@ class FullBDIndexer:
                     else:
                         count = stat.get('points_count', stat.get('vectors_count', 0))
                         print(f"  {name}: {count:,} vectors")
-            except:
+            except Exception as e:
+                logger.error("qdrant_stats_fetch_failed: %s", e)
                 print("  (Could not fetch Qdrant stats)")
 
 

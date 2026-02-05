@@ -1,0 +1,21 @@
+Priority,Contact_Name,Company,Programs,Score,Attempts_So_Far,Worked_By,Competition_Level,Reason_to_Grab,Recommended_Action,Approach_Strategy
+1,Dan Liggins,Peraton,DISA,80,8,Drew Oxley,LOW,"MDA program - Peraton contact, only 1 person working",GRAB NOW,Different approach - LinkedIn first then warm call
+2,Mike Glenn,Northrop,MDA,80,7,Ethan Dial,LOW,"MDA program contact at Northrop, low competition",GRAB NOW,Try email with MDA case study
+3,Peter Engler,Northrop,MDA,80,5,Ethan Dial,LOW,"MDA program at Northrop, moderate attempts",GRAB NOW,LinkedIn connection + value prop
+4,Erica Jenkins,Booz Allen,SPACE_FORCE,70,4,Drew Oxley,LOW,"Space Force at Booz Allen - growing program",GRAB NOW,Cold call with Space Force pitch
+5,Delynn Huskey,Northrop,MDA,70,3,Ethan Dial,LOW,"MDA Northrop - only 3 attempts, room to grow",GRAB NOW,Fresh approach needed
+6,Michael Jester,Northrop,-,70,16,Ethan Dial,LOW,"High activity but no traction - try different approach",GRAB NOW,LinkedIn warm-up before call
+7,Sean Sullivan,Northrop,-,70,15,Ethan Dial,LOW,"Many attempts - needs fresh perspective",GRAB NOW,Email with testimonial
+8,John Parrish,Lockheed/Northrop,MDA,65,8,"Ethan Dial, Tanner Windom",MEDIUM,"MDA dual prime contact - valuable",GRAB NOW,Reference Lockheed wins
+9,Scott Rowland,Northrop,SPACE_FORCE,65,6,"Ethan Dial, Jesse Kane",MEDIUM,"Space Force at Northrop - growth area",GRAB NOW,Space Force growth pitch
+10,Matthew Wood,Lockheed/Northrop,MDA,65,6,"Ethan Dial, Tanner Windom",MEDIUM,"MDA at dual primes",GRAB NOW,MDA specialization pitch
+11,Brandon Collins,GDIT/LM/NG,I2TS,60,9,Multiple (4),CROWDED,"I2TS program but 4 recruiters working",COORDINATE,Team coordination needed
+12,Linda Nichols,GDIT,-,70,13,Ethan Dial,LOW,"GDIT contact - high attempts, low traction",GRAB NOW,Management intro approach
+13,Bob Basinger,GDIT,-,70,13,Ethan Dial,LOW,"GDIT high activity no traction",GRAB NOW,GDIT success story pitch
+14,ganesh bhatt,Northrop,-,70,14,Ethan Dial,LOW,"Northrop - 14 attempts, no progress",GRAB NOW,Technical conversation angle
+15,Bernard Wawrzeniak,GDIT,-,70,13,Ethan Dial,LOW,"GDIT 13 attempts",GRAB NOW,Reference JUSTIFIED wins
+16,Gabie Hong,Northrop,-,70,12,Ethan Dial,LOW,"Northrop 12 attempts",GRAB NOW,Aerospace pitch
+17,Andre Thomas,GDIT,-,70,12,Ethan Dial,LOW,"GDIT 12 attempts",GRAB NOW,GDIT SDVOSB angle
+18,Steven Brown,GDIT,-,70,12,Ethan Dial,LOW,"GDIT 12 attempts",GRAB NOW,Program specific approach
+19,Craig Whitten,GDIT,-,70,11,Ethan Dial,LOW,"GDIT 11 attempts",GRAB NOW,Leadership introduction
+20,John Porter,GDIT,-,70,11,Ethan Dial,LOW,"GDIT 11 attempts",GRAB NOW,Value proposition refresh

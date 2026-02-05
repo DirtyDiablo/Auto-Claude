@@ -13,6 +13,9 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 from typing import Dict, List, Any, Optional
+import logging
+
+logger = logging.getLogger(__name__)
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent.parent
@@ -97,7 +100,8 @@ class BullhornXLSParser:
                     return int(cell.value)
                 return cell.value
             return str(cell.value).strip() if cell.value else ''
-        except:
+        except Exception as e:
+            logger.debug("cell_value_parse_failed", extra={"error": str(e)})
             return ''
 
     def _parse_sales_activity(self, sheet):
@@ -165,8 +169,8 @@ class BullhornXLSParser:
                 try:
                     datetime.strptime(val, '%m/%d/%Y')
                     contact['date_added'] = val
-                except:
-                    pass
+                except ValueError as e:
+                    logger.debug("date_parse_failed", extra={"value": val, "error": str(e)})
 
         # Extract names - typically position 1 is salesperson, position 2 is contact
         name_candidates = [v for v in values if v not in DEPARTMENTS + CONTACT_STATUSES
@@ -203,8 +207,8 @@ class BullhornXLSParser:
                 try:
                     datetime.strptime(val, '%m/%d/%Y')
                     contact['date_added'] = val
-                except:
-                    pass
+                except ValueError as e:
+                    logger.debug("date_parse_failed", extra={"value": val, "error": str(e)})
 
         name_candidates = [v for v in values if v not in DEPARTMENTS + CONTACT_STATUSES
                           and not ('/' in v and len(v) <= 10)]
@@ -245,8 +249,8 @@ class BullhornXLSParser:
                 try:
                     datetime.strptime(val, '%m/%d/%Y')
                     job['date'] = val
-                except:
-                    pass
+                except ValueError as e:
+                    logger.debug("date_parse_failed", extra={"value": val, "error": str(e)})
             # Location (contains comma)
             elif ',' in val and any(c.isalpha() for c in val):
                 job['location'] = val
@@ -314,8 +318,8 @@ class BullhornXLSParser:
                 try:
                     datetime.strptime(val, '%m/%d/%Y')
                     submission['date'] = val
-                except:
-                    pass
+                except ValueError as e:
+                    logger.debug("date_parse_failed", extra={"value": val, "error": str(e)})
 
         # Extract names (salesperson, candidate, recruiter)
         name_candidates = []
@@ -407,8 +411,8 @@ class BullhornXLSParser:
                     try:
                         datetime.strptime(val, '%m/%d/%Y')
                         job['date'] = val
-                    except:
-                        pass
+                    except ValueError as e:
+                        logger.debug("date_parse_failed", extra={"value": val, "error": str(e)})
                 # Location (contains comma and letters)
                 elif ',' in val and any(c.isalpha() for c in val):
                     job['location'] = val
@@ -517,8 +521,8 @@ class BDPlaybookGenerator:
                     dt = datetime.strptime(date_str, '%m/%d/%Y')
                     year_month = dt.strftime('%Y-%m')
                     by_date[year_month].append(contact)
-                except:
-                    pass
+                except ValueError as e:
+                    logger.debug("date_parse_failed", extra={"value": date_str, "error": str(e)})
         self.playbook['contacts']['by_date'] = dict(by_date)
 
         # Build timeline

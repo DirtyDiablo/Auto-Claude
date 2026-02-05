@@ -1,0 +1,117 @@
+{
+  "name": "Scraper - Trigger Full Pipeline",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "full-pipeline",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare full pipeline request\nconst body = $input.first().json.body || {};\n\nreturn {\n  json: {\n    sources: body.sources || ['apex-jobs', 'insight-global-jobs', 'teksystems-jobs'],\n    sync_to_hub: body.sync_to_hub !== false,\n    include_insights: body.include_insights !== false,\n    locations: body.locations || ['Washington DC', 'Virginia', 'Maryland']\n  }\n};"
+      },
+      "id": "prepare-request",
+      "name": "Prepare Request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8200/pipeline/full",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 600000
+        }
+      },
+      "id": "run-pipeline",
+      "name": "Run Full Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process pipeline response\nconst response = $input.first().json;\nconst request = $('Prepare Request').first().json;\n\nconst summary = response.summary || {};\n\nreturn {\n  json: {\n    success: response.status === 'completed' || response.status === 'success',\n    pipeline: {\n      sources_processed: request.sources.length,\n      total_scraped: summary.total_scraped || 0,\n      unique_jobs: summary.unique || 0,\n      valid_jobs: summary.valid || 0,\n      synced_to_hub: summary.synced || 0\n    },\n    duration_seconds: response.duration_seconds || 0,\n    errors: response.errors || [],\n    message: `Full pipeline completed: ${summary.synced || 0} jobs synced to Hub`,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "process-response",
+      "name": "Process Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Prepare Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Request": {
+      "main": [
+        [
+          {
+            "node": "Run Full Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Full Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Process Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["scraper", "pipeline", "production"]
+}

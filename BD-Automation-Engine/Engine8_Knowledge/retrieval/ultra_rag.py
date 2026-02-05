@@ -10,6 +10,9 @@ from enum import Enum
 from datetime import datetime
 import asyncio
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RetrievalStrategy(Enum):
@@ -203,7 +206,8 @@ Return as JSON array: ["sub_question_1", "sub_question_2", ...]"""
         response = self.llm(prompt)
         try:
             return json.loads(response)[:max_sub]
-        except:
+        except (json.JSONDecodeError, TypeError) as e:
+            logger.warning("sub_question_parse_failed: %s", e)
             return [query]
 
     async def _execute_step(self,
@@ -304,7 +308,8 @@ Rate confidence (0.0-1.0) and identify any issues:
                     verification = json.loads(self.llm(prompt))
                     plan.confidence = verification.get("confidence", 0.5)
                     result["verification"] = verification
-                except:
+                except (json.JSONDecodeError, TypeError) as e:
+                    logger.warning("verification_parse_failed: %s", e)
                     plan.confidence = 0.5
             else:
                 plan.confidence = 0.5

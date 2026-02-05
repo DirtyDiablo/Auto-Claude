@@ -1,0 +1,14 @@
+Award Date,Vendor,Contract,Agency,Amount,Location,NAICS,BD Relevance
+2025-09-22,"Leidos, Inc.",CBP Cyber Security Operations Center,CBP,"$24,668,199","Reston, VA",541512,"HIGH - Leidos cyber ops win, target for subcontract staffing"
+2025-09-30,Deloitte Consulting,DOE Cyber Enterprise SOC,DOE/NNSA,"$6,541,796","Washington, DC",541611,"MEDIUM - DOE cyber, cleared positions likely"
+2025-12-31,Deloitte & Touche,Treasury CIO ESS - Cyber Operations & Maintenance,Treasury,"$5,610,043","Arlington, VA",541519,"MEDIUM - DevSecOps, cyber ops maintenance"
+2025-12-23,GDIT,IRS Cyber Threat Fusion Center SOC Bridge 4,IRS,"$4,807,782","Lanham, MD",541511,"HIGH - GDIT cyber, SOC staffing opportunities"
+2024-09-26,GDIT,VA Enterprise Service Desk Tier One,VA,"$45,093,640","Falls Church, VA",541511,"HIGH - Large ESD contract, IT support staff needed"
+2026-01-09,Peraton,FAA BNATCS Radars Support,FAA,"$50,000,000","Washington, DC",541512,"HIGH - Major Peraton win, staffing opportunities"
+2026-01-09,Peraton,FAA BNATCS Voice Switch,FAA,"$14,512,948","Washington, DC",541512,MEDIUM - Telecommunications IT support
+2025-04-23,Peraton,Army MI Center of Excellence IT Support,Army,"$20,757,289","Fort Huachuca, AZ",541512,"HIGH - Army Intel IT, cleared workforce"
+2025-03-10,Peraton,State Dept Consular Systems Modernization,State,"$25,447,630","Washington, DC",541512,"MEDIUM - Data analytics, cleared staff"
+2025-09-23,AWS,DISA AI for Defensive Cyber Operations,DISA,"$50,000","Chambersburg, PA",518210,LOW - Small AI/cloud contract
+2025-09-26,"FCN, Inc.",AF Cyber Defense - Palo Alto Cortex XSOAR,Air Force,"$10,996,870","San Antonio, TX",541519,"HIGH - AF Cyber, San Antonio presence"
+2025-09-16,SEV1Tech,"Navy Cyber Engineering, Operations & Security",Navy,"$2,029,226","Woodbridge, VA",541330,"MEDIUM - Navy cyber, NCR location"
+2025-09-16,CACI,ICE Cyber Crimes Center Dark Web Operations,ICE,"$1,656,456","Fairfax, VA",541512,"HIGH - CACI cyber intel, cleared workforce"

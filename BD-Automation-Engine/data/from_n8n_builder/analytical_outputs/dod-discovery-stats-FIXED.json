@@ -1,0 +1,22 @@
+{
+  "start_time": "2026-01-20T21:24:52.816386",
+  "api_requests": 6910,
+  "phase1_contracts_found": 345293,
+  "phase1_dod_by_code": 4,
+  "phase1_dod_by_keyword": 4,
+  "phase1_dod_contracts": 8,
+  "phase1_active_contracts": 6,
+  "phase2_with_target_firms": 0,
+  "target_firms_breakdown": {
+    "APEX": 0,
+    "INSIGHT_GLOBAL": 0,
+    "TEKSYSTEMS": 0,
+    "BELCAN": 0,
+    "SHINE": 0,
+    "DCI": 0,
+    "PATRIOT": 0,
+    "AKINA": 0
+  },
+  "end_time": "2026-01-21T00:51:05.799703",
+  "elapsed_hours": 3.436939810277778
+}

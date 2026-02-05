@@ -1,0 +1,40 @@
+{
+  "last_updated": "2026-01-23T13:36:12.739191",
+  "pipeline_run_id": "20260123_133612",
+  "files": {
+    "past_performance": {
+      "filename": "past_performance.json",
+      "size_bytes": 80236,
+      "record_count": 205
+    },
+    "prime_org_chart": {
+      "filename": "prime_org_chart.json",
+      "size_bytes": 28225,
+      "record_count": 41
+    },
+    "contact_org_chart": {
+      "filename": "contact_org_chart.json",
+      "size_bytes": 2401575,
+      "record_count": 5000
+    },
+    "program_org_chart": {
+      "filename": "program_org_chart.json",
+      "size_bytes": 265883,
+      "record_count": 423
+    },
+    "placements": {
+      "filename": "placements.json",
+      "size_bytes": 233982,
+      "record_count": 616
+    },
+    "correlation_summary_enriched": {
+      "filename": "correlation_summary_enriched.json",
+      "size_bytes": 1672,
+      "record_count": 1
+    }
+  },
+  "sources": {
+    "bullhorn_db": "C:\\Users\\gtmar\\Projects\\Auto-Claude\\BD-Automation-Engine\\Engine7_BullhornETL\\data\\bullhorn_master.db",
+    "federal_programs_csv": "C:\\Users\\gtmar\\Projects\\Auto-Claude\\BD-Automation-Engine\\Engine2_ProgramMapping\\data\\Federal Programs MASTER ENRICHED.csv"
+  }
+}

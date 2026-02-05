@@ -1,0 +1,170 @@
+{
+  "name": "Notion - Sync Jobs to Notion",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "sync-jobs-notion",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/search/hybrid",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.body.query || 'recent jobs clearance:TS/SCI' }}"
+            },
+            {
+              "name": "collection",
+              "value": "bd_knowledge"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $json.body.limit || 50 }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "fetch-jobs",
+      "name": "Fetch Jobs from Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform jobs for Notion\nconst response = $input.first().json;\nconst jobs = response.results || response.data || [];\n\nconst notionItems = jobs.map(job => ({\n  title: job.title || 'Untitled',\n  company: job.company || 'Unknown',\n  location: job.location || '',\n  clearance: job.clearance || '',\n  url: job.url || '',\n  source: job.source || 'Hub',\n  added_date: new Date().toISOString().split('T')[0]\n}));\n\nreturn {\n  json: {\n    items: notionItems,\n    count: notionItems.length\n  }\n};"
+      },
+      "id": "transform-for-notion",
+      "name": "Transform for Notion",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "create",
+        "databaseId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "Name",
+              "title": "={{ $json.title }}"
+            },
+            {
+              "key": "Company",
+              "richTextValue": "={{ $json.company }}"
+            },
+            {
+              "key": "Location",
+              "richTextValue": "={{ $json.location }}"
+            },
+            {
+              "key": "Clearance",
+              "selectValue": "={{ $json.clearance }}"
+            },
+            {
+              "key": "URL",
+              "urlValue": "={{ $json.url }}"
+            }
+          ]
+        }
+      },
+      "id": "create-notion-pages",
+      "name": "Create Notion Pages",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [850, 300],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Summarize sync results\nconst transformed = $('Transform for Notion').first().json;\n\nreturn {\n  json: {\n    success: true,\n    message: `Prepared ${transformed.count} jobs for Notion sync`,\n    count: transformed.count,\n    note: 'Notion node disabled - configure credentials and database ID',\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "summarize",
+      "name": "Summarize Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Fetch Jobs from Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Jobs from Hub": {
+      "main": [
+        [
+          {
+            "node": "Transform for Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform for Notion": {
+      "main": [
+        [
+          {
+            "node": "Summarize Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Results": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["notion", "sync", "jobs"]
+}

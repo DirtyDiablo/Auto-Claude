@@ -1,0 +1,180 @@
+program,location,total_openings,leadership_openings,lead_openings,senior_openings,junior_openings,job_sources,clearances_needed,sample_titles,prime_contractor,hiring_intensity
+Project Convergence (JADC2 Experiments),"Montgomery, Alabama",7,0,0,3,4,Insight Global,Secret; TS/SCI,SECRET NETWORK ADMINISTRATOR II (DAYS); TS/SCI NETWORK ADMINISTRATOR III (WAN) (AFTERNOON); TS/SCI NETWORK ADMINISTRATOR III (WAN) (AFTERNOON); TS/SCI NETWORK ADMINISTRATOR III (WAN) (DAY SHIFT); SECRET NETWORK ADMINISTRATOR II (WAN) (AFTERNOONS),SAIC,High
+Army AESD Enterprise Service Desk,"San Antonio, Texas",5,1,1,0,3,Insight Global,TS/SCI,"MECHANICAL ENGINEER, PE - DESIGNER; TS/SCI ENGINEERING TECHNICIAN; TS/SCI LOGISTICS SPECIALIST; TS/SCI PROGRAM MANAGER; TS/SCI PROGRAM ADMINISTRATOR",SAIC,High
+GBS (Global Broadcast Service),"San Diego, California",4,0,0,0,4,Insight Global,Secret,SYSTEMS ADMINISTRATOR; ELECTRO-MECHANICAL ASSEMBLY TECHNICIAN; V-22 AIRCRAFT MAINTENANCE AND MODIFICATION TECHNICIAN; SECRET CLEARED TECHNICAL WRITER,L3Harris (historical),Medium
+Advanced Battle Management System,"Colorado Springs, Colorado",3,0,0,1,2,Insight Global,Top Secret; Secret,PRICING ANALYST - SECRET CLEARANCE; SECRET SENIOR ELASTIC ENGINEER; SALES ENGINEER,Multi (SAIC supports parts),Medium
+Aegis Ballistic Missile Defense / Aegis Program,"Huntsville, Alabama",3,0,0,2,1,Insight Global,Secret; TS/SCI,ELECTRICAL ENGINEER - SECRET CLEARANCE; SENIOR SYSTEMS ENGINEER - SECRET CLEARANCE; TS/SCI - SENIOR SURVIVABILITY ENGINEER,Lockheed Martin,Medium
+"EDIS – Engineering, Development, Integration & Sustainment","Colorado Springs, Colorado",3,0,0,0,3,Insight Global,Top Secret; TS/SCI,SCHEDULER; SECRET SOFTWARE ENGINEER; TS/SCI - GCCS SYSTEMS ENGINEER,SAIC,Medium
+Global Service Management – Operations II,"Huntsville, Alabama",3,0,1,0,2,Insight Global,Secret,DEVSECOPS ENGINEER - SECRET CLEARANCE; PROGRAM INTEGRATOR; CAPTURE MANAGER,Leidos,Medium
+Global Service Management – Operations II,"Kings Bay, Georgia",3,0,0,0,3,Insight Global,,STRUCTURAL WELDER; BLASTER / PAINTER; SHIPFITTER,Leidos,Medium
+Integrated Base Defense Security System,"Reston, VA",3,0,0,0,3,Apex Systems,,Sr Systems Administrator; Sr ISSE; Sr Network Engineer,Leidos,Medium
+Advanced Battle Management System,"Washington, District Of Columbia",2,0,0,0,2,Insight Global,Top Secret,"TOP SECRET RESEARCH PHYSICIST 1; TOP SECRET FSR ANALYST (WASHINGTON, DC & FT. CAMPBELL, KY)",Multi (SAIC supports parts),Medium
+Air Force Advanced Battle Management System,"Alexandria, Virginia",2,0,0,0,2,Insight Global,Secret; TS/SCI,SOFTWARE ARCHITECT; TS/SCI COMPLY-TO-CONNECT & ENDPOINT POLICY ANALYST,"Multiple: SAIC, Leidos, Booz Allen Hamilton",Medium
+Army Enterprise Service Management Framework,"Colorado Springs, Colorado",2,0,0,0,2,Insight Global,TS/SCI Poly; Secret,BUYER'S TECHNICAL WRITER - SECRET; TS/SCI CI POLY SOFTWARE ENGINEER,SAIC,Medium
+Battlefield Information Collection & Exploitation System,"Norfolk, Virginia",2,0,1,0,1,Insight Global,Top Secret; Secret,SECRET DEPLOYED SUPPORT SPECIALIST; TOP SECRET TECHNICAL LEAD ENGINEERING SYSTEM,GDIT,Medium
+BICES Defense Intelligence Agency Variant,"Washington, District Of Columbia",2,0,0,0,2,Insight Global,TS/SCI Poly,COPY - TOP SECRET IAM ARCHITECT; TOP SECRET ICAM ARCHITECT,CACI + Leidos + Peraton + SAIC (various subs),Medium
+CMS Enterprise Cloud Infrastructure Services,"Dahlgren, Virginia",2,0,0,0,2,Insight Global,Top Secret; Secret,SECRET FULL STACK DEVELOPER; TOP SECRET VIRTUALIZATION/STORAGE ENGINEER,Peraton / SAIC (indicative),Medium
+Defense Enterprise Office 365 Migration / DoD365,"Mclean, Virginia",2,0,0,0,2,Insight Global,,SUPPLY CHAIN SYSTEMS ENGINEER; TRANSPORTATION AND SHIPPING COORDINATOR,Microsoft,Medium
+DIA Information Systems Engineering Office,"Dayton, Ohio",2,0,0,0,2,Insight Global,TS/SCI,SOFTWARE ENGINEER (C++); TS/SCI SYSTEMS ADMINISTRATOR,Leidos,Medium
+DIA Information Systems Engineering Office,"Kings Bay, Georgia",2,0,0,0,2,Insight Global,,MARINE ELECTRICIAN; UT INSPECTOR,Leidos,Medium
+DISA Global Service Mgmt – Ops II,"Huntsville, Alabama",2,0,1,0,1,Insight Global,Secret,WELDER; PRICING MANAGER,Leidos,Medium
+DISA JWCC – Joint Warfighting Cloud Capability,"Aberdeen Proving Ground, Maryland",2,0,0,0,2,Insight Global,TS/SCI,SECRET VULNERABILITY PENETRATION TESTER; TOP SECRET ELECTRONICS EXPLOITATION DEPLOYER,Amazon; Microsoft; Google; Oracle,Medium
+Global Service Management – Operations II,"Hampton, Virginia",2,0,0,0,2,Insight Global,TS/SCI,TSSCI CYBER ANALYST; TSSCI CYBER CAPABILITIES TRAINER,Leidos,Medium
+Integrated Base Defense Security System,"Norfolk, VA",2,0,0,0,2,Apex Systems,,Communications Network Engineer Mid (Norfolk); Siemens OpsCenter Solutions Architect,Leidos,Medium
+SPICE (Space Payload Integration & Cyber Eng),"Hill AFB, Utah",2,0,0,1,1,Insight Global,Secret,SENIOR NUCLEAR HARDNESS ELECTRICAL ENGINEER; JUNIOR NUCLEAR HARDNESS ELECTRICAL ENGINEER,SAIC / LinQuest (indicative),Medium
+Advanced Battle Management System,"Savannah, GA",1,0,0,0,1,Apex Systems,TS/SCI,VDI Systems Administrator,Multi (SAIC supports parts),Low
+Advanced Battle Management System,"Pearl City, Hawaii",1,0,0,0,1,Insight Global,Secret,SECRET CLEARED WINDOWS AND LINUX ADMIN,Multi (SAIC supports parts),Low
+Advanced Battle Management System,"East Hartford, Connecticut",1,0,0,0,1,Insight Global,,ONSITE PLM APPLICATION ANALYST,Multi (SAIC supports parts),Low
+Advanced Medium-Range Air-to-Air Missile (AMRAAM) Production & Sustainment,"Jacksonville, Florida",1,0,0,0,1,Insight Global,,CNC PROGRAMMER,Raytheon,Low
+Aegis Ballistic Missile Defense / Aegis Program,"Sunset, Utah",1,0,0,0,1,Insight Global,Top Secret,CLEARED MS&A DEVELOPER,Lockheed Martin,Low
+Aegis Ballistic Missile Defense / Aegis Program,"Austin, Texas",1,0,1,1,-1,Insight Global,TS/SCI Poly,IDENTITY ACCESS MANAGER / SME ARCHITECT,Lockheed Martin,Low
+AFCENT SCORPION Cyber Task (ISSO/ISSM Support),"Tyndall Air Force Base, FL",1,0,0,0,1,Apex Systems,Active Secret Security Clearance or higher,Information Systems Security Officer,CACI,Low
+Air Force Advanced Battle Management System,"Herndon, VA",1,0,1,0,0,Apex Systems,,EVMS Lead Program Control Consultant,"Multiple: SAIC, Leidos, Booz Allen Hamilton",Low
+Air Force Advanced Battle Management System,"Quantico, VA",1,0,0,1,0,Apex Systems,,IT Specialist Senior,"Multiple: SAIC, Leidos, Booz Allen Hamilton",Low
+Air Force Advanced Battle Management System,"Braddock, Virginia",1,0,0,0,1,Insight Global,Secret,ESS HELPDESK TECHNICIAN,"Multiple: SAIC, Leidos, Booz Allen Hamilton",Low
+Air Force Advanced Battle Management System,"Dahlgren, Virginia",1,0,0,0,1,Insight Global,Secret,SECRET WINDOWS SYSTEMS ADMINISTRATOR,"Multiple: SAIC, Leidos, Booz Allen Hamilton",Low
+Air Force Advanced Battle Management System,"Oakton, Virginia",1,0,0,0,1,Insight Global,Top Secret,ISSO- TOP SECRET- ON SITE,"Multiple: SAIC, Leidos, Booz Allen Hamilton",Low
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,"Colorado Springs, Colorado",1,0,0,0,1,Insight Global,Top Secret,"SECRET LINUX SYSTEM ADMINISTRATOR (CO SPRINGS, CO)",SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),Low
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,"Washington, District Of Columbia",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET SOFTWARE ENGINEER,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),Low
+ARCYBER Information Advantage / Mission Support (general),"Salem, Massachusetts",1,0,0,0,1,Insight Global,,SPECIAL EDUCATION PARAPROFESSIONAL,Peraton / others (Peraton lead on ARCYBER Information Advantage Enterprise line; additional primes on related work),Low
+Army Backbone Infrastructure Modernization – Task Order 2,"Sully, Virginia",1,0,0,0,1,Insight Global,Public Trust,SALES SUPPORT SPECIALIST,CACI,Low
+Army Enterprise Service Management Framework,"Middletown, Connecticut",1,0,0,0,1,Insight Global,,MODEL BASED DEFINITION ENGINEER,SAIC,Low
+Army Enterprise Service Management Framework,"Goose Creek, South Carolina",1,0,0,0,1,Insight Global,Secret,SECRET DEVOPS ENGINEER,SAIC,Low
+Army Enterprise Service Management Framework,"Atlanta, Georgia",1,0,0,0,1,Insight Global,,MAINTENANCE DATA SPECIALIST,SAIC,Low
+Army Enterprise Service Management Framework,"Vienna, Virginia",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET SPLUNK ENGINEER,SAIC,Low
+Army Enterprise Service Management Framework,"Groton, Connecticut",1,0,0,0,1,Insight Global,,CYBER SECURITY ENGINEER,SAIC,Low
+Army Integrated Battle Command System,"Hazelwood, MO",1,0,0,0,1,Apex Systems,Must be eligible for a Secret Clearance or willing to be processed for one,Software Packager/Technician - Security Tools,Northrop Grumman,Low
+Army Integrated Battle Command System Support,"Rivanna, Virginia",1,0,0,0,1,Insight Global,Top Secret,SECRET TECHNICAL EDITOR,Northrop Grumman (prime); CACI (support),Low
+Army Integrated Battle Command System Support,"Chantilly, Virginia",1,0,0,0,1,Insight Global,Top Secret,LINUX SYSTEMS ENGINEER (TS),Northrop Grumman (prime); CACI (support),Low
+Army IT Enterprise Mgmt Systems Solution,"Arlington, VA",1,0,0,0,1,Apex Systems,,Security Control Assessor,CACI,Low
+Army IT Enterprise Mgmt Systems Solution,"Fort Belvoir, VA",1,0,0,1,0,Apex Systems,,Senior Cyber Security Specialist,CACI,Low
+Army IT Enterprise Mgmt Systems Solution,"Bossier City, LA",1,0,0,0,1,Apex Systems,"secret clearance OR previously held secret clearance preferred, must have ability to obtain",Software Developer,CACI,Low
+Army IT Enterprise Mgmt Systems Solution,"Norfolk, Virginia",1,0,0,0,1,Insight Global,Secret,CLEARED MARINE ELECTRICIAN,CACI,Low
+Army IT Enterprise Mgmt Systems Solution,"Arlington, Virginia",1,0,0,0,1,Insight Global,TS/SCI,FULL STACK ENGINEER,CACI,Low
+Army IT Enterprise Mgmt Systems Solution,"Fairfax, Virginia",1,0,0,0,1,Insight Global,Secret,SECRET APPLICATION DEVELOPER,CACI,Low
+Army IT Enterprise Mgmt Systems Solution,"Ashburn, Virginia",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET .NET DEVELOPER,CACI,Low
+Army Missile & Space R&D Support (Huntsville),"Huntsville, Alabama",1,0,0,0,1,Insight Global,Secret,GNC ENGINEER (FIXED WING),Dynetics; Northrop teams,Low
+Battlefield Information Collection & Exploitation System,"Detroit, Michigan",1,0,0,0,1,Insight Global,Secret,HELP DESK SUPPORT SPEC I,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Chesapeake, Virginia",1,0,0,0,1,Insight Global,Secret,SECRET/INTERIM CLEARED OUTSIDE MACHINIST,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Niskayuna, New York",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET SYSTEM ADMIN,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Deerfield Beach, Florida",1,1,1,0,-1,Insight Global,Secret,PROGRAM MANAGER,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Huntsville, Alabama",1,0,0,0,1,Insight Global,Secret,C++ SOFTWARE ENGINEER,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Quantico, Virginia",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET ISSO,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Springfield, Virginia",1,0,0,0,1,Insight Global,,OPERATING ENGINEER 2,GDIT,Low
+Battlefield Information Collection & Exploitation System,"Hampton, Virginia",1,0,0,0,1,Insight Global,TS/SCI,TSSCI TIER 1 NETWORK MONITOR (EAST COAST),GDIT,Low
+BICES Defense Intelligence Agency Variant,"Colorado Springs, CO",1,0,0,0,1,Apex Systems,ACTIVE SECRET SECURITY CLEARANCE OR HIGHER TO BE CONS,Sr Elastic Engineer (EDR/Defend Focus),CACI + Leidos + Peraton + SAIC (various subs),Low
+CDAO Advanced AI Tools (Scale AI OTA),"Emerado, ND",1,0,0,0,1,Apex Systems,Secret Clearance Required,(VMS) NDT Test Examiner 2,Scale AI,Low
+CDAO Advanced AI Tools (Scale AI OTA),"Goose Creek, South Carolina",1,0,0,0,1,Insight Global,Secret,SECRET MICROSOFT SYSTEMS ENGINEER,Scale AI,Low
+Cloud One (USAF Cloud Program),"Dayton, Ohio",1,0,0,0,1,Insight Global,,SOFTWARE ENGINEER,SAIC,Low
+CMS Enterprise Cloud Infrastructure Services,"Fayetteville, NC",1,0,0,0,1,Apex Systems,active Secret Clearance eligible for upgrade.,Cloud Engineer,Peraton / SAIC (indicative),Low
+CMS Enterprise Cloud Infrastructure Services,"Vienna, Virginia",1,0,0,0,1,Insight Global,Top Secret Poly,TOP SECRET AWS ENGINEER,Peraton / SAIC (indicative),Low
+CMS Enterprise Cloud Infrastructure Services,"Sully, Virginia",1,0,0,1,0,Insight Global,TS/SCI Poly,SR. SOFTWARE ENGINEER W/ POLYGRAPH,Peraton / SAIC (indicative),Low
+CMS Enterprise Cloud Infrastructure Services,"Suffolk, Virginia",1,0,0,1,0,Insight Global,Secret,SECRET DATACENTER SME,Peraton / SAIC (indicative),Low
+CMS Enterprise Cloud Infrastructure Services,"Broad Run, Virginia",1,0,0,0,1,Insight Global,Top Secret,CBP GCP PLATFORM ENGINEER (MID-LEVEL),Peraton / SAIC (indicative),Low
+"Command and Control, Battle Management & Communications (MDA)","Redstone Arsenal, AL",1,0,0,0,1,Apex Systems,• Secret security clearance,SQL Developer/Administrator,Northrop Grumman,Low
+Data Center & Cloud Optimization,"Arlington, VA",1,0,0,0,1,Apex Systems,,Network Security Engineer,Peraton / Leidos (indicative),Low
+Data Center & Cloud Optimization,"Research Triangle Park, NC",1,0,0,0,1,Apex Systems,TS/SCI with Full Scope Poly (FSP),Data Center Engineer - RTP (TS/SCI with Full Scope Poly),Peraton / Leidos (indicative),Low
+Data Center & Cloud Optimization,"Alexandria, Virginia",1,0,0,0,1,Insight Global,Secret,POWER PLATFORM DEVELOPER,Peraton / Leidos (indicative),Low
+Data Center & Cloud Optimization,"Manassas, Virginia",1,0,0,1,0,Insight Global,Top Secret,SENIOR INTEGRATION SPECIALIST,Peraton / Leidos (indicative),Low
+Defense Enclave Services,"Sainte-Anne-De-Bellevue, Quebec",1,0,0,0,1,Insight Global,,PYTHON TESTER - V&V,Leidos,Low
+Defense Enterprise Office Solutions,"North Charleston, SC",1,0,0,0,1,Apex Systems,,Microsoft Systems Engineer,CSRA / Leidos (team),Low
+Defense Enterprise Office Solutions,"Fayetteville, NC",1,0,0,0,1,Apex Systems,"Secret (this position supports sponsorship for an upgraded security clearance, c",Client Support / Sys Admin - Site D,CSRA / Leidos (team),Low
+DIA Information Systems Engineering Office,"North Charleston, SC",1,0,0,0,1,Apex Systems,,Software Developer,Leidos,Low
+DIA Information Systems Engineering Office,"Elkridge, MD",1,0,0,0,1,Apex Systems,Secret Clearance Required,(VMS) Engineering Writer and Instructor,Leidos,Low
+DIA Information Systems Engineering Office,"Niskayuna, New York",1,0,0,1,0,Insight Global,,SR. POWER ELECTRIC ENGINEER - CLEARANCE REQUIRED,Leidos,Low
+DIA Information Systems Engineering Office,"Sterling Heights, Michigan",1,0,0,0,1,Insight Global,Secret,INFORMATION SYSTEMS SECURITY OFFICER (ISSO),Leidos,Low
+DIA Information Systems Engineering Office,"Wilmington, Massachusetts",1,0,0,1,0,Insight Global,TS/SCI,TS/SCI SENIOR OPTICAL SYSTEMS ENGINEER,Leidos,Low
+DIA Information Systems Engineering Office,"Beavercreek, Ohio",1,0,0,0,1,Insight Global,TS/SCI,TS/SCI SOFTWARE ENGINEER (AFSIM),Leidos,Low
+DIA Information Systems Engineering Office,"Salt Lake City, Utah",1,0,0,0,1,Insight Global,Secret,SECRET RF SYSTEM ENGINEER,Leidos,Low
+DIA Information Systems Engineering Office,"Berkeley, Missouri",1,0,0,0,1,Insight Global,,NONDESTRUCTIVE EVALUATION ENGINEER (NDE),Leidos,Low
+DIA Information Systems Engineering Office,"Huntsville, Alabama",1,0,0,0,1,Insight Global,Secret,2ND SHIFT CNC MACHINIST LEVEL 5,Leidos,Low
+DIA Information Systems Engineering Office,"Camden, New Jersey",1,0,0,0,1,Insight Global,Secret,RUST DEVELOPER,Leidos,Low
+DIA Information Systems Engineering Office,"Hanover, Maryland",1,0,0,0,1,Insight Global,TS/SCI Poly,TS/SCI + POLY CLEARED LINUX ADMIN/TEST ENGINEER,Leidos,Low
+DIA Information Systems Engineering Office,"Scott Air Force Base, Illinois",1,0,0,0,1,Insight Global,Top Secret,DATA ENGINEER,Leidos,Low
+DIA Information Systems Engineering Office,"Frederick, Maryland",1,0,1,0,0,Insight Global,,PRE-DEPLOYMENT MANAGER,Leidos,Low
+DIA Information Systems Engineering Office,"Madison, Alabama",1,0,1,0,0,Insight Global,,PROJECT MANAGER,Leidos,Low
+DIA Information Systems Engineering Office,"Wailuku, Hawaii",1,0,0,0,1,Insight Global,Top Secret,CONSTRUCTION SURVEILLANCE TECHNICIAN (CST) I,Leidos,Low
+DIA Information Systems Engineering Office,"Cleveland, Ohio",1,0,0,0,1,Insight Global,,QUALITY ENGINEER,Leidos,Low
+DIA Information Systems Engineering Office,"Grand Forks, North Dakota",1,0,0,0,1,Insight Global,Secret,SECRET SATELLITE SYSTEMS ENGINEER,Leidos,Low
+DISA Global Service Mgmt – Ops II,"Muscatine, Iowa",1,0,0,0,1,Insight Global,,REGISTERED NURSE,Leidos,Low
+DISA Global Service Mgmt – Ops II,"Kings Bay, Georgia",1,0,0,0,1,Insight Global,,SHIPWRIGHT,Leidos,Low
+DISA Global Service Mgmt – Ops II,"Meridianville, Alabama",1,0,0,1,0,Insight Global,Secret,UH-60 SHEET METAL AIRCRAFT MECHANIC IIII,Leidos,Low
+Distributed Common Ground System (AF),"Hampton, VA",1,0,0,0,1,Apex Systems,,Tier 1 Network Monitor,BAE; multiple,Low
+DTRA IAC-MAC Research & Analysis,"Bossier City, LA",1,0,0,0,1,Apex Systems,active secret clearance,Software Developer Advisor,CACI,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Plymouth, Minnesota",1,0,0,0,1,Insight Global,Secret,FPGA DESIGN ENGINEER - SECRET CLEARANCE,SAIC,Low
+"EDIS – Engineering, Development, Integration & Sustainment","El Segundo, California",1,0,0,0,1,Insight Global,TS/SCI,TRANSITION TO OPERATIONS ENGINEER,SAIC,Low
+"EDIS – Engineering, Development, Integration & Sustainment","New London, Connecticut",1,0,0,0,1,Insight Global,Secret,MECHANICAL SYSTEMS ENGINEER,SAIC,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Broomfield, Colorado",1,0,0,0,1,Insight Global,TS/SCI,EMBEDDED SOFTWARE ENGINEER,SAIC,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Seattle, Washington",1,0,0,1,0,Insight Global,Top Secret,SENIOR MECHANICAL EQUIPMENT & TOOL ENGINEER,SAIC,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Manchester, New Hampshire",1,0,0,0,1,Insight Global,Top Secret,CLEARED ELECTRONIC WARFARE ENGINEER,SAIC,Low
+GBS (Global Broadcast Service),"Vista, California",1,0,0,0,1,Insight Global,Secret,SECRET CUSTOMER SUPPORT ADMIN,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Palmdale, California",1,0,0,0,1,Insight Global,Secret,SECRET NON-DESTRUCTIVE TEST TECHNICIAN 2/3,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Anaheim, California",1,0,0,0,1,Insight Global,Secret,SYSTEMS ENGINEER - LEVEL 3,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Beale AFB, California",1,0,0,0,1,Insight Global,TS/SCI,TSSCI TIER 1 NETWORK MONITOR,L3Harris (historical),Low
+GBS (Global Broadcast Service),"El Segundo, California",1,0,0,0,1,Insight Global,TS/SCI,SAFETY ENGINEER,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Santa Cruz, California",1,0,0,0,1,Insight Global,,SUPPORT COUNSELOR,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Solana Beach, California",1,0,0,0,1,Insight Global,Secret,AEROMECHANICAL ENGINEER,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Jacksonville, North Carolina",1,0,0,0,1,Insight Global,Secret,SECRET AMPHIBIOUS RAIDS INSTRUCTOR,L3Harris (historical),Low
+GBS (Global Broadcast Service),"Hanahan, South Carolina",1,0,0,1,0,Insight Global,TS/SCI,TS/SCI SENIOR DEVSECOPS ENGINEER,L3Harris (historical),Low
+Global Command and Control System – Joint,"Kings Bay, Georgia",1,0,0,0,1,Insight Global,,PIPEFITTER,Northrop Grumman,Low
+Global Command and Control System – Joint,"Sunset, Utah",1,0,1,0,0,Insight Global,Secret,SECRET LEAD F-16 SIMULATOR TECHNICIAN,Northrop Grumman,Low
+Global Command and Control System – Joint (Variant),"Windsor Mill, Maryland",1,0,0,1,0,Insight Global,,SENIOR POSTGRES DATABASE ENGINEER,Leidos,Low
+Global Command and Control System – Joint (Variant),"Cockeysville, Maryland",1,0,0,0,1,Insight Global,Secret,ELECTRICAL ENGINEER,Leidos,Low
+Global Network Operations (DISA GSM-O II),"Montgomery, Alabama",1,0,0,0,1,Insight Global,Secret,SECRET SECURITY ENGINEER (BOUNDARY),Leidos,Low
+Global Network Operations (DISA GSM-O II),"Grand Forks, North Dakota",1,0,0,0,1,Insight Global,TS/SCI,TS/SCI SYSTEM ADMINISTRATOR,Leidos,Low
+Global Network Operations (DISA GSM-O II),"'Aiea, Hawaii",1,0,0,0,1,Insight Global,Secret,SR NETWORK DESIGN ENGINEER,Leidos,Low
+Global Service Management – Operations II,"Tarpon Springs, Florida",1,0,0,0,1,Insight Global,,HOSPITAL SECURITY OFFICER,Leidos,Low
+Global Service Management – Operations II,"Dayton, Ohio",1,0,0,0,1,Insight Global,TS/SCI,KUBERNETES ADMINISTRATOR,Leidos,Low
+Global Service Management – Operations II,"Wilmington, Delaware",1,0,0,1,0,Insight Global,,SENIOR ANALYST – IT CAPITAL FINANCIAL MANAGEMENT – INTL INDIA,Leidos,Low
+Global Service Management – Operations II,"Albuquerque, New Mexico",1,0,0,0,1,Insight Global,Secret,SECRET ISSO,Leidos,Low
+Global Service Management – Operations II,"Suffolk, Virginia",1,0,0,0,1,Insight Global,Secret,SECRET KNOWLEDGE MANAGEMENT SPECIALIST,Leidos,Low
+Global Service Management – Operations II,"Woburn, Massachusetts",1,0,0,0,1,Insight Global,,HARDWARE LAB STRING ENGINEER,Leidos,Low
+Global Service Management – Operations II,"Chambersburg, Pennsylvania",1,1,1,0,-1,Insight Global,Secret,DEPUTY PROGRAM MANAGER,Leidos,Low
+Global Service Management – Operations II,"Sterling Heights, Michigan",1,0,1,0,0,Insight Global,,"INFORMATION SYSTEM SECURITY MANAGER (ISSM) - WARREN, MICHIGAN",Leidos,Low
+Global Service Management – Operations II,"O'fallon, Illinois",1,0,0,1,0,Insight Global,Top Secret,AIR MOBILITY OPERATIONS SME,Leidos,Low
+Global Service Management – Operations II,"New York, New York",1,0,0,0,1,Insight Global,,COLDFUSION DEVELOPER,Leidos,Low
+Global Solutions Management – Operations II,"Saint Louis, Missouri",1,0,0,0,1,Insight Global,Secret,SECRET CLEARED SOLUTIONS ARCHITECT,Leidos,Low
+Global Solutions Management – Operations II,"Fort Bliss, Texas",1,0,0,0,1,Insight Global,Secret,SUPERINTENDENT - MILCON,Leidos,Low
+GMD Weapon System (Ground C2),"Tucson, Arizona",1,0,0,1,0,Insight Global,Secret,SENIOR SOFTWARE ENGINEER (SECRET CLEARANCE),Northrop Grumman,Low
+GPS Next-Gen Operational Control System,"Orlando, FL",1,0,0,0,1,Apex Systems,ACTIVE TOP SECRET SECURITY CLEARANCE OR HIGHER AND BE ABL,Structural Mechanical/Professional Engineer,Raytheon Intelligence & Space,Low
+GPS Next-Gen Operational Control System,"Aurora, CO",1,0,0,0,1,Apex Systems,,Software Engineer - ENG05 - Cleared On-Site,Raytheon Intelligence & Space,Low
+GPS Next-Gen Operational Control System,"Aurora, Colorado",1,0,0,0,1,Insight Global,Secret,SECRET INTEGRATION AND TEST ENGINEER - LEVEL 4,Raytheon Intelligence & Space,Low
+GPS Operational Control System (sustainment),"Vandenberg Space Force Base, CA",1,0,0,0,1,Apex Systems,ACTIVE TOP SECRET SECURITY CLEARANCE OR HIGHER AND BE ABL,Technicians &amp; Engineers,Raytheon,Low
+GRASP (Raytheon/Peraton),"North Charleston, SC",1,0,0,0,1,Apex Systems,,Software Developer,Peraton,Low
+GRASP (Raytheon/Peraton),"Salt Lake City, Utah",1,0,0,0,1,Insight Global,,FIELD ENGINEER (CENTRAL US),Peraton,Low
+Ground-Based Midcourse Defense,"Tucson, AZ",1,0,0,0,1,Apex Systems,,Data Entry Specialist,Boeing (prime); Northrop & Raytheon (NGI),Low
+Ground-Based Midcourse Defense,"Huntsville, Alabama",1,0,0,0,1,Insight Global,Secret,MECHANICAL ENGINEER - SECRET CLEARANCE,Boeing (prime); Northrop & Raytheon (NGI),Low
+HHS Advanced Secure Data Repository,"Washington, VA",1,0,0,0,1,Apex Systems,,Sr Business Systems Analyst (PPBE),GDIT / SAIC (indicative),Low
+Hypersonic & Ballistic Tracking Space Sensor,"Chandler, Arizona",1,0,0,1,0,Insight Global,,CLEARED GNC SR. PRINCIPAL ENGINEER,Northrop & L3Harris (co-primes),Low
+Integrated Air & Missile Defense,"Andover, MA",1,0,0,0,1,Apex Systems,,JAVA/REACT Developer,Raytheon,Low
+Integrated Base Defense Security System,"Washington, VA",1,0,0,0,1,Apex Systems,,.NET Developer - Placement,Leidos,Low
+Integrated Base Defense Security System,"Jacksonville, NC",1,0,0,0,1,Apex Systems,,Network Switching Design Engineer Sr-Camp Lejeune,Leidos,Low
+Integrated Base Defense Security System,"Fort Belvoir, VA",1,0,0,0,1,Apex Systems,TS/SCI with active POLY,Systems Administrator,Leidos,Low
+Integrated Digital Engineering Environment,"Tucson, Arizona",1,0,0,0,1,Insight Global,Secret,ELECTRICAL ENGINEER 4,Northrop Grumman,Low
+Intelligence Systems Enterprise Operations,"Jessup, Maryland",1,0,0,0,1,Insight Global,TS/SCI Poly,TS/SCI WITH POLY CYBER NETWORK DEFENSE AND EXPLOITATION ANALYST,Leidos,Low
+Intelligence Systems Enterprise Operations,"San Francisco, California",1,0,0,0,1,Insight Global,Secret,"SECRET FSR ANALYST (CALIBAN: SAN FRANCISCO, CA; MIAMI, FL; JUNEAU, AK)",Leidos,Low
+Intelligence Systems Infrastructure Tools & Enhancements,"San Diego, CA",1,0,1,0,0,Apex Systems,,Engineering Manager,Northrop Grumman,Low
+MDA Tactical Embedded Systems,"Chandler, AZ",1,0,0,0,1,Apex Systems,Top Secret clearance required,(VMS) Guidance Navigation &amp; Control Engineer,Northrop Grumman,Low
+Mission Partner Environment (Field Ops / MPCO),"Dhs, Virginia",1,0,0,0,1,Insight Global,Public Trust,PROJECT CONTROLS,GDIT,Low
+MSS Smart Systems (Palantir contract),"Norfolk, Virginia",1,0,0,0,1,Insight Global,Secret,DATA ENGINEER,Palantir,Low
+NARSIL – Advanced Research for System Intelligence & Learning,"O'fallon, Illinois",1,0,0,0,1,Insight Global,Secret,DATA ANALYST,Peraton,Low
+NARSIL – Advanced Research for System Intelligence & Learning,"Herndon, Virginia",1,0,0,0,1,Insight Global,Secret,SECRET DATABASE ENGINEER,Peraton,Low
+NARSIL – Advanced Research for System Intelligence & Learning,"Suffolk, Virginia",1,0,0,0,1,Insight Global,,SIMULATION SYSTEMS ENGINEER II,Peraton,Low
+NASA SENSE (Space Comms & Tracking),"Washington, VA",1,0,0,0,1,Apex Systems,,Oracle DBA,Peraton,Low
+Navy Aegis Combat System Modernization,"Fort Worth, TX",1,0,0,0,1,Apex Systems,,IT System Engineer,Lockheed Martin,Low
+Next-Gen OPIR (Ground + Payload),"Redondo Beach, California",1,0,0,0,1,Insight Global,TS/SCI,TS/SCI C++ SOFTWARE ENGINEER,Northrop Grumman,Low
+Next-Generation Overhead Persistent Infrared,"El Segundo, California",1,0,0,0,1,Insight Global,TS/SCI,VERIFICATION & VALIDATION ENGINEER,Northrop Grumman,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","St. Louis, MO",1,0,0,0,1,Apex Systems,,Ops Tech II,Leidos,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Carlsbad, CA",1,0,0,0,1,Apex Systems,,Secure Enterprise Engineer,Leidos,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Mount Vernon, Virginia",1,0,0,1,0,Insight Global,TS/SCI,TS/SCI SR. NETWORK ENGINEER,Leidos,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Greece, New York",1,0,0,0,1,Insight Global,,DIGITAL HARDWARE ENGINEER,Leidos,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Lincoln, Massachusetts",1,0,0,0,1,Insight Global,Top Secret,CYBER SYSTEMS & NETWORK OPERATIONS SPECIALIST- TS,Leidos,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Fairfax, Virginia",1,0,0,0,1,Insight Global,Secret,SECRET NETWORK ENGINEER,Leidos,Low
+Peraton ARCYBER Information Advantage Enterprise,"Fort George G Meade, MD",1,0,0,0,1,Apex Systems,,Cyber Security Watch Officer LCAT 1 Weekday Night (Monday - Thursday 9pm - 7am),Peraton,Low
+PRISM Support Services (Consolidated),"Milford Mill, MD",1,0,0,1,0,Apex Systems,,Microsoft Copilot Studio AI SME,"11 MA-IDIQ primes (incl. CTC, SAIC, Booz Allen, ManTech)",Low
+Project Convergence (JADC2 Experiments),"Charlottesville, VA",1,0,0,0,1,Apex Systems,TS/SCI Clearance level,Install Specialist / IT Certified Professional,SAIC,Low
+Project Convergence (JADC2 Experiments),"Monroeville, Pennsylvania",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET HARDWARE TECH,SAIC,Low
+Project Convergence (JADC2 Experiments),"Huntsville, Alabama",1,0,0,0,1,Insight Global,Top Secret,TOP SECRET OPERATIONS SUPPORT ENGINEER,SAIC,Low
+SITEC III – Enterprise Operations & Maintenance,"Juno Beach, FL",1,0,0,1,0,Apex Systems,,Project Management Consultant-Level 3 - Senior (11 - 15 Years),Peraton,Low
+SITEC III – Enterprise Operations & Maintenance,"Pensacola, FL",1,0,0,0,1,Apex Systems,,Deployed Support Specialist Mid- Pensacola,Peraton,Low
+SITEC III – Enterprise Operations & Maintenance,"Tampa, Florida",1,0,0,0,1,Insight Global,Secret,SR PROJECT ENGINEER,Peraton,Low

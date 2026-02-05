@@ -8,7 +8,10 @@ from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 import hashlib
 import json
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -75,8 +78,8 @@ class BDDocumentPipeline:
                     "columns": list(df.columns),
                     "data": df.to_dict(orient="records")[:100]  # Limit rows
                 })
-            except:
-                pass
+            except Exception as e:
+                logger.debug("table_export_failed: %s", e)
 
         # Build pages list
         pages = []
@@ -137,8 +140,8 @@ class BDDocumentPipeline:
                         "index": i,
                         "data": table.extract()[:50]  # Limit rows
                     })
-            except:
-                pass
+            except Exception as e:
+                logger.debug("pdf_table_extract_failed: %s", e)
 
         doc.close()
 

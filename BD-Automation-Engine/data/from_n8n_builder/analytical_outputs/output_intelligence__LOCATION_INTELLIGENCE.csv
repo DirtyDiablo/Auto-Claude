@@ -1,0 +1,51 @@
+Location,Total Jobs,High Confidence Jobs,Top Primes,Top Programs,BD Priority
+"Huntsville, Alabama",13,2,Lockheed Martin; Dynetics; GDIT; SAIC; Leidos,Ground-Based Midcourse Defense; Aegis Ballistic Missile Defens; Army Missile & Space R&D Suppo; Battlefield Information Collec; DIA Information Systems Engine,MEDIUM
+"Colorado Springs, Colorado",9,9,SAIC; Multi,"Army Enterprise Service Manage; Advanced Battle Management Sys; EDIS – Engineering, Developmen; Air Force Cyber Operations / P",HIGH
+"Montgomery, Alabama",8,7,SAIC; Leidos,Project Convergence (JADC2 Exp; Global Network Operations (DIS,HIGH
+"Kings Bay, Georgia",7,0,Northrop Grumman; Leidos,DIA Information Systems Engine; DISA Global Service Mgmt – Ops; Global Command and Control Sys; Global Service Management – Op,LOW
+"Washington, District Of Columbia",5,0,SAIC; CACI + Leidos + Pera; Multi,Advanced Battle Management Sys; BICES Defense Intelligence Age; Air Force Cyber Operations / P,LOW
+"San Antonio, Texas",5,5,SAIC,Army AESD Enterprise Service D,HIGH
+"Norfolk, Virginia",4,1,GDIT; Palantir; CACI,Battlefield Information Collec; MSS Smart Systems (Palantir co; Army IT Enterprise Mgmt System,MEDIUM
+"San Diego, California",4,0,L3Harris,GBS (Global Broadcast Service),LOW
+"Dayton, Ohio",4,0,SAIC; Leidos,Cloud One (USAF Cloud Program); DIA Information Systems Engine; Global Service Management – Op,LOW
+"Washington, VA",3,1,GDIT / SAIC; Peraton; Leidos,Integrated Base Defense Securi; HHS Advanced Secure Data Repos; NASA SENSE (Space Comms & Trac,MEDIUM
+"Reston, VA",3,3,Leidos,Integrated Base Defense Securi,HIGH
+"North Charleston, SC",3,1,CSRA / Leidos; Peraton; Leidos,Defense Enterprise Office Solu; GRASP (Raytheon/Peraton); DIA Information Systems Engine,MEDIUM
+"Dahlgren, Virginia",3,0,"Peraton / SAIC; Multiple: SAIC, Leid",Air Force Advanced Battle Mana; CMS Enterprise Cloud Infrastru,LOW
+"El Segundo, California",3,1,SAIC; Northrop Grumman; L3Harris,"GBS (Global Broadcast Service); EDIS – Engineering, Developmen; Next-Generation Overhead Persi",MEDIUM
+"Alexandria, Virginia",3,0,"Peraton / Leidos; Multiple: SAIC, Leid",Air Force Advanced Battle Mana; Data Center & Cloud Optimizati,LOW
+"Hampton, Virginia",3,0,GDIT; Leidos,Battlefield Information Collec; Global Service Management – Op,LOW
+"Suffolk, Virginia",3,1,Peraton / SAIC; Peraton; Leidos,CMS Enterprise Cloud Infrastru; NARSIL – Advanced Research for; Global Service Management – Op,MEDIUM
+"Bossier City, LA",2,0,CACI,DTRA IAC-MAC Research & Analys; Army IT Enterprise Mgmt System,LOW
+"Arlington, VA",2,2,Peraton / Leidos; CACI,Data Center & Cloud Optimizati; Army IT Enterprise Mgmt System,MEDIUM
+"Norfolk, VA",2,0,Leidos,Integrated Base Defense Securi,LOW
+"Fort Belvoir, VA",2,0,Leidos; CACI,Integrated Base Defense Securi; Army IT Enterprise Mgmt System,LOW
+"Fayetteville, NC",2,0,CSRA / Leidos; Peraton / SAIC,Defense Enterprise Office Solu; CMS Enterprise Cloud Infrastru,LOW
+"Niskayuna, New York",2,0,GDIT; Leidos,DIA Information Systems Engine; Battlefield Information Collec,LOW
+"Tucson, Arizona",2,0,Northrop Grumman,GMD Weapon System (Ground C2); Integrated Digital Engineering,LOW
+"Aberdeen Proving Ground, Maryland",2,0,Amazon,DISA JWCC – Joint Warfighting ,LOW
+"Salt Lake City, Utah",2,1,Peraton; Leidos,DIA Information Systems Engine; GRASP (Raytheon/Peraton),MEDIUM
+"Sterling Heights, Michigan",2,0,Leidos,DIA Information Systems Engine; Global Service Management – Op,LOW
+"Goose Creek, South Carolina",2,0,SAIC; Scale AI,Army Enterprise Service Manage; CDAO Advanced AI Tools (Scale ,LOW
+"Sunset, Utah",2,0,Northrop Grumman; Lockheed Martin,Aegis Ballistic Missile Defens; Global Command and Control Sys,LOW
+"Hill AFB, Utah",2,2,SAIC / LinQuest,SPICE (Space Payload Integrati,MEDIUM
+"Sully, Virginia",2,0,Peraton / SAIC; CACI,CMS Enterprise Cloud Infrastru; Army Backbone Infrastructure M,LOW
+"Mclean, Virginia",2,1,Microsoft,Defense Enterprise Office 365 ,MEDIUM
+"Vienna, Virginia",2,0,SAIC; Peraton / SAIC,Army Enterprise Service Manage; CMS Enterprise Cloud Infrastru,LOW
+"Grand Forks, North Dakota",2,0,Leidos,DIA Information Systems Engine; Global Network Operations (DIS,LOW
+"O'fallon, Illinois",2,0,Peraton; Leidos,NARSIL – Advanced Research for; Global Service Management – Op,LOW
+"Fairfax, Virginia",2,1,Leidos; CACI,NGEN-R SMIT – Navy Next Genera; Army IT Enterprise Mgmt System,MEDIUM
+"Tyndall Air Force Base, FL",1,0,CACI,AFCENT SCORPION Cyber Task (IS,LOW
+"Herndon, VA",1,1,"Multiple: SAIC, Leid",Air Force Advanced Battle Mana,MEDIUM
+"Juno Beach, FL",1,0,Peraton,SITEC III – Enterprise Operati,LOW
+"St. Louis, MO",1,0,Leidos,NGEN-R SMIT – Navy Next Genera,LOW
+"Jacksonville, NC",1,0,Leidos,Integrated Base Defense Securi,LOW
+"Fort George G Meade, MD",1,1,Peraton,Peraton ARCYBER Information Ad,MEDIUM
+"Hampton, VA",1,1,BAE,Distributed Common Ground Syst,MEDIUM
+"Orlando, FL",1,0,Raytheon Intelligenc,GPS Next-Gen Operational Contr,LOW
+"San Diego, CA",1,0,Northrop Grumman,Intelligence Systems Infrastru,LOW
+"Chandler, AZ",1,1,Northrop Grumman,MDA Tactical Embedded Systems,MEDIUM
+"Hazelwood, MO",1,0,Northrop Grumman,Army Integrated Battle Command,LOW
+"Charlottesville, VA",1,1,SAIC,Project Convergence (JADC2 Exp,MEDIUM
+"Tucson, AZ",1,0,Boeing,Ground-Based Midcourse Defense,LOW
+"Milford Mill, MD",1,1,11 MA-IDIQ primes,PRISM Support Services (Consol,MEDIUM

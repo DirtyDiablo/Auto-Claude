@@ -1,0 +1,9 @@
+category,program_count,total_mentions,unique_keywords,sample_keywords
+Languages,9,11,8,SQL; .NET; Rust; PYTHON; REACT; C++; Assembly; JAVA
+Network,6,7,4,LINUX; F5; Linux; WINDOWS
+Database,4,4,3,ORACLE; POSTGRES; Elastic
+Defense,2,3,3,GCCS; Electronic Warfare; AFSIM
+DevSecOps,3,3,2,DevSecOps; DevOps
+Cloud,2,3,3,Kubernetes; GCP; AWS
+Analytics,1,1,1,Splunk
+Security,1,1,1,CISCO

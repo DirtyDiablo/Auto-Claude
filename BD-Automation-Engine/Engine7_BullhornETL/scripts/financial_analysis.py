@@ -6,6 +6,7 @@ Calculates revenue, margins, and financial metrics from Bullhorn placement data.
 import sqlite3
 import json
 import csv
+import logging
 from pathlib import Path
 from datetime import datetime, timedelta
 from collections import defaultdict
@@ -42,7 +43,8 @@ def calculate_placement_revenue(placement: dict) -> dict:
             start = datetime.strptime(str(start_date)[:10], '%Y-%m-%d')
             end = datetime.strptime(str(end_date)[:10], '%Y-%m-%d')
             duration_days = (end - start).days
-        except:
+        except ValueError as e:
+            logging.debug("date_parse_failed for placement duration: %s", e)
             duration_days = DEFAULT_PLACEMENT_MONTHS * 30
     else:
         duration_days = DEFAULT_PLACEMENT_MONTHS * 30

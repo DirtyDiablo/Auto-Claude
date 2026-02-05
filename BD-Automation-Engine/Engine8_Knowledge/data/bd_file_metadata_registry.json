@@ -1,0 +1,634 @@
+{
+  "registry_version": "1.0.0",
+  "generated": "2026-02-05",
+  "system": "PTS BD Intelligence Hub - Unified File Metadata Registry",
+  "purpose": "Master index for AI search agents, dashboard queries, and semantic retrieval. Every file tagged with intelligence category, search keywords, collection mapping, source project, and data lineage.",
+  "total_vectors": 611654,
+  "qdrant_collections": {
+    "contacts": {"vectors": 193593, "description": "Personnel intelligence across all prime contractors, programs, and locations"},
+    "activities": {"vectors": 373765, "description": "CRM activities, call notes, placement history, recruiter interactions"},
+    "documents": {"vectors": 24880, "description": "Federal contracts, FPDS data, opportunities, solicitations, analysis reports, briefings"},
+    "jobs": {"vectors": 10475, "description": "Job postings, scraped competitor jobs, enriched requisitions"},
+    "programs": {"vectors": 8941, "description": "Federal defense programs, contract vehicles, prime/sub relationships"}
+  },
+
+  "intelligence_categories": {
+    "CONTACT_INTEL": "Personnel data, org charts, hierarchy classifications, contact scoring",
+    "PROGRAM_INTEL": "Federal program details, contract values, prime/sub mappings, period of performance",
+    "CONTRACT_INTEL": "FPDS awards, USASpending data, contract vehicles, PIIDs, subawards",
+    "JOB_INTEL": "Active requisitions, labor gaps, hiring signals, clearance requirements",
+    "HUMINT": "Call notes intelligence, pain points, insider knowledge, relationship dynamics",
+    "PAST_PERFORMANCE": "PTS placement history, prime contractor experience, capability narratives",
+    "BD_STRATEGY": "Playbooks, call sheets, outreach scripts, targeting priorities",
+    "COMPETITIVE_INTEL": "Competitor staffing activity, competitor job scrapes, market positioning",
+    "FINANCIAL_INTEL": "Bill rates, margins, revenue data, contract values, headcount costs",
+    "ARCHITECTURE": "System design, implementation plans, technical documentation"
+  },
+
+  "source_projects": {
+    "bd-automation-engine": {"path": "C:/Auto-Claud/Auto-Claude/BD-Automation-Engine", "role": "Hub - unified data store and API", "status": "ACTIVE"},
+    "data-scraper": {"path": "C:/Auto-Claud/data-scraper", "role": "Feeder - job scraping, contract enrichment, competitive intel", "status": "ARCHIVED_TO_HUB"},
+    "n8n-builder": {"path": "C:/Auto-Claud/N8N-Builder", "role": "Feeder - contact databases, Bullhorn processing, LangGraph workflows", "status": "ARCHIVED_TO_HUB"}
+  },
+
+  "directories": [
+    {
+      "path": "Engine7_BullhornETL/colton_scurry_analysis/FINAL_OUTPUTS/",
+      "intelligence_category": ["HUMINT", "BD_STRATEGY", "PAST_PERFORMANCE", "CONTACT_INTEL"],
+      "description": "Colton Scurry account takeover - final executive deliverables. $60K weekly spread, 27 contractors, 16 primes, 1,183 contacts analyzed.",
+      "search_tags": ["colton scurry", "account takeover", "portfolio", "executive summary", "bd playbook", "fair game contacts", "referral network", "action items"],
+      "priority": "CRITICAL",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "Engine7_BullhornETL/colton_scurry_analysis/ANALYSIS/",
+      "intelligence_category": ["HUMINT", "CONTACT_INTEL", "PROGRAM_INTEL"],
+      "description": "Deep analytical breakdowns - 16 prime contractors, 264 placements, 22 open jobs, 45+ programs, 1,183 contacts with org structure mapping.",
+      "search_tags": ["prime contractor breakdown", "active placements", "open jobs pipeline", "contacts database", "program master list", "transition checklist", "authored notes"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "Engine7_BullhornETL/colton_scurry_analysis/ANALYSIS/NOTES_DEEP_DIVE/",
+      "intelligence_category": ["HUMINT", "CONTACT_INTEL", "PROGRAM_INTEL"],
+      "description": "2,687 notes deep dive - contact-program matrix (834KB), org structure maps, prime-to-program mappings, actionable intelligence extracts.",
+      "search_tags": ["notes deep dive", "contact program matrix", "org structure", "prime contractor programs", "actionable insights", "full notes export", "intelligence extract"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "outputs/coworker_takeover/",
+      "intelligence_category": ["BD_STRATEGY", "CONTACT_INTEL", "PROGRAM_INTEL"],
+      "description": "Coworker BD takeover analysis - master contact data, per-program analysis (29 programs), structured playbook, org chart data.",
+      "search_tags": ["coworker takeover", "bd playbook", "program analysis", "org chart", "master data"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "outputs/BD_Briefings/",
+      "intelligence_category": ["BD_STRATEGY", "HUMINT"],
+      "description": "Auto-generated BD briefings - call scripts, emails, talking points, playbooks per program opportunity. Covers AF DCGS, BICES, Corporate HQ, NSA Programs.",
+      "search_tags": ["bd briefing", "call script", "email template", "talking points", "playbook", "AF DCGS", "BICES", "Langley", "PACAF", "Wright-Patt"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "outputs/bd_dashboard/",
+      "intelligence_category": ["CONTACT_INTEL", "PROGRAM_INTEL", "JOB_INTEL"],
+      "description": "Dashboard JSON data feeds - classified contacts (9.6MB), mindmap nodes/edges, enriched jobs/programs/contractors.",
+      "search_tags": ["dashboard", "contacts classified", "mindmap", "enriched jobs", "enriched programs", "visualization"],
+      "priority": "MEDIUM",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "dashboard/public/data/",
+      "intelligence_category": ["CONTACT_INTEL", "PROGRAM_INTEL", "JOB_INTEL", "PAST_PERFORMANCE", "HUMINT"],
+      "description": "Live dashboard data - 25 JSON files covering contacts, jobs, programs, placements, call notes by contact/program/prime/location, org charts, referral networks.",
+      "search_tags": ["dashboard live data", "contacts", "jobs", "programs", "placements", "call notes", "org chart", "referral network", "past performance"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "docs/Claude Exports/",
+      "intelligence_category": ["ARCHITECTURE"],
+      "description": "Claude session exports - architectural decisions, system design sessions, integration documentation. 12+ files capturing design reasoning.",
+      "search_tags": ["architecture", "design session", "apify audit", "engine optimization", "program mapping design", "notion integration", "MCP server", "system design"],
+      "priority": "MEDIUM",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_data_scraper/contracts/",
+      "intelligence_category": ["CONTRACT_INTEL", "FINANCIAL_INTEL"],
+      "description": "Federal contract intelligence from Data-Scraper - FPDS enriched targets, DoD 100M+ contracts, opportunities, solicitations, subawards, USASpending data.",
+      "search_tags": ["FPDS", "federal contract", "DoD", "USASpending", "subaward", "solicitation", "opportunity", "PIID", "contract vehicle", "100M"],
+      "priority": "CRITICAL",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_data_scraper/contacts/",
+      "intelligence_category": ["CONTACT_INTEL", "COMPETITIVE_INTEL"],
+      "description": "Contact intelligence from Data-Scraper - Bullhorn master contacts, fair game/claimed contacts, org chart data, ZoomInfo exports, Colton Scurry handoff.",
+      "search_tags": ["contacts", "bullhorn", "fair game", "claimed", "org chart", "ZoomInfo", "L3Harris", "colton scurry"],
+      "priority": "HIGH",
+      "qdrant_collection": "contacts"
+    },
+    {
+      "path": "data/from_data_scraper/jobs/",
+      "intelligence_category": ["JOB_INTEL", "COMPETITIVE_INTEL"],
+      "description": "Job intelligence from Data-Scraper - enriched job listings, job-to-program mapping, standardized jobs, Apify scrape exports.",
+      "search_tags": ["jobs", "enriched", "program mapping", "standardized", "apify", "scrape", "hiring signal"],
+      "priority": "HIGH",
+      "qdrant_collection": "jobs"
+    },
+    {
+      "path": "data/from_data_scraper/bullhorn_analysis/",
+      "intelligence_category": ["HUMINT", "CONTACT_INTEL", "PROGRAM_INTEL", "PAST_PERFORMANCE"],
+      "description": "CRITICAL: Bullhorn CRM analysis outputs - contact intelligence detailed, programs clean/master, primes master. THE primary source for Bullhorn-derived BD intelligence.",
+      "search_tags": ["bullhorn analysis", "contact intelligence", "programs", "primes", "CRM", "placement history", "DCGS"],
+      "priority": "CRITICAL",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_data_scraper/bullhorn_analysis/notes_intelligence/",
+      "intelligence_category": ["HUMINT", "CONTACT_INTEL", "PROGRAM_INTEL"],
+      "description": "CRITICAL: Mined intelligence from 2,687 Bullhorn call notes - author performance, programs from notes, primes from notes, gap programs, contacts intelligence.",
+      "search_tags": ["notes intelligence", "author performance", "programs from notes", "primes from notes", "gap programs", "contacts intelligence", "call notes mined", "HUMINT"],
+      "priority": "CRITICAL",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_data_scraper/bullhorn_analysis/past_performance/",
+      "intelligence_category": ["PAST_PERFORMANCE"],
+      "description": "Past performance narratives derived from Bullhorn placement history - PTS capabilities by program, prime contractor experience documentation.",
+      "search_tags": ["past performance", "placement history", "PTS capabilities", "narrative", "credentials"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_data_scraper/bullhorn_analysis/prime_dossiers/",
+      "intelligence_category": ["COMPETITIVE_INTEL", "CONTACT_INTEL"],
+      "description": "Prime contractor dossiers - detailed intelligence profiles on each major prime (GDIT, Leidos, NGC, Lockheed, etc.).",
+      "search_tags": ["prime dossier", "contractor profile", "GDIT", "Leidos", "Northrop Grumman", "Lockheed Martin", "SAIC", "Raytheon", "BAE Systems"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_data_scraper/bullhorn_analysis/enriched_intelligence/",
+      "intelligence_category": ["HUMINT", "CONTACT_INTEL", "PROGRAM_INTEL"],
+      "description": "Enhanced and advanced intelligence outputs - multi-pass enrichment combining Bullhorn data with FPDS, USASpending, and program databases.",
+      "search_tags": ["enriched intelligence", "enhanced", "advanced", "multi-pass", "cross-referenced"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_n8n_builder/contacts/",
+      "intelligence_category": ["CONTACT_INTEL"],
+      "description": "68 contact CSV files from N8N-Builder - 26 enriched per-prime CSVs (Accenture through Unclassified), base contact exports, DCGS contacts.",
+      "search_tags": ["contacts", "enriched per prime", "Accenture", "AWS", "BAE", "Boeing", "CACI", "Deloitte", "GDIT", "Jacobs", "KBR", "L3Harris", "Leidos", "Lockheed Martin", "ManTech", "Northrop Grumman", "Palantir", "Peraton", "Raytheon", "SAIC"],
+      "priority": "HIGH",
+      "qdrant_collection": "contacts"
+    },
+    {
+      "path": "data/from_n8n_builder/bullhorn/",
+      "intelligence_category": ["HUMINT", "PAST_PERFORMANCE"],
+      "description": "42 Bullhorn activity files from N8N-Builder - per-recruiter activity CSVs, sales reports, master data aggregation.",
+      "search_tags": ["bullhorn", "recruiter activity", "sales report", "interviews", "submissions", "placements"],
+      "priority": "MEDIUM",
+      "qdrant_collection": "activities"
+    },
+    {
+      "path": "data/from_n8n_builder/documents/",
+      "intelligence_category": ["CONTRACT_INTEL", "PROGRAM_INTEL"],
+      "description": "78 processed knowledge base documents from N8N-Builder - FPDS manuals, SAM.gov guides, federal procurement references.",
+      "search_tags": ["knowledge base", "FPDS", "SAM.gov", "federal procurement", "reference documents"],
+      "priority": "MEDIUM",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "data/from_n8n_builder/langgraph/",
+      "intelligence_category": ["ARCHITECTURE"],
+      "description": "12 LangGraph Python modules - BD automation workflow code (state machines, tool definitions, agent configurations).",
+      "search_tags": ["langgraph", "workflow", "automation", "agent", "state machine", "python"],
+      "priority": "LOW",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "Engine1_Scraper/",
+      "intelligence_category": ["COMPETITIVE_INTEL", "JOB_INTEL"],
+      "description": "Apify Puppeteer scraper configurations for competitor job boards (Insight Global, TEKsystems, Apex Systems, CACI).",
+      "search_tags": ["scraper", "apify", "insight global", "teksystems", "apex systems", "competitor jobs", "puppeteer"],
+      "priority": "MEDIUM",
+      "qdrant_collection": "jobs"
+    },
+    {
+      "path": "Engine2_ProgramMapping/",
+      "intelligence_category": ["PROGRAM_INTEL", "JOB_INTEL"],
+      "description": "Multi-signal program mapping engine - matches scraped jobs to 388 federal programs using location, keywords, clearance. Contains Federal Programs master CSVs.",
+      "search_tags": ["program mapping", "federal programs", "location matching", "clearance", "job enrichment", "pipeline", "388 programs"],
+      "priority": "HIGH",
+      "qdrant_collection": "programs"
+    },
+    {
+      "path": "Engine3_OrgChart/",
+      "intelligence_category": ["CONTACT_INTEL"],
+      "description": "Contact classification engine - 6-tier hierarchy system, location-to-program mapping, BD priority scoring. Contains Prime_Contacts CSVs (26 files).",
+      "search_tags": ["org chart", "contact classification", "hierarchy tier", "BD priority", "prime contacts", "location mapping"],
+      "priority": "HIGH",
+      "qdrant_collection": "contacts"
+    },
+    {
+      "path": "Engine4_Playbook/",
+      "intelligence_category": ["BD_STRATEGY"],
+      "description": "BD playbook generator - auto-generates briefings, call scripts, emails, talking points per scored opportunity.",
+      "search_tags": ["playbook generator", "call script", "email template", "briefing", "talking points", "bd outreach"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    },
+    {
+      "path": "Engine5_Scoring/",
+      "intelligence_category": ["BD_STRATEGY", "JOB_INTEL"],
+      "description": "BD scoring engine - 0-100 priority scores with Hot/Warm/Cold tier classification for opportunities.",
+      "search_tags": ["scoring", "priority score", "hot warm cold", "opportunity ranking", "BD priority"],
+      "priority": "MEDIUM",
+      "qdrant_collection": "jobs"
+    },
+    {
+      "path": "Engine7_BullhornETL/",
+      "intelligence_category": ["HUMINT", "PAST_PERFORMANCE", "CONTACT_INTEL", "FINANCIAL_INTEL"],
+      "description": "Bullhorn CRM ETL processor - 293MB SQLite with 897K rows. Generates BD intelligence reports, past performance, contact scoring, financial analysis.",
+      "search_tags": ["bullhorn", "ETL", "CRM", "candidates", "placements", "call notes", "contact scores", "past performance", "financial analysis"],
+      "priority": "CRITICAL",
+      "qdrant_collection": "activities"
+    },
+    {
+      "path": "Engine8_Knowledge/",
+      "intelligence_category": ["ARCHITECTURE"],
+      "description": "Knowledge system - Qdrant vector store management, staged data indexing (9-phase pipeline), deduplication, RAG retrieval.",
+      "search_tags": ["knowledge system", "vector store", "qdrant", "indexing", "deduplication", "RAG", "semantic search"],
+      "priority": "HIGH",
+      "qdrant_collection": "documents"
+    }
+  ],
+
+  "files": [
+    {
+      "filename": "CONTACT_INTELLIGENCE_DETAILED.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/CONTACT_INTELLIGENCE_DETAILED.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["CONTACT_INTEL", "HUMINT"],
+      "qdrant_collection": "contacts",
+      "rows": 6158,
+      "description": "Detailed contact enrichment with program associations, interaction history, and BD scoring from Bullhorn CRM analysis.",
+      "search_tags": ["contact intelligence", "detailed", "enriched contacts", "program association", "interaction history", "BD scoring", "bullhorn", "DCGS"],
+      "query_examples": ["Bullhorn placement history DCGS", "contact intelligence detailed", "who works on DCGS programs", "contact scoring bullhorn"]
+    },
+    {
+      "filename": "CONTACTS_INTELLIGENCE.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/notes_intelligence/CONTACTS_INTELLIGENCE.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["CONTACT_INTEL", "HUMINT"],
+      "qdrant_collection": "contacts",
+      "rows": 41925,
+      "description": "Comprehensive contact database with programs, primes, clearances, mined from 2,687 Bullhorn call notes.",
+      "search_tags": ["contacts intelligence", "notes mined", "call notes", "programs", "primes", "clearances", "comprehensive"],
+      "query_examples": ["contacts with clearances", "all contacts by program", "who has TS/SCI"]
+    },
+    {
+      "filename": "PROGRAMS_FROM_NOTES.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/notes_intelligence/PROGRAMS_FROM_NOTES.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["PROGRAM_INTEL", "HUMINT"],
+      "qdrant_collection": "programs",
+      "rows": 62,
+      "description": "Federal programs extracted and validated from Bullhorn call notes - programs actually discussed in BD conversations.",
+      "search_tags": ["programs from notes", "program intelligence", "call notes programs", "discussed programs", "bullhorn programs"],
+      "query_examples": ["what programs came up in calls", "programs from bullhorn notes", "programs discussed with contacts"]
+    },
+    {
+      "filename": "PRIMES_FROM_NOTES.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/notes_intelligence/PRIMES_FROM_NOTES.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["COMPETITIVE_INTEL", "HUMINT"],
+      "qdrant_collection": "documents",
+      "rows": 50,
+      "description": "Prime contractors extracted from Bullhorn call notes - which primes are actively discussed, relationship strength indicators.",
+      "search_tags": ["primes from notes", "prime contractor intelligence", "relationship strength", "discussed primes", "bullhorn primes"],
+      "query_examples": ["which primes mentioned in calls", "prime contractor relationships", "GDIT mentions in notes"]
+    },
+    {
+      "filename": "GAP_PROGRAMS.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/notes_intelligence/GAP_PROGRAMS.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["PROGRAM_INTEL", "BD_STRATEGY"],
+      "qdrant_collection": "programs",
+      "rows": 200,
+      "description": "Programs with identified staffing gaps - BD opportunities where hiring demand exceeds supply.",
+      "search_tags": ["gap programs", "staffing gaps", "labor shortage", "BD opportunity", "hiring demand", "understaffed programs"],
+      "query_examples": ["programs with staffing gaps", "understaffed programs", "where are the labor gaps"]
+    },
+    {
+      "filename": "AUTHOR_PERFORMANCE.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/notes_intelligence/AUTHOR_PERFORMANCE.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["HUMINT", "PAST_PERFORMANCE"],
+      "qdrant_collection": "activities",
+      "description": "Recruiter/author performance metrics extracted from Bullhorn notes - activity levels, contact coverage, program engagement.",
+      "search_tags": ["author performance", "recruiter metrics", "activity levels", "note authors", "engagement tracking"],
+      "query_examples": ["recruiter performance metrics", "who wrote the most notes", "author activity levels"]
+    },
+    {
+      "filename": "PROGRAMS_CLEAN.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/PROGRAMS_CLEAN.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["PROGRAM_INTEL"],
+      "qdrant_collection": "programs",
+      "rows": 75,
+      "description": "Clean validated program list from Bullhorn analysis - deduplicated, standardized program names with prime associations.",
+      "search_tags": ["programs clean", "validated programs", "program list", "deduplicated", "standard names"],
+      "query_examples": ["list of validated programs", "clean program names", "which programs are confirmed"]
+    },
+    {
+      "filename": "programs_master.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/programs_master.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["PROGRAM_INTEL"],
+      "qdrant_collection": "programs",
+      "description": "Master programs database from Bullhorn analysis - comprehensive program intelligence with all known attributes.",
+      "search_tags": ["programs master", "master database", "comprehensive programs", "all programs"],
+      "query_examples": ["all programs in master list", "program database", "comprehensive program data"]
+    },
+    {
+      "filename": "primes_master.csv",
+      "path": "data/from_data_scraper/bullhorn_analysis/primes_master.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["COMPETITIVE_INTEL"],
+      "qdrant_collection": "documents",
+      "description": "Master prime contractors database - all primes with program counts, contact counts, engagement metrics.",
+      "search_tags": ["primes master", "prime contractors", "master database", "engagement metrics", "program counts"],
+      "query_examples": ["all prime contractors", "which prime has most programs", "prime engagement levels"]
+    },
+    {
+      "filename": "MASTER_PROGRAMS_ENRICHED.csv",
+      "path": "data/from_data_scraper/contracts/MASTER_PROGRAMS_ENRICHED.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["PROGRAM_INTEL", "CONTRACT_INTEL"],
+      "qdrant_collection": "programs",
+      "rows": 8415,
+      "description": "Federal programs with FPDS/USASpending enrichment - contract values, PIIDs, award dates, performance periods.",
+      "search_tags": ["programs enriched", "FPDS", "USASpending", "contract values", "PIIDs", "award dates", "performance periods", "federal programs"],
+      "query_examples": ["enriched program data", "contract values by program", "FPDS program intelligence"]
+    },
+    {
+      "filename": "PRIME_INTELLIGENCE_DETAILED.csv",
+      "path": "data/from_data_scraper/contracts/PRIME_INTELLIGENCE_DETAILED.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["COMPETITIVE_INTEL", "CONTRACT_INTEL"],
+      "qdrant_collection": "documents",
+      "rows": 61,
+      "description": "Detailed prime contractor intelligence profiles - contract portfolios, program counts, subcontracting patterns, BD targeting data.",
+      "search_tags": ["prime intelligence", "detailed", "contractor profile", "contract portfolio", "subcontracting", "L3Harris", "GDIT", "Leidos"],
+      "query_examples": ["L3Harris company intelligence", "prime contractor detailed profile", "GDIT contract portfolio"]
+    },
+    {
+      "filename": "db1_dod_prime_contracts_100m.csv",
+      "path": "data/from_data_scraper/contracts/db1_dod_prime_contracts_100m.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["CONTRACT_INTEL", "FINANCIAL_INTEL"],
+      "qdrant_collection": "documents",
+      "rows": 1932,
+      "description": "DoD prime contracts over $100M - largest defense contracts with prime identifiers, agencies, values.",
+      "search_tags": ["DoD contracts", "100M", "prime contracts", "large contracts", "defense spending", "agency awards"],
+      "query_examples": ["DoD contracts over 100 million", "largest defense contracts", "big ticket DoD awards"]
+    },
+    {
+      "filename": "db3_dod_opportunities_all.csv",
+      "path": "data/from_data_scraper/contracts/db3_dod_opportunities_all.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["CONTRACT_INTEL", "BD_STRATEGY"],
+      "qdrant_collection": "documents",
+      "rows": 3505,
+      "description": "All DoD contract opportunities - active solicitations, upcoming awards, recompetes, new contract vehicles.",
+      "search_tags": ["DoD opportunities", "solicitation", "upcoming awards", "recompete", "contract vehicle", "SAM.gov"],
+      "query_examples": ["DoD opportunity solicitation 100M", "upcoming DoD contract awards", "active solicitations"]
+    },
+    {
+      "filename": "FULL_PROGRAM_CONTRACTS.csv",
+      "path": "data/from_data_scraper/contracts/FULL_PROGRAM_CONTRACTS.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["CONTRACT_INTEL", "PROGRAM_INTEL"],
+      "qdrant_collection": "documents",
+      "rows": 1510,
+      "description": "Complete program-to-contract mapping - every federal program linked to its contract awards, vehicles, and values.",
+      "search_tags": ["program contracts", "full mapping", "contract awards", "program-contract linkage"],
+      "query_examples": ["contracts for DCGS program", "program contract mapping", "which contracts support which programs"]
+    },
+    {
+      "filename": "master_bd_targets_fpds_enriched.csv",
+      "path": "data/from_data_scraper/contracts/master_bd_targets_fpds_enriched.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["BD_STRATEGY", "CONTRACT_INTEL"],
+      "qdrant_collection": "documents",
+      "rows": 1933,
+      "description": "BD targets enriched with FPDS data - prioritized contractors with contract evidence, spending patterns, subcontracting activity.",
+      "search_tags": ["BD targets", "FPDS enriched", "prioritized", "spending patterns", "subcontracting", "target list"],
+      "query_examples": ["BD target list with FPDS data", "prioritized contractors", "target companies for BD"]
+    },
+    {
+      "filename": "tier1_high_priority_targets.csv",
+      "path": "data/from_data_scraper/contracts/tier1_high_priority_targets.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["BD_STRATEGY"],
+      "qdrant_collection": "documents",
+      "rows": 1068,
+      "description": "Tier 1 high priority BD targets - top-ranked companies for immediate outreach based on contract activity and staffing signals.",
+      "search_tags": ["tier 1", "high priority", "BD targets", "immediate outreach", "top ranked"],
+      "query_examples": ["highest priority BD targets", "tier 1 targets", "who to call first"]
+    },
+    {
+      "filename": "high_subcontract_activity.csv",
+      "path": "data/from_data_scraper/contracts/high_subcontract_activity.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["COMPETITIVE_INTEL", "BD_STRATEGY"],
+      "qdrant_collection": "documents",
+      "rows": 969,
+      "description": "Companies with high subcontracting activity - indicates staffing firm usage, potential PTS entry points.",
+      "search_tags": ["high subcontract", "subcontracting activity", "staffing firm usage", "PTS entry points", "teaming opportunities"],
+      "query_examples": ["companies using lots of subcontractors", "high subcontracting activity", "teaming opportunities"]
+    },
+    {
+      "filename": "bullhorn_master.db",
+      "path": "Engine7_BullhornETL/data/bullhorn_master.db",
+      "source_project": "bd-automation-engine",
+      "intelligence_category": ["HUMINT", "PAST_PERFORMANCE", "CONTACT_INTEL", "FINANCIAL_INTEL"],
+      "qdrant_collection": "activities",
+      "size_mb": 293,
+      "rows": 897000,
+      "description": "MASTER: Primary Bullhorn CRM SQLite database - 426K candidates, 404K activities, 50K call notes, 9.8K contact scores, 616 placements, 205 past performance records.",
+      "search_tags": ["bullhorn master", "CRM database", "candidates", "activities", "call notes", "placements", "past performance", "contact scores", "financial data"],
+      "query_examples": ["bullhorn placement data", "CRM activity history", "past performance records", "candidate database"]
+    },
+    {
+      "filename": "contacts_classified.json",
+      "path": "dashboard/public/data/contacts_classified.json",
+      "source_project": "bd-automation-engine",
+      "intelligence_category": ["CONTACT_INTEL"],
+      "qdrant_collection": "contacts",
+      "size_mb": 9.6,
+      "description": "All contacts with 6-tier hierarchy classification - ready for dashboard rendering and search.",
+      "search_tags": ["contacts classified", "hierarchy tier", "dashboard data", "6-tier", "classified contacts"],
+      "query_examples": ["classified contacts for dashboard", "tier 1 executives", "contacts by hierarchy"]
+    },
+    {
+      "filename": "Federal_Program_Cleaned_Notion_Import.csv",
+      "path": "Engine2_ProgramMapping/data/Federal_Program_Cleaned_Notion_Import.csv",
+      "source_project": "bd-automation-engine",
+      "intelligence_category": ["PROGRAM_INTEL"],
+      "qdrant_collection": "programs",
+      "rows": 388,
+      "description": "388 federal programs cleaned for Notion import - program names, acronyms, agency, prime, subs, contract values, clearance requirements, key locations.",
+      "search_tags": ["federal programs", "388 programs", "Notion import", "program reference", "prime contractor", "contract value", "clearance", "locations"],
+      "query_examples": ["GDIT prime DCGS program", "federal programs database", "programs by prime contractor"]
+    },
+    {
+      "filename": "colton_scurry_analysis_complete.xlsx",
+      "path": "Engine7_BullhornETL/colton_scurry_analysis/colton_scurry_analysis_complete.xlsx",
+      "source_project": "bd-automation-engine",
+      "intelligence_category": ["HUMINT", "BD_STRATEGY", "CONTACT_INTEL"],
+      "qdrant_collection": "documents",
+      "size_mb": 1.3,
+      "description": "Multi-tab Excel workbook - complete Colton Scurry account takeover analysis with contacts, programs, placements, action items.",
+      "search_tags": ["colton scurry", "excel", "workbook", "account takeover", "multi-tab analysis"],
+      "query_examples": ["colton scurry excel analysis", "account takeover workbook"]
+    },
+    {
+      "filename": "HUMINT_BD_BRIEFINGS_2026-01-24.md",
+      "path": "outputs/HUMINT_BD_BRIEFINGS_2026-01-24.md",
+      "source_project": "bd-automation-engine",
+      "intelligence_category": ["HUMINT", "BD_STRATEGY"],
+      "qdrant_collection": "documents",
+      "description": "HUMINT BD briefings - NGC JTAGS, DCGS programs, account manager briefing material.",
+      "search_tags": ["HUMINT briefing", "BD briefing", "NGC", "JTAGS", "DCGS", "account manager"],
+      "query_examples": ["latest HUMINT briefing", "BD briefing DCGS", "account manager briefing material"]
+    },
+    {
+      "filename": "processed_docs.json",
+      "path": "data/from_n8n_builder/documents/processed_docs.json",
+      "source_project": "n8n-builder",
+      "intelligence_category": ["CONTRACT_INTEL", "PROGRAM_INTEL"],
+      "qdrant_collection": "documents",
+      "size_mb": 15.7,
+      "description": "78 processed knowledge base documents from N8N-Builder - FPDS manuals, SAM.gov reference guides, federal procurement data dictionaries.",
+      "search_tags": ["processed documents", "knowledge base", "FPDS manual", "SAM.gov", "procurement reference", "data dictionary"],
+      "query_examples": ["FPDS documentation", "SAM.gov reference", "federal procurement guide"]
+    },
+    {
+      "filename": "navy_subaward_N00019.csv",
+      "path": "data/from_data_scraper/contracts/navy_subaward_N00019.csv",
+      "source_project": "data-scraper",
+      "intelligence_category": ["CONTRACT_INTEL"],
+      "qdrant_collection": "documents",
+      "rows": 590,
+      "description": "Navy subaward data for contract N00019 - subcontractor details, award amounts, performance locations.",
+      "search_tags": ["navy subaward", "N00019", "subcontractor", "navy contract"],
+      "query_examples": ["navy subaward data", "N00019 contract subs", "navy subcontractors"]
+    }
+  ],
+
+  "search_optimization": {
+    "high_value_query_mappings": [
+      {
+        "query_pattern": "Bullhorn placement history DCGS",
+        "priority_files": [
+          "data/from_data_scraper/bullhorn_analysis/CONTACT_INTELLIGENCE_DETAILED.csv",
+          "data/from_data_scraper/bullhorn_analysis/notes_intelligence/CONTACTS_INTELLIGENCE.csv",
+          "data/from_data_scraper/bullhorn_analysis/notes_intelligence/PROGRAMS_FROM_NOTES.csv",
+          "Engine7_BullhornETL/colton_scurry_analysis/FINAL_OUTPUTS/04_PROGRAM_CONTACT_NOTES.md"
+        ],
+        "expected_collection": "documents",
+        "target_score": 0.80
+      },
+      {
+        "query_pattern": "DCGS PACAF San Diego site lead",
+        "priority_files": [
+          "dashboard/public/data/contacts_classified.json",
+          "Engine3_OrgChart/Prime_Contacts/GDIT_Enriched.csv",
+          "outputs/BD_Briefings/AF DCGS - PACAF*"
+        ],
+        "expected_collection": "contacts",
+        "target_score": 0.75
+      },
+      {
+        "query_pattern": "programs with staffing gaps",
+        "priority_files": [
+          "data/from_data_scraper/bullhorn_analysis/notes_intelligence/GAP_PROGRAMS.csv",
+          "outputs/PROGRAM_PLACEMENT_GAP_ANALYSIS_20260122.csv",
+          "data/from_data_scraper/bullhorn_analysis/PROGRAMS_CLEAN.csv"
+        ],
+        "expected_collection": "programs",
+        "target_score": 0.75
+      },
+      {
+        "query_pattern": "past performance PTS GDIT",
+        "priority_files": [
+          "data/from_data_scraper/bullhorn_analysis/past_performance/",
+          "Engine7_BullhornETL/colton_scurry_analysis/FINAL_OUTPUTS/06_CONTRACT_PROGRAM_INTEL.md",
+          "dashboard/public/data/past_performance.json"
+        ],
+        "expected_collection": "documents",
+        "target_score": 0.80
+      },
+      {
+        "query_pattern": "FPDS federal contract GDIT",
+        "priority_files": [
+          "data/from_data_scraper/contracts/FULL_PROGRAM_CONTRACTS.csv",
+          "data/from_data_scraper/contracts/MASTER_CONTRACTS_COMBINED.csv",
+          "data/from_data_scraper/contracts/db1_dod_prime_contracts_100m.csv"
+        ],
+        "expected_collection": "documents",
+        "target_score": 0.75
+      },
+      {
+        "query_pattern": "L3Harris company intelligence",
+        "priority_files": [
+          "data/from_data_scraper/contracts/PRIME_INTELLIGENCE_DETAILED.csv",
+          "data/from_data_scraper/contracts/L3Harris_GBS_PROGRAM_CONTRACTS.csv",
+          "data/from_data_scraper/contracts/L3Harris_SATCOM_RF_CONTRACTS.csv"
+        ],
+        "expected_collection": "documents",
+        "target_score": 0.70
+      },
+      {
+        "query_pattern": "network engineer TS/SCI Langley",
+        "priority_files": [
+          "dashboard/public/data/jobs.json",
+          "outputs/all_jobs_enriched.json",
+          "dashboard/public/data/contacts_classified.json"
+        ],
+        "expected_collection": "jobs",
+        "target_score": 0.75
+      },
+      {
+        "query_pattern": "DoD opportunity solicitation",
+        "priority_files": [
+          "data/from_data_scraper/contracts/db3_dod_opportunities_all.csv",
+          "data/from_data_scraper/contracts/phase3_solicitations_only.csv",
+          "data/from_data_scraper/contracts/db3_dod_solicitations.csv"
+        ],
+        "expected_collection": "documents",
+        "target_score": 0.70
+      }
+    ],
+
+    "collection_routing_rules": [
+      {"query_contains": ["contact", "person", "who works", "org chart", "hierarchy", "tier"], "route_to": "contacts"},
+      {"query_contains": ["call note", "meeting", "interaction", "placement", "recruiter", "activity", "CRM"], "route_to": "activities"},
+      {"query_contains": ["job", "hiring", "requisition", "vacancy", "opening", "labor gap", "clearance requirement"], "route_to": "jobs"},
+      {"query_contains": ["program", "contract vehicle", "task order", "recompete", "period of performance"], "route_to": "programs"},
+      {"query_contains": ["FPDS", "USASpending", "solicitation", "opportunity", "subaward", "contract value", "PIID", "briefing", "playbook", "report", "analysis", "intelligence", "dossier"], "route_to": "documents"}
+    ]
+  },
+
+  "analysis_scripts": {
+    "generators": [
+      {"script": "Engine2_ProgramMapping/scripts/pipeline.py", "produces": "7-stage job enrichment pipeline outputs", "tags": ["job enrichment", "program mapping", "pipeline"]},
+      {"script": "Engine2_ProgramMapping/scripts/exporters.py", "produces": "Notion CSV + n8n JSON exports", "tags": ["export", "Notion", "n8n"]},
+      {"script": "Engine4_Playbook/scripts/bd_playbook_generator.py", "produces": "BD briefings, call scripts, emails, talking points", "tags": ["playbook", "call script", "email", "BD outreach"]},
+      {"script": "Engine5_Scoring/scripts/bd_scoring.py", "produces": "0-100 BD priority scores + tier classification", "tags": ["scoring", "priority", "tier classification"]},
+      {"script": "Engine7_BullhornETL/scripts/bd_intelligence_report.py", "produces": "Comprehensive BD intelligence JSON", "tags": ["BD intelligence", "report", "comprehensive"]},
+      {"script": "Engine7_BullhornETL/scripts/past_performance_report.py", "produces": "Defense primes past performance narratives", "tags": ["past performance", "narratives", "credentials"]},
+      {"script": "Engine7_BullhornETL/scripts/analyze_prime_contacts.py", "produces": "Prime contact coverage analysis", "tags": ["prime contacts", "coverage", "gap analysis"]},
+      {"script": "Engine7_BullhornETL/scripts/contact_scoring.py", "produces": "Contact engagement scores 0-100", "tags": ["contact scoring", "engagement", "priority"]},
+      {"script": "Engine7_BullhornETL/scripts/analyze_call_notes.py", "produces": "Call notes intelligence extraction", "tags": ["call notes", "intelligence", "HUMINT"]},
+      {"script": "Engine7_BullhornETL/scripts/financial_analysis.py", "produces": "Revenue, margins, financial metrics", "tags": ["financial", "revenue", "margins", "bill rates"]},
+      {"script": "Engine7_BullhornETL/scripts/export_intelligence_dashboard.py", "produces": "Dashboard JSON exports", "tags": ["dashboard", "export", "JSON"]},
+      {"script": "Engine8_Knowledge/scripts/index_staged_data.py", "produces": "9-phase vector indexing into Qdrant", "tags": ["indexing", "Qdrant", "vectors", "embedding"]}
+    ],
+    "processors": [
+      {"script": "Engine2_ProgramMapping/scripts/job_standardizer.py", "produces": "LLM-powered 28-field job standardization", "tags": ["job standardization", "LLM", "28-field schema"]},
+      {"script": "Engine2_ProgramMapping/scripts/program_mapper.py", "produces": "Multi-signal program matching against 388 programs", "tags": ["program mapper", "multi-signal", "388 programs"]},
+      {"script": "Engine3_OrgChart/scripts/contact_classifier.py", "produces": "6-tier hierarchy classification", "tags": ["contact classifier", "6-tier", "hierarchy"]},
+      {"script": "Engine7_BullhornETL/scripts/bullhorn_etl.py", "produces": "CSV to SQLite ETL processing", "tags": ["ETL", "SQLite", "data processing"]},
+      {"script": "Engine8_Knowledge/scripts/dedup_programs.py", "produces": "Programs collection deduplication", "tags": ["deduplication", "programs", "cleanup"]}
+    ]
+  }
+}

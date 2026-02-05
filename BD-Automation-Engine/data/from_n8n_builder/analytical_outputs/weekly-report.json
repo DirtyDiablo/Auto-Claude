@@ -1,0 +1,188 @@
+{
+  "name": "Scheduled - Weekly Intelligence Report",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Monday 9 AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/stats",
+        "options": {}
+      },
+      "id": "get-hub-stats",
+      "name": "Get Hub Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 200]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/memory/recent",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "limit",
+              "value": "100"
+            },
+            {
+              "name": "memory_type",
+              "value": "insight"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "get-insights",
+      "name": "Get Recent Insights",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 400]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-data",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate weekly report\nconst stats = $('Get Hub Stats').first().json;\nconst insights = $('Get Recent Insights').first().json;\n\nconst weekStart = new Date();\nweekStart.setDate(weekStart.getDate() - 7);\n\nconst report = {\n  report_type: 'Weekly Intelligence Summary',\n  period: {\n    start: weekStart.toISOString().split('T')[0],\n    end: new Date().toISOString().split('T')[0]\n  },\n  hub_statistics: {\n    total_memories: stats.memory?.total_memories || 0,\n    total_insights: stats.memory?.insights || 0,\n    graph_files: stats.graph?.files || 0,\n    cached_queries: stats.cache?.cached_queries || 0\n  },\n  recent_insights: (insights.memories || insights.data || []).slice(0, 10).map(i => ({\n    type: i.insight_type || i.memory_type,\n    content: (i.content || i.insight || '').substring(0, 200),\n    confidence: i.confidence,\n    date: i.timestamp || i.created_at\n  })),\n  generated_at: new Date().toISOString()\n};\n\n// Generate summary text\nreport.summary_text = `Weekly BD Intelligence Report\\n` +\n  `Period: ${report.period.start} to ${report.period.end}\\n\\n` +\n  `Hub Stats:\\n` +\n  `• Total Memories: ${report.hub_statistics.total_memories}\\n` +\n  `• Total Insights: ${report.hub_statistics.total_insights}\\n` +\n  `• Graph Files: ${report.hub_statistics.graph_files}\\n` +\n  `• Cached Queries: ${report.hub_statistics.cached_queries}\\n\\n` +\n  `Recent Insights: ${report.recent_insights.length} captured this week`;\n\nreturn { json: report };"
+      },
+      "id": "generate-report",
+      "name": "Generate Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8100/memory/add",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: $json.summary_text, memory_type: 'weekly_report' }) }}",
+        "options": {}
+      },
+      "id": "save-report",
+      "name": "Save Report to Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://primetech.app.n8n.cloud/webhook/slack-alert",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: $('Generate Report').first().json.summary_text, severity: 'info', channel: '#bd-leadership' }) }}",
+        "options": {}
+      },
+      "id": "send-to-slack",
+      "name": "Send to Slack",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1250, 300]
+    }
+  ],
+  "connections": {
+    "Monday 9 AM Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Hub Stats",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Recent Insights",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Hub Stats": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Insights": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Generate Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Report": {
+      "main": [
+        [
+          {
+            "node": "Save Report to Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Report to Hub": {
+      "main": [
+        [
+          {
+            "node": "Send to Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["scheduled", "report", "weekly", "production"]
+}

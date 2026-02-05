@@ -205,7 +205,8 @@ class BDMemoryLayer:
             try:
                 all_mem = self.memory.get_all(user_id=self.user_id)
                 memories = all_mem.get("results", [])
-            except:
+            except Exception as e:
+                logger.error("memory_fetch_failed: %s", e)
                 memories = []
         else:
             memories = self.memory.get_all()

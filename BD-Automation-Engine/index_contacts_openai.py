@@ -13,6 +13,9 @@ RESUME CAPABILITY:
 
 import sys
 import os
+import logging
+
+logger = logging.getLogger(__name__)
 import sqlite3
 import time
 import json
@@ -178,7 +181,8 @@ def main():
         try:
             qdrant.delete_collection(COLLECTION_NAME)
             print(f"  Deleted existing collection.")
-        except:
+        except Exception as e:
+            logger.debug("collection_delete_skipped: %s", e)
             print(f"  No existing collection to delete.")
 
         qdrant.create_collection(

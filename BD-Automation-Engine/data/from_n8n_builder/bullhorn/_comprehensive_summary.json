@@ -1,0 +1,314 @@
+{
+  "analysis_date": "2026-01-30T09:03:34.360130",
+  "total_files": 9,
+  "reports_with_data": 5,
+  "empty_reports": 4,
+  "reports": [
+    {
+      "filename": "0F0B1E45-FA0D-DC84-28ED32C53510B741.XLS",
+      "filepath": "C:\\N8N Builder\\data\\bullhorn\\exports\\Colton Scurry Takeover\\0F0B1E45-FA0D-DC84-28ED32C53510B741.XLS",
+      "report_type": "Sales Activity Report",
+      "report_period": "Period 01/01/2025 to 01/30/2026",
+      "sections": [
+        {
+          "name": "Client Visits",
+          "row_count": 13,
+          "columns": [
+            "Department",
+            "Salesperson",
+            "Contact Name",
+            "Date Added",
+            "Status"
+          ],
+          "csv_file": "0F0B1E45-FA0D-DC84-28ED32C5351_Client Visits.csv"
+        },
+        {
+          "name": "New Contacts",
+          "row_count": 49,
+          "columns": [
+            "Department",
+            "Salesperson",
+            "Contact Name",
+            "Date Added",
+            "Status"
+          ],
+          "csv_file": "0F0B1E45-FA0D-DC84-28ED32C5351_New Contacts.csv"
+        },
+        {
+          "name": "Submissions",
+          "row_count": 196,
+          "columns": [
+            "Department",
+            "Salesperson",
+            ":CANDIDATE: Name",
+            ":JOBPOSTING:",
+            "Company",
+            "Submission Owner",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F0B1E45-FA0D-DC84-28ED32C5351_Submissions.csv"
+        },
+        {
+          "name": "Client Submissions",
+          "row_count": 192,
+          "columns": [
+            "Department",
+            "Salesperson",
+            ":CANDIDATE: Name",
+            ":JOBPOSTING:",
+            "Company",
+            "Submission Owner",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F0B1E45-FA0D-DC84-28ED32C5351_Client Submissions.csv"
+        },
+        {
+          "name": "Interviews",
+          "row_count": 95,
+          "columns": [
+            "Department",
+            "Salesperson",
+            ":CANDIDATE: Name",
+            ":JOBPOSTING:",
+            "Company",
+            "Date of Interview",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F0B1E45-FA0D-DC84-28ED32C5351_Interviews.csv"
+        }
+      ]
+    },
+    {
+      "filename": "0F227128-B787-CDD4-AFD5BCEC3CFEA2D2.XLS",
+      "filepath": "C:\\N8N Builder\\data\\bullhorn\\exports\\Colton Scurry Takeover\\0F227128-B787-CDD4-AFD5BCEC3CFEA2D2.XLS",
+      "report_type": "Job Activity Report",
+      "report_period": "Period 01/01/2016 to 01/30/2026",
+      "sections": [
+        {
+          "name": "Submissions",
+          "row_count": 263,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F227128-B787-CDD4-AFD5BCEC3CF_Submissions.csv"
+        },
+        {
+          "name": "Client Submissions",
+          "row_count": 253,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F227128-B787-CDD4-AFD5BCEC3CF_Client Submissions.csv"
+        },
+        {
+          "name": "Client Interviews",
+          "row_count": 109,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date of Interview",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F227128-B787-CDD4-AFD5BCEC3CF_Client Interviews.csv"
+        }
+      ]
+    },
+    {
+      "filename": "0F22FA1A-0251-6502-E19EA5D6A4CD0647.XLS",
+      "filepath": "C:\\N8N Builder\\data\\bullhorn\\exports\\Colton Scurry Takeover\\0F22FA1A-0251-6502-E19EA5D6A4CD0647.XLS",
+      "report_type": "Job Activity Report",
+      "report_period": "Period 01/01/2016 to 01/30/2026",
+      "sections": [
+        {
+          "name": "Submissions",
+          "row_count": 263,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F22FA1A-0251-6502-E19EA5D6A4C_Submissions.csv"
+        },
+        {
+          "name": "Client Submissions",
+          "row_count": 253,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F22FA1A-0251-6502-E19EA5D6A4C_Client Submissions.csv"
+        },
+        {
+          "name": "Client Interviews",
+          "row_count": 109,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date of Interview",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F22FA1A-0251-6502-E19EA5D6A4C_Client Interviews.csv"
+        }
+      ]
+    },
+    {
+      "filename": "0F246D80-0A5B-3C34-4A331A52BE8DCA1A.XLS",
+      "filepath": "C:\\N8N Builder\\data\\bullhorn\\exports\\Colton Scurry Takeover\\0F246D80-0A5B-3C34-4A331A52BE8DCA1A.XLS",
+      "report_type": "Job Activity Report",
+      "report_period": "Period 01/01/2016 to 01/30/2026",
+      "sections": [
+        {
+          "name": "Submissions",
+          "row_count": 81,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F246D80-0A5B-3C34-4A331A52BE8_Submissions.csv"
+        },
+        {
+          "name": "Client Submissions",
+          "row_count": 80,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F246D80-0A5B-3C34-4A331A52BE8_Client Submissions.csv"
+        },
+        {
+          "name": "Client Interviews",
+          "row_count": 24,
+          "columns": [
+            ":JOBPOSTING:",
+            "Company",
+            ":CANDIDATE: Name",
+            "Date of Interview",
+            "Current Submission Status"
+          ],
+          "csv_file": "0F246D80-0A5B-3C34-4A331A52BE8_Client Interviews.csv"
+        }
+      ]
+    },
+    {
+      "filename": "Sales Activity Report.XLS",
+      "filepath": "C:\\N8N Builder\\data\\bullhorn\\exports\\Colton Scurry Takeover\\Sales Activity Report.XLS",
+      "report_type": "Sales Activity Report",
+      "report_period": "Period 01/01/2025 to 01/30/2026",
+      "sections": [
+        {
+          "name": "Client Visits",
+          "row_count": 13,
+          "columns": [
+            "Department",
+            "Salesperson",
+            "Contact Name",
+            "Date Added",
+            "Status"
+          ],
+          "csv_file": "Sales Activity Report_Client Visits.csv"
+        },
+        {
+          "name": "New Contacts",
+          "row_count": 49,
+          "columns": [
+            "Department",
+            "Salesperson",
+            "Contact Name",
+            "Date Added",
+            "Status"
+          ],
+          "csv_file": "Sales Activity Report_New Contacts.csv"
+        },
+        {
+          "name": "Submissions",
+          "row_count": 196,
+          "columns": [
+            "Department",
+            "Salesperson",
+            ":CANDIDATE: Name",
+            ":JOBPOSTING:",
+            "Company",
+            "Submission Owner",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "Sales Activity Report_Submissions.csv"
+        },
+        {
+          "name": "Client Submissions",
+          "row_count": 192,
+          "columns": [
+            "Department",
+            "Salesperson",
+            ":CANDIDATE: Name",
+            ":JOBPOSTING:",
+            "Company",
+            "Submission Owner",
+            "Date Submitted",
+            "Current Submission Status"
+          ],
+          "csv_file": "Sales Activity Report_Client Submissions.csv"
+        },
+        {
+          "name": "Interviews",
+          "row_count": 95,
+          "columns": [
+            "Department",
+            "Salesperson",
+            ":CANDIDATE: Name",
+            ":JOBPOSTING:",
+            "Company",
+            "Date of Interview",
+            "Current Submission Status"
+          ],
+          "csv_file": "Sales Activity Report_Interviews.csv"
+        }
+      ]
+    }
+  ],
+  "empty_report_details": [
+    {
+      "filename": "0F0E31DE-B213-147B-B8D1ABEAC65594C1.XLS",
+      "sheet_name": "NotesActivityReport_Main",
+      "status": "No data returned"
+    },
+    {
+      "filename": "0F0EDEE3-99E2-6C02-56F3946820ED6950.XLS",
+      "sheet_name": "NotesActivityReport_Main",
+      "status": "No data returned"
+    },
+    {
+      "filename": "0F1C65EA-00DF-A6C9-DD6D72487CA1F6F3.XLS",
+      "sheet_name": "SalesActivityReport_Main",
+      "status": "No data returned"
+    },
+    {
+      "filename": "0F23F288-F984-B140-BE9222C313B47A1A.XLS",
+      "sheet_name": "JobActivityReport_Main",
+      "status": "No data returned"
+    }
+  ]
+}

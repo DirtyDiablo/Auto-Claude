@@ -1,0 +1,28 @@
+mention_count,pct_of_jobs,prime_contractor,program_acronym,program_name,technology_keyword
+1,12.5,Multi (SAIC supports parts),ABMS,Advanced Battle Management System,ELASTIC
+1,12.5,Multi (SAIC supports parts),ABMS,Advanced Battle Management System,LINUX
+1,12.5,Multi (SAIC supports parts),ABMS,Advanced Battle Management System,WINDOWS
+1,14.3,"Multiple: SAIC, Leidos, Booz Allen Hamilton",ABMS,Air Force Advanced Battle Management System,WINDOWS
+1,50.0,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),Platform One / Cyber Portfolio,Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,LINUX
+1,14.3,SAIC,AESMF,Army Enterprise Service Management Framework,DEVOPS
+1,14.3,SAIC,AESMF,Army Enterprise Service Management Framework,SPLUNK
+1,50.0,Northrop Grumman (prime); CACI (support),IBCS,Army Integrated Battle Command System Support,LINUX
+1,14.3,CACI,ITEMSS,Army IT Enterprise Mgmt Systems Solution,.NET
+1,10.0,GDIT,BICES,Battlefield Information Collection & Exploitation System,C++
+1,33.3,CACI + Leidos + Peraton + SAIC (various subs),BICES,BICES Defense Intelligence Agency Variant,ELASTIC
+1,14.3,Peraton / SAIC (indicative),ECIS,CMS Enterprise Cloud Infrastructure Services,AWS
+1,14.3,Peraton / SAIC (indicative),ECIS,CMS Enterprise Cloud Infrastructure Services,GCP
+1,100.0,Northrop Grumman,C2BMC,"Command and Control, Battle Management & Communications (MDA)",SQL
+1,100.0,Leidos,DES,Defense Enclave Services,PYTHON
+1,4.8,Leidos,ISEO,DIA Information Systems Engineering Office,C++
+1,4.8,Leidos,ISEO,DIA Information Systems Engineering Office,LINUX
+1,7.7,L3Harris (historical),GBS,GBS (Global Broadcast Service),DEVSECOPS
+1,50.0,Leidos,GCCS-J,Global Command and Control System – Joint (Variant),POSTGRES
+1,5.6,Leidos,GSM-O II,Global Service Management – Operations II,DEVSECOPS
+1,5.6,Leidos,GSM-O II,Global Service Management – Operations II,KUBERNETES
+1,100.0,Raytheon,IAMD,Integrated Air & Missile Defense,JAVA
+1,100.0,Raytheon,IAMD,Integrated Air & Missile Defense,REACT
+1,12.5,Leidos,IBDS,Integrated Base Defense Security System,.NET
+1,50.0,Leidos,ISEO,Intelligence Systems Enterprise Operations,CISCO
+1,100.0,Peraton,SENSE,NASA SENSE (Space Comms & Tracking),ORACLE
+1,100.0,Northrop Grumman,Next-Gen OPIR,Next-Gen OPIR (Ground + Payload),C++

@@ -1,0 +1,387 @@
+{
+  "name": "Pipeline - Full BD Intelligence",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "bd-pipeline",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Initialize BD pipeline\nconst body = $input.first().json.body || {};\n\nif (!body.program) {\n  throw new Error('Program name is required');\n}\n\nreturn {\n  json: {\n    program: body.program,\n    company: body.company || null,\n    include_scrape: body.include_scrape || false,\n    generate_strategy: body.generate_strategy !== false,\n    pipeline_id: `bd-${Date.now()}`,\n    started_at: new Date().toISOString()\n  }\n};"
+      },
+      "id": "init-pipeline",
+      "name": "Initialize Pipeline",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/ask/smart",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ 'Program intelligence for ' + $json.program + ($json.company ? ' at ' + $json.company : '') }}"
+            },
+            {
+              "name": "use_cache",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "query-hub",
+      "name": "Query Hub Intelligence",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Initialize Pipeline').first().json.include_scrape }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-scrape",
+      "name": "Include Scrape?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8200/scrape/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source: 'apex-jobs', locations: ['Washington DC'], max_items: 50 }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      },
+      "id": "run-scrape",
+      "name": "Run Targeted Scrape",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1050, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "scrape_status",
+              "value": "skipped"
+            }
+          ]
+        }
+      },
+      "id": "skip-scrape",
+      "name": "Skip Scrape",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1050, 400]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-scrape",
+      "name": "Merge Scrape Result",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [1250, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $('Initialize Pipeline').first().json.generate_strategy }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "if-strategy",
+      "name": "Generate Strategy?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1450, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/agent/strategy",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ 'Generate capture strategy for ' + $('Initialize Pipeline').first().json.program }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 60000
+        }
+      },
+      "id": "generate-strategy",
+      "name": "Generate Strategy",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1650, 200]
+    },
+    {
+      "parameters": {
+        "values": {
+          "string": [
+            {
+              "name": "strategy_status",
+              "value": "skipped"
+            }
+          ]
+        }
+      },
+      "id": "skip-strategy",
+      "name": "Skip Strategy",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3,
+      "position": [1650, 400]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "merge-strategy",
+      "name": "Merge Strategy Result",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [1850, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Compile final pipeline results\nconst init = $('Initialize Pipeline').first().json;\nconst hubQuery = $('Query Hub Intelligence').first().json;\nconst scrapeResult = $('Merge Scrape Result').first()?.json;\nconst strategyResult = $('Merge Strategy Result').first()?.json;\n\nconst result = {\n  success: true,\n  pipeline_id: init.pipeline_id,\n  program: init.program,\n  company: init.company,\n  phases: {\n    hub_query: {\n      status: 'completed',\n      results_count: hubQuery.results?.length || 0\n    },\n    scrape: {\n      status: scrapeResult?.scrape_status || 'completed',\n      jobs_found: scrapeResult?.jobs_scraped || scrapeResult?.count || 0\n    },\n    strategy: {\n      status: strategyResult?.strategy_status || 'completed',\n      generated: !!strategyResult?.strategy || !!strategyResult?.response\n    }\n  },\n  hub_intelligence: hubQuery,\n  strategy: strategyResult?.strategy || strategyResult?.response || null,\n  started_at: init.started_at,\n  completed_at: new Date().toISOString()\n};\n\nreturn { json: result };"
+      },
+      "id": "compile-results",
+      "name": "Compile Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2050, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8100/memory/add",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: 'BD Pipeline completed for ' + $json.program + ': Hub query returned ' + $json.phases.hub_query.results_count + ' results', memory_type: 'pipeline_run' }) }}",
+        "options": {}
+      },
+      "id": "record-pipeline",
+      "name": "Record Pipeline Run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [2250, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $('Compile Results').first().json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [2450, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Initialize Pipeline",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Pipeline": {
+      "main": [
+        [
+          {
+            "node": "Query Hub Intelligence",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Hub Intelligence": {
+      "main": [
+        [
+          {
+            "node": "Include Scrape?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Include Scrape?": {
+      "main": [
+        [
+          {
+            "node": "Run Targeted Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Scrape",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Run Targeted Scrape": {
+      "main": [
+        [
+          {
+            "node": "Merge Scrape Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Scrape": {
+      "main": [
+        [
+          {
+            "node": "Merge Scrape Result",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Scrape Result": {
+      "main": [
+        [
+          {
+            "node": "Generate Strategy?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Strategy?": {
+      "main": [
+        [
+          {
+            "node": "Generate Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Skip Strategy",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Strategy": {
+      "main": [
+        [
+          {
+            "node": "Merge Strategy Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Skip Strategy": {
+      "main": [
+        [
+          {
+            "node": "Merge Strategy Result",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge Strategy Result": {
+      "main": [
+        [
+          {
+            "node": "Compile Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Results": {
+      "main": [
+        [
+          {
+            "node": "Record Pipeline Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Record Pipeline Run": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["pipeline", "bd-intelligence", "production"]
+}

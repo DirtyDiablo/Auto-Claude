@@ -1,0 +1,62 @@
+prime_name,bullhorn_mentions,bullhorn_contacts,bullhorn_programs,programs,usa_contracts,usa_total_value,usa_agencies,usa_top_contract,usa_top_value,tango_contracts,tango_total_value,tango_naics,recompete_count,narrative_generated,relationship_tier
+Leidos,5841,509,18,"AEGIS, DARPA, DIA, DISA, DTRA, EAGLE, INSCOM, ITES, MDA, NASA, NGA, NRO, NSA, OASIS, STRATCOM, Sentinel, TRANSCOM, Zero Trust",96,37178682257.27,General Services Administration; Department of Justice; Department of Veterans Affairs; Department of Transportation; Department of Defense; National Science Foundation; Department of the Interior; Department of Energy; Department of Health and Human Services; Department of Commerce,HHSN261200800001E,4813063024.9,0,0,,0,Yes,Strategic Partner
+General Dynamics,4546,463,29,"ABMS, Alliant, CENTCOM, DARPA, DEOS, DIA, DISA, DTRA, EAGLE, EIS, F-35, GPS OCX, INSCOM, ITES, JWCC, MDA, NASA, NGA, NRO, NSA, OASIS, SEWP, SLS, SOCOM, SOUTHCOM, SPACECOM, STRATCOM, Sentinel, Zero Trust",91,80413371668.08,General Services Administration; Department of Veterans Affairs; Department of Transportation; Department of Defense; Department of State; Department of the Interior; Department of Health and Human Services; National Aeronautics and Space Administration; Department of Homeland Security; Securities and Exchange Commission,N0002416C2229,5812593038.64,0,0,,0,Yes,Strategic Partner
+Deloitte,1500,298,19,"Alliant, CENTCOM, CYBERCOM, DIA, DISA, DTRA, ECMA, ECMO, F-35, INDOPACOM, INSCOM, ITES, JWCC, NGA, NRO, NSA, OASIS, SOCOM, SeaPort",55,8280317189.67,Department of Agriculture; General Services Administration; Department of Veterans Affairs; Agency for International Development; Department of Defense; Department of the Treasury; Department of State; Department of Health and Human Services; Department of Homeland Security,HHSN31600002,468373579.16,0,0,,0,Yes,Strategic Partner
+SAIC,1415,388,24,"ABMS, AEGIS, Alliant, CENTCOM, CYBERCOM, DIA, DISA, DTRA, EAGLE, GPS OCX, INSCOM, ITES, JADC2, JLTV, MDA, NASA, NGA, NRO, NSA, OASIS, SPACECOM, SeaPort, TRANSCOM, Zero Trust",94,23571892020.04,General Services Administration; Department of Veterans Affairs; Department of Defense; Department of the Treasury; Department of State; Department of Energy; Department of Health and Human Services; Department of Commerce; National Aeronautics and Space Administration; Department of Homeland Security,SAQMMA11F0233,2087211597.56,0,0,,0,Yes,Strategic Partner
+Microsoft,1170,489,20,"CENTCOM, DEOS, DIA, DISA, ECMA, EIS, INSCOM, ITES, JWCC, MDA, NASA, NGA, NRO, NSA, SEWP, SOCOM, SOUTHCOM, Sentinel, V-22, Zero Trust",50,2421689392.79,Department of Agriculture; Department of Homeland Security; Department of Defense; Department of State,HC102822F0982,220001168.23,0,0,,0,Yes,Strategic Partner
+Lockheed Martin,769,228,18,"AEGIS, Alliant, CH-53K, DIA, DISA, F-35, INSCOM, ITES, JWCC, MDA, NASA, NGA, NGAD, NSA, Orion, SLS, Sentinel, Zero Trust",66,275727289318.27,Department of Energy; Department of Defense; National Aeronautics and Space Administration,DEAC0494AL85000,48066473048.89,0,0,,0,Yes,Established Partner
+Northrop Grumman,543,174,13,"AEGIS, B-21, DARPA, DIA, DISA, F-35, ITES, MDA, NGA, NRO, NSA, SOCOM, Sentinel",51,97907361567.55,Social Security Administration; Department of Defense; National Aeronautics and Space Administration,FA821920C0006,10801259923.19,0,0,,0,Yes,Established Partner
+CACI,441,154,15,"Alliant, CENTCOM, DIA, DISA, EAGLE, INSCOM, ITES, MDA, NGA, NSA, OASIS, SOCOM, SOUTHCOM, SeaPort, TRANSCOM",97,20828391232.79,General Services Administration; Department of Justice; Department of Veterans Affairs; Department of Defense; Department of the Interior; Department of Health and Human Services; National Aeronautics and Space Administration; Department of Homeland Security; Securities and Exchange Commission,GSQ0017AJ0006,960038373.03,50,0.0,561611; 541330; 541512; 541715; 517111,0,Yes,Established Partner
+Raytheon,370,115,14,"AEGIS, DIA, DISA, EAGLE, F-35, GPS OCX, ITES, JWCC, MDA, NASA, NGA, NRO, NSA, Sentinel",62,127830315552.67,Department of Defense; National Aeronautics and Space Administration,N0001918C1021,8688654906.89,0,0,,0,Yes,Established Partner
+Booz Allen Hamilton,353,154,7,"DIA, DISA, F-35, GPS OCX, ITES, NGA, Zero Trust",50,22911953457.61,General Services Administration; Department of Veterans Affairs; Department of the Treasury; Department of Defense; National Science Foundation; Department of the Interior; Department of Health and Human Services; Securities and Exchange Commission,47QFCA21F0018,1379603153.12,0,0,,0,Yes,Established Partner
+Jacobs,286,82,17,"AEGIS, Alliant, CENTCOM, DIA, ECMA, F-35, INSCOM, ITES, JWCC, MDA, NASA, NGA, NSA, SLS, SOCOM, SOUTHCOM, SPACECOM",65,15306646830.55,Department of Education; General Services Administration; Department of Defense; National Science Foundation; Department of the Interior; Department of Health and Human Services; National Aeronautics and Space Administration; Department of Homeland Security; Environmental Protection Agency,NNK13MA14C,2099373524.58,50,0.0,541310; 541330; 541620; 541712; 562910,0,Yes,Growing Relationship
+Amazon Web Services,281,150,16,"AEGIS, Alliant, CYBERCOM, DEOS, DIA, DISA, ECMA, INSCOM, ITES, JWCC, NASA, NGA, NRO, NSA, OASIS, Sentinel",100,1693106514.81,Department of Agriculture; General Services Administration; Department of Justice; National Gallery of Art; Department of Veterans Affairs; Department of Defense; Department of the Treasury; Department of Energy; Department of Homeland Security,12SAD223F0014,215783340.32,50,0.0,541512; 518210; 541511,0,Yes,Growing Relationship
+Boeing,249,141,13,"DIA, DISA, E-7, ITES, JWCC, MDA, MQ-25, NASA, NGA, NRO, NSA, SLS, VC-25B",74,269087616821.95,Department of Defense; National Aeronautics and Space Administration,FA862511C6600,29485980901.28,0,0,,0,Yes,Growing Relationship
+BAE Systems,208,68,6,"DIA, DISA, GBSD, ITES, Sentinel, Zero Trust",48,56020893498.71,Department of Defense; National Aeronautics and Space Administration,DAAE0703CS023,7052768924.82,0,0,,0,Yes,Growing Relationship
+VMware,200,75,7,"DIA, DTRA, INSCOM, ITES, JWCC, NGA, NRO",5,282978.85,Environmental Protection Agency; Department of Defense; Department of Justice; Department of State,FA861223CB008,228760.0,0,0,,0,Yes,Growing Relationship
+Perspecta,185,142,14,"CIO-SP3, CYBERCOM, DARPA, DIA, DISA, ECMA, ECMO, ITES, NGA, NRO, NSA, SOUTHCOM, SPACECOM, SeaPort",58,4026341657.39,General Services Administration; Department of Justice; Department of Defense; Department of Health and Human Services; National Aeronautics and Space Administration; Department of Homeland Security,NNX11AA01C,769166010.07,0,0,,0,Yes,Growing Relationship
+Cisco,180,76,7,"DIA, DISA, INSCOM, ITES, NGA, NRO, SOCOM",73,1090860813.16,Department of Agriculture; General Services Administration; U.S. Agency for Global Media; Department of Veterans Affairs; Department of Defense; Department of State; Department of Health and Human Services,HC108418F0015,129999999.73,0,0,,0,Yes,Growing Relationship
+ServiceNow,156,80,6,"AEGIS, CENTCOM, DIA, DISA, ITES, NASA",2,3740885.26,Smithsonian Institution,33314523P00496079,2247440.4,2,0.0,541519; 541511,0,Yes,Growing Relationship
+IBM Federal,153,42,6,"Alliant, DIA, DISA, ITES, NGA, SPACECOM",0,0,,,0,0,0,,0,Yes,Growing Relationship
+Oracle,138,73,10,"Alliant, DIA, DISA, ECMA, INSCOM, ITES, JWCC, NGA, NSA, STRATCOM",90,8260258931.18,Department of Agriculture; Department of Education; Department of Justice; Department of Veterans Affairs; Department of Defense; District of Columbia Courts; Department of Health and Human Services; Department of Commerce; Federal Communications Commission; Department of Homeland Security,36C10B18N0003,1276290794.61,0,0,,0,Yes,Growing Relationship
+Palantir,103,25,8,"CYBERCOM, ITES, JWCC, NGA, NSA, SOCOM, SPACECOM, TRANSCOM",50,2569758306.25,Department of Justice; Department of Veterans Affairs; Department of Transportation; Department of Defense; Department of the Treasury; Department of State; Department of Energy; Department of Health and Human Services; Department of Homeland Security; Securities and Exchange Commission,W911QX24F0053,292680689.24,,,,,No,
+Salesforce,92,40,2,"DIA, NSA",2,29010.72,Agency for International Development; Department of State,AID660O1600007,27330.72,,,,,No,
+Dell Technologies,63,39,7,"DEOS, DIA, DISA, SOUTHCOM, STRATCOM, Sentinel, Zero Trust",100,17355439588.58,General Services Administration; Commodity Futures Trading Commission; Department of Veterans Affairs; Department of Transportation; Department of Defense; Department of State; Department of the Interior; Social Security Administration; Department of Homeland Security,VA11817F1888,1730532626.58,,,,,No,
+Palo Alto Networks,52,15,5,"DISA, INSCOM, ITES, JWCC, NGA",29,60334427.3,Small Business Administration; General Services Administration; Department of Veterans Affairs; Department of Defense; Department of the Interior,36C26119P1251,9485262.03,,,,,No,
+Accenture Federal,51,37,12,"Alliant, CYBERCOM, DIA, DISA, ECMA, JWCC, NASA, NGA, NRO, NSA, SOCOM, TRANSCOM",52,13777525004.33,Department of Education; Department of Agriculture; General Services Administration; Department of Justice; Department of Veterans Affairs; Department of Defense; Department of the Treasury; Department of State; Department of Energy; Department of Health and Human Services,EDFSA15C0006,1507684723.07,,,,,No,
+Splunk,47,30,1,ITES,,,,,,,,,,No,
+L3Harris,42,22,5,"ITES, JADC2, JWCC, NGA, SLS",,,,,,,,,,No,
+ManTech,28,13,4,"DIA, INSCOM, ITES, SOUTHCOM",,,,,,,,,,No,
+Huntington Ingalls,26,12,2,"DIA, NGA",,,,,,,,,,No,
+Parsons,16,11,4,"CYBERCOM, ITES, JWCC, MDA",,,,,,,,,,No,
+Google,16,6,1,NGA,,,,,,,,,,No,
+Elastic,14,6,2,"DIA, ITES",,,,,,,,,,No,
+Vertex,14,4,2,"DIA, ITES",,,,,,,,,,No,
+NetApp,14,6,1,NSA,,,,,,,,,,No,
+Amentum,14,8,1,CENTCOM,,,,,,,,,,No,
+Serco,12,4,1,NSA,,,,,,,,,,No,
+Sierra Nevada,12,9,4,"F-35, JWCC, NGA, NSA",,,,,,,,,,No,
+Red Hat,10,10,4,"DEOS, DIA, NRO, Sentinel",,,,,,,,,,No,
+KBR,7,3,0,,,,,,,,,,,No,
+DXC Technology,7,7,1,SeaPort,,,,,,,,,,No,
+Nutanix,6,4,1,ITES,,,,,,,,,,No,
+MITRE,5,4,2,"ITES, NGA",,,,,,,,,,No,
+CGI Federal,4,3,0,,,,,,,,,,,No,
+CSRA,4,3,2,"EAGLE, INSCOM",,,,,,,,,,No,
+Unisys,4,4,0,,,,,,,,,,,No,
+Cubic,3,2,1,DIA,,,,,,,,,,No,
+Veritas,3,2,0,,,,,,,,,,,No,
+Maximus,3,3,1,DIA,,,,,,,,,,No,
+Vencore,3,3,2,"DISA, SeaPort",,,,,,,,,,No,
+ICF,2,1,0,,,,,,,,,,,No,
+Zscaler,2,2,0,,,,,,,,,,,No,
+Appian,2,2,0,,,,,,,,,,,No,
+Fortinet,2,2,0,,,,,,,,,,,No,
+Okta,2,1,3,"DEOS, DIA, Zero Trust",,,,,,,,,,No,
+Textron,2,1,0,,,,,,,,,,,No,
+Veeam,2,1,0,,,,,,,,,,,No,
+Engility,2,2,2,"DISA, DTRA",,,,,,,,,,No,
+CrowdStrike,1,1,0,,,,,,,,,,,No,
+Kratos,1,1,1,ITES,,,,,,,,,,No,
+Vectrus,1,1,0,,,,,,,,,,,No,
+Commvault,1,1,0,,,,,,,,,,,No,

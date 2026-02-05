@@ -1,0 +1,355 @@
+{
+  "name": "Contact Enrichment Pipeline",
+  "nodes": [
+    {
+      "id": "c3300397-c422-4e88-9127-08f3221854a6",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "path": "/enrich-contact",
+        "httpMethod": "POST",
+        "responseMode": "lastNode"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "e3559bce-6b39-48b5-a5d5-06264580393c",
+      "name": "Extract Contacts",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        650,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\n// Handle both single contact and batch inputs\nconst input = $input.first().json;\n\nlet contacts = [];\nif (Array.isArray(input.contacts)) {\n    contacts = input.contacts;\n} else if (Array.isArray(input)) {\n    contacts = input;\n} else if (input.email || input.name) {\n    contacts = [input];\n}\n\n// Return as separate items for processing\nreturn contacts.map(contact => ({\n    json: {\n        id: contact.id || null,\n        name: contact.name || '',\n        email: contact.email || '',\n        company: contact.company || '',\n        title: contact.title || '',\n        linkedin_url: contact.linkedin_url || '',\n        phone: contact.phone || '',\n        location: contact.location || '',\n        source: contact.source || 'manual',\n        original_data: contact\n    }\n}));\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "cea75691-9b2a-4b4a-ad3f-c27bd1e5f1dc",
+      "name": "Batch Contacts",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        850,
+        300
+      ],
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "ba4cb90b-c8ae-43c5-9070-b2a15c3656e9",
+      "name": "Enrich Contact",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1050,
+        300
+      ],
+      "parameters": {
+        "url": "http://localhost:8100/contacts/enrich",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({\n    name: $json.name,\n    email: $json.email,\n    company: $json.company,\n    title: $json.title,\n    linkedin_url: $json.linkedin_url\n}) }}"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "e9511d45-800a-406b-8df5-9d31a44c66dd",
+      "name": "Rate Limit",
+      "type": "n8n-nodes-base.wait",
+      "position": [
+        1250,
+        300
+      ],
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "b91a6f25-145a-46bb-b839-2ac207700b5a",
+      "name": "Score Contacts",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1050,
+        450
+      ],
+      "parameters": {
+        "jsCode": "\n// Score contacts based on enrichment data\nconst items = $input.all();\n\nreturn items.map(item => {\n    const contact = item.json;\n    let score = 0;\n    const scoring_factors = [];\n\n    // Title scoring\n    const title = (contact.title || '').toLowerCase();\n    if (title.includes('director') || title.includes('vp') || title.includes('chief')) {\n        score += 30;\n        scoring_factors.push('Senior leadership title');\n    } else if (title.includes('manager') || title.includes('lead')) {\n        score += 20;\n        scoring_factors.push('Management title');\n    } else if (title.includes('engineer') || title.includes('analyst')) {\n        score += 10;\n        scoring_factors.push('Technical role');\n    }\n\n    // Company relevance (if we have company intel)\n    if (contact.company_intel?.is_target_company) {\n        score += 25;\n        scoring_factors.push('Target company');\n    }\n\n    // Clearance indicators\n    const clearance = (contact.clearance || '').toLowerCase();\n    if (clearance.includes('ts/sci')) {\n        score += 20;\n        scoring_factors.push('TS/SCI clearance');\n    } else if (clearance.includes('secret')) {\n        score += 10;\n        scoring_factors.push('Secret clearance');\n    }\n\n    // Data completeness bonus\n    if (contact.email && contact.phone) {\n        score += 10;\n        scoring_factors.push('Complete contact info');\n    }\n    if (contact.linkedin_url) {\n        score += 5;\n        scoring_factors.push('LinkedIn available');\n    }\n\n    // Location relevance\n    const location = (contact.location || '').toLowerCase();\n    const keyLocations = ['dc', 'washington', 'arlington', 'mclean', 'reston', 'san diego', 'huntsville'];\n    if (keyLocations.some(loc => location.includes(loc))) {\n        score += 15;\n        scoring_factors.push('Key BD location');\n    }\n\n    return {\n        json: {\n            ...contact,\n            bd_score: Math.min(score, 100),\n            scoring_factors,\n            is_high_priority: score >= 50,\n            scored_at: new Date().toISOString()\n        }\n    };\n});\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "6ea95900-613c-42dc-b07c-322c7e1c501b",
+      "name": "Update Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1250,
+        450
+      ],
+      "parameters": {
+        "url": "http://localhost:8100/contacts/batch-update",
+        "method": "POST",
+        "options": {},
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ contacts: $input.all().map(i => i.json) }) }}"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "91804b6f-5ebd-4a50-b4de-3c14852f5ce5",
+      "name": "Filter High Priority",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1450,
+        450
+      ],
+      "parameters": {
+        "jsCode": "\nconst contacts = $input.all();\nconst highPriority = contacts\n    .filter(c => c.json.is_high_priority)\n    .map(c => c.json);\n\nif (highPriority.length === 0) {\n    // No high-priority contacts, still return something\n    return [{\n        json: {\n            has_high_priority: false,\n            total_processed: contacts.length,\n            message: \"No high-priority contacts in this batch\"\n        }\n    }];\n}\n\nreturn [{\n    json: {\n        has_high_priority: true,\n        total_processed: contacts.length,\n        high_priority_count: highPriority.length,\n        contacts: highPriority.slice(0, 10)  // Top 10 for notification\n    }\n}];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "12dad3a4-acba-48d4-934e-9f6300dc483a",
+      "name": "Has High Priority?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1650,
+        450
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "condition",
+              "leftValue": "={{ $json.has_high_priority }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "equals"
+              }
+            }
+          ]
+        }
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "4af176c7-754d-4fcc-8219-dffafd20bc3d",
+      "name": "Format Alert",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1850,
+        350
+      ],
+      "parameters": {
+        "jsCode": "\nconst data = $input.first().json;\n\nconst contactList = data.contacts\n    .map(c => `\u2022 *${c.name}* (${c.company}) - Score: ${c.bd_score}`)\n    .join('\\n');\n\nreturn [{\n    json: {\n        message: `\ud83c\udfaf *High-Priority Contacts Identified*\\n\\n` +\n                 `Processed: ${data.total_processed} contacts\\n` +\n                 `High Priority: ${data.high_priority_count}\\n\\n` +\n                 `*Top Contacts:*\\n${contactList}`,\n        data\n    }\n}];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "66c65595-0de7-4e1c-96b4-3fbdff532ec8",
+      "name": "Slack Notify",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        2050,
+        350
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "#bd-alerts",
+        "text": "{{ $json.message }}",
+        "otherOptions": {}
+      },
+      "typeVersion": 1,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "",
+          "name": "Slack OAuth2"
+        }
+      }
+    },
+    {
+      "id": "734a5bb2-aaf7-4920-9b63-0a02a50290f0",
+      "name": "Return Response",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1850,
+        550
+      ],
+      "parameters": {
+        "jsCode": "\nconst filterResult = $('Filter High Priority').first().json;\nreturn [{\n    json: {\n        success: true,\n        processed: filterResult.total_processed,\n        high_priority_count: filterResult.high_priority_count || 0,\n        timestamp: new Date().toISOString()\n    }\n}];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Extract Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Contacts": {
+      "main": [
+        [
+          {
+            "node": "Batch Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Contacts": {
+      "main": [
+        [
+          {
+            "node": "Enrich Contact",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Score Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enrich Contact": {
+      "main": [
+        [
+          {
+            "node": "Rate Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rate Limit": {
+      "main": [
+        [
+          {
+            "node": "Batch Contacts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score Contacts": {
+      "main": [
+        [
+          {
+            "node": "Update Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Hub": {
+      "main": [
+        [
+          {
+            "node": "Filter High Priority",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter High Priority": {
+      "main": [
+        [
+          {
+            "node": "Has High Priority?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Has High Priority?": {
+      "main": [
+        [
+          {
+            "node": "Format Alert",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Alert": {
+      "main": [
+        [
+          {
+            "node": "Slack Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack Notify": {
+      "main": [
+        [
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "description": "Enriches contact records with additional data and scores them for BD prioritization. Can run on-demand or in batch mode.",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [],
+  "pinData": {}
+}

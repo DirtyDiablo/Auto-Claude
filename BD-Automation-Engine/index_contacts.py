@@ -11,7 +11,10 @@ import sys
 import os
 import sqlite3
 import time
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 # Fix Windows encoding
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -36,7 +39,8 @@ def get_indexed_count():
         response = urllib.request.urlopen(f"{QDRANT_URL}/collections/contacts", timeout=10)
         data = json.loads(response.read())
         return data["result"]["points_count"]
-    except:
+    except (ConnectionError, TimeoutError, KeyError, ValueError) as e:
+        logger.debug("qdrant_count_fetch_failed: %s", e)
         return 0
 
 def main():

@@ -9,6 +9,9 @@ from dataclasses import dataclass
 import numpy as np
 import logging
 
+from dotenv import load_dotenv
+load_dotenv()
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -20,11 +23,18 @@ except ImportError:
     logger.warning("rank_bm25 not available")
 
 try:
-    from sentence_transformers import SentenceTransformer, CrossEncoder
-    SENTENCE_TRANSFORMERS_AVAILABLE = True
+    from sentence_transformers import CrossEncoder
+    CROSSENCODER_AVAILABLE = True
 except ImportError:
-    SENTENCE_TRANSFORMERS_AVAILABLE = False
-    logger.warning("sentence_transformers not available")
+    CROSSENCODER_AVAILABLE = False
+    logger.warning("CrossEncoder not available for reranking")
+
+try:
+    import openai
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    logger.warning("openai not available")
 
 try:
     from qdrant_client import QdrantClient
@@ -55,20 +65,18 @@ class HybridRetriever:
 
     def __init__(
         self,
-        qdrant_path: str = None,
+        qdrant_url: str = None,
         collection_name: str = "bd_knowledge",
         use_reranker: bool = True
     ):
-        # Qdrant path
-        qdrant_path = qdrant_path or os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "data", "qdrant"
-        )
+        # Qdrant - prefer server URL from environment
+        qdrant_url = qdrant_url or os.getenv('QDRANT_URL', 'http://localhost:6333')
 
-        # Qdrant
+        # Qdrant client - connect to server
         if QDRANT_AVAILABLE:
             try:
-                self.qdrant = QdrantClient(path=qdrant_path)
+                self.qdrant = QdrantClient(url=qdrant_url, timeout=60)
+                logger.info(f"HybridRetriever connected to Qdrant at: {qdrant_url}")
             except Exception as e:
                 logger.warning(f"Qdrant init failed: {e}")
                 self.qdrant = None
@@ -77,28 +85,28 @@ class HybridRetriever:
 
         self.collection_name = collection_name
 
-        # Embedder
-        if SENTENCE_TRANSFORMERS_AVAILABLE:
+        # OpenAI Embedder (1536 dimensions - matches indexed data)
+        self.openai_client = None
+        self.embedding_model = "text-embedding-3-small"
+        if OPENAI_AVAILABLE:
             try:
-                self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+                self.openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+                logger.info(f"HybridRetriever using OpenAI embeddings: {self.embedding_model}")
             except Exception as e:
-                logger.warning(f"Embedder init failed: {e}")
-                self.embedder = None
+                logger.warning(f"OpenAI init failed: {e}")
+                self.openai_client = None
         else:
-            self.embedder = None
+            logger.warning("OpenAI not available for embeddings")
 
-        # Reranker
+        # Reranker (optional - still uses CrossEncoder)
         self.use_reranker = use_reranker
-        if use_reranker and SENTENCE_TRANSFORMERS_AVAILABLE:
+        self.reranker = None
+        if use_reranker and CROSSENCODER_AVAILABLE:
             try:
                 self.reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
             except Exception as e:
                 logger.warning(f"Reranker init failed: {e}")
-                self.reranker = None
                 self.use_reranker = False
-        else:
-            self.reranker = None
-            self.use_reranker = False
 
         # BM25 indices (built on-demand)
         self._bm25_indices: Dict[str, Any] = {}
@@ -112,30 +120,46 @@ class HybridRetriever:
         self._bm25_indices[collection] = BM25Okapi(tokenized)
         self._bm25_docs[collection] = documents
 
+    def _generate_embedding(self, text: str) -> List[float]:
+        """Generate embedding using OpenAI API (1536 dimensions)."""
+        if not self.openai_client:
+            return []
+        try:
+            response = self.openai_client.embeddings.create(
+                model=self.embedding_model,
+                input=text
+            )
+            return response.data[0].embedding
+        except Exception as e:
+            logger.error(f"OpenAI embedding error: {e}")
+            return []
+
     def _semantic_search(
         self, query: str, collection: str, limit: int = 20
     ) -> List[SearchResult]:
-        """Qdrant semantic search."""
-        if not self.qdrant or not self.embedder:
+        """Qdrant semantic search using OpenAI embeddings."""
+        if not self.qdrant or not self.openai_client:
             return []
 
-        query_vector = self.embedder.encode(query).tolist()
+        query_vector = self._generate_embedding(query)
+        if not query_vector:
+            return []
 
         try:
-            results = self.qdrant.search(
+            results = self.qdrant.query_points(
                 collection_name=collection,
-                query_vector=query_vector,
+                query=query_vector,
                 limit=limit
             )
             return [
                 SearchResult(
                     id=str(r.id),
-                    text=r.payload.get('text', ''),
+                    text=r.payload.get('text', r.payload.get('name', '')),
                     score=r.score,
                     source='semantic',
                     metadata=r.payload
                 )
-                for r in results
+                for r in results.points
             ]
         except Exception as e:
             logger.error(f"Semantic search error: {e}")

@@ -1,0 +1,104 @@
+{
+  "name": "Alert - Slack Notification",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "slack-alert",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Format message with severity\nconst body = $input.first().json.body || {};\n\nconst severityEmoji = {\n  info: 'information_source',\n  success: 'white_check_mark',\n  warning: 'warning',\n  error: 'rotating_light',\n  critical: 'fire'\n};\n\nconst severity = body.severity || 'info';\nconst emoji = severityEmoji[severity] || severityEmoji.info;\n\nreturn {\n  json: {\n    channel: body.channel || '#bd-alerts',\n    message: body.message || 'No message provided',\n    severity: severity,\n    emoji: emoji,\n    formatted_message: `:${emoji}: *[${severity.toUpperCase()}]* ${body.message || 'No message provided'}`,\n    timestamp: new Date().toISOString()\n  }\n};"
+      },
+      "id": "format-message",
+      "name": "Format Message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "operation": "post",
+        "channel": "={{ $json.channel }}",
+        "text": "={{ $json.formatted_message }}",
+        "otherOptions": {}
+      },
+      "id": "slack-post",
+      "name": "Post to Slack",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2,
+      "position": [650, 300],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Return response (Slack node disabled - configure credentials)\nconst formatted = $('Format Message').first().json;\n\nreturn {\n  json: {\n    success: true,\n    message: 'Alert processed',\n    details: {\n      channel: formatted.channel,\n      severity: formatted.severity,\n      message_preview: formatted.message.substring(0, 100)\n    },\n    note: 'Slack node disabled - configure OAuth2 credentials',\n    timestamp: formatted.timestamp\n  }\n};"
+      },
+      "id": "format-response",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [850, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [1050, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Message": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["alert", "slack", "notification", "production"]
+}

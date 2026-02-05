@@ -8,8 +8,11 @@ import sys
 import os
 import sqlite3
 import uuid
+import logging
 from datetime import datetime
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
@@ -53,8 +56,8 @@ def index_jobs(qdrant, conn):
     # Create collection
     try:
         qdrant.delete_collection("jobs")
-    except:
-        pass
+    except Exception as e:
+        logger.debug("collection_delete_skipped for jobs: %s", e)
     qdrant.create_collection(
         collection_name="jobs",
         vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
@@ -105,8 +108,8 @@ def index_programs(qdrant, conn):
 
     try:
         qdrant.delete_collection("programs")
-    except:
-        pass
+    except Exception as e:
+        logger.debug("collection_delete_skipped for programs: %s", e)
     qdrant.create_collection(
         collection_name="programs",
         vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
@@ -155,8 +158,8 @@ def index_documents(qdrant, conn):
 
     try:
         qdrant.delete_collection("documents")
-    except:
-        pass
+    except Exception as e:
+        logger.debug("collection_delete_skipped for documents: %s", e)
     qdrant.create_collection(
         collection_name="documents",
         vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
@@ -212,8 +215,8 @@ def index_primes(qdrant, conn):
 
     try:
         qdrant.delete_collection("primes")
-    except:
-        pass
+    except Exception as e:
+        logger.debug("collection_delete_skipped for primes: %s", e)
     qdrant.create_collection(
         collection_name="primes",
         vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
@@ -286,7 +289,8 @@ def main():
         try:
             info = qdrant.get_collection(coll)
             print(f"  {coll}: {info.points_count} points ({EMBEDDING_DIM} dims)")
-        except:
+        except Exception as e:
+            logger.error("collection_stats_failed for %s: %s", coll, e)
             print(f"  {coll}: error")
 
 

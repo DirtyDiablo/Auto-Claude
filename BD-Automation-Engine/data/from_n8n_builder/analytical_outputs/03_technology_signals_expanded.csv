@@ -1,0 +1,34 @@
+program_name,program_acronym,prime_contractor,technology_keyword,technology_category,mention_count,pct_of_jobs,source_types,sample_contexts,confidence_level,extraction_date
+DIA Information Systems Engineering Office,ISEO,Leidos,AFSIM,Defense,1,4.8,Job Titles,TS/SCI SOFTWARE ENGINEER (AFSIM),Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Leidos,Rust,Languages,1,4.8,Job Titles,RUST DEVELOPER,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Leidos,Linux,Network,1,4.8,Job Titles,TS/SCI + POLY CLEARED LINUX ADMIN/TEST ENGINEER,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Leidos,C++,Languages,1,4.8,Existing Data,,Medium,2026-01-21
+Global Service Management – Operations II,GSM-O II,Leidos,DevSecOps,DevSecOps,1,5.6,Job Titles,DEVSECOPS ENGINEER - SECRET CLEARANCE,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Leidos,Kubernetes,Cloud,1,5.6,Job Titles,KUBERNETES ADMINISTRATOR,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,L3Harris (historical),Assembly,Languages,1,7.7,Job Titles,ELECTRO-MECHANICAL ASSEMBLY TECHNICIAN,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,L3Harris (historical),DevSecOps,DevSecOps,1,7.7,Job Titles,TS/SCI SENIOR DEVSECOPS ENGINEER,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,GDIT,C++,Languages,1,10.0,Existing Data,,Medium,2026-01-21
+Project Convergence (JADC2 Experiments),PC,SAIC,F5,Network,1,10.0,Job Titles,STEM ADMINISTRATOR II (BIG IP F5),Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,SAIC,Electronic Warfare,Defense,1,11.1,Job Titles,CLEARED ELECTRONIC WARFARE ENGINEER,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,SAIC,GCCS,Defense,1,11.1,Job Titles,TS/SCI - GCCS SYSTEMS ENGINEER,Low,2026-01-21
+Advanced Battle Management System,ABMS,Multi (SAIC supports parts),Elastic,Database,1,12.5,Job Titles,SECRET SENIOR ELASTIC ENGINEER,Low,2026-01-21
+Advanced Battle Management System,ABMS,Multi (SAIC supports parts),Linux,Network,1,12.5,Job Titles,SECRET CLEARED WINDOWS AND LINUX ADMIN,Low,2026-01-21
+Advanced Battle Management System,ABMS,Multi (SAIC supports parts),WINDOWS,Network,1,12.5,Existing Data,,Medium,2026-01-21
+Integrated Base Defense Security System,IBDS,Leidos,.NET,Languages,1,12.5,Existing Data,,Medium,2026-01-21
+Air Force Advanced Battle Management System,ABMS,"Multiple: SAIC, Leidos, Booz Allen Hamilton",WINDOWS,Network,1,14.3,Existing Data,,Medium,2026-01-21
+Army Enterprise Service Management Framework,AESMF,SAIC,DevOps,DevSecOps,1,14.3,Job Titles,SECRET DEVOPS ENGINEER,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,SAIC,Splunk,Analytics,1,14.3,Job Titles,TOP SECRET SPLUNK ENGINEER,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,CACI,.NET,Languages,1,14.3,Existing Data,,Medium,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Peraton / SAIC (indicative),AWS,Cloud,1,14.3,Job Titles,TOP SECRET AWS ENGINEER,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Peraton / SAIC (indicative),GCP,Cloud,1,14.3,Job Titles,CBP GCP PLATFORM ENGINEER (MID-LEVEL),Low,2026-01-21
+BICES Defense Intelligence Agency Variant,BICES,CACI + Leidos + Peraton + SAIC (various subs),Elastic,Database,1,33.3,Job Titles,Sr Elastic Engineer (EDR/Defend Focus),Low,2026-01-21
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,Platform One / Cyber Portfolio,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),LINUX,Network,1,50.0,Existing Data,,Medium,2026-01-21
+Army Integrated Battle Command System Support,IBCS,Northrop Grumman (prime); CACI (support),LINUX,Network,1,50.0,Existing Data,,Medium,2026-01-21
+Global Command and Control System – Joint (Variant),GCCS-J,Leidos,POSTGRES,Database,1,50.0,Existing Data,,Medium,2026-01-21
+Intelligence Systems Enterprise Operations,ISEO,Leidos,CISCO,Security,1,50.0,Existing Data,,Medium,2026-01-21
+"Command and Control, Battle Management & Communications (MDA)",C2BMC,Northrop Grumman,SQL,Languages,1,100.0,Existing Data,,Medium,2026-01-21
+Defense Enclave Services,DES,Leidos,PYTHON,Languages,1,100.0,Existing Data,,Medium,2026-01-21
+Integrated Air & Missile Defense,IAMD,Raytheon,JAVA,Languages,1,100.0,Existing Data,,Medium,2026-01-21
+Integrated Air & Missile Defense,IAMD,Raytheon,REACT,Languages,1,100.0,Existing Data,,Medium,2026-01-21
+NASA SENSE (Space Comms & Tracking),SENSE,Peraton,ORACLE,Database,1,100.0,Existing Data,,Medium,2026-01-21
+Next-Gen OPIR (Ground + Payload),Next-Gen OPIR,Northrop Grumman,C++,Languages,1,100.0,Existing Data,,Medium,2026-01-21

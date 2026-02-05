@@ -1,0 +1,2263 @@
+{
+  "metadata": {
+    "generated": "2026-01-21T11:55:58.384891",
+    "total_programs": 62,
+    "total_locations": 179,
+    "total_technologies": 33
+  },
+  "programs": [
+    {
+      "program_name": "DIA Information Systems Engineering Office",
+      "program_acronym": "ISEO",
+      "agency": "DIA",
+      "prime_contractor": "Leidos",
+      "primary_location": "FREDERICK, MARYLAND",
+      "clearance_requirements": "Unknown (9); Secret (6); Top Secret (5)",
+      "key_technologies": "C++; LINUX",
+      "functional_areas": "Engineering (11); Other (5); Software Development (2); Cybersecurity (1); Network/Infrastructure (1)",
+      "total_job_postings": "21",
+      "hiring_velocity": "HOT",
+      "contract_number": "HHSN261200800001E",
+      "locations": [
+        {
+          "city": "North Charleston",
+          "state": "SC",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Elkridge",
+          "state": "MD",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Niskayuna",
+          "state": "NEW YORK",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Sterling Heights",
+          "state": "MICHIGAN",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Wilmington",
+          "state": "MASSACHUSETTS",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Beavercreek",
+          "state": "OHIO",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Salt Lake City",
+          "state": "UTAH",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Dayton",
+          "state": "OHIO",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Network/Infrastructure"
+        },
+        {
+          "city": "Berkeley",
+          "state": "MISSOURI",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Kings Bay",
+          "state": "GEORGIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Camden",
+          "state": "NEW JERSEY",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Hanover",
+          "state": "MARYLAND",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Scott Air Force Base",
+          "state": "ILLINOIS",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Frederick",
+          "state": "MARYLAND",
+          "location_type": "Project Site",
+          "team_function": "PMO/Leadership"
+        },
+        {
+          "city": "Madison",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "PMO/Leadership"
+        },
+        {
+          "city": "Wailuku",
+          "state": "HAWAII",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Cleveland",
+          "state": "OHIO",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Grand Forks",
+          "state": "NORTH DAKOTA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "AFSIM",
+          "category": "Defense",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "Rust",
+          "category": "Languages",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "Linux",
+          "category": "Network",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "C++",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Global Service Management \u2013 Operations II",
+      "program_acronym": "GSM-O II",
+      "agency": "DISA",
+      "prime_contractor": "Leidos",
+      "primary_location": "MORGANTOWN, WEST VIRGINIA",
+      "clearance_requirements": "Unknown (8); Secret (6); Top Secret (4)",
+      "key_technologies": "DEVSECOPS; KUBERNETES",
+      "functional_areas": "Other (6); Cybersecurity (5); Engineering (2); Data/Analytics (2); Network/Infrastructure (1)",
+      "total_job_postings": "18",
+      "hiring_velocity": "HOT",
+      "contract_number": "89243318CFE000003",
+      "locations": [
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Other; PMO/Leadership"
+        },
+        {
+          "city": "Tarpon Springs",
+          "state": "FLORIDA",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Dayton",
+          "state": "OHIO",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Wilmington",
+          "state": "DELAWARE",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        },
+        {
+          "city": "Kings Bay",
+          "state": "GEORGIA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics; Other"
+        },
+        {
+          "city": "Albuquerque",
+          "state": "NEW MEXICO",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Suffolk",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Hampton",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Woburn",
+          "state": "MASSACHUSETTS",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Chambersburg",
+          "state": "PENNSYLVANIA",
+          "location_type": "Project Site",
+          "team_function": "PMO/Leadership"
+        },
+        {
+          "city": "Sterling Heights",
+          "state": "MICHIGAN",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "O'fallon",
+          "state": "ILLINOIS",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        },
+        {
+          "city": "New York",
+          "state": "NEW YORK",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "DevSecOps",
+          "category": "DevSecOps",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "Kubernetes",
+          "category": "Cloud",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "GBS (Global Broadcast Service)",
+      "program_acronym": "GBS",
+      "agency": "DISA",
+      "prime_contractor": "L3Harris (historical)",
+      "primary_location": "ANAHEIM, CALIFORNIA",
+      "clearance_requirements": "Secret (9); Top Secret (3); Unknown (1)",
+      "key_technologies": "DEVSECOPS",
+      "functional_areas": "Engineering (4); Other (3); Network/Infrastructure (2); Testing/QA (1); Help Desk/Service Desk (1)",
+      "total_job_postings": "13",
+      "hiring_velocity": "HOT",
+      "contract_number": "N0003022C2001",
+      "locations": [
+        {
+          "city": "San Diego",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics; Network/Infrastructure; Other; Technical Writing"
+        },
+        {
+          "city": "Vista",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Palmdale",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Anaheim",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Beale AFB",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "El Segundo",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Santa Cruz",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Help Desk/Service Desk"
+        },
+        {
+          "city": "Solana Beach",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Jacksonville",
+          "state": "NORTH CAROLINA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        },
+        {
+          "city": "Hanahan",
+          "state": "SOUTH CAROLINA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "Assembly",
+          "category": "Languages",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "DevSecOps",
+          "category": "DevSecOps",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Battlefield Information Collection & Exploitation System",
+      "program_acronym": "BICES",
+      "agency": "DoD",
+      "prime_contractor": "GDIT",
+      "primary_location": "SPRINGFIELD, VIRGINIA",
+      "clearance_requirements": "Secret (5); Top Secret (4); Unknown (1)",
+      "key_technologies": "C++",
+      "functional_areas": "Help Desk/Service Desk (3); PMO/Leadership (2); Engineering (2); Other (1); Network/Infrastructure (1)",
+      "total_job_postings": "10",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "19AQMM18C0185",
+      "locations": [
+        {
+          "city": "Detroit",
+          "state": "MICHIGAN",
+          "location_type": "Project Site",
+          "team_function": "Help Desk/Service Desk"
+        },
+        {
+          "city": "Chesapeake",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Niskayuna",
+          "state": "NEW YORK",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Norfolk",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Help Desk/Service Desk"
+        },
+        {
+          "city": "Deerfield Beach",
+          "state": "FLORIDA",
+          "location_type": "Project Site",
+          "team_function": "PMO/Leadership"
+        },
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Quantico",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Springfield",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Hampton",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "C++",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Project Convergence (JADC2 Experiments)",
+      "program_acronym": "PC",
+      "agency": "Army",
+      "prime_contractor": "SAIC",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "Top Secret (6); Secret (4)",
+      "key_technologies": "",
+      "functional_areas": "Network/Infrastructure (7); Other (2); Engineering (1)",
+      "total_job_postings": "10",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "W15QKN19F1290",
+      "locations": [
+        {
+          "city": "Charlottesville",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Montgomery",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Monroeville",
+          "state": "PENNSYLVANIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "F5",
+          "category": "Network",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "EDIS \u2013 Engineering, Development, Integration & Sustainment",
+      "program_acronym": "EDIS",
+      "agency": "Space Force",
+      "prime_contractor": "SAIC",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "Top Secret (7); Secret (2)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (8); Other (1)",
+      "total_job_postings": "9",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "FA251822F0034",
+      "locations": [
+        {
+          "city": "Plymouth",
+          "state": "MINNESOTA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "El Segundo",
+          "state": "CALIFORNIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "New London",
+          "state": "CONNECTICUT",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Colorado Springs",
+          "state": "COLORADO",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Other"
+        },
+        {
+          "city": "Broomfield",
+          "state": "COLORADO",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Seattle",
+          "state": "WASHINGTON",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Manchester",
+          "state": "NEW HAMPSHIRE",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "Electronic Warfare",
+          "category": "Defense",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "GCCS",
+          "category": "Defense",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Advanced Battle Management System",
+      "program_acronym": "ABMS",
+      "agency": "Air Force",
+      "prime_contractor": "Multi (SAIC supports parts)",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "Top Secret (4); Secret (2); Unknown (2)",
+      "key_technologies": "ELASTIC; LINUX; WINDOWS",
+      "functional_areas": "Data/Analytics (3); Network/Infrastructure (2); Engineering (2); Other (1)",
+      "total_job_postings": "8",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "FA251822F0034",
+      "locations": [
+        {
+          "city": "Savannah",
+          "state": "GA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Colorado Springs",
+          "state": "COLORADO",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics; Engineering"
+        },
+        {
+          "city": "Washington",
+          "state": "DISTRICT OF COLUMBIA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics; Other"
+        },
+        {
+          "city": "Pearl City",
+          "state": "HAWAII",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "East Hartford",
+          "state": "CONNECTICUT",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "Elastic",
+          "category": "Database",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "Linux",
+          "category": "Network",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "WINDOWS",
+          "category": "Network",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Integrated Base Defense Security System",
+      "program_acronym": "IBDS",
+      "agency": "Army",
+      "prime_contractor": "Leidos",
+      "primary_location": "RESTON, VIRGINIA",
+      "clearance_requirements": "Unknown (7); TS/SCI Poly (1)",
+      "key_technologies": ".NET",
+      "functional_areas": "Engineering (3); Network/Infrastructure (2); Other (2); Software Development (1)",
+      "total_job_postings": "8",
+      "hiring_velocity": "HOT",
+      "contract_number": "70T04019C9DAP3006",
+      "locations": [
+        {
+          "city": "Washington",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Reston",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Network/Infrastructure; Other"
+        },
+        {
+          "city": "Norfolk",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Jacksonville",
+          "state": "NC",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Fort Belvoir",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": ".NET",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Air Force Advanced Battle Management System",
+      "program_acronym": "ABMS",
+      "agency": "Air Force",
+      "prime_contractor": "Multiple: SAIC, Leidos, Booz Allen Hamilton",
+      "primary_location": "HERNDON, VIRGINIA",
+      "clearance_requirements": "Secret (3); Unknown (2); Top Secret (2)",
+      "key_technologies": "WINDOWS",
+      "functional_areas": "Other (2); PMO/Leadership (1); Network/Infrastructure (1); Software Development (1); Cybersecurity (1)",
+      "total_job_postings": "7",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "36C10B21N10150056",
+      "locations": [
+        {
+          "city": "Herndon",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "PMO/Leadership"
+        },
+        {
+          "city": "Quantico",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Braddock",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Dahlgren",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Alexandria",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics; Engineering"
+        },
+        {
+          "city": "Oakton",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "WINDOWS",
+          "category": "Network",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Army Enterprise Service Management Framework",
+      "program_acronym": "AESMF",
+      "agency": "Army",
+      "prime_contractor": "SAIC",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "Unknown (3); Secret (2); Top Secret (1)",
+      "key_technologies": "DEVOPS; SPLUNK",
+      "functional_areas": "Engineering (5); Technical Writing (1); Data/Analytics (1)",
+      "total_job_postings": "7",
+      "hiring_velocity": "HOT",
+      "contract_number": "W15QKN19F1290",
+      "locations": [
+        {
+          "city": "Middletown",
+          "state": "CONNECTICUT",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Colorado Springs",
+          "state": "COLORADO",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Technical Writing"
+        },
+        {
+          "city": "Goose Creek",
+          "state": "SOUTH CAROLINA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Atlanta",
+          "state": "GEORGIA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        },
+        {
+          "city": "Vienna",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Groton",
+          "state": "CONNECTICUT",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "DevOps",
+          "category": "DevSecOps",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "Splunk",
+          "category": "Analytics",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Army IT Enterprise Mgmt Systems Solution",
+      "program_acronym": "ITEMSS",
+      "agency": "Army",
+      "prime_contractor": "CACI",
+      "primary_location": "ARLINGTON, VIRGINIA",
+      "clearance_requirements": "Secret (3); Unknown (2); Top Secret (2)",
+      "key_technologies": ".NET",
+      "functional_areas": "Software Development (3); Cybersecurity (2); Other (1); Engineering (1)",
+      "total_job_postings": "7",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "47QFRA19F0011",
+      "locations": [
+        {
+          "city": "Arlington",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Fort Belvoir",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Bossier City",
+          "state": "LA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Norfolk",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Arlington",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Fairfax",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Ashburn",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": ".NET",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "CMS Enterprise Cloud Infrastructure Services",
+      "program_acronym": "ECIS",
+      "agency": "DoD",
+      "prime_contractor": "Peraton / SAIC (indicative)",
+      "primary_location": "HERNDON, VIRGINIA",
+      "clearance_requirements": "Secret (3); Top Secret (3); TS/SCI Poly (1)",
+      "key_technologies": "AWS; GCP",
+      "functional_areas": "Engineering (5); Software Development (1); Data/Analytics (1)",
+      "total_job_postings": "7",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "47QFCA20F0015",
+      "locations": [
+        {
+          "city": "Fayetteville",
+          "state": "NC",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Dahlgren",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Vienna",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Sully",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Suffolk",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        },
+        {
+          "city": "Broad Run",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "AWS",
+          "category": "Cloud",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "GCP",
+          "category": "Cloud",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "NGEN-R SMIT \u2013 Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",
+      "program_acronym": "NGEN-R SMIT",
+      "agency": "Navy",
+      "prime_contractor": "Leidos",
+      "primary_location": "MORGANTOWN, WEST VIRGINIA",
+      "clearance_requirements": "Unknown (3); Top Secret (2); Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (4); Other (1); Cybersecurity (1)",
+      "total_job_postings": "6",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "89243318CFE000003",
+      "locations": [
+        {
+          "city": "St. Louis",
+          "state": "MO",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Carlsbad",
+          "state": "CA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Mount Vernon",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Greece",
+          "state": "NEW YORK",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Lincoln",
+          "state": "MASSACHUSETTS",
+          "location_type": "Project Site",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "Fairfax",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Aegis Ballistic Missile Defense / Aegis Program",
+      "program_acronym": "Aegis",
+      "agency": "Navy",
+      "prime_contractor": "Lockheed Martin",
+      "primary_location": "FORT WORTH, TEXAS",
+      "clearance_requirements": "Secret (2); Top Secret (2); TS/SCI Poly (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (3); Software Development (1); Other (1)",
+      "total_job_postings": "5",
+      "hiring_velocity": "SLOW",
+      "contract_number": "N0001917C0001",
+      "locations": [
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Sunset",
+          "state": "UTAH",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Austin",
+          "state": "TEXAS",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Army AESD Enterprise Service Desk",
+      "program_acronym": "AESD",
+      "agency": "Army",
+      "prime_contractor": "SAIC",
+      "primary_location": "SAN ANTONIO, TEXAS",
+      "clearance_requirements": "Top Secret (4); Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (2); Logistics/Supply (1); PMO/Leadership (1); Network/Infrastructure (1)",
+      "total_job_postings": "5",
+      "hiring_velocity": "HOT",
+      "contract_number": "FA877319FA023",
+      "locations": [
+        {
+          "city": "San Antonio",
+          "state": "TEXAS",
+          "location_type": "Project Site",
+          "team_function": "Engineering; Logistics/Supply; Network/Infrastructure; PMO/Leadership"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "DISA Global Service Mgmt \u2013 Ops II",
+      "program_acronym": "GSM-O II",
+      "agency": "DISA",
+      "prime_contractor": "Leidos",
+      "primary_location": "MORGANTOWN, WEST VIRGINIA",
+      "clearance_requirements": "Secret (3); Unknown (2)",
+      "key_technologies": "",
+      "functional_areas": "Other (5)",
+      "total_job_postings": "5",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "89243318CFE000003",
+      "locations": [
+        {
+          "city": "Muscatine",
+          "state": "IOWA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Other; PMO/Leadership"
+        },
+        {
+          "city": "Kings Bay",
+          "state": "GEORGIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        },
+        {
+          "city": "Meridianville",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Data/Analytics"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Data Center & Cloud Optimization",
+      "program_acronym": "DCCO",
+      "agency": "DHS",
+      "prime_contractor": "Peraton / Leidos (indicative)",
+      "primary_location": "MC LEAN, VIRGINIA",
+      "clearance_requirements": "Unknown (1); TS/SCI Poly (1); Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (2); Software Development (1); Other (1)",
+      "total_job_postings": "4",
+      "hiring_velocity": "SLOW",
+      "contract_number": "GST0011AJ0025",
+      "locations": [
+        {
+          "city": "Arlington",
+          "state": "VA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Research Triangle Park",
+          "state": "NC",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Alexandria",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Manassas",
+          "state": "VIRGINIA",
+          "location_type": "Project Site",
+          "team_function": "Other"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "BICES Defense Intelligence Agency Variant",
+      "program_acronym": "BICES",
+      "agency": "DIA",
+      "prime_contractor": "CACI + Leidos + Peraton + SAIC (various subs)",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "TS/SCI Poly (2); Secret (1)",
+      "key_technologies": "ELASTIC",
+      "functional_areas": "Other (2); Engineering (1)",
+      "total_job_postings": "3",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "FA251822F0034",
+      "locations": [
+        {
+          "city": "Colorado Springs",
+          "state": "CO",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Washington",
+          "state": "DISTRICT OF COLUMBIA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "Elastic",
+          "category": "Database",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Global Network Operations (DISA GSM-O II)",
+      "program_acronym": "GSM-O II",
+      "agency": "DISA",
+      "prime_contractor": "Leidos",
+      "primary_location": "HOUSTON, TEXAS",
+      "clearance_requirements": "Secret (2); Top Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (2); Network/Infrastructure (1)",
+      "total_job_postings": "3",
+      "hiring_velocity": "SLOW",
+      "contract_number": "NNJ09HD46C",
+      "locations": [
+        {
+          "city": "Montgomery",
+          "state": "ALABAMA",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Grand Forks",
+          "state": "NORTH DAKOTA",
+          "location_type": "Project Site",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "'Aiea",
+          "state": "HAWAII",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "GPS Next-Gen Operational Control System",
+      "program_acronym": "GPS OCX",
+      "agency": "Space Force",
+      "prime_contractor": "Raytheon Intelligence & Space",
+      "primary_location": "AURORA, COLORADO",
+      "clearance_requirements": "Top Secret (1); Unknown (1); Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (3)",
+      "total_job_postings": "3",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "FA880710C0001",
+      "locations": [
+        {
+          "city": "Orlando",
+          "state": "FL",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Aurora",
+          "state": "CO",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Aurora",
+          "state": "COLORADO",
+          "location_type": "Project Site",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
+      "program_acronym": "NARSIL",
+      "agency": "IC",
+      "prime_contractor": "Peraton",
+      "primary_location": "HERNDON, VIRGINIA",
+      "clearance_requirements": "Secret (2); Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (2); Data/Analytics (1)",
+      "total_job_postings": "3",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "80GSFC19C0063",
+      "locations": [
+        {
+          "city": "Herndon",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "O'fallon",
+          "state": "ILLINOIS",
+          "location_type": "Unknown",
+          "team_function": "Data/Analytics"
+        },
+        {
+          "city": "Suffolk",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "SITEC III \u2013 Enterprise Operations & Maintenance",
+      "program_acronym": "SITEC III",
+      "agency": "SOCOM",
+      "prime_contractor": "Peraton",
+      "primary_location": "TAMPA, FLORIDA",
+      "clearance_requirements": "Unknown (2); Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Other (1); Help Desk/Service Desk (1); Engineering (1)",
+      "total_job_postings": "3",
+      "hiring_velocity": "SLOW",
+      "contract_number": "47QFCA24F0002",
+      "locations": [
+        {
+          "city": "Juno Beach",
+          "state": "FL",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        },
+        {
+          "city": "Pensacola",
+          "state": "FL",
+          "location_type": "Unknown",
+          "team_function": "Help Desk/Service Desk"
+        },
+        {
+          "city": "Tampa",
+          "state": "FLORIDA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio",
+      "program_acronym": "Platform One / Cyber Portfolio",
+      "agency": "Air Force",
+      "prime_contractor": "SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1)",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "Top Secret (2)",
+      "key_technologies": "LINUX",
+      "functional_areas": "Network/Infrastructure (1); Engineering (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA882316C0004",
+      "locations": [
+        {
+          "city": "Colorado Springs",
+          "state": "COLORADO",
+          "location_type": "Unknown",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "Washington",
+          "state": "DISTRICT OF COLUMBIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "LINUX",
+          "category": "Network",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Army Integrated Battle Command System Support",
+      "program_acronym": "IBCS",
+      "agency": "Army",
+      "prime_contractor": "Northrop Grumman (prime); CACI (support)",
+      "primary_location": "CHANTILLY, VIRGINIA",
+      "clearance_requirements": "Top Secret (2)",
+      "key_technologies": "LINUX",
+      "functional_areas": "Technical Writing (1); Engineering (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "W15QKN15C0049",
+      "locations": [
+        {
+          "city": "Chantilly",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Rivanna",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Technical Writing"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "LINUX",
+          "category": "Network",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "CDAO Advanced AI Tools (Scale AI OTA)",
+      "program_acronym": "Donovan",
+      "agency": "DoD",
+      "prime_contractor": "Scale AI",
+      "primary_location": "PALO ALTO, CALIFORNIA",
+      "clearance_requirements": "Secret (2)",
+      "key_technologies": "",
+      "functional_areas": "Testing/QA (1); Engineering (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "W911QX24F0053",
+      "locations": [
+        {
+          "city": "Emerado",
+          "state": "ND",
+          "location_type": "Unknown",
+          "team_function": "Testing/QA"
+        },
+        {
+          "city": "Goose Creek",
+          "state": "SOUTH CAROLINA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Defense Enterprise Office 365 Migration / DoD365",
+      "program_acronym": "DOD365",
+      "agency": "DISA",
+      "prime_contractor": "Microsoft",
+      "primary_location": "MCLEAN, VIRGINIA",
+      "clearance_requirements": "Unknown (2)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1); Other (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "47QFCA22F0047",
+      "locations": [
+        {
+          "city": "Mclean",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Defense Enterprise Office Solutions",
+      "program_acronym": "DEOS",
+      "agency": "DISA",
+      "prime_contractor": "CSRA / Leidos (team)",
+      "primary_location": "FREDERICK, MARYLAND",
+      "clearance_requirements": "Unknown (1); Top Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1); Network/Infrastructure (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "HHSN261200800001E",
+      "locations": [
+        {
+          "city": "Fayetteville",
+          "state": "NC",
+          "location_type": "Unknown",
+          "team_function": "Network/Infrastructure"
+        },
+        {
+          "city": "North Charleston",
+          "state": "SC",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "DISA JWCC \u2013 Joint Warfighting Cloud Capability",
+      "program_acronym": "JWCC",
+      "agency": "DISA",
+      "prime_contractor": "Amazon; Microsoft; Google; Oracle",
+      "primary_location": "ABERDEEN PROVING GROUND, MARYLAND",
+      "clearance_requirements": "Top Secret (1); TS/SCI (1)",
+      "key_technologies": "",
+      "functional_areas": "Data/Analytics (1); Other (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "W91CRB20F0448",
+      "locations": [
+        {
+          "city": "Aberdeen Proving Ground",
+          "state": "MARYLAND",
+          "location_type": "Unknown",
+          "team_function": "Data/Analytics"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Global Command and Control System \u2013 Joint",
+      "program_acronym": "GCCS-J",
+      "agency": "DISA",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "ROY, UTAH",
+      "clearance_requirements": "Unknown (1); Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Other (1); PMO/Leadership (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA821920C0006",
+      "locations": [
+        {
+          "city": "Kings Bay",
+          "state": "GEORGIA",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        },
+        {
+          "city": "Sunset",
+          "state": "UTAH",
+          "location_type": "Unknown",
+          "team_function": "PMO/Leadership"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Global Command and Control System \u2013 Joint (Variant)",
+      "program_acronym": "GCCS-J",
+      "agency": "DISA",
+      "prime_contractor": "Leidos",
+      "primary_location": "FREDERICK, MARYLAND",
+      "clearance_requirements": "Unknown (1); Secret (1)",
+      "key_technologies": "POSTGRES",
+      "functional_areas": "Engineering (2)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HHSN261200800001E",
+      "locations": [
+        {
+          "city": "Cockeysville",
+          "state": "MARYLAND",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Windsor Mill",
+          "state": "MARYLAND",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "POSTGRES",
+          "category": "Database",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Global Solutions Management \u2013 Operations II",
+      "program_acronym": "GSMO II",
+      "agency": "DISA",
+      "prime_contractor": "Leidos",
+      "primary_location": "HOUSTON, TEXAS",
+      "clearance_requirements": "Secret (2)",
+      "key_technologies": "",
+      "functional_areas": "Other (2)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "NNJ09HD46C",
+      "locations": [
+        {
+          "city": "Fort Bliss",
+          "state": "TEXAS",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        },
+        {
+          "city": "Saint Louis",
+          "state": "MISSOURI",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "GRASP (Raytheon/Peraton)",
+      "program_acronym": "GRASP",
+      "agency": "DoD",
+      "prime_contractor": "Peraton",
+      "primary_location": "HERNDON, VIRGINIA",
+      "clearance_requirements": "Unknown (2)",
+      "key_technologies": "",
+      "functional_areas": "Software Development (1); Engineering (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "ACTIVE",
+      "contract_number": "80GSFC19C0063",
+      "locations": [
+        {
+          "city": "North Charleston",
+          "state": "SC",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        },
+        {
+          "city": "Salt Lake City",
+          "state": "UTAH",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Ground-Based Midcourse Defense",
+      "program_acronym": "GMD",
+      "agency": "MDA",
+      "prime_contractor": "Boeing (prime); Northrop & Raytheon (NGI)",
+      "primary_location": "CHANDLER, ARIZONA",
+      "clearance_requirements": "Unknown (1); Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Data/Analytics (1); Engineering (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HQ085621C0003",
+      "locations": [
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        },
+        {
+          "city": "Tucson",
+          "state": "AZ",
+          "location_type": "Unknown",
+          "team_function": "Data/Analytics"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Intelligence Systems Enterprise Operations",
+      "program_acronym": "ISEO",
+      "agency": "DIA",
+      "prime_contractor": "Leidos",
+      "primary_location": "FREDERICK, MARYLAND",
+      "clearance_requirements": "TS/SCI Poly (1); Secret (1)",
+      "key_technologies": "CISCO",
+      "functional_areas": "Cybersecurity (1); Data/Analytics (1)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HHSN261200800001E",
+      "locations": [
+        {
+          "city": "Jessup",
+          "state": "MARYLAND",
+          "location_type": "Unknown",
+          "team_function": "Cybersecurity"
+        },
+        {
+          "city": "San Francisco",
+          "state": "CALIFORNIA",
+          "location_type": "Unknown",
+          "team_function": "Data/Analytics"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "CISCO",
+          "category": "Security",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "SPICE (Space Payload Integration & Cyber Eng)",
+      "program_acronym": "SPICE",
+      "agency": "Space Force",
+      "prime_contractor": "SAIC / LinQuest (indicative)",
+      "primary_location": "SAN ANTONIO, TEXAS",
+      "clearance_requirements": "Secret (2)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (2)",
+      "total_job_postings": "2",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA877319FA023",
+      "locations": [
+        {
+          "city": "Hill AFB",
+          "state": "UTAH",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Advanced Medium-Range Air-to-Air Missile (AMRAAM) Production & Sustainment",
+      "program_acronym": "AMRAAM",
+      "agency": "Air Force",
+      "prime_contractor": "Raytheon",
+      "primary_location": "ANDOVER, MASSACHUSETTS",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Software Development (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "W31P4Q15C0022",
+      "locations": [
+        {
+          "city": "Jacksonville",
+          "state": "FLORIDA",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "AFCENT SCORPION Cyber Task (ISSO/ISSM Support)",
+      "program_acronym": "SCORPION",
+      "agency": "Air Force",
+      "prime_contractor": "CACI",
+      "primary_location": "COLORADO SPRINGS, COLORADO",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Cybersecurity (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA882316C0004",
+      "locations": [
+        {
+          "city": "Tyndall Air Force Base",
+          "state": "FL",
+          "location_type": "Unknown",
+          "team_function": "Cybersecurity"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "ARCYBER Information Advantage / Mission Support (general)",
+      "program_acronym": "ARCYBER",
+      "agency": "Army",
+      "prime_contractor": "Peraton / others (Peraton lead on ARCYBER Information Advantage Enterprise line; additional primes on related work)",
+      "primary_location": "FORT GEORGE G MEADE, MARYLAND",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Other (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "47QFCA19F0033",
+      "locations": [
+        {
+          "city": "Salem",
+          "state": "MASSACHUSETTS",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Army Backbone Infrastructure Modernization \u2013 Task Order 2",
+      "program_acronym": "BIM TO2",
+      "agency": "Army",
+      "prime_contractor": "CACI",
+      "primary_location": "CHANTILLY, VIRGINIA",
+      "clearance_requirements": "Public Trust (1)",
+      "key_technologies": "",
+      "functional_areas": "Help Desk/Service Desk (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "W15QKN15C0049",
+      "locations": [
+        {
+          "city": "Sully",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Help Desk/Service Desk"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Army Integrated Battle Command System",
+      "program_acronym": "IBCS",
+      "agency": "Army",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "CHANDLER, ARIZONA",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Software Development (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HQ085621C0003",
+      "locations": [
+        {
+          "city": "Hazelwood",
+          "state": "MO",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Army Missile & Space R&D Support (Huntsville)",
+      "program_acronym": "",
+      "agency": "Army",
+      "prime_contractor": "Dynetics; Northrop teams",
+      "primary_location": "ROY, UTAH",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "F4261098C0001",
+      "locations": [
+        {
+          "city": "Huntsville",
+          "state": "ALABAMA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Cloud One (USAF Cloud Program)",
+      "program_acronym": "Cloud One",
+      "agency": "Air Force",
+      "prime_contractor": "SAIC",
+      "primary_location": "SAN ANTONIO, TEXAS",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA877319FA023",
+      "locations": [
+        {
+          "city": "Dayton",
+          "state": "OHIO",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Command and Control, Battle Management & Communications (MDA)",
+      "program_acronym": "C2BMC",
+      "agency": "MDA",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "CHANDLER, ARIZONA",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "SQL",
+      "functional_areas": "Software Development (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HQ085621C0003",
+      "locations": [
+        {
+          "city": "Redstone Arsenal",
+          "state": "AL",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "SQL",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Defense Enclave Services",
+      "program_acronym": "DES",
+      "agency": "DoD",
+      "prime_contractor": "Leidos",
+      "primary_location": "FREDERICK, MARYLAND",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "PYTHON",
+      "functional_areas": "Software Development (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HHSN261200800001E",
+      "locations": [
+        {
+          "city": "Sainte-Anne-De-Bellevue",
+          "state": "QUEBEC",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "PYTHON",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Distributed Common Ground System (AF)",
+      "program_acronym": "DCGS",
+      "agency": "Air Force",
+      "prime_contractor": "BAE; multiple",
+      "primary_location": "ROCKVILLE, MARYLAND",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Help Desk/Service Desk (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA821413C0001",
+      "locations": [
+        {
+          "city": "Hampton",
+          "state": "VA",
+          "location_type": "Unknown",
+          "team_function": "Help Desk/Service Desk"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "DTRA IAC-MAC Research & Analysis",
+      "program_acronym": "IAC-MAC",
+      "agency": "DoD",
+      "prime_contractor": "CACI",
+      "primary_location": "RESTON, VIRGINIA",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Software Development (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "GSQ0017AJ0006",
+      "locations": [
+        {
+          "city": "Bossier City",
+          "state": "LA",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "GMD Weapon System (Ground C2)",
+      "program_acronym": "GWS (GMD)",
+      "agency": "MDA",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "CHANDLER, ARIZONA",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HQ085621C0003",
+      "locations": [
+        {
+          "city": "Tucson",
+          "state": "ARIZONA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "GPS Operational Control System (sustainment)",
+      "program_acronym": "GPS OCX",
+      "agency": "Space Force",
+      "prime_contractor": "Raytheon",
+      "primary_location": "AURORA, COLORADO",
+      "clearance_requirements": "Top Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA880710C0001",
+      "locations": [
+        {
+          "city": "Vandenberg Space Force Base",
+          "state": "CA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "HHS Advanced Secure Data Repository",
+      "program_acronym": "ASDR",
+      "agency": "DoD",
+      "prime_contractor": "GDIT / SAIC (indicative)",
+      "primary_location": "SPRINGFIELD, VIRGINIA",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Data/Analytics (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "19AQMM18C0185",
+      "locations": [
+        {
+          "city": "Washington",
+          "state": "VA",
+          "location_type": "Unknown",
+          "team_function": "Data/Analytics"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Hypersonic & Ballistic Tracking Space Sensor",
+      "program_acronym": "HBTSS",
+      "agency": "MDA",
+      "prime_contractor": "Northrop & L3Harris (co-primes)",
+      "primary_location": "CHANDLER, ARIZONA",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HQ085621C0003",
+      "locations": [
+        {
+          "city": "Chandler",
+          "state": "ARIZONA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Integrated Air & Missile Defense",
+      "program_acronym": "IAMD",
+      "agency": "Army",
+      "prime_contractor": "Raytheon",
+      "primary_location": "ANDOVER, MASSACHUSETTS",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "JAVA; REACT",
+      "functional_areas": "Software Development (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "W31P4Q15C0022",
+      "locations": [
+        {
+          "city": "Andover",
+          "state": "MA",
+          "location_type": "Unknown",
+          "team_function": "Software Development"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "JAVA",
+          "category": "Languages",
+          "mention_count": "1"
+        },
+        {
+          "keyword": "REACT",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Integrated Digital Engineering Environment",
+      "program_acronym": "IDEE",
+      "agency": "Air Force",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "ROY, UTAH",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA821920C0006",
+      "locations": [
+        {
+          "city": "Tucson",
+          "state": "ARIZONA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Intelligence Systems Infrastructure Tools & Enhancements",
+      "program_acronym": "inSITE",
+      "agency": "DoD",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "ROY, UTAH",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA821920C0006",
+      "locations": [
+        {
+          "city": "San Diego",
+          "state": "CA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "MDA Tactical Embedded Systems",
+      "program_acronym": "",
+      "agency": "MDA",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "CHANDLER, ARIZONA",
+      "clearance_requirements": "Top Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "HQ085621C0003",
+      "locations": [
+        {
+          "city": "Chandler",
+          "state": "AZ",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Mission Partner Environment (Field Ops / MPCO)",
+      "program_acronym": "MPE / MPCO",
+      "agency": "Air Force",
+      "prime_contractor": "GDIT",
+      "primary_location": "SPRINGFIELD, VIRGINIA",
+      "clearance_requirements": "Public Trust (1)",
+      "key_technologies": "",
+      "functional_areas": "Other (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "19AQMM18C0185",
+      "locations": [
+        {
+          "city": "Dhs",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "MSS Smart Systems (Palantir contract)",
+      "program_acronym": "MSS",
+      "agency": "Army",
+      "prime_contractor": "Palantir",
+      "primary_location": "PALO ALTO, CALIFORNIA",
+      "clearance_requirements": "Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "W911QX24F0113",
+      "locations": [
+        {
+          "city": "Norfolk",
+          "state": "VIRGINIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "NASA SENSE (Space Comms & Tracking)",
+      "program_acronym": "SENSE",
+      "agency": "NASA",
+      "prime_contractor": "Peraton",
+      "primary_location": "HERNDON, VIRGINIA",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "ORACLE",
+      "functional_areas": "Other (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "80GSFC19C0063",
+      "locations": [
+        {
+          "city": "Washington",
+          "state": "VA",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "ORACLE",
+          "category": "Database",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Navy Aegis Combat System Modernization",
+      "program_acronym": "AEGIS",
+      "agency": "Navy",
+      "prime_contractor": "Lockheed Martin",
+      "primary_location": "FORT WORTH, TEXAS",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "N0001917C0001",
+      "locations": [
+        {
+          "city": "Fort Worth",
+          "state": "TX",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Next-Gen OPIR (Ground + Payload)",
+      "program_acronym": "Next-Gen OPIR",
+      "agency": "Space Force",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "REDONDO BEACH, CALIFORNIA",
+      "clearance_requirements": "Top Secret (1)",
+      "key_technologies": "C++",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA881018C0006",
+      "locations": [
+        {
+          "city": "Redondo Beach",
+          "state": "CALIFORNIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": [
+        {
+          "keyword": "C++",
+          "category": "Languages",
+          "mention_count": "1"
+        }
+      ]
+    },
+    {
+      "program_name": "Next-Generation Overhead Persistent Infrared",
+      "program_acronym": "NG OPIR (classified)",
+      "agency": "Space Force",
+      "prime_contractor": "Northrop Grumman",
+      "primary_location": "REDONDO BEACH, CALIFORNIA",
+      "clearance_requirements": "Top Secret (1)",
+      "key_technologies": "",
+      "functional_areas": "Engineering (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "FA881018C0006",
+      "locations": [
+        {
+          "city": "El Segundo",
+          "state": "CALIFORNIA",
+          "location_type": "Unknown",
+          "team_function": "Engineering"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "Peraton ARCYBER Information Advantage Enterprise",
+      "program_acronym": "IAE",
+      "agency": "Army",
+      "prime_contractor": "Peraton",
+      "primary_location": "FORT GEORGE G MEADE, MARYLAND",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Cybersecurity (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "47QFCA19F0033",
+      "locations": [
+        {
+          "city": "Fort George G Meade",
+          "state": "MD",
+          "location_type": "Unknown",
+          "team_function": "Cybersecurity"
+        }
+      ],
+      "technologies": []
+    },
+    {
+      "program_name": "PRISM Support Services (Consolidated)",
+      "program_acronym": "PRISM",
+      "agency": "DoD",
+      "prime_contractor": "11 MA-IDIQ primes (incl. CTC, SAIC, Booz Allen, ManTech)",
+      "primary_location": "WASHINGTON, DISTRICT OF COLUMBIA",
+      "clearance_requirements": "Unknown (1)",
+      "key_technologies": "",
+      "functional_areas": "Other (1)",
+      "total_job_postings": "1",
+      "hiring_velocity": "SLOW",
+      "contract_number": "47QFCA21F0018",
+      "locations": [
+        {
+          "city": "Milford Mill",
+          "state": "MD",
+          "location_type": "Unknown",
+          "team_function": "Other"
+        }
+      ],
+      "technologies": []
+    }
+  ]
+}

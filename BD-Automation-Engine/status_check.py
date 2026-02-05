@@ -4,7 +4,10 @@
 import sys
 import os
 import sqlite3
+import logging
 from datetime import datetime
+
+logger = logging.getLogger(__name__)
 
 # Fix Windows encoding
 sys.stdout.reconfigure(encoding='utf-8', errors='replace')
@@ -70,8 +73,8 @@ if os.path.exists(db_path):
                 if target not in source_counts:
                     source_counts[target] = 0
                 source_counts[target] += count
-            except:
-                pass
+            except Exception as e:
+                logger.debug("table_count_failed for %s: %s", table, e)
         conn.close()
     except Exception as e:
         print(f"  Error reading DB: {e}")
@@ -141,13 +144,15 @@ print("\n=== SERVICES STATUS ===")
 try:
     response = urllib.request.urlopen("http://localhost:8100/health", timeout=5)
     print("  Knowledge API:    [RUNNING] on port 8100")
-except:
+except Exception as e:
+    logger.debug("knowledge_api_check_failed: %s", e)
     print("  Knowledge API:    [STOPPED] - Start with: python Engine8_Knowledge/api.py")
 
 try:
     response = urllib.request.urlopen("http://localhost:6333/collections", timeout=5)
     print("  Qdrant Docker:    [RUNNING] on port 6333")
-except:
+except Exception as e:
+    logger.debug("qdrant_check_failed: %s", e)
     print("  Qdrant Docker:    [STOPPED]")
 
 print("\n" + "=" * 70)

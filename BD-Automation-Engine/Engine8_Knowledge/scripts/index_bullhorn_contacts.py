@@ -130,7 +130,8 @@ def index_bullhorn_contacts():
     try:
         current_count = store.client.get_collection("contacts").points_count
         logger.info(f"Current contacts in Qdrant: {current_count:,}")
-    except:
+    except Exception as e:
+        logger.warning("collection_count_fetch_failed: %s", e)
         current_count = 0
 
     # Process in batches

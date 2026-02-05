@@ -1,0 +1,1559 @@
+job_id,job_number,title,owner,contact,employment_type,status,pay_rate,bill_rate,date_added,linked_prime,linked_programs,tech_areas
+1,9373,React Developer,Will Apple,Darla Walker,Contract To Hire,Open,0.0,0.0,"01/12/2026, 2:18 PM",,,
+2,9360,Network Engineer,Kevin Chavez,Alex Velez,Contract To Hire,Open,0.0,0.0,"01/05/2026, 3:08 PM",,,networking
+3,9359,Control Technician,Matt Gullette,Charles Swindell,Contract,Open,112.49,0.0,"01/05/2026, 10:54 AM",Leidos,,
+4,9358,Change Management Specialist,Matt Gullette,Hardie White,Contract,Open,76.78,0.0,"01/05/2026, 9:24 AM",Leidos,,
+5,9352,Security Control Assessor,Natasha Clark,Cliff Feiring,Contract To Hire,Open,0.0,0.0,"12/12/2025, 3:27 PM",,,cybersecurity
+6,9350,Cyber Public Affairs Officer,Brad Glaser,Darrell Shorter,Contract To Hire,Placed,0.0,0.0,"12/10/2025, 3:22 PM",Leidos,DIA,"cybersecurity, ai_ml"
+7,9347,Technical Writer,Matt Capelluto,Erin McKenna,Contract,Placed,0.0,0.0,"12/09/2025, 4:31 PM",Leidos,,
+8,9341,SOC Analyst,Kevin Chavez,Alphonso Moore,Contract To Hire,Open,0.0,0.0,"12/05/2025, 8:55 AM",Leidos,,cybersecurity
+9,9336,SOC Analyst,Kevin Chavez,Alphonso Moore,Contract To Hire,Open,0.0,0.0,"12/04/2025, 2:30 PM",Leidos,,cybersecurity
+10,9335,Data Scientist,Brad Glaser,Chris McDonald,Contract To Hire,Open,0.0,0.0,"12/04/2025, 2:29 PM",,,
+11,9333,Cloud Security Analyst,Brad Glaser,Jevencia Barkwell,Contract To Hire,Open,0.0,0.0,"12/04/2025, 8:26 AM",Leidos,Zero Trust,"cybersecurity, cloud"
+12,9330,Oracle EBS and Exadata SME,Matt Capelluto,Dean Finley,Contract,Open,0.0,0.0,"12/03/2025, 11:02 AM",Leidos,DIA,database
+13,9329,Logistics Systems Specialist,Will Apple,Eric Clayton,Contract To Hire,Open,0.0,0.0,"12/03/2025, 10:27 AM",,,
+14,9323,Operations Research Analyst,Kevin Chavez,Lloyd Mcdonald,Contract To Hire,Open,0.0,0.0,"11/26/2025, 9:19 AM",,,
+15,9320,Information Security Specialist,Natasha Clark,Cliff Feiring,Contract To Hire,Open,0.0,0.0,"11/21/2025, 3:35 PM",,,cybersecurity
+16,9305,Desktop Support Technician (DOJ),Josh Tipton,Bernice Dargan,Contract To Hire,Open,0.0,0.0,"11/11/2025, 11:15 AM",Leidos,,
+17,9283,Cyber Intrusion Analyst,Emma Davis,Michael Najmulski,Contract,Open,0.0,0.0,"10/29/2025, 3:49 PM",Leidos,,cybersecurity
+18,9279,Cyber Security Watch Officer,Brad Glaser,Brian Cooley,Contract To Hire,Open,0.0,0.0,"10/28/2025, 2:36 PM",Leidos,,cybersecurity
+19,9263,Sr. Network Administrator,Kevin Chavez,Lloyd Mcdonald,Contract To Hire,Open,0.0,0.0,"10/22/2025, 9:48 AM",,,networking
+20,9259,Inventory Management Analyst,Matt Gullette,Rob Turner,Contract,Open,61.68,0.0,"10/21/2025, 10:53 AM",Leidos,,
+21,9256,Business Analyst (Scott AFB),Emma Davis,Dipa Dayal,Contract,Open,0.0,0.0,"10/20/2025, 8:28 AM",Leidos,,
+22,9234,Network Engineer,Emma Davis,James Tubb,Contract To Hire,Open,0.0,0.0,"10/09/2025, 9:33 AM",Leidos,DIA,networking
+23,9233,Cyber Capabilities SME,Brad Glaser,Lloyd Mcdonald,Contract To Hire,Placed,0.0,0.0,"10/07/2025, 2:58 PM",,,cybersecurity
+24,9228,Mission Assurance Cyber Analyst,Brad Glaser,Lloyd Mcdonald,Contract To Hire,Open,0.0,0.0,"10/06/2025, 10:37 AM",,,cybersecurity
+25,9220,Active Directory Specialist,Kevin Testerman,Melissa Romero,Contract,Open,0.0,0.0,"10/03/2025, 8:27 AM",Leidos,,
+26,9217,"Configuration Management Specialist - Beaufort, SC",Matt Capelluto,Erin McKenna,Contract,Open,0.0,0.0,"10/01/2025, 4:50 PM",Leidos,,
+27,9189,COMSEC Manager,Emma Davis,James Tubb,Contract,Open,0.0,0.0,"09/17/2025, 8:41 AM",Leidos,DIA,
+28,9159,Senior Network Engineer,Ethan Dial,Terry Reilly,Contract,Open,48.08,0.0,"09/03/2025, 1:32 PM",Leidos,,networking
+29,9155,Network Service Reliability Engineer,Josh Overley,Brian Nagel,Contract,Accepting Candidates,48.08,100000.0,"09/03/2025, 8:45 AM",Leidos,,networking
+30,9149,Automation Test Engineer,Matt Capelluto,Candace Rauschuber,Contract,Placed,0.0,0.0,"08/27/2025, 3:53 PM",Leidos,,
+31,9148,Battle Captain Trainer,Brad Glaser,Reginald Avery,Contract To Hire,Open,0.0,0.0,"08/27/2025, 2:12 PM",,,ai_ml
+32,9147,CSSP Trainer,Brad Glaser,Reginald Avery,Contract To Hire,Placed,0.0,0.0,"08/27/2025, 2:12 PM",,,ai_ml
+33,9145,Senior Network Engineer,Josh Tipton,Keze Lavala,Contract,Open,0.0,0.0,"08/26/2025, 11:29 AM",Leidos,,networking
+34,9140,Senior Business Analyst,Zach Adauto,Way Wan,Contract To Hire,Open,0.0,0.0,"08/26/2025, 8:21 AM",Leidos,DIA,
+35,9139,Requirements Engineer,Emma Davis,Carlos Amaro,Contract,Open,0.0,0.0,"08/25/2025, 1:08 PM",,,
+36,9138,Backend Developer,Emma Davis,Carlos Amaro,Contract,Placed,0.0,0.0,"08/25/2025, 1:08 PM",,,
+37,9137,Front End Developer,Emma Davis,Carlos Amaro,Contract,Open,0.0,0.0,"08/25/2025, 1:06 PM",,,
+38,9136,UI/UX SME,Steph Sullivan,Sara Shariff,Contract To Hire,Open,126.91,0.0,"08/22/2025, 10:44 AM",Leidos,,
+39,9135,SOC Analysts,Ralph Geabhart,Alphonso Moore,Contract,Placed,78.0,127.34,"08/22/2025, 9:07 AM",Leidos,,cybersecurity
+40,9132,Cyber Security Analyst,Brad Glaser,Sandra Lopez,Contract To Hire,Placed,0.0,0.0,"08/20/2025, 8:40 AM",Leidos,,cybersecurity
+41,9129,Project Manager,Matt Capelluto,Erin McKenna,Contract,Placed,0.0,0.0,"08/19/2025, 9:42 AM",Leidos,,
+42,9127,Test Engineer (Data Visualization),Emma Davis,Dipa Dayal,Contract,Open,0.0,0.0,"08/18/2025, 11:06 AM",Leidos,,
+43,9125,Cyber Security Engineer,Matt Catanzano,Steven Watkins,Contract,Open,260000.0,0.0,"08/15/2025, 3:39 PM",,,cybersecurity
+44,9123,Sr. Oracle Apex Developer / ESA V supporting DOJ / On Site D.C.,Natasha Clark,Cliff Feiring,Contract To Hire,Open,0.0,0.0,"08/14/2025, 11:02 AM",,,database
+45,9122,Tempest Analyst,Matt Gullette,Lauren Taylor,Contract,Open,112.72,0.0,"08/13/2025, 9:55 AM",,,
+46,9117,ACAS Admin,Brad Glaser,Brian Cooley,Contract To Hire,Open,0.0,0.0,"08/11/2025, 4:43 PM",Leidos,,
+47,9103,IT CSR,Matt Gullette,John Patterson,Contract,Placed,64.14,0.0,"08/05/2025, 8:23 AM",Leidos,,
+48,9102,MDA NOC Technician - SECRET - Leidos GSMOII TN01 - Scott AFB,Trey Kelly,Joshua Dittman,Contract,Accepting Candidates,0.0,0.0,"08/05/2025, 8:19 AM",Leidos,"DISA, MDA",
+49,9101,Licensed Registration Authority,Matt Gullette,John Patterson,Contract,Open,74.91,0.0,"08/05/2025, 8:19 AM",Leidos,,
+50,9099,Multi Cloud Systems Engineer/Administrator,Natasha Clark,Cliff Feiring,Contract To Hire,Open,105000.0,0.0,"08/04/2025, 10:21 AM",,,cloud
+51,9084,NetOps Lead Mid,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"07/29/2025, 8:40 AM",Leidos,DIA,
+52,9073,Server Adminstrator,Kevin Testerman,Melissa Romero,Contract,Open,0.0,0.0,"07/23/2025, 8:20 AM",Leidos,,
+53,9021,JRSS NOC Technician - Leidos GSMOII (Scott AFB),Trey Kelly,Stephen Murray,Contract,Open,0.0,0.0,"07/17/2025, 8:27 AM",,,
+54,9016,Desktop Queue Manager,Matt Gullette,Hardie White,Contract,Placed,0.0,0.0,"07/16/2025, 8:38 AM",Leidos,,
+55,9007,NetOps Mid - Cherry Point,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"07/14/2025, 2:15 PM",Leidos,DIA,
+56,9006,"Lead ServiceNow Developer - Leidos GSMOII TN01 JMT (Ft. Meade, MD)",Trey Kelly,Kevin Criel,Contract,Accepting Candidates,0.0,0.0,"07/14/2025, 1:58 PM",Leidos,,
+57,9003,Business Analyst,Emma Davis,Mindy Goddin,Contract,Placed,0.0,0.0,"07/10/2025, 1:34 PM",,,
+58,9002,Scrum Master,Emma Davis,Training Place Holder,Contract,Open,0.0,0.0,"07/10/2025, 1:22 PM",,,software_dev
+59,9001,"Sr. Test Engineer - Leidos GSMOII - JTM (Ft. Meade, MD)",Trey Kelly,Kevin Criel,Contract,Accepting Candidates,124.0,0.0,"07/10/2025, 1:14 PM",Leidos,,
+60,9000,Network Admin - Journeyman,Brad Glaser,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"07/10/2025, 11:21 AM",Leidos,,networking
+61,8999,System Admin - VDI,Brad Glaser,Brian Cooley,Contract To Hire,Open,0.0,0.0,"07/10/2025, 11:21 AM",Leidos,,
+62,8998,System Admin - Journeyman,Brad Glaser,Brian Cooley,Contract To Hire,Open,0.0,0.0,"07/10/2025, 11:20 AM",Leidos,,
+63,8997,IA Engineer,Brad Glaser,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"07/10/2025, 11:19 AM",Leidos,,
+64,8993,Jr Systems Administrator - Leidos GSMOII,Trey Kelly,John Mattingly,Contract,Open,0.0,0.0,"07/09/2025, 8:28 AM",,,
+65,8992,SATCOM NOC Technician - Leidos GSMOII TN01 (Hill AFB),Trey Kelly,Rich King,Contract,Open,0.0,0.0,"07/09/2025, 8:17 AM",,,
+66,8991,Business Systems Analyst,Matt Capelluto,Marta Williams,Contract To Hire,Open,0.0,0.0,"07/08/2025, 4:23 PM",Leidos,,
+67,8988,Data Collection Specialist II - LCAT51 - Leidos GSMO-II TN01 (Scott AFB),Trey Kelly,Rich King,Contract,Placed,35.17,0.0,"07/08/2025, 10:42 AM",,,
+68,8984,Watch Staff Specialist,Matt Capelluto,Marta Williams,Contract,Open,0.0,0.0,"07/03/2025, 9:57 AM",Leidos,,
+69,8979,VMWare Engineer,Matt Gullette,Keze Lavala,Contract,Open,112.15,0.0,"07/02/2025, 9:12 AM",Leidos,,
+70,8978,Oracle EBS Developer,Matt Capelluto,Abraham Lleva,Contract,Open,0.0,0.0,"07/02/2025, 8:26 AM",Leidos,DISA,database
+71,8974,Linux Administrator,Matt Capelluto,Dean Finley,Contract,Placed,0.0,0.0,"06/30/2025, 3:12 PM",Leidos,DIA,
+72,8973,Oracle Exadata DBA,Matt Capelluto,Dean Finley,Contract,Placed,0.0,0.0,"06/30/2025, 2:56 PM",Leidos,DIA,database
+73,8967,Operations Watch Specialist,Brad Glaser,LaRon Pryor,Direct Hire,Placed,0.0,0.0,"06/26/2025, 1:45 PM",Leidos,DIA,
+74,8966,UC NOC Tech - Leidos GSMOII TN01 (Scott AFB),Trey Kelly,Cedric Beller,Contract,Accepting Candidates,0.0,0.0,"06/25/2025, 1:09 PM",,,
+75,8964,MDA NOC Tech III - Leidos GSMOII TN01 (Hill AFB),Trey Kelly,Justin Blakeway,Contract,Accepting Candidates,75000.0,0.0,"06/24/2025, 9:57 AM",Leidos,"DISA, MDA",
+76,8954,Inspections & Exercise Manager,Matt Gullette,Charles Flanders,Contract,Open,0.0,0.0,"06/18/2025, 9:32 AM",,,
+77,8953,Strat Comms Manager,Matt Gullette,Charles Flanders,Contract,Open,0.0,0.0,"06/18/2025, 9:30 AM",,,
+78,8950,Help Desk,Matt Gullette,Peter Merritt,Contract,Open,0.0,0.0,"06/16/2025, 9:48 AM",,,
+79,8949,Enterprise Voice Engineer,Brad Glaser,Clinton Foster,Contract To Hire,Placed,0.0,0.0,"06/12/2025, 1:06 PM",Leidos,"DISA, ITES",
+80,8948,Systems Administrator,Brad Glaser,Clinton Foster,Contract To Hire,Open,0.0,0.0,"06/12/2025, 1:04 PM",Leidos,"DISA, ITES",
+81,8946,RELO TRIP NOC Technician - Leidos GSMOII TN01 (Scott AFB),Trey Kelly,George Boone,Contract,Open,46.09,0.0,"06/11/2025, 3:00 PM",Leidos,,
+82,8945,Cybersecurity Analyst,Brad Glaser,Jevencia Barkwell,Contract To Hire,Open,0.0,0.0,"06/11/2025, 12:53 PM",Leidos,Zero Trust,cybersecurity
+83,8932,ServiceNow Developer - Leidos GSMOII (Scott AFB),Trey Kelly,Kevin Criel,Contract,Accepting Candidates,124.0,0.0,"06/05/2025, 8:55 AM",Leidos,,
+84,8927,Project Manager,Matt Gullette,Charles Flanders,Contract,Placed,0.0,0.0,"06/03/2025, 3:06 PM",,,
+85,8925,Operations Security Engineer,Brad Glaser,Keze Lavala,Direct Hire,Open,0.0,0.0,"06/02/2025, 2:27 PM",Leidos,,cybersecurity
+86,8923,Routine Requirements,Mike Huerkamp,Michael Jackson,Contract,Open,0.0,0.0,"06/02/2025, 1:06 PM",Leidos,,
+87,8921,Executive Support Tech,Matt Gullette,Michael Jackson,Contract,Open,0.0,0.0,"06/02/2025, 9:37 AM",Leidos,,
+88,8920,Desktop,Matt Gullette,Michael Jackson,Contract,Placed,0.0,0.0,"06/02/2025, 9:36 AM",Leidos,,
+89,8919,Systems Engineer,Matt Gullette,Steven Marlow,Contract,Open,0.0,0.0,"05/30/2025, 1:21 PM",Leidos,DIA,
+90,8918,Asset Management Technician,Matt Gullette,Rob Turner,Contract,Open,0.0,0.0,"05/30/2025, 1:20 PM",Leidos,,
+91,8914,Customer Relations Manager,Matt Gullette,Ken Shaffer,Contract,Placed,0.0,0.0,"05/29/2025, 2:30 PM",Leidos,,
+92,8911,"ServiceNow Developer - Leidos GSMOII TN01 (Ft. Meade, MD)",Trey Kelly,Kevin Criel,Contract,Accepting Candidates,0.0,0.0,"05/29/2025, 8:27 AM",Leidos,,
+93,8879,Configuration Management Specialist,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"05/13/2025, 12:59 PM",Leidos,DIA,
+94,8877,SOC Analyst,Brad Glaser,Brian Cooley,Contract To Hire,Open,0.0,0.0,"05/13/2025, 7:46 AM",Leidos,,cybersecurity
+95,8870,SD-WAN Engineer SME,Brad Glaser,Erin Birdsong,Contract To Hire,Open,0.0,0.0,"05/08/2025, 8:28 AM",,,networking
+96,8864,Network Switching Design Engineer,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"05/07/2025, 8:26 AM",Leidos,DIA,"networking, systems_engineering"
+97,8861,Intune Engineer,Kevin Testerman,Evan Packard,Contract,Open,0.0,0.0,"05/06/2025, 8:41 AM",Leidos,,
+98,8860,Cyber Ops Planning SME,Kevin Chavez,Lloyd Mcdonald,Contract To Hire,Placed,0.0,0.0,"05/05/2025, 1:02 PM",,,cybersecurity
+99,8853,TRIP Network Controller - Leidos GSMOII (Hill AFB),Trey Kelly,Damien Rivera,Contract,Placed,0.0,0.0,"04/29/2025, 3:23 PM",Leidos,"DISA, MDA, DIA",networking
+100,8852,NOC Manager - Leidos GSMOII TO1 (Scott AFB),Trey Kelly,Damien Rivera,Contract,Accepting Candidates,0.0,0.0,"04/29/2025, 12:49 PM",Leidos,"DISA, MDA, DIA",
+101,8373,Firewall Engineer,Jason Soifer,Ryan Odell,Contract To Hire,Open,0.0,0.0,"09/13/2024, 1:33 PM",,,networking
+102,8372,SCCM/MECM Administrator,Kevin Chavez,Keze Lavala,Contract,Open,0.0,0.0,"09/13/2024, 9:01 AM",Leidos,,
+103,8369,Imaging Technician,Anthony Fusco,Keze Lavala,Contract,Accepting Candidates,0.0,0.0,"09/11/2024, 3:56 PM",Leidos,,
+104,8365,ISSO - TS/SCI - MacDill AFB,Ben Dorsey,Mickey O'Neil,Contract To Hire,Placed,0.0,0.0,"09/10/2024, 12:55 PM",Leidos,ITES,
+105,8362,Cyber Watch Officer,Brad Glaser,Marvin Shullenberger,Contract To Hire,Placed,0.0,0.0,"09/10/2024, 8:29 AM",,,cybersecurity
+106,8361,Desktop Technician,Anthony Fusco,Kenneth Shove,Contract,Placed,0.0,0.0,"09/09/2024, 10:21 AM",,,
+107,8352,Mobility Technician,Anthony Fusco,Kenneth Shove,Contract,Placed,0.0,0.0,"08/29/2024, 8:28 AM",,,
+108,8350,SharePoint Admin,Steph Sullivan,Ermias Teferra,Contract To Hire,Placed,0.0,0.0,"08/27/2024, 9:56 AM",Leidos,,
+109,8346,FHA Specialist Leidos-Remote,Ryan Whitmire,Lori Neilson,Contract To Hire,Placed,20.77,42.32,"08/22/2024, 3:15 PM",Leidos,DIA,
+110,8338,Network Unified Communications Design Engineer,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"08/20/2024, 9:14 AM",Leidos,,"networking, systems_engineering"
+111,8325,VoIP Engineer,Kevin Testerman,Melissa Romero,Contract,Placed,0.0,0.0,"08/14/2024, 12:32 PM",Leidos,,
+112,8324,Data Collection Specialist,Ben Dorsey,Becky Harrison,Contract To Hire,Placed,0.0,0.0,"08/14/2024, 10:59 AM",Leidos,DISA,
+113,8323,Network Engineer,Kevin Chavez,Placeholder Placeholder,Contract To Hire,Placed,0.0,0.0,"08/13/2024, 5:07 PM",,,networking
+114,8309,Distribution Engineer,Drew McEntyre,Gene Smith,Contract To Hire,Open,29.81,0.0,"08/05/2024, 8:31 AM",Leidos,,
+115,8305,Software Engineer- Web Developer,Steph Sullivan,Mary Bogensberger,Contract To Hire,Placed,0.0,0.0,"07/31/2024, 4:06 PM",Leidos,"Sentinel, DIA",software_dev
+116,8304,Endpoint Security Solutions Engineer,Brad Glaser,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"07/31/2024, 3:30 PM",,,cybersecurity
+117,8298,Operations Center Specialist,Matt Capelluto,Marta Williams,Contract To Hire,Open,0.0,0.0,"07/30/2024, 8:18 AM",Leidos,,
+118,8294,IT Project Manager,Kevin Chavez,Laura Israel,Contract,Open,0.0,0.0,"07/29/2024, 1:16 PM",Leidos,,
+119,8291,Firmware Engineer,Colton Scurry,Russell spear,Contract To Hire,Placed,0.0,0.0,"07/26/2024, 12:53 PM",,,
+120,8287,Commercial Solutions for Classified (CSfC) Operations Planner,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"07/26/2024, 10:41 AM",Leidos,DIA,
+121,8285,Unified Communications Specialist,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"07/25/2024, 1:23 PM",Leidos,DIA,
+122,8277,Technical Writer- GSMO,Matthew Soifer,Kevin Criel,Contract To Hire,Placed,0.0,0.0,"07/23/2024, 7:33 AM",Leidos,,
+123,8274,Budget Specialist,Matt Capelluto,Marta Williams,Contract,Open,0.0,0.0,"07/22/2024, 12:48 PM",Leidos,,
+124,8272,DevOps Architect,Paul Bartlett,Alex Velez,Contract To Hire,Accepting Candidates,0.0,0.0,"07/19/2024, 11:13 AM",,,devops
+125,8261,Distribution Engineer 2,Drew McEntyre,Tyler Harris,Contract To Hire,Open,0.0,0.0,"07/18/2024, 8:21 AM",Leidos,,
+126,8258,Release Train Engineer,Kevin Testerman,Tom Young,Contract,Placed,0.0,0.0,"07/17/2024, 8:44 AM",Leidos,,ai_ml
+127,8256,Logistics FMS Specialist,Matt Capelluto,Marta Williams,Contract,Placed,0.0,0.0,"07/16/2024, 10:11 AM",Leidos,,
+128,8254,Information Assurance / Security Specialist,Brad Glaser,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"07/15/2024, 12:53 PM",,,cybersecurity
+129,8245,Systems Engineer,Ben Dorsey,Jessica Cook,Contract To Hire,Placed,0.0,0.0,"07/09/2024, 9:44 AM",,,
+130,8243,Sr. Fullstack Engineer,Kevin Chavez,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"07/08/2024, 2:58 PM",,,
+131,8235,Distribution Engineer,Drew McEntyre,Gene Smith,Contract To Hire,Placed,0.0,0.0,"07/02/2024, 12:18 PM",Leidos,,
+132,8234,SOC Intrusion Analyst,Justin Howard,Kristian Leibfarth,Contract To Hire,Open,0.0,0.0,"07/02/2024, 11:12 AM",,,cybersecurity
+133,8229,Network Engineer,Paul Bartlett,Nathan Luberda,Contract To Hire,Accepting Candidates,0.0,0.0,"07/01/2024, 3:38 PM",,,networking
+134,8224,Senior Windows Engineer,Justin Howard,Kristian Leibfarth,Contract To Hire,Open,0.0,0.0,"06/27/2024, 10:06 AM",,,
+135,8221,Palo Alto Engineer,Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"06/26/2024, 10:48 AM",Leidos,DIA,
+136,8213,Test Engineer- San Diego,Steph Sullivan,Mary Bogensberger,Contract To Hire,Open,0.0,0.0,"06/20/2024, 3:06 PM",Leidos,"Sentinel, DIA",
+137,8212,Linux Systems Administrator,Tyler Holmes,Peter Cheung,Contract To Hire,Open,0.0,0.0,"06/20/2024, 8:05 AM",Leidos,,
+138,8201,VoIP & Unified Communications Specialist,Alex Barkan,Rich King,Contract To Hire,Open,0.0,0.0,"06/17/2024, 4:59 PM",,,
+139,8195,Monitoring Analyst - DES,Brad Glaser,Placeholder Placeholder,Contract,Open,0.0,0.0,"06/13/2024, 8:45 AM",,,
+140,8189,IA Network Engineer,Josh Overley,Placeholder Placeholder,Contract,Open,48.08,0.0,"06/11/2024, 12:27 PM",,,networking
+141,8183,Chief Network Architect,Kevin Chavez,Placeholder Placeholder,Contract To Hire,Placed,0.0,0.0,"06/07/2024, 8:56 AM",,,networking
+142,8175,Veritas Administrator- GSMO- Arlington,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,0.0,0.0,"06/05/2024, 7:51 AM",Leidos,DIA,
+143,8173,Desktop Support,Steph Sullivan,Elizabeth Balick,Contract,Placed,0.0,0.0,"06/04/2024, 9:56 AM",,,
+144,8169,Cyber Security Engineer,Kevin Chavez,Placeholder Placeholder,Contract,Accepting Candidates,0.0,0.0,"05/31/2024, 2:16 PM",,,cybersecurity
+145,8161,NetOps Lead,Paul Bartlett,Geoffrey Stankewitz,Contract To Hire,Accepting Candidates,0.0,0.0,"05/30/2024, 9:02 AM",,,
+146,8159,Systems Engineer NGLD,Steph Sullivan,Duane Hewett,Contract To Hire,Open,0.0,0.0,"05/30/2024, 8:24 AM",Leidos,,
+147,8155,Software Engineer C++ AND QT,Steph Sullivan,Duane Hewett,Contract To Hire,Placed,0.0,0.0,"05/28/2024, 2:16 PM",Leidos,,software_dev
+148,8138,Firewall Engineer - GSMO,Paul Bartlett,Jevencia Barkwell,Contract To Hire,Accepting Candidates,0.0,0.0,"05/17/2024, 1:38 PM",Leidos,Zero Trust,networking
+149,8130,"Tier III Senior Network Engineer- GSMO- MacDill AFB, FL",Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,0.0,0.0,"05/14/2024, 9:36 AM",Leidos,ITES,networking
+150,8128,Cyber Security Analyst,Kevin Chavez,Place Holder,Contract To Hire,Placed,0.0,0.0,"05/13/2024, 4:39 PM",,,cybersecurity
+151,8096,"Cyber Security Specialist Mid - Bridgeport, CA",Matt Capelluto,Donald Quinn,Contract,Open,0.0,0.0,"04/30/2024, 3:14 PM",,,cybersecurity
+152,8091,Cloud SME,Kevin Chavez,Jevencia Barkwell,Contract To Hire,Open,0.0,0.0,"04/29/2024, 1:15 PM",Leidos,Zero Trust,cloud
+153,8078,Associate Distribution Design Engineer,Will Apple,Keane Kalso,Contract,Open,0.0,0.0,"04/22/2024, 8:54 AM",,,"cybersecurity, systems_engineering"
+154,8074,"Automation Engineer- GSMO- Arlington, VA",Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"04/22/2024, 7:39 AM",Leidos,DIA,
+155,8049,Project Engineer,Steph Sullivan,Randy Hickman,Contract To Hire,Placed,0.0,0.0,"04/10/2024, 3:01 PM",Leidos,DIA,
+156,8018,ServiceNow Scrum Master,Matthew Soifer,Kevin Criel,Contract To Hire,Open,0.0,0.0,"03/27/2024, 9:02 AM",Leidos,,software_dev
+157,8016,ServiceNow Test Engineer- GSMO,Matthew Soifer,Kevin Criel,Contract To Hire,Placed,0.0,0.0,"03/27/2024, 7:41 AM",Leidos,,
+158,8015,Systems Administrator - DES,Paul Bartlett,Jeanette Mitchell,Contract,Accepting Candidates,0.0,0.0,"03/26/2024, 3:01 PM",Leidos,MDA,
+159,8012,Detection Engineer- GSMO- Scott AFB,Matthew Soifer,Hersh Bhatt,Contract To Hire,Open,0.0,0.0,"03/26/2024, 10:38 AM",,,
+160,8008,Automation Engineer,Kevin Testerman,Melissa Romero,Contract,Placed,0.0,0.0,"03/25/2024, 8:14 AM",Leidos,,
+161,8007,ServiceNow Systems Engineer,Matthew Soifer,Kevin Criel,Contract To Hire,Placed,0.0,0.0,"03/22/2024, 9:15 AM",Leidos,,
+162,8006,ISSO - Paducah KY,Emma Davis,Donald Scheve,Contract To Hire,Open,0.0,0.0,"03/21/2024, 8:57 AM",,,
+163,8003,Helpdesk,Garrison Pirkle,Albert Manley,Contract,Placed,0.0,0.0,"03/20/2024, 11:17 AM",,,
+164,7993,Scrum Master,Kevin Chavez,Laura Israel,Contract To Hire,Placed,0.0,0.0,"03/18/2024, 8:38 AM",Leidos,,software_dev
+165,7990,Fusion Analyst- GSMO- Scott AFB,Matthew Soifer,Hersh Bhatt,Contract To Hire,Open,0.0,0.0,"03/18/2024, 7:40 AM",,,
+166,7984,Engineering Designer 1,Julia Smith,Thomas Wheeler,Contract To Hire,Accepting Candidates,28.37,45.9,"03/14/2024, 8:43 AM",,,systems_engineering
+167,7983,Engineering Designer 1,Julia Smith,Thomas Wheeler,Contract To Hire,Placed,28.37,0.0,"03/13/2024, 6:02 PM",,,systems_engineering
+168,7980,Lead Cybersecurity Engineer,Steven Weaver,Laura Israel,Contract To Hire,Open,0.0,0.0,"03/12/2024, 12:50 PM",Leidos,,cybersecurity
+169,7979,ISSM,Kevin Chavez,Laura Israel,Contract To Hire,Open,0.0,0.0,"03/12/2024, 11:07 AM",Leidos,,
+170,7974,IDAM- GSMO- Arlington- TS/SCI,Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"03/11/2024, 7:53 AM",Leidos,DIA,
+171,7973,Network Engineer,Anthony Fusco,Leslie Branch,Contract,Open,0.0,0.0,"03/08/2024, 3:25 PM",,,networking
+172,7959,Senior Network Engineer- GSMO,Matthew Soifer,Erin Birdsong,Contract To Hire,Open,0.0,0.0,"03/04/2024, 9:26 AM",,,networking
+173,7958,Senior System Administrator- GSMO,Matthew Soifer,Erin Birdsong,Contract To Hire,Open,0.0,0.0,"03/04/2024, 9:23 AM",,,
+174,7957,Systems Integration Engineer- GSMO,Matthew Soifer,Erin Birdsong,Contract To Hire,Open,0.0,0.0,"03/04/2024, 9:19 AM",,,systems_engineering
+175,7955,Software Engineer (Java Swing San Diego),Steph Sullivan,Mary Bogensberger,Contract To Hire,Open,0.0,0.0,"03/01/2024, 10:42 AM",Leidos,"Sentinel, DIA",software_dev
+176,7954,Software Tester (San Diego),Steph Sullivan,Mary Bogensberger,Contract To Hire,Open,0.0,0.0,"03/01/2024, 10:35 AM",Leidos,"Sentinel, DIA",software_dev
+177,7953,Software Engineer (JavaScript) San Diego,Steph Sullivan,Mary Bogensberger,Contract To Hire,Open,0.0,0.0,"03/01/2024, 10:28 AM",Leidos,"Sentinel, DIA",software_dev
+178,7952,Software Engineer - C++,Derek Todd,Mary Bogensberger,Contract To Hire,Placed,0.0,0.0,"03/01/2024, 10:21 AM",Leidos,"Sentinel, DIA",software_dev
+179,7950,Systems Engineer- GSMO- Ft. Meade,Matthew Soifer,Dipa Dayal,Contract To Hire,Placed,0.0,0.0,"02/29/2024, 8:19 AM",Leidos,,
+180,7941,Logistics Systems Specialist,Matt Capelluto,Annette Pointer,Contract To Hire,Open,0.0,0.0,"02/27/2024, 9:32 AM",Leidos,,
+181,7940,IA Engineer,Kevin Testerman,Tom Young,Contract,Placed,0.0,0.0,"02/27/2024, 8:36 AM",Leidos,,
+182,7939,Jira Administrator,Kevin Testerman,Tom Young,Contract,Placed,0.0,0.0,"02/27/2024, 8:35 AM",Leidos,,
+183,7934,Dashboard Systems Engineer- GSMO,Matthew Soifer,Dipa Dayal,Contract To Hire,Open,0.0,0.0,"02/26/2024, 7:38 AM",Leidos,,
+184,7933,Software Development Engineer,Matt Capelluto,Place Holder,Contract To Hire,Open,0.0,0.0,"02/23/2024, 1:32 PM",,,software_dev
+185,7932,SCCM Engineer,Matt Capelluto,Place Holder,Contract To Hire,Open,0.0,0.0,"02/23/2024, 1:31 PM",,,
+186,7920,Cyber Operations Planner,Kevin Chavez,Jeffrey Voice,Contract To Hire,Placed,0.0,0.0,"02/20/2024, 1:10 PM",,,cybersecurity
+187,7914,Sharepoint Developer,Brad Glaser,Juan Broadnax,Contract To Hire,Open,0.0,0.0,"02/19/2024, 8:15 AM",Leidos,,
+188,7906,CSR- Bilingual Rep,Steph Sullivan,Wan Way,Contract To Hire,Placed,0.0,0.0,"02/14/2024, 5:39 PM",Leidos,,
+189,7905,CSR- Customer Service Rep,Steph Sullivan,Wan Way,Contract To Hire,Placed,0.0,0.0,"02/14/2024, 5:37 PM",Leidos,,
+190,7904,CSR- Rental Housing,Steph Sullivan,Wan Way,Contract To Hire,Open,0.0,0.0,"02/14/2024, 5:35 PM",Leidos,,
+191,7903,CSR- Mortgage Servicing,Steph Sullivan,Wan Way,Contract To Hire,Placed,0.0,0.0,"02/14/2024, 5:33 PM",Leidos,,
+192,7902,Customer Service,Garrett Seckler,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"02/14/2024, 5:10 PM",,,
+193,7901,Cyber Operation Planner,Kevin Chavez,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"02/14/2024, 4:58 PM",,,cybersecurity
+194,7892,Chief Engineer,Kevin Chavez,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"02/13/2024, 12:41 PM",,,
+195,7891,SQL Administrator,Trevor Watson,Melissa Romero,Contract,Placed,0.0,0.0,"02/13/2024, 9:19 AM",Leidos,,database
+196,7890,Journeyman Security Infrastructure Engineer,Kevin Chavez,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"02/13/2024, 8:59 AM",,,cybersecurity
+197,7880,Leidos - Site Surveyor/AV Technician,Brad Glaser,Noell Williams,Contract To Hire,Placed,0.0,0.0,"02/07/2024, 9:46 AM",Leidos,DARPA,
+198,7876,Test Engineer II,Steph Sullivan,Mary Bogensberger,Contract To Hire,Open,0.0,0.0,"02/06/2024, 2:54 PM",Leidos,"Sentinel, DIA",
+199,7875,Test Engineer III,Steph Sullivan,Mary Bogensberger,Contract To Hire,Open,0.0,0.0,"02/06/2024, 2:53 PM",Leidos,"Sentinel, DIA",
+200,7874,IT Project Manager (remote),Julia Smith,Michael Brandon Parker,Contract,Open,0.0,0.0,"02/06/2024, 12:43 PM",,,
+201,7869,Cybersecurity Engineer,Derek Todd,Sean Black,Contract,Open,0.0,0.0,"02/05/2024, 9:30 AM",,,cybersecurity
+202,7866,Desktop Virtualization Engineer,Paul Bartlett,Tara Laymon,Contract,Accepting Candidates,0.0,0.0,"02/02/2024, 10:09 AM",,,
+203,7865,Network Engineer DES DIET,Steven Weaver,Tara Laymon,Contract,Open,0.0,0.0,"02/02/2024, 9:52 AM",,,networking
+204,7864,Network Administrator Journeyman- GSMO Scott AFB,Matthew Soifer,Derrick Collier,Contract To Hire,Placed,0.0,0.0,"02/02/2024, 7:22 AM",,,networking
+205,7861,Azure Cloud Engineer,Steven Weaver,Tara Laymon,Contract,Open,0.0,0.0,"02/01/2024, 8:06 AM",,,cloud
+206,7849,Software Engineer SBNAB- Adelphi,Steven Weaver,Laura Israel,Contract To Hire,Placed,0.0,0.0,"01/30/2024, 9:25 AM",Leidos,,software_dev
+207,7816,Zero Trust SME,Matthew Soifer,Chris Sova,Contract To Hire,Open,0.0,0.0,"01/19/2024, 3:03 PM",,Zero Trust,cybersecurity
+208,7815,Software Engineer,Matt Capelluto,Placeholder Placeholder,Contract,Open,0.0,0.0,"01/19/2024, 9:14 AM",,,software_dev
+209,7798,"Linux SME - TS/SCI - Arlington, VA",Ben Dorsey,Andy Studeny,Contract To Hire,Open,0.0,0.0,"01/16/2024, 8:53 AM",Leidos,DIA,
+210,7782,"Linux Engineer SME- GSMO- Arlington, VA",Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"01/10/2024, 2:58 PM",Leidos,DIA,
+211,7766,"Software Developer (Android, C++)",Steph Sullivan,Mary Bogensberger,Contract To Hire,Placed,0.0,0.0,"01/08/2024, 2:39 PM",Leidos,"Sentinel, DIA",software_dev
+212,7762,Engineering Planner,Steph Sullivan,Bryan Bourgoin,Contract To Hire,Open,0.0,0.0,"01/08/2024, 9:32 AM",,,
+213,7749,Exchange Engineer,Kevin Testerman,Tom Young,Contract,Placed,0.0,0.0,"01/04/2024, 8:43 AM",Leidos,,
+214,7741,Azure Cloud Admin-Norfolk NGEN,Trevor Watson,Jeanette Mitchell,Contract,Open,0.0,0.0,"12/21/2023, 8:30 AM",Leidos,MDA,cloud
+215,7703,Data Analyst,Kevin Testerman,Melissa Romero,Contract,Accepting Candidates,0.0,0.0,"12/07/2023, 1:33 PM",Leidos,,
+216,7702,Technical Writer,Kevin Testerman,Melissa Romero,Contract,Open,0.0,0.0,"12/07/2023, 1:32 PM",Leidos,,
+217,7698,Communications Network Engineer - 29 Palms,Matt Capelluto,Donald Quinn,Contract,Open,0.0,0.0,"12/06/2023, 9:40 AM",,,networking
+218,7679,Cyber Intel Analyst - GSMO - Meade,Kevin Chavez,Kevin Klein,Contract To Hire,Placed,0.0,0.0,"11/30/2023, 8:34 AM",Leidos,DIA,cybersecurity
+219,7674,Endpoint Security Analyst,Brad Glaser,Jevencia Barkwell,Contract To Hire,Open,0.0,0.0,"11/29/2023, 8:26 AM",Leidos,Zero Trust,cybersecurity
+220,7671,IT Specialist Senior,Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"11/28/2023, 2:26 PM",Leidos,DIA,
+221,7663,ISP/OSP - Norfolk,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"11/24/2023, 8:43 AM",Leidos,DIA,
+222,7662,ISP/OSP - Camp Lejeune,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"11/24/2023, 8:36 AM",Leidos,DIA,
+223,7661,IT Specialist Junior - Beaufort,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"11/24/2023, 8:34 AM",Leidos,DIA,
+224,7650,Systems Engineer - GSMO - Executive Building (White House),Paul Bartlett,Alex Velez,Contract To Hire,Accepting Candidates,0.0,0.0,"11/20/2023, 1:20 PM",,,
+225,7643,"IT Specialist Junior - Beaufort, SC",Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"11/17/2023, 1:01 PM",Leidos,DIA,
+226,7641,Senior Network Engineer,Gavin Jump,Jeanette Mitchell,Contract,Open,0.0,0.0,"11/17/2023, 10:58 AM",Leidos,MDA,networking
+227,7640,System Engineer,Kevin Chavez,Jeanette Mitchell,Contract,Placed,0.0,0.0,"11/17/2023, 10:38 AM",Leidos,MDA,
+228,7639,Automation Engineer - DES,Trey Hall,Jannette Clark (Williams),Contract,Open,0.0,0.0,"11/17/2023, 10:31 AM",Leidos,,
+229,7632,DRSN Network Engineer - TIER III,Joe Cornielle,George Boone,Contract To Hire,Open,150.0,0.0,"11/16/2023, 2:47 PM",Leidos,,networking
+230,7630,Systems Engineer - DES,Paul Bartlett,Jeanette Mitchell,Contract,Accepting Candidates,0.0,0.0,"11/16/2023, 12:37 PM",Leidos,MDA,
+231,7629,Network Engineer - DES - DIET,Paul Bartlett,Jeanette Mitchell,Contract,Placed,0.0,0.0,"11/16/2023, 11:06 AM",Leidos,MDA,networking
+232,7625,Intune Engineer - DES (DIET),Brad Glaser,Jeanette Mitchell,Contract,Accepting Candidates,0.0,0.0,"11/16/2023, 8:24 AM",Leidos,MDA,
+233,7623,Azure Cloud Engineer - DES,Paul Bartlett,Jeanette Mitchell,Contract To Hire,Accepting Candidates,0.0,0.0,"11/15/2023, 2:26 PM",Leidos,MDA,cloud
+234,7620,Salesforce Administrator - DCSB,Paul Bartlett,Anthony Campitelli,Contract To Hire,Accepting Candidates,0.0,0.0,"11/15/2023, 1:36 PM",,,
+235,7594,Knowledge Manager,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,0.0,0.0,"11/13/2023, 7:49 AM",Leidos,DIA,
+236,7593,Configuration Manager Lead,Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"11/13/2023, 7:48 AM",Leidos,DIA,
+237,7576,Engineering Designer 1,David Wachtel,Gene Smith,Contract To Hire,Placed,28.0,0.0,"11/08/2023, 10:27 AM",Leidos,,systems_engineering
+238,7571,"Continuous Monitoring Lead - GSMO - Alexandria, VA",Paul Bartlett,Juan Broadnax,Contract To Hire,Accepting Candidates,0.0,0.0,"11/07/2023, 5:04 PM",Leidos,,
+239,7568,136985-1 - Program Manager Non-Tech 2,Jacob Mariotti,Placeholder Placeholder,Contract,Open,0.0,0.0,"11/07/2023, 11:54 AM",,,
+240,7559,"Systems Administrator - GSMO - Ford Island, HI",Paul Bartlett,Juan Broadnax,Contract To Hire,Accepting Candidates,0.0,0.0,"11/03/2023, 2:23 PM",Leidos,,
+241,7556,Salesforce Developer,Matt Capelluto,Placeholder Placeholder,Contract,Open,0.0,0.0,"11/03/2023, 9:13 AM",,,
+242,7525,Engineering Technician I (Matthews),David Wachtel,Gene Smith,Contract To Hire,Open,23.0,0.0,"10/27/2023, 9:01 AM",Leidos,,
+243,7524,Engineering Technician I (Gastonia),David Wachtel,Gene Smith,Contract To Hire,Open,23.0,0.0,"10/27/2023, 8:58 AM",Leidos,,
+244,7523,Engineering Technician I (Greenville),David Wachtel,Gene Smith,Contract To Hire,Open,23.0,0.0,"10/27/2023, 8:53 AM",Leidos,,
+245,7502,Power BI Developer,Steph Sullivan,Arun Elluru,Contract To Hire,Open,0.0,0.0,"10/23/2023, 10:56 AM",Leidos,DIA,data_analytics
+246,7499,Business Systems Analyst,Matt Capelluto,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"10/23/2023, 8:23 AM",,,
+247,7496,Senior Cloud Adminiistrator,Matt Capelluto,Place Holder,Contract To Hire,Open,0.0,0.0,"10/20/2023, 8:56 AM",,,cloud
+248,7488,Data Analyst,Steve Marinelli,Dan Pomykala,Contract,Open,36.06,65.0,"10/18/2023, 1:32 PM",,,
+249,7482,Configuration Manager- GSMO- Arlington,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,0.0,0.0,"10/18/2023, 7:26 AM",Leidos,DIA,
+250,7481,Senior Network Engineer- GSMO- Arlington,Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"10/18/2023, 7:21 AM",Leidos,DIA,networking
+251,7448,Business Process Analyst,Matt Capelluto,Place Holder,Contract To Hire,Accepting Candidates,0.0,0.0,"10/12/2023, 1:27 PM",,,
+252,7445,Business Systems Analyst,Matt Capelluto,Place Holder,Contract To Hire,Accepting Candidates,0.0,0.0,"10/12/2023, 11:18 AM",,,
+253,7443,Linux Administrator,Matt Capelluto,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"10/11/2023, 3:13 PM",,,
+254,7438,Knowledge Management Developer,Trey Hall,Juan Broadnax,Contract To Hire,Open,0.0,0.0,"10/11/2023, 11:14 AM",Leidos,,
+255,7429,Electrical Engineer (LVL 1-3),Ethan Gill,Evan Magill,Contract To Hire,Open,0.0,0.0,"10/09/2023, 2:21 PM",,,
+256,7421,Cyber Analyst,Tyler Holmes,Albert Franke,Contract To Hire,Open,0.0,0.0,"10/06/2023, 10:01 AM",Leidos,,cybersecurity
+257,7416,System Adminstrator III,Steve Marinelli,Vinayaka Kotraiah,Contract To Hire,Open,50.0,73.24,"10/05/2023, 9:45 AM",,,
+258,7411,NetOps Specialist - Orlando,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"10/04/2023, 5:02 PM",Leidos,DIA,
+259,7407,CND Firewall SME,Matthew Soifer,Alex Velez,Contract To Hire,Accepting Candidates,170000.0,0.0,"10/04/2023, 10:45 AM",,,networking
+260,7387,Help Desk- GSMO- Scott AFB,Matthew Soifer,Rich King,Contract To Hire,Accepting Candidates,0.0,0.0,"10/02/2023, 7:55 AM",,,
+261,7369,Software Engineer (CHS-6),Steph Sullivan,Ryan Steele,Contract To Hire,Open,0.0,0.0,"09/27/2023, 9:54 AM",Leidos,,software_dev
+262,7336,"SCA-R Lead - GSMO - Mark Center - Alexandria, VA - Hybrid",Paul Bartlett,Chad Sumpter,Contract To Hire,Placed,0.0,0.0,"09/19/2023, 9:44 AM",Leidos,,
+263,7333,DevOps Engineer- GSMO- Ft. Meade,Matthew Soifer,Jason Putz,Contract To Hire,Accepting Candidates,0.0,0.0,"09/18/2023, 10:06 AM",,,devops
+264,7327,Electrical Engineer,Ross Harbaugh,Justin Tallent,Contract To Hire,Open,0.0,0.0,"09/14/2023, 2:49 PM",,,
+265,7326,Relay Settings Engineer,Ross Harbaugh,Leon Koshy,Contract To Hire,Open,0.0,0.0,"09/14/2023, 2:48 PM",,,
+266,7325,Network Routing Design Engineer,Matt Capelluto,Ed Alsip,Contract To Hire,Open,0.0,0.0,"09/14/2023, 1:56 PM",Leidos,,"networking, systems_engineering"
+267,7324,Platform Security Engineer,Matt Capelluto,Place Holder,Contract To Hire,Open,0.0,0.0,"09/14/2023, 11:09 AM",,,cybersecurity
+268,7298,IA Engineer- GSMO Ft. Meade,Matthew Soifer,Jessica Cook,Contract To Hire,Placed,110000.0,0.0,"09/08/2023, 10:40 AM",,,
+269,7296,Workday Developer (Extend),Steph Sullivan,Rebecca Grenn,Contract To Hire,Open,0.0,0.0,"09/07/2023, 4:41 PM",,,
+270,7293,Cyber Security Analyst - Colorado Springs,Trey Hall,Adam Vannoy,Contract To Hire,Open,0.0,0.0,"09/07/2023, 12:59 PM",,,cybersecurity
+271,7284,Fusion Analyst - GSMO,Derek Todd,Marvin Shullenberger,Contract To Hire,Open,0.0,0.0,"09/06/2023, 11:06 AM",,,
+272,7282,Action Officer - GSMO - Meade,Cameron Knotts,Brian Cooley,Contract To Hire,Open,0.0,0.0,"09/06/2023, 8:47 AM",Leidos,,
+273,7278,ISSM- Leidos GSMO Alexandria- Marks Center,Matthew Soifer,Chad Sumpter,Contract To Hire,Placed,0.0,0.0,"09/05/2023, 5:02 PM",Leidos,,
+274,7274,NetOps Specialist Junior - Norfolk,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"09/05/2023, 9:28 AM",Leidos,DIA,
+275,7257,Software Engineer (CMOP) - Hybrid / remote - Leidos,Tyler Holmes,Douglas Disinger,Contract To Hire,Placed,0.0,0.0,"08/30/2023, 8:08 AM",Leidos,,software_dev
+276,7251,SCCM System Administrator,Trey Hall,Steve Morton,Contract,Open,112.76,0.0,"08/29/2023, 8:41 AM",,,
+277,7248,Project Manager - AFNCR - andrews AFB,Kevin Chavez,Detrice Imafidon,Contract,Placed,0.0,0.0,"08/25/2023, 11:04 AM",,,
+278,7238,Cyber Specialist Mid - Quantico,Matt Capelluto,Ed Alsip,Contract To Hire,Accepting Candidates,0.0,0.0,"08/23/2023, 3:03 PM",Leidos,,cybersecurity
+279,7237,ServiceNow Release and Deployment Engineer- DIGIT,Steph Sullivan,Cliff Feiring,Contract To Hire,Open,0.0,0.0,"08/23/2023, 2:40 PM",,,
+280,7233,Elastic Engineer,Brandon Braner,Place Holder,Contract To Hire,Placed,0.0,0.0,"08/23/2023, 9:13 AM",,,
+281,7231,Data Analyst,Steph Sullivan,Robert Tidmarsh,Contract To Hire,Placed,0.0,0.0,"08/22/2023, 3:11 PM",Leidos,,
+282,7229,Cyber Security Analyst,Kevin Chavez,Jevencia Barkwell,Contract To Hire,Placed,0.0,0.0,"08/22/2023, 10:03 AM",Leidos,Zero Trust,cybersecurity
+283,7220,Senior Cloud Data Architect,Steph Sullivan,Cliff Feiring,Contract To Hire,Open,0.0,0.0,"08/17/2023, 3:50 PM",,,cloud
+284,7206,Senior Windows Engineer,Matt Capelluto,Place Holder,Contract To Hire,Open,0.0,0.0,"08/15/2023, 12:57 PM",,,
+285,7201,VPN/Firewall Engineer,Matt Capelluto,Roman Vitkovitsky,Contract To Hire,Open,0.0,0.0,"08/14/2023, 10:19 AM",Leidos,"DISA, DIA, NSA",networking
+286,7196,Senior Active Directory Engineer- N2NOMS,Matthew Soifer,Geoffrey Stankewitz,Contract To Hire,Placed,128.0,165000.0,"08/11/2023, 7:31 AM",,,
+287,7194,TechOps Manager- Leidos N2NOMS,Matthew Soifer,Geoffrey Stankewitz,Contract To Hire,Placed,89.0,125000.0,"08/10/2023, 2:31 PM",,,
+288,7190,System Administrator- Ticketing N2NOMS,Matthew Soifer,Geoffrey Stankewitz,Contract To Hire,Accepting Candidates,67.5,95000.0,"08/10/2023, 8:08 AM",,,
+289,7187,VTC Engineer,Brendan English,Geoffrey Stankewitz,Contract To Hire,Open,0.0,0.0,"08/09/2023, 8:09 AM",,,
+290,7179,Mechanical Technician,Ross Harbaugh,Brandon Hooks,Contract To Hire,Open,0.0,0.0,"08/07/2023, 11:16 AM",,,
+291,7177,Netops Admin - N2NOMS - Leidos - Springs,Cameron Knotts,Geoffrey Stankewitz,Contract To Hire,Placed,0.0,0.0,"08/07/2023, 8:26 AM",,,
+292,7175,Network Operations Technician,Brendan English,Geoffrey Stankewitz,Contract To Hire,Placed,0.0,0.0,"08/04/2023, 1:55 PM",,,networking
+293,7168,Mobility Lead,Ben Dorsey,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"08/04/2023, 9:00 AM",Leidos,,
+294,7166,Electrical Drafter I,Ross Harbaugh,Kirk Powell,Contract To Hire,Open,0.0,0.0,"08/04/2023, 8:56 AM",,,
+295,7165,Physical Substation Design Engineer,Ross Harbaugh,Kirk Powell,Contract To Hire,Open,0.0,0.0,"08/04/2023, 8:56 AM",,,systems_engineering
+296,7163,eDiscovery Application Analyst (MEGA 5) - Top Secret,Cory Miller,BEN TANGPRICHA,Contract To Hire,Open,0.0,0.0,"08/03/2023, 5:46 PM",Leidos,DIA,
+297,7162,VDI/Systems Admin,Brandon Braner,Place Holder,Contract To Hire,Accepting Candidates,0.0,0.0,"08/03/2023, 2:44 PM",,,
+298,7149,Contract Specialist,Jacqueline McLellan,Lauren Phelps,Contract,Open,0.0,0.0,"08/01/2023, 9:19 AM",,,
+299,7147,UC Engineer- GSMO- Ft. Belvoir,Matthew Soifer,James Mitchell,Contract To Hire,Accepting Candidates,0.0,0.0,"07/31/2023, 3:43 PM",,,
+300,7137,ACAS Administrator,Kevin Chavez,LaRon Pryor,Contract,Open,0.0,0.0,"07/28/2023, 9:47 AM",Leidos,DIA,
+301,7136,Electrical Distribution Designer (Remote),Ross Harbaugh,Ryan Gough,Contract To Hire,Open,0.0,0.0,"07/28/2023, 9:41 AM",,,systems_engineering
+302,7131,Linux System Administrator- GSMO- Meade,Matthew Soifer,Jessica Cook,Contract To Hire,Placed,0.0,0.0,"07/28/2023, 8:19 AM",,,
+303,7129,Help Desk Specialist,Ross Harbaugh,Andrei Taylor,Contract To Hire,Open,0.0,0.0,"07/27/2023, 11:43 AM",,,
+304,7128,Modeling Systems Engineer,Tyler Holmes,Scott Pisut,Contract To Hire,Open,0.0,0.0,"07/27/2023, 10:32 AM",,,
+305,7125,Warehouseman Mid,Matt Capelluto,Ed Alsip,Contract,Accepting Candidates,0.0,0.0,"07/27/2023, 10:01 AM",Leidos,,
+306,7124,System Engineer - DES,Paul Bartlett,Sean Black,Contract,Placed,0.0,0.0,"07/27/2023, 8:45 AM",,,
+307,7117,System Engineer,Kevin Chavez,Leslie Branch,Contract,Placed,0.0,0.0,"07/26/2023, 8:24 AM",,,
+308,7112,Java Developer,Steve Marinelli,Keith Wallace,Contract,Open,75.0,110.0,"07/25/2023, 2:20 PM",,,software_dev
+309,7105,I/A Security Specialist,Steve Marinelli,Lauren Taylor,Contract,Placed,100.39,0.0,"07/24/2023, 12:51 PM",,,cybersecurity
+310,7103,IA Engineer- MacDill AFB- Leidos- GSMO,Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,98.96,130000.0,"07/24/2023, 10:45 AM",Leidos,ITES,
+311,7101,Customer Support Specialist,Trey Hall,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"07/21/2023, 2:27 PM",Leidos,,
+312,7095,Communications Systems Engineer,Tyler Holmes,Scott Pisut,Contract To Hire,Open,0.0,0.0,"07/21/2023, 8:21 AM",,,
+313,7045,IT Specialist Senior - New Orleans,Matt Capelluto,Mark Pitre,Contract To Hire,Open,0.0,0.0,"07/13/2023, 1:37 PM",Leidos,DIA,
+314,7039,Network Engineer- TS,Steve Marinelli,Keze Lavala,Contract To Hire,Open,117.11,0.0,"07/12/2023, 1:32 PM",Leidos,,networking
+315,7028,Lead eDiscovery PM - Department of State,Cory Miller,Jennifer Bukvics,Contract To Hire,Open,0.0,0.0,"07/10/2023, 11:39 AM",,,
+316,7013,IT Specialist Senior - Camp Lejeune,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"07/06/2023, 9:57 AM",Leidos,DIA,
+317,7004,Desktop Specialist,Steve Marinelli,Mark Haynes,Contract,Accepting Candidates,0.0,0.0,"07/05/2023, 8:51 AM",,,
+318,6996,Systems Enterprise Management Design Engineer,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"06/30/2023, 9:19 AM",Leidos,,systems_engineering
+319,6995,Cloud Application Engineer,Matt Capelluto,Cliff Feiring,Contract To Hire,Open,0.0,0.0,"06/30/2023, 9:17 AM",,,cloud
+320,6990,RMF Analyst - DES - Leidos - Fort Meade - Hybrid,Paul Bartlett,Sean Black,Contract,Accepting Candidates,0.0,0.0,"06/29/2023, 10:08 AM",,,
+321,6988,Voice and Data Network Engineer- GSMO TN01 Scott,Matthew Soifer,Tuscany Puig,Contract To Hire,Placed,68.19,80000.0,"06/28/2023, 5:05 PM",,,networking
+322,6981,Systems Enterprise Management Design Engineer,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"06/28/2023, 10:58 AM",Leidos,,systems_engineering
+323,6956,TSR Systems Admin 1,Ralph Geabhart,Brandon Hazelwood,Contract To Hire,Placed,26.0,39.04,"06/26/2023, 2:31 PM",,,
+324,6947,Asset Management Specialist,Matt Capelluto,Ed Alsip,Contract,Placed,0.0,0.0,"06/23/2023, 2:29 PM",Leidos,,
+325,6943,ISSE,Kevin Chavez,LaRon Pryor,Contract,Accepting Candidates,0.0,0.0,"06/22/2023, 9:37 AM",Leidos,DIA,
+326,6942,Systems Administrator (FTC),Steph Sullivan,Jason Fierro,Contract To Hire,Open,0.0,0.0,"06/22/2023, 9:19 AM",,,
+327,6941,Software Engineer,Tyler Holmes,Brendan Tammetta,Contract To Hire,Placed,0.0,0.0,"06/22/2023, 8:48 AM",,,software_dev
+328,6935,Software Engineer- NGA,Steph Sullivan,Brendan Tammetta,Contract To Hire,Open,0.0,0.0,"06/21/2023, 4:12 PM",,NGA,software_dev
+329,6925,Network Systems and Services Engineer,Matthew Soifer,George Boone,Contract To Hire,Open,80.66,110000.0,"06/20/2023, 12:43 PM",Leidos,,networking
+330,6924,Network COMSEC Manager- GSMO TN01 Ft. Meade,Matthew Soifer,George Boone,Contract To Hire,Placed,100000.0,68.19,"06/20/2023, 12:41 PM",Leidos,,networking
+331,6914,Systems Administrator,Tyler Holmes,Richard Wicher,Contract,Open,0.0,0.0,"06/15/2023, 4:25 PM",Leidos,,
+332,6907,Scrum Master,Kevin Testerman,Tom Young,Contract,Placed,0.0,0.0,"06/14/2023, 1:42 PM",Leidos,,software_dev
+333,6898,Cybersecurity Engineer,Ben Dorsey,Sean Black,Contract,Placed,0.0,0.0,"06/12/2023, 9:33 AM",,,cybersecurity
+334,6895,Electrical Engineer,Xavier O'Neal,Tyler Harris,Contract To Hire,Placed,0.0,0.0,"06/09/2023, 5:01 PM",Leidos,,
+335,6894,"Windows Systems Administrator Leidos-GSMO (Columbus, OH)",Joe Cornielle,Erik Lozano,Contract To Hire,Placed,36.05,59.04,"06/09/2023, 4:20 PM",,,
+336,6893,"Windows Systems Administrator (Leidos-GSMO-DISA) (San Antonio, TX)",Joe Cornielle,Rock Booze,Contract To Hire,Placed,36.05,59.63,"06/09/2023, 4:09 PM",,DISA,
+337,6890,Business Systems Analyst,Matthew Soifer,Scott Pisut,Contract To Hire,Accepting Candidates,0.0,0.0,"06/09/2023, 2:59 PM",,,
+338,6888,Principal Cloud Engineer,Matt Capelluto,Cliff Feiring,Contract,Open,0.0,0.0,"06/09/2023, 9:34 AM",,,cloud
+339,6873,Project Scheduler- GSMO TN15 Arlington,Matthew Soifer,Andy Studeny,Contract To Hire,Open,78.42,100000.0,"06/06/2023, 1:21 PM",Leidos,DIA,
+340,6867,Cyber Transformation Lead,Kevin Chavez,Nicholas Brink,Contract To Hire,Accepting Candidates,0.0,0.0,"06/05/2023, 10:32 AM",Leidos,,cybersecurity
+341,6864,MS 365 Project Manager,Steph Sullivan,Place Holder,Contract,Open,0.0,0.0,"06/02/2023, 1:36 PM",,,
+342,6863,CND Analyst,Steven Weaver,Lauren Taylor,Contract,Open,0.0,0.0,"06/02/2023, 10:11 AM",,,
+343,6860,Network Security Engineer (Tier III)- GSMO- MacDill,Matthew Soifer,Mickey O'Neil,Contract To Hire,Open,80.66,100000.0,"06/02/2023, 7:34 AM",Leidos,ITES,"cybersecurity, networking"
+344,6858,CSWO,Jason Soifer,Ryan Odell,Contract To Hire,Open,0.0,0.0,"06/01/2023, 12:41 PM",,,
+345,6849,Network Engineer,Kevin Testerman,Jeanette Mitchell,Contract,Placed,0.0,0.0,"05/31/2023, 9:10 AM",Leidos,MDA,networking
+346,6848,Systems Engineer,Steph Sullivan,Venis Knight,Contract To Hire,Open,0.0,0.0,"05/30/2023, 5:05 PM",,,
+347,6845,Test Engineer/System Engineer (Test) - Leidos - GSM-O II - Fort Meade,Paul Bartlett,Dipa Dayal,Contract To Hire,Placed,0.0,0.0,"05/30/2023, 8:35 AM",Leidos,,
+348,6843,Sharepoint Administrator,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"05/26/2023, 10:47 AM",Leidos,,
+349,6842,IT Specialist Senior,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"05/26/2023, 8:40 AM",Leidos,DIA,
+350,6841,Cyber Threat Fusion Analyst,Nick Gainous,Ryan Odell,Contract To Hire,Placed,0.0,0.0,"05/26/2023, 8:34 AM",,,cybersecurity
+351,6835,Windows Systems Administrator,Nick Gainous,Zackery Turbyfill,Contract To Hire,Open,130000.0,0.0,"05/25/2023, 8:19 AM",Leidos,,
+352,6823,Cloud Administrator - SBNAB - Adelphi,Ethan Dial,Anthony Campitelli,Contract To Hire,Placed,0.0,0.0,"05/23/2023, 2:35 PM",,,cloud
+353,6822,Engineering Lead - DES - Meade - Secret/hybrid,Jason Soifer,Jeanette Mitchell,Contract,Placed,0.0,0.0,"05/23/2023, 12:20 PM",Leidos,MDA,
+354,6821,Sr. Solutions Architect,Kevin Testerman,Jeanette Mitchell,Contract,Open,0.0,0.0,"05/23/2023, 10:43 AM",Leidos,MDA,
+355,6820,Lead Systems Engineer,Kevin Testerman,Jeanette Mitchell,Contract,Open,0.0,0.0,"05/23/2023, 9:15 AM",Leidos,MDA,
+356,6818,Tier III Systems Engineer- GSMO,Matthew Soifer,Zackery Turbyfill,Contract To Hire,Placed,100.0,150000.0,"05/23/2023, 8:45 AM",Leidos,,
+357,6817,Senior Linux System Admin,Gavin Jump,Zackery Turbyfill,Contract To Hire,Placed,0.0,0.0,"05/23/2023, 8:31 AM",Leidos,,
+358,6814,Tier III Lead Windows System Administrator- GSMO,Matthew Soifer,Zackery Turbyfill,Contract To Hire,Placed,110.0,165000.0,"05/22/2023, 2:19 PM",Leidos,,
+359,6810,Network Engineer,Kevin Testerman,Terry Reilly,Contract,Placed,0.0,0.0,"05/22/2023, 9:52 AM",Leidos,,networking
+360,6800,Senior Cyber Analyst,Paul Bartlett,Kevin Klein,Contract To Hire,Placed,0.0,0.0,"05/18/2023, 1:20 PM",Leidos,DIA,cybersecurity
+361,6798,Cyber Security Specialist Mid,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"05/18/2023, 9:42 AM",Leidos,,cybersecurity
+362,6797,IT Specialist - Senior,Kevin Testerman,Joseph Richardson,Contract,Placed,0.0,0.0,"05/18/2023, 7:55 AM",,,
+363,6793,Asset Management Specialist Mid,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"05/17/2023, 4:31 PM",Leidos,DIA,
+364,6791,Tier III Project- Lead Windows System Admin- Ft. Meade,Matthew Soifer,Zackery Turbyfill,Contract To Hire,Placed,110.0,165000.0,"05/17/2023, 12:54 PM",Leidos,,
+365,6777,Remedy Architect,Kevin Testerman,Tom Young,Contract,Open,0.0,0.0,"05/12/2023, 3:49 PM",Leidos,,
+366,6773,System Administrator V,Matt Capelluto,Placeholder Placeholder,Contract,Accepting Candidates,0.0,0.0,"05/12/2023, 11:14 AM",,,
+367,6771,Software Developer,Matt Capelluto,Place Holder,Contract,Open,0.0,0.0,"05/12/2023, 9:41 AM",,,software_dev
+368,6766,"Active Directory/Exchange Specialist – Camp Lejeune, NC",Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"05/11/2023, 8:55 AM",Leidos,DIA,
+369,6765,Technical Writer (Exec Building - White House),Paul Bartlett,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"05/11/2023, 8:36 AM",Leidos,,
+370,6752,HBSS Engineer,Trey Hall,Jeff Smith,Contract To Hire,Placed,0.0,0.0,"05/09/2023, 1:20 PM",,,
+371,6742,"Lead Electrical Distribution Designer- St Louis, MO",Bailey Rollins,Deangelo Clark,Contract To Hire,Open,0.0,0.0,"05/05/2023, 10:48 AM",,,systems_engineering
+372,6737,ISSM - Leidos - SBNAB - Belvoir / Adelphi,Ethan Dial,Laura Israel,Contract To Hire,Open,0.0,0.0,"05/03/2023, 10:39 AM",Leidos,,
+373,6735,IT Specialist Senior,Matt Capelluto,Steven Luis,Contract,Open,0.0,0.0,"05/03/2023, 8:51 AM",Leidos,,
+374,6734,NetOps Specialist Junior,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"05/02/2023, 4:24 PM",Leidos,,
+375,6733,Senior DevSecOps Engineer - SBNAB,Trey Hall,Laura Israel,Contract To Hire,Placed,0.0,0.0,"05/02/2023, 3:27 PM",Leidos,,devops
+376,6727,"Lead Electrical Distribution Designer- St Louis, MO",Bailey Rollins,Deangelo Clark,Contract To Hire,Open,0.0,0.0,"05/02/2023, 9:27 AM",,,systems_engineering
+377,6726,NetOps Specialist Senior,Matt Capelluto,Ed Alsip,Contract,Placed,0.0,0.0,"05/02/2023, 8:37 AM",Leidos,,
+378,6725,Cyber Security Specialist Mid,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"05/02/2023, 8:35 AM",Leidos,,cybersecurity
+379,6715,UC Engineer,Matthew Soifer,Warren McKee,Contract To Hire,Placed,55.72,70000.0,"04/28/2023, 7:20 AM",,,
+380,6711,Lead Information Technology Specialist,Joe Cornielle,Jason Putz,Contract To Hire,Placed,200.0,0.0,"04/26/2023, 4:52 PM",,,
+381,6708,Active Directory Engineer (Hybrid),Joe Cornielle,Terence Coston,Contract To Hire,Placed,62.5,130.0,"04/26/2023, 10:49 AM",,,
+382,6707,Network Engineer Jr.- Kings Bay,Matt Gullette,Elly Buenviaje,Contract,Placed,0.0,0.0,"04/26/2023, 10:34 AM",,,networking
+383,6697,Communications Network Engineer,Matt Capelluto,Roman Vitkovitsky,Contract,Open,0.0,0.0,"04/24/2023, 9:12 AM",Leidos,"DISA, DIA, NSA",networking
+384,6696,Electrical Distribution Design,Ross Harbaugh,Tyler Harris,Contract To Hire,Open,0.0,0.0,"04/24/2023, 9:10 AM",Leidos,,systems_engineering
+385,6692,Communications Network Engineer Senior,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"04/21/2023, 3:04 PM",Leidos,,networking
+386,6687,Informatica Developer,Steph Sullivan,Timothy Fenning,Contract To Hire,Open,0.0,0.0,"04/21/2023, 8:03 AM",,,
+387,6683,Active Directory Administrator,Steve Marinelli,Ermias Teferra,Contract,Placed,65.0,100.0,"04/20/2023, 10:51 AM",Leidos,,
+388,6675,VMware Systems Administrator,Tyler Holmes,Richard Wicher,Contract To Hire,Open,0.0,0.0,"04/19/2023, 3:41 PM",Leidos,,
+389,6671,Power Platform Developer,Steph Sullivan,Sam Talbert,Contract,Accepting Candidates,0.0,0.0,"04/19/2023, 10:35 AM",,,
+390,6667,Sr. Software Developer,Steph Sullivan,Venis Knight,Contract To Hire,Placed,0.0,0.0,"04/19/2023, 8:33 AM",,,software_dev
+391,6666,IT Specialist Senior - Wallops Island,Kevin Testerman,Patrice Smallwood,Contract,Placed,0.0,0.0,"04/19/2023, 8:31 AM",,,
+392,6664,NetOps Mid,Steve Marinelli,Steven Luis,Contract,Open,33.65,58.89,"04/18/2023, 4:47 PM",Leidos,,
+393,6655,NetOps Specialist Lead Mid,Matt Capelluto,Donald Quinn,Contract,Placed,0.0,0.0,"04/17/2023, 2:37 PM",,,
+394,6654,System Administrator III,Steph Sullivan,Venis Knight,Contract,Open,0.0,0.0,"04/17/2023, 1:51 PM",,,
+395,6652,"Network Engineer-Carderock, MD",Matt Gullette,Stephanie Bethea,Contract,Placed,0.0,0.0,"04/17/2023, 11:20 AM",,,networking
+396,6647,Network Support Engineer,Joe Cornielle,Chris Lashbrook,Contract To Hire,Open,0.0,0.0,"04/14/2023, 10:44 AM",Leidos,,networking
+397,6638,Software Engineer EDI,Steph Sullivan,Timothy Fenning,Contract To Hire,Open,0.0,0.0,"04/13/2023, 2:48 PM",,,software_dev
+398,6637,Host Defense Design Engineer,Matt Capelluto,Roman Vitkovitsky,Contract,Placed,0.0,0.0,"04/13/2023, 10:15 AM",Leidos,"DISA, DIA, NSA",systems_engineering
+399,6622,UC Engineer- Scott/Hill/Tampa,Matthew Soifer,George Boone,Contract To Hire,Placed,107.0,120000.0,"04/11/2023, 10:24 AM",Leidos,,
+400,6606,Civil Engineer Chicago,Steph Sullivan,Raja Reddy,Contract To Hire,Placed,0.0,0.0,"04/07/2023, 7:55 AM",Leidos,DIA,
+401,6602,Business Planning Specialist,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"04/06/2023, 12:05 PM",Leidos,DIA,
+402,6597,Desktop Support,Andrew Longo,Placeholder Placeholder,Contract,Placed,0.0,0.0,"04/05/2023, 4:44 PM",,,
+403,6590,Full Stack Developer GSMO REMOTE,Julia Smith,Alex Velez,Contract To Hire,Open,0.0,0.0,"04/04/2023, 1:01 PM",,,
+404,6582,Logistics Systems Trainer,Matt Capelluto,Marta Williams,Contract To Hire,Open,0.0,0.0,"04/03/2023, 5:17 PM",Leidos,,ai_ml
+405,6580,Quality Support Specialist,Matt Capelluto,Marta Williams,Contract To Hire,Placed,0.0,0.0,"03/31/2023, 3:08 PM",Leidos,,
+406,6578,Cloud Engineer,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,118.95,170000.0,"03/31/2023, 1:23 PM",Leidos,DIA,cloud
+407,6566,Electrical Engineer Chicago,Steph Sullivan,Raja Reddy,Contract,Placed,0.0,0.0,"03/30/2023, 8:37 AM",Leidos,DIA,
+408,6565,Electrical Distribution Design,Ross Harbaugh,Tyler Harris,Contract To Hire,Placed,0.0,0.0,"03/29/2023, 5:16 PM",Leidos,,systems_engineering
+409,6564,ServiceNow Developer,Steph Sullivan,Scott Gresko,Contract,Open,0.0,0.0,"03/29/2023, 4:15 PM",,,
+410,6562,ServiceNow Developer,Steph Sullivan,Venis Knight,Contract,Open,0.0,0.0,"03/29/2023, 3:52 PM",,,
+411,6560,Remote Full Stack Developer- UI/UX,Bailey Rollins,Alex Velez,Contract To Hire,Open,0.0,0.0,"03/29/2023, 3:08 PM",,,
+412,6559,Technical Writer,Matthew Soifer,Andy Studeny,Contract To Hire,Accepting Candidates,78.44,80000.0,"03/29/2023, 12:45 PM",Leidos,DIA,
+413,6554,Project Manager,Matt Capelluto,Mark Pitre,Contract To Hire,Open,0.0,0.0,"03/28/2023, 4:39 PM",Leidos,DIA,
+414,6553,NetOps Lead Mid,Matt Capelluto,Mini Elmore,Contract To Hire,Open,0.0,0.0,"03/28/2023, 4:36 PM",Leidos,DIA,
+415,6544,IT Asset Manager,Matthew Soifer,Andy Studeny,Contract To Hire,Open,65.0,80000.0,"03/27/2023, 10:51 AM",Leidos,DIA,
+416,6540,Mechanical Engineer (Chicago),Steph Sullivan,Raja Reddy,Contract To Hire,Placed,0.0,0.0,"03/24/2023, 2:25 PM",Leidos,DIA,
+417,6539,Network Engineer - Indian Head,Kevin Testerman,Odaro Edomwonyi,Contract,Open,0.0,0.0,"03/24/2023, 12:41 PM",Leidos,DIA,networking
+418,6535,Service Now Developer,Steph Sullivan,Andrea Quinn,Contract To Hire,Open,0.0,0.0,"03/24/2023, 9:05 AM",,,
+419,6525,SharePoint Developer,Gavin Jump,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"03/22/2023, 2:48 PM",Leidos,,
+420,6514,Sr. ServiceNow Engineer,Clay Failor,Josina Woodruff,Contract To Hire,Accepting Candidates,0.0,0.0,"03/21/2023, 1:31 PM",Leidos,,
+421,6513,Azure Cloud Engineer,Steph Sullivan,Josina Woodruff,Contract To Hire,Open,0.0,0.0,"03/21/2023, 9:48 AM",Leidos,,cloud
+422,6508,Intrusion Detection Analyst,Clay Failor,Brandon Hazelwood,Contract To Hire,Accepting Candidates,0.0,0.0,"03/20/2023, 10:48 AM",,,
+423,6507,NetOps Specialist,Matt Capelluto,Mini Elmore,Contract To Hire,Placed,0.0,0.0,"03/20/2023, 8:46 AM",Leidos,DIA,
+424,6504,"Network Engineer- Ford Island, HI/ Scott AFB, IL",Matthew Soifer,John Eubanks,Contract To Hire,Open,55.72,0.0,"03/17/2023, 9:59 AM",,,networking
+425,6502,Field Service Engineer,Matt Capelluto,James Eelman,Contract To Hire,Open,0.0,0.0,"03/16/2023, 1:21 PM",,,
+426,6501,Project Manager,Kevin Chavez,Placeholder Placeholder,Contract,Accepting Candidates,0.0,0.0,"03/16/2023, 1:20 PM",,,
+427,6498,Process Analyst / Knowledge manager,Madison Yokley,Placeholder Placeholder,Contract To Hire,Open,129.85,0.0,"03/16/2023, 9:38 AM",,,
+428,6497,Mobility tech - GSMO - Leidos - Peterson AFB,Cameron Knotts,Placeholder Placeholder,Contract To Hire,Placed,0.0,0.0,"03/16/2023, 8:35 AM",,,
+429,6496,Civil Engineer (Ft. Worth),Steph Sullivan,Raja Reddy,Contract,Placed,0.0,0.0,"03/15/2023, 4:55 PM",Leidos,DIA,
+430,6495,Business Process Analyst,Clay Failor,Brian Cooley,Contract To Hire,Accepting Candidates,0.0,0.0,"03/15/2023, 3:44 PM",Leidos,,
+431,6488,Electrical Engineer (Fort Worth),Steph Sullivan,Raja Reddy,Contract,Placed,0.0,0.0,"03/14/2023, 4:34 PM",Leidos,DIA,
+432,6484,Civil Engineer (Structural) Chicago,Steph Sullivan,Raja Reddy,Contract,Placed,0.0,0.0,"03/14/2023, 8:36 AM",Leidos,DIA,
+433,6482,Watch Officer Mid,Matt Capelluto,Mark Pitre,Contract To Hire,Placed,0.0,0.0,"03/13/2023, 11:32 AM",Leidos,DIA,
+434,6471,Windows Engineer- SME,Steven Weaver,Courtney Winstead,Contract,Open,0.0,0.0,"03/09/2023, 9:04 AM",Leidos,,
+435,6470,Storage Engineer,Bobby Duncan,Courtney Winstead,Contract,Open,0.0,0.0,"03/09/2023, 8:55 AM",Leidos,,
+436,6461,Project Manager,Clay Failor,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"03/08/2023, 8:27 AM",Leidos,,
+437,6458,Network Technician,Kevin Testerman,Odaro Edomwonyi,Contract,Placed,0.0,0.0,"03/07/2023, 9:53 AM",Leidos,DIA,networking
+438,6452,"Electrical Distribution Design Engineer- Orlando, FL",Bailey Rollins,Place Holder,Contract,Open,0.0,0.0,"03/06/2023, 3:45 PM",,,systems_engineering
+439,6450,Network UC Design Engineer Senior,Matt Capelluto,Roman Vitkovitsky,Contract,Open,0.0,0.0,"03/06/2023, 8:55 AM",Leidos,"DISA, DIA, NSA","networking, systems_engineering"
+440,6449,Electrical Engineer - FAA,Steph Sullivan,Jeffrey Jones,Contract,Open,0.0,0.0,"03/03/2023, 5:00 PM",,,
+441,6440,Electrical Distribution Engineer,Ross Harbaugh,Tyler Harris,Contract To Hire,Placed,0.0,0.0,"03/02/2023, 1:27 PM",Leidos,,
+442,6437,Field Service Tech,Ross Harbaugh,Tim Gerchman,Contract To Hire,Open,0.0,0.0,"03/02/2023, 9:23 AM",,,
+443,6435,Supply Chain Risk Management Analyst,Ben Dorsey,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"03/02/2023, 8:45 AM",Leidos,,ai_ml
+444,6427,Cyber Operations Manager,Ben Dorsey,Jeffrey Voice,Contract To Hire,Placed,0.0,0.0,"03/01/2023, 8:42 AM",,,cybersecurity
+445,6423,Salesforce,Ross Harbaugh,Heather Cunningham,Contract To Hire,Open,0.0,0.0,"02/28/2023, 2:42 PM",,,
+446,6415,Relativity Archiving Analyst,Cory Miller,Clarice Bratton,Contract To Hire,Accepting Candidates,0.0,0.0,"02/27/2023, 11:08 AM",,,
+447,6414,Hardware Engineer (SCADA EMS),Steph Sullivan,Aiyisha Smothers,Contract,Open,0.0,0.0,"02/27/2023, 10:33 AM",,,
+448,6413,Network Engineer-SMIT-Annacostia,Matt Gullette,Stephanie Bethea,Contract,Open,0.0,0.0,"02/27/2023, 9:53 AM",,,networking
+449,6411,RPA Engineer,Clay Failor,Joe Cannon,Contract,Open,0.0,0.0,"02/24/2023, 4:33 PM",,,
+450,6401,MECM Administrator,Kevin Testerman,Duane Carnine,Contract,Open,0.0,0.0,"02/23/2023, 8:30 AM",Leidos,,
+451,6395,ServiceNow Developer,Steph Sullivan,Scott Gresko,Contract To Hire,Open,0.0,0.0,"02/22/2023, 9:06 AM",,,
+452,6382,"Test Engineer (Tucson, AZ)",Tyler Holmes,Douglas Disinger,Contract To Hire,Open,0.0,0.0,"02/20/2023, 12:54 PM",Leidos,,
+453,6378,Director of Electrical Distribution Engineering- TX,Bailey Rollins,Place Holder,Direct Hire,Open,0.0,0.0,"02/20/2023, 11:18 AM",,,
+454,6368,NetOps Lead/Chief Engineer,Cory Miller,Aruna Mathuranayagam,Contract To Hire,Accepting Candidates,0.0,0.0,"02/16/2023, 10:46 AM",,,
+455,6363,System Administrator,Steve Marinelli,Steven Contreras,Contract,Open,62.5,94.18,"02/16/2023, 8:22 AM",Leidos,DIA,
+456,6357,Communications Network Engineer Mid- China Lake,Bobby Duncan,Joel Fagerhaug,Contract,Placed,0.0,0.0,"02/15/2023, 1:00 PM",,,networking
+457,6353,Service Desk Technician - ESA V,Cory Miller,James McGee,Contract To Hire,Open,0.0,0.0,"02/14/2023, 2:51 PM",Leidos,,
+458,6351,RHEL Systems Engineer - NOAA,Cory Miller,Kelly Hamilton,Contract To Hire,Open,0.0,0.0,"02/14/2023, 10:57 AM",,,
+459,6350,Electrical Distribution Design Engineer,Santino Mostaccio,Place Holder,Contract To Hire,Open,0.0,0.0,"02/14/2023, 9:58 AM",,,systems_engineering
+460,6347,Sr. Principal Cloud Engineer,Cory Miller,Josina Woodruff,Contract To Hire,Placed,0.0,0.0,"02/13/2023, 5:36 PM",Leidos,,cloud
+461,6343,Desk Side Support Technician III,Steph Sullivan,John Bilas,Contract,Placed,0.0,0.0,"02/13/2023, 1:22 PM",,,
+462,6341,RF/Satellite Engineer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Open,68.19,80000.0,"02/13/2023, 8:43 AM",Leidos,ITES,
+463,6336,Sr. Oracle Application DBA,Steph Sullivan,Aiyisha Smothers,Contract,Open,0.0,0.0,"02/10/2023, 10:13 AM",,,database
+464,6331,Business Systems Analyst (IV),Santino Mostaccio,Place Holder,Contract,Placed,121.62,0.0,"02/09/2023, 9:12 AM",,,
+465,6329,Senior System Administrator - NOAA,Ethan Gill,Kelly Hamilton,Contract To Hire,Accepting Candidates,0.0,0.0,"02/08/2023, 5:13 PM",,,
+466,6325,Info Security Analyst IV,Steph Sullivan,Robert Carroll III,Contract,Open,0.0,0.0,"02/08/2023, 3:37 PM",,,cybersecurity
+467,6321,Windchill,Ross Harbaugh,Place Holder,Contract To Hire,Open,0.0,0.0,"02/07/2023, 3:21 PM",,,
+468,6320,Splunk Developer,Gavin Jump,Eamon Mankle,Contract To Hire,Placed,0.0,0.0,"02/07/2023, 11:11 AM",,,
+469,6316,Lead Configuration Manager,Matthew Soifer,Andy Studeny,Contract To Hire,Filled by Client,103.16,150000.0,"02/07/2023, 7:42 AM",Leidos,DIA,
+470,6313,RF Engineer - Dynetics,Trey Hall,Larry Barisciano,Contract To Hire,Open,0.0,0.0,"02/06/2023, 2:15 PM",,,
+471,6311,Desktop Technician,Kevin Chavez,Micheal Thomas,Contract,Placed,0.0,0.0,"02/06/2023, 8:21 AM",Leidos,,
+472,6308,Domino Developer,Ross Harbaugh,Place Holder,Direct Hire,Open,0.0,0.0,"02/03/2023, 1:56 PM",,,
+473,6305,Senior Network Engineer,Matt Garten,Marty Hilliard,Contract To Hire,Open,0.0,0.0,"02/03/2023, 12:53 PM",,,networking
+474,6295,Cloudera Admin,Steph Sullivan,Dhiresh Pandaya,Contract,Open,0.0,0.0,"02/01/2023, 1:41 PM",Leidos,DIA,cloud
+475,6293,SQL Developer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Filled by Client,0.0,0.0,"02/01/2023, 9:31 AM",Leidos,ITES,database
+476,6292,SharePoint Developer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Filled by Client,82.34,110000.0,"02/01/2023, 9:27 AM",Leidos,ITES,
+477,6277,SCOM Engineer,Kevin Chavez,Charles Flanders,Contract,Placed,0.0,0.0,"01/31/2023, 8:28 AM",,,
+478,6276,Network Engineer,Steve Marinelli,Wendy Anderson,Contract,Open,79.32,120.92,"01/31/2023, 8:20 AM",,,networking
+479,6269,Countermeasures Engineer,Edvins Gelin,Marvin Shullenberger,Contract To Hire,Placed,0.0,0.0,"01/30/2023, 9:06 AM",,,
+480,6268,"SQL DBA (Hines, IL)",Tyler Holmes,Douglas Disinger,Contract To Hire,Open,0.0,0.0,"01/30/2023, 8:14 AM",Leidos,,database
+481,6264,-,Jake Floyd,Scott Flood,Contract To Hire,Open,0.0,0.0,"01/27/2023, 9:16 AM",,,
+482,6261,Sr. Network Engineer - MARAD - DOT,Cory Miller,Josina Woodruff,Contract To Hire,Open,0.0,0.0,"01/26/2023, 8:09 PM",Leidos,,networking
+483,6256,CAD Drafter,Ross Harbaugh,Place Holder Place Holder,Contract To Hire,Placed,0.0,0.0,"01/26/2023, 1:16 PM",,,
+484,6255,Electrical Distribution Design,Ross Harbaugh,Philip Cosey,Contract To Hire,Open,0.0,0.0,"01/26/2023, 1:14 PM",,,systems_engineering
+485,6230,Configuration Manager - N2NOMS,Cory Miller,Tim Norton,Contract,Open,0.0,0.0,"01/23/2023, 4:45 PM",,,
+486,6227,SharePoint/PowerApps Developer - MEGA,Cory Miller,Clarice Bratton,Contract,Placed,0.0,0.0,"01/23/2023, 2:18 PM",,,
+487,6226,Window System Admin- Roslynn,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,81.12,0.0,"01/23/2023, 11:12 AM",Leidos,DIA,
+488,6225,Sr. Jira Developer,Matt Garten,Andy Studeny,Contract,Open,118.95,0.0,"01/23/2023, 8:50 AM",Leidos,DIA,
+489,6224,AutoCAD Drafter,Kevin Testerman,James Bingham,Contract,Placed,0.0,0.0,"01/23/2023, 8:22 AM",Leidos,,
+490,6222,Endpoint Security Engineer,Trey Hall,Jevencia Barkwell,Contract To Hire,Placed,0.0,0.0,"01/21/2023, 11:08 AM",Leidos,Zero Trust,cybersecurity
+491,6220,Senior Windows Admin- Scott AFB,Matthew Soifer,Marty Hilliard,Contract To Hire,Open,100000.0,74.39,"01/20/2023, 11:30 AM",,,
+492,6212,Software Specialist VII,Clay Failor,Greg Wolski,Contract,Accepting Candidates,0.0,0.0,"01/19/2023, 10:56 AM",,,software_dev
+493,6202,Windows Engineer,Steven Weaver,Anthony Blanton,Contract,Open,0.0,0.0,"01/18/2023, 9:33 AM",,,
+494,6199,e-Discovery EPC Team Supervisor,Cory Miller,Lisa Nelson,Contract To Hire,Open,0.0,0.0,"01/17/2023, 7:23 PM",Leidos,,
+495,6196,Lead Data Scientist,Jack Defoor,Peter Cheung,Contract To Hire,Accepting Candidates,0.0,0.0,"01/17/2023, 4:16 PM",Leidos,,
+496,6193,Software Dev IV,Steph Sullivan,Dianna Vigil,Contract,Open,0.0,0.0,"01/17/2023, 2:16 PM",,,software_dev
+497,6185,IdAM Systems Engineer,Matt Garten,Andy Studeny,Contract,Placed,93.0,0.0,"01/16/2023, 5:25 PM",Leidos,DIA,
+498,6179,Splunk Administrator- GSMO Roslynn,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,110000.0,0.0,"01/16/2023, 11:01 AM",Leidos,DIA,
+499,6177,Project Manager,Kevin Chavez,Taneka Patterson,Contract,Open,0.0,0.0,"01/16/2023, 8:37 AM",,,
+500,6174,Cyber Security Specialist Junior,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"01/16/2023, 7:12 AM",Leidos,DIA,cybersecurity
+501,6166,Network Planning Analyst,Matthew Soifer,Mickey O'Neil,Contract To Hire,Filled by Client,90000.0,69.06,"01/13/2023, 7:36 AM",Leidos,ITES,networking
+502,6161,Leidos - Project Supervisor (MEGA),Cory Miller,Nana Aboagye,Contract,Open,0.0,0.0,"01/12/2023, 12:04 PM",,,
+503,6159,Database Administrator - SBNAB,Trey Hall,Laura Israel,Contract To Hire,Open,0.0,0.0,"01/12/2023, 8:29 AM",Leidos,,database
+504,6157,Software Engineer IV,Cory Miller,Amy Cagle,Contract To Hire,Open,0.0,0.0,"01/11/2023, 1:43 PM",Leidos,,software_dev
+505,6153,E-Discovery (Help Desk Supervisor) - MEGA,Cory Miller,Nana Aboagye,Contract To Hire,Open,0.0,0.0,"01/11/2023, 11:25 AM",,,
+506,6151,Distribution Engineer I,Cory Miller,Jacob Barrett,Contract To Hire,Open,0.0,0.0,"01/11/2023, 10:58 AM",,,
+507,6150,Information Systems Architect Senior,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"01/11/2023, 10:37 AM",Leidos,,
+508,6143,"Cybersecurity Analyst- GSMO Peterson AFB, CO",Matthew Soifer,Hersh Bhatt,Contract To Hire,Placed,78.54,0.0,"01/10/2023, 1:32 PM",,,cybersecurity
+509,6141,Software Engineer,Tyler Holmes,Justin Ly,Contract,Open,0.0,0.0,"01/10/2023, 9:27 AM",Leidos,,software_dev
+510,6137,Automated Test Engineer- GSMO,Matthew Soifer,Andy Studeny,Contract To Hire,Filled by Client,81.12,0.0,"01/09/2023, 4:57 PM",Leidos,DIA,
+511,6136,Citrix Admin- GSMO,Matthew Soifer,Andy Studeny,Contract To Hire,Placed,0.0,0.0,"01/09/2023, 4:54 PM",Leidos,DIA,
+512,6131,IT Specialist Mid,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"01/09/2023, 11:29 AM",Leidos,DIA,
+513,6118,eDiscovery Analytics Lead/Relativity Certified Admin - MEGA,Cory Miller,Clarice Bratton,Contract To Hire,Accepting Candidates,0.0,0.0,"01/06/2023, 1:20 PM",,,
+514,6116,Software Engineer - C++ - DHS,Cory Miller,Daniel Crespo,Contract To Hire,Open,0.0,0.0,"01/06/2023, 11:30 AM",,,software_dev
+515,6111,Asset Management Specialist Mid,Matt Capelluto,Mini Elmore,Contract To Hire,Placed,0.0,0.0,"01/05/2023, 4:06 PM",Leidos,DIA,
+516,6108,P&P Assurance Engineer III,Matt Capelluto,Justin Ly,Contract To Hire,Open,0.0,0.0,"01/05/2023, 1:53 PM",Leidos,,
+517,6107,Data Entry Technician - USAO Miami,Cory Miller,Jennifer Bukvics,Contract,Open,0.0,0.0,"01/05/2023, 12:32 PM",,,
+518,6103,System Admin Mid,Matt Capelluto,Mini Elmore,Contract To Hire,Placed,0.0,0.0,"01/05/2023, 7:05 AM",Leidos,DIA,
+519,6093,Cyber Security Specialist Jr,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"01/03/2023, 7:35 AM",Leidos,DIA,cybersecurity
+520,6092,Enterprise Service Desk Senior,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"01/03/2023, 7:17 AM",Leidos,DIA,
+521,6091,CAD Drafter I,Cory Miller,Kyle Jewers,Contract To Hire,Accepting Candidates,0.0,0.0,"12/30/2022, 1:17 PM",,,
+522,6073,E-Discovery (Junior Asset Manager) - ESA,Cory Miller,Placeholder Placeholder,Contract To Hire,Accepting Candidates,0.0,0.0,"12/21/2022, 4:43 PM",,,
+523,6072,"Help Desk- MacDill, FL",Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,68.19,80000.0,"12/21/2022, 3:28 PM",Leidos,ITES,
+524,6068,Voice Engineer (Journeyman),Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,68.19,80000.0,"12/21/2022, 9:42 AM",Leidos,ITES,
+525,6065,Mission Assurance Analyst,Trey Hall,Jevencia Barkwell,Contract To Hire,Placed,0.0,0.0,"12/20/2022, 4:57 PM",Leidos,Zero Trust,
+526,6064,Law Clerk I - MEGA 5 - Leidos (DC),Cory Miller,Michael Winkelspecht,Contract To Hire,Accepting Candidates,0.0,0.0,"12/20/2022, 4:48 PM",,,
+527,6041,"Network Engineer - Silverdale, WA",Kevin Testerman,Mike Gilbert,Contract,Open,0.0,0.0,"12/15/2022, 10:58 AM",,,networking
+528,6039,ACAS/HBSS Lead (Pentagon),Garrett Seckler,Place Holder,Contract To Hire,Open,0.0,0.0,"12/15/2022, 9:04 AM",,,
+529,6035,ServiceNow Developer/Engineer,Matthew Soifer,Kevin Criel,Contract To Hire,Placed,90.9,120000.0,"12/14/2022, 1:55 PM",Leidos,,
+530,6023,Jr. Deskside Engineer,Cory Miller,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"12/13/2022, 10:40 AM",,,
+531,6018,Java DevOps Engineer,Darius Davis,Placeholder Placeholder,Contract To Hire,Open,0.0,0.0,"12/12/2022, 10:36 AM",,,"software_dev, devops"
+532,6007,Field Service Technician II,Steph Sullivan,Dusty Miller,Contract To Hire,Placed,52.16,0.0,"12/07/2022, 12:37 PM",,,
+533,5996,Cyber Security Specialist SR,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"12/05/2022, 1:20 PM",Leidos,DIA,cybersecurity
+534,5995,VM Analyst,Jason Soifer,Darrell Shorter,Contract To Hire,Placed,0.0,0.0,"12/05/2022, 7:43 AM",Leidos,DIA,
+535,5994,Project Manager Mid,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"12/05/2022, 7:24 AM",Leidos,DIA,
+536,5993,Watch officer,Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"12/02/2022, 5:01 PM",Leidos,DIA,
+537,5991,Project Manager - Network / Systems,Anthony Fusco,Courtney Winstead,Contract,Open,0.0,0.0,"12/02/2022, 9:55 AM",Leidos,,networking
+538,5990,Virtual Server Administrator,Matt Capelluto,Mini Elmore,Contract,Accepting Candidates,0.0,0.0,"12/02/2022, 9:40 AM",Leidos,DIA,
+539,5989,IA Engineer - Ft. Meade,Trey Hall,Jevencia Barkwell,Contract To Hire,Open,0.0,0.0,"12/02/2022, 9:01 AM",Leidos,Zero Trust,
+540,5983,Project Manager Lead,Ben Dorsey,Courtney Winstead,Contract,Open,0.0,0.0,"12/01/2022, 4:38 PM",Leidos,,
+541,5980,Electrical Engineer III FAA,Steph Sullivan,Jeffrey Jones,Contract To Hire,Placed,116.55,0.0,"12/01/2022, 12:48 PM",,,
+542,5978,Program Manager - JBA,Paul Bartlett,Courtney Winstead,Contract To Hire,Placed,0.0,0.0,"12/01/2022, 10:49 AM",Leidos,,
+543,5974,Lead ServiceNow Developer/Engineer,Matthew Soifer,David Garza,Contract To Hire,Placed,121.82,0.0,"11/30/2022, 2:23 PM",Leidos,DISA,
+544,5973,Nuclear Engineer,Steph Sullivan,Beth Farrell Hale,Contract,Open,0.0,0.0,"11/30/2022, 2:17 PM",,,
+545,5967,Cyber Security Specialist Mid,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"11/30/2022, 7:24 AM",Leidos,DIA,cybersecurity
+546,5957,Systems Test Engineer,Matthew Soifer,Dipa Dayal,Contract To Hire,Placed,100000.0,85.35,"11/28/2022, 1:27 PM",Leidos,,
+547,5956,CND Analyst,Matthew Soifer,Amanda Huntley,Contract To Hire,Open,78.54,70000.0,"11/27/2022, 1:59 PM",,,
+548,5954,Network Security Engineer,Cory Miller,James Wei,Contract To Hire,Accepting Candidates,55.0,130000.0,"11/22/2022, 12:05 PM",,,"cybersecurity, networking"
+549,5944,Helpdesk II,Steph Sullivan,Debi Waldrop-Lopez,Contract To Hire,Placed,0.0,0.0,"11/17/2022, 4:47 PM",Leidos,,
+550,5921,Cyber Security Analyst,Jack Defoor,Todd Smith,Contract To Hire,Placed,74.52,0.0,"11/15/2022, 9:11 AM",,,cybersecurity
+551,5916,Network Engineer Mid NGEN- Patuxent River,Bailey Rollins,Daniel Maples,Contract,Placed,0.0,0.0,"11/14/2022, 9:43 AM",Leidos,,networking
+552,5915,Database Architect (OCIO),Garrett Seckler,Jim Chatfield,Contract To Hire,Open,97.88,0.0,"11/14/2022, 8:49 AM",Leidos,,database
+553,5912,Cloud Security Analyst,Tyler Holmes,Todd Smith,Contract To Hire,Open,0.0,0.0,"11/11/2022, 1:56 PM",,,"cybersecurity, cloud"
+554,5908,Linux Administrator,Brad Glaser,Leslie Branch,Contract,Open,0.0,0.0,"11/11/2022, 8:19 AM",,,
+555,5905,CAD Drafter/Designer,Steph Sullivan,Logan Sweeney,Contract,Open,0.0,0.0,"11/10/2022, 10:09 AM",,,systems_engineering
+556,5903,Data Architect SME,Matt Capelluto,Jim Chatfield,Contract,Accepting Candidates,0.0,0.0,"11/10/2022, 9:23 AM",Leidos,,
+557,5902,Data Architect Senior,Matt Capelluto,Jim Chatfield,Contract,Accepting Candidates,0.0,0.0,"11/10/2022, 9:22 AM",Leidos,,
+558,5901,Application Architect,Tyler Holmes,Peter Cheung,Contract To Hire,Open,0.0,0.0,"11/10/2022, 9:13 AM",Leidos,,
+559,5899,Systems Engineer - AFNCR - Andrews,Steven Weaver,Dominque Respass,Contract,Placed,0.0,0.0,"11/10/2022, 8:23 AM",Leidos,,
+560,5898,Software System Architect,Jack Defoor,Jim Chatfield,Contract To Hire,Open,0.0,0.0,"11/10/2022, 7:55 AM",Leidos,,software_dev
+561,5895,Azure Architect,Tyler Holmes,Jim Chatfield,Contract To Hire,Open,0.0,0.0,"11/09/2022, 5:04 PM",Leidos,,cloud
+562,5892,VMware Engineer,Sloane Malloy,Courtney Winstead,Contract,Open,0.0,0.0,"11/09/2022, 8:21 AM",Leidos,,
+563,5890,Leidos CDC Openings (Leads),Tyler Holmes,Peter Cheung,Contract To Hire,Open,0.0,0.0,"11/08/2022, 2:43 PM",Leidos,,
+564,5889,Network Defense Design Engineer,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"11/08/2022, 1:05 PM",Leidos,,"networking, systems_engineering"
+565,5886,Linux Administrator- Roslynn (TN15),Matthew Soifer,Andy Studeny,Contract To Hire,Accepting Candidates,100000.0,81.12,"11/08/2022, 8:55 AM",Leidos,DIA,
+566,5874,Electrical Engineer,Steph Sullivan,Zachary Chaffin,Contract To Hire,Open,0.0,0.0,"11/04/2022, 3:04 PM",,,
+567,5873,Linux System Admin- Meade/Scott/Hill,Matthew Soifer,Terence Coston,Contract To Hire,Placed,72.93,100000.0,"11/04/2022, 10:29 AM",,,
+568,5871,Project Analyst,Jason Soifer,Chad Sumpter,Contract To Hire,Placed,0.0,0.0,"11/04/2022, 9:24 AM",Leidos,,
+569,5863,Systems Engineer,Colt Clark,Courtney Winstead,Contract,Open,0.0,0.0,"11/03/2022, 10:12 AM",Leidos,,
+570,5860,IT Specialist Mid,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"11/02/2022, 4:15 PM",Leidos,,
+571,5855,Security Impact Assessor,Trey Hall,LaRon Pryor,Contract,Placed,0.0,0.0,"11/02/2022, 8:45 AM",Leidos,DIA,cybersecurity
+572,5818,NOC Technician,Cory Miller,Anne Francisco,Contract To Hire,Accepting Candidates,0.0,0.0,"10/27/2022, 7:09 PM",,,
+573,5816,JIRA Administrator,Paul Bartlett,Brian Cooley,Contract To Hire,Open,0.0,0.0,"10/27/2022, 4:42 PM",Leidos,,
+574,5815,IA Engineer- GSMO- Scott AFB- TS/SCI,Matthew Soifer,Steven Wisdom,Contract To Hire,Placed,80000.0,58.13,"10/27/2022, 3:06 PM",,,
+575,5810,Cyber Threat Analyst- COF,Matthew Soifer,Brandon Hazelwood,Contract To Hire,Placed,100000.0,80.0,"10/27/2022, 9:50 AM",,,cybersecurity
+576,5807,Distribution Engineer,Steph Sullivan,Keane Kalso,Contract To Hire,Open,0.0,0.0,"10/27/2022, 8:52 AM",,,
+577,5806,IT Specialist- NGEN SMIT- Pentagon,Bailey Rollins,David Webb,Contract,Placed,0.0,0.0,"10/26/2022, 1:45 PM",Leidos,,
+578,5798,System Administrator Mid,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"10/25/2022, 11:23 AM",Leidos,,
+579,5795,IT Specialist Senior,Kevin Testerman,Walter Kueck,Contract,Open,33.65,59.22,"10/24/2022, 3:17 PM",,,
+580,5792,"Command Center Liaison- NGEN SMIT- Suffolk, VA",Bailey Rollins,Mary Berrian,Contract,Open,0.0,0.0,"10/24/2022, 1:14 PM",,,ai_ml
+581,5788,C# Developer,Paul Bartlett,Brian Cooley,Contract To Hire,Open,0.0,0.0,"10/24/2022, 9:49 AM",Leidos,,
+582,5774,CounterMeasures Analyst (Journeyman),Jason Soifer,Kevin Klein,Contract To Hire,Open,0.0,0.0,"10/21/2022, 7:49 AM",Leidos,DIA,
+583,5772,Senior Network Defense Design Engineer,Matt Capelluto,Ed Alsip,Contract,Accepting Candidates,0.0,0.0,"10/20/2022, 5:15 PM",Leidos,,"networking, systems_engineering"
+584,5768,NetOps Specialist Senior,Matt Capelluto,Ed Alsip,Contract,Accepting Candidates,0.0,0.0,"10/20/2022, 7:27 AM",Leidos,,
+585,5760,Software Engineer,Jack Defoor,Venis Knight,Contract To Hire,Open,0.0,0.0,"10/18/2022, 1:27 PM",,,software_dev
+586,5759,Systems Enginner,Jack Defoor,Venis Knight,Contract To Hire,Open,0.0,0.0,"10/18/2022, 1:18 PM",,,
+587,5757,Cyber SME,Trey Hall,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"10/18/2022, 8:53 AM",Leidos,,cybersecurity
+588,5753,NetOps Lead Mid,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"10/18/2022, 7:36 AM",Leidos,DIA,
+589,5752,Cyber Security Specialist Mid,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"10/17/2022, 5:06 PM",Leidos,DIA,cybersecurity
+590,5750,Windows System Administrator,Jordan Merriman,Andy Studeny,Contract,Open,0.0,0.0,"10/17/2022, 8:34 AM",Leidos,DIA,
+591,5749,Incident Response Tech,Steve Marinelli,Charles Flanders,Contract,Placed,45.0,83.87,"10/17/2022, 7:57 AM",,,cybersecurity
+592,5742,Network Engineer,Matthew Soifer,Erin Birdsong,Contract To Hire,Placed,102.0,140000.0,"10/13/2022, 5:42 PM",,,networking
+593,5732,Active Directory Specialist Mid,Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"10/12/2022, 4:59 PM",Leidos,DIA,
+594,5727,Senior Automated Test Engineer,Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"10/12/2022, 7:47 AM",Leidos,DIA,
+595,5726,Communications Network Engineer- Mid,Bailey Rollins,Elly Buenviaje,Contract,Placed,0.0,0.0,"10/11/2022, 10:44 PM",,,networking
+596,5725,NetOps Specialist Mid,Matt Capelluto,Mark Pitre,Contract,Placed,76000.0,0.0,"10/11/2022, 4:57 PM",Leidos,DIA,
+597,5710,IA Engineer- IGC,Matt Gullette,Scott Sweeney,Contract To Hire,Accepting Candidates,83.79,120000.0,"10/10/2022, 12:57 PM",,,
+598,5709,Data Center Technician,Matt Gullette,Journee Zeigler,Contract,Open,49.14,0.0,"10/10/2022, 10:30 AM",,,
+599,5697,MECM System Administrator,Cory Miller,Duane Riggins,Contract,Accepting Candidates,0.0,0.0,"10/07/2022, 2:37 PM",,,
+600,5695,Senior Automated Test Engineer,Matthew Soifer,Andy Studeny,Contract To Hire,Open,0.0,0.0,"10/07/2022, 12:49 PM",Leidos,DIA,
+601,5694,SQL DBA,Matthew Soifer,Andy Studeny,Contract To Hire,Open,81.12,0.0,"10/07/2022, 10:28 AM",Leidos,DIA,database
+602,5692,Solutions Architect,Matthew Soifer,Laura Israel,Contract To Hire,Placed,152.0,0.0,"10/07/2022, 10:03 AM",Leidos,,
+603,5688,CND Security Engineer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Filled by Client,79.33,110000.0,"10/07/2022, 7:57 AM",Leidos,ITES,cybersecurity
+604,5687,Systems Administrator,Kevin Testerman,Tom Young,Contract,Open,35.0,59.22,"10/07/2022, 7:51 AM",Leidos,,
+605,5685,Desktop,Matt Gullette,Marcus Billups,Contract,Placed,59.22,0.0,"10/06/2022, 2:27 PM",Leidos,,
+606,5678,ISSO Lead,Jason Soifer,Sean Black,Contract,Open,0.0,0.0,"10/06/2022, 9:13 AM",,,
+607,5675,Lead AWS Cloud Engineer,Matthew Soifer,Andy Studeny,Contract To Hire,Accepting Candidates,0.0,0.0,"10/06/2022, 7:55 AM",Leidos,DIA,cloud
+608,5664,Sr. Network Technician - N2NOMS (Colorado Springs),Cory Miller,Jennifer Boudreau,Contract,Accepting Candidates,50.0,90000.0,"10/04/2022, 5:12 PM",,,networking
+609,5662,Applications Developer,Matthew Lambert,Brian Cooley,Contract To Hire,Accepting Candidates,86.54,130.5,"10/04/2022, 4:10 PM",Leidos,,
+610,5661,Network Engineer-Mid,Matt Gullette,Miguel Garces,Contract,Open,64.24,0.0,"10/04/2022, 11:16 AM",,,networking
+611,5660,System Administrator - N2NOMS (Colorado Springs),Cory Miller,Jennifer Boudreau,Contract To Hire,Accepting Candidates,48.07,90000.0,"10/04/2022, 9:54 AM",,,
+612,5654,Electrical Engineer,Steph Sullivan,Christopher Jones,Contract To Hire,Open,0.0,0.0,"10/04/2022, 7:54 AM",,,
+613,5653,ISSO,Steven Weaver,LaRon Pryor,Contract,Placed,102.0,0.0,"10/04/2022, 7:43 AM",Leidos,DIA,
+614,5651,Network Engineer,Kevin Testerman,Daniel Maples,Contract,Open,38.46,64.24,"10/03/2022, 9:24 AM",Leidos,,networking
+615,5649,Soc Analyst,Tyler Holmes,James Wei,Contract To Hire,Open,48.0,72.88,"09/30/2022, 10:09 AM",,,cybersecurity
+616,5646,Knowledge Manager,Jason Soifer,Andy Studeny,Contract,Placed,0.0,0.0,"09/30/2022, 9:08 AM",Leidos,DIA,
+617,5642,Cloud Systems Integration Engineer,Matthew Soifer,Dipa Dayal,Contract To Hire,Filled by Client,0.0,0.0,"09/30/2022, 7:41 AM",Leidos,,"systems_engineering, cloud"
+618,5640,Solarwinds Engineer,Anthony Fusco,Charles Flanders,Contract,Open,60.1,95.02,"09/29/2022, 5:18 PM",,,
+619,5635,SDA Lead,Jason Soifer,Chad Sumpter,Contract,Open,0.0,0.0,"09/29/2022, 8:25 AM",Leidos,,
+620,5628,IT Specialist Senior,Matt Capelluto,Mini Elmore,Contract,Accepting Candidates,80000.0,0.0,"09/28/2022, 7:32 AM",Leidos,DIA,
+621,5626,Requirements Analyst,Jason Soifer,Juan Broadnax,Contract,Placed,72.11,0.0,"09/27/2022, 3:26 PM",Leidos,,
+622,5624,Desktop Specialist,Steve Marinelli,Elias Bourji,Contract,Placed,45.0,74.02,"09/27/2022, 1:35 PM",Leidos,,
+623,5621,Senior DevOps Software Engineer,Matt Garten,Jason Putz,Contract To Hire,Open,121.82,0.0,"09/27/2022, 11:21 AM",,,"software_dev, devops"
+624,5620,Network Engineer,Matt Gullette,Dan Brown,Contract,Placed,64.24,0.0,"09/27/2022, 11:13 AM",Leidos,,networking
+625,5610,IT Specialist,Matt Capelluto,Mark Pitre,Contract,Accepting Candidates,70000.0,0.0,"09/26/2022, 10:31 AM",Leidos,DIA,
+626,5608,Asset Management Specialist,Matt Capelluto,Mark Pitre,Contract,Accepting Candidates,63420.0,0.0,"09/26/2022, 7:45 AM",Leidos,DIA,
+627,5601,Training,Matt Pergolini,Training Place Holder,Contract,Placed,0.0,0.0,"09/23/2022, 1:57 PM",,,ai_ml
+628,5596,Virtualization Design Engineer,Matt Capelluto,Ed Alsip,Contract To Hire,Open,86.0,0.0,"09/23/2022, 12:57 PM",Leidos,,systems_engineering
+629,5593,Telecom Systems Integration Engineer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,48.07,76.12,"09/23/2022, 10:58 AM",Leidos,ITES,systems_engineering
+630,5582,Database Engineer,Kevin Testerman,Tom Young,Contract,Placed,55.0,93.0,"09/21/2022, 4:26 PM",Leidos,,database
+631,5573,Jira Administrator,Jason Soifer,Andy Studeny,Contract,Placed,110000.0,81.12,"09/20/2022, 1:43 PM",Leidos,DIA,
+632,5572,Linux Administrator,Jason Soifer,Andy Studeny,Contract,Open,0.0,0.0,"09/20/2022, 1:40 PM",Leidos,DIA,
+633,5571,Splunk Administrator,Jason Soifer,Andy Studeny,Contract,Open,0.0,0.0,"09/20/2022, 1:37 PM",Leidos,DIA,
+634,5570,Virtualization and Storage Engineer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Accepting Candidates,90.0,0.0,"09/20/2022, 12:57 PM",Leidos,ITES,
+635,5569,Network Engineer,Jason Soifer,Chad Buechel,Contract,Open,0.0,0.0,"09/20/2022, 12:36 PM",,,networking
+636,5563,"NetOps Engineer- MacDill, FL- GSMO",Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,67.51,90000.0,"09/20/2022, 7:34 AM",Leidos,ITES,
+637,5561,Jira Developer,Jason Soifer,Alex Velez,Contract To Hire,Open,0.0,0.0,"09/19/2022, 6:00 PM",,,
+638,5560,Software Developer,Jason Soifer,Alex Velez,Contract To Hire,Open,0.0,0.0,"09/19/2022, 5:59 PM",,,software_dev
+639,5559,Network Management Engineer,Kevin Testerman,Tom Young,Contract,Placed,45.0,76.14,"09/19/2022, 4:47 PM",Leidos,,networking
+640,5555,Network Storage Engineer (Senior),Matt Capelluto,Roman Vitkovitsky,Contract,Open,62.5,96.9,"09/19/2022, 1:53 PM",Leidos,"DISA, DIA, NSA",networking
+641,5553,Cyber Engineer,Jason Soifer,Andy Studeny,Contract,Open,0.0,0.0,"09/19/2022, 9:42 AM",Leidos,DIA,cybersecurity
+642,5539,Oracle ERP Consultant,Tyler Holmes,Peter Cheung,Contract To Hire,Open,80.0,113.0,"09/16/2022, 11:12 AM",Leidos,,database
+643,5538,Systems Administrator,Kevin Testerman,John Hamlette,Contract,Accepting Candidates,50.0,85.0,"09/16/2022, 9:15 AM",,,
+644,5534,ISSE,Anthony Fusco,LaRon Pryor,Contract,Open,101.5,0.0,"09/16/2022, 7:50 AM",Leidos,DIA,
+645,5533,Fusion Analyst,Jason Soifer,Jevencia Barkwell,Contract To Hire,Placed,105.0,130000.0,"09/16/2022, 7:38 AM",Leidos,Zero Trust,
+646,5532,SOC Analyst,Will Boyk,James Wei,Contract To Hire,Accepting Candidates,121.64,0.0,"09/15/2022, 7:37 PM",,,cybersecurity
+647,5506,Network Operations Engineer,Matthew Soifer,Erik Lozano,Contract To Hire,Placed,36.05,59.04,"09/15/2022, 8:23 AM",,,networking
+648,5503,Network Engineer,Steve Marinelli,Keze Lavala,Contract,Placed,50.0,84.73,"09/15/2022, 7:38 AM",Leidos,,networking
+649,5499,Sr. Test Engineer,Jordan Merriman,Andy Studeny,Contract,Open,81.12,150000.0,"09/14/2022, 3:57 PM",Leidos,DIA,
+650,5498,Network Engineer,Matt Gullette,Marcus Billups,Contract,Placed,64.24,80000.0,"09/14/2022, 3:20 PM",Leidos,,networking
+651,5497,VMware System Administrator,Matt Gullette,Stephan Levesque,Contract,Accepting Candidates,72.78,95000.0,"09/14/2022, 3:12 PM",Leidos,,
+652,5496,Network Engineer,Matt Gullette,Greg Swallow,Contract,Accepting Candidates,61.73,80000.0,"09/14/2022, 3:05 PM",Leidos,,networking
+653,5495,NetOps Specialist Mid,Matt Gullette,Joe Webb,Contract,Placed,33.05,52.25,"09/14/2022, 2:55 PM",Leidos,,
+654,5494,Oracle Test Engineer,Tyler Holmes,Peter Cheung,Contract To Hire,Open,45.0,68.0,"09/14/2022, 2:41 PM",Leidos,,database
+655,5493,Oracle DBA,Tyler Holmes,Peter Cheung,Contract To Hire,Open,65.0,92.0,"09/14/2022, 2:38 PM",Leidos,,database
+656,5481,Change Management,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"09/14/2022, 9:14 AM",,,
+657,5480,Network Engineer,Kevin Chavez,Marco Edwards,Contract,Open,0.0,0.0,"09/14/2022, 8:23 AM",,,networking
+658,5475,Knowledge Manager,Jason Soifer,Andy Studeny,Contract,Accepting Candidates,0.0,0.0,"09/13/2022, 1:02 PM",Leidos,DIA,
+659,5471,Citrix Admin - GSMO,Trey Hall,Andy Studeny,Contract,Open,81.12,115000.0,"09/13/2022, 8:40 AM",Leidos,DIA,
+660,5468,Oracle EBS,Tyler Holmes,Peter Cheung,Contract To Hire,Placed,0.0,0.0,"09/12/2022, 1:08 PM",Leidos,,database
+661,5467,Tech Controller,Santino Mostaccio,Brian Cooley,Contract To Hire,Open,0.0,0.0,"09/12/2022, 8:32 AM",Leidos,,
+662,5462,Network Engineer - JBA/JBAB - AFNCR,Trey Hall,Marco Edwards,Contract,Placed,0.0,0.0,"09/09/2022, 8:44 AM",,,networking
+663,5460,Network Engineer,Kevin Chavez,Marco Edwards,Contract,Open,0.0,0.0,"09/08/2022, 4:39 PM",,,networking
+664,5459,Information Assurance Engineer - SMIT,Emma Davis,Jim Solnay,Contract,Open,0.0,0.0,"09/08/2022, 2:36 PM",Leidos,,
+665,5453,Unified Communications Operational Engineer,Matthew Soifer,George Boone,Contract To Hire,Open,0.0,0.0,"09/07/2022, 2:36 PM",Leidos,,
+666,5449,SharePoint Admin - NSC,Trey Hall,Alex Velez,Contract To Hire,Open,0.0,0.0,"09/07/2022, 8:33 AM",,,
+667,5446,Cloud Virtualization Engineer (Leidos GSMO),Garrett Seckler,Place Holder,Contract To Hire,Open,0.0,0.0,"09/06/2022, 9:19 AM",,,cloud
+668,5443,System Admin,Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"09/02/2022, 9:06 AM",Leidos,DIA,
+669,5440,Network Engineer - Remote SMIT,Kevin Testerman,Nick Battles,Contract,Placed,65.0,115.0,"09/01/2022, 12:38 PM",Leidos,,networking
+670,5438,Systems Operator,Matthew Soifer,Scott Sweeney,Contract To Hire,Open,26.44,41.02,"09/01/2022, 10:29 AM",,,
+671,5436,System Admin,Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"09/01/2022, 9:57 AM",Leidos,DIA,
+672,5432,Intrusion Detection Analyst,Matthew Soifer,Brandon Hazelwood,Contract To Hire,Open,0.0,0.0,"08/31/2022, 10:48 PM",,,
+673,5427,ISSO,Steve Marinelli,Larry Carr,Contract,Open,60.0,93.01,"08/31/2022, 10:15 AM",,,
+674,5425,Senior Cyber Security Specialist,Matt Capelluto,Ed Alsip,Contract To Hire,Open,0.0,0.0,"08/31/2022, 8:35 AM",Leidos,,cybersecurity
+675,5415,Cyber Watch Officer,Steven Weaver,Charles Flanders,Contract,Placed,0.0,0.0,"08/30/2022, 8:41 AM",,,cybersecurity
+676,5414,NetOps Lead Mid,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"08/29/2022, 3:17 PM",Leidos,DIA,
+677,5408,"ISSO (Fort Belvoir, VA)",Garrett Seckler,Place Holder,Contract To Hire,Placed,0.0,0.0,"08/29/2022, 8:16 AM",,,
+678,5407,Sr. Sharepoint Developer - Leidos GSMOII (White House),Trey Kelly,Laura Israel,Contract,Accepting Candidates,0.0,0.0,"08/26/2022, 2:06 PM",Leidos,,
+679,5402,System Engineer - Server,Paul Bartlett,Greg Dawson,Contract,Open,0.0,0.0,"08/26/2022, 9:35 AM",,,
+680,5400,System Admin,Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"08/26/2022, 8:36 AM",Leidos,DIA,
+681,5399,Cyber Security Specialist,Matt Capelluto,Mini Elmore,Contract,Accepting Candidates,0.0,0.0,"08/25/2022, 5:05 PM",Leidos,DIA,cybersecurity
+682,5398,System Admin,Matt Capelluto,Mini Elmore,Contract To Hire,Open,0.0,0.0,"08/25/2022, 5:04 PM",Leidos,DIA,
+683,5378,"Cyber Intelligence Analyst (Fort Meade, MD)",Garrett Seckler,Ed Naro,Contract To Hire,Placed,105.04,130000.0,"08/22/2022, 10:04 AM",Leidos,,cybersecurity
+684,5377,Cyber Security Specialist,Cassidy Hragyil,Ed Alsip,Contract,Open,0.0,0.0,"08/22/2022, 9:19 AM",Leidos,,cybersecurity
+685,5375,System Admin,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"08/22/2022, 8:27 AM",Leidos,DIA,
+686,5374,NOC Shift Lead,Trey Hall,Andy Studeny,Contract,Placed,0.0,0.0,"08/21/2022, 7:55 PM",Leidos,DIA,
+687,5373,Virtualization Engineer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Open,0.0,0.0,"08/21/2022, 7:13 PM",Leidos,ITES,
+688,5372,Job Controller,Steve Marinelli,Charles Flanders,Contract,Placed,42.0,71.09,"08/20/2022, 2:02 PM",,,
+689,5370,"Network Support Engineer (Ford Island, HI)",Matthew Soifer,Elisa Maura,Contract To Hire,Open,0.0,0.0,"08/19/2022, 1:43 PM",,,networking
+690,5367,ISP/OSP jr,Matt Capelluto,Mini Elmore,Contract,Open,0.0,0.0,"08/19/2022, 9:12 AM",Leidos,DIA,
+691,5357,Cloud Virtualization Engineer,Trey Hall,Andy Studeny,Contract To Hire,Open,0.0,0.0,"08/18/2022, 8:40 AM",Leidos,DIA,cloud
+692,5354,Project Manager,Jordan Merriman,Lauren Sakolos,Contract To Hire,Placed,0.0,0.0,"08/17/2022, 4:00 PM",,,
+693,5349,Configuration Manager (CESO),Paul Bartlett,Andy Studeny,Contract,Open,0.0,0.0,"08/17/2022, 10:07 AM",Leidos,DIA,
+694,5346,Splunk SME (Yankee White),Matthew Soifer,Juan Angeles,Contract To Hire,Placed,0.0,0.0,"08/17/2022, 8:29 AM",Leidos,,
+695,5334,Network Engineer Layer 2 R & S- JBA/JBAB AFNCR,Bailey Rollins,Place Holder,Contract,Accepting Candidates,0.0,0.0,"08/14/2022, 8:56 PM",,,networking
+696,5333,Cyber Analyst- AFNCR- Arlington,Bailey Rollins,Larry Carr,Contract,Accepting Candidates,0.0,0.0,"08/14/2022, 8:17 PM",,,cybersecurity
+697,5329,Network Engineer,Steve Marinelli,Marco Edwards,Contract,Placed,0.0,0.0,"08/12/2022, 10:27 AM",,,networking
+698,5328,"ACAS Administrator (Adelphi, MD)",Garrett Seckler,Place Holder,Contract To Hire,Placed,0.0,0.0,"08/12/2022, 9:38 AM",,,
+699,5324,NetOps Specialist Jr,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"08/11/2022, 11:56 AM",Leidos,DIA,
+700,5317,Vulnerability Management,Paul Bartlett,Larry Carr,Contract,Open,0.0,0.0,"08/10/2022, 3:00 PM",,,cybersecurity
+701,5316,"Windows Systems Administrator (Columbus, OH)",Matthew Soifer,Erik Lozano,Contract To Hire,Placed,36.05,59.04,"08/10/2022, 12:55 PM",,,
+702,5315,NetOps Specialist (Senior),Matt Capelluto,Mark Pitre,Contract,Open,0.0,0.0,"08/10/2022, 11:05 AM",Leidos,DIA,
+703,5314,ISSO,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"08/10/2022, 10:56 AM",,,
+704,5309,Cyber Trainer,Trey Hall,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"08/10/2022, 8:50 AM",Leidos,,"cybersecurity, ai_ml"
+705,5306,ACAS Administrator,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"08/09/2022, 3:02 PM",,,
+706,5301,ACAS Administrator,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"08/09/2022, 9:48 AM",,,
+707,5300,Network Admin,Cassidy Hragyil,Alex Velez,Contract To Hire,Placed,0.0,0.0,"08/09/2022, 9:10 AM",,,networking
+708,5294,CND Analyst (Yankee White),Matthew Soifer,Juan Angeles,Contract To Hire,Placed,105.0,130000.0,"08/08/2022, 10:08 AM",Leidos,,
+709,5292,Knowledge Manager,Steven Weaver,Erik Maxwell,Contract,Open,0.0,0.0,"08/05/2022, 1:03 PM",Leidos,,
+710,5291,IA Engineer (w/ Networking),Matthew Soifer,Steven Wisdom,Contract To Hire,Open,0.0,0.0,"08/05/2022, 12:53 PM",,,networking
+711,5289,ISSM Lead,Trey Hall,Sean Black,Contract To Hire,Placed,0.0,0.0,"08/05/2022, 9:02 AM",,,
+712,5285,Oracle Database Admin,Matthew Soifer,Andy Studeny,Contract,Placed,81.12,125000.0,"08/04/2022, 10:46 AM",Leidos,DIA,database
+713,5284,Firewall VPN Design Engineer,Matt Capelluto,Roman Vitkovitsky,Contract To Hire,Open,0.0,0.0,"08/04/2022, 10:25 AM",Leidos,"DISA, DIA, NSA","networking, systems_engineering"
+714,5274,Cyber Security Specialist (Senior),Matt Capelluto,Ed Alsip,Contract To Hire,Open,0.0,0.0,"08/03/2022, 11:16 AM",Leidos,,cybersecurity
+715,5269,"System Administrator Leidos, GSMO",Garrett Seckler,Place Holder Place Holder,Contract To Hire,Open,0.0,0.0,"08/03/2022, 8:22 AM",,,
+716,5264,NetOps Specialist Jr,Matt Capelluto,Mini Elmore,Contract To Hire,Accepting Candidates,0.0,0.0,"08/02/2022, 2:14 PM",Leidos,DIA,
+717,5263,Systems Admin IAVA,Cassidy Hragyil,Art Camargo,Contract,Placed,0.0,0.0,"08/02/2022, 2:14 PM",Leidos,,
+718,5258,"Data Center Technician- NGEN-SMIT- JAX, FL",Bailey Rollins,Joel Marcinowski,Contract,Placed,0.0,0.0,"08/02/2022, 9:33 AM",Leidos,,
+719,5251,NOC Technician,Trey Hall,Andy Studeny,Contract,Placed,0.0,0.0,"08/01/2022, 8:45 AM",Leidos,DIA,
+720,5249,Broad Capability Systems Administrator,Matthew Soifer,Michael Schorn,Contract To Hire,Placed,33.65,55.73,"08/01/2022, 8:09 AM",,,
+721,5247,ISP/OSP (Jr),Matt Capelluto,Mini Elmore,Contract To Hire,Placed,0.0,0.0,"07/29/2022, 3:47 PM",Leidos,DIA,
+722,5243,Storage Design Engineer (Senior),Matt Capelluto,Roman Vitkovitsky,Contract To Hire,Accepting Candidates,0.0,0.0,"07/29/2022, 9:04 AM",Leidos,"DISA, DIA, NSA",systems_engineering
+723,5242,Network Engineer - Fort Meade,Kevin Testerman,Miguel Garces,Contract,Placed,0.0,0.0,"07/29/2022, 8:59 AM",,,networking
+724,5241,System Administrator,Steve Marinelli,Marco Edwards,Contract,Placed,0.0,0.0,"07/29/2022, 8:23 AM",,,
+725,5240,Technical Writer (Mid),Matt Capelluto,John Rickert,Contract To Hire,Open,0.0,0.0,"07/29/2022, 8:14 AM",Leidos,NSA,
+726,5235,Windows System Administrator,Trey Hall,Erica Wade,Contract To Hire,Open,0.0,0.0,"07/28/2022, 8:55 AM",,,
+727,5234,IT Service Delivery Specialist,Steven Weaver,Erik Maxwell,Contract,Placed,0.0,0.0,"07/28/2022, 8:46 AM",Leidos,,
+728,5227,IT - Account Manager,Anthony Fusco,LaRon Pryor,Contract,Open,0.0,0.0,"07/27/2022, 10:59 AM",Leidos,DIA,
+729,5217,"Windows Systems Administrator (San Antonio, TX)",Matthew Soifer,Erik Lozano,Contract To Hire,Placed,36.05,59.04,"07/26/2022, 8:32 AM",,,
+730,5215,System Administrator (Mid),Matt Capelluto,Mini Elmore,Contract To Hire,Accepting Candidates,0.0,0.0,"07/25/2022, 1:56 PM",Leidos,DIA,
+731,5209,IT Specialist Mid,Matt Capelluto,Roman Vitkovitsky,Contract,Open,0.0,0.0,"07/25/2022, 9:05 AM",Leidos,"DISA, DIA, NSA",
+732,5208,Senior Linux Systems Engineer,Matthew Soifer,Adam Vannoy,Contract To Hire,Filled by Client,86.53,125.0,"07/25/2022, 8:40 AM",,,
+733,5203,NetOps Lead (Mid),Matt Capelluto,Mark Pitre,Contract,Accepting Candidates,0.0,0.0,"07/22/2022, 9:06 AM",Leidos,DIA,
+734,5202,Intrusion Detection SME,Trey Hall,Laura Israel,Contract To Hire,Open,0.0,0.0,"07/22/2022, 8:42 AM",Leidos,,
+735,5194,Splunk SME (Cybersecurity Engineer/ Sr Software Specialist) - Scott AFB,Trey Hall,Zackery Turbyfill,Contract To Hire,Open,0.0,0.0,"07/20/2022, 1:34 PM",Leidos,,"cybersecurity, software_dev"
+736,5188,Virtual Server Administrator,Matt Capelluto,Roman Vitkovitsky,Contract To Hire,Open,0.0,0.0,"07/19/2022, 2:15 PM",Leidos,"DISA, DIA, NSA",
+737,5173,Change Management Specialist,Anthony Fusco,Charles Flanders,Contract,Placed,43.27,71.09,"07/18/2022, 8:36 AM",,,
+738,5167,NetOps Lead (Mid),Matt Capelluto,Roman Vitkovitsky,Contract To Hire,Accepting Candidates,0.0,0.0,"07/15/2022, 12:10 PM",Leidos,"DISA, DIA, NSA",
+739,5164,Deployed Support Specialist,Matt Capelluto,Roman Vitkovitsky,Contract To Hire,Placed,0.0,0.0,"07/15/2022, 10:42 AM",Leidos,"DISA, DIA, NSA",
+740,5162,Tech Controller,Paul Bartlett,Charles Swindell,Contract To Hire,Open,0.0,0.0,"07/15/2022, 10:29 AM",Leidos,,
+741,5161,Continuous Monitoring Analyst,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"07/15/2022, 9:33 AM",,,
+742,5160,Network Engineer - SBNAB - APG,Trey Hall,Laura Israel,Contract To Hire,Placed,0.0,0.0,"07/15/2022, 8:51 AM",Leidos,,networking
+743,5146,Cyber Security Specialist (Senior),Matt Capelluto,Ed Alsip,Contract To Hire,Placed,0.0,0.0,"07/13/2022, 10:57 AM",Leidos,,cybersecurity
+744,5144,NetOps Specialist (Junior),Matt Capelluto,Mini Elmore,Direct Hire,Placed,0.0,0.0,"07/12/2022, 4:58 PM",Leidos,DIA,
+745,5137,VMware Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"07/12/2022, 10:33 AM",,,
+746,5136,Cyber Watch Officer- Fort Meade,Matthew Lambert,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"07/12/2022, 10:04 AM",Leidos,,cybersecurity
+747,5135,ITSM Remote,Cassidy Hragyil,Kathy Villani,Contract To Hire,Open,0.0,0.0,"07/12/2022, 9:17 AM",Leidos,,
+748,5125,System Administrator - JBA or JBAB,Ben Dorsey,Doug South,Contract,Open,0.0,0.0,"07/09/2022, 10:32 AM",,,
+749,5123,Systems Administrator,Steven Weaver,Richard Wicher,Contract,Open,0.0,0.0,"07/08/2022, 3:05 PM",Leidos,,
+750,5119,network specialist,John Pop,Place Holder,Contract,Open,0.0,0.0,"07/08/2022, 11:31 AM",,,networking
+751,5117,Network Administrator (AFNCR),Tyler Holmes,Doug South,Contract,Placed,0.0,0.0,"07/08/2022, 10:53 AM",,,networking
+752,5100,Help Desk- AFNCR,Steve Marinelli,Sidney McCall,Contract,Placed,32.0,64.38,"07/07/2022, 8:33 AM",Leidos,,
+753,5092,Senior Software Engineer (RPA),Matthew Soifer,Jason Putz,Contract To Hire,Open,0.0,0.0,"07/06/2022, 8:08 AM",,,software_dev
+754,5088,Test Engineer (Charleston),Jordan Merriman,Douglas Disinger,Contract To Hire,Placed,0.0,0.0,"07/05/2022, 9:02 AM",Leidos,,
+755,5087,Communications Network Engineer,Steve Marinelli,Susan Baker,Contract,Placed,0.0,0.0,"07/05/2022, 8:50 AM",Leidos,,networking
+756,5084,Systems Engineer,Jason Soifer,Adam Vannoy,Contract,Open,0.0,0.0,"07/03/2022, 10:57 AM",,,
+757,5082,ISSO,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"07/01/2022, 1:40 PM",,,
+758,5074,NMCC – Cybersecurity Auditor,Matt Garten,LaRon Pryor,Contract,Placed,0.0,0.0,"06/30/2022, 9:15 AM",Leidos,DIA,cybersecurity
+759,5073,ISSE Engineer,Brad Glaser,LaRon Pryor,Direct Hire,Open,0.0,0.0,"06/30/2022, 8:33 AM",Leidos,DIA,
+760,5067,V & V Analyst,Trey Hall,Sean Black,Contract To Hire,Open,0.0,0.0,"06/29/2022, 8:34 AM",,,
+761,5058,Systems Engineer,Tyler Holmes,Richard Wicher,Contract To Hire,Open,0.0,0.0,"06/28/2022, 9:42 AM",Leidos,,
+762,5057,Continuous Monitoring/POAM Management,Paul Bartlett,LaRon Pryor,Contract,Open,0.0,0.0,"06/28/2022, 8:44 AM",Leidos,DIA,
+763,5054,Systems Administrator,Matt Pergolini,Greg Dawson,Contract,Placed,0.0,0.0,"06/27/2022, 6:25 PM",,,
+764,5053,Senior Voice Data Engineer,Anthony Fusco,John Hayes,Contract,Placed,55.29,103.43,"06/27/2022, 6:05 PM",,,
+765,5050,ISP/OSP Jr,Matt Capelluto,Mini Elmore,Contract,Placed,0.0,0.0,"06/27/2022, 2:33 PM",Leidos,DIA,
+766,5036,"Cable Technician - Kittery, Maine",Ben Moser,Dan Brown,Contract,Accepting Candidates,0.0,0.0,"06/23/2022, 2:11 PM",Leidos,,ai_ml
+767,5028,SQL DBA,John Pop,Place Holder,Contract,Open,0.0,0.0,"06/22/2022, 10:33 AM",,,database
+768,5027,DevOps Engineer,Steve Marinelli,Anita Trotter,Contract,Open,80.0,140.0,"06/22/2022, 10:32 AM",,,devops
+769,5022,Senior Information Systems Architect,Matt Capelluto,Ed Alsip,Contract,Open,0.0,0.0,"06/21/2022, 2:15 PM",Leidos,,
+770,5014,NetOps Specialist (Senior),Matt Capelluto,Mark Pitre,Contract,Filled by Client,0.0,0.0,"06/20/2022, 10:15 AM",Leidos,DIA,
+771,5011,"Network Engineer - Fallon, NV",Ben Moser,Angela Boyer,Contract,Open,0.0,0.0,"06/20/2022, 9:06 AM",,,networking
+772,5010,"IA Engineer (ACAS Engineer) Scott AFB, IL",Matthew Soifer,Steven Wisdom,Contract To Hire,Placed,38.46,58.13,"06/20/2022, 8:11 AM",,,
+773,5004,Sr Cloud Engineer,Jordan Merriman,Laura Israel,Contract To Hire,Open,0.0,0.0,"06/17/2022, 9:48 AM",Leidos,,cloud
+774,4993,HBSS Engineer- GSMO- Alexandria,Matthew Lambert,Sean Black,Contract To Hire,Open,0.0,0.0,"06/16/2022, 9:34 AM",,,
+775,4990,Senior UX/UI Design Engineer,Matthew Soifer,Jason Putz,Contract To Hire,Open,0.0,0.0,"06/15/2022, 5:04 PM",,,systems_engineering
+776,4983,VMware Administrator,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"06/15/2022, 10:02 AM",,,
+777,4982,Senior HBSS Engineer,Paul Bartlett,Sean Black,Contract To Hire,Accepting Candidates,0.0,0.0,"06/15/2022, 9:11 AM",,,
+778,4981,Cyber Analyst (NOAA),Tyler Holmes,Clint Anderson,Contract To Hire,Open,0.0,0.0,"06/15/2022, 8:57 AM",,,cybersecurity
+779,4968,Audit Lead,Jack Defoor,Place Holder Place Holder,Contract To Hire,Open,0.0,0.0,"06/14/2022, 8:28 AM",,,
+780,4967,Mobility Tech- Windows Admin,Steve Marinelli,Julie Lepur,Contract,Placed,72.78,0.0,"06/14/2022, 7:54 AM",,,
+781,4962,Senior Linux Systems Administrator,Matt Garten,Place Holder,Contract To Hire,Open,0.0,0.0,"06/13/2022, 8:56 AM",,,
+782,4961,Strategic Development/Cyber Transformation SME,Matt Garten,Laura Israel,Contract To Hire,Open,0.0,0.0,"06/13/2022, 8:35 AM",Leidos,,"cybersecurity, software_dev"
+783,4959,Full Stack Developer,Jason Soifer,Bob Perry,Direct Hire,Open,0.0,0.0,"06/11/2022, 2:06 PM",,,
+784,4954,Senior Network Administrator,Matt Garten,Zackery Turbyfill,Contract To Hire,Placed,0.0,0.0,"06/10/2022, 8:53 AM",Leidos,,networking
+785,4946,C2OTM,Matthew Soifer,Mickey O'Neil,Contract To Hire,Open,0.0,0.0,"06/08/2022, 2:49 PM",Leidos,ITES,
+786,4942,"Network Engineer - Fallbrook, CA",Ben Moser,Paul LeBlanc,Contract,Filled by Client,0.0,0.0,"06/08/2022, 10:23 AM",Leidos,,networking
+787,4940,Knowledge Manager,Matt Garten,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"06/08/2022, 8:37 AM",Leidos,,
+788,4939,Watch Officer - GSMO,Trey Hall,Kevin Klein,Contract To Hire,Placed,0.0,0.0,"06/08/2022, 8:33 AM",Leidos,DIA,
+789,4935,SQL DBA,Tyler Holmes,Douglas Disinger,Contract To Hire,Placed,0.0,0.0,"06/07/2022, 10:28 AM",Leidos,,database
+790,4934,Helpdesk - GSMO,Trey Hall,Erica Wade,Contract To Hire,Placed,0.0,0.0,"06/07/2022, 8:36 AM",,,
+791,4922,Senior Test Engineer,Jason Soifer,Diane Bishop,Contract,Open,0.0,0.0,"06/03/2022, 10:18 AM",,,
+792,4919,Piers Support-Mayport/Kings Bay,Steve Marinelli,Eric Morris,Contract,Placed,30.14,0.0,"06/03/2022, 8:24 AM",,,
+793,4918,SATCOM Watch Officer-GSMO-Ft Meade,Matthew Lambert,Rich King,Contract To Hire,Open,0.0,0.0,"06/03/2022, 8:09 AM",,,
+794,4917,Mobility Technician,Kevin Chavez,Place Holder,Contract To Hire,Open,0.0,0.0,"06/02/2022, 5:55 PM",,,
+795,4916,SATCOM Watch Officer,Matthew Soifer,Rich King,Contract To Hire,Placed,80000.0,0.0,"06/02/2022, 2:37 PM",,,
+796,4891,Problem/Performance Analyst,Brad Glaser,Brian Cooley,Contract To Hire,Placed,0.0,0.0,"05/31/2022, 9:29 AM",Leidos,,
+797,4890,Master System Engineer,Garrett Seckler,Mickey O'Neil,Contract To Hire,Open,0.0,0.0,"05/31/2022, 8:29 AM",Leidos,ITES,
+798,4889,SCA SME- GSMO,Matthew Lambert,Sean Black,Contract,Open,0.0,0.0,"05/31/2022, 8:13 AM",,,
+799,4881,System Administrator - SCCM,Anthony Fusco,Leslie Branch,Contract,Placed,0.0,0.0,"05/26/2022, 2:53 PM",,,
+800,4876,SQL DBA Administrator,Brad Glaser,Steven Contreras,Contract,Open,0.0,0.0,"05/25/2022, 3:53 PM",Leidos,DIA,database
+801,4874,Transportation Specialist,Anthony Fusco,Marta Williams,Contract To Hire,Open,0.0,0.0,"05/25/2022, 10:43 AM",Leidos,,
+802,4864,Software Tester - AFNCR,Trey Hall,Mark Haynes,Contract,Open,0.0,0.0,"05/24/2022, 9:21 AM",,,software_dev
+803,4857,SQL/Oracle Administrator,Trey Hall,Steven Contreras,Contract,Open,0.0,0.0,"05/21/2022, 10:41 AM",Leidos,DIA,database
+804,4852,Cyber Strategy SME- FT Meade-GSMO,Matthew Lambert,Kevin Klein,Contract To Hire,Placed,0.0,0.0,"05/20/2022, 9:54 AM",Leidos,DIA,cybersecurity
+805,4837,DevOps Engineer- DHMSM,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"05/18/2022, 3:55 PM",,,devops
+806,4832,Cyber Security Analyst,Matthew Soifer,Hersh Bhatt,Contract To Hire,Placed,38.46,78.54,"05/18/2022, 9:13 AM",,,cybersecurity
+807,4830,CPMO Cybersecurity Manager,Matt Capelluto,Amadi Bluitt,Contract To Hire,Placed,0.0,0.0,"05/18/2022, 7:46 AM",,,cybersecurity
+808,4825,Security Analyst,Matthew Soifer,Bob Meder,Contract To Hire,Open,0.0,0.0,"05/17/2022, 10:30 AM",,,cybersecurity
+809,4817,Help Desk Specialist,Jason Soifer,Heather Funderburg,Contract,Open,0.0,0.0,"05/16/2022, 3:15 PM",,,
+810,4816,Applications Engineer,Jason Soifer,Joshua Lordemann,Contract,Open,0.0,0.0,"05/16/2022, 1:35 PM",,,
+811,4794,System Administrator - SolarWinds,Trey Hall,Charles Flanders,Contract,Open,0.0,0.0,"05/11/2022, 4:22 PM",,,
+812,4790,Systems Administrator,Ross Harbaugh,Tom Young,Contract,Open,0.0,0.0,"05/11/2022, 12:51 PM",Leidos,,
+813,4787,Linux Systems Administrator,Matthew Soifer,Marty Hilliard,Contract To Hire,Open,0.0,0.0,"05/11/2022, 8:49 AM",,,
+814,4773,CLIN VTC Technician,Steven Weaver,Brian Nagel,Contract,Placed,0.0,0.0,"05/10/2022, 9:39 AM",Leidos,,
+815,4772,Bioinformatics Scientist,Jack Defoor,Place Holder,Contract To Hire,Open,0.0,0.0,"05/10/2022, 8:48 AM",,,
+816,4770,Network Engineer - AFNCR,Trey Hall,Delmonik Contee,Contract,Placed,0.0,0.0,"05/10/2022, 8:16 AM",,,networking
+817,4762,ISSE SME- GSMO- Arlington,Matthew Lambert,Sean Black,Contract To Hire,Placed,0.0,0.0,"05/09/2022, 8:47 AM",,,
+818,4751,Systems Integration Engineer,John Pop,Erin Birdsong,Contract,Placed,0.0,0.0,"05/06/2022, 9:17 AM",,,systems_engineering
+819,4749,Systems Engineer Ft. Meade,Paul Bartlett,Erin Birdsong,Contract To Hire,Open,0.0,0.0,"05/05/2022, 6:13 PM",,,
+820,4742,Tier 3 Support Analyst,Kevin Chavez,Place Holder,Contract To Hire,Open,0.0,0.0,"05/05/2022, 9:43 AM",,,
+821,4739,Sr. IT Specialist,Steven Weaver,Marcus Billups,Contract,Placed,0.0,0.0,"05/05/2022, 8:57 AM",Leidos,,
+822,4722,Cybersecurity Analyst- GSMO-Pentagon,Matthew Lambert,Sean Black,Contract,Placed,0.0,0.0,"05/04/2022, 9:34 AM",,,cybersecurity
+823,4712,Countermeasures Engineer,Paul Bartlett,Kevin Klein,Contract To Hire,Open,0.0,0.0,"05/03/2022, 10:04 AM",Leidos,DIA,
+824,4701,Network Controller-- Scott AFB,Matthew Soifer,Jeremy Sedlak,Contract To Hire,Placed,0.0,0.0,"05/01/2022, 1:24 PM",,,networking
+825,4700,Mobility Specialist- GSMO,Matthew Lambert,Jannette Clark (Williams),Contract To Hire,Open,0.0,0.0,"05/01/2022, 11:20 AM",Leidos,,
+826,4696,Soc Analyst -- Alexandria,Paul Bartlett,Sean Black,Contract To Hire,Placed,0.0,0.0,"04/29/2022, 10:42 AM",,,cybersecurity
+827,4693,Software Assurance Analyst,Matthew Lambert,Sean Black,Contract To Hire,Open,0.0,0.0,"04/29/2022, 8:55 AM",,,software_dev
+828,4692,Network Engineer,Matthew Soifer,Mickey O'Neil,Contract To Hire,Placed,0.0,0.0,"04/29/2022, 8:27 AM",Leidos,ITES,networking
+829,4658,Network Performance and Reliability Analyst,Matthew Soifer,Jason Schneider,Contract To Hire,Open,0.0,0.0,"04/25/2022, 9:17 AM",,,networking
+830,4655,Contract Specialist,Anthony Fusco,Marta Williams,Contract To Hire,Open,0.0,0.0,"04/23/2022, 11:56 AM",Leidos,,
+831,4649,SOC Analyst,Brad Glaser,Laura Israel,Contract To Hire,Placed,0.0,0.0,"04/22/2022, 8:48 AM",Leidos,,cybersecurity
+832,4645,Application Developer,Jack Defoor,Fletcher Crews,Contract To Hire,Open,0.0,0.0,"04/21/2022, 2:23 PM",,,
+833,4643,Voice Engineering Lead,Matthew Soifer,Rich King,Contract To Hire,Open,0.0,0.0,"04/21/2022, 10:50 AM",,,
+834,4642,Mobility Tech- GSMO II (duplicate),John Pop,Jannette Clark (Williams),Contract To Hire,Placed,0.0,0.0,"04/21/2022, 8:34 AM",Leidos,,
+835,4628,System Administrator,Steve Marinelli,Art Camargo,Contract,Open,0.0,0.0,"04/19/2022, 8:43 AM",Leidos,,
+836,4621,"Project Manager - NGEN - Norfolk, VA",Ben Moser,Patrice Smallwood,Contract,Filled by Client,0.0,0.0,"04/18/2022, 9:20 AM",,,
+837,4617,Data Scientist- SBNAB,Matthew Lambert,Laura Israel,Contract To Hire,Open,0.0,0.0,"04/17/2022, 9:27 PM",Leidos,,
+838,4613,Sharepoint Developer - NGEN - REMOTE,Madison Yokley,Brian Nagel,Contract,Placed,0.0,0.0,"04/15/2022, 11:29 AM",Leidos,,
+839,4611,Security Engineer - Remote (NGEN),Ben Moser,Brian Butson,Contract,Placed,0.0,0.0,"04/15/2022, 9:51 AM",,,cybersecurity
+840,4610,Software Engineer,Jack Defoor,Todd Smith,Contract,Open,0.0,0.0,"04/15/2022, 9:12 AM",,,software_dev
+841,4595,Junior Soc Analyst,Paul Bartlett,Place Holder Place Holder,Contract,Open,0.0,0.0,"04/13/2022, 4:54 PM",,,cybersecurity
+842,4589,Business Systems Analyst,Jack Defoor,Place Holder,Contract To Hire,Placed,0.0,0.0,"04/13/2022, 8:52 AM",,,
+843,4586,Senior Network Admin-GSMO-Scott AFB,Matthew Lambert,Zackery Turbyfill,Contract To Hire,Open,0.0,0.0,"04/12/2022, 2:33 PM",Leidos,,networking
+844,4567,Desktop,Jack Defoor,Susan Baker,Contract To Hire,Placed,0.0,0.0,"04/08/2022, 8:32 AM",Leidos,,
+845,4558,IT Specialist - Pensacola,John Pop,Alex DeBelle,Contract,Placed,0.0,0.0,"04/07/2022, 8:26 AM",Leidos,NSA,
+846,4553,Data Center Technician,Steven Weaver,Joel Marcinowski,Contract,Open,0.0,0.0,"04/06/2022, 11:15 AM",Leidos,,
+847,4549,Junior DevOps Software Engineer,Matthew Soifer,Jason Putz,Direct Hire,Open,54.88,60000.0,"04/06/2022, 8:41 AM",,,"software_dev, devops"
+848,4548,System Server Engineer,Brad Glaser,Delmonik Contee,Contract,Open,0.0,0.0,"04/05/2022, 6:02 PM",,,
+849,4542,Applications Systems Administrator,Matthew Soifer,Terence Coston,Direct Hire,Open,0.0,0.0,"04/04/2022, 12:39 PM",,,
+850,4540,Action Officer,Paul Bartlett,Kevin Klein,Contract To Hire,Open,0.0,0.0,"04/04/2022, 10:06 AM",Leidos,DIA,
+851,4539,Tech Writer - AFNCR,Trey Hall,Kaja Williams,Contract,Open,0.0,0.0,"04/04/2022, 8:35 AM",,,
+852,4523,Cyber Security Analyst,Santino Mostaccio,Bryan LaPlant,Contract To Hire,Open,0.0,0.0,"03/30/2022, 4:45 PM",,,cybersecurity
+853,4517,Solutions Architect,Jason Soifer,Gregory Dotson,Contract,Open,0.0,0.0,"03/30/2022, 8:59 AM",Leidos,,
+854,4516,Mobility Tech,Kevin Chavez,Place Holder Place Holder,Contract To Hire,Open,0.0,0.0,"03/30/2022, 8:49 AM",,,
+855,4502,Splunk SME- GSMO- Meade,Matthew Lambert,Sean Black,Contract,Placed,0.0,0.0,"03/28/2022, 8:29 AM",,,
+856,4500,Data Engineer- DHMSM,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"03/27/2022, 8:44 PM",,,
+857,4494,Clinical Informaticist,Jason Soifer,Gregory Dotson,Contract To Hire,Open,0.0,0.0,"03/24/2022, 4:54 PM",Leidos,,
+858,4492,"Network Engineer - Key West, FL",Ben Moser,Alex DeBelle,Contract,Filled by Client,0.0,0.0,"03/24/2022, 3:28 PM",Leidos,NSA,networking
+859,4490,"Senior I.T. Specialist - Norfolk, VA",Ben Moser,Patrice Smallwood,Contract,Placed,0.0,0.0,"03/24/2022, 10:12 AM",,,
+860,4481,Communications Network Engineer,Steve Marinelli,Patrice Smallwood,Contract,Placed,74.85,0.0,"03/23/2022, 8:24 AM",,,networking
+861,4473,"Network Engineer - Orlando, FL",Ben Moser,Keith Gallagher,Contract,Placed,0.0,0.0,"03/21/2022, 10:51 AM",Leidos,,networking
+862,4460,Mobility Tech- GSMO II,Matthew Lambert,Jannette Clark (Williams),Contract To Hire,Placed,0.0,0.0,"03/17/2022, 10:31 AM",Leidos,,
+863,4457,Field Service Tech (Little Creek),Ben Moser,Patrice Smallwood,Contract,Placed,0.0,0.0,"03/17/2022, 9:09 AM",,,
+864,4453,Systems Integration Engineer,Paul Bartlett,Place Holder Place Holder,Contract To Hire,Open,0.0,0.0,"03/16/2022, 2:44 PM",,,systems_engineering
+865,4449,RPA Developer,Kevin Testerman,Jason Labumbard,Contract,Placed,0.0,0.0,"03/15/2022, 3:07 PM",Leidos,,
+866,4444,System Engineer - AFNCR,Trey Hall,Doug South,Contract,Placed,0.0,0.0,"03/15/2022, 9:34 AM",,,
+867,4430,Communications Network Engineer,Steve Marinelli,Joel Marcinowski,Contract,Placed,46.0,74.85,"03/11/2022, 1:58 PM",Leidos,,networking
+868,4426,IDAM Engineer,Matthew Soifer,Brian Butson,Contract,Placed,0.0,0.0,"03/11/2022, 9:05 AM",,,
+869,4414,Fusion Analyst FT Meade,Jordan Merriman,Darrell Shorter,Contract To Hire,Placed,0.0,0.0,"03/09/2022, 9:00 AM",Leidos,DIA,
+870,4410,System Administrator,Kevin Chavez,Place Holder,Contract To Hire,Placed,0.0,0.0,"03/08/2022, 2:35 PM",,,
+871,4408,Communications Network Engineer (Dahlgren),Kevin Testerman,Odaro Edomwonyi,Contract,Placed,38.46,62.99,"03/08/2022, 9:55 AM",Leidos,DIA,networking
+872,4396,ISSM,Paul Bartlett,Sean Black,Contract To Hire,Open,0.0,0.0,"03/04/2022, 10:28 AM",,,
+873,4395,Sr. IT Specialist,Kevin Chavez,Place Holder,Contract,Placed,0.0,0.0,"03/03/2022, 2:16 PM",,,
+874,4385,Audit & Inspections Lead- GSMO,Matthew Lambert,Steven Wisdom,Contract To Hire,Placed,0.0,0.0,"03/02/2022, 9:54 AM",,,
+875,4381,Storage Admin,Trey Hall,Delmonik Contee,Contract,Placed,0.0,0.0,"03/02/2022, 8:26 AM",,,
+876,4374,SR Systems Engineer,Paul Bartlett,Erin Birdsong,Contract To Hire,Open,0.0,0.0,"03/01/2022, 8:07 AM",,,
+877,4369,HBSS Lead,Jason Soifer,Jeremy Lamarre,Contract To Hire,Placed,0.0,0.0,"02/26/2022, 10:57 AM",Leidos,,
+878,4368,System Administrator III,Steve Marinelli,Jason Krall,Contract To Hire,Open,67.61,101.42,"02/25/2022, 2:31 PM",,,
+879,4359,Project Manager,Steve Marinelli,Aiyisha Smothers,Contract To Hire,Open,0.0,0.0,"02/24/2022, 3:16 PM",,,
+880,4358,System Engineer Jr,Cassidy Hragyil,Kaja Williams,Contract,Placed,120.92,0.0,"02/24/2022, 3:04 PM",,,
+881,4356,Storage and Backup Engineer - AFNCR,Trey Hall,Delmonik Contee,Contract,Open,0.0,0.0,"02/24/2022, 1:18 PM",,,
+882,4346,Watch Officer- SBNAB,Matthew Lambert,Laura Israel,Contract To Hire,Placed,0.0,0.0,"02/23/2022, 2:57 PM",Leidos,,
+883,4344,SATCOM Network Controller,Matthew Soifer,James Hall,Contract To Hire,Placed,28.84,44.73,"02/23/2022, 2:44 PM",Leidos,DISA,networking
+884,4342,Linux Sys Admin,Paul Bartlett,Terence Coston,Contract To Hire,Open,0.0,0.0,"02/23/2022, 9:19 AM",,,
+885,4334,Storage & Backup Engineer,Anthony Fusco,Delmonik Contee,Contract,Open,0.0,0.0,"02/22/2022, 10:25 AM",,,
+886,4333,Project Specialist,Trey Hall,Delmonik Contee,Contract,Placed,0.0,0.0,"02/22/2022, 9:04 AM",,,
+887,4332,Linux System Admin- SBNAB,Matthew Lambert,Laura Israel,Contract To Hire,Placed,0.0,0.0,"02/22/2022, 8:33 AM",Leidos,,
+888,4331,"Cable Technician - Panama City Beach, FL",Ben Moser,Alex DeBelle,Contract,Placed,0.0,0.0,"02/22/2022, 8:27 AM",Leidos,NSA,
+889,4329,Transport Watch Officer,Steven Weaver,Brian Cooley,Contract To Hire,Placed,70.25,90000.0,"02/21/2022, 10:03 AM",Leidos,,
+890,4327,Splunk SME,Jason Soifer,Zackery Turbyfill,Contract,Open,0.0,0.0,"02/20/2022, 9:54 AM",Leidos,,
+891,4326,AWS Dev Ops Engineer,Matthew Soifer,Terence Coston,Contract To Hire,Filled by Client,0.0,0.0,"02/19/2022, 9:46 AM",,,cloud
+892,4325,MBSE,Kevin Testerman,Charlie Liu,Contract,Open,0.0,0.0,"02/18/2022, 4:25 PM",,,
+893,4316,SCCM Engineer,Kevin Testerman,Debbie Seichko,Contract,Placed,0.0,0.0,"02/17/2022, 7:42 AM",Leidos,,
+894,4311,SIEM engineer,Jordan Merriman,Kevin Klein,Contract To Hire,Open,0.0,0.0,"02/16/2022, 10:08 AM",Leidos,DIA,cybersecurity
+895,4310,UC Network Engineer,Madison Yokley,Kevin Reynolds,Contract,Placed,0.0,0.0,"02/16/2022, 9:49 AM",,,networking
+896,4302,A&A Analyst-Test,Matthew Lambert,Place Holder,Contract To Hire,Open,0.0,0.0,"02/15/2022, 1:20 PM",,,
+897,4301,Splunk Analyst,Steven Weaver,Sean Black,Contract To Hire,Placed,0.0,0.0,"02/15/2022, 12:55 PM",,,
+898,4297,Linux Admin,Paul Bartlett,Dean Finley,Contract To Hire,Open,0.0,0.0,"02/15/2022, 8:49 AM",Leidos,DIA,
+899,4290,Data Scientist- GSMO II,Matthew Lambert,Sean Black,Contract,Placed,0.0,0.0,"02/14/2022, 2:17 PM",,,
+900,4286,HBSS Engineer-NGEN- Remote,Matthew Lambert,Sam Focarelli,Contract,Open,0.0,0.0,"02/11/2022, 9:57 AM",,,
+901,4282,Network Engineer,Kevin Testerman,Richard Bell,Contract,Placed,0.0,0.0,"02/10/2022, 8:22 AM",,,networking
+902,4281,HBSS Engineer - SMIT,Kevin Testerman,Brian Butson,Contract,Placed,0.0,0.0,"02/09/2022, 5:49 PM",,,
+903,4278,Security Design Assessment Analyst- GSMO II,Matthew Lambert,Sean Black,Contract,Placed,0.0,0.0,"02/09/2022, 9:08 AM",,,"cybersecurity, systems_engineering"
+904,4275,Communications Network Engineer - Mid,Kevin Testerman,Eric Morris,Contract,Placed,0.0,0.0,"02/09/2022, 8:28 AM",,,networking
+905,4269,CSSP Inspection Lead- GSMO II,Matthew Lambert,Sean Black,Contract,Open,0.0,0.0,"02/08/2022, 8:54 AM",,,
+906,4264,SCA Team Lead,Tyler Holmes,Juan Broadnax,Contract To Hire,Placed,0.0,0.0,"02/07/2022, 9:10 AM",Leidos,,
+907,4254,CPP Analyst - GSMO II,Tyler Holmes,Sean Black,Contract To Hire,Placed,0.0,0.0,"02/02/2022, 10:02 AM",,,
+908,4246,Audit/eMASS Team lead,Tyler Holmes,Juan Broadnax,Contract To Hire,Open,0.0,0.0,"02/01/2022, 9:14 AM",Leidos,,
+909,4244,ISSO Lead- GSMO,Matthew Lambert,Steven Wisdom,Contract To Hire,Open,0.0,0.0,"02/01/2022, 8:20 AM",,,
+910,4239,"Network Engineer - Crane, IN",Ben Moser,David Rooney,Contract,Placed,0.0,0.0,"01/28/2022, 9:00 AM",Leidos,,networking
+911,4238,ISSM,Tyler Holmes,Juan Broadnax,Contract To Hire,Open,0.0,0.0,"01/27/2022, 2:50 PM",Leidos,,
+912,4237,Cyber Analyst,Matthew Lambert,Laura Israel,Contract To Hire,Open,0.0,0.0,"01/27/2022, 2:37 PM",Leidos,,cybersecurity
+913,4235,"Data Center Technician - North Island, CA",Ben Moser,James Bingham,Contract,Placed,0.0,0.0,"01/27/2022, 10:22 AM",Leidos,,
+914,4234,SolarWinds System Administrator,Trey Hall,Charles Flanders,Contract,Open,0.0,0.0,"01/27/2022, 8:28 AM",,,
+915,4220,ConMon Analyst,Matthew Lambert,Walter Crafton,Contract,Placed,0.0,0.0,"01/25/2022, 8:35 AM",Leidos,ITES,
+916,4219,VDI Administrator,Ben Moser,Kenneth Merenda,Contract,Placed,0.0,0.0,"01/25/2022, 8:34 AM",Leidos,NASA,
+917,4213,Vulnerability Management Program (VMP) Analyst,Matthew Lambert,Steven Wisdom,Contract,Placed,0.0,0.0,"01/24/2022, 8:10 AM",,,cybersecurity
+918,4212,"Network Engineer - Portsmouth, NH",Ben Moser,Dan Brown,Contract,Placed,0.0,0.0,"01/21/2022, 1:43 PM",Leidos,,networking
+919,4208,Jr. Cyber Analyst - Leidos GSMO TN10 (Arlington),Trey Kelly,Steven Wisdom,Contract,Filled by Client,0.0,0.0,"01/20/2022, 2:53 PM",,,cybersecurity
+920,4205,ISSO- GSMO,Matthew Lambert,Steven Wisdom,Contract,Placed,0.0,0.0,"01/19/2022, 6:19 PM",,,
+921,4203,HBSS Engineer (Norfolk),Trevor Newell,Kendra McFarlane,Contract,Open,0.0,0.0,"01/19/2022, 2:26 PM",Leidos,,
+922,4201,Site Assistance Visit Analyst,Matthew Lambert,Steven Wisdom,Contract,Placed,0.0,0.0,"01/19/2022, 11:23 AM",,,
+923,4194,Mobility Technician,Ben Moser,Ryan Newell,Contract,Placed,0.0,0.0,"01/18/2022, 10:29 AM",Leidos,,
+924,4192,Mobility Technician,Anthony Fusco,Ryan Newell,Contract,Placed,0.0,0.0,"01/17/2022, 3:43 PM",Leidos,,
+925,4190,A&A Analyst,Tyler Holmes,Juan Broadnax,Contract To Hire,Open,0.0,0.0,"01/17/2022, 10:14 AM",Leidos,,
+926,4189,ACAS/HBSS Engineer,Anthony Fusco,LaRon Pryor,Contract,Placed,0.0,0.0,"01/17/2022, 9:48 AM",Leidos,DIA,
+927,4187,ISSO,Jason Soifer,Sean Black,Contract,Placed,0.0,0.0,"01/16/2022, 2:45 PM",,,
+928,4185,Hardware Engineer,Jordan Merriman,Joseph Waldron,Contract,Placed,0.0,0.0,"01/14/2022, 2:44 PM",Leidos,,
+929,4184,ACAS Lead,Tyler Holmes,Sean Black,Contract To Hire,Open,0.0,0.0,"01/14/2022, 12:58 PM",,,
+930,4181,HBSS Administrator,Tyler Holmes,Laura Israel,Contract To Hire,Placed,0.0,0.0,"01/14/2022, 8:15 AM",Leidos,,
+931,4175,NetOps Senior (Barstow),Trevor Newell,Donald Quinn,Contract,Open,0.0,0.0,"01/12/2022, 3:24 PM",,,
+932,4174,EDI Specialist,Steven Weaver,Eric Clayton,Contract,Open,0.0,0.0,"01/12/2022, 2:58 PM",,,
+933,4170,Lead Software Engineer - GSMO,Tyler Holmes,Jason Putz,Contract To Hire,Open,0.0,0.0,"01/11/2022, 2:25 PM",,,software_dev
+934,4167,Linux Engineer,Tyler Holmes,Laura Israel,Contract To Hire,Open,0.0,0.0,"01/11/2022, 8:32 AM",Leidos,,
+935,4161,IA Engineer,Steven Weaver,Marco Edwards,Contract,Filled by Client,0.0,0.0,"01/07/2022, 10:05 AM",,,
+936,4144,SOC Analysts,Kevin Chavez,Alphonso Moore,Contract To Hire,Placed,0.0,0.0,"01/06/2022, 8:14 AM",Leidos,,cybersecurity
+937,4140,IT Specialist Senior,Kevin Testerman,Dan Brown,Contract,Placed,0.0,0.0,"01/04/2022, 10:55 AM",Leidos,,
+938,4139,Desktop Technician,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"01/04/2022, 8:08 AM",,,
+939,4138,Action Officer,Kevin Chavez,Kevin Klein,Contract To Hire,Placed,0.0,0.0,"01/03/2022, 8:04 AM",Leidos,DIA,
+940,4136,IT Specialist- Senior,Steve Marinelli,David Webb,Contract,Placed,58.06,0.0,"12/23/2021, 7:43 AM",Leidos,,
+941,4135,Network Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"12/22/2021, 3:49 PM",,,networking
+942,4134,Systems Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"12/22/2021, 2:47 PM",,,
+943,4132,Cyber Analyst - Macdill AFB GSMO,Tyler Holmes,Silas Porterfield,Contract To Hire,Placed,0.0,0.0,"12/22/2021, 9:15 AM",,,cybersecurity
+944,4130,ISSO Cyber Analyst,Anthony Fusco,LaRon Pryor,Contract,Placed,0.0,0.0,"12/21/2021, 6:44 PM",Leidos,DIA,cybersecurity
+945,4129,Sr. Systems Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"12/21/2021, 1:01 PM",,,
+946,4126,Network Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"12/21/2021, 11:11 AM",,,networking
+947,4122,Sr. Systems Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"12/21/2021, 8:23 AM",,,
+948,4121,Data Center Engineer,Kevin Chavez,Place Holder,Contract,Open,0.0,0.0,"12/21/2021, 8:21 AM",,,
+949,4111,Network/Systems Architect- Leidos- GSMO- Tampa,Bailey Rollins,Place Holder Place Holder,Contract,Open,0.0,0.0,"12/17/2021, 10:49 AM",,,networking
+950,4099,Cybersecurity Analyst,Jason Soifer,Sean Black,Contract,Open,0.0,0.0,"12/13/2021, 5:24 PM",,,cybersecurity
+951,4096,"Network Engineer - Pensacola, FL",Ben Moser,Alex DeBelle,Contract,Placed,0.0,0.0,"12/13/2021, 7:55 AM",Leidos,NSA,networking
+952,4088,Cyber Threat Fusion Analyst,Jordan Merriman,Bryan LaPlant,Contract To Hire,Open,0.0,0.0,"12/09/2021, 10:54 AM",,,cybersecurity
+953,4084,Cyber Analyst,Jason Soifer,Mike Najmulski,Contract To Hire,Open,0.0,0.0,"12/07/2021, 3:59 PM",,,cybersecurity
+954,4083,Business Systems Analyst- ServiceNow,Steve Marinelli,Jo Ann Arcieri,Contract To Hire,Open,76.06,0.0,"12/07/2021, 2:28 PM",,,
+955,4079,Cable Network Technician,Ben Moser,David Rooney,Contract,Placed,0.0,0.0,"12/06/2021, 3:11 PM",Leidos,,networking
+956,4075,Cloud Admin,Andrew Longo,Laura Israel,Contract To Hire,Open,0.0,0.0,"12/03/2021, 8:25 AM",Leidos,,cloud
+957,4071,Business Systems Analyst,Tyler Holmes,Zackery Turbyfill,Contract To Hire,Open,0.0,0.0,"12/02/2021, 9:06 AM",Leidos,,
+958,4060,SCCM SME,Steve Marinelli,Christopher Stone,Contract,Open,0.0,0.0,"11/30/2021, 11:02 AM",Leidos,,
+959,4058,"Senior Desktop - Bremerton, WA",Ben Moser,Ron Carr,Contract,Placed,0.0,0.0,"11/29/2021, 8:17 AM",,,
+960,4057,Operations Support Analyst,Jason Soifer,Darrell Shorter,Contract To Hire,Open,0.0,0.0,"11/28/2021, 10:24 AM",Leidos,DIA,
+961,4045,Maintenance Technician,Ben Moser,Eric Clayton,Contract,Accepting Candidates,0.0,0.0,"11/23/2021, 8:11 AM",,,ai_ml
+962,4039,Senior Desktop Support,Steve Marinelli,Charles Flanders,Contract,Placed,45.0,79.39,"11/22/2021, 1:28 PM",,,
+963,4036,"I.T. Specialist - Senior - PCB, FL",Ben Moser,Alex DeBelle,Contract,Placed,0.0,0.0,"11/22/2021, 8:19 AM",Leidos,NSA,
+964,4031,Watch Officer,Steve Marinelli,Joe Yaeger,Contract,Open,27.95,54.5,"11/19/2021, 8:05 AM",,,
+965,4029,Mac Systems Administrator,Tyler Holmes,Jitesh Amin,Contract To Hire,Placed,0.0,0.0,"11/18/2021, 9:02 AM",,,
+966,4026,Cyber Operations Planner,Andrew Longo,Jon Patrick,Contract To Hire,Open,0.0,0.0,"11/17/2021, 3:36 PM",,,cybersecurity
+967,4020,"I.T. Specialist - Senior - Suitland, MD",Ben Moser,Miguel Garces,Contract,Accepting Candidates,0.0,0.0,"11/16/2021, 8:27 AM",,,
+968,4018,ELK Stack SME,Andrew Longo,Laura Israel,Contract To Hire,Placed,0.0,0.0,"11/15/2021, 2:35 PM",Leidos,,
+969,4005,Network Engineer - Carderock,Ben Moser,Miguel Garces,Contract,Placed,0.0,0.0,"11/11/2021, 9:07 AM",,,networking
+970,4000,DevOps Software Engineer,Santino Mostaccio,Jason Putz,Contract To Hire,Accepting Candidates,0.0,0.0,"11/09/2021, 11:21 AM",,,"software_dev, devops"
+971,3996,Cyber Security Specialist-MID,Steve Marinelli,Don Keibel,Contract,Placed,58.06,0.0,"11/08/2021, 9:39 AM",Perspecta,,cybersecurity
+972,3994,Leidos - Salesforce Architect,Madison Yokley,Place Holder,Contract,Open,0.0,0.0,"11/05/2021, 4:51 PM",,,
+973,3987,Network Engineer - Point Mugu,Ben Moser,Paul LeBlanc,Contract,Accepting Candidates,0.0,0.0,"11/04/2021, 10:04 AM",Leidos,,networking
+974,3986,UC Engineer,Santino Mostaccio,Heather Moore,Contract To Hire,Open,0.0,0.0,"11/04/2021, 9:54 AM",,,
+975,3979,VMWare Engineer,Steven Weaver,Terry Sharp,Contract,Placed,0.0,0.0,"11/04/2021, 8:49 AM",,,
+976,3973,I.T. Specialist - Senior,Kevin Testerman,Miguel Garces,Contract,Placed,32.0,58.06,"11/03/2021, 9:11 AM",,,
+977,3972,Field Service Team Lead,Tyler Holmes,Matt Olson,Contract To Hire,Open,0.0,0.0,"11/03/2021, 9:05 AM",,,
+978,3961,Desktop Technician,Kevin Chavez,Place Holder,Contract,Placed,0.0,0.0,"11/01/2021, 9:15 AM",,,
+979,3955,"Network Engineer - Seal Beach, CA",Ben Moser,Paul LeBlanc,Contract,Placed,0.0,0.0,"10/28/2021, 10:03 AM",Leidos,,networking
+980,3932,DevOps Engineer - Leidos SBNAB,Andrew Longo,Laura Israel,Contract To Hire,Placed,110.0,150000.0,"10/21/2021, 1:27 PM",Leidos,,devops
+981,3926,Cloud Migration Lead,Santino Mostaccio,Tara Laymon,Contract To Hire,Open,0.0,0.0,"10/20/2021, 4:36 PM",,,cloud
+982,3924,Communications Network Engineer - Senior,Kevin Testerman,Nicole Canter,Contract,Placed,0.0,0.0,"10/20/2021, 9:36 AM",,,networking
+983,3912,Splunk SME,Kevin Testerman,Sheila Stoutamyer,Contract,Placed,0.0,0.0,"10/18/2021, 8:25 AM",Leidos,,
+984,3905,Remedy Architect,Tyler Holmes,Steven Contreras,Contract,Open,0.0,0.0,"10/15/2021, 9:47 AM",Leidos,DIA,
+985,3898,Systems Engineer,Kevin Chavez,Place Holder,Contract To Hire,Open,0.0,0.0,"10/14/2021, 8:11 AM",,,
+986,3895,PostgreSQL Database Engineer,Anthony Fusco,Emillio Stokes,Contract,Open,0.0,0.0,"10/13/2021, 2:55 PM",,,database
+987,3881,Sr. Linux System Administrator,Kevin Chavez,Laura Israel,Contract To Hire,Open,0.0,0.0,"10/12/2021, 8:24 AM",Leidos,,
+988,3878,Linux Systems Administrator,Kevin Testerman,Tom Young,Contract,Placed,48.07,77.67,"10/11/2021, 3:50 PM",Leidos,,
+989,3875,IA Engineer,Kevin Chavez,Steven Wisdom,Contract To Hire,Open,0.0,0.0,"10/11/2021, 8:13 AM",,,
+990,3871,Cloud Engineer,Tyler Holmes,Laura Israel,Contract To Hire,Open,0.0,0.0,"10/08/2021, 10:30 AM",Leidos,,cloud
+991,3869,Net Ops Specialist-MID,Steve Marinelli,John Hamlette,Contract,Open,65.02,0.0,"10/08/2021, 9:39 AM",,,
+992,3868,F5 Network Engineer,Cameron Knotts,Hale Kpetigo,Contract To Hire,Open,0.0,0.0,"10/08/2021, 8:50 AM",,,networking
+993,3854,BI Data Analyst,Anthony Fusco,Emillio Stokes,Contract,Open,0.0,0.0,"10/06/2021, 9:58 AM",,,data_analytics
+994,3851,Data Engineer,Tyler Holmes,Brian Nagel,Contract,Placed,0.0,0.0,"10/06/2021, 8:25 AM",Leidos,,
+995,3846,Senior Desktop Tech (DC),Trevor Newell,Marcus Billups,Contract,Placed,0.0,0.0,"10/05/2021, 10:38 AM",Leidos,,
+996,3837,Cloud Engineer,Santino Mostaccio,Terence Coston,Contract To Hire,Placed,0.0,0.0,"10/04/2021, 10:58 AM",,,cloud
+997,3836,Java / Spring Boot Developer,Alex Barkan,Emillio Stokes,Contract,Open,0.0,0.0,"10/02/2021, 11:29 AM",,,software_dev
+998,3835,Sr. SOC Analyst/Cyber Fusion - Leidos JSP (Marcs Center),Trey Kelly,GDIT GDIT,Contract,Filled by Client,0.0,0.0,"10/01/2021, 2:51 PM",,,cybersecurity
+999,3832,Senior SOC Analyst,Andrew Longo,Sean Black,Contract,Open,0.0,0.0,"10/01/2021, 8:26 AM",,,cybersecurity
+1000,3831,Software Developer-Leidos-SBNAB,Matthew Lambert,Laura Israel,Contract To Hire,Open,0.0,0.0,"10/01/2021, 8:24 AM",Leidos,,software_dev
+1001,3827,Communications Network Engineer,Trevor Newell,Marcus Billups,Contract,Placed,0.0,0.0,"09/30/2021, 8:24 AM",Leidos,,networking
+1002,3815,Network Engineer,Kevin Chavez,Ed Alsip,Contract,Open,0.0,0.0,"09/28/2021, 7:50 AM",Leidos,,networking
+1003,3812,Test Engineer,Alex Barkan,Brian Potvin,Contract,Open,0.0,0.0,"09/27/2021, 9:13 AM",,,
+1004,3803,Cyber Security Analyst,Kevin Chavez,Bryan LaPlant,Contract To Hire,Open,0.0,0.0,"09/23/2021, 5:41 PM",,,cybersecurity
+1005,3801,Network Engineer Whidbey Island,Jordan Merriman,Angela Boyer,Contract,Placed,0.0,0.0,"09/23/2021, 10:30 AM",,,networking
+1006,3799,MBSE,Kevin Testerman,Chris Pate,Contract,Open,0.0,0.0,"09/23/2021, 9:03 AM",,,
+1007,3794,"Network Engineer - Mayport, FL",Ben Moser,Eric Morris,Contract,Placed,0.0,0.0,"09/22/2021, 9:38 AM",,,networking
+1008,3773,System Admin- Leidos-Pentagon,Matthew Lambert,Place Holder,Contract To Hire,Open,0.0,0.0,"09/17/2021, 9:24 AM",,,
+1009,3767,Boundary Engineer,Santino Mostaccio,Kevin Klein,Contract To Hire,Open,0.0,0.0,"09/16/2021, 10:42 AM",Leidos,DIA,
+1010,3757,"Communications Network Engineer - Mid (Newport, RI)",Kevin Testerman,Dan Brown,Contract,Placed,0.0,0.0,"09/15/2021, 9:47 AM",Leidos,,networking
+1011,3756,JavaScript Developer,Alex Barkan,Emillio Stokes,Contract,Open,0.0,0.0,"09/15/2021, 9:13 AM",,,software_dev
+1012,3748,AFNCR - Help Desk Specialist,Tyler Holmes,Sidney McCall,Contract,Open,0.0,0.0,"09/14/2021, 9:08 AM",Leidos,,
+1013,3730,EDI Analyst,Alex Barkan,Eric Clayton,Contract,Open,0.0,0.0,"09/09/2021, 9:07 AM",,,
+1014,3729,Data Center Facilities Technician,Steven Weaver,Amanda Hale,Contract,Open,0.0,0.0,"09/09/2021, 8:39 AM",Leidos,,
+1015,3725,Network Controller (Transport),Santino Mostaccio,Kaitlyn Chairney,Contract,Open,0.0,0.0,"09/08/2021, 11:24 AM",,,networking
+1016,3709,System Administrator- JSP-Leidos,Matthew Lambert,Place Holder,Contract To Hire,Open,0.0,0.0,"09/02/2021, 8:16 AM",,,
+1017,3701,Java Developer-SSA,Matthew Lambert,Deric Dunn,Contract,Open,0.0,0.0,"09/01/2021, 8:50 AM",,,software_dev
+1018,3695,System Admin- Change Management,Steve Marinelli,James Bingham,Contract,Placed,53.43,0.0,"08/31/2021, 10:04 AM",Leidos,,
+1019,3692,"Network Engineer - Lemoore, CA",Ben Moser,Angela Boyer,Contract,Placed,0.0,0.0,"08/30/2021, 10:01 AM",,,networking
+1020,3691,Cold Fusion,Alex Barkan,Steven Contreras,Contract,Open,0.0,0.0,"08/30/2021, 9:42 AM",Leidos,DIA,
+1021,3684,Network Controller (SATCOM),Jason Soifer,Rich King,Contract,Placed,0.0,0.0,"08/27/2021, 2:29 PM",,,networking
+1022,3662,Communications Network Engineer Mid,Steve Marinelli,Stephen Dibeler,Contract,Placed,34.0,62.99,"08/23/2021, 10:53 AM",,,networking
+1023,3647,CND SME,Santino Mostaccio,Juan Broadnax,Contract,Placed,0.0,0.0,"08/19/2021, 8:37 AM",Leidos,,
+1024,3641,Sr Java Developer- NIH,Matthew Lambert,Place Holder,Contract To Hire,Open,0.0,0.0,"08/18/2021, 8:36 AM",,,software_dev
+1025,3632,DCO Systems Manager,Kevin Chavez,Place Holder Place Holder,Contract To Hire,Placed,0.0,0.0,"08/16/2021, 8:45 AM",,,
+1026,3631,Cyber Security Watch Officer,Cameron Knotts,Kevin Klein,Contract To Hire,Placed,75.98,0.0,"08/16/2021, 8:26 AM",Leidos,DIA,cybersecurity
+1027,3624,Firewall Administrator,Santino Mostaccio,Zackery Turbyfill,Contract To Hire,Placed,0.0,0.0,"08/13/2021, 9:23 AM",Leidos,,networking
+1028,3619,Project Scheduler,Anthony Fusco,Rajendra Shrestha,Contract To Hire,Open,0.0,0.0,"08/12/2021, 1:37 PM",,,
+1029,3611,Communications Network Engineer Senior,Steve Marinelli,Maria Quintana,Contract,Placed,73.38,0.0,"08/11/2021, 1:50 PM",,,networking
+1030,3610,MOC Technician,Kevin Testerman,Christy Murray,Contract,Open,0.0,0.0,"08/11/2021, 8:33 AM",,,
+1031,3582,System Administrator- Senior,Steve Marinelli,Lincoln Eldridge,Contract,Placed,71.35,0.0,"08/04/2021, 11:06 AM",Leidos,,
+1032,3581,Data Center Facilities Technician Mid,Steve Marinelli,Maria Quintana,Contract,Placed,27.8,47.23,"08/04/2021, 11:02 AM",,,
+1033,3580,Cyber Security Specialist,Steve Marinelli,Roman Vitkovitsky,Contract,Placed,81.25,0.0,"08/04/2021, 10:40 AM",Leidos,"DISA, DIA, NSA",cybersecurity
+1034,3579,Desktop Support Technician,Steve Marinelli,Tracy Noel,Contract,Placed,27.8,43.64,"08/04/2021, 10:26 AM",,,
+1035,3578,Virtual Server Administrator,Steve Marinelli,Lincoln Eldridge,Contract,Placed,56.25,0.0,"08/04/2021, 10:07 AM",Leidos,,
+1036,3575,Desktop Support Technician,Steve Marinelli,Donald Quinn,Contract,Placed,36.8,56.92,"08/04/2021, 9:18 AM",,,
+1037,3574,Desktop Support Technician,Steve Marinelli,Joel Marcinowski,Contract,Placed,27.8,43.64,"08/04/2021, 8:45 AM",Leidos,,
+1038,3572,CLIN 54- Technician,Steve Marinelli,Stephen Dibeler,Contract,Placed,31.25,63.25,"08/03/2021, 4:45 PM",,,
+1039,3571,CLIN 54- Technician,Steve Marinelli,Richard Bell,Contract,Placed,0.0,0.0,"08/03/2021, 3:41 PM",,,
+1040,3570,Desktop Support Technician,Steve Marinelli,Lamonte Westbrook,Contract,Placed,0.0,0.0,"08/03/2021, 3:31 PM",,,
+1041,3569,Desktop Support Technician,Steve Marinelli,Brian Nagel,Contract,Placed,25.79,41.03,"08/03/2021, 3:09 PM",Leidos,,
+1042,3568,Desktop Support Technician,Steve Marinelli,Patricia Simard,Contract,Placed,25.64,40.83,"08/03/2021, 3:02 PM",,,
+1043,3567,Information Security Engineer,Ben Moser,Todd Smith,Contract,Filled by Client,0.0,0.0,"08/03/2021, 2:37 PM",,,cybersecurity
+1044,3566,Sr. Sharepoint Engineer - Leidos NGEN (REMOTE),Trey Kelly,Place Holder,Contract,Placed,0.0,0.0,"08/03/2021, 2:17 PM",,,
+1045,3562,System Administrator- MID,Steve Marinelli,Lincoln Eldridge,Contract,Placed,53.43,0.0,"08/03/2021, 10:26 AM",Leidos,,
+1046,3561,Pier Support,Kevin Testerman,Patrice Smallwood,Contract,Placed,0.0,0.0,"08/03/2021, 9:17 AM",,,
+1047,3537,Network Controller ---- Hill,Matt Garten,Diana Valencia,Contract To Hire,Placed,28.84,44.73,"07/26/2021, 1:50 PM",,,networking
+1048,3531,Service Delivery Consultant,Steve Marinelli,Roman Vitkovitsky,Contract,Placed,52.88,81.5,"07/26/2021, 10:52 AM",Leidos,"DISA, DIA, NSA",
+1049,3530,Desktop Support Technician,Steve Marinelli,Patrice Smallwood,Contract,Placed,0.0,0.0,"07/26/2021, 10:34 AM",,,
+1050,3529,Storage Engineer,Steve Marinelli,Lincoln Eldridge,Contract,Placed,0.0,0.0,"07/26/2021, 10:02 AM",Leidos,,
+1051,3528,IT Specialist - Senior,Steve Marinelli,Amanda Hale,Contract,Placed,27.95,56.92,"07/26/2021, 9:59 AM",Leidos,,
+1052,3527,Field Service Engineer - Leidos HUD HITS (Chicago),Trey Kelly,Place Holder,Contract,Placed,0.0,0.0,"07/26/2021, 9:56 AM",,,
+1053,3526,Communications Network Engineer - Senior (Quantico),Trevor Newell,Ed Alsip,Contract,Open,0.0,0.0,"07/26/2021, 9:54 AM",Leidos,,networking
+1054,3525,Desktop Support Technician,Steve Marinelli,Keith Gallagher,Contract,Placed,25.64,40.83,"07/26/2021, 9:43 AM",Leidos,,
+1055,3522,Desktop Support Technician,Steve Marinelli,David Rooney,Contract,Placed,24.9,40.26,"07/26/2021, 9:34 AM",Leidos,,
+1056,3521,Enterprise Service Desk - Mid,Trevor Newell,Alexander Mason,Contract,Placed,0.0,0.0,"07/26/2021, 9:33 AM",,,
+1057,3504,CLIN54,Kevin Testerman,Maria Quintana,Contract,Open,0.0,0.0,"07/22/2021, 9:40 AM",,,
+1058,3501,IT Project Manager- Leidos,Matthew Lambert,Lincoln Eldridge,Contract,Open,0.0,0.0,"07/21/2021, 1:28 PM",Leidos,,
+1059,3500,Senior IT Data Engineer,Santino Mostaccio,Place Holder,Contract To Hire,Accepting Candidates,0.0,0.0,"07/21/2021, 8:22 AM",,,
+1060,3494,Waterfront Communications Network Engineer,Kevin Chavez,Walter Kueck,Contract,Placed,0.0,0.0,"07/20/2021, 9:27 AM",,,networking
+1061,3491,Communications Network Engineer,Kevin Testerman,Sheila Stoutamyer,Contract,Placed,0.0,0.0,"07/20/2021, 8:13 AM",Leidos,,networking
+1062,3489,Remedy Developer,Tyler Holmes,Steven Contreras,Contract,Placed,0.0,0.0,"07/19/2021, 4:06 PM",Leidos,DIA,
+1063,3485,Cyber Security Forensic's Analyst,Kevin Chavez,Sean Black,Contract,Open,0.0,0.0,"07/16/2021, 10:50 AM",,,cybersecurity
+1064,3475,ArcGIS Developer,Anthony Fusco,Gordon Hall,Contract To Hire,Open,0.0,0.0,"07/14/2021, 9:49 AM",,,
+1065,3472,Network Controller,Ben Moser,Elisa Maura,Contract To Hire,Placed,0.0,0.0,"07/13/2021, 3:53 PM",,,networking
+1066,3469,Cyber Security Specialist,Kevin Chavez,Ed Alsip,Direct Hire,Open,0.0,0.0,"07/13/2021, 8:20 AM",Leidos,,cybersecurity
+1067,3465,Jr. Systems Admin -- Scott AFB,Santino Mostaccio,Zackery Turbyfill,Contract To Hire,Placed,0.0,0.0,"07/12/2021, 8:34 AM",Leidos,,
+1068,3464,Linux Admin (Scott AFB),Andrew Longo,Zackery Turbyfill,Contract To Hire,Placed,100000.0,72.93,"07/12/2021, 8:17 AM",Leidos,,
+1069,3462,Windows Systems Admin - Scott AFB,Matthew Soifer,Zackery Turbyfill,Contract,Placed,45.67,72.93,"07/09/2021, 1:25 PM",Leidos,,
+1070,3455,System Administrator,Kevin Chavez,Christopher Stone,Direct Hire,Placed,0.0,0.0,"07/08/2021, 9:08 AM",Leidos,,
+1071,3452,Cross Domain Engineer,Kevin Testerman,Sheila Stoutamyer,Contract,Placed,0.0,0.0,"07/07/2021, 4:00 PM",Leidos,,ai_ml
+1072,3448,Waterfront Communications Network Engineer,Steve Marinelli,Angela Boyer,Contract,Placed,34.63,61.75,"07/07/2021, 8:46 AM",,,networking
+1073,3447,Waterfront Communications Network Engineer,Steve Marinelli,Walter Kueck,Contract,Open,32.27,61.75,"07/07/2021, 8:43 AM",,,networking
+1074,3436,Citrix Administrator,Steven Weaver,Christopher Stone,Contract,Open,0.0,0.0,"07/01/2021, 10:56 AM",Leidos,,
+1075,3435,Network Controller,Jason Soifer,Fred Hudson,Contract,Placed,0.0,0.0,"07/01/2021, 9:04 AM",,,networking
+1076,3433,NIA Technician,Matt Garten,John Hubler,Contract To Hire,Placed,19.71,58.13,"07/01/2021, 8:24 AM",,,
+1077,3428,Storage Admin,Will Boyk,Christopher Stone,Contract,Placed,0.0,0.0,"06/30/2021, 1:20 PM",Leidos,,
+1078,3421,System admin,Alex Barkan,Bill Curtin,Contract,Open,0.0,0.0,"06/29/2021, 9:27 AM",,,
+1079,3418,Cyber Security Specialist Senior,Trevor Newell,Mini Elmore,Contract,Open,0.0,0.0,"06/29/2021, 8:24 AM",Leidos,DIA,cybersecurity
+1080,3404,Software System Engineer,Alex Barkan,Louis De Bonis,Contract To Hire,Open,0.0,0.0,"06/25/2021, 12:56 PM",,,software_dev
+1081,3402,Software System Engineer,Alex Barkan,Louis De Bonis,Contract To Hire,Open,0.0,0.0,"06/25/2021, 10:54 AM",,,software_dev
+1082,3393,Virtualization Design Engineer,Trevor Newell,Ed Alsip,Contract,Open,0.0,0.0,"06/23/2021, 4:09 PM",Leidos,,systems_engineering
+1083,3390,Cloud Architect,Alex Barkan,Hale Kpetigo,Contract To Hire,Open,0.0,0.0,"06/23/2021, 8:47 AM",,,cloud
+1084,3388,Cyber Analyst - GSM-O II (Meade),Andrew Longo,Place Holder,Contract,Open,0.0,0.0,"06/22/2021, 4:40 PM",,,cybersecurity
+1085,3386,Network Admin,Alex Barkan,Lincoln Eldridge,Contract To Hire,Open,0.0,0.0,"06/22/2021, 11:21 AM",Leidos,,networking
+1086,3382,Box Engineer,Jason Soifer,Tom Houghton,Contract,Placed,0.0,0.0,"06/22/2021, 7:19 AM",,,
+1087,3369,Sr. Service Desk Specialist,Kevin Chavez,Lincoln Eldridge,Direct Hire,Placed,0.0,0.0,"06/15/2021, 6:44 PM",Leidos,,
+1088,3365,Information Specialist,Steven Weaver,Larry Bonner,Contract,Open,0.0,0.0,"06/15/2021, 10:32 AM",,,
+1089,3361,Cyber Analyst,Santino Mostaccio,Harrison Betsill,Contract To Hire,Placed,77.0,0.0,"06/15/2021, 8:06 AM",,,cybersecurity
+1090,3360,Full Stack Engineer/Dev Ops,Santino Mostaccio,Tara Laymon,Contract,Open,0.0,0.0,"06/14/2021, 10:18 AM",,,
+1091,3358,Storage Engineer- NGEN-SMIT,Matthew Lambert,Lincoln Eldridge,Contract,Placed,0.0,0.0,"06/14/2021, 8:58 AM",Leidos,,
+1092,3350,Network Engineer,Jason Soifer,Rich King,Contract,Filled by Client,0.0,0.0,"06/10/2021, 11:15 AM",,,networking
+1093,3348,UIUX Designer,Alex Barkan,Danielle Dufour,Contract,Filled by Client,0.0,0.0,"06/10/2021, 9:55 AM",,,systems_engineering
+1094,3346,Project Controller- Leidos,Matthew Lambert,Place Holder,Contract To Hire,Open,0.0,0.0,"06/10/2021, 8:45 AM",,,
+1095,3345,NetOps Lead - Mid (29 Palms),Trevor Newell,Donald Quinn,Contract,Open,0.0,0.0,"06/09/2021, 7:28 PM",,,
+1096,3342,Desktop Support Technician,Steve Marinelli,Dean Cardenas,Contract,Placed,27.8,43.64,"06/09/2021, 10:34 AM",,,
+1097,3328,SharePoint Dev (Programmer Sr) - MCEN,Trevor Newell,Ed Alsip,Contract,Open,0.0,0.0,"06/07/2021, 3:05 PM",Leidos,,
+1098,3326,Information Assurance Engineer,Tyler Holmes,Paul Hurst,Direct Hire,Open,0.0,0.0,"06/07/2021, 9:13 AM",,,
+1099,3321,Watch Officer Pentagon - GSM-O II,Andrew Longo,Place Holder,Contract To Hire,Open,0.0,0.0,"06/04/2021, 9:07 AM",,,
+1100,3318,A&A Engineer,Jason Soifer,Paul Hurst,Direct Hire,Open,0.0,0.0,"06/03/2021, 10:44 AM",,,
+1101,3315,Linux System Admin - GSM-O II,Andrew Longo,Place Holder,Contract To Hire,Open,0.0,0.0,"06/03/2021, 8:07 AM",,,
+1102,3313,DevSecOps Engineer-Leidos-CDC,Matthew Lambert,Place Holder,Contract,Placed,0.0,0.0,"06/02/2021, 8:15 AM",,,devops
+1103,3308,Java Developer-HHS-CDC,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"06/01/2021, 9:25 AM",,,software_dev
+1104,3304,Clin-53 Field Services,Steven Weaver,Amanda Hale,Contract,Placed,0.0,0.0,"05/28/2021, 9:54 AM",Leidos,,
+1105,3292,Senior Systems Administrator,Matthew Soifer,Zackery Turbyfill,Contract To Hire,Accepting Candidates,74.39,100000.0,"05/26/2021, 8:34 AM",Leidos,,
+1106,3262,SQL DBA,Steven Weaver,Joe Bourque,Contract,Open,0.0,0.0,"05/19/2021, 11:18 AM",,,database
+1107,3256,Desktop Support Technician,Steve Marinelli,Joella Cain,Contract,Placed,0.0,0.0,"05/17/2021, 10:54 AM",,,
+1108,3253,Windows Systems Administrator,Tyler Holmes,Laura Israel,Contract To Hire,Open,0.0,0.0,"05/14/2021, 1:14 PM",Leidos,,
+1109,3250,Software Developer,Tyler Holmes,Laura Israel,Contract To Hire,Open,0.0,0.0,"05/14/2021, 9:36 AM",Leidos,,software_dev
+1110,3248,System Administrator- CDC- Leidos,Matthew Lambert,Place Holder,Contract To Hire,Placed,0.0,0.0,"05/14/2021, 8:18 AM",,,
+1111,3243,Data Entry Analyst,Anthony Fusco,Eric Clayton,Contract,Open,0.0,0.0,"05/13/2021, 10:51 AM",,,
+1112,3236,Sr. Network Engineer,Kevin Chavez,Rich King,Direct Hire,Open,0.0,0.0,"05/12/2021, 8:33 AM",,,networking
+1113,3233,AWS CLoud Admin - GSMO,Andrew Longo,Place Holder,Contract,Open,0.0,0.0,"05/11/2021, 5:20 PM",,,cloud
+1114,3228,DCO SME,Tyler Holmes,Kevin Klein,Contract To Hire,Open,0.0,0.0,"05/11/2021, 11:23 AM",Leidos,DIA,
+1115,3213,Cyber Analyst - GSMO Hill AFB,Tyler Holmes,Bryan LaPlant,Contract To Hire,Open,0.0,0.0,"05/05/2021, 7:58 AM",,,cybersecurity
+1116,3209,Network Engineer - GSMO II (surge project),Andrew Longo,Delmonik Contee,Contract,Placed,0.0,0.0,"05/04/2021, 8:54 AM",,,networking
+1117,3208,Mechanical Engineer,Steve Marinelli,Michael Lipscomb,Contract To Hire,Open,44.82,67.23,"05/03/2021, 3:51 PM",,,
+1118,3197,Jr Windows Sys Admin,Mike Huerkamp,Karl Kilthau,Contract To Hire,Placed,0.0,0.0,"04/30/2021, 10:05 AM",,,
+1119,3193,Power BI Developer,Anthony Fusco,Ken Simpson,Contract To Hire,Placed,0.0,0.0,"04/29/2021, 2:54 PM",,,data_analytics
+1120,3189,BioMedical Specialist,Anthony Fusco,Eric Clayton,Contract To Hire,Placed,67953.0,49.0,"04/29/2021, 10:30 AM",,,
+1121,3185,Network Engineer,Jason Soifer,Delmonik Contee,Contract To Hire,Open,0.0,0.0,"04/27/2021, 4:13 PM",,,networking
+1122,3169,SMIT- Desktop Support Technician,Steve Marinelli,David Rooney,Contract,Placed,20.68,40.26,"04/21/2021, 9:08 PM",Leidos,,
+1123,3162,Cyber Operations Planner,Tyler Holmes,Jeffrey Voice,Contract To Hire,Placed,0.0,0.0,"04/21/2021, 8:40 AM",,,cybersecurity
+1124,3157,Cyber Action Officer - GSMO I,Andrew Longo,Kevin Klein,Contract,Open,0.0,0.0,"04/20/2021, 2:44 PM",Leidos,DIA,cybersecurity
+1125,3155,Systems Admin 1,Jason Soifer,Karl Kilthau,Contract,Open,0.0,0.0,"04/20/2021, 8:25 AM",,,
+1126,3129,Network Engineer,Tyler Holmes,Len Tyler,Contract,Open,0.0,0.0,"04/14/2021, 9:25 AM",Leidos,,networking
+1127,3108,Windows 10 Migration Tech,Ethan Armstrong,Place Holder,Contract,Open,0.0,0.0,"04/07/2021, 8:32 AM",,,
+1128,3091,Network Admin,Anthony Fusco,ROBERT KAPLAN,Contract To Hire,Placed,0.0,0.0,"04/02/2021, 2:14 PM",,,networking
+1129,3077,Cyber Fusion and Threat Analyst,Jason Soifer,Kevin Klein,Contract,Accepting Candidates,52.88,114.0,"03/31/2021, 4:04 PM",Leidos,DIA,cybersecurity
+1130,3073,Security Analyst,Steve Marinelli,Jason Bryant,Contract To Hire,Open,40.0,60.0,"03/31/2021, 9:02 AM",SAIC,"ITES, MDA",cybersecurity
+1131,3061,Logistics Specialist,Anthony Fusco,Marta Williams,Contract To Hire,Placed,0.0,0.0,"03/25/2021, 1:53 PM",Leidos,,
+1132,3056,Install Tech,Anthony Fusco,Howard (JD) Daniel,Contract To Hire,Open,0.0,0.0,"03/24/2021, 4:08 PM",Leidos,,
+1133,3053,Network Controller,Jason Soifer,Len Tyler,Contract To Hire,Placed,0.0,0.0,"03/24/2021, 1:03 PM",Leidos,,networking
+1134,3052,Systems Operator,Ethan Armstrong,Place Holder,Contract To Hire,Placed,0.0,0.0,"03/24/2021, 12:50 PM",,,
+1135,3042,Jr. Systems Admin,Ethan Armstrong,Place Holder,Contract To Hire,Open,0.0,0.0,"03/22/2021, 10:40 AM",,,
+1136,3040,IA Engineer- GSMO- Scott AFB,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"03/22/2021, 9:16 AM",,,
+1137,3038,"Sr. Systems Administrator (GSMO, Scott AFB)",Tyler Holmes,Tara Laymon,Contract,Open,0.0,0.0,"03/22/2021, 8:24 AM",,,
+1138,3034,Sr. Windows Systems Admin,Jason Soifer,John Mattingly,Contract To Hire,Open,0.0,0.0,"03/20/2021, 10:39 AM",,,
+1139,3033,Firewall SME - Leidos GSMO,Trey Kelly,Jon Patrick,Contract,Open,0.0,0.0,"03/19/2021, 5:01 PM",,,networking
+1140,3020,Desktop Support Specialist,Steve Marinelli,Clint Anderson,Contract,Placed,62.49,0.0,"03/16/2021, 9:24 AM",,,
+1141,3005,Cyber Architect,Matthew Soifer,Nicholas Brink,Direct Hire,Placed,96.15,200000.0,"03/11/2021, 10:29 AM",Leidos,,cybersecurity
+1142,2991,Informatics Specialist,Steven Weaver,Peter Cheung,Contract,Open,0.0,0.0,"03/04/2021, 9:49 AM",Leidos,,
+1143,2983,Oracle DBA,Tyler Holmes,Tara Laymon,Contract,Placed,0.0,0.0,"03/03/2021, 9:30 AM",,,database
+1144,2982,Sr. Cyber Forensics Analyst,Ethan Armstrong,Sean Black,Contract,Open,0.0,0.0,"03/03/2021, 9:28 AM",,,cybersecurity
+1145,2972,Computer Network Defense,Tyler Holmes,Tara Laymon,Contract,Open,0.0,0.0,"03/01/2021, 9:19 AM",,,networking
+1146,2956,Data Analyst (remote) - Leidos/CDC,Andrew Longo,Place Holder,Contract,Placed,57.81,0.0,"02/23/2021, 8:24 AM",,,
+1147,2954,Cybersecurity Analyst - Leidos GSMO Ft Meade,Trey Kelly,Laura Israel,Contract,Placed,0.0,0.0,"02/22/2021, 1:50 PM",Leidos,,cybersecurity
+1148,2950,Sr Cyber Analyst,Bailey Rollins,Laura Israel,Contract,Open,0.0,0.0,"02/19/2021, 3:33 PM",Leidos,,cybersecurity
+1149,2943,Systems Engineer- RHEL,Steve Marinelli,Joe Bourque,Contract,Placed,130.29,0.0,"02/19/2021, 8:43 AM",,,
+1150,2937,Devops Manager,Tyler Holmes,Tara Laymon,Contract To Hire,Placed,0.0,0.0,"02/18/2021, 9:14 AM",,,devops
+1151,2935,Sr. RHEL Engineer - Leidos AFNCR Pentagon,Trey Kelly,Joe Bourque,Contract,Filled by Client,0.0,0.0,"02/17/2021, 9:59 AM",,,
+1152,2934,Sr. Project Manager - Leidos AFNCR,Trey Kelly,Joe Bourque,Contract,Filled by Client,0.0,0.0,"02/17/2021, 9:42 AM",,,
+1153,2922,Automation Test Lead,Ethan Armstrong,Place Holder,Contract,Open,0.0,0.0,"02/12/2021, 12:42 PM",,,
+1154,2916,Sr. Systems Engineer - Leidos ARLE Manassas,Trey Kelly,Kevin Reynolds,Contract,Filled by Client,0.0,0.0,"02/11/2021, 1:13 PM",,,
+1155,2914,Oracle DBA - Leidos AFNCR Pentagon/JBAB,Trey Kelly,John Hayes,Contract,Filled by Client,0.0,0.0,"02/11/2021, 10:53 AM",,,database
+1156,2911,Sr System Admin (Stig & ACAS) AFNCR,Bailey Rollins,Place Holder,Contract,Open,0.0,0.0,"02/10/2021, 4:21 PM",,,
+1157,2910,Sr. Oracle DBA (Remote) - Leidos ACE IT,Trey Kelly,David Tran,Contract,Filled by Client,0.0,0.0,"02/10/2021, 12:40 PM",,,database
+1158,2909,Oracle DBA/SQL - Leidos AFNCR,Trey Kelly,John Hayes,Contract,Placed,0.0,0.0,"02/10/2021, 9:31 AM",,,database
+1159,2904,Senior Cloud Database Administrator,Jason Soifer,Tara Laymon,Contract,Open,0.0,0.0,"02/09/2021, 10:58 AM",,,"cloud, database"
+1160,2903,ISSO (RMF) - Leidos AFNCR,Trey Kelly,Place Holder,Contract,Placed,0.0,0.0,"02/09/2021, 8:19 AM",,,
+1161,2897,Project Manager- Leidos-DISA,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"02/05/2021, 12:48 PM",,DISA,
+1162,2885,DevSecOps Engineer,Steven Weaver,Tara Laymon,Contract,Placed,0.0,0.0,"02/03/2021, 4:28 PM",,,devops
+1163,2881,Sr. Linux Sys Admin - Leidos GSMO,Trey Kelly,John Mattingly,Contract,Accepting Candidates,0.0,0.0,"02/02/2021, 10:03 AM",,,
+1164,2864,Incident Response Engineers - Leidos NOAA,Trey Kelly,Lesley Harris,Contract,Open,0.0,0.0,"01/27/2021, 10:44 AM",,,cybersecurity
+1165,2855,Network Tech,Ethan Armstrong,Place Holder,Contract,Open,0.0,0.0,"01/22/2021, 9:02 AM",,,networking
+1166,2851,Sr. Tanium Administrator,Kevin Chavez,Place Holder,Direct Hire,Open,0.0,0.0,"01/20/2021, 4:21 PM",,,
+1167,2844,Sr. Unix Systems Admin,Ethan Armstrong,Place Holder,Contract,Open,0.0,0.0,"01/19/2021, 1:19 PM",,,
+1168,2839,VOIP Engineer,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"01/18/2021, 8:26 AM",,,
+1169,2838,Process Engineer,Jason Soifer,Tara Laymon,Contract,Open,0.0,0.0,"01/17/2021, 11:57 AM",,,
+1170,2832,Cisco Voice UC Engineer - Leidos GSMO,Trey Kelly,Gary Felax,Contract,Filled by Client,0.0,0.0,"01/15/2021, 1:47 PM",,,networking
+1171,2828,Leidos Leads,Trey Hall,Place Holder,Contract To Hire,Open,0.0,0.0,"01/15/2021, 8:11 AM",,,
+1172,2822,Systems Admin,Ethan Armstrong,Place Holder,Contract,Placed,0.0,0.0,"01/13/2021, 5:21 PM",,,
+1173,2821,Systems Engineer,Ethan Armstrong,Place Holder,Contract,Open,0.0,0.0,"01/13/2021, 3:36 PM",,,
+1174,2815,PC Tech (St. Louis),Matt Pergolini,Bruce Brower,Contract,Open,0.0,0.0,"01/12/2021, 1:52 PM",SAIC,,
+1175,2813,Senior Cloud Database Admin - Leidos GSM-O,Matthew Lambert,Place Holder,Contract,Placed,0.0,0.0,"01/12/2021, 10:31 AM",,,"cloud, database"
+1176,2803,Sr. Cloud DBA - Leidos GSMO,Trey Kelly,Tara Laymon,Contract,Accepting Candidates,0.0,0.0,"01/08/2021, 12:58 PM",,,"cloud, database"
+1177,2802,Electrical Distribution Design Engineer,Bailey Rollins,Tyler Harris,Contract,Placed,0.0,0.0,"01/08/2021, 11:14 AM",Leidos,,systems_engineering
+1178,2801,Systems Admin (AIX),Matt Pergolini,Jo Ann Arcieri,Contract,Open,0.0,0.0,"01/08/2021, 11:10 AM",,,ai_ml
+1179,2799,Project Manager - Leidos GSMO,Trey Kelly,Tara Laymon,Contract,Filled by Client,0.0,0.0,"01/08/2021, 9:45 AM",,,
+1180,2795,Senior Linux Admin,Jason Soifer,John Mattingly,Contract To Hire,Open,0.0,0.0,"01/06/2021, 11:09 AM",,,
+1181,2771,Cyber Analyst ReTool - Leidos GSMO,Trey Kelly,Jeff Brown,Contract,Filled by Client,0.0,0.0,"12/22/2020, 8:20 AM",,,cybersecurity
+1182,2754,Content Developer,Jason Soifer,Kelly Marsh,Contract To Hire,Open,0.0,0.0,"12/17/2020, 10:32 AM",,,
+1183,2740,Cyber Security Analyst,Jason Soifer,Bryan LaPlant,Contract To Hire,Placed,0.0,0.0,"12/14/2020, 3:06 PM",,,cybersecurity
+1184,2733,System Admin-AFNCR,Matthew Lambert,Place Holder,Contract To Hire,Placed,0.0,0.0,"12/11/2020, 12:38 PM",,,
+1185,2732,Maintenance Tech,Matthew Lambert,Place Holder,Contract To Hire,Placed,0.0,0.0,"12/11/2020, 12:33 PM",,,ai_ml
+1186,2729,HBSS Lead,Jason Soifer,Sean Black,Contract,Placed,0.0,0.0,"12/11/2020, 9:18 AM",,,
+1187,2725,PC TECH ACE- D.C,Steve Marinelli,Christopher Stone,Contract,Open,0.0,0.0,"12/10/2020, 3:48 PM",Leidos,,
+1188,2717,Network Specialist - Leidos AFNCR,Trey Kelly,Place Holder,Contract,Filled by Client,0.0,0.0,"12/09/2020, 9:57 AM",,,networking
+1189,2716,Data Scientist and Data Engineer,Jason Soifer,Matt Miller,Contract To Hire,Open,0.0,0.0,"12/09/2020, 9:40 AM",,,
+1190,2699,Cyber Security Analyst,Matt Garten,James Jones,Contract,Placed,40.86,78.54,"12/06/2020, 10:29 AM",,,cybersecurity
+1191,2697,Sr Security Engineer,Madison Yokley,Sean Black,Contract,Open,0.0,0.0,"12/03/2020, 2:27 PM",,,cybersecurity
+1192,2693,ELK SME,Jason Soifer,Tara Laymon,Contract,Open,0.0,0.0,"12/02/2020, 7:15 AM",,,
+1193,2674,Firewall Engineer,Jason Soifer,Laura Israel,Contract,Open,0.0,0.0,"11/23/2020, 10:49 AM",Leidos,,networking
+1194,2653,Network Admin,Bailey Rollins,Robert Kaplan,Contract,Placed,0.0,0.0,"11/13/2020, 1:08 PM",,,networking
+1195,2644,Sr. Tanium Administrator,Ethan Armstrong,Place Holder,Contract,Open,0.0,0.0,"11/11/2020, 2:43 PM",,,
+1196,2641,Oracle DBA- NGEN- SD or NF,Matthew Lambert,Place Holder,Contract,Placed,0.0,0.0,"11/11/2020, 8:15 AM",,,database
+1197,2623,Assembler/Technician,Matt Pergolini,Michael Lipscomb,Contract To Hire,Placed,0.0,0.0,"11/04/2020, 9:13 AM",,,
+1198,2613,Splunk SME,Jason Soifer,Steve Mullins,Contract To Hire,Placed,0.0,0.0,"10/30/2020, 8:24 AM",,,
+1199,2612,NetOps Trainer,Jason Soifer,Laura Israel,Contract,Open,0.0,0.0,"10/29/2020, 8:52 AM",Leidos,,ai_ml
+1200,2610,Help Desk Support Specialist,Jason Soifer,Heather Funderburg,Contract To Hire,Open,0.0,0.0,"10/28/2020, 10:33 AM",,,
+1201,2602,Watch Officer - JDOC - GSMO,Jason Soifer,Mark Clarke,Contract,Open,0.0,0.0,"10/27/2020, 7:30 AM",Microsoft,,
+1202,2601,Network Engineer (R&S) - Leidos GSMOII,Trey Kelly,Laura Israel,Contract,Placed,0.0,0.0,"10/26/2020, 3:17 PM",Leidos,,networking
+1203,2599,Network Admin/Jr. Eng - Leidos (Langley AFB),Andrew Longo,Place Holder,Contract To Hire,Open,0.0,0.0,"10/26/2020, 8:44 AM",,,networking
+1204,2590,Leidos Remote ServiceNow Developer,Andrew Longo,Place Holder,Contract,Open,0.0,0.0,"10/22/2020, 12:54 PM",,,
+1205,2585,SQL DBA - Leidos,Andrew Longo,Place Holder,Contract To Hire,Open,0.0,0.0,"10/22/2020, 8:21 AM",,,database
+1206,2584,Oracle DBA,Matt Pergolini,Jo Ann Arcieri,Contract,Open,0.0,0.0,"10/21/2020, 9:27 AM",,,database
+1207,2581,Distribution Design Engineer - Kalamazoo,Trey Kelly,Keane Kalso,Contract,Filled by Client,0.0,0.0,"10/21/2020, 8:55 AM",,,systems_engineering
+1208,2560,SOC Manager,Derek Todd,Sean Black,Contract To Hire,Placed,0.0,0.0,"10/14/2020, 1:36 PM",,,cybersecurity
+1209,2558,Network Performance Engineer - Leidos GSMO,Trey Kelly,Laura Israel,Contract,Open,0.0,0.0,"10/13/2020, 2:37 PM",Leidos,,networking
+1210,2557,Kafka Engineer - Leidos GSMOII,Jason Soifer,Ray Deyton,Contract,Placed,0.0,0.0,"10/13/2020, 9:28 AM",,,
+1211,2548,Network Specialist - Leidos DHMSM,Trey Kelly,Place Holder,Contract,Open,0.0,0.0,"10/08/2020, 9:59 AM",,,networking
+1212,2547,Windows Admin,Derek Todd,Charles E Branum,Contract To Hire,Open,0.0,0.0,"10/08/2020, 7:51 AM",,,
+1213,2546,Engineer (Mechanical or Electrical),Steve Marinelli,Michael Lipscomb,Contract To Hire,Open,0.0,0.0,"10/07/2020, 9:19 AM",,,
+1214,2538,JRSS - InfoVista and Kafka Engineer,Jason Soifer,Laura Israel,Contract To Hire,Open,0.0,0.0,"10/05/2020, 2:42 PM",Leidos,,
+1215,2536,Network Engineer Level 1,Derek Todd,Place Holder,Contract To Hire,Open,0.0,0.0,"10/05/2020, 12:06 PM",,,networking
+1216,2523,ACAS Lead,Jason Soifer,Sean Black,Contract To Hire,Placed,0.0,0.0,"09/29/2020, 5:26 PM",,,
+1217,2522,Sr. Cyber Security Eng.,Derek Todd,Place Holder,Contract To Hire,Open,0.0,0.0,"09/29/2020, 1:24 PM",,,cybersecurity
+1218,2514,Principal Business Systems Analyst,Derek Todd,Place Holder,Contract,Open,0.0,0.0,"09/25/2020, 1:52 PM",,,
+1219,2510,Sr. Linux Admin,Jason Soifer,Charles E Branum,Contract To Hire,Open,0.0,0.0,"09/24/2020, 10:08 AM",,,
+1220,2508,Jr. Sys Admin - Leidos,Andrew Longo,Mike Gostomski,Contract To Hire,Open,0.0,0.0,"09/24/2020, 9:08 AM",,,
+1221,2494,Java Developer,Jason Soifer,Glen Caneel,Contract To Hire,Open,0.0,0.0,"09/21/2020, 1:20 PM",,,software_dev
+1222,2474,Cyber Security Forensic's Analyst/SOC Lead,Jason Soifer,Sean Black,Contract To Hire,Placed,0.0,0.0,"09/15/2020, 1:30 PM",,,cybersecurity
+1223,2450,Systems Administrator - Norfolk,Jason Soifer,Richard Wicher,Contract To Hire,Open,0.0,0.0,"09/03/2020, 9:26 AM",Leidos,,
+1224,2435,Help Desk - AFNCR,Trey Kelly,Sidney McCall,Contract,Placed,0.0,0.0,"08/27/2020, 9:16 AM",Leidos,,
+1225,2428,IA Engineer - GSMOII,Trey Kelly,Heather Moore,Contract,Open,0.0,0.0,"08/25/2020, 5:38 PM",,,
+1226,2426,Biometrics System Engineer,Jason Soifer,Anamika Goyal,Contract To Hire,Open,0.0,0.0,"08/25/2020, 9:50 AM",,,
+1227,2423,Systems Engineer - Norfolk,Jason Soifer,Richard Wicher,Contract To Hire,Open,35.78,0.0,"08/24/2020, 5:12 PM",Leidos,,
+1228,2405,Desktop Technician - ESA IV Refresh,Trey Kelly,Bradford Gee,Contract,Filled by Client,0.0,0.0,"08/18/2020, 8:55 AM",,,
+1229,2398,Distribution Engineer - Consumer's Energy Jackson,Trey Kelly,Keane Kalso,Contract,Open,0.0,0.0,"08/14/2020, 10:20 AM",,,
+1230,2395,Senior System Administrator,Jason Soifer,Kevin Reynolds,Contract To Hire,Placed,0.0,0.0,"08/13/2020, 6:02 PM",,,
+1231,2389,Distribution Engineering Manager,Ralph Geabhart,Thomas Cooney,Contract To Hire,Open,0.0,0.0,"08/12/2020, 9:22 AM",,,
+1232,2386,Business Systems Analyst - Stockpile CDC,Trey Kelly,Marta Williams,Contract,Filled by Client,0.0,0.0,"08/11/2020, 2:52 PM",Leidos,,
+1233,2385,Security Analyst,Steve Marinelli,Lesley Harris,Contract To Hire,Open,73.0,0.0,"08/11/2020, 11:08 AM",,,cybersecurity
+1234,2384,Routing Network Engineer,Derek Todd,Albert Franke,Contract To Hire,Open,0.0,0.0,"08/11/2020, 7:48 AM",Leidos,,networking
+1235,2382,Desktop - HUD,Trey Kelly,Ralph Thomas,Contract,Filled by Client,0.0,0.0,"08/10/2020, 2:56 PM",Leidos,,
+1236,2374,Configuration Analyst - IHCCS,Trey Kelly,Ben Gall,Contract,Filled by Client,0.0,0.0,"08/06/2020, 4:12 PM",,,
+1237,2369,Network Engineer,Derek Todd,Albert Franke,Contract To Hire,Open,0.0,0.0,"08/05/2020, 9:00 AM",Leidos,,networking
+1238,2362,Sr. Network Engineer - ACE IT,Trey Kelly,Ralph Thomas,Contract,Filled by Client,0.0,0.0,"08/04/2020, 9:01 AM",Leidos,,networking
+1239,2357,Sr. Biostatician,Trey Kelly,Sherry Ketemepi,Contract,Open,0.0,0.0,"07/31/2020, 2:39 PM",,,
+1240,2356,Distribution Engineer,Jason Soifer,Thomas Cooney,Contract To Hire,Open,60000.0,0.0,"07/31/2020, 2:14 PM",,,
+1241,2352,.Net Developer,Jason Soifer,Glen Caneel,Contract,Filled by Client,40.0,0.0,"07/30/2020, 7:58 AM",,,software_dev
+1242,2345,VOIP Engineer - Leidos ACE IT,Trey Kelly,Ralph Thomas,Contract,Placed,0.0,0.0,"07/28/2020, 8:38 AM",Leidos,,
+1243,2337,Epidemiologist Stat Programmer - Leidos CDC,Trey Kelly,Sherry Ketemepi,Contract To Hire,Filled by Client,0.0,0.0,"07/27/2020, 9:07 AM",,,
+1244,2327,PowerApps SME,Matt Pergolini,Scott Feverston,Contract,Open,0.0,0.0,"07/22/2020, 10:30 AM",,,
+1245,2323,Lead Subcontracts Administrator - Leidos,Trey Kelly,Taneshia Reeves,Contract,Placed,0.0,0.0,"07/21/2020, 3:16 PM",,,
+1246,2313,Firewall Engineer - Leidos CMS,Trey Kelly,Dale Davis,Contract,Filled by Client,0.0,0.0,"07/16/2020, 2:19 PM",,,networking
+1247,2302,ISSO - Leidos US Mint,Trey Kelly,Lexy Guenther,Contract,Open,0.0,0.0,"07/15/2020, 1:14 PM",,,
+1248,2299,Cyber Security Engineer - Leidos US Mint,Trey Kelly,Lexy Guenther,Contract,Filled by Client,0.0,0.0,"07/14/2020, 12:54 PM",,,cybersecurity
+1249,2298,Cyber Security Analyst - Leidos US Mint,Trey Kelly,Lexy Guenther,Contract,Open,0.0,0.0,"07/13/2020, 5:22 PM",,,cybersecurity
+1250,2286,Business Systems Analyst/Project Coordinator,Trey Kelly,Rebecca Hartung,Contract,Accepting Candidates,0.0,0.0,"07/09/2020, 12:52 PM",,,
+1251,2283,Splunk Engineer,Matt Pergolini,Chris Smith,Contract,Open,0.0,0.0,"07/09/2020, 9:43 AM",,,
+1252,2280,Remedy Developer,Matt Pergolini,Scott Feverston,Contract,Open,0.0,0.0,"07/08/2020, 2:19 PM",,,
+1253,2275,Project Manager/Systems Engineer III,Trey Kelly,Rebecca Hartung,Contract,Filled by Client,0.0,0.0,"07/07/2020, 2:03 PM",,,
+1254,2273,PC Tech,Matt Pergolini,Melanie Batista,Contract,Placed,0.0,0.0,"07/07/2020, 10:52 AM",,,
+1255,2264,Sr. Distribution Engineer,Trey Kelly,Nick Rymeski,Contract,Filled by Client,0.0,0.0,"07/02/2020, 11:19 AM",,,
+1256,2262,Hardware Engineer - Leidos DISA JSP,Trey Kelly,Richard Wicher,Contract,Open,0.0,0.0,"07/01/2020, 3:46 PM",Leidos,DISA,
+1257,2247,Architecture Engineer - IHCCS,Trey Kelly,Johnathon Brett,Contract,Filled by Client,0.0,0.0,"06/25/2020, 10:48 AM",,,systems_engineering
+1258,2243,Software Developer,Trey Kelly,Douglas Disinger,Contract,Filled by Client,0.0,0.0,"06/24/2020, 8:48 AM",Leidos,,software_dev
+1259,2233,Training Specialist - ITEMS UFS,Trey Kelly,Jennifer Lash,Contract,Filled by Client,0.0,0.0,"06/22/2020, 1:58 PM",,,ai_ml
+1260,2230,IT Systems Engineer - IHCCS,Trey Kelly,Ben Gall,Contract,Filled by Client,0.0,0.0,"06/18/2020, 4:53 PM",,,
+1261,2219,Network Support Specialist - US AF,Trey Kelly,Albert Franke,Contract,Filled by Client,0.0,0.0,"06/16/2020, 10:16 AM",Leidos,,networking
+1262,2214,HR Specialist,Trey Kelly,Katie Fischer,Contract,Filled by Client,0.0,0.0,"06/11/2020, 2:33 PM",,,
+1263,2210,Helpdesk Specialist,Steve Marinelli,Gary Baldwin,Contract,Placed,0.0,0.0,"06/10/2020, 2:27 PM",,,
+1264,2207,AHLTA/Genesis - Leidos Defense Health,Trey Kelly,Trey Kelly,Contract,Filled by Client,0.0,0.0,"06/08/2020, 4:31 PM",,,
+1265,2206,Network Engineer (SolarWinds),Steve Marinelli,Jo Ann Arcieri,Contract,Open,0.0,0.0,"06/08/2020, 3:38 PM",,,networking
+1266,2205,Leidos Comp Targets,Trey Kelly,Trey Kelly,Contract,Filled by Client,0.0,0.0,"06/08/2020, 2:20 PM",,,
+1267,2201,Software Testing Specialist - NHLBI,Trey Kelly,Kashish Ashpalia,Contract,Open,0.0,0.0,"06/07/2020, 1:57 PM",,,software_dev
+1268,2199,Network Engineer- ACE,Matthew Lambert,Place Holder,Contract,Open,0.0,0.0,"06/05/2020, 4:04 PM",,,networking
+1269,2196,Lead Generation - Kevin Chavez (Leidos),Trey Kelly,Trey Kelly,Contract,Filled by Client,0.0,0.0,"06/05/2020, 2:27 PM",,,
+1270,2186,Java Developer - Leidos VA,Trey Kelly,Glen Caneel,Contract,Open,0.0,0.0,"06/04/2020, 3:15 PM",,,software_dev
+1271,2182,SCOM Engineer - Leidos AFNCR,Trey Kelly,Christiana Goode,Contract,Filled by Client,0.0,0.0,"06/03/2020, 6:23 PM",,,
+1272,2178,Software Application Engineer - Leidos (Remote),Trey Kelly,Kathryn McConnell,Contract,Filled by Client,0.0,0.0,"06/02/2020, 5:14 PM",,,software_dev
+1273,2175,Lockheed Leads,Trey Hall,Place Holder,Contract To Hire,Open,0.0,0.0,"06/02/2020, 8:42 AM",,,
+1274,2173,Enterprise Monitoring Manager - Leidos IHCCS,Trey Kelly,Matthew Janowiak,Contract,Filled by Client,0.0,0.0,"06/01/2020, 4:44 PM",,,
+1275,2172,Sr. Backend .NET Developer Devops - Leidos VA,Trey Kelly,Glen Caneel,Contract,Filled by Client,0.0,0.0,"06/01/2020, 2:41 PM",,,"software_dev, devops"
+1276,2164,Electrical Engineer,Trey Kelly,Maryann Clark,Contract,Filled by Client,0.0,0.0,"05/27/2020, 9:15 PM",,,
+1277,2163,Distribution Engineer - Leidos PG&E,Trey Kelly,James Kuiken,Contract,Filled by Client,0.0,0.0,"05/27/2020, 5:55 PM",,,
+1278,2157,Strategic Communications Specialist - Leidos ITEMS UFS,Trey Kelly,Sherry Pittman,Contract,Filled by Client,0.0,0.0,"05/21/2020, 4:44 PM",,,
+1279,2152,Firewall Engineer III&IV - IHCCS,Trey Kelly,Dale Davis,Contract,Filled by Client,0.0,0.0,"05/20/2020, 9:18 AM",,,networking
+1280,2148,Electrical Distribution Engineer - Traverse City,Trey Kelly,Keane Kalso,Contract,Placed,0.0,0.0,"05/18/2020, 4:01 PM",,,
+1281,2145,Deployment Engineer - Leidos EUCS,Trey Kelly,Durell Wooten,Contract,Filled by Client,0.0,0.0,"05/16/2020, 2:44 PM",Leidos,,
+1282,2142,UI/UX Designer - Leidos DOJ,Trey Kelly,Robert Carroll III,Contract,Filled by Client,0.0,0.0,"05/14/2020, 5:02 PM",,,systems_engineering
+1283,2138,Network Architect,Trey Kelly,John McDermott,Contract To Hire,Open,0.0,0.0,"05/13/2020, 6:30 PM",,,networking
+1284,2136,Software Developer,Trey Kelly,Douglas Disinger,Contract To Hire,Placed,0.0,0.0,"05/13/2020, 10:57 AM",Leidos,,software_dev
+1285,2134,Tier III Systems Administrator,Trey Kelly,Todd Williford,Contract,Filled by Client,0.0,0.0,"05/12/2020, 5:37 PM",Leidos,"DIA, NGA",
+1286,2133,R Shiny Developer - Leidos CDC,Trey Kelly,Sherry Ketemepi,Contract,Filled by Client,0.0,0.0,"05/12/2020, 11:29 AM",,,
+1287,2132,Big Data/Machine Learning Developer - Leidos Civil IT,Trey Kelly,Arun Elluru,Contract,Open,0.0,0.0,"05/12/2020, 9:54 AM",Leidos,DIA,"ai_ml, data_analytics"
+1288,2130,Distribution Design Engineer,Trey Kelly,Evan Selahowski,Contract,Open,0.0,0.0,"05/11/2020, 10:12 AM",,,systems_engineering
+1289,2124,Configuration Analyst DTO - Leidos NGA,Trey Kelly,Michelle Rubinstein,Contract,Open,0.0,0.0,"05/07/2020, 6:09 PM",,NGA,
+1290,2121,Network Engineer - NGITS,Trey Kelly,John McDermott,Contract,Open,0.0,0.0,"05/06/2020, 9:29 AM",,,networking
+1291,2119,SCCM Engineer - Leidos NGA,Trey Kelly,Jennifer Lash,Contract,Open,0.0,0.0,"05/05/2020, 12:47 PM",,NGA,
+1292,2117,Storage Engineer,Matt Pergolini,Sutter Bailey,Contract,Placed,0.0,0.0,"05/05/2020, 8:37 AM",,,
+1293,2113,SCCM Lead Engineer - Leidos NGA,Trey Kelly,Michelle Rubinstein,Contract,Filled by Client,0.0,0.0,"05/02/2020, 1:42 PM",,NGA,
+1294,2111,Service Now Program Manager,Trey Kelly,Way Wan,Contract,Open,0.0,0.0,"04/30/2020, 8:06 PM",Leidos,DIA,
+1295,2107,SQL DBA - Leidos,Trey Kelly,Carlos Castrillon,Contract,Open,0.0,0.0,"04/29/2020, 6:52 PM",,,database
+1296,2104,VDI Engineer,Trey Kelly,Torrence Smith,Contract,Open,0.0,0.0,"04/28/2020, 7:06 PM",,,
+1297,2103,Distribution Engineer,Trey Kelly,Keane Kalso,Contract,Placed,0.0,0.0,"04/27/2020, 2:10 PM",,,
+1298,2098,eDiscover Administrator - Leidos DoJ,Trey Kelly,Angela Green,Contract,Open,0.0,0.0,"04/23/2020, 8:43 PM",,,
+1299,2097,Node Developer,Trey Kelly,Robert Carroll III,Contract,Filled by Client,0.0,0.0,"04/23/2020, 6:22 PM",,,
+1300,2093,Jr. Network Engineer,Trey Kelly,Sherman Blanton,Contract,Filled by Client,0.0,0.0,"04/22/2020, 4:12 PM",,,networking
+1301,2081,Sr. Systems Engineer,Trey Kelly,Ben Gall,Contract,Open,0.0,0.0,"04/16/2020, 3:27 PM",,,
+1302,2074,Software Systems Engineer - HealthShare Devops,Trey Kelly,Glen Caneel,Contract,Open,0.0,0.0,"04/14/2020, 7:52 PM",,,"software_dev, devops"
+1303,2060,Distribution Engineers - Indianapolis,Trey Kelly,Evan Selahowski,Contract,Open,0.0,0.0,"04/10/2020, 2:16 PM",,DIA,
+1304,2053,Business Systems Administrator - Leidos AHLTA,Trey Kelly,Frank Pena,Contract,Filled by Client,0.0,0.0,"04/09/2020, 3:28 PM",,,
+1305,2050,Configuration Management Librarian,Trey Kelly,Jennifer Lash,Contract,Filled by Client,0.0,0.0,"04/08/2020, 4:21 PM",,,
+1306,2047,Sr. DBA,Trey Kelly,Andy Karras,Contract,Filled by Client,0.0,0.0,"04/08/2020, 11:40 AM",,,database
+1307,2044,PC TECH (ST. LOUIS),Steve Marinelli,Melanie Batista,Contract,Placed,0.0,0.0,"04/07/2020, 4:47 PM",,,
+1308,2041,Sr. HR Systems Analyst,Trey Kelly,Jimmy Cheng,Contract,Filled by Client,0.0,0.0,"04/06/2020, 3:16 PM",,,
+1309,2037,Sr. Network Engineer/Architect,Trey Kelly,Johnathon Brett,Contract,Open,0.0,0.0,"04/03/2020, 4:03 PM",,,networking
+1310,2022,Information Security Analyst - Leidos DCPDS,Trey Kelly,Dean Finley,Contract,Placed,0.0,0.0,"03/31/2020, 10:48 AM",Leidos,DIA,cybersecurity
+1311,2019,VTC Technician,Steve Marinelli,John Hayes,Contract,Open,46.0,69.0,"03/31/2020, 8:48 AM",,,
+1312,2018,VTC Technician - AFNCR,Madison Yokley,Place Holder,Contract,Placed,0.0,0.0,"03/31/2020, 8:40 AM",,,
+1313,2017,Endpoint Engineer - Leidos NGITS,Trey Kelly,John McDermott,Contract,Filled by Client,0.0,0.0,"03/30/2020, 5:24 PM",,,
+1314,2006,Software Tester - Leidos NHLBI,Trey Kelly,Martha Ramirez,Contract,Filled by Client,0.0,0.0,"03/26/2020, 2:54 PM",,,software_dev
+1315,1998,Software Developer (java) - NIH,Andrew Longo,Vidya Patankar,Contract To Hire,Open,72.22,110.0,"03/26/2020, 8:32 AM",,,software_dev
+1316,1996,Software Engineer - USTRANSCOM,Trey Kelly,Debra Stanfill,Contract,Open,0.0,0.0,"03/25/2020, 5:05 PM",,TRANSCOM,software_dev
+1317,1990,Systems Admin AZ,Matt Pergolini,Melanie Batista,Contract,Placed,0.0,0.0,"03/25/2020, 8:44 AM",,,
+1318,1989,PC Tech AZ,Matt Pergolini,Melanie Batista,Contract,Open,0.0,0.0,"03/25/2020, 8:43 AM",,,
+1319,1985,Sr. Systems Administrator - Leidos Corporate,Trey Kelly,Michael Lott,Contract,Filled by Client,0.0,0.0,"03/24/2020, 3:22 PM",,,
+1320,1983,SOC Manager - Leidos,Trey Kelly,Lexy Guenther,Contract,Filled by Client,0.0,0.0,"03/24/2020, 10:29 AM",,,cybersecurity
+1321,1981,Java Developer,Ethan Armstrong,Martha Ramirez,Contract To Hire,Open,0.0,0.0,"03/24/2020, 9:36 AM",,,software_dev
+1322,1967,Software Developer - Leidos NIH,Andrew Longo,Martha Ramirez,Contract To Hire,Open,0.0,0.0,"03/19/2020, 4:57 PM",,,software_dev
+1323,1966,Business Analyst - Leidos NIH,Andrew Longo,Martha Ramirez,Contract To Hire,Open,56.66,85.0,"03/19/2020, 4:56 PM",,,
+1324,1964,Information Assurance Risk Manager - Leidos F16,Trey Kelly,Natalie Fleming,Contract,Open,0.0,0.0,"03/19/2020, 11:09 AM",,,
+1325,1963,Oracle DBA - Leidos USAF,Trey Kelly,Robert Skriniak,Contract,Open,0.0,0.0,"03/19/2020, 10:40 AM",,,database
+1326,1958,Oracle Apps DBA - Leidos Remote,Trey Kelly,Daniel Goldberg,Contract,Open,0.0,0.0,"03/17/2020, 1:15 PM",,,database
+1327,1957,Project Manager,Trey Kelly,Konstantin Moroz,Contract,Filled by Client,0.0,0.0,"03/17/2020, 10:01 AM",,,
+1328,1949,Network Engineer - NGITS,Trey Kelly,John McDermott,Contract,Filled by Client,0.0,0.0,"03/16/2020, 8:49 AM",,,networking
+1329,1947,Sr. Java Developer - Leidos NIH,Trey Kelly,Martha Ramirez,Contract,Open,0.0,0.0,"03/13/2020, 12:46 PM",,,software_dev
+1330,1941,Solaris Engineer - Leidos NIH,Andrew Longo,Martha Ramirez,Contract,Open,51.06,76.59,"03/12/2020, 11:18 AM",,,
+1331,1940,Administrative Assistant - Leidos NIH,Andrew Longo,Martha Ramirez,Contract,Open,33.67,0.0,"03/12/2020, 10:53 AM",,,
+1332,1939,Scrum Master - PMP,Trey Kelly,Martha Ramirez,Contract,Open,0.0,0.0,"03/11/2020, 1:28 PM",,,"project_management, software_dev"
+1333,1938,Tax Accountant,Trey Kelly,Leila Soliman,Contract,Open,0.0,0.0,"03/11/2020, 9:09 AM",,,
+1334,1935,Software Engineer,Tyler Holmes,Douglas Disinger,Contract To Hire,Placed,0.0,0.0,"03/10/2020, 4:00 PM",Leidos,,software_dev
+1335,1933,Drupal SME,Steve Marinelli,Dan Pomykala,Contract To Hire,Placed,95.0,139.5,"03/09/2020, 2:40 PM",,,
+1336,1920,Oracle Developer (Data Warehouse) - Leidos DCPDS,Trey Kelly,Sheila Stoutamyer,Contract,Filled by Client,0.0,0.0,"03/06/2020, 11:19 AM",Leidos,,database
+1337,1917,Software Engineer - Leidos DCPDS,Trey Kelly,Sheila Stoutamyer,Contract,Filled by Client,0.0,0.0,"03/05/2020, 3:39 PM",Leidos,,software_dev
+1338,1915,Tech Writer - Leidos DOE NETL,Trey Kelly,Martha Clough,Contract,Filled by Client,0.0,0.0,"03/05/2020, 10:24 AM",,,
+1339,1911,Tech Writer - NETL Leidos DOE,Trey Kelly,Martha Clough,Contract To Hire,Open,0.0,0.0,"03/04/2020, 11:57 AM",,,
+1340,1906,Financial Professional 20 - Leidos Corporate Arizona,Trey Kelly,Charise Gonzalez,Contract,Open,0.0,0.0,"03/03/2020, 8:48 PM",,,
+1341,1905,Computer Tech - Leidos,Trey Kelly,Monica Lee,Contract,Open,0.0,0.0,"03/03/2020, 5:34 PM",,,
+1342,1900,Splunk Engineer - IHCCS Baltimore,Trey Kelly,Keith Nelson,Contract,Filled by Client,0.0,0.0,"03/03/2020, 9:41 AM",,,
+1343,1890,Peoplesoft SME Developer - New Orleans (Remote Potential),Trey Kelly,Danielle Dufour,Contract,Filled by Client,0.0,0.0,"02/27/2020, 3:36 PM",,,
+1344,1884,Sr. Software Developer - Leidos VA CMOP,Trey Kelly,Darla Walker,Contract,Open,0.0,0.0,"02/26/2020, 11:29 AM",,,software_dev
+1345,1862,Oracle Apps DBA - Leidos DCPDS,Trey Kelly,Dean Finley,Contract,Open,0.0,0.0,"02/18/2020, 3:38 PM",Leidos,DIA,database
+1346,1852,Associate Distribution Engineer - Leidos Engineering,Trey Kelly,Keane Kalso,Contract,Filled by Client,0.0,0.0,"02/14/2020, 10:40 AM",,,cybersecurity
+1347,1843,Jr. Software Engineer - Leidos CBRNE,Trey Kelly,Derek Queen,Contract,Filled by Client,0.0,0.0,"02/13/2020, 9:04 AM",,,software_dev
+1348,1835,Full Stack Java Developer - Leidos NIH,Trey Kelly,Darla Walker,Contract,Filled by Client,0.0,0.0,"02/12/2020, 9:47 AM",,,software_dev
+1349,1833,Jr Desktop Support Engineer,Matthew Lambert,Place Holder,Contract To Hire,Open,50.0,0.0,"02/12/2020, 8:14 AM",,,
+1350,1832,SharePoint Administrator - Leidos NGA,Trey Kelly,Jeremy Bloom,Contract,Filled by Client,0.0,0.0,"02/11/2020, 5:04 PM",,NGA,
+1351,1829,IOSS Tech Hunt - Leidos,Trey Kelly,Andy Karras,Contract,Filled by Client,0.0,0.0,"02/10/2020, 11:10 AM",,,
+1352,1818,Associate Contract Representative,Trey Kelly,John Morton,Contract,Filled by Client,0.0,0.0,"02/06/2020, 11:02 AM",,,cybersecurity
+1353,1812,National Geospatial-Intelligence Agency - ITEMS UFS,Trey Kelly,Douglas Gray,Contract,Filled by Client,0.0,0.0,"02/05/2020, 10:51 AM",,,
+1354,1800,Sr. Storage Engineern - IOSS,Trey Kelly,Andy Karras,Contract,Filled by Client,0.0,0.0,"02/03/2020, 10:20 AM",,,
+1355,1790,Cyber Analyst/Engineer Watch Officer,Trey Kelly,Chad Sumpter,Contract,Open,0.0,0.0,"01/30/2020, 9:03 AM",Leidos,,cybersecurity
+1356,1780,Cyber Watch Officer,Trey Kelly,Chad Sumpter,Contract,Open,0.0,0.0,"01/24/2020, 11:12 AM",Leidos,,cybersecurity
+1357,1773,Mobility Engineer,Steve Marinelli,Scott Thomas,Contract,Placed,60.0,91.0,"01/23/2020, 9:16 AM",Leidos,,
+1358,1770,Systems Engineers - GSMO Scott AFB,Trey Kelly,Jeremy Sedlak,Contract,Filled by Client,0.0,0.0,"01/22/2020, 4:24 PM",,,
+1359,1755,Devops - AWS Cloud Engineer,Trey Kelly,Richard Ortiz,Contract,Accepting Candidates,0.0,0.0,"01/20/2020, 10:19 AM",Leidos,,"devops, cloud"
+1360,1753,Network Engineer - GSMO,Trey Kelly,Jeremy Sedlak,Contract,Open,0.0,0.0,"01/17/2020, 12:25 PM",,,networking
+1361,1745,Network Security Engineer - CMS,Trey Kelly,Keith Nelson,Contract,Filled by Client,0.0,0.0,"01/15/2020, 5:45 PM",,,"cybersecurity, networking"
+1362,1742,Network Controller,Trey Kelly,Fred Hudson,Contract,Placed,0.0,0.0,"01/15/2020, 9:50 AM",,,networking
+1363,1741,System Administrator,Steve Marinelli,John Hayes,Contract,Open,65.0,91.0,"01/15/2020, 9:49 AM",,,
+1364,1729,Unified Communications Engineer - GSMO II,Trey Kelly,George Boone,Contract,Filled by Client,0.0,0.0,"01/09/2020, 9:27 AM",Leidos,,
+1365,1726,Systems Administrator,Matt Pergolini,Ermias Teferra,Contract,Open,0.0,0.0,"01/07/2020, 11:33 AM",Leidos,,
+1366,1718,Jr. Network Engineer,Trey Kelly,John McDermott,Contract,Filled by Client,0.0,0.0,"12/23/2019, 3:26 PM",,,networking
+1367,1709,Mid Level Network Engineer,Trey Kelly,John McDermott,Contract,Filled by Client,0.0,0.0,"12/18/2019, 11:46 AM",,,networking
+1368,1705,Service Desk - GSMO,Trey Kelly,Kyle Whittington,Contract,Filled by Client,0.0,0.0,"12/17/2019, 9:48 AM",,,
+1369,1701,Devops Engineer,Trey Kelly,Elie Haddad,Contract,Accepting Candidates,0.0,0.0,"12/13/2019, 3:45 PM",,,devops
+1370,1700,Backup Engineer - AFNCR - Pentagon,Logan Hornback,Joe Bourque,Contract To Hire,Open,0.0,0.0,"12/13/2019, 8:47 AM",,,
+1371,1698,Software Specialist,Steve Marinelli,Mark Haynes,Contract To Hire,Placed,45.67,70.89,"12/12/2019, 9:19 AM",,,software_dev
+1372,1697,UC/Sr. Network Engineer,Trey Kelly,Steven Wisdom,Contract,Open,0.0,0.0,"12/11/2019, 1:28 PM",,,networking
+1373,1696,Tier II Desktop Support - Leidos,Trey Kelly,Charles Lane,Contract,Placed,0.0,0.0,"12/10/2019, 2:50 PM",,,
+1374,1686,UC Engineer - HHS,Trey Kelly,Kali Capaletti,Contract,Open,0.0,0.0,"12/05/2019, 4:00 PM",,,
+1375,1672,Oracle Cloud Engineer-Remote,Andrew Longo,Ralph Thomas,Contract,Open,0.0,0.0,"11/22/2019, 3:17 PM",Leidos,,"cloud, database"
+1376,1668,ONI - Systems Architect,Trey Kelly,Stephen Brook,Contract,Open,0.0,0.0,"11/21/2019, 10:19 AM",,,
+1377,1653,ColdFusion Programmer,Matt Pergolini,Ralph Thomas,Contract,Open,0.0,0.0,"11/14/2019, 2:18 PM",Leidos,,
+1378,1650,Linux Admin (AFNCR),Trey Hall,Jo Ann Arcieri,Contract To Hire,Open,0.0,0.0,"11/13/2019, 8:50 AM",,,
+1379,1649,PC Technician,Andrew Longo,Melanie Batista,Contract,Open,24.07,0.0,"11/12/2019, 5:51 PM",,,
+1380,1637,SCCM Engineer - ACEIT - Remote,Logan Hornback,Place Holder,Contract To Hire,Open,0.0,0.0,"11/06/2019, 8:53 AM",,,
+1381,1636,Desktop Tech,Andrew Longo,Place Holder,Contract,Open,0.0,0.0,"11/06/2019, 8:52 AM",,,
+1382,1634,Steven Wisdom - Leidos SCOTT AFB,Trey Kelly,Steven Wisdom,Contract,Filled by Client,0.0,0.0,"11/05/2019, 3:23 PM",,,
+1383,1633,Network Systems Engineer,Matt Pergolini,Jo Ann Arcieri,Contract,Open,0.0,0.0,"11/01/2019, 9:09 AM",,,networking
+1384,1631,BI Developer,Steve Marinelli,Sherry Ketemepi,Contract To Hire,Open,55.29,82.93,"10/31/2019, 1:39 PM",,,data_analytics
+1385,1626,Network Engineer,Matt Pergolini,James Gray,Contract,Open,0.0,0.0,"10/29/2019, 8:37 AM",,,networking
+1386,1621,Network Engineer - Firewalls,Trey Kelly,Mustafa Ahmad,Contract,Open,0.0,0.0,"10/28/2019, 9:49 AM",,,networking
+1387,1615,Oracle DBA,Andrew Longo,Jim Curray,Contract,Open,93.12,0.0,"10/23/2019, 5:42 PM",,,database
+1388,1613,VMWare Engineer,Matt Pergolini,Joe Bourque,Contract To Hire,Open,0.0,0.0,"10/23/2019, 8:53 AM",,,
+1389,1609,HelpDesk,Andrew Longo,Jeff Taylor,Contract To Hire,Placed,0.0,0.0,"10/22/2019, 1:39 PM",,,
+1390,1602,Software Systems Engineer,Matt Pergolini,Adam Streets,Contract To Hire,Open,0.0,0.0,"10/17/2019, 9:20 AM",,,software_dev
+1391,1597,Database Engineer,Matt Pergolini,Sherry Ketemepi,Contract To Hire,Open,0.0,0.0,"10/14/2019, 9:55 AM",,,database
+1392,1595,Security Engineer,Andrew Longo,Ralph Thomas,Contract,Open,0.0,0.0,"10/11/2019, 5:07 PM",Leidos,,cybersecurity
+1393,1585,Help Desk,Matt Pergolini,Heather Funderburg,Contract To Hire,Open,0.0,0.0,"10/08/2019, 8:56 AM",,,
+1394,1582,Oracle DBA,Madison Yokley,David Tran,Contract To Hire,Placed,0.0,0.0,"10/04/2019, 2:49 PM",,,database
+1395,1579,Business Analyst,Steve Marinelli,Sherry Ketemepi,Contract To Hire,Open,48.18,72.27,"10/04/2019, 1:22 PM",,,
+1396,1573,GIS Analyst,Matt Pergolini,Sherry Ketemepi,Contract To Hire,Open,0.0,0.0,"10/04/2019, 9:32 AM",,,
+1397,1571,MAC Engineer,Matt Pergolini,John Heritage,Contract,Open,0.0,0.0,"10/03/2019, 2:42 PM",,,
+1398,1567,Network Engineer,Matt Pergolini,Sutter Bailey,Contract,Placed,0.0,0.0,"10/02/2019, 10:01 AM",,,networking
+1399,1564,Sharepoint Engineer,Matt Pergolini,Jo Ann Arcieri,Contract To Hire,Open,0.0,0.0,"10/01/2019, 9:33 AM",,,
+1400,1563,Network Engineer,Steve Marinelli,Ralph Thomas,Contract,Open,42.0,68.0,"10/01/2019, 9:17 AM",Leidos,,networking
+1401,1560,Sharepoint Engineer,Matthew Lambert,Jo Ann Arcieri,Contract To Hire,Open,0.0,0.0,"09/30/2019, 2:37 PM",,,
+1402,1551,Software Engineer,Matt Pergolini,Ryan Kenny,Contract,Open,0.0,0.0,"09/24/2019, 1:21 PM",,,software_dev
+1403,1539,Phone Support,Matt Pergolini,Scott Thomas,Contract,Placed,0.0,0.0,"09/17/2019, 10:18 AM",Leidos,,
+1404,1536,Project Manager,Matt Pergolini,Jo Ann Arcieri,Contract To Hire,Placed,0.0,0.0,"09/16/2019, 10:00 AM",,,
+1405,1526,Desktop Support,Kevin Testerman,Jojo Cinco,Contract To Hire,Placed,0.0,0.0,"09/09/2019, 3:28 PM",Leidos,,
+1406,1525,Computer Technician,Tyler Holmes,Joni Batson,Contract To Hire,Open,0.0,0.0,"09/06/2019, 1:05 PM",,,
+1407,1507,Software Systems Engineering Manager,Trey Hall,Adam Streets,Contract To Hire,Open,0.0,0.0,"08/28/2019, 9:22 AM",,,"systems_engineering, software_dev"
+1408,1492,Sr. Project Controls,Colin Broder,Harvey Stivers,Contract,Open,0.0,0.0,"08/21/2019, 9:46 AM",,,
+1409,1487,Design Engineer,Trey Hall,Kevin Chastain,Contract,Open,0.0,0.0,"08/16/2019, 1:40 PM",,,systems_engineering
+1410,1485,Systems Engineer III,Tyler Holmes,John Fraser,Contract To Hire,Open,0.0,0.0,"08/16/2019, 1:35 PM",,,
+1411,1479,SharePoint Engineer,Kevin Testerman,Sidney McCall,Contract To Hire,Open,0.0,0.0,"08/16/2019, 1:06 PM",Leidos,,
+1412,1442,Help Desk,Kevin Testerman,Sidney McCall,Contract To Hire,Placed,0.0,0.0,"08/02/2019, 1:25 PM",Leidos,,
+1413,1422,Test Engineer,Kevin Testerman,Jennifer Colbert,Contract To Hire,Open,0.0,0.0,"07/26/2019, 1:11 PM",,,
+1414,1417,Drafter,Kevin Testerman,Peter Cheung,Contract To Hire,Open,0.0,0.0,"07/26/2019, 12:58 PM",Leidos,,
+1415,1402,IT PM,Kevin Testerman,Joseph Baweja,Contract To Hire,Open,0.0,0.0,"07/19/2019, 1:45 PM",,,
+1416,1399,Software Systems Engineer,Kevin Testerman,Jennifer Colbert,Contract To Hire,Open,0.0,0.0,"07/19/2019, 1:31 PM",,,software_dev
+1417,1397,Engineer IV,Tyler Holmes,Joni Batson,Contract To Hire,Open,0.0,0.0,"07/18/2019, 2:48 PM",,,
+1418,1388,Network Engineer,Kevin Testerman,Larry Barisciano,Contract To Hire,Open,0.0,0.0,"07/12/2019, 11:44 AM",,,networking
+1419,1387,Cyber Security Watch Officer,Kevin Testerman,Larry Barisciano,Contract To Hire,Open,0.0,0.0,"07/12/2019, 11:41 AM",,,cybersecurity
+1420,1373,MDM Administrator,Steve Marinelli,Ralph Thomas,Contract,Placed,0.0,0.0,"07/03/2019, 3:53 PM",Leidos,,
+1421,1370,Desktop Engineer,Kevin Testerman,Chris Smith,Contract To Hire,Open,0.0,0.0,"07/03/2019, 9:42 AM",,,
+1422,1357,Electrical Engineer - Indianapolis,Tyler Holmes,Evan Selahowski,Contract To Hire,Open,0.0,0.0,"06/21/2019, 8:29 AM",,DIA,
+1423,1324,Tier III Helpdesk,Steve Marinelli,Heather Funderburg,Contract To Hire,Open,32.31,48.47,"06/07/2019, 8:33 AM",,,
+1424,1323,Test Engineer,Tyler Holmes,Craig Dunn,Direct Hire,Open,0.0,0.0,"06/06/2019, 5:14 PM",,,
+1425,1308,SOFTWARE APPL ENG/PROG III (32699),Santino Mostaccio,Hale Kpetigo,Contract To Hire,Open,82.2,0.0,"05/28/2019, 9:15 AM",,,software_dev
+1426,1302,System Administrator,Steve Marinelli,Eric Purcell,Contract,Open,51.06,76.59,"05/21/2019, 9:44 AM",,,
+1427,1297,Electrical Engineer,Kevin Testerman,Joni Batson,Contract To Hire,Open,0.0,0.0,"05/17/2019, 10:18 AM",,,
+1428,1296,Cyber Security Tools Admin,Kevin Testerman,Robert Meder,Contract To Hire,Open,0.0,0.0,"05/16/2019, 10:22 AM",,,cybersecurity
+1429,1264,Technical Writer,Alex Barkan,Bethany King,Contract To Hire,Open,0.0,0.0,"04/19/2019, 8:07 AM",,,
+1430,1256,Project Scheduler,Alex Barkan,Kathryn McConnell,Contract,Open,0.0,0.0,"04/16/2019, 8:19 AM",,,
+1431,1244,PC TECH-NE,Alex Barkan,Melanie Batista,Contract,Placed,0.0,0.0,"04/10/2019, 7:52 AM",,,
+1432,1232,Subcontracts Administrator,Alex Barkan,Kodi Kosmoski,Contract To Hire,Open,0.0,0.0,"04/05/2019, 1:58 PM",,,
+1433,1228,Project Coordinator,Alex Barkan,Danielle Dufour,Contract,Open,0.0,0.0,"04/05/2019, 8:29 AM",,,
+1434,1226,Security Analyst,Alex Barkan,Bob Cranor,Contract To Hire,Open,0.0,0.0,"04/04/2019, 9:41 AM",,,cybersecurity
+1435,1225,Software Application Engineer (32549),Santino Mostaccio,Andre Swoope,Contract To Hire,Open,0.0,0.0,"04/04/2019, 8:40 AM",,,software_dev
+1436,1222,GIS Technician,Kevin Testerman,John Zuzek,Contract To Hire,Open,0.0,0.0,"04/04/2019, 8:10 AM",,,
+1437,1220,Project Manager,Alex Barkan,Danielle Dufour,Contract,Open,85.0,149.98,"04/02/2019, 8:33 AM",,,
+1438,1219,Logistics Support Coordinator,Alex Barkan,Danielle Dufour,Contract,Open,22.78,0.0,"04/01/2019, 8:31 AM",,,
+1439,1211,Help Desk Support Specialist,Alex Barkan,Pamela Davis,Contract,Open,24.94,0.0,"03/19/2019, 8:29 AM",,,
+1440,1210,SCCM System Engineer,Alex Barkan,Ermias Teferra,Contract,Open,0.0,0.0,"03/15/2019, 3:35 PM",Leidos,,
+1441,1209,Entry Level Software Engineer,Santino Mostaccio,Ermias Teferra,Contract,Open,0.0,0.0,"03/13/2019, 4:02 PM",Leidos,,software_dev
+1442,1207,Application Engineer (32516),Alex Barkan,Danielle Dufour,Contract,Open,42.32,63.48,"03/11/2019, 8:52 AM",,,
+1443,1204,Field Service Technician,Alex Barkan,Kathryn McConnell,Contract,Open,32.55,48.83,"03/08/2019, 8:57 AM",,,
+1444,1203,P&P Assurance Engineer,Alex Barkan,Alex Lebedinsky,Contract,Open,0.0,0.0,"03/07/2019, 8:39 AM",,,
+1445,1195,Systems Administrator IV,Alex Barkan,Michelle Matthews,Contract,Open,0.0,0.0,"03/04/2019, 8:37 AM",,,
+1446,1193,Electrical Eng.,Kevin Testerman,Evan Selahowski,Contract To Hire,Open,0.0,0.0,"02/27/2019, 4:02 PM",,,
+1447,1190,Software Engineer (32479),Steve Marinelli,Creig Smith,Contract To Hire,Open,69.67,104.58,"02/25/2019, 3:47 PM",,,software_dev
+1448,1187,Database Specialist (32429),Steve Marinelli,Eric Sculthorpe,Contract To Hire,Open,41.67,62.5,"02/22/2019, 8:49 AM",,,database
+1449,1186,Software Design Engineer (32431),Steve Marinelli,Eric Sculthorpe,Contract To Hire,Open,47.68,71.61,"02/22/2019, 8:43 AM",,,"systems_engineering, software_dev"
+1450,1183,Business Systems Analyst-New Orleans,Alex Barkan,Pamela Davis,Contract,Open,0.0,0.0,"02/21/2019, 8:57 AM",,,
+1451,1182,Project Manager,Steve Marinelli,L'Shaun Powell,Contract To Hire,Open,125.0,0.0,"02/20/2019, 2:55 PM",,,
+1452,1181,Business Process Analyst/Tech Writer (32459),Steve Marinelli,Kathryn McConnell,Contract To Hire,Open,43.34,65.0,"02/20/2019, 11:34 AM",,,
+1453,1176,Software Systems Engineer III (32449),Clay Failor,Douglas Disinger,Contract,Filled by Client,50.13,75.2,"02/18/2019, 7:11 PM",Leidos,,software_dev
+1454,1173,Software Engineer (32424),Steve Marinelli,Douglas Disinger,Contract To Hire,Open,75.2,0.0,"02/15/2019, 2:38 PM",Leidos,,software_dev
+1455,1171,Business Analyst-Entergy,Alex Barkan,Pamela Davis,Contract,Open,0.0,0.0,"02/15/2019, 2:27 PM",,,
+1456,1165,Field Service Technician I,Alex Barkan,Pamela Davis,Contract,Open,0.0,0.0,"02/13/2019, 6:11 PM",,,
+1457,1164,Field Service Technician II - AR,Alex Barkan,Pamela Davis,Contract,Open,0.0,0.0,"02/13/2019, 6:05 PM",,,
+1458,1163,Field Service Technician III,Alex Barkan,Pamela Davis,Contract,Open,0.0,0.0,"02/13/2019, 6:02 PM",,,
+1459,1155,Cost Schedule Analyst,Alex Barkan,Kodi Kosmoski,Contract,Placed,0.0,0.0,"02/07/2019, 3:12 PM",,,
+1460,1149,Software Design Engineer II,Alex Barkan,Mark Elgert,Contract,Open,0.0,0.0,"02/06/2019, 8:45 AM",,,"systems_engineering, software_dev"
+1461,1140,PC Tech-ACEIT,Alex Barkan,Melanie Batista,Contract,Placed,0.0,0.0,"01/30/2019, 8:13 AM",,,
+1462,1013,NetBackup Systems Admin III,Alex Barkan,Michael Younkins,Contract,Open,0.0,0.0,"09/19/2018, 11:55 AM",,,
+1463,1012,Systems Administrator,Steve Marinelli,Michael Younkins,Contract To Hire,Open,66.31,0.0,"09/19/2018, 10:05 AM",,,
+1464,1008,Desktop Engineer,Santino Mostaccio,Ray Danner Jr.,Contract,Open,0.0,0.0,"09/13/2018, 8:21 AM",,,
+1465,974,Property /Asset Management,Steve Marinelli,Michael Younkins,Contract,Open,0.0,0.0,"08/13/2018, 1:06 PM",,,
+1466,971,PC TECH,Steve Marinelli,Melanie Batista,Contract,Open,0.0,0.0,"08/10/2018, 2:11 PM",,,
+1467,925,Desktop Support,Santino Mostaccio,Rod Carter,Contract,Placed,0.0,0.0,"07/12/2018, 8:21 AM",,,
+1468,923,Priority Manager,Madison Yokley,Sutter Bailey,Contract,Open,0.0,0.0,"07/11/2018, 11:00 AM",,,
+1469,920,SharePoint Sys Admin,Santino Mostaccio,Ermias Teferra,Contract,Placed,0.0,0.0,"07/10/2018, 8:22 AM",Leidos,,
+1470,867,Application Developer,Steve Marinelli,Sutter Bailey,Contract,Open,0.0,0.0,"06/12/2018, 8:42 AM",,,
+1471,865,Unix Engineer,Steve Marinelli,Sutter Bailey,Contract,Placed,0.0,0.0,"06/11/2018, 10:09 AM",,,
+1472,861,Systems Engineer,Steve Marinelli,Udeagha Ezebuiro,Contract,Open,0.0,0.0,"06/10/2018, 10:08 PM",,,
+1473,858,UITOC Technician,Santino Mostaccio,Sutter Bailey,Contract,Placed,0.0,0.0,"06/08/2018, 11:01 AM",,,
+1474,839,Storage Engineer,Steve Marinelli,John Morton,Contract To Hire,Open,0.0,0.0,"05/30/2018, 2:58 PM",,,
+1475,838,Database Specialist (Master),Steve Marinelli,Joseph Walker,Contract To Hire,Open,0.0,0.0,"05/29/2018, 1:19 PM",,,database
+1476,837,Network Specialist (Master),Steve Marinelli,Joseph Walker,Contract To Hire,Open,0.0,0.0,"05/29/2018, 1:17 PM",,,networking
+1477,836,Network Specialist (Journeyman),Steve Marinelli,Joseph Walker,Contract To Hire,Open,0.0,0.0,"05/29/2018, 1:16 PM",,,networking
+1478,831,Systems Engineer,Steve Marinelli,John Morton,Contract To Hire,Open,0.0,0.0,"05/25/2018, 7:48 AM",,,
+1479,830,Systems Engineer Manager,Steve Marinelli,John Morton,Contract To Hire,Open,0.0,0.0,"05/25/2018, 7:47 AM",,,
+1480,829,System Administrator,Steve Marinelli,Alex Lebedinsky,Contract To Hire,Open,0.0,0.0,"05/24/2018, 2:35 PM",,,
+1481,818,Windows Endpoint Engineer,Steve Marinelli,Dan Charles,Contract,Open,74.47,0.0,"05/15/2018, 5:39 PM",,,
+1482,817,Apple Endpoint Engineer,Steve Marinelli,Dan Charles,Contract,Open,74.47,0.0,"05/15/2018, 5:37 PM",,,
+1483,808,ServiceNow Developer,Steve Marinelli,Alex Lebedinsky,Contract,Placed,101.0,0.0,"05/11/2018, 7:51 AM",,,
+1484,797,Jr Desktop Specialist,Matt Gullette,Ada Yicks,Contract,Open,0.0,0.0,"05/03/2018, 8:57 AM",,,
+1485,793,Tier 2 NOC Service Desk Agent,Matt Gullette,Catherine Zagar,Contract,Open,72.89,0.0,"04/30/2018, 9:59 AM",,,
+1486,770,VDI Architect,Steve Marinelli,Catherine Zagar,Contract,Open,0.0,0.0,"04/17/2018, 8:25 AM",,,
+1487,769,Network Engineer,Steve Marinelli,Catherine Zagar,Contract,Open,0.0,0.0,"04/17/2018, 8:23 AM",,,networking
+1488,768,Litigation Technology Analyst,Steve Marinelli,Jennifer Bailey,Contract,Open,65.0,0.0,"04/15/2018, 6:58 PM",,,
+1489,743,Helpdesk Specialist,Steve Marinelli,Tracey Wells,Contract,Placed,22.0,0.0,"04/03/2018, 9:30 AM",,,
+1490,736,Computer Systems Analyst II,Steve Marinelli,Bernice Dargan,Contract,Open,43.86,0.0,"03/29/2018, 6:41 PM",Leidos,,
+1491,714,Security Engineer,Steve Marinelli,John McDermott,Contract,Open,0.0,0.0,"03/19/2018, 10:45 AM",,,cybersecurity
+1492,708,System Admin II,Steve Marinelli,Dan Charles,Contract,Open,40.8,0.0,"03/18/2018, 7:51 PM",,,
+1493,707,Sr. Application Analyst,Matt Gullette,Dan Pomykala,Contract,Filled by Client,0.0,0.0,"03/18/2018, 2:21 PM",,,
+1494,702,Systems Administrator II,Matt Gullette,Dan Charles,Contract,Open,0.0,0.0,"03/16/2018, 9:09 AM",,,
+1495,381,CM Analyst,Steve Marinelli,Shelly Dolford,Contract,Lost to Competition,50.0,0.0,"01/23/2017, 9:55 AM",,,
+1496,376,Java Developer,Steve Marinelli,Rochel Smith,Contract,$0.00,0.0,0.0,"01/11/2017, 3:16 PM",,,software_dev
+1497,372,Logistics Support Specialist,Steve Marinelli,Marta Williams,Contract,$0.00,0.0,0.0,"01/10/2017, 8:45 AM",Leidos,,
+1498,371,FMS Medical Support,Steve Marinelli,Marta Williams,Contract,$0.00,0.0,0.0,"01/10/2017, 8:26 AM",Leidos,,
+1499,369,Software Engineer,Steve Marinelli,Margaret Hunt,Contract To Hire,$0.00,0.0,0.0,"01/07/2017, 2:11 PM",,,software_dev
+1500,368,AMS Configuration Management Analyst,Steve Marinelli,Rochel Smith,Contract To Hire,$0.00,0.0,0.0,"01/06/2017, 7:41 AM",,,
+1501,364,Enterprise Network Architect,Steve Marinelli,Ellen Lemaster,Contract,$0.00,0.0,0.0,"12/27/2016, 8:43 AM",,,networking
+1502,363,Project Manager,Steve Marinelli,Ellen Lemaster,Contract,$0.00,0.0,0.0,"12/27/2016, 8:40 AM",,,
+1503,344,NNMi Admin,Steve Marinelli,Chris Cannon,Contract,$0.00,0.0,0.0,"11/15/2016, 8:40 AM",,,
+1504,329,Database Engineer,Steve Marinelli,Tom Gargiulo,Contract To Hire,Lost to Competition,0.0,0.0,"10/17/2016, 8:08 AM",,,database
+1505,328,Computer Operations Support Analyst III,Steve Marinelli,Greg Wilson,Contract To Hire,Lost to Competition,43.0,0.0,"10/13/2016, 9:43 AM",,,
+1506,327,Computer Systems Security Spec. IV,Steve Marinelli,Wes Hager,Contract,Placed,78.0,0.0,"10/13/2016, 8:22 AM",,,cybersecurity
+1507,326,Computer Systems Security Analyst IV,Steve Marinelli,Wes Hager,Contract,$0.00,0.0,0.0,"10/13/2016, 8:18 AM",,,cybersecurity
+1508,324,QA Analyst/Tester,Steve Marinelli,Peter Cheung,Contract To Hire,Lost to Competition,0.0,0.0,"10/12/2016, 3:34 PM",Leidos,,
+1509,320,Network Voice Communications Analyst IV,Steve Marinelli,Wes Hager,Contract,Lost to Competition,71.0,0.0,"10/05/2016, 10:15 AM",,,networking
+1510,318,Master Desktop Engineer,Steve Marinelli,Marcia Edwards,Contract,Filled by Client,0.0,0.0,"10/03/2016, 7:21 AM",,,
+1511,317,Jr. Systems Admin,Steve Marinelli,Jason Edmonds,Contract,Lost to Competition,0.0,0.0,"10/03/2016, 6:51 AM",,,
+1512,309,Systems Administrator,Steve Marinelli,Marcia Edwards,Contract,Filled by Client,0.0,0.0,"09/14/2016, 12:06 PM",,,
+1513,308,Project Engineer V,Steve Marinelli,Dexter Merritt,Contract,Lost to Competition,80.0,0.0,"09/14/2016, 7:43 AM",,,
+1514,305,SME SR. ATF Mobility Support,Steve Marinelli,Marcia Edwards,Contract,Lost to Competition,0.0,0.0,"09/13/2016, 9:48 AM",,,
+1515,296,System Engineer IV,Steven Weaver,Joseph Arcidiacono,Contract,Filled by Client,0.0,0.0,"08/30/2016, 8:32 AM",,,
+1516,277,Oracle OBIEE SME,Steve Marinelli,George Perkins,Contract To Hire,Placed,69.5,98.0,"08/17/2016, 6:12 PM",,,database
+1517,265,EOC Operations Admin. Assistant,Steve Marinelli,John Quarino,Contract,Placed,22.0,38.5,"07/29/2016, 1:24 AM",,,
+1518,242,SR. Repository Manager,Steve Marinelli,Annette Pointer,Contract,Lost to Competition,0.0,0.0,"06/24/2016, 11:11 AM",Leidos,,
+1519,227,Accounts Maintenance Lead,Steve Marinelli,Nathan Hukill,Contract,Filled by Client,0.0,0.0,"05/12/2016, 10:31 PM",,,ai_ml
+1520,226,Sr. Hadoop Administrator,Steve Marinelli,Nathan Hukill,Contract,Filled by Client,0.0,0.0,"05/11/2016, 1:54 PM",,,
+1521,221,Computer Programmer III,Steve Marinelli,Peter Cheung,Contract,Lost to Competition,0.0,0.0,"05/04/2016, 11:33 AM",Leidos,,
+1522,214,Program Administration Specialist,Steve Marinelli,Nathan Hukill,Contract,Placed,23.15,34.0,"04/28/2016, 11:59 AM",,,
+1523,209,Information Assurance Engineer III,Steve Marinelli,Keith Nelson,Contract,Placed,0.0,0.0,"04/20/2016, 3:46 PM",,,
+1524,193,Administrative Assistant,Steve Marinelli,Shannon Woodis,Contract,Lost to Competition,11.0,21.63,"03/23/2016, 4:40 PM",Leidos,,
+1525,192,SR. Systems Architect: Redhat,Steve Marinelli,Joseph Andrews,Contract,Lost to Competition,58.0,85.0,"03/21/2016, 1:16 PM",,,
+1526,182,Hardware Technician,Steve Marinelli,Nathan Hukill,Contract,Lost to Competition,18.0,32.0,"03/07/2016, 9:09 AM",,,
+1527,176,CITRIX/VMWare Architect,Steve Marinelli,Matt Theis,Contract To Hire,Lost to Competition,0.0,0.0,"03/04/2016, 9:57 AM",,,
+1528,174,SOC Analyst,Steve Marinelli,Nathan Hukill,Contract,Lost to Competition,0.0,0.0,"02/29/2016, 2:23 PM",,,cybersecurity
+1529,173,Database Administrator,Steve Marinelli,Matt Theis,Contract To Hire,Filled by Client,0.0,0.0,"02/28/2016, 3:06 PM",,,database
+1530,167,Citrix System Administrator,Steve Marinelli,Judi-Malec Digioia,Contract To Hire,Accepting Candidates,0.0,0.0,"02/16/2016, 3:04 PM",,,
+1531,164,Jr Systems Analyst._ Storage & Virtualization,Steve Marinelli,Nathan Hukill,Contract,Lost to Competition,0.0,0.0,"02/03/2016, 1:33 PM",,,
+1532,160,Systems Administrator,Steve Marinelli,George Perkins,Contract,Lost to Competition,0.0,0.0,"01/28/2016, 2:58 PM",,,
+1533,147,Computer Systems Architect,Steve Marinelli,Nathan Hukill,Contract,Lost to Competition,0.0,0.0,"01/12/2016, 1:04 PM",,,
+1534,133,Administrative Representative,Steve Marinelli,Matt Theis,Contract,Lost to Competition,0.0,0.0,"12/21/2015, 7:47 AM",,,
+1535,129,Senior Desktop Specialist,Steve Marinelli,Nathan Hukill,Contract,Placed,22.0,41.0,"12/04/2015, 4:39 PM",,,
+1536,126,Security Engineer,Steve Marinelli,Nathan Hukill,Contract,Lost to Competition,0.0,0.0,"11/24/2015, 3:36 PM",,,cybersecurity
+1537,120,Communications Specialist,Steve Marinelli,Nathan Hukill,Contract,Placed,43.0,64.0,"11/05/2015, 1:16 PM",,,
+1538,89,Technical Writer,Steve Marinelli,Clarence Bloomfield,Contract,Lost to Competition,0.0,0.0,"09/01/2015, 11:23 PM",,,
+1539,86,User Applications Analyst,Steve Marinelli,Susan Loya,Contract,Lost to Competition,0.0,0.0,"08/26/2015, 9:54 AM",,,
+1540,85,Database Administrator,Steve Marinelli,Peter Cheung,Contract,Lost to Competition,0.0,0.0,"08/25/2015, 8:19 AM",Leidos,,database
+1541,84,Computer Programmer III,Steve Marinelli,Peter Cheung,Contract,Lost to Competition,0.0,0.0,"08/25/2015, 8:00 AM",Leidos,,
+1542,82,Business Process Analyst (TED),Steve Marinelli,Susan Loya,Contract,Lost to Competition,0.0,0.0,"08/17/2015, 1:10 PM",,,
+1543,81,Business Process Analyst Stf (DEERS),Steve Marinelli,Susan Loya,Contract,Lost to Competition,0.0,0.0,"08/17/2015, 1:03 PM",,,
+1544,75,Business System Analyst/Solutions Architect,Steve Marinelli,Peter Cheung,Contract,Lost to Competition,0.0,0.0,"08/11/2015, 2:44 PM",Leidos,,
+1545,67,Apple MAC SME,Steve Marinelli,Matt Theis,Contract,Filled by Client,0.0,0.0,"07/27/2015, 11:01 AM",,,
+1546,66,Web App. & Database Developer,Steve Marinelli,John Quarino,Contract,Filled by Client,0.0,0.0,"07/24/2015, 9:20 AM",,,database
+1547,55,Network Engineer,Matt Gullette,Matt Theis,Contract,Filled by Client,0.0,0.0,"06/08/2015, 10:37 AM",,,networking
+1548,54,Oracle DBA / CDC,Matt Gullette,Matt Theis,Contract,Filled by Client,105.0,0.0,"06/04/2015, 4:10 PM",,,database
+1549,49,Web Application Developer,Matt Gullette,John Quarino,Contract,Lost to Competition,0.0,0.0,"05/20/2015, 8:40 AM",,,
+1550,47,MEDICAL DATA COORDINATOR,Matt Gullette,John Quarino,Contract To Hire,Filled by Client,0.0,0.0,"05/07/2015, 1:41 PM",,,
+1551,46,MAP API Developer,Matt Gullette,Matt Theis,Contract To Hire,Accepting Candidates,38.0,67.0,"05/07/2015, 1:39 PM",,,
+1552,45,Government Staffing Specialist,Matt Gullette,Matt Theis,Contract,Lost to Competition,0.0,0.0,"05/05/2015, 7:42 AM",,,
+1553,43,Software Developer,Matt Gullette,John Quarino,Contract,Lost to Competition,0.0,0.0,"04/21/2015, 1:12 PM",,,software_dev
+1554,35,Training Specialist,Matt Gullette,Matt Theis,Contract,Lost to Competition,0.0,0.0,"03/24/2015, 3:56 PM",,,ai_ml
+1555,34,Quality Assurance (QA) Specialist / Software Tester,Matt Gullette,Matt Theis,Contract,Lost to Competition,0.0,0.0,"03/24/2015, 3:21 PM",,,software_dev
+1556,32,Database Developer,Matt Gullette,Matt Theis,Contract,Lost to Competition,0.0,0.0,"03/18/2015, 1:17 PM",,,database
+1557,31,.NET Developer,Matt Gullette,Matt Theis,Contract,Lost to Competition,0.0,0.0,"03/18/2015, 1:16 PM",,,software_dev
+1558,25,Information Assurance Engineer - NIST,Matt Gullette,Matt Theis,Contract,Placed,0.0,0.0,"03/04/2015, 4:31 PM",,,

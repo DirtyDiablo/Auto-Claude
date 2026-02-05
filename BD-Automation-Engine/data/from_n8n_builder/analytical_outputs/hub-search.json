@@ -1,0 +1,110 @@
+{
+  "name": "Hub - Search",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "hub-search",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "webhook",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [250, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/search/hybrid",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "q",
+              "value": "={{ $json.query.q }}"
+            },
+            {
+              "name": "collection",
+              "value": "={{ $json.query.collection || 'bd_knowledge' }}"
+            },
+            {
+              "name": "limit",
+              "value": "={{ $json.query.limit || 10 }}"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "id": "search-hub",
+      "name": "Search Hub",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [450, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Process search results\nconst response = $input.first().json;\nconst query = $('Webhook').first().json.query;\n\nconst results = Array.isArray(response.results) ? response.results : (response.data || []);\n\nreturn {\n  json: {\n    success: true,\n    query: query.q,\n    collection: query.collection || 'bd_knowledge',\n    total_results: results.length,\n    results: results,\n    timestamp: new Date().toISOString(),\n    source: 'n8n-orchestrator'\n  }\n};"
+      },
+      "id": "process-results",
+      "name": "Process Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [650, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "id": "respond",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [850, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Search Hub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Hub": {
+      "main": [
+        [
+          {
+            "node": "Process Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Results": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "tags": ["hub", "search", "production"]
+}

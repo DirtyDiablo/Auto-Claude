@@ -13,6 +13,9 @@ import sys
 import os
 import time
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 import argparse
 from datetime import datetime
 from dotenv import load_dotenv
@@ -133,8 +136,8 @@ def reindex_collection(collection: str):
     print(f"\nCreating temp collection: {temp_collection} ({EMBEDDING_DIM} dims)")
     try:
         qdrant.delete_collection(temp_collection)
-    except:
-        pass
+    except Exception as e:
+        logger.debug("temp_collection_delete_skipped: %s", e)
 
     qdrant.create_collection(
         collection_name=temp_collection,

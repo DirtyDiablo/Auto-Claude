@@ -22,6 +22,12 @@ try:
 except ImportError:
     CREWAI_AVAILABLE = False
     logger.warning("CrewAI not available")
+    # Placeholder BaseTool for when CrewAI isn't installed
+    class BaseTool:
+        name: str = ""
+        description: str = ""
+        def _run(self, *args, **kwargs): pass
+    Agent = Task = Crew = Process = None
 
 try:
     from langchain_anthropic import ChatAnthropic

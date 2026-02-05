@@ -1,0 +1,141 @@
+{
+  "name": "Core - Daily Scrape & Sync",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Daily 6AM Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "http://127.0.0.1:8100/health"
+      },
+      "id": "check-hub",
+      "name": "Check Hub Health",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.status }}",
+              "value2": "healthy"
+            }
+          ]
+        }
+      },
+      "id": "if-healthy",
+      "name": "IF Hub Healthy",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8200/pipeline/full",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"sources\": [\"apex-jobs\", \"insight-global-jobs\", \"teksystems-jobs\"], \"sync_to_hub\": true}"
+      },
+      "id": "run-pipeline",
+      "name": "Run Full Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://primetech.app.n8n.cloud/webhook/slack-alert",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: 'BD Hub is unavailable! Daily scrape skipped.', severity: 'warning' }) }}"
+      },
+      "id": "alert-hub-down",
+      "name": "Alert Hub Down",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "const results = $input.first().json;\n\nconst summary = {\n  status: results.status,\n  total_scraped: results.summary?.total_scraped || 0,\n  unique_jobs: results.summary?.unique || 0,\n  valid_jobs: results.summary?.valid || 0,\n  synced_to_hub: results.summary?.synced || 0,\n  duration_seconds: results.duration_seconds || 0,\n  errors: results.errors || [],\n  timestamp: new Date().toISOString()\n};\n\nreturn { json: summary };"
+      },
+      "id": "process-results",
+      "name": "Process Results",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:8100/memory/add",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ content: 'Daily scrape completed: ' + $json.synced_to_hub + ' jobs synced to Hub', memory_type: 'scrape_result' }) }}"
+      },
+      "id": "record-memory",
+      "name": "Record in Hub Memory",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1340, 200]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://primetech.app.n8n.cloud/webhook/slack-alert",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ message: 'Daily Scrape Complete!\\n\\n• Total Scraped: ' + $('Process Results').first().json.total_scraped + '\\n• Unique Jobs: ' + $('Process Results').first().json.unique_jobs + '\\n• Valid Jobs: ' + $('Process Results').first().json.valid_jobs + '\\n• Synced to Hub: ' + $('Process Results').first().json.synced_to_hub + '\\n• Duration: ' + $('Process Results').first().json.duration_seconds + 's', severity: 'success' }) }}"
+      },
+      "id": "notify-success",
+      "name": "Notify Success",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1560, 200]
+    }
+  ],
+  "connections": {
+    "Daily 6AM Trigger": {
+      "main": [[{ "node": "Check Hub Health", "type": "main", "index": 0 }]]
+    },
+    "Check Hub Health": {
+      "main": [[{ "node": "IF Hub Healthy", "type": "main", "index": 0 }]]
+    },
+    "IF Hub Healthy": {
+      "main": [
+        [{ "node": "Run Full Pipeline", "type": "main", "index": 0 }],
+        [{ "node": "Alert Hub Down", "type": "main", "index": 0 }]
+      ]
+    },
+    "Run Full Pipeline": {
+      "main": [[{ "node": "Process Results", "type": "main", "index": 0 }]]
+    },
+    "Process Results": {
+      "main": [[{ "node": "Record in Hub Memory", "type": "main", "index": 0 }]]
+    },
+    "Record in Hub Memory": {
+      "main": [[{ "node": "Notify Success", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["core", "scheduled", "production"]
+}

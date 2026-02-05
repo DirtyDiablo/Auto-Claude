@@ -1,0 +1,283 @@
+{
+  "name": "Weekly BD Intelligence Report",
+  "nodes": [
+    {
+      "id": "30984112-9eb6-40f8-9036-862f508a93cb",
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        250,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * 1"
+            }
+          ]
+        },
+        "options": {
+          "timezone": "America/New_York"
+        }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "e6421160-2e81-4df6-8f33-59c310b0d313",
+      "name": "Get Hub Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        450,
+        200
+      ],
+      "parameters": {
+        "url": "http://localhost:8100/stats",
+        "method": "GET",
+        "options": {}
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "20f9b244-add6-47e2-9dcb-a7788cf5dc3f",
+      "name": "Get Recent Jobs",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        450,
+        350
+      ],
+      "parameters": {
+        "url": "http://localhost:8100/jobs",
+        "method": "GET",
+        "options": {},
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "days",
+              "value": "7"
+            },
+            {
+              "name": "limit",
+              "value": "50"
+            }
+          ]
+        }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "58cc5342-d5f1-41dd-9e95-66f8b7c58234",
+      "name": "Get Hot Programs",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        450,
+        500
+      ],
+      "parameters": {
+        "url": "http://localhost:8100/programs/hot",
+        "method": "GET",
+        "options": {}
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "86e2cfe5-0a2b-4624-a9cb-180214d950d0",
+      "name": "Generate Weekly Intel",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        450,
+        650
+      ],
+      "parameters": {
+        "url": "http://localhost:8100/agents/weekly-intel",
+        "method": "POST",
+        "options": {
+          "timeout": 180000
+        }
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "9eb49d02-111e-4342-a4f5-0f5b89a10183",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        700,
+        375
+      ],
+      "parameters": {
+        "mode": "combine"
+      },
+      "typeVersion": 2
+    },
+    {
+      "id": "7a393db9-8252-492b-a178-7a5c98a7f8e8",
+      "name": "Compile Report",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        900,
+        375
+      ],
+      "parameters": {
+        "jsCode": "\n// Gather all data from parallel branches\nconst stats = $('Get Hub Stats').first()?.json || {};\nconst recentJobs = $('Get Recent Jobs').first()?.json?.jobs || [];\nconst hotPrograms = $('Get Hot Programs').first()?.json?.programs || [];\nconst aiIntel = $('Generate Weekly Intel').first()?.json || {};\n\n// Calculate week-over-week metrics\nconst totalJobs = stats.total_jobs || 0;\nconst newJobs = recentJobs.length;\nconst totalContacts = stats.total_contacts || 0;\nconst totalPrograms = stats.total_programs || 0;\n\n// Identify high-priority items\nconst highPriorityJobs = recentJobs.filter(job => {\n    const clearance = (job.detected_clearance || '').toLowerCase();\n    return clearance.includes('ts/sci') || clearance.includes('top secret');\n});\n\n// Top locations this week\nconst locationCounts = {};\nrecentJobs.forEach(job => {\n    const loc = job.location || 'Unknown';\n    locationCounts[loc] = (locationCounts[loc] || 0) + 1;\n});\nconst topLocations = Object.entries(locationCounts)\n    .sort((a, b) => b[1] - a[1])\n    .slice(0, 5)\n    .map(([loc, count]) => ({ location: loc, count }));\n\n// Build report\nconst report = {\n    report_type: \"Weekly BD Intelligence\",\n    report_date: new Date().toISOString().split('T')[0],\n    generated_at: new Date().toISOString(),\n\n    executive_summary: aiIntel.summary ||\n        `This week: ${newJobs} new jobs identified, ${highPriorityJobs.length} high-priority opportunities.`,\n\n    metrics: {\n        total_jobs_in_system: totalJobs,\n        new_jobs_this_week: newJobs,\n        high_priority_jobs: highPriorityJobs.length,\n        total_contacts: totalContacts,\n        total_programs: totalPrograms\n    },\n\n    hot_programs: hotPrograms.slice(0, 10).map(p => ({\n        name: p.name,\n        score: p.priority_score || p.score,\n        reason: p.reason || 'High activity detected'\n    })),\n\n    top_locations: topLocations,\n\n    high_priority_jobs: highPriorityJobs.slice(0, 10).map(j => ({\n        title: j.title,\n        company: j.company,\n        location: j.location,\n        clearance: j.detected_clearance,\n        url: j.url\n    })),\n\n    ai_insights: aiIntel.insights || [],\n\n    recommendations: aiIntel.recommendations || [\n        \"Review high-priority job listings\",\n        \"Update contact database with new leads\",\n        \"Schedule outreach for hot programs\"\n    ],\n\n    next_week_focus: aiIntel.next_week_focus || []\n};\n\nreturn [{ json: report }];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "fd38bc17-9e63-4155-867a-a507e3e29e2f",
+      "name": "Format Slack Message",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1100,
+        300
+      ],
+      "parameters": {
+        "jsCode": "\nconst report = $input.first().json;\n\n// Build Slack blocks for rich formatting\nconst message = `\ud83d\udcca *Weekly BD Intelligence Report*\n_Week of ${report.report_date}_\n\n*Executive Summary:*\n${report.executive_summary}\n\n*\ud83d\udcc8 This Week's Numbers:*\n\u2022 New Jobs: ${report.metrics.new_jobs_this_week}\n\u2022 High Priority: ${report.metrics.high_priority_jobs}\n\u2022 Total Contacts: ${report.metrics.total_contacts}\n\u2022 Total Programs: ${report.metrics.total_programs}\n\n*\ud83d\udd25 Hot Programs:*\n${report.hot_programs.slice(0, 5).map((p, i) =>\n    `${i + 1}. ${p.name} (Score: ${p.score})`\n).join('\\n')}\n\n*\ud83d\udccd Top Locations:*\n${report.top_locations.map(l => `\u2022 ${l.location}: ${l.count} jobs`).join('\\n')}\n\n*\u2705 Recommended Actions:*\n${report.recommendations.map(r => `\u2022 ${r}`).join('\\n')}\n\n_Full report available in the Hub dashboard_`;\n\nreturn [{\n    json: {\n        message,\n        report\n    }\n}];\n",
+        "mode": "runOnceForAllItems"
+      },
+      "typeVersion": 1
+    },
+    {
+      "id": "cf67ecd8-a493-4ced-b3d8-18d15d5b3dd5",
+      "name": "Slack Notify",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "post",
+        "channel": "#bd-weekly",
+        "text": "{{ $json.message }}",
+        "otherOptions": {}
+      },
+      "typeVersion": 1,
+      "credentials": {
+        "slackOAuth2Api": {
+          "id": "",
+          "name": "Slack OAuth2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule": {
+      "main": [
+        [
+          {
+            "node": "Get Hub Stats",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Recent Jobs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Hot Programs",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Weekly Intel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Hub Stats": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Jobs": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Hot Programs": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Weekly Intel": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Compile Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Compile Report": {
+      "main": [
+        [
+          {
+            "node": "Format Slack Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Slack Message": {
+      "main": [
+        [
+          {
+            "node": "Slack Notify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "saveManualExecutions": true,
+    "callerPolicy": "workflowsFromSameOwner"
+  },
+  "meta": {
+    "description": "Generates weekly BD intelligence summary every Monday at 6 AM ET. Includes hot programs, new opportunities, and AI-generated insights.",
+    "templateCredsSetupCompleted": false
+  },
+  "tags": [],
+  "pinData": {}
+}

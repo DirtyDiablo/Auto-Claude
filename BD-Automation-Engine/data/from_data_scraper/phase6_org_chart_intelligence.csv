@@ -1,0 +1,180 @@
+program,location,total_jobs,leadership_count,lead_count,senior_count,other_count,leadership_titles,lead_titles,primary_source,prime_contractor,inferred_team_size,hiring_activity_level
+Project Convergence (JADC2 Experiments),"Montgomery, Alabama",7,0,0,3,4,,,Insight Global,SAIC,7,High
+Army AESD Enterprise Service Desk,"San Antonio, Texas",5,1,0,0,4,TS/SCI PROGRAM MANAGER,,Insight Global,SAIC,5,Medium
+GBS (Global Broadcast Service),"San Diego, California",4,0,0,0,4,,,Insight Global,L3Harris (historical),4,Medium
+Advanced Battle Management System,"Colorado Springs, Colorado",3,0,0,1,2,,,Insight Global,Multi (SAIC supports parts),3,Medium
+Aegis Ballistic Missile Defense / Aegis Program,"Huntsville, Alabama",3,0,0,2,1,,,Insight Global,Lockheed Martin,3,Medium
+"EDIS – Engineering, Development, Integration & Sustainment","Colorado Springs, Colorado",3,0,0,0,3,,,Insight Global,SAIC,3,Medium
+Global Service Management – Operations II,"Huntsville, Alabama",3,0,1,0,2,,CAPTURE MANAGER,Insight Global,Leidos,3,Medium
+Global Service Management – Operations II,"Kings Bay, Georgia",3,0,0,0,3,,,Insight Global,Leidos,3,Medium
+Integrated Base Defense Security System,"Reston, VA",3,0,0,0,3,,,Apex Systems,Leidos,3,Medium
+Advanced Battle Management System,"Washington, District Of Columbia",2,0,0,0,2,,,Insight Global,Multi (SAIC supports parts),2,Low
+Air Force Advanced Battle Management System,"Alexandria, Virginia",2,0,0,0,2,,,Insight Global,"Multiple: SAIC, Leidos, Booz Allen Hamilton",2,Low
+Army Enterprise Service Management Framework,"Colorado Springs, Colorado",2,0,0,0,2,,,Insight Global,SAIC,2,Low
+Battlefield Information Collection & Exploitation System,"Norfolk, Virginia",2,0,1,0,1,,TOP SECRET TECHNICAL LEAD ENGINEERING SYSTEM,Insight Global,GDIT,2,Low
+BICES Defense Intelligence Agency Variant,"Washington, District Of Columbia",2,0,0,0,2,,,Insight Global,CACI + Leidos + Peraton + SAIC (various subs),2,Low
+CMS Enterprise Cloud Infrastructure Services,"Dahlgren, Virginia",2,0,0,0,2,,,Insight Global,Peraton / SAIC (indicative),2,Low
+Defense Enterprise Office 365 Migration / DoD365,"Mclean, Virginia",2,0,0,0,2,,,Insight Global,Microsoft,2,Low
+DIA Information Systems Engineering Office,"Dayton, Ohio",2,0,0,0,2,,,Insight Global,Leidos,2,Low
+DIA Information Systems Engineering Office,"Kings Bay, Georgia",2,0,0,0,2,,,Insight Global,Leidos,2,Low
+DISA Global Service Mgmt – Ops II,"Huntsville, Alabama",2,0,1,0,1,,PRICING MANAGER,Insight Global,Leidos,2,Low
+DISA JWCC – Joint Warfighting Cloud Capability,"Aberdeen Proving Ground, Maryland",2,0,0,0,2,,,Insight Global,Amazon; Microsoft; Google; Oracle,2,Low
+Global Service Management – Operations II,"Hampton, Virginia",2,0,0,0,2,,,Insight Global,Leidos,2,Low
+Integrated Base Defense Security System,"Norfolk, VA",2,0,0,0,2,,,Apex Systems,Leidos,2,Low
+SPICE (Space Payload Integration & Cyber Eng),"Hill AFB, Utah",2,0,0,1,1,,,Insight Global,SAIC / LinQuest (indicative),2,Low
+Advanced Battle Management System,"Savannah, GA",1,0,0,0,1,,,Apex Systems,Multi (SAIC supports parts),1,Low
+Advanced Battle Management System,"Pearl City, Hawaii",1,0,0,0,1,,,Insight Global,Multi (SAIC supports parts),1,Low
+Advanced Battle Management System,"East Hartford, Connecticut",1,0,0,0,1,,,Insight Global,Multi (SAIC supports parts),1,Low
+Advanced Medium-Range Air-to-Air Missile (AMRAAM) Production & Sustainment,"Jacksonville, Florida",1,0,0,0,1,,,Insight Global,Raytheon,1,Low
+Aegis Ballistic Missile Defense / Aegis Program,"Sunset, Utah",1,0,0,0,1,,,Insight Global,Lockheed Martin,1,Low
+Aegis Ballistic Missile Defense / Aegis Program,"Austin, Texas",1,0,1,0,0,,IDENTITY ACCESS MANAGER / SME ARCHITECT,Insight Global,Lockheed Martin,1,Low
+AFCENT SCORPION Cyber Task (ISSO/ISSM Support),"Tyndall Air Force Base, FL",1,0,0,0,1,,,Apex Systems,CACI,1,Low
+Air Force Advanced Battle Management System,"Herndon, VA",1,0,1,0,0,,EVMS Lead Program Control Consultant,Apex Systems,"Multiple: SAIC, Leidos, Booz Allen Hamilton",1,Low
+Air Force Advanced Battle Management System,"Quantico, VA",1,0,0,1,0,,,Apex Systems,"Multiple: SAIC, Leidos, Booz Allen Hamilton",1,Low
+Air Force Advanced Battle Management System,"Braddock, Virginia",1,0,0,0,1,,,Insight Global,"Multiple: SAIC, Leidos, Booz Allen Hamilton",1,Low
+Air Force Advanced Battle Management System,"Dahlgren, Virginia",1,0,0,0,1,,,Insight Global,"Multiple: SAIC, Leidos, Booz Allen Hamilton",1,Low
+Air Force Advanced Battle Management System,"Oakton, Virginia",1,0,0,0,1,,,Insight Global,"Multiple: SAIC, Leidos, Booz Allen Hamilton",1,Low
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,"Colorado Springs, Colorado",1,0,0,0,1,,,Insight Global,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),1,Low
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,"Washington, District Of Columbia",1,0,0,0,1,,,Insight Global,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),1,Low
+ARCYBER Information Advantage / Mission Support (general),"Salem, Massachusetts",1,0,0,0,1,,,Insight Global,Peraton / others (Peraton lead on ARCYBER Information Advantage Enterprise line; additional primes on related work),1,Low
+Army Backbone Infrastructure Modernization – Task Order 2,"Sully, Virginia",1,0,0,0,1,,,Insight Global,CACI,1,Low
+Army Enterprise Service Management Framework,"Middletown, Connecticut",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+Army Enterprise Service Management Framework,"Goose Creek, South Carolina",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+Army Enterprise Service Management Framework,"Atlanta, Georgia",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+Army Enterprise Service Management Framework,"Vienna, Virginia",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+Army Enterprise Service Management Framework,"Groton, Connecticut",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+Army Integrated Battle Command System,"Hazelwood, MO",1,0,0,0,1,,,Apex Systems,Northrop Grumman,1,Low
+Army Integrated Battle Command System Support,"Rivanna, Virginia",1,0,0,0,1,,,Insight Global,Northrop Grumman (prime); CACI (support),1,Low
+Army Integrated Battle Command System Support,"Chantilly, Virginia",1,0,0,0,1,,,Insight Global,Northrop Grumman (prime); CACI (support),1,Low
+Army IT Enterprise Mgmt Systems Solution,"Arlington, VA",1,0,0,0,1,,,Apex Systems,CACI,1,Low
+Army IT Enterprise Mgmt Systems Solution,"Fort Belvoir, VA",1,0,0,1,0,,,Apex Systems,CACI,1,Low
+Army IT Enterprise Mgmt Systems Solution,"Bossier City, LA",1,0,0,0,1,,,Apex Systems,CACI,1,Low
+Army IT Enterprise Mgmt Systems Solution,"Norfolk, Virginia",1,0,0,0,1,,,Insight Global,CACI,1,Low
+Army IT Enterprise Mgmt Systems Solution,"Arlington, Virginia",1,0,0,0,1,,,Insight Global,CACI,1,Low
+Army IT Enterprise Mgmt Systems Solution,"Fairfax, Virginia",1,0,0,0,1,,,Insight Global,CACI,1,Low
+Army IT Enterprise Mgmt Systems Solution,"Ashburn, Virginia",1,0,0,0,1,,,Insight Global,CACI,1,Low
+Army Missile & Space R&D Support (Huntsville),"Huntsville, Alabama",1,0,0,0,1,,,Insight Global,Dynetics; Northrop teams,1,Low
+Battlefield Information Collection & Exploitation System,"Detroit, Michigan",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Chesapeake, Virginia",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Niskayuna, New York",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Deerfield Beach, Florida",1,1,0,0,0,PROGRAM MANAGER,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Huntsville, Alabama",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Quantico, Virginia",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Springfield, Virginia",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+Battlefield Information Collection & Exploitation System,"Hampton, Virginia",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+BICES Defense Intelligence Agency Variant,"Colorado Springs, CO",1,0,0,0,1,,,Apex Systems,CACI + Leidos + Peraton + SAIC (various subs),1,Low
+CDAO Advanced AI Tools (Scale AI OTA),"Emerado, ND",1,0,0,0,1,,,Apex Systems,Scale AI,1,Low
+CDAO Advanced AI Tools (Scale AI OTA),"Goose Creek, South Carolina",1,0,0,0,1,,,Insight Global,Scale AI,1,Low
+Cloud One (USAF Cloud Program),"Dayton, Ohio",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+CMS Enterprise Cloud Infrastructure Services,"Fayetteville, NC",1,0,0,0,1,,,Apex Systems,Peraton / SAIC (indicative),1,Low
+CMS Enterprise Cloud Infrastructure Services,"Vienna, Virginia",1,0,0,0,1,,,Insight Global,Peraton / SAIC (indicative),1,Low
+CMS Enterprise Cloud Infrastructure Services,"Sully, Virginia",1,0,0,1,0,,,Insight Global,Peraton / SAIC (indicative),1,Low
+CMS Enterprise Cloud Infrastructure Services,"Suffolk, Virginia",1,0,0,1,0,,,Insight Global,Peraton / SAIC (indicative),1,Low
+CMS Enterprise Cloud Infrastructure Services,"Broad Run, Virginia",1,0,0,0,1,,,Insight Global,Peraton / SAIC (indicative),1,Low
+"Command and Control, Battle Management & Communications (MDA)","Redstone Arsenal, AL",1,0,0,0,1,,,Apex Systems,Northrop Grumman,1,Low
+Data Center & Cloud Optimization,"Arlington, VA",1,0,0,0,1,,,Apex Systems,Peraton / Leidos (indicative),1,Low
+Data Center & Cloud Optimization,"Research Triangle Park, NC",1,0,0,0,1,,,Apex Systems,Peraton / Leidos (indicative),1,Low
+Data Center & Cloud Optimization,"Alexandria, Virginia",1,0,0,0,1,,,Insight Global,Peraton / Leidos (indicative),1,Low
+Data Center & Cloud Optimization,"Manassas, Virginia",1,0,0,1,0,,,Insight Global,Peraton / Leidos (indicative),1,Low
+Defense Enclave Services,"Sainte-Anne-De-Bellevue, Quebec",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Defense Enterprise Office Solutions,"North Charleston, SC",1,0,0,0,1,,,Apex Systems,CSRA / Leidos (team),1,Low
+Defense Enterprise Office Solutions,"Fayetteville, NC",1,0,0,0,1,,,Apex Systems,CSRA / Leidos (team),1,Low
+DIA Information Systems Engineering Office,"North Charleston, SC",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+DIA Information Systems Engineering Office,"Elkridge, MD",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+DIA Information Systems Engineering Office,"Niskayuna, New York",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Sterling Heights, Michigan",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Wilmington, Massachusetts",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Beavercreek, Ohio",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Salt Lake City, Utah",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Berkeley, Missouri",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Huntsville, Alabama",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Camden, New Jersey",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Hanover, Maryland",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Scott Air Force Base, Illinois",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Frederick, Maryland",1,0,1,0,0,,PRE-DEPLOYMENT MANAGER,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Madison, Alabama",1,0,1,0,0,,PROJECT MANAGER,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Wailuku, Hawaii",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Cleveland, Ohio",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DIA Information Systems Engineering Office,"Grand Forks, North Dakota",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DISA Global Service Mgmt – Ops II,"Muscatine, Iowa",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DISA Global Service Mgmt – Ops II,"Kings Bay, Georgia",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+DISA Global Service Mgmt – Ops II,"Meridianville, Alabama",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+Distributed Common Ground System (AF),"Hampton, VA",1,0,0,0,1,,,Apex Systems,BAE; multiple,1,Low
+DTRA IAC-MAC Research & Analysis,"Bossier City, LA",1,0,0,0,1,,,Apex Systems,CACI,1,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Plymouth, Minnesota",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+"EDIS – Engineering, Development, Integration & Sustainment","El Segundo, California",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+"EDIS – Engineering, Development, Integration & Sustainment","New London, Connecticut",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Broomfield, Colorado",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Seattle, Washington",1,0,0,1,0,,,Insight Global,SAIC,1,Low
+"EDIS – Engineering, Development, Integration & Sustainment","Manchester, New Hampshire",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+GBS (Global Broadcast Service),"Vista, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Palmdale, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Anaheim, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Beale AFB, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"El Segundo, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Santa Cruz, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Solana Beach, California",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Jacksonville, North Carolina",1,0,0,0,1,,,Insight Global,L3Harris (historical),1,Low
+GBS (Global Broadcast Service),"Hanahan, South Carolina",1,0,0,1,0,,,Insight Global,L3Harris (historical),1,Low
+Global Command and Control System – Joint,"Kings Bay, Georgia",1,0,0,0,1,,,Insight Global,Northrop Grumman,1,Low
+Global Command and Control System – Joint,"Sunset, Utah",1,0,1,0,0,,SECRET LEAD F-16 SIMULATOR TECHNICIAN,Insight Global,Northrop Grumman,1,Low
+Global Command and Control System – Joint (Variant),"Windsor Mill, Maryland",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+Global Command and Control System – Joint (Variant),"Cockeysville, Maryland",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Network Operations (DISA GSM-O II),"Montgomery, Alabama",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Network Operations (DISA GSM-O II),"Grand Forks, North Dakota",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Network Operations (DISA GSM-O II),"'Aiea, Hawaii",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Tarpon Springs, Florida",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Dayton, Ohio",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Wilmington, Delaware",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Albuquerque, New Mexico",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Suffolk, Virginia",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Woburn, Massachusetts",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Chambersburg, Pennsylvania",1,1,0,0,0,DEPUTY PROGRAM MANAGER,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"Sterling Heights, Michigan",1,0,1,0,0,,"INFORMATION SYSTEM SECURITY MANAGER (ISSM) - WARREN, MICHIGAN",Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"O'fallon, Illinois",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+Global Service Management – Operations II,"New York, New York",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Solutions Management – Operations II,"Saint Louis, Missouri",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Global Solutions Management – Operations II,"Fort Bliss, Texas",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+GMD Weapon System (Ground C2),"Tucson, Arizona",1,0,0,1,0,,,Insight Global,Northrop Grumman,1,Low
+GPS Next-Gen Operational Control System,"Orlando, FL",1,0,0,0,1,,,Apex Systems,Raytheon Intelligence & Space,1,Low
+GPS Next-Gen Operational Control System,"Aurora, CO",1,0,0,0,1,,,Apex Systems,Raytheon Intelligence & Space,1,Low
+GPS Next-Gen Operational Control System,"Aurora, Colorado",1,0,0,0,1,,,Insight Global,Raytheon Intelligence & Space,1,Low
+GPS Operational Control System (sustainment),"Vandenberg Space Force Base, CA",1,0,0,0,1,,,Apex Systems,Raytheon,1,Low
+GRASP (Raytheon/Peraton),"North Charleston, SC",1,0,0,0,1,,,Apex Systems,Peraton,1,Low
+GRASP (Raytheon/Peraton),"Salt Lake City, Utah",1,0,0,0,1,,,Insight Global,Peraton,1,Low
+Ground-Based Midcourse Defense,"Tucson, AZ",1,0,0,0,1,,,Apex Systems,Boeing (prime); Northrop & Raytheon (NGI),1,Low
+Ground-Based Midcourse Defense,"Huntsville, Alabama",1,0,0,0,1,,,Insight Global,Boeing (prime); Northrop & Raytheon (NGI),1,Low
+HHS Advanced Secure Data Repository,"Washington, VA",1,0,0,0,1,,,Apex Systems,GDIT / SAIC (indicative),1,Low
+Hypersonic & Ballistic Tracking Space Sensor,"Chandler, Arizona",1,0,0,1,0,,,Insight Global,Northrop & L3Harris (co-primes),1,Low
+Integrated Air & Missile Defense,"Andover, MA",1,0,0,0,1,,,Apex Systems,Raytheon,1,Low
+Integrated Base Defense Security System,"Washington, VA",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+Integrated Base Defense Security System,"Jacksonville, NC",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+Integrated Base Defense Security System,"Fort Belvoir, VA",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+Integrated Digital Engineering Environment,"Tucson, Arizona",1,0,0,0,1,,,Insight Global,Northrop Grumman,1,Low
+Intelligence Systems Enterprise Operations,"Jessup, Maryland",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Intelligence Systems Enterprise Operations,"San Francisco, California",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Intelligence Systems Infrastructure Tools & Enhancements,"San Diego, CA",1,0,1,0,0,,Engineering Manager,Apex Systems,Northrop Grumman,1,Low
+MDA Tactical Embedded Systems,"Chandler, AZ",1,0,0,0,1,,,Apex Systems,Northrop Grumman,1,Low
+Mission Partner Environment (Field Ops / MPCO),"Dhs, Virginia",1,0,0,0,1,,,Insight Global,GDIT,1,Low
+MSS Smart Systems (Palantir contract),"Norfolk, Virginia",1,0,0,0,1,,,Insight Global,Palantir,1,Low
+NARSIL – Advanced Research for System Intelligence & Learning,"O'fallon, Illinois",1,0,0,0,1,,,Insight Global,Peraton,1,Low
+NARSIL – Advanced Research for System Intelligence & Learning,"Herndon, Virginia",1,0,0,0,1,,,Insight Global,Peraton,1,Low
+NARSIL – Advanced Research for System Intelligence & Learning,"Suffolk, Virginia",1,0,0,0,1,,,Insight Global,Peraton,1,Low
+NASA SENSE (Space Comms & Tracking),"Washington, VA",1,0,0,0,1,,,Apex Systems,Peraton,1,Low
+Navy Aegis Combat System Modernization,"Fort Worth, TX",1,0,0,0,1,,,Apex Systems,Lockheed Martin,1,Low
+Next-Gen OPIR (Ground + Payload),"Redondo Beach, California",1,0,0,0,1,,,Insight Global,Northrop Grumman,1,Low
+Next-Generation Overhead Persistent Infrared,"El Segundo, California",1,0,0,0,1,,,Insight Global,Northrop Grumman,1,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","St. Louis, MO",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Carlsbad, CA",1,0,0,0,1,,,Apex Systems,Leidos,1,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Mount Vernon, Virginia",1,0,0,1,0,,,Insight Global,Leidos,1,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Greece, New York",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Lincoln, Massachusetts",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)","Fairfax, Virginia",1,0,0,0,1,,,Insight Global,Leidos,1,Low
+Peraton ARCYBER Information Advantage Enterprise,"Fort George G Meade, MD",1,0,0,0,1,,,Apex Systems,Peraton,1,Low
+PRISM Support Services (Consolidated),"Milford Mill, MD",1,0,0,1,0,,,Apex Systems,"11 MA-IDIQ primes (incl. CTC, SAIC, Booz Allen, ManTech)",1,Low
+Project Convergence (JADC2 Experiments),"Charlottesville, VA",1,0,0,0,1,,,Apex Systems,SAIC,1,Low
+Project Convergence (JADC2 Experiments),"Monroeville, Pennsylvania",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+Project Convergence (JADC2 Experiments),"Huntsville, Alabama",1,0,0,0,1,,,Insight Global,SAIC,1,Low
+SITEC III – Enterprise Operations & Maintenance,"Juno Beach, FL",1,0,0,1,0,,,Apex Systems,Peraton,1,Low
+SITEC III – Enterprise Operations & Maintenance,"Pensacola, FL",1,0,0,0,1,,,Apex Systems,Peraton,1,Low
+SITEC III – Enterprise Operations & Maintenance,"Tampa, Florida",1,0,0,0,1,,,Insight Global,Peraton,1,Low

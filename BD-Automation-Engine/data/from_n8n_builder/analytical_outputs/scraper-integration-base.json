@@ -1,0 +1,90 @@
+{
+  "name": "Utility - Scraper Integration Base",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "start",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DATA_SCRAPER_URL || 'http://127.0.0.1:8200' }}/scrape/run",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ source: $json.source || 'apex-jobs', locations: $json.locations, max_items: $json.max_items || 100 }) }}"
+      },
+      "id": "run-scraper",
+      "name": "Run Scraper",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DATA_SCRAPER_URL || 'http://127.0.0.1:8200' }}/scrape/run-all",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ locations: $json.locations }) }}"
+      },
+      "id": "run-all-scrapers",
+      "name": "Run All Scrapers",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.DATA_SCRAPER_URL || 'http://127.0.0.1:8200' }}/pipeline/full",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ sources: $json.sources, sync_to_hub: true }) }}"
+      },
+      "id": "run-full-pipeline",
+      "name": "Run Full Pipeline",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.DATA_SCRAPER_URL || 'http://127.0.0.1:8200' }}/intel/competitor",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            { "name": "company", "value": "={{ $json.company }}" }
+          ]
+        }
+      },
+      "id": "analyze-competitor",
+      "name": "Analyze Competitor",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 900]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $env.DATA_SCRAPER_URL || 'http://127.0.0.1:8200' }}/stats/pipeline"
+      },
+      "id": "get-stats",
+      "name": "Get Pipeline Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [460, 1100]
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [[{ "node": "Run Scraper", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "tags": ["utility", "scraper", "template"]
+}

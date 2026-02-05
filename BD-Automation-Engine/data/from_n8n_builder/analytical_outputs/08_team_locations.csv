@@ -1,0 +1,180 @@
+program_name,program_acronym,location_type,city,state,zip_code,site_name,team_function,headcount_estimate,prime_contractor,subcontractors,data_sources,confidence_level,extraction_date
+DIA Information Systems Engineering Office,ISEO,Project Site,North Charleston,SC,,ISEO - North Charleston,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Elkridge,MD,,ISEO - Elkridge,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Niskayuna,NEW YORK,,ISEO - Niskayuna,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Sterling Heights,MICHIGAN,,ISEO - Sterling Heights,Cybersecurity,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Wilmington,MASSACHUSETTS,,ISEO - Wilmington,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Beavercreek,OHIO,,ISEO - Beavercreek,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Salt Lake City,UTAH,,ISEO - Salt Lake City,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Dayton,OHIO,,ISEO - Dayton,Engineering; Network/Infrastructure,2,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Berkeley,MISSOURI,,ISEO - Berkeley,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Kings Bay,GEORGIA,,ISEO - Kings Bay,Other,2,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Huntsville,ALABAMA,,ISEO - Huntsville,Other,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Camden,NEW JERSEY,,ISEO - Camden,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Hanover,MARYLAND,,ISEO - Hanover,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Scott Air Force Base,ILLINOIS,,ISEO - Scott Air Force Base,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Frederick,MARYLAND,,ISEO - Frederick,PMO/Leadership,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Madison,ALABAMA,,ISEO - Madison,PMO/Leadership,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Wailuku,HAWAII,,ISEO - Wailuku,Other,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Cleveland,OHIO,,ISEO - Cleveland,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+DIA Information Systems Engineering Office,ISEO,Project Site,Grand Forks,NORTH DAKOTA,,ISEO - Grand Forks,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Huntsville,ALABAMA,,GSM-O II - Huntsville,Engineering; Other; PMO/Leadership,3,Leidos,,Job Postings,Medium,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Tarpon Springs,FLORIDA,,GSM-O II - Tarpon Springs,Cybersecurity,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Dayton,OHIO,,GSM-O II - Dayton,Network/Infrastructure,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Wilmington,DELAWARE,,GSM-O II - Wilmington,Data/Analytics,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Kings Bay,GEORGIA,,GSM-O II - Kings Bay,Data/Analytics; Other,3,Leidos,,Job Postings,Medium,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Albuquerque,NEW MEXICO,,GSM-O II - Albuquerque,Cybersecurity,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Suffolk,VIRGINIA,,GSM-O II - Suffolk,Other,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Hampton,VIRGINIA,,GSM-O II - Hampton,Cybersecurity,2,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Woburn,MASSACHUSETTS,,GSM-O II - Woburn,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Chambersburg,PENNSYLVANIA,,GSM-O II - Chambersburg,PMO/Leadership,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,Sterling Heights,MICHIGAN,,GSM-O II - Sterling Heights,Cybersecurity,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,O'fallon,ILLINOIS,,GSM-O II - O'fallon,Data/Analytics,1,Leidos,,Job Postings,Low,2026-01-21
+Global Service Management – Operations II,GSM-O II,Project Site,New York,NEW YORK,,GSM-O II - New York,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,San Diego,CALIFORNIA,,GBS - San Diego,Data/Analytics; Network/Infrastructure; Other; Technical Writing,4,L3Harris (historical),,Job Postings,Medium,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Vista,CALIFORNIA,,GBS - Vista,Network/Infrastructure,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Palmdale,CALIFORNIA,,GBS - Palmdale,Other,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Anaheim,CALIFORNIA,,GBS - Anaheim,Engineering,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Beale AFB,CALIFORNIA,,GBS - Beale AFB,Network/Infrastructure,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,El Segundo,CALIFORNIA,,GBS - El Segundo,Engineering,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Santa Cruz,CALIFORNIA,,GBS - Santa Cruz,Help Desk/Service Desk,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Solana Beach,CALIFORNIA,,GBS - Solana Beach,Engineering,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Jacksonville,NORTH CAROLINA,,GBS - Jacksonville,Data/Analytics,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+GBS (Global Broadcast Service),GBS,Project Site,Hanahan,SOUTH CAROLINA,,GBS - Hanahan,Engineering,1,L3Harris (historical),,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Detroit,MICHIGAN,,BICES - Detroit,Help Desk/Service Desk,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Chesapeake,VIRGINIA,,BICES - Chesapeake,Other,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Niskayuna,NEW YORK,,BICES - Niskayuna,Network/Infrastructure,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Norfolk,VIRGINIA,,BICES - Norfolk,Engineering; Help Desk/Service Desk,2,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Deerfield Beach,FLORIDA,,BICES - Deerfield Beach,PMO/Leadership,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Huntsville,ALABAMA,,BICES - Huntsville,Engineering,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Quantico,VIRGINIA,,BICES - Quantico,Cybersecurity,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Springfield,VIRGINIA,,BICES - Springfield,Engineering,1,GDIT,,Job Postings,Low,2026-01-21
+Battlefield Information Collection & Exploitation System,BICES,Project Site,Hampton,VIRGINIA,,BICES - Hampton,Network/Infrastructure,1,GDIT,,Job Postings,Low,2026-01-21
+Project Convergence (JADC2 Experiments),PC,Project Site,Charlottesville,VA,,PC - Charlottesville,Other,1,SAIC,,Job Postings,Low,2026-01-21
+Project Convergence (JADC2 Experiments),PC,Project Site,Montgomery,ALABAMA,,PC - Montgomery,Network/Infrastructure,7,SAIC,,Job Postings,Medium,2026-01-21
+Project Convergence (JADC2 Experiments),PC,Project Site,Monroeville,PENNSYLVANIA,,PC - Monroeville,Other,1,SAIC,,Job Postings,Low,2026-01-21
+Project Convergence (JADC2 Experiments),PC,Project Site,Huntsville,ALABAMA,,PC - Huntsville,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,Plymouth,MINNESOTA,,EDIS - Plymouth,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,El Segundo,CALIFORNIA,,EDIS - El Segundo,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,New London,CONNECTICUT,,EDIS - New London,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,Colorado Springs,COLORADO,,EDIS - Colorado Springs,Engineering; Other,3,SAIC,,Job Postings,Medium,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,Broomfield,COLORADO,,EDIS - Broomfield,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,Seattle,WASHINGTON,,EDIS - Seattle,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+"EDIS – Engineering, Development, Integration & Sustainment",EDIS,Project Site,Manchester,NEW HAMPSHIRE,,EDIS - Manchester,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+Advanced Battle Management System,ABMS,Project Site,Savannah,GA,,ABMS - Savannah,Network/Infrastructure,1,Multi (SAIC supports parts),,Job Postings,Low,2026-01-21
+Advanced Battle Management System,ABMS,Project Site,Colorado Springs,COLORADO,,ABMS - Colorado Springs,Data/Analytics; Engineering,3,Multi (SAIC supports parts),,Job Postings,Medium,2026-01-21
+Advanced Battle Management System,ABMS,Project Site,Washington,DISTRICT OF COLUMBIA,,ABMS - Washington,Data/Analytics; Other,2,Multi (SAIC supports parts),,Job Postings,Low,2026-01-21
+Advanced Battle Management System,ABMS,Project Site,Pearl City,HAWAII,,ABMS - Pearl City,Network/Infrastructure,1,Multi (SAIC supports parts),,Job Postings,Low,2026-01-21
+Advanced Battle Management System,ABMS,Project Site,East Hartford,CONNECTICUT,,ABMS - East Hartford,Data/Analytics,1,Multi (SAIC supports parts),,Job Postings,Low,2026-01-21
+Integrated Base Defense Security System,IBDS,Project Site,Washington,VA,,IBDS - Washington,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+Integrated Base Defense Security System,IBDS,Project Site,Reston,VA,,IBDS - Reston,Engineering; Network/Infrastructure; Other,3,Leidos,,Job Postings,Medium,2026-01-21
+Integrated Base Defense Security System,IBDS,Project Site,Norfolk,VA,,IBDS - Norfolk,Engineering,2,Leidos,,Job Postings,Low,2026-01-21
+Integrated Base Defense Security System,IBDS,Project Site,Jacksonville,NC,,IBDS - Jacksonville,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+Integrated Base Defense Security System,IBDS,Project Site,Fort Belvoir,VA,,IBDS - Fort Belvoir,Network/Infrastructure,1,Leidos,,Job Postings,Low,2026-01-21
+Air Force Advanced Battle Management System,ABMS,Project Site,Herndon,VA,,ABMS - Herndon,PMO/Leadership,1,"Multiple: SAIC, Leidos, Booz Allen Hamilton",,Job Postings,Low,2026-01-21
+Air Force Advanced Battle Management System,ABMS,Project Site,Quantico,VA,,ABMS - Quantico,Other,1,"Multiple: SAIC, Leidos, Booz Allen Hamilton",,Job Postings,Low,2026-01-21
+Air Force Advanced Battle Management System,ABMS,Project Site,Braddock,VIRGINIA,,ABMS - Braddock,Other,1,"Multiple: SAIC, Leidos, Booz Allen Hamilton",,Job Postings,Low,2026-01-21
+Air Force Advanced Battle Management System,ABMS,Project Site,Dahlgren,VIRGINIA,,ABMS - Dahlgren,Network/Infrastructure,1,"Multiple: SAIC, Leidos, Booz Allen Hamilton",,Job Postings,Low,2026-01-21
+Air Force Advanced Battle Management System,ABMS,Project Site,Alexandria,VIRGINIA,,ABMS - Alexandria,Data/Analytics; Engineering,2,"Multiple: SAIC, Leidos, Booz Allen Hamilton",,Job Postings,Low,2026-01-21
+Air Force Advanced Battle Management System,ABMS,Project Site,Oakton,VIRGINIA,,ABMS - Oakton,Cybersecurity,1,"Multiple: SAIC, Leidos, Booz Allen Hamilton",,Job Postings,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,Project Site,Middletown,CONNECTICUT,,AESMF - Middletown,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,Project Site,Colorado Springs,COLORADO,,AESMF - Colorado Springs,Engineering; Technical Writing,2,SAIC,,Job Postings,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,Project Site,Goose Creek,SOUTH CAROLINA,,AESMF - Goose Creek,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,Project Site,Atlanta,GEORGIA,,AESMF - Atlanta,Data/Analytics,1,SAIC,,Job Postings,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,Project Site,Vienna,VIRGINIA,,AESMF - Vienna,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+Army Enterprise Service Management Framework,AESMF,Project Site,Groton,CONNECTICUT,,AESMF - Groton,Engineering,1,SAIC,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Arlington,VA,,ITEMSS - Arlington,Cybersecurity,1,CACI,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Fort Belvoir,VA,,ITEMSS - Fort Belvoir,Cybersecurity,1,CACI,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Bossier City,LA,,ITEMSS - Bossier City,Engineering,1,CACI,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Norfolk,VIRGINIA,,ITEMSS - Norfolk,Other,1,CACI,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Arlington,VIRGINIA,,ITEMSS - Arlington,Engineering,1,CACI,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Fairfax,VIRGINIA,,ITEMSS - Fairfax,Engineering,1,CACI,,Job Postings,Low,2026-01-21
+Army IT Enterprise Mgmt Systems Solution,ITEMSS,Project Site,Ashburn,VIRGINIA,,ITEMSS - Ashburn,Engineering,1,CACI,,Job Postings,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Project Site,Fayetteville,NC,,ECIS - Fayetteville,Engineering,1,Peraton / SAIC (indicative),,Job Postings,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Project Site,Dahlgren,VIRGINIA,,ECIS - Dahlgren,Engineering,2,Peraton / SAIC (indicative),,Job Postings,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Project Site,Vienna,VIRGINIA,,ECIS - Vienna,Engineering,1,Peraton / SAIC (indicative),,Job Postings,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Project Site,Sully,VIRGINIA,,ECIS - Sully,Engineering,1,Peraton / SAIC (indicative),,Job Postings,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Project Site,Suffolk,VIRGINIA,,ECIS - Suffolk,Data/Analytics,1,Peraton / SAIC (indicative),,Job Postings,Low,2026-01-21
+CMS Enterprise Cloud Infrastructure Services,ECIS,Project Site,Broad Run,VIRGINIA,,ECIS - Broad Run,Engineering,1,Peraton / SAIC (indicative),,Job Postings,Low,2026-01-21
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",NGEN-R SMIT,Project Site,St. Louis,MO,,NGEN-R SMIT - St. Louis,Other,1,Leidos,,Job Postings,Low,2026-01-21
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",NGEN-R SMIT,Project Site,Carlsbad,CA,,NGEN-R SMIT - Carlsbad,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",NGEN-R SMIT,Project Site,Mount Vernon,VIRGINIA,,NGEN-R SMIT - Mount Vernon,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",NGEN-R SMIT,Project Site,Greece,NEW YORK,,NGEN-R SMIT - Greece,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",NGEN-R SMIT,Project Site,Lincoln,MASSACHUSETTS,,NGEN-R SMIT - Lincoln,Cybersecurity,1,Leidos,,Job Postings,Low,2026-01-21
+"NGEN-R SMIT – Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",NGEN-R SMIT,Project Site,Fairfax,VIRGINIA,,NGEN-R SMIT - Fairfax,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+Aegis Ballistic Missile Defense / Aegis Program,Aegis,Project Site,Huntsville,ALABAMA,,Aegis - Huntsville,Engineering,3,Lockheed Martin,,Job Postings,Medium,2026-01-21
+Aegis Ballistic Missile Defense / Aegis Program,Aegis,Project Site,Sunset,UTAH,,Aegis - Sunset,Engineering,1,Lockheed Martin,,Job Postings,Low,2026-01-21
+Aegis Ballistic Missile Defense / Aegis Program,Aegis,Project Site,Austin,TEXAS,,Aegis - Austin,Engineering,1,Lockheed Martin,,Job Postings,Low,2026-01-21
+Army AESD Enterprise Service Desk,AESD,Project Site,San Antonio,TEXAS,,AESD - San Antonio,Engineering; Logistics/Supply; Network/Infrastructure; PMO/Leadership,5,SAIC,,Job Postings,Medium,2026-01-21
+DISA Global Service Mgmt – Ops II,GSM-O II,Project Site,Muscatine,IOWA,,GSM-O II - Muscatine,Other,1,Leidos,,Job Postings,Low,2026-01-21
+DISA Global Service Mgmt – Ops II,GSM-O II,Project Site,Huntsville,ALABAMA,,GSM-O II - Huntsville,Other; PMO/Leadership,2,Leidos,,Job Postings,Low,2026-01-21
+DISA Global Service Mgmt – Ops II,GSM-O II,Project Site,Kings Bay,GEORGIA,,GSM-O II - Kings Bay,Other,1,Leidos,,Job Postings,Low,2026-01-21
+DISA Global Service Mgmt – Ops II,GSM-O II,Project Site,Meridianville,ALABAMA,,GSM-O II - Meridianville,Data/Analytics,1,Leidos,,Job Postings,Low,2026-01-21
+Data Center & Cloud Optimization,DCCO,Project Site,Arlington,VA,,DCCO - Arlington,Engineering,1,Peraton / Leidos (indicative),,Job Postings,Low,2026-01-21
+Data Center & Cloud Optimization,DCCO,Project Site,Research Triangle Park,NC,,DCCO - Research Triangle Park,Engineering,1,Peraton / Leidos (indicative),,Job Postings,Low,2026-01-21
+Data Center & Cloud Optimization,DCCO,Project Site,Alexandria,VIRGINIA,,DCCO - Alexandria,Engineering,1,Peraton / Leidos (indicative),,Job Postings,Low,2026-01-21
+Data Center & Cloud Optimization,DCCO,Project Site,Manassas,VIRGINIA,,DCCO - Manassas,Other,1,Peraton / Leidos (indicative),,Job Postings,Low,2026-01-21
+BICES Defense Intelligence Agency Variant,BICES,Project Site,Colorado Springs,CO,,BICES - Colorado Springs,Engineering,1,CACI + Leidos + Peraton + SAIC (various subs),,Job Postings,Low,2026-01-21
+BICES Defense Intelligence Agency Variant,BICES,Project Site,Washington,DISTRICT OF COLUMBIA,,BICES - Washington,Engineering,2,CACI + Leidos + Peraton + SAIC (various subs),,Job Postings,Low,2026-01-21
+Global Network Operations (DISA GSM-O II),GSM-O II,Project Site,Montgomery,ALABAMA,,GSM-O II - Montgomery,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+Global Network Operations (DISA GSM-O II),GSM-O II,Project Site,Grand Forks,NORTH DAKOTA,,GSM-O II - Grand Forks,Network/Infrastructure,1,Leidos,,Job Postings,Low,2026-01-21
+Global Network Operations (DISA GSM-O II),GSM-O II,Project Site,'Aiea,HAWAII,,GSM-O II - 'Aiea,Engineering,1,Leidos,,Job Postings,Low,2026-01-21
+GPS Next-Gen Operational Control System,GPS OCX,Project Site,Orlando,FL,,GPS OCX - Orlando,Engineering,1,Raytheon Intelligence & Space,,Job Postings,Low,2026-01-21
+GPS Next-Gen Operational Control System,GPS OCX,Project Site,Aurora,CO,,GPS OCX - Aurora,Engineering,1,Raytheon Intelligence & Space,,Job Postings,Low,2026-01-21
+GPS Next-Gen Operational Control System,GPS OCX,Project Site,Aurora,COLORADO,,GPS OCX - Aurora,Engineering,1,Raytheon Intelligence & Space,,Job Postings,Low,2026-01-21
+NARSIL – Advanced Research for System Intelligence & Learning,NARSIL,Unknown,Herndon,VIRGINIA,,NARSIL - Herndon,Engineering,1,Peraton,,Existing Data,Medium,2026-01-21
+NARSIL – Advanced Research for System Intelligence & Learning,NARSIL,Unknown,O'fallon,ILLINOIS,,NARSIL - O'fallon,Data/Analytics,1,Peraton,,Existing Data,Medium,2026-01-21
+NARSIL – Advanced Research for System Intelligence & Learning,NARSIL,Unknown,Suffolk,VIRGINIA,,NARSIL - Suffolk,Engineering,1,Peraton,,Existing Data,Medium,2026-01-21
+SITEC III – Enterprise Operations & Maintenance,SITEC III,Unknown,Juno Beach,FL,,SITEC III - Juno Beach,Other,1,Peraton,,Existing Data,Medium,2026-01-21
+SITEC III – Enterprise Operations & Maintenance,SITEC III,Unknown,Pensacola,FL,,SITEC III - Pensacola,Help Desk/Service Desk,1,Peraton,,Existing Data,Medium,2026-01-21
+SITEC III – Enterprise Operations & Maintenance,SITEC III,Unknown,Tampa,FLORIDA,,SITEC III - Tampa,Engineering,1,Peraton,,Existing Data,Medium,2026-01-21
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,Platform One / Cyber Portfolio,Unknown,Colorado Springs,COLORADO,,Platform One / Cyber Portfolio - Colorado Springs,Network/Infrastructure,1,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),,Existing Data,Medium,2026-01-21
+Air Force Cyber Operations / Platform One + Cyber/DevSecOps Portfolio,Platform One / Cyber Portfolio,Unknown,Washington,DISTRICT OF COLUMBIA,,Platform One / Cyber Portfolio - Washington,Engineering,1,SAIC; Leidos; CACI; Booz Allen Hamilton (aggregate DevSecOps/Cyber vendors supporting CSO & P1),,Existing Data,Medium,2026-01-21
+Army Integrated Battle Command System Support,IBCS,Unknown,Chantilly,VIRGINIA,,IBCS - Chantilly,Engineering,1,Northrop Grumman (prime); CACI (support),,Existing Data,Medium,2026-01-21
+Army Integrated Battle Command System Support,IBCS,Unknown,Rivanna,VIRGINIA,,IBCS - Rivanna,Technical Writing,1,Northrop Grumman (prime); CACI (support),,Existing Data,Medium,2026-01-21
+CDAO Advanced AI Tools (Scale AI OTA),Donovan,Unknown,Emerado,ND,,Donovan - Emerado,Testing/QA,1,Scale AI,,Existing Data,Medium,2026-01-21
+CDAO Advanced AI Tools (Scale AI OTA),Donovan,Unknown,Goose Creek,SOUTH CAROLINA,,Donovan - Goose Creek,Engineering,1,Scale AI,,Existing Data,Medium,2026-01-21
+Defense Enterprise Office 365 Migration / DoD365,DOD365,Unknown,Mclean,VIRGINIA,,DOD365 - Mclean,Engineering,2,Microsoft,,Existing Data,Medium,2026-01-21
+Defense Enterprise Office Solutions,DEOS,Unknown,Fayetteville,NC,,DEOS - Fayetteville,Network/Infrastructure,1,CSRA / Leidos (team),,Existing Data,Medium,2026-01-21
+Defense Enterprise Office Solutions,DEOS,Unknown,North Charleston,SC,,DEOS - North Charleston,Engineering,1,CSRA / Leidos (team),,Existing Data,Medium,2026-01-21
+DISA JWCC – Joint Warfighting Cloud Capability,JWCC,Unknown,Aberdeen Proving Ground,MARYLAND,,JWCC - Aberdeen Proving Ground,Data/Analytics,2,Amazon; Microsoft; Google; Oracle,,Existing Data,Medium,2026-01-21
+Global Command and Control System – Joint,GCCS-J,Unknown,Kings Bay,GEORGIA,,GCCS-J - Kings Bay,Other,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Global Command and Control System – Joint,GCCS-J,Unknown,Sunset,UTAH,,GCCS-J - Sunset,PMO/Leadership,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Global Command and Control System – Joint (Variant),GCCS-J,Unknown,Cockeysville,MARYLAND,,GCCS-J - Cockeysville,Engineering,1,Leidos,,Existing Data,Medium,2026-01-21
+Global Command and Control System – Joint (Variant),GCCS-J,Unknown,Windsor Mill,MARYLAND,,GCCS-J - Windsor Mill,Engineering,1,Leidos,,Existing Data,Medium,2026-01-21
+Global Solutions Management – Operations II,GSMO II,Unknown,Fort Bliss,TEXAS,,GSMO II - Fort Bliss,Other,1,Leidos,,Existing Data,Medium,2026-01-21
+Global Solutions Management – Operations II,GSMO II,Unknown,Saint Louis,MISSOURI,,GSMO II - Saint Louis,Other,1,Leidos,,Existing Data,Medium,2026-01-21
+GRASP (Raytheon/Peraton),GRASP,Unknown,North Charleston,SC,,GRASP - North Charleston,Software Development,1,Peraton,,Existing Data,Medium,2026-01-21
+GRASP (Raytheon/Peraton),GRASP,Unknown,Salt Lake City,UTAH,,GRASP - Salt Lake City,Engineering,1,Peraton,,Existing Data,Medium,2026-01-21
+Ground-Based Midcourse Defense,GMD,Unknown,Huntsville,ALABAMA,,GMD - Huntsville,Engineering,1,Boeing (prime); Northrop & Raytheon (NGI),,Existing Data,Medium,2026-01-21
+Ground-Based Midcourse Defense,GMD,Unknown,Tucson,AZ,,GMD - Tucson,Data/Analytics,1,Boeing (prime); Northrop & Raytheon (NGI),,Existing Data,Medium,2026-01-21
+Intelligence Systems Enterprise Operations,ISEO,Unknown,Jessup,MARYLAND,,ISEO - Jessup,Cybersecurity,1,Leidos,,Existing Data,Medium,2026-01-21
+Intelligence Systems Enterprise Operations,ISEO,Unknown,San Francisco,CALIFORNIA,,ISEO - San Francisco,Data/Analytics,1,Leidos,,Existing Data,Medium,2026-01-21
+SPICE (Space Payload Integration & Cyber Eng),SPICE,Unknown,Hill AFB,UTAH,,SPICE - Hill AFB,Engineering,2,SAIC / LinQuest (indicative),,Existing Data,Medium,2026-01-21
+Advanced Medium-Range Air-to-Air Missile (AMRAAM) Production & Sustainment,AMRAAM,Unknown,Jacksonville,FLORIDA,,AMRAAM - Jacksonville,Software Development,1,Raytheon,,Existing Data,Medium,2026-01-21
+AFCENT SCORPION Cyber Task (ISSO/ISSM Support),SCORPION,Unknown,Tyndall Air Force Base,FL,,SCORPION - Tyndall Air Force Base,Cybersecurity,1,CACI,,Existing Data,Medium,2026-01-21
+ARCYBER Information Advantage / Mission Support (general),ARCYBER,Unknown,Salem,MASSACHUSETTS,,ARCYBER - Salem,Other,1,Peraton / others (Peraton lead on ARCYBER Information Advantage Enterprise line; additional primes on related work),,Existing Data,Medium,2026-01-21
+Army Backbone Infrastructure Modernization – Task Order 2,BIM TO2,Unknown,Sully,VIRGINIA,,BIM TO2 - Sully,Help Desk/Service Desk,1,CACI,,Existing Data,Medium,2026-01-21
+Army Integrated Battle Command System,IBCS,Unknown,Hazelwood,MO,,IBCS - Hazelwood,Software Development,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Army Missile & Space R&D Support (Huntsville),,Unknown,Huntsville,ALABAMA,, - Huntsville,Engineering,1,Dynetics; Northrop teams,,Existing Data,Medium,2026-01-21
+Cloud One (USAF Cloud Program),Cloud One,Unknown,Dayton,OHIO,,Cloud One - Dayton,Engineering,1,SAIC,,Existing Data,Medium,2026-01-21
+"Command and Control, Battle Management & Communications (MDA)",C2BMC,Unknown,Redstone Arsenal,AL,,C2BMC - Redstone Arsenal,Software Development,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Defense Enclave Services,DES,Unknown,Sainte-Anne-De-Bellevue,QUEBEC,,DES - Sainte-Anne-De-Bellevue,Software Development,1,Leidos,,Existing Data,Medium,2026-01-21
+Distributed Common Ground System (AF),DCGS,Unknown,Hampton,VA,,DCGS - Hampton,Help Desk/Service Desk,1,BAE; multiple,,Existing Data,Medium,2026-01-21
+DTRA IAC-MAC Research & Analysis,IAC-MAC,Unknown,Bossier City,LA,,IAC-MAC - Bossier City,Software Development,1,CACI,,Existing Data,Medium,2026-01-21
+GMD Weapon System (Ground C2),GWS (GMD),Unknown,Tucson,ARIZONA,,GWS (GMD) - Tucson,Engineering,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+GPS Operational Control System (sustainment),GPS OCX,Unknown,Vandenberg Space Force Base,CA,,GPS OCX - Vandenberg Space Force Base,Engineering,1,Raytheon,,Existing Data,Medium,2026-01-21
+HHS Advanced Secure Data Repository,ASDR,Unknown,Washington,VA,,ASDR - Washington,Data/Analytics,1,GDIT / SAIC (indicative),,Existing Data,Medium,2026-01-21
+Hypersonic & Ballistic Tracking Space Sensor,HBTSS,Unknown,Chandler,ARIZONA,,HBTSS - Chandler,Engineering,1,Northrop & L3Harris (co-primes),,Existing Data,Medium,2026-01-21
+Integrated Air & Missile Defense,IAMD,Unknown,Andover,MA,,IAMD - Andover,Software Development,1,Raytheon,,Existing Data,Medium,2026-01-21
+Integrated Digital Engineering Environment,IDEE,Unknown,Tucson,ARIZONA,,IDEE - Tucson,Engineering,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Intelligence Systems Infrastructure Tools & Enhancements,inSITE,Unknown,San Diego,CA,,inSITE - San Diego,Engineering,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+MDA Tactical Embedded Systems,,Unknown,Chandler,AZ,, - Chandler,Engineering,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Mission Partner Environment (Field Ops / MPCO),MPE / MPCO,Unknown,Dhs,VIRGINIA,,MPE / MPCO - Dhs,Other,1,GDIT,,Existing Data,Medium,2026-01-21
+MSS Smart Systems (Palantir contract),MSS,Unknown,Norfolk,VIRGINIA,,MSS - Norfolk,Engineering,1,Palantir,,Existing Data,Medium,2026-01-21
+NASA SENSE (Space Comms & Tracking),SENSE,Unknown,Washington,VA,,SENSE - Washington,Other,1,Peraton,,Existing Data,Medium,2026-01-21
+Navy Aegis Combat System Modernization,AEGIS,Unknown,Fort Worth,TX,,AEGIS - Fort Worth,Engineering,1,Lockheed Martin,,Existing Data,Medium,2026-01-21
+Next-Gen OPIR (Ground + Payload),Next-Gen OPIR,Unknown,Redondo Beach,CALIFORNIA,,Next-Gen OPIR - Redondo Beach,Engineering,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Next-Generation Overhead Persistent Infrared,NG OPIR (classified),Unknown,El Segundo,CALIFORNIA,,NG OPIR (classified) - El Segundo,Engineering,1,Northrop Grumman,,Existing Data,Medium,2026-01-21
+Peraton ARCYBER Information Advantage Enterprise,IAE,Unknown,Fort George G Meade,MD,,IAE - Fort George G Meade,Cybersecurity,1,Peraton,,Existing Data,Medium,2026-01-21
+PRISM Support Services (Consolidated),PRISM,Unknown,Milford Mill,MD,,PRISM - Milford Mill,Other,1,"11 MA-IDIQ primes (incl. CTC, SAIC, Booz Allen, ManTech)",,Existing Data,Medium,2026-01-21

@@ -4,10 +4,13 @@ Notion API Client with rate limiting and batch operations
 import os
 import time
 import json
+import logging
 import requests
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 from dotenv import load_dotenv
+
+logger = logging.getLogger(__name__)
 
 load_dotenv()
 
@@ -81,7 +84,8 @@ class NotionClient:
             try:
                 error_body = e.response.json() if e.response.content else {}
                 message = error_body.get("message", str(e))
-            except:
+            except (ValueError, AttributeError) as parse_err:
+                logger.debug("error_body_parse_failed: %s", parse_err)
                 message = str(e)
             return {"error": True, "status": e.response.status_code, "message": message}
         except requests.exceptions.Timeout:
