@@ -151,6 +151,8 @@ export type TabId =
   | 'knowledgegraph'
   | 'agents'
   | 'memory'
+  | 'qadashboard'
+  | 'pipelinestatus'
   | 'systemhealth'
   | 'settings';
 

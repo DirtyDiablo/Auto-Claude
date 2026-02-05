@@ -774,7 +774,67 @@ class BDOrchestrator:
         # Log result
         logger.info(f"Pipeline complete: {result.jobs_processed} jobs, {result.hot_leads} hot leads")
 
+        # Persist state and check alerts
+        self._save_pipeline_state(result)
+        self._check_and_send_alerts(result)
+
         return result
+
+    def _save_pipeline_state(self, result: PipelineResult, run_id: str = None):
+        """Persist pipeline run result to outputs/pipeline_state.json."""
+        state_file = Path(self.config.output_dir) / "pipeline_state.json"
+        state_file.parent.mkdir(parents=True, exist_ok=True)
+
+        state = {}
+        if state_file.exists():
+            try:
+                with open(state_file, "r") as f:
+                    state = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                state = {}
+
+        run_record = {
+            "run_id": run_id or datetime.now().strftime("RUN_%Y%m%d_%H%M%S"),
+            "timestamp": datetime.now().isoformat(),
+            "success": result.success,
+            "duration_seconds": result.duration_seconds,
+            "stats": {
+                "jobs_processed": result.jobs_processed,
+                "hot_leads": result.hot_leads,
+                "warm_leads": result.warm_leads,
+                "cold_leads": result.cold_leads,
+                "briefings_generated": result.briefings_generated,
+                "qa_approved": result.qa_approved,
+                "qa_needs_review": result.qa_needs_review,
+            },
+            "errors": result.errors,
+        }
+
+        state["last_completed_run"] = run_record
+        state.setdefault("history", []).append(run_record)
+        state["current_run"] = None
+
+        # Keep last 100 runs
+        if len(state["history"]) > 100:
+            state["history"] = state["history"][-100:]
+
+        with open(state_file, "w") as f:
+            json.dump(state, f, indent=2, default=str)
+        logger.info(f"Pipeline state saved: {state_file}")
+
+    def _check_and_send_alerts(self, result: PipelineResult):
+        """Trigger alert engine after pipeline run."""
+        try:
+            from Engine6_QA.scripts.alerts import AlertEngine
+            engine = AlertEngine()
+            alerts = engine.check_all_rules()
+            if alerts:
+                engine.deliver_all(alerts)
+                logger.info(f"Delivered {len(alerts)} alert(s)")
+        except ImportError:
+            logger.debug("Alert engine not available")
+        except Exception as e:
+            logger.error(f"Alert check failed: {e}")
 
     def _error_result(self, errors: List[str], start_time: datetime) -> PipelineResult:
         """Create an error result."""

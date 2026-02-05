@@ -614,6 +614,61 @@ export class HubApiClient {
   }
 
   // ---------------------------------------------------------------------------
+  // QA & PIPELINE
+  // ---------------------------------------------------------------------------
+
+  async getQAStats(): Promise<{ total_items: number; pending: number; reviewed: number; timestamp: string }> {
+    return this.fetch('/qa/stats');
+  }
+
+  async getQAReviewQueue(params?: {
+    limit?: number;
+    offset?: number;
+    status?: 'pending' | 'reviewed';
+  }): Promise<{ items: Array<Record<string, unknown>>; total: number; limit: number; offset: number }> {
+    const qs = params
+      ? '?' + Object.entries(params).filter(([, v]) => v !== undefined).map(([k, v]) => `${k}=${v}`).join('&')
+      : '';
+    return this.fetch(`/qa/review-queue${qs}`);
+  }
+
+  async resolveQAItem(
+    itemId: string,
+    action: 'approve' | 'reject' | 'fix',
+    notes?: string,
+  ): Promise<{ success: boolean; item: Record<string, unknown> }> {
+    return this.fetch(`/qa/review-queue/${encodeURIComponent(itemId)}/resolve`, {
+      method: 'POST',
+      body: JSON.stringify({ action, notes }),
+    });
+  }
+
+  async getPipelineStatus(): Promise<{
+    is_running: boolean;
+    current_run: Record<string, unknown> | null;
+    last_run: Record<string, unknown> | null;
+    history: Array<Record<string, unknown>>;
+    stats: { total_runs: number; success_rate: number; avg_duration: number };
+  }> {
+    return this.fetch('/pipeline/status');
+  }
+
+  async triggerPipeline(params?: {
+    input_file?: string;
+    test_mode?: boolean;
+    hot_leads_only?: boolean;
+  }): Promise<{ success: boolean; run_id: string; status: string }> {
+    return this.fetch('/pipeline/trigger', {
+      method: 'POST',
+      body: JSON.stringify(params || {}),
+    });
+  }
+
+  async getAlerts(limit: number = 20): Promise<{ alerts: Array<Record<string, unknown>>; count: number }> {
+    return this.fetch(`/alerts?limit=${limit}`);
+  }
+
+  // ---------------------------------------------------------------------------
   // CONFIGURATION
   // ---------------------------------------------------------------------------
 

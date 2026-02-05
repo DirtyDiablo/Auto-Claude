@@ -21,6 +21,9 @@ import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
 import { PlacementsPage } from './pages/PlacementsPage';
 import CallIntelligence from './pages/CallIntelligence';
 import { AccountTakeover } from './pages/AccountTakeover';
+// Operations Pages
+import { QADashboard } from './pages/QADashboard';
+import { PipelineStatus } from './pages/PipelineStatus';
 // Hub AI Pages
 import { SmartQuery } from './pages/SmartQuery';
 import { KnowledgeGraph } from './pages/KnowledgeGraph';
@@ -238,6 +241,11 @@ function App() {
         return <CallIntelligence />;
       case 'accounttakeover':
         return <AccountTakeover />;
+      // Operations Pages
+      case 'qadashboard':
+        return <QADashboard />;
+      case 'pipelinestatus':
+        return <PipelineStatus />;
       // Hub AI Pages
       case 'smartquery':
         return <SmartQuery loading={loading} />;

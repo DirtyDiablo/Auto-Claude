@@ -35,8 +35,12 @@ class FallbackKnowledgeGraph:
 
     def _load(self):
         if os.path.exists(self.docs_file):
-            with open(self.docs_file, 'r') as f:
-                self.documents = json.load(f)
+            try:
+                with open(self.docs_file, 'r') as f:
+                    self.documents = json.load(f)
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning(f"Failed to load {self.docs_file}: {e} - starting fresh")
+                self.documents = []
 
     def _save(self):
         os.makedirs(self.working_dir, exist_ok=True)

@@ -83,21 +83,20 @@ async def unified_search(
     embedding = get_embedding(query)
 
     target_collections = collections.split(",") if collections else [
-        "contacts_unified", "programs_unified", "jobs_unified",
-        "activities_log", "documents_kb"
+        "contacts", "programs", "jobs",
+        "activities", "documents"
     ]
 
     results = []
     for coll in target_collections:
         coll = coll.strip()
         try:
-            hits = qdrant.search(
+            response = qdrant.query_points(
                 collection_name=coll,
-                query_vector=embedding,
+                query=embedding,
                 limit=limit,
-                with_payload=True,
             )
-            for hit in hits:
+            for hit in response.points:
                 results.append({
                     "collection": coll,
                     "score": hit.score,
@@ -143,7 +142,7 @@ async def list_contacts(
 
     try:
         results, next_offset = qdrant.scroll(
-            collection_name="contacts_unified",
+            collection_name="contacts",
             scroll_filter=filter_obj,
             limit=limit,
             offset=offset,
@@ -171,15 +170,14 @@ async def search_contacts(
     embedding = get_embedding(query)
 
     try:
-        hits = qdrant.search(
-            collection_name="contacts_unified",
-            query_vector=embedding,
+        response = qdrant.query_points(
+            collection_name="contacts",
+            query=embedding,
             limit=limit,
-            with_payload=True,
         )
 
         return {
-            "results": [{"id": str(h.id), "score": h.score, **h.payload} for h in hits],
+            "results": [{"id": str(h.id), "score": h.score, **h.payload} for h in response.points],
             "query": query,
         }
     except Exception as e:
@@ -212,7 +210,7 @@ async def list_programs(
 
     try:
         results, _ = qdrant.scroll(
-            collection_name="programs_unified",
+            collection_name="programs",
             scroll_filter=filter_obj,
             limit=limit,
             with_payload=True,
@@ -249,7 +247,7 @@ async def list_jobs(
 
     try:
         results, _ = qdrant.scroll(
-            collection_name="jobs_unified",
+            collection_name="jobs",
             scroll_filter=filter_obj,
             limit=limit,
             with_payload=True,
@@ -296,8 +294,8 @@ async def analytics_overview(authenticated: bool = Depends(verify_api_key)):
     qdrant = get_qdrant()
 
     collections_data = {}
-    for name in ["contacts_unified", "programs_unified", "jobs_unified",
-                 "activities_log", "pipeline_tracking"]:
+    for name in ["contacts", "programs", "jobs",
+                 "activities", "documents"]:
         try:
             info = qdrant.get_collection(name)
             collections_data[name] = {"count": info.points_count}
@@ -305,11 +303,11 @@ async def analytics_overview(authenticated: bool = Depends(verify_api_key)):
             collections_data[name] = {"count": 0}
 
     return {
-        "total_contacts": collections_data.get("contacts_unified", {}).get("count", 0),
-        "total_programs": collections_data.get("programs_unified", {}).get("count", 0),
-        "total_jobs": collections_data.get("jobs_unified", {}).get("count", 0),
-        "total_activities": collections_data.get("activities_log", {}).get("count", 0),
-        "pipeline_items": collections_data.get("pipeline_tracking", {}).get("count", 0),
+        "total_contacts": collections_data.get("contacts", {}).get("count", 0),
+        "total_programs": collections_data.get("programs", {}).get("count", 0),
+        "total_jobs": collections_data.get("jobs", {}).get("count", 0),
+        "total_activities": collections_data.get("activities", {}).get("count", 0),
+        "total_documents": collections_data.get("documents", {}).get("count", 0),
     }
 
 
@@ -364,8 +362,8 @@ async def sync_status(authenticated: bool = Depends(verify_api_key)):
     status = {}
 
     collection_names = [
-        "contacts_unified", "programs_unified", "jobs_unified",
-        "activities_log", "documents_kb", "knowledge_graph"
+        "contacts", "programs", "jobs",
+        "activities", "documents"
     ]
 
     for name in collection_names:

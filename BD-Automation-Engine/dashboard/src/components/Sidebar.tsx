@@ -26,6 +26,8 @@ import {
   Brain,
   Activity,
   UserMinus,
+  ShieldCheck,
+  Layers,
 } from 'lucide-react';
 import type { TabId } from '../types';
 
@@ -60,6 +62,9 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'contactorgchart', label: 'Contact Org Chart', icon: UserCheck },
   { id: 'placements', label: 'Placements', icon: FileSpreadsheet },
   { id: 'callintelligence', label: 'Call Intelligence', icon: Phone },
+  // Operations Section
+  { id: 'qadashboard', label: 'QA Dashboard', icon: ShieldCheck, section: 'Operations' },
+  { id: 'pipelinestatus', label: 'Pipeline Status', icon: Layers, section: 'Operations' },
   // Takeover Section
   { id: 'accounttakeover', label: 'Account Takeover', icon: UserMinus, section: 'Takeover' },
   { id: 'enrichment', label: 'Auto-Enrichment', icon: Zap },

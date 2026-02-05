@@ -410,6 +410,52 @@ async def smart_ask(
 
 
 # =========================================
+# COLLECTION LIST ENDPOINTS
+# =========================================
+
+@app.get("/programs")
+async def list_programs(
+    limit: int = Query(100, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+):
+    """List programs from Qdrant programs collection (replaces /api/v2/programs)."""
+    try:
+        results, _next = store.client.scroll(
+            collection_name="programs",
+            limit=limit,
+            offset=offset if offset else None,
+            with_payload=True,
+            with_vectors=False,
+        )
+        programs = [{"id": str(p.id), **p.payload} for p in results]
+        return {"programs": programs, "total": len(programs), "offset": offset}
+    except Exception as e:
+        logger.error(f"List programs error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/contacts/list")
+async def list_contacts(
+    limit: int = Query(100, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+):
+    """List contacts from Qdrant contacts collection."""
+    try:
+        results, _next = store.client.scroll(
+            collection_name="contacts",
+            limit=limit,
+            offset=offset if offset else None,
+            with_payload=True,
+            with_vectors=False,
+        )
+        contacts = [{"id": str(p.id), **p.payload} for p in results]
+        return {"contacts": contacts, "total": len(contacts), "offset": offset}
+    except Exception as e:
+        logger.error(f"List contacts error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================
 # SEARCH ENDPOINTS
 # =========================================
 
@@ -891,61 +937,152 @@ async def analyze_query_strategy(q: str = Query(..., description="Query to analy
 
 @app.post("/ingest/document")
 async def ingest_document(data: DocumentInput):
-    """Ingest document to graph."""
-    await graph.insert_document(data.text)
-    memory.add_interaction(f"Ingested document: {data.text[:200]}...")
-    return {"success": True, "message": "Document ingested"}
+    """Ingest document to Qdrant documents collection via OpenAI embeddings."""
+    try:
+        doc = {
+            "content": data.text,
+            "indexed_at": datetime.now().isoformat(),
+            "_source": "api_ingest",
+        }
+        if data.metadata:
+            doc.update(data.metadata)
+        indexed, errors = store.index_documents([doc])
+        return {"success": True, "indexed": indexed, "errors": errors}
+    except Exception as e:
+        logger.error(f"Ingest document error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/ingest/program")
 async def ingest_program(data: ProgramInput):
-    """Ingest program."""
-    await graph.insert_program(data.dict())
-    memory.add_entity_fact(data.name, "program", f"Value: {data.value}, Clearance: {data.clearance}")
-    return {"success": True, "program": data.name}
+    """Ingest program to Qdrant programs collection via OpenAI embeddings."""
+    try:
+        program_dict = {
+            "Program Name": data.name,
+            "description": data.description,
+            "Agency": data.agency,
+            "Prime Contractor": ", ".join(data.primes) if data.primes else "",
+            "Contract Value": data.value,
+            "clearance": data.clearance,
+            "technologies": ", ".join(data.technologies) if data.technologies else "",
+            "indexed_at": datetime.now().isoformat(),
+            "_source": "api_ingest",
+        }
+        indexed, errors = store.index_programs([program_dict])
+        return {"success": True, "program": data.name, "indexed": indexed, "errors": errors}
+    except Exception as e:
+        logger.error(f"Ingest program error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/ingest/programs/batch")
+async def ingest_programs_batch(programs: List[ProgramInput]):
+    """Batch ingest programs to Qdrant programs collection."""
+    try:
+        program_dicts = []
+        for p in programs:
+            program_dicts.append({
+                "Program Name": p.name,
+                "description": p.description,
+                "Agency": p.agency,
+                "Prime Contractor": ", ".join(p.primes) if p.primes else "",
+                "Contract Value": p.value,
+                "clearance": p.clearance,
+                "technologies": ", ".join(p.technologies) if p.technologies else "",
+                "indexed_at": datetime.now().isoformat(),
+                "_source": "api_ingest_batch",
+            })
+        indexed, errors = store.index_programs(program_dicts)
+        return {"success": True, "inserted": indexed, "updated": 0, "errors": errors, "total_submitted": len(programs)}
+    except Exception as e:
+        logger.error(f"Batch ingest programs error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/ingest/company")
 async def ingest_company(data: CompanyInput):
-    """Ingest company."""
-    await graph.insert_company(data.dict())
-    memory.add_entity_fact(data.name, "company", f"Type: {data.type}, Programs: {len(data.programs)}")
-    return {"success": True, "company": data.name}
+    """Ingest company to Qdrant documents collection via OpenAI embeddings."""
+    try:
+        doc = {
+            "content": f"COMPANY: {data.name} | Type: {data.type} | Capabilities: {', '.join(data.capabilities)} | Programs: {', '.join(data.programs)}",
+            "name": data.name,
+            "type": data.type,
+            "capabilities": ", ".join(data.capabilities),
+            "programs": ", ".join(data.programs),
+            "partners": ", ".join(data.partners),
+            "locations": ", ".join(data.locations),
+            "indexed_at": datetime.now().isoformat(),
+            "_source": "api_ingest",
+        }
+        indexed, errors = store.index_documents([doc])
+        return {"success": True, "company": data.name, "indexed": indexed, "errors": errors}
+    except Exception as e:
+        logger.error(f"Ingest company error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/ingest/contact")
 async def ingest_contact(data: ContactInput):
-    """Ingest contact."""
-    await graph.insert_contact(data.dict())
-    memory.add_entity_fact(data.name, "contact", f"Company: {data.company}, Title: {data.title}")
-    return {"success": True, "contact": data.name}
+    """Ingest contact to Qdrant contacts collection via OpenAI embeddings."""
+    try:
+        contact_dict = {
+            "name": data.name,
+            "company": data.company,
+            "title": data.title,
+            "programs": ", ".join(data.programs) if data.programs else "",
+            "clearance": data.clearance,
+            "indexed_at": datetime.now().isoformat(),
+            "_source": "api_ingest",
+        }
+        indexed, errors = store.index_contacts([contact_dict])
+        return {"success": True, "contact": data.name, "indexed": indexed, "errors": errors}
+    except Exception as e:
+        logger.error(f"Ingest contact error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/ingest/contacts/batch")
+async def ingest_contacts_batch(contacts: List[ContactInput]):
+    """Batch ingest contacts to Qdrant contacts collection."""
+    try:
+        contact_dicts = []
+        for c in contacts:
+            contact_dicts.append({
+                "name": c.name,
+                "company": c.company,
+                "title": c.title,
+                "programs": ", ".join(c.programs) if c.programs else "",
+                "clearance": c.clearance,
+                "indexed_at": datetime.now().isoformat(),
+                "_source": "api_ingest_batch",
+            })
+        indexed, errors = store.index_contacts(contact_dicts)
+        return {"success": True, "inserted": indexed, "updated": 0, "errors": errors, "total_submitted": len(contacts)}
+    except Exception as e:
+        logger.error(f"Batch ingest contacts error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/ingest/jobs")
 async def ingest_jobs(jobs: List[JobInput]):
     """Ingest multiple jobs (for Data-Scraper)."""
-    # Convert JobInput to dicts for indexing
-    job_dicts = []
-    for job in jobs:
-        job_dicts.append({
-            "title": job.title,
-            "company": job.company,
-            "location": job.location,
-            "clearance": job.clearance,
-            "description": job.description[:2000] if job.description else "",
-            "indexed_at": datetime.now().isoformat()
-        })
-
-    # Use the vector store's index_jobs method
-    indexed, errors = store.index_jobs(job_dicts)
-
-    # Log to memory (optional, may fail)
     try:
-        memory.add_scrape_result("jobs", f"Ingested {indexed} jobs", indexed)
+        job_dicts = []
+        for job in jobs:
+            job_dicts.append({
+                "title": job.title,
+                "company": job.company,
+                "location": job.location,
+                "clearance": job.clearance,
+                "description": job.description[:2000] if job.description else "",
+                "indexed_at": datetime.now().isoformat(),
+                "_source": "api_ingest",
+            })
+        indexed, errors = store.index_jobs(job_dicts)
+        return {"success": True, "count": indexed, "errors": errors}
     except Exception as e:
-        logger.warning(f"Memory logging failed: {e}")
-
-    return {"success": True, "count": indexed, "errors": errors}
+        logger.error(f"Ingest jobs error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/ingest/scraper-batch")
@@ -1454,6 +1591,168 @@ async def api_weekly_intel():
     except Exception as e:
         logger.error(f"Weekly intel error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================
+# QA & PIPELINE STATUS
+# =========================================
+
+@app.get("/qa/stats")
+async def get_qa_stats():
+    """Get QA review queue statistics."""
+    try:
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from Engine6_QA.scripts.qa_feedback import ReviewQueue
+        queue = ReviewQueue()
+        stats = queue.get_stats()
+        return {
+            "total_items": stats["total"],
+            "pending": stats["pending"],
+            "reviewed": stats["reviewed"],
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"QA stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/qa/review-queue")
+async def get_qa_review_queue(
+    limit: int = Query(50, ge=1, le=200),
+    offset: int = Query(0, ge=0),
+    status: Optional[str] = Query(None),
+):
+    """Get paginated QA review queue items."""
+    try:
+        from Engine6_QA.scripts.qa_feedback import ReviewQueue
+        queue = ReviewQueue()
+        items = queue.get_pending() if status == "pending" else queue.items
+        return {
+            "items": items[offset:offset + limit],
+            "total": len(items),
+            "limit": limit,
+            "offset": offset,
+        }
+    except Exception as e:
+        logger.error(f"QA review-queue error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class ResolveRequest(BaseModel):
+    action: str = Field(..., description="approve, reject, or fix")
+    notes: Optional[str] = None
+
+
+@app.post("/qa/review-queue/{item_id}/resolve")
+async def resolve_qa_item(item_id: str, request: ResolveRequest):
+    """Approve, reject, or fix a QA review queue item."""
+    try:
+        from Engine6_QA.scripts.qa_feedback import ReviewQueue
+        queue = ReviewQueue()
+        item = next((i for i in queue.items if i.get("job_id") == item_id), None)
+        if not item:
+            raise HTTPException(status_code=404, detail=f"Item '{item_id}' not found")
+        item["reviewed"] = True
+        item["review_action"] = request.action
+        item["review_notes"] = request.notes
+        item["reviewed_at"] = datetime.now().isoformat()
+        queue._save()
+        return {"success": True, "item": item}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"QA resolve error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/pipeline/status")
+async def get_pipeline_status():
+    """Get pipeline execution status and history."""
+    state_file = Path(__file__).parent.parent / "outputs" / "pipeline_state.json"
+    if not state_file.exists():
+        return {
+            "is_running": False,
+            "current_run": None,
+            "last_run": None,
+            "history": [],
+            "stats": {"total_runs": 0, "success_rate": 0.0, "avg_duration": 0.0},
+        }
+    try:
+        with open(state_file, "r") as f:
+            state = json.load(f)
+        history = state.get("history", [])
+        successes = sum(1 for r in history if r.get("success"))
+        durations = [r.get("duration_seconds", 0) for r in history if r.get("duration_seconds")]
+        return {
+            "is_running": bool(state.get("current_run")),
+            "current_run": state.get("current_run"),
+            "last_run": state.get("last_completed_run"),
+            "history": history[-10:],
+            "stats": {
+                "total_runs": len(history),
+                "success_rate": round(successes / len(history), 2) if history else 0.0,
+                "avg_duration": round(sum(durations) / len(durations), 1) if durations else 0.0,
+            },
+        }
+    except Exception as e:
+        logger.error(f"Pipeline status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class TriggerRequest(BaseModel):
+    input_file: Optional[str] = None
+    test_mode: bool = False
+    hot_leads_only: bool = False
+
+
+@app.post("/pipeline/trigger")
+async def trigger_pipeline(request: TriggerRequest):
+    """Trigger a pipeline run as a background subprocess."""
+    import subprocess as sp
+    import uuid as _uuid
+
+    run_id = str(_uuid.uuid4())[:8]
+    python_exe = sys.executable
+    orchestrator_path = Path(__file__).parent.parent / "orchestrator.py"
+
+    cmd = [python_exe, str(orchestrator_path)]
+    if request.input_file:
+        cmd.extend(["--input", request.input_file])
+    if request.test_mode:
+        cmd.append("--test")
+    if request.hot_leads_only:
+        cmd.append("--hot-leads-only")
+
+    # Record start in state file
+    state_file = Path(__file__).parent.parent / "outputs" / "pipeline_state.json"
+    state_file.parent.mkdir(parents=True, exist_ok=True)
+    state = {}
+    if state_file.exists():
+        try:
+            with open(state_file, "r") as f:
+                state = json.load(f)
+        except (json.JSONDecodeError, OSError):
+            state = {}
+    state["current_run"] = {"run_id": run_id, "started_at": datetime.now().isoformat(), "config": request.dict()}
+    with open(state_file, "w") as f:
+        json.dump(state, f, indent=2, default=str)
+
+    sp.Popen(cmd, stdout=sp.DEVNULL, stderr=sp.DEVNULL)
+    logger.info(f"Pipeline triggered: run_id={run_id}")
+
+    return {"success": True, "run_id": run_id, "status": "started"}
+
+
+@app.get("/alerts")
+async def get_alerts(limit: int = Query(20, ge=1, le=100)):
+    """Get recent alert history."""
+    try:
+        from Engine6_QA.scripts.alerts import AlertEngine
+        engine = AlertEngine()
+        return {"alerts": engine.get_recent_alerts(limit), "count": len(engine.get_recent_alerts(limit))}
+    except Exception as e:
+        logger.error(f"Alerts error: {e}")
+        return {"alerts": [], "count": 0, "error": str(e)}
 
 
 # =========================================
