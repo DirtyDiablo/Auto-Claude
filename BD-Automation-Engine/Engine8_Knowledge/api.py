@@ -1672,6 +1672,98 @@ async def resolve_qa_item(item_id: str, request: ResolveRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.get("/qa/report")
+def get_qa_report():
+    """Full quality report: collection health, quality scores, alerts."""
+    try:
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from Engine6_QA.quality_monitor import QualityMonitor
+        qdrant_client = store.client if store else None
+        monitor = QualityMonitor(client=qdrant_client)
+        report = monitor.generate_report()
+        return {
+            "timestamp": report.timestamp,
+            "collections": report.collections,
+            "quality_scores": report.quality_scores,
+            "alerts": report.alerts,
+            "summary": report.summary,
+        }
+    except Exception as e:
+        logger.error(f"QA report error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/alerts/check")
+def check_alerts_now():
+    """Manually trigger alert rule evaluation."""
+    try:
+        sys.path.insert(0, str(Path(__file__).parent.parent))
+        from Engine6_QA.scripts.alerts import AlertEngine
+        engine = AlertEngine()
+        alerts = engine.check_all_rules()
+        engine.deliver_all(alerts)
+        return {
+            "triggered": len(alerts),
+            "alerts": [
+                {"title": a.title, "severity": a.severity.value, "message": a.message}
+                for a in alerts
+            ],
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"Alert check error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/dashboard/summary")
+def get_dashboard_summary():
+    """Aggregated dashboard data in a single call."""
+    result = {"timestamp": datetime.now().isoformat()}
+
+    # Collection stats
+    try:
+        result["collections"] = store.get_collection_stats() if store else {}
+    except Exception:
+        result["collections"] = {}
+
+    # QA queue stats
+    try:
+        from Engine6_QA.scripts.qa_feedback import ReviewQueue
+        queue = ReviewQueue()
+        result["qa"] = queue.get_stats()
+    except Exception:
+        result["qa"] = {"total": 0, "pending": 0, "reviewed": 0}
+
+    # Pipeline status
+    state_file = Path(__file__).parent.parent / "outputs" / "pipeline_state.json"
+    try:
+        if state_file.exists():
+            with open(state_file, "r") as f:
+                state = json.load(f)
+            result["pipeline"] = {
+                "is_running": bool(state.get("current_run")),
+                "last_run": state.get("last_completed_run"),
+                "total_runs": len(state.get("history", [])),
+            }
+        else:
+            result["pipeline"] = {"is_running": False, "last_run": None, "total_runs": 0}
+    except Exception:
+        result["pipeline"] = {"is_running": False, "last_run": None, "total_runs": 0}
+
+    # Recent alerts
+    try:
+        from Engine6_QA.scripts.alerts import AlertEngine
+        engine = AlertEngine()
+        result["alerts"] = engine.get_recent_alerts(5)
+    except Exception:
+        result["alerts"] = []
+
+    # System health
+    result["health"] = {"status": "healthy", "api": True, "qdrant": store is not None}
+
+    return result
+
+
 @app.get("/pipeline/status")
 async def get_pipeline_status():
     """Get pipeline execution status and history."""
