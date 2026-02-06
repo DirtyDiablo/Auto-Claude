@@ -943,7 +943,7 @@ async def analyze_query_strategy(q: str = Query(..., description="Query to analy
 # =========================================
 
 @app.post("/ingest/document")
-async def ingest_document(data: DocumentInput):
+def ingest_document(data: DocumentInput):
     """Ingest document to Qdrant documents collection via OpenAI embeddings."""
     try:
         doc = {
@@ -961,7 +961,7 @@ async def ingest_document(data: DocumentInput):
 
 
 @app.post("/ingest/program")
-async def ingest_program(data: ProgramInput):
+def ingest_program(data: ProgramInput):
     """Ingest program to Qdrant programs collection via OpenAI embeddings."""
     try:
         program_dict = {
@@ -983,7 +983,7 @@ async def ingest_program(data: ProgramInput):
 
 
 @app.post("/ingest/programs/batch")
-async def ingest_programs_batch(programs: List[ProgramInput]):
+def ingest_programs_batch(programs: List[ProgramInput]):
     """Batch ingest programs to Qdrant programs collection."""
     try:
         program_dicts = []
@@ -1007,7 +1007,7 @@ async def ingest_programs_batch(programs: List[ProgramInput]):
 
 
 @app.post("/ingest/company")
-async def ingest_company(data: CompanyInput):
+def ingest_company(data: CompanyInput):
     """Ingest company to Qdrant documents collection via OpenAI embeddings."""
     try:
         doc = {
@@ -1029,7 +1029,7 @@ async def ingest_company(data: CompanyInput):
 
 
 @app.post("/ingest/contact")
-async def ingest_contact(data: ContactInput):
+def ingest_contact(data: ContactInput):
     """Ingest contact to Qdrant contacts collection via OpenAI embeddings."""
     try:
         contact_dict = {
@@ -1049,7 +1049,7 @@ async def ingest_contact(data: ContactInput):
 
 
 @app.post("/ingest/contacts/batch")
-async def ingest_contacts_batch(contacts: List[ContactInput]):
+def ingest_contacts_batch(contacts: List[ContactInput]):
     """Batch ingest contacts to Qdrant contacts collection."""
     try:
         contact_dicts = []
@@ -1071,7 +1071,7 @@ async def ingest_contacts_batch(contacts: List[ContactInput]):
 
 
 @app.post("/ingest/jobs")
-async def ingest_jobs(jobs: List[JobInput]):
+def ingest_jobs(jobs: List[JobInput]):
     """Ingest multiple jobs (for Data-Scraper)."""
     try:
         job_dicts = []
@@ -1774,6 +1774,7 @@ def main():
     parser.add_argument('--host', default=API_HOST, help='Host to bind')
     parser.add_argument('--port', type=int, default=API_PORT, help='Port to bind')
     parser.add_argument('--reload', action='store_true', help='Enable auto-reload')
+    parser.add_argument('--workers', type=int, default=4, help='Number of uvicorn workers (default: 4)')
 
     args = parser.parse_args()
 
