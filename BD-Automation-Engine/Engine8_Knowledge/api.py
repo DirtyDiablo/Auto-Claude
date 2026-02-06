@@ -353,6 +353,13 @@ if UNIFIED_API_AVAILABLE:
     app.include_router(unified_router)
     logger.info("Unified API v2 routes enabled: /api/v2/*")
 
+try:
+    from Engine8_Knowledge.api.hybrid_endpoints import router as hybrid_router
+    app.include_router(hybrid_router)
+    logger.info("Hybrid search routes enabled: /search/hybrid/v2, /collections/*, /sync/*, /index/bullhorn-notes")
+except ImportError as e:
+    logger.warning(f"Hybrid endpoints not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
@@ -1778,12 +1785,19 @@ def main():
     print(f"50+ endpoints available")
     print(f"{'='*60}\n")
 
-    uvicorn.run(
-        "Engine8_Knowledge.api:app",
-        host=args.host,
-        port=args.port,
-        reload=args.reload
-    )
+    if args.reload:
+        uvicorn.run(
+            "Engine8_Knowledge.api:app",
+            host=args.host,
+            port=args.port,
+            reload=True
+        )
+    else:
+        uvicorn.run(
+            app,
+            host=args.host,
+            port=args.port
+        )
 
 
 if __name__ == '__main__':

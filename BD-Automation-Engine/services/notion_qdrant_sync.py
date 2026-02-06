@@ -61,12 +61,12 @@ NOTION_DATABASES = {
 
 # Mapping from Notion DB to Qdrant collection
 QDRANT_COLLECTION_MAP = {
-    "dcgs_contacts": "contacts_unified",
-    "gdit_other": "contacts_unified",
-    "gdit_jobs": "jobs_unified",
-    "program_mapping": "jobs_unified",
-    "federal_programs": "programs_unified",
-    "bd_opportunities": "pipeline_tracking",
+    "dcgs_contacts": "contacts",
+    "gdit_other": "contacts",
+    "gdit_jobs": "jobs",
+    "program_mapping": "jobs",
+    "federal_programs": "programs",
+    "bd_opportunities": "opportunities",
 }
 
 
@@ -184,9 +184,9 @@ class NotionQdrantSync:
             raise ValueError(f"Unknown source database: {source_db}")
 
         # Determine text builder based on collection
-        if collection == "contacts_unified":
+        if collection == "contacts":
             build_text = self.build_contact_text
-        elif collection == "programs_unified":
+        elif collection == "programs":
             build_text = self.build_program_text
         else:
             build_text = self.build_job_text

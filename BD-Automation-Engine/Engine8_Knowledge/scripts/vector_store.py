@@ -99,7 +99,31 @@ COLLECTION_CONFIGS = {
         description='Bullhorn call notes, activities, and interactions',
         text_fields=['content', 'subject', 'contact_name', 'company_name'],
         indexed_fields=['activity_type', 'contact_id', 'company', 'date']
-    )
+    ),
+    'bullhorn_notes': CollectionConfig(
+        name='bullhorn_notes',
+        description='Bullhorn CRM call notes with hybrid (dense + sparse) vectors',
+        text_fields=['note_body', 'comments', 'about', 'action'],
+        indexed_fields=['note_type', 'noteType', 'personReference', '_source']
+    ),
+    'federal_contracts': CollectionConfig(
+        name='federal_contracts',
+        description='Federal contract awards, vehicles, and modifications',
+        text_fields=['title', 'description', 'agency', 'contractor'],
+        indexed_fields=['agency', 'contractor', 'contract_vehicle', 'status']
+    ),
+    'intelligence_reports': CollectionConfig(
+        name='intelligence_reports',
+        description='BD intelligence reports, HUMINT briefings, analysis docs',
+        text_fields=['content', 'title', 'summary', 'source'],
+        indexed_fields=['report_type', 'classification', 'source', 'date']
+    ),
+    'opportunities': CollectionConfig(
+        name='opportunities',
+        description='BD pipeline opportunities and capture tracking',
+        text_fields=['title', 'description', 'program', 'agency', 'prime'],
+        indexed_fields=['status', 'priority', 'agency', 'program']
+    ),
 }
 
 
