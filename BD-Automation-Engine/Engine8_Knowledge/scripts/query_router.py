@@ -53,6 +53,9 @@ class QueryRouter:
     - KEYWORD: Exact match -> BM25
     """
 
+    # Collections to search across for Qdrant queries
+    SEARCH_COLLECTIONS = ["contacts", "programs", "jobs", "documents", "activities", "intelligence_reports"]
+
     def __init__(self):
         self.memory = get_memory()
         self.graph = get_knowledge_graph()
@@ -115,12 +118,36 @@ class QueryRouter:
         )
 
     async def _query_qdrant(self, query: str, limit: int = 10) -> List[Dict]:
-        try:
-            results = self.retriever.search(query, "bd_knowledge", limit, True, True)
-            return [{"text": getattr(r, 'text', None) or "", "score": getattr(r, 'score', 0), "source": "qdrant"} for r in results if results]
-        except Exception as e:
-            logger.error(f"Error querying qdrant: {e}")
-            return []
+        all_results = []
+        per_collection_limit = max(3, limit // len(self.SEARCH_COLLECTIONS))
+        logger.info(f"_query_qdrant: searching {len(self.SEARCH_COLLECTIONS)} collections, limit={per_collection_limit} each")
+        for collection in self.SEARCH_COLLECTIONS:
+            try:
+                # Use semantic-only search (skip BM25 to avoid scrolling entire collections)
+                results = self.retriever._semantic_search(query, collection, per_collection_limit)
+                logger.info(f"  {collection}: {len(results) if results else 0} results")
+                if results:
+                    for r in results:
+                        text = getattr(r, 'text', None) or ""
+                        # Enrich text from metadata if short
+                        if len(text) < 20 and hasattr(r, 'metadata') and r.metadata:
+                            meta = r.metadata
+                            name = meta.get('name', meta.get('Name', meta.get('\ufeffContact Name', meta.get('title', ''))))
+                            company = meta.get('company', meta.get('employer', meta.get('prime_contractor', '')))
+                            content = meta.get('content', '')
+                            text = f"{name} | {company} | {content}".strip(' |') if name else (content or text)
+                        all_results.append({
+                            "text": text,
+                            "score": getattr(r, 'score', 0),
+                            "source": f"qdrant:{collection}",
+                            "collection": collection,
+                        })
+            except Exception as e:
+                logger.warning(f"Qdrant search failed for {collection}: {e}")
+        logger.info(f"_query_qdrant total: {len(all_results)} results")
+        # Sort by score and return top results
+        all_results.sort(key=lambda x: x.get("score", 0), reverse=True)
+        return all_results[:limit]
 
     async def _query_lightrag(self, query: str) -> List[Dict]:
         try:
@@ -141,12 +168,9 @@ class QueryRouter:
             return []
 
     async def _query_bm25(self, query: str, limit: int = 10) -> List[Dict]:
-        try:
-            results = self.retriever._keyword_search(query, "bd_knowledge", limit)
-            return [{"text": getattr(r, 'text', None) or "", "score": getattr(r, 'score', 0), "source": "bm25"} for r in results if results]
-        except Exception as e:
-            logger.error(f"Error querying bm25: {e}")
-            return []
+        # BM25 requires downloading entire collections into memory which is
+        # impractical for 200K+ record collections. Fall back to semantic search.
+        return await self._query_qdrant(query, limit)
 
     async def smart_query(
         self, query: str, override_type: Optional[QueryType] = None
@@ -215,8 +239,13 @@ class QueryRouter:
         if not valid_results:
             return "No relevant information found."
 
-        top = sorted(valid_results, key=lambda x: x.get('score', 0), reverse=True)[:5]
-        parts = [f"[{r.get('source', 'unknown')}] {(r.get('text') or '')[:500]}" for r in top]
+        top = sorted(valid_results, key=lambda x: x.get('score', 0), reverse=True)[:8]
+        parts = []
+        for r in top:
+            collection = r.get('collection', r.get('source', 'unknown'))
+            score = r.get('score', 0)
+            text = (r.get('text') or '')[:500]
+            parts.append(f"[{collection} | {score:.0%}] {text}")
         return "\n\n".join(parts)
 
 

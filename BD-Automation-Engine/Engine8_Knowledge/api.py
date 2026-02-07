@@ -436,6 +436,12 @@ async def smart_ask(
 
     result = await router.smart_query(q)
 
+    logger.info("smart_query_result",
+                answer_len=len(result.answer),
+                sources_count=len(result.sources),
+                systems=result.systems_used,
+                query_type=result.query_type.value)
+
     response = {
         "answer": result.answer,
         "query_type": result.query_type.value,

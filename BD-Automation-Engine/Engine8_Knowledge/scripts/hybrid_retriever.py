@@ -120,6 +120,43 @@ class HybridRetriever:
         self._bm25_indices[collection] = BM25Okapi(tokenized)
         self._bm25_docs[collection] = documents
 
+    @staticmethod
+    def _extract_text(payload: Dict) -> str:
+        """Extract readable text from a Qdrant payload across different collection schemas."""
+        # Try common text fields first
+        for key in ('content', 'text', 'summary', 'description', 'Raw Notes', 'notes'):
+            val = payload.get(key, '')
+            if val and len(str(val)) > 10:
+                return str(val)
+
+        # Build text from name/title/company fields
+        parts = []
+        name = payload.get('\ufeffContact Name', '') or payload.get('Name', '') or payload.get('name', '') or payload.get('Program Name', '')
+        if name:
+            parts.append(str(name))
+        for key in ('Role/Title', 'jobTitle', 'title'):
+            val = payload.get(key, '')
+            if val:
+                parts.append(str(val))
+                break
+        for key in ('company', 'employer', 'Agency', 'agency', 'Prime Contractor', 'prime_contractor'):
+            val = payload.get(key, '')
+            if val:
+                parts.append(str(val))
+                break
+        for key in ('Program', 'program', 'program_name'):
+            val = payload.get(key, '')
+            if val:
+                parts.append(str(val))
+                break
+
+        if parts:
+            return ' | '.join(parts)
+
+        # Last resort: concatenate all non-empty string values
+        vals = [str(v) for v in payload.values() if v and isinstance(v, str) and len(str(v)) > 3]
+        return ' | '.join(vals[:5]) if vals else ''
+
     def _generate_embedding(self, text: str) -> List[float]:
         """Generate embedding using OpenAI API (1536 dimensions)."""
         if not self.openai_client:
@@ -154,7 +191,7 @@ class HybridRetriever:
             return [
                 SearchResult(
                     id=str(r.id),
-                    text=r.payload.get('text', r.payload.get('name', '')),
+                    text=self._extract_text(r.payload),
                     score=r.score,
                     source='semantic',
                     metadata=r.payload
