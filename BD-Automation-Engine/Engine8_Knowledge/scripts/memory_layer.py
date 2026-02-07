@@ -123,7 +123,7 @@ class BDMemoryLayer:
         try:
             self.memory = Memory.from_config(config)
             self.backend = "mem0"
-        except Exception as e:
+        except BaseException as e:
             logger.error(f"Mem0 init failed: {e}")
             self._init_fallback()
 

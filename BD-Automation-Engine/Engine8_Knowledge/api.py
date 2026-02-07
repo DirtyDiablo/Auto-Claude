@@ -49,9 +49,16 @@ from Engine8_Knowledge.agents.contact_finder_agent import ContactFinderAgent
 from Engine8_Knowledge.agents.bd_strategy_agent import BDStrategyAgent
 from Engine8_Knowledge.agents.crewai_orchestrator import get_orchestrator
 
-# Configure logging early so imports can use logger
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDKnowledgeAPI')
+# Configure structlog early so imports can use logger
+try:
+    from config.logging_config import setup_logging, get_logger as _get_structlog, generate_request_id, request_id_var
+    setup_logging(log_level="INFO")
+    logger = _get_structlog("BDKnowledgeAPI")
+    STRUCTLOG_AVAILABLE = True
+except Exception:
+    logging.basicConfig(level=logging.INFO)
+    logger = logging.getLogger('BDKnowledgeAPI')
+    STRUCTLOG_AVAILABLE = False
 
 # Import new module routers
 try:
@@ -133,6 +140,7 @@ class SearchRequest(BaseModel):
     limit: int = Field(10, ge=1, le=50, description="Max results")
     score_threshold: float = Field(0.3, ge=0.0, le=1.0, description="Min relevance score")
     filters: Optional[Dict[str, Any]] = Field(None, description="Filter conditions")
+    rerank: bool = Field(False, description="Apply cross-encoder reranking")
 
 
 class AskRequest(BaseModel):
@@ -277,8 +285,12 @@ async def lifespan(app: FastAPI):
     rag_engine = BDRAGEngine(vector_store=store)
     indexer = BDIndexer(store=store)
 
-    # Initialize new components
-    memory = get_memory()
+    # Initialize new components (catch chromadb/mem0 Rust panic - PanicException is BaseException)
+    try:
+        memory = get_memory()
+    except BaseException as e:
+        logger.warning(f"Memory layer init failed (continuing without): {e}")
+        memory = None
     graph = get_knowledge_graph()
     retriever = get_hybrid_retriever()
     router = QueryRouter()
@@ -313,6 +325,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Structlog request-ID middleware
+if STRUCTLOG_AVAILABLE:
+    from starlette.middleware.base import BaseHTTPMiddleware
+    from starlette.requests import Request
+
+    class RequestIdMiddleware(BaseHTTPMiddleware):
+        async def dispatch(self, request: Request, call_next):
+            rid = generate_request_id()
+            request_id_var.set(rid)
+            response = await call_next(request)
+            response.headers["X-Request-ID"] = rid
+            return response
+
+    app.add_middleware(RequestIdMiddleware)
 
 # Include module routers
 if DOCUMENT_PROCESSOR_AVAILABLE:
@@ -354,7 +381,7 @@ if UNIFIED_API_AVAILABLE:
     logger.info("Unified API v2 routes enabled: /api/v2/*")
 
 try:
-    from Engine8_Knowledge.api.hybrid_endpoints import router as hybrid_router
+    from Engine8_Knowledge.api_routers.hybrid_endpoints import router as hybrid_router
     app.include_router(hybrid_router)
     logger.info("Hybrid search routes enabled: /search/hybrid/v2, /collections/*, /sync/*, /index/bullhorn-notes")
 except ImportError as e:
@@ -468,7 +495,7 @@ async def list_contacts(
 
 @app.post("/search", response_model=SearchResponse)
 async def search(request: SearchRequest):
-    """Semantic search across knowledge base."""
+    """Semantic search across knowledge base. Set rerank=true for cross-encoder reranking."""
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
 
@@ -494,6 +521,13 @@ async def search(request: SearchRequest):
                     results.append(item)
             results.sort(key=lambda x: x.score, reverse=True)
             results = results[:request.limit]
+
+        # Optional cross-encoder reranking
+        if request.rerank and results and retriever and getattr(retriever, 'reranker', None):
+            pairs = [[request.query, r.payload.get("text", "") or str(r.payload)] for r in results]
+            scores = retriever.reranker.predict(pairs)
+            ranked = sorted(zip(results, scores), key=lambda x: x[1], reverse=True)
+            results = [r for r, _ in ranked[:request.limit]]
 
         return SearchResponse(
             query=request.query,

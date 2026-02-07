@@ -273,18 +273,37 @@ class BDKnowledgeStore:
         return stats
 
     def _generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding for text using OpenAI API."""
+        """Generate embedding for text using OpenAI API with retry."""
         if not text or not text.strip():
             text = "empty"
         try:
-            response = self.openai_client.embeddings.create(
-                model=self.model_name,
-                input=text
-            )
-            return response.data[0].embedding
+            return self._call_embedding_api(text)
         except Exception as e:
             logger.error(f"OpenAI embedding error: {e}")
             return [0.0] * EMBEDDING_DIMENSION
+
+    @staticmethod
+    def _init_embedding_retry():
+        """Lazy-load tenacity decorator."""
+        try:
+            from config.resilience import with_embedding_retry
+            return with_embedding_retry
+        except ImportError:
+            return lambda f: f  # no-op if tenacity missing
+
+    def _call_embedding_api(self, text: str) -> List[float]:
+        """Call OpenAI embedding API with tenacity retry."""
+        decorator = self._init_embedding_retry()
+
+        @decorator
+        def _do_call():
+            response = self.openai_client.embeddings.create(
+                model=self.model_name,
+                input=text,
+            )
+            return response.data[0].embedding
+
+        return _do_call()
 
     def _generate_text_for_embedding(self, data: Dict, config: CollectionConfig) -> str:
         """Generate concatenated text for embedding from data fields."""

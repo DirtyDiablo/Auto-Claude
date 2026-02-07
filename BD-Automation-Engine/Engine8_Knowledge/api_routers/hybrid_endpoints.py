@@ -104,19 +104,24 @@ class CreateCollectionsResponse(BaseModel):
 
 def _get_store():
     """Get the global BDKnowledgeStore instance."""
-    # The api/ package shadows api.py, so we find the actual running module
-    # by checking sys.modules for the module that defines 'store'
     import sys
+    # Try direct import now that api_routers/ no longer shadows api.py
+    try:
+        from Engine8_Knowledge.api import store
+        if store is not None:
+            return store
+    except (ImportError, AttributeError):
+        pass
+    # Fallback: scan sys.modules
     for mod_name, mod in sys.modules.items():
         if hasattr(mod, 'store') and hasattr(mod, 'BDKnowledgeStore'):
-            store = getattr(mod, 'store', None)
-            if store is not None:
-                return store
-    # Fallback: try __main__ (when run as python api.py)
+            s = getattr(mod, 'store', None)
+            if s is not None:
+                return s
     main_mod = sys.modules.get('__main__')
-    store = getattr(main_mod, 'store', None)
-    if store is not None:
-        return store
+    s = getattr(main_mod, 'store', None)
+    if s is not None:
+        return s
     raise HTTPException(status_code=503, detail="Store not initialized")
 
 
