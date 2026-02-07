@@ -8,7 +8,8 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import type { DashboardData } from '../types'
 
-const API_BASE = 'http://localhost:8100'
+// Use relative URLs in dev (vite proxy) and allow override via env
+const API_BASE = import.meta.env.VITE_API_BASE || ''
 const STALE_TIME = 5 * 60 * 1000 // 5 minutes
 
 /**
@@ -37,18 +38,23 @@ async function fetchDashboardData(): Promise<DashboardData> {
 
       // If Hub API has data, use it
       if (contactsRes?.ok && programsRes?.ok) {
-        const contacts = await contactsRes.json()
-        const programs = await programsRes.json()
-        const jobs = jobsRes?.ok ? await jobsRes.json() : []
+        const contactsData = await contactsRes.json()
+        const programsData = await programsRes.json()
+        const jobsData = jobsRes?.ok ? await jobsRes.json() : { jobs: [] }
         const stats = statsRes?.ok ? await statsRes.json() : null
 
-        if (contacts?.results?.length || programs?.results?.length) {
+        // API returns {contacts: [...]}, {programs: [...]}, {jobs: [...]}
+        const contactsList = contactsData?.contacts || contactsData?.results || []
+        const programsList = programsData?.programs || programsData?.results || []
+        const jobsList = jobsData?.jobs || jobsData?.results || []
+
+        if (contactsList.length || programsList.length) {
           return {
-            jobs: jobs?.results || [],
-            programs: programs?.results || [],
-            contacts: groupContactsByTier(contacts?.results || []),
+            jobs: jobsList,
+            programs: programsList,
+            contacts: groupContactsByTier(contactsList),
             contractors: [],
-            summary: buildSummary(contacts?.results || [], programs?.results || [], jobs?.results || [], stats),
+            summary: buildSummary(contactsList, programsList, jobsList, stats),
           }
         }
       }

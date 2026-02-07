@@ -257,7 +257,7 @@ export class HubApiClient {
   private baseUrl: string;
   private timeout: number;
 
-  constructor(config: HubApiConfig = { baseUrl: 'http://127.0.0.1:8100' }) {
+  constructor(config: HubApiConfig = { baseUrl: import.meta.env.VITE_API_BASE || '' }) {
     this.baseUrl = config.baseUrl.replace(/\/$/, ''); // Remove trailing slash
     this.timeout = config.timeout || 30000;
   }
@@ -689,8 +689,8 @@ export class HubApiClient {
 // SINGLETON INSTANCE
 // =============================================================================
 
-// Default Hub API URL
-const DEFAULT_HUB_URL = 'http://127.0.0.1:8100';
+// Default Hub API URL - empty string uses vite proxy in dev, direct URL in production
+const DEFAULT_HUB_URL = import.meta.env.VITE_API_BASE || '';
 
 // Get URL from localStorage or use default
 function getStoredHubUrl(): string {

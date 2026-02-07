@@ -11,4 +11,97 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    port: 5173,
+    proxy: {
+      '/api': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/health': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/stats': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/search': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/ask': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/agents': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/memory': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/bdgraph': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/cache': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/qa': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/pipeline': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/alerts': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/rag': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/agent': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/dify': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/collections': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/contacts': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/programs': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/jobs': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/ingest': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/sync': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/index': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+    },
+  },
 })

@@ -91,7 +91,7 @@ export function CommandPalette({ onNavigate }: CommandPaletteProps) {
     setAiResult(null)
 
     try {
-      const res = await fetch('http://localhost:8100/ask/smart', {
+      const res = await fetch('/ask/smart', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question: aiQuery, limit: 5 }),

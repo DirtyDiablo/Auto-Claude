@@ -125,7 +125,7 @@ export function CollectionHealthChart() {
   useEffect(() => {
     async function fetchHealth() {
       try {
-        const res = await fetch('http://localhost:8100/collections/stats', {
+        const res = await fetch('/collections/stats', {
           signal: AbortSignal.timeout(5000),
         })
         if (res.ok) {
@@ -264,7 +264,7 @@ export function SystemHealthCards() {
 
       // Check Knowledge API
       try {
-        const res = await fetch('http://localhost:8100/health', { signal: AbortSignal.timeout(3000) })
+        const res = await fetch('/health', { signal: AbortSignal.timeout(3000) })
         services['Knowledge API'] = res.ok ? 'healthy' : 'unhealthy'
       } catch {
         services['Knowledge API'] = 'offline'

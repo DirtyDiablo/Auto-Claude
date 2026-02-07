@@ -277,7 +277,7 @@ export function DataProvider({ children, initialSource }: DataProviderProps) {
         if (connected) {
           setDataSource(source);
         } else {
-          setError('Hub API not available. Is the server running on localhost:8100?');
+          setError('Hub API not available. Is the Knowledge API server running?');
         }
       });
       return;
