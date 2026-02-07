@@ -99,26 +99,42 @@ class BDMemoryLayer:
     def _init_mem0(self):
         config = {
             "llm": {
-                "provider": "anthropic",
+                "provider": "openai",
                 "config": {
-                    "model": "claude-sonnet-4-20250514",
-                    "api_key": os.getenv("ANTHROPIC_API_KEY"),
+                    "model": "gpt-4o-mini",
+                    "api_key": os.getenv("OPENAI_API_KEY"),
                 }
             },
             "embedder": {
                 "provider": "openai",
                 "config": {
                     "model": "text-embedding-3-small",
-                    "api_key": os.getenv("OPENAI_API_KEY")
+                    "api_key": os.getenv("OPENAI_API_KEY"),
                 }
             },
             "vector_store": {
-                "provider": "chroma",
+                "provider": "qdrant",
                 "config": {
-                    "collection_name": "bd_memory",
-                    "path": self.storage_path
+                    "collection_name": "bd_memories",
+                    "host": "localhost",
+                    "port": 6333,
+                    "embedding_model_dims": 1536,
                 }
-            }
+            },
+            "graph_store": {
+                "provider": "neo4j",
+                "config": {
+                    "url": os.getenv("NEO4J_URI", "bolt://localhost:7687"),
+                    "username": "neo4j",
+                    "password": os.getenv("NEO4J_PASSWORD", "pts_bd_2026"),
+                },
+                "custom_prompt": (
+                    "Extract people, organizations, programs, contracts, "
+                    "agencies, and their relationships from business "
+                    "development intelligence."
+                ),
+            },
+            "version": "v1.1",
         }
         try:
             self.memory = Memory.from_config(config)

@@ -1706,6 +1706,89 @@ async def resolve_qa_item(item_id: str, request: ResolveRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 
+# =========================================
+# DOCLING DOCUMENT INGESTION
+# =========================================
+
+@app.post("/ingest/document")
+def ingest_document(
+    file: UploadFile = File(...),
+    collection: str = Form("federal_contracts"),
+    doc_type: str = Form("unknown"),
+    max_tokens: int = Form(512),
+):
+    """Ingest a PDF/DOCX via Docling: convert, chunk, embed, upsert to Qdrant."""
+    import tempfile
+    try:
+        from Engine8_Knowledge.processors.docling_processor import ingest_document_to_qdrant
+    except ImportError as e:
+        raise HTTPException(status_code=503, detail=f"Docling processor not available: {e}")
+
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+
+    # Save upload to temp file
+    suffix = Path(file.filename).suffix if file.filename else ".pdf"
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        content = file.file.read()
+        tmp.write(content)
+        tmp_path = tmp.name
+
+    try:
+        result = ingest_document_to_qdrant(
+            file_path=tmp_path,
+            store=store,
+            collection=collection,
+            max_tokens=max_tokens,
+            doc_type=doc_type,
+            metadata={"original_filename": file.filename},
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Document ingest error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+
+# =========================================
+# GRAPHITI KNOWLEDGE GRAPH ENDPOINTS
+# =========================================
+
+@app.post("/graphiti/ingest")
+async def graphiti_ingest(
+    name: str = Query(..., description="Episode name"),
+    source: str = Query("api", description="Source description"),
+    body: str = Query(..., description="Episode text body"),
+):
+    """Add a BD intelligence episode to the Graphiti knowledge graph."""
+    try:
+        from services.graphiti_service import add_bd_episode
+        result = await add_bd_episode(name=name, body=body, source=source)
+        return result
+    except Exception as e:
+        logger.error(f"Graphiti ingest error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/graphiti/search")
+async def graphiti_search(
+    q: str = Query(..., description="Search query"),
+    limit: int = Query(10, ge=1, le=50, description="Max results"),
+):
+    """Search the Graphiti knowledge graph for facts and relationships."""
+    try:
+        from services.graphiti_service import search_graph
+        results = await search_graph(query=q, limit=limit)
+        return {"query": q, "results": results, "count": len(results)}
+    except Exception as e:
+        logger.error(f"Graphiti search error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @app.get("/qa/report")
 def get_qa_report():
     """Full quality report: collection health, quality scores, alerts."""
