@@ -5,6 +5,7 @@ Supports dashboard JSON files, Bullhorn exports, and processed documents.
 
 import os
 import sys
+import csv
 import json
 import logging
 from pathlib import Path
@@ -42,6 +43,7 @@ DASHBOARD_DATA_DIR = PROJECT_ROOT / "dashboard" / "public" / "data"
 BULLHORN_DB_PATH = PROJECT_ROOT / "Engine7_BullhornETL" / "data" / "bullhorn_intelligence.db"
 FEDERAL_PROGRAMS_CSV = PROJECT_ROOT / "Engine2_ProgramMapping" / "data" / "Federal_Programs_Master_Enriched_v2.csv"
 OUTPUTS_DIR = PROJECT_ROOT / "outputs"
+ANALYTICAL_OUTPUTS_DIR = PROJECT_ROOT / "data" / "from_n8n_builder" / "analytical_outputs"
 
 # Dashboard data files
 DASHBOARD_FILES = {
@@ -268,6 +270,218 @@ class BDDataLoader:
         logger.info(f"Loaded {len(documents)} past performance documents")
         return documents
 
+    @staticmethod
+    def load_intelligence_reports() -> List[Dict]:
+        """Load BD intelligence reports from markdown, CSV, and JSON sources."""
+        reports = []
+
+        # --- 1. Markdown intelligence reports from analytical_outputs ---
+        if ANALYTICAL_OUTPUTS_DIR.exists():
+            for md_file in sorted(ANALYTICAL_OUTPUTS_DIR.glob('*.md')):
+                try:
+                    content = md_file.read_text(encoding='utf-8', errors='replace')
+                    if len(content.strip()) < 50:
+                        continue
+
+                    # Extract title from first heading or filename
+                    title = md_file.stem.replace('_', ' ').replace('-', ' ').title()
+                    for line in content.split('\n')[:5]:
+                        line = line.strip()
+                        if line.startswith('#'):
+                            title = line.lstrip('#').strip()
+                            break
+
+                    # Classify report type from filename
+                    fname_lower = md_file.stem.lower()
+                    if 'intelligence' in fname_lower or 'intel' in fname_lower:
+                        report_type = 'intelligence_analysis'
+                    elif 'competitive' in fname_lower or 'competitor' in fname_lower:
+                        report_type = 'competitive_intelligence'
+                    elif 'strategy' in fname_lower:
+                        report_type = 'strategy'
+                    elif 'summary' in fname_lower or 'executive' in fname_lower:
+                        report_type = 'executive_summary'
+                    elif 'audit' in fname_lower:
+                        report_type = 'audit'
+                    elif 'playbook' in fname_lower:
+                        report_type = 'playbook'
+                    elif 'analysis' in fname_lower:
+                        report_type = 'analysis'
+                    elif 'implementation' in fname_lower or 'guide' in fname_lower:
+                        report_type = 'guide'
+                    else:
+                        report_type = 'analytical_report'
+
+                    # Truncate very long content for embedding (keep first ~8000 chars)
+                    summary = content[:2000] if len(content) > 2000 else content
+
+                    reports.append({
+                        'title': title,
+                        'content': content[:8000],
+                        'summary': summary,
+                        'source': str(md_file.relative_to(PROJECT_ROOT)),
+                        'report_type': report_type,
+                        'classification': 'unclassified',
+                        'date': datetime.fromtimestamp(md_file.stat().st_mtime).strftime('%Y-%m-%d'),
+                    })
+                except Exception as e:
+                    logger.warning(f"Failed to load MD report {md_file.name}: {e}")
+
+        # --- 2. HUMINT briefings from outputs ---
+        if OUTPUTS_DIR.exists():
+            for humint_file in sorted(OUTPUTS_DIR.glob('HUMINT_*.md')):
+                try:
+                    content = humint_file.read_text(encoding='utf-8', errors='replace')
+                    if len(content.strip()) < 50:
+                        continue
+
+                    title = humint_file.stem.replace('_', ' ').title()
+                    for line in content.split('\n')[:5]:
+                        line = line.strip()
+                        if line.startswith('#'):
+                            title = line.lstrip('#').strip()
+                            break
+
+                    summary = content[:2000]
+                    reports.append({
+                        'title': title,
+                        'content': content[:8000],
+                        'summary': summary,
+                        'source': str(humint_file.relative_to(PROJECT_ROOT)),
+                        'report_type': 'humint_briefing',
+                        'classification': 'unclassified',
+                        'date': datetime.fromtimestamp(humint_file.stat().st_mtime).strftime('%Y-%m-%d'),
+                    })
+                except Exception as e:
+                    logger.warning(f"Failed to load HUMINT report {humint_file.name}: {e}")
+
+            # BD Briefings subdirectory
+            briefings_dir = OUTPUTS_DIR / 'BD_Briefings'
+            if briefings_dir.exists():
+                for brief_file in sorted(briefings_dir.glob('*.md')):
+                    try:
+                        content = brief_file.read_text(encoding='utf-8', errors='replace')
+                        if len(content.strip()) < 50:
+                            continue
+
+                        title = brief_file.stem.replace('_', ' ').title()
+                        for line in content.split('\n')[:5]:
+                            line = line.strip()
+                            if line.startswith('#'):
+                                title = line.lstrip('#').strip()
+                                break
+
+                        reports.append({
+                            'title': title,
+                            'content': content[:8000],
+                            'summary': content[:2000],
+                            'source': str(brief_file.relative_to(PROJECT_ROOT)),
+                            'report_type': 'bd_briefing',
+                            'classification': 'unclassified',
+                            'date': datetime.fromtimestamp(brief_file.stat().st_mtime).strftime('%Y-%m-%d'),
+                        })
+                    except Exception as e:
+                        logger.warning(f"Failed to load briefing {brief_file.name}: {e}")
+
+        # --- 3. Intelligence CSV files (row-per-record) ---
+        csv_files = {
+            'competitive_intelligence': 'COMPETITIVE_INTELLIGENCE.csv',
+            'hiring_intelligence': 'hiring_intelligence.csv',
+            'location_intelligence': 'location_intelligence.csv',
+            'subaward_intelligence': 'subaward_intelligence.csv',
+        }
+
+        for report_type, csv_name in csv_files.items():
+            csv_path = ANALYTICAL_OUTPUTS_DIR / csv_name
+            if not csv_path.exists():
+                continue
+
+            try:
+                with open(csv_path, 'r', encoding='utf-8', errors='replace') as f:
+                    reader = csv.DictReader(f)
+                    for i, row in enumerate(reader):
+                        # Build content from all fields
+                        content_parts = [f"{k}: {v}" for k, v in row.items() if v and v.strip()]
+                        content = '; '.join(content_parts)
+
+                        # Extract a meaningful title
+                        title_field = next(
+                            (row.get(k, '') for k in ['Prime', 'Program Name', 'Location', 'Company']
+                             if row.get(k, '').strip()),
+                            f"Row {i + 1}"
+                        )
+
+                        reports.append({
+                            'title': f"{report_type.replace('_', ' ').title()}: {title_field}",
+                            'content': content,
+                            'summary': content[:500],
+                            'source': str(csv_path.relative_to(PROJECT_ROOT)),
+                            'report_type': report_type,
+                            'classification': 'unclassified',
+                            'date': datetime.fromtimestamp(csv_path.stat().st_mtime).strftime('%Y-%m-%d'),
+                        })
+            except Exception as e:
+                logger.warning(f"Failed to load CSV {csv_name}: {e}")
+
+        # --- 4. Master program intelligence JSON ---
+        master_intel = ANALYTICAL_OUTPUTS_DIR / 'master_program_intelligence.json'
+        if master_intel.exists():
+            try:
+                with open(master_intel, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+
+                programs = data.get('programs', []) if isinstance(data, dict) else data
+                for prog in programs:
+                    if not isinstance(prog, dict):
+                        continue
+
+                    name = prog.get('program_name', 'Unknown Program')
+                    content_parts = [f"{k}: {v}" for k, v in prog.items()
+                                     if isinstance(v, (str, int, float)) and str(v).strip()]
+                    content = '; '.join(content_parts)
+
+                    reports.append({
+                        'title': f"Program Intelligence: {name}",
+                        'content': content,
+                        'summary': content[:500],
+                        'source': str(master_intel.relative_to(PROJECT_ROOT)),
+                        'report_type': 'program_intelligence',
+                        'classification': 'unclassified',
+                        'date': data.get('metadata', {}).get('generated', '2026-01-21')[:10]
+                            if isinstance(data, dict) else
+                            datetime.fromtimestamp(master_intel.stat().st_mtime).strftime('%Y-%m-%d'),
+                    })
+            except Exception as e:
+                logger.warning(f"Failed to load master_program_intelligence.json: {e}")
+
+        # --- 5. Competitor analysis JSON ---
+        competitor_json = ANALYTICAL_OUTPUTS_DIR / 'competitor-analysis.json'
+        if competitor_json.exists():
+            try:
+                with open(competitor_json, 'r', encoding='utf-8') as f:
+                    data = json.load(f)
+
+                items = data if isinstance(data, list) else [data]
+                for item in items:
+                    if not isinstance(item, dict):
+                        continue
+                    name = item.get('name', item.get('company', 'Unknown'))
+                    content = json.dumps(item, indent=2)[:6000]
+                    reports.append({
+                        'title': f"Competitor Analysis: {name}",
+                        'content': content,
+                        'summary': content[:500],
+                        'source': str(competitor_json.relative_to(PROJECT_ROOT)),
+                        'report_type': 'competitive_intelligence',
+                        'classification': 'unclassified',
+                        'date': datetime.fromtimestamp(competitor_json.stat().st_mtime).strftime('%Y-%m-%d'),
+                    })
+            except Exception as e:
+                logger.warning(f"Failed to load competitor-analysis.json: {e}")
+
+        logger.info(f"Loaded {len(reports)} intelligence reports from all sources")
+        return reports
+
 
 # =========================================
 # INDEXER CLASS
@@ -345,6 +559,7 @@ class BDIndexer:
         self.results.append(self.index_programs())
         self.results.append(self.index_documents())
         self.results.append(self.index_activities())
+        self.results.append(self.index_intelligence_reports())
 
         # Print summary
         self._print_summary()
@@ -497,6 +712,34 @@ class BDIndexer:
         logger.info(f"Activities indexing complete: {indexed} indexed, {errors} errors")
         return result
 
+    def index_intelligence_reports(self, reports: List[Dict] = None) -> IndexingResult:
+        """Index BD intelligence reports, HUMINT briefings, and analysis docs."""
+        start_time = datetime.now()
+
+        if reports is None:
+            reports = self.loader.load_intelligence_reports()
+
+        # Enrich with auto-tags
+        reports = self._enrich_data(reports)
+
+        indexed, errors = 0, 0
+        if reports:
+            indexed, errors = self.store._index_data('intelligence_reports', reports, batch_size=50)
+
+        duration = (datetime.now() - start_time).total_seconds()
+
+        result = IndexingResult(
+            collection='intelligence_reports',
+            source='analytical_outputs + HUMINT + BD_Briefings',
+            total_items=len(reports),
+            indexed=indexed,
+            errors=errors,
+            duration_seconds=duration
+        )
+
+        logger.info(f"Intelligence reports indexing complete: {indexed} indexed, {errors} errors")
+        return result
+
     def _print_summary(self):
         """Print indexing summary."""
         print("\n" + "=" * 60)
@@ -559,6 +802,7 @@ def main():
     parser.add_argument('--programs', action='store_true', help='Index programs only')
     parser.add_argument('--documents', action='store_true', help='Index documents only')
     parser.add_argument('--activities', action='store_true', help='Index activities only')
+    parser.add_argument('--intelligence', action='store_true', help='Index intelligence reports only')
     parser.add_argument('--force-recreate', action='store_true', help='Recreate collections')
     parser.add_argument('--stats', action='store_true', help='Show collection stats')
     parser.add_argument('--report', action='store_true', help='Save index report')
@@ -569,7 +813,7 @@ def main():
     indexer = BDIndexer()
 
     # Determine what to index
-    if args.all or not any([args.jobs, args.contacts, args.programs, args.documents, args.activities, args.stats]):
+    if args.all or not any([args.jobs, args.contacts, args.programs, args.documents, args.activities, args.intelligence, args.stats]):
         indexer.index_all(force_recreate=args.force_recreate)
     else:
         indexer.initialize(force_recreate=args.force_recreate)
@@ -584,6 +828,8 @@ def main():
             indexer.index_documents()
         if args.activities:
             indexer.index_activities()
+        if args.intelligence:
+            indexer.index_intelligence_reports()
 
     if args.stats:
         print("\nCollection Statistics:")
