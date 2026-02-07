@@ -41,6 +41,7 @@ def create_bd_research_crew(
         ContactProfile,
         CompetitiveReport,
         OutreachPlan,
+        BDResearchBundle,
     )
 
     context_str = f"Program: {program_name}"
@@ -93,9 +94,22 @@ def create_bd_research_crew(
         agent=outreach_composer,
     )
 
+    t_synthesis = Task(
+        description=(
+            "Compile ALL results from the previous tasks into a single comprehensive "
+            "BD research bundle. Include the full program intelligence, competitive report, "
+            "all contact profiles, and all outreach plans. Do not summarize — preserve "
+            "the complete data from each prior task."
+        ),
+        expected_output="Complete BD research bundle with all intermediate results preserved.",
+        agent=outreach_composer,
+        output_pydantic=BDResearchBundle,
+        context=[t1, t2, t3, t4],
+    )
+
     return Crew(
         agents=[program_researcher, contact_enricher, competitive_analyst, outreach_composer],
-        tasks=[t1, t2, t3, t4],
+        tasks=[t1, t2, t3, t4, t_synthesis],
         process=Process.sequential,
         verbose=True,
     )
@@ -115,7 +129,7 @@ def create_weekly_intel_crew(focus_programs: Optional[list[str]] = None) -> Opti
         competitive_analyst,
         program_researcher,
     )
-    from Engine8_Knowledge.agents.models import HUMINTBrief
+    from Engine8_Knowledge.agents.models import HUMINTBrief, WeeklyIntelBundle
 
     programs_str = ", ".join(focus_programs) if focus_programs else "all active DCGS programs"
 
@@ -150,9 +164,21 @@ def create_weekly_intel_crew(focus_programs: Optional[list[str]] = None) -> Opti
         agent=program_researcher,
     )
 
+    t_synthesis = Task(
+        description=(
+            "Bundle ALL results from the previous tasks into a single weekly intel package. "
+            "Include the complete HUMINT brief, competitive scan results, weekly summary, "
+            "and consolidated action items. Preserve all data — do not drop details."
+        ),
+        expected_output="Complete weekly intel bundle with HUMINT, competitive scan, and action items.",
+        agent=program_researcher,
+        output_pydantic=WeeklyIntelBundle,
+        context=[t1, t2, t3],
+    )
+
     return Crew(
         agents=[humint_analyst, competitive_analyst, program_researcher],
-        tasks=[t1, t2, t3],
+        tasks=[t1, t2, t3, t_synthesis],
         process=Process.sequential,
         verbose=True,
     )

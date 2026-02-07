@@ -99,3 +99,20 @@ class HUMINTBrief(BaseModel):
     vendor_preferences: Optional[str] = None
     action_items: list[str]
     confidence_level: str = Field(description="High/Medium/Low")
+
+
+class BDResearchBundle(BaseModel):
+    """Collects all intermediate crew outputs into one response."""
+    program_intel: dict = Field(default_factory=dict)
+    competitive_report: dict = Field(default_factory=dict)
+    contact_profiles: list[dict] = Field(default_factory=list)
+    outreach_plans: list[dict] = Field(default_factory=list)
+    summary: str = ""
+
+
+class WeeklyIntelBundle(BaseModel):
+    """Collects all intermediate weekly intel crew outputs into one response."""
+    humint_brief: dict = Field(default_factory=dict)
+    competitive_scan: dict = Field(default_factory=dict)
+    weekly_summary: str = ""
+    action_items: list[str] = Field(default_factory=list)

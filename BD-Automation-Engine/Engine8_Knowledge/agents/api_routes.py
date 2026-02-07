@@ -71,6 +71,13 @@ def run_crew_background(task_id: str, crew, crew_type: str, inputs: dict):
         if hasattr(result, "pydantic") and result.pydantic:
             result_data["structured"] = result.pydantic.model_dump()
 
+        # Capture individual task outputs so intermediate results aren't lost
+        task_outputs = {}
+        for i, task in enumerate(crew.tasks):
+            if task.output:
+                task_outputs[f"task_{i}_{task.agent.role}"] = str(task.output)[:5000]
+        result_data["task_outputs"] = task_outputs
+
         _tasks[task_id]["status"] = "completed"
         _tasks[task_id]["result"] = result_data
         _tasks[task_id]["completed_at"] = datetime.now().isoformat()
