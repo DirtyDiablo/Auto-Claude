@@ -4,6 +4,7 @@ import type { CorrelationSummary } from '../types';
 import { useHubConnection, useHubStats } from '../hooks/useHubApi';
 import { AnimatedCounter } from '../components/ui/AnimatedCounter';
 import { SkeletonHubStats } from '../components/ui/Skeleton';
+import { CollectionHealthChart, WeeklyOutreachChart, SystemHealthCards } from '../components/KPICharts';
 
 interface ExecutiveSummaryProps {
   summary: CorrelationSummary | null;
@@ -364,6 +365,13 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
             </BarChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* KPI Charts Row */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <CollectionHealthChart />
+        <WeeklyOutreachChart />
+        <SystemHealthCards />
       </div>
     </div>
   );

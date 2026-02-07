@@ -30,7 +30,8 @@ import { KnowledgeGraph } from './pages/KnowledgeGraph';
 import { AgentPanel } from './pages/AgentPanel';
 import { MemoryContext } from './pages/MemoryContext';
 import { SystemHealth } from './pages/SystemHealth';
-import { useNotionDashboard } from './hooks/useNotionData';
+import { useAppData } from './hooks/useAppData';
+import { CommandPalette } from './components/CommandPalette';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
 import './index.css';
@@ -51,7 +52,7 @@ interface MindMapNav {
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('executive');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const { data, loading, error, refresh, lastUpdated, isConfigured } = useNotionDashboard();
+  const { data, loading, error, refresh, lastUpdated, isConfigured } = useAppData();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [crossNavFilter, setCrossNavFilter] = useState<CrossNavFilter | null>(null);
   const [mindMapNav, setMindMapNav] = useState<MindMapNav | null>(null);
@@ -283,6 +284,7 @@ function App() {
       />
       <main className="flex-1 overflow-hidden">{renderContent()}</main>
       <DataFreshness />
+      <CommandPalette onNavigate={handleTabChange} />
     </div>
   );
 }

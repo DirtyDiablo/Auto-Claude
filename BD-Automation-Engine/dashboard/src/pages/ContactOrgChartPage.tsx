@@ -14,8 +14,11 @@ import {
   Activity,
   Building2,
   Calendar,
+  LayoutGrid,
+  Network,
 } from 'lucide-react';
 import type { ContactOrgChart, ContactOrgChartItem } from '../types';
+import { OrgChartGraph } from '../components/OrgChartGraph';
 
 interface ContactOrgChartPageProps {
   loading?: boolean;
@@ -56,6 +59,7 @@ export function ContactOrgChartPage({ loading = false }: ContactOrgChartPageProp
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedTiers, setExpandedTiers] = useState<Set<string>>(new Set(['A - Strategic', 'B - High Value']));
   const [selectedContact, setSelectedContact] = useState<ContactOrgChartItem | null>(null);
+  const [viewMode, setViewMode] = useState<'list' | 'graph'>('list');
 
   useEffect(() => {
     async function loadData() {
@@ -152,6 +156,20 @@ export function ContactOrgChartPage({ loading = false }: ContactOrgChartPageProp
             {data.summary.total_contacts.toLocaleString()} contacts scored across {Object.keys(data.tiers).length} tiers
           </p>
         </div>
+        <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
+          <button
+            onClick={() => setViewMode('list')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'list' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <LayoutGrid className="h-4 w-4" /> List
+          </button>
+          <button
+            onClick={() => setViewMode('graph')}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'graph' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            <Network className="h-4 w-4" /> Graph
+          </button>
+        </div>
       </div>
 
       {/* Summary Cards */}
@@ -186,7 +204,23 @@ export function ContactOrgChartPage({ loading = false }: ContactOrgChartPageProp
         </div>
       </div>
 
-      <div className="flex gap-6">
+      {viewMode === 'graph' && (
+        <OrgChartGraph
+          title="Contact Org Chart"
+          height={600}
+          nodes={Object.entries(data.tiers).flatMap(([tierName, tierData]) =>
+            tierData.contacts.slice(0, 100).map(c => ({
+              id: c.id,
+              label: c.name,
+              tier: tierName,
+              score: c.score,
+              group: c.primes[0] || 'Unknown',
+            }))
+          )}
+        />
+      )}
+
+      {viewMode === 'list' && <div className="flex gap-6">
         {/* Tier Accordion */}
         <div className="flex-1 space-y-4">
           {Object.entries(filteredData?.tiers || {}).map(([tierName, tierData]) => {
@@ -356,7 +390,7 @@ export function ContactOrgChartPage({ loading = false }: ContactOrgChartPageProp
             </button>
           </div>
         )}
-      </div>
+      </div>}
     </div>
   );
 }

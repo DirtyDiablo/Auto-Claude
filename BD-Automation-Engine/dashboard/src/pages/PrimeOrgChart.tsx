@@ -14,8 +14,10 @@ import {
   ChevronDown,
   ChevronRight,
   Star,
+  Network,
 } from 'lucide-react';
 import type { PrimeOrgChartItem } from '../types';
+import { OrgChartGraph } from '../components/OrgChartGraph';
 
 interface PrimeOrgChartProps {
   loading?: boolean;
@@ -27,7 +29,7 @@ export function PrimeOrgChart({ loading = false }: PrimeOrgChartProps) {
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedPrimes, setExpandedPrimes] = useState<Set<string>>(new Set());
-  const [viewMode, setViewMode] = useState<'cards' | 'tree'>('cards');
+  const [viewMode, setViewMode] = useState<'cards' | 'tree' | 'graph'>('cards');
 
   useEffect(() => {
     async function loadData() {
@@ -166,6 +168,16 @@ export function PrimeOrgChart({ loading = false }: PrimeOrgChartProps) {
           >
             Tree View
           </button>
+          <button
+            onClick={() => setViewMode('graph')}
+            className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              viewMode === 'graph'
+                ? 'bg-blue-600 text-white'
+                : 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+            }`}
+          >
+            <Network className="h-4 w-4" /> Graph
+          </button>
         </div>
       </div>
 
@@ -183,7 +195,19 @@ export function PrimeOrgChart({ loading = false }: PrimeOrgChartProps) {
         </div>
       </div>
 
-      {viewMode === 'cards' ? (
+      {viewMode === 'graph' ? (
+        <OrgChartGraph
+          title="Prime Contractors"
+          height={600}
+          nodes={filteredData.map(p => ({
+            id: p.id,
+            label: p.name,
+            tier: p.relationship_tier || 'Emerging',
+            score: p.total_placements * 10 + p.total_contacts,
+            group: p.category,
+          }))}
+        />
+      ) : viewMode === 'cards' ? (
         /* Cards View - Grouped by Tier */
         <div className="space-y-6">
           {Object.entries(groupedByTier).map(([tier, primes]) => (
