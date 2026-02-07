@@ -387,6 +387,13 @@ try:
 except ImportError as e:
     logger.warning(f"Hybrid endpoints not available: {e}")
 
+try:
+    from Engine8_Knowledge.agents.api_routes import router as crewai_router
+    app.include_router(crewai_router)
+    logger.info("CrewAI agent routes enabled: /agents/*")
+except ImportError as e:
+    logger.warning(f"CrewAI agent routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
