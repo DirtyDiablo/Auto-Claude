@@ -3,76 +3,101 @@ CrewAI Tools for BD Intelligence Agents.
 
 6 Qdrant vector search tools (using text-embedding-3-small 1536-dim)
 + 2 custom tools for Mem0 and Graphiti.
+
+Uses @tool decorator for clean schemas compatible with GPT-4o function calling.
 """
 
-import os
 import logging
 from openai import OpenAI
-from crewai import tool
-from crewai_tools import QdrantVectorSearchTool
-from crewai_tools.tools.qdrant_search_tool import QdrantConfig
+from qdrant_client import QdrantClient
+from crewai.tools import tool
 
 logger = logging.getLogger("BD-AgentTools")
 
-# OpenAI client for embeddings
-oai = OpenAI()
+# Shared clients
+_oai = OpenAI()
+_qdrant = QdrantClient(url="http://localhost:6333")
+
+EMBEDDING_MODEL = "text-embedding-3-small"
+SCORE_THRESHOLD = 0.35
+DEFAULT_LIMIT = 10
 
 
-def embed_1536(text: str) -> list[float]:
-    """Embed text using text-embedding-3-small (1536 dims) to match existing collections."""
-    return oai.embeddings.create(
-        input=text, model="text-embedding-3-small"
-    ).data[0].embedding
+def _search_qdrant(query: str, collection: str, limit: int = DEFAULT_LIMIT) -> str:
+    """Embed query and search a Qdrant collection, returning formatted results."""
+    try:
+        embedding = _oai.embeddings.create(
+            input=query, model=EMBEDDING_MODEL
+        ).data[0].embedding
 
+        results = _qdrant.query_points(
+            collection_name=collection,
+            query=embedding,
+            limit=limit,
+            score_threshold=SCORE_THRESHOLD,
+            with_payload=True,
+        ).points
 
-def qdrant_cfg(collection: str, limit: int = 10) -> QdrantConfig:
-    return QdrantConfig(
-        qdrant_url="http://localhost:6333",
-        collection_name=collection,
-        limit=limit,
-        score_threshold=0.35,
-    )
+        if not results:
+            return f"No results found in '{collection}' for: {query}"
+
+        lines = []
+        for i, pt in enumerate(results, 1):
+            score = pt.score
+            payload = pt.payload or {}
+            text = payload.get("text", "")[:300]
+            # Build a summary from key payload fields
+            meta_parts = []
+            for key in ["name", "title", "company", "program", "agency", "location", "source_file"]:
+                if key in payload and payload[key]:
+                    meta_parts.append(f"{key}={payload[key]}")
+            meta_str = ", ".join(meta_parts[:5])
+            lines.append(f"[{i}] (score={score:.3f}) {meta_str}\n    {text}")
+
+        return "\n\n".join(lines)
+    except Exception as e:
+        logger.error("Qdrant search error (%s): %s", collection, e)
+        return f"Search error in {collection}: {e}"
 
 
 # =========================================
 # 6 Qdrant Search Tools
 # =========================================
 
-qdrant_contacts_tool = QdrantVectorSearchTool(
-    qdrant_config=qdrant_cfg("contacts"),
-    custom_embedding_fn=embed_1536,
-    description="Search BD contacts by name, title, company, program, or location",
-)
+@tool("Search BD Contacts")
+def qdrant_contacts_tool(query: str) -> str:
+    """Search BD contacts by name, title, company, program, or location. Returns contact records with tier classification."""
+    return _search_qdrant(query, "contacts")
 
-qdrant_programs_tool = QdrantVectorSearchTool(
-    qdrant_config=qdrant_cfg("programs"),
-    custom_embedding_fn=embed_1536,
-    description="Search federal programs by name, agency, prime contractor, or contract value",
-)
 
-qdrant_documents_tool = QdrantVectorSearchTool(
-    qdrant_config=qdrant_cfg("documents"),
-    custom_embedding_fn=embed_1536,
-    description="Search federal contract documents, SOWs, and RFPs",
-)
+@tool("Search Federal Programs")
+def qdrant_programs_tool(query: str) -> str:
+    """Search federal programs by name, agency, prime contractor, or contract value. Returns program intelligence."""
+    return _search_qdrant(query, "programs")
 
-qdrant_jobs_tool = QdrantVectorSearchTool(
-    qdrant_config=qdrant_cfg("jobs"),
-    custom_embedding_fn=embed_1536,
-    description="Search scraped job postings by title, company, location, clearance",
-)
 
-qdrant_notes_tool = QdrantVectorSearchTool(
-    qdrant_config=qdrant_cfg("bullhorn_notes"),
-    custom_embedding_fn=embed_1536,
-    description="Search CRM notes and HUMINT intelligence from field contacts",
-)
+@tool("Search Federal Documents")
+def qdrant_documents_tool(query: str) -> str:
+    """Search federal contract documents, SOWs, RFPs, and past performance records."""
+    return _search_qdrant(query, "documents")
 
-qdrant_contracts_tool = QdrantVectorSearchTool(
-    qdrant_config=qdrant_cfg("federal_contracts"),
-    custom_embedding_fn=embed_1536,
-    description="Search USASpending federal contract awards by agency, contractor, NAICS",
-)
+
+@tool("Search Job Postings")
+def qdrant_jobs_tool(query: str) -> str:
+    """Search scraped job postings by title, company, location, or clearance level. Reveals labor gaps."""
+    return _search_qdrant(query, "jobs")
+
+
+@tool("Search CRM Notes")
+def qdrant_notes_tool(query: str) -> str:
+    """Search CRM notes and HUMINT intelligence from field contacts and account managers."""
+    return _search_qdrant(query, "bullhorn_notes")
+
+
+@tool("Search Federal Contracts")
+def qdrant_contracts_tool(query: str) -> str:
+    """Search USASpending federal contract awards by agency, contractor, or NAICS code."""
+    return _search_qdrant(query, "federal_contracts")
 
 
 # =========================================
@@ -80,7 +105,7 @@ qdrant_contracts_tool = QdrantVectorSearchTool(
 # =========================================
 
 @tool("Search Contact Memory")
-def mem0_search_tool(query: str, contact_name: str = "") -> str:
+def mem0_search_tool(query: str) -> str:
     """Search Mem0 for contact interaction history, HUMINT notes, and pain points."""
     try:
         from Engine8_Knowledge.scripts.memory_layer import get_memory
