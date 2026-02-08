@@ -50,10 +50,10 @@ async function fetchDashboardData(): Promise<DashboardData> {
 
         if (contactsList.length || programsList.length) {
           return {
-            jobs: jobsList,
-            programs: programsList,
-            contacts: groupContactsByTier(contactsList),
-            contractors: [],
+            jobs: jobsList as DashboardData['jobs'],
+            programs: programsList as DashboardData['programs'],
+            contacts: groupContactsByTier(contactsList) as DashboardData['contacts'],
+            contractors: [] as DashboardData['contractors'],
             summary: buildSummary(contactsList, programsList, jobsList, stats),
           }
         }
@@ -94,21 +94,63 @@ function buildSummary(
   contacts: unknown[],
   programs: unknown[],
   jobs: unknown[],
-  _stats: unknown,
-) {
+  stats: Record<string, unknown> | null,
+): import('../types').CorrelationSummary {
+  // Use Qdrant stats for real counts when available
+  const qdrant = (stats as { qdrant?: Record<string, { points_count?: number }> })?.qdrant
+  const totalContacts = qdrant?.contacts?.points_count || contacts.length
+  const totalPrograms = qdrant?.programs?.points_count || programs.length
+  const totalJobs = qdrant?.jobs?.points_count || jobs.length
+
+  // Build contacts_by_tier from the fetched contact data
+  const tierCounts: Record<string, number> = {}
+  for (const c of contacts) {
+    const rec = c as Record<string, unknown>
+    const tier = String(rec.influence_tier || rec.tier || rec.Tier || '6')
+    tierCounts[tier] = (tierCounts[tier] || 0) + 1
+  }
+
+  // Build top_programs_by_jobs from programs data
+  const topPrograms = (programs as Record<string, unknown>[])
+    .slice(0, 10)
+    .map((p) => ({
+      name: String(p['Program Name'] || p.name || p.title || 'Unknown'),
+      job_count: Number(p.job_count || 0),
+      contact_count: Number(p.contact_count || 0),
+    }))
+
+  // Build priority distribution from jobs
+  const priorityDist: Record<string, number> = { critical: 0, high: 0, medium: 0, low: 0 }
+  for (const j of jobs) {
+    const rec = j as Record<string, unknown>
+    const priority = String(rec.priority || rec.bd_priority || 'medium').toLowerCase()
+    if (priority in priorityDist) {
+      priorityDist[priority]++
+    } else {
+      priorityDist['medium']++
+    }
+  }
+
   return {
-    totalJobs: jobs.length,
-    openJobs: jobs.length,
-    totalPrograms: programs.length,
-    highPriorityPrograms: 0,
-    totalContacts: contacts.length,
-    tier1Contacts: 0,
-    tier2Contacts: 0,
-    tier3Contacts: 0,
-    jobsBySource: {},
-    jobsByLocation: {},
-    programsByAgency: {},
-    contactsByTier: {},
+    generated_at: new Date().toISOString(),
+    statistics: {
+      total_jobs: totalJobs,
+      total_programs: totalPrograms,
+      total_contacts: totalContacts,
+      total_contractors: 0,
+      jobs_matched_to_programs: 0,
+      jobs_matched_to_contacts: 0,
+      contacts_matched_to_programs: 0,
+      contacts_with_relevant_jobs: 0,
+      match_rates: {
+        jobs_to_programs: 0,
+        jobs_to_contacts: 0,
+        contacts_to_programs: 0,
+      },
+    },
+    priority_distribution: priorityDist,
+    contacts_by_tier: tierCounts,
+    top_programs_by_jobs: topPrograms,
   }
 }
 

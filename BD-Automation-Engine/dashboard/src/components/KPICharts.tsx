@@ -202,7 +202,7 @@ export function CollectionHealthChart() {
             <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
             <XAxis type="number" tick={{ fontSize: 11 }} />
             <YAxis dataKey="name" type="category" tick={{ fontSize: 11 }} width={120} />
-            <Tooltip formatter={(value: number) => value.toLocaleString()} />
+            <Tooltip formatter={(value) => (value as number).toLocaleString()} />
             <Bar dataKey="vectors" fill="#6366f1" radius={[0, 4, 4, 0]} />
           </BarChart>
         </ResponsiveContainer>

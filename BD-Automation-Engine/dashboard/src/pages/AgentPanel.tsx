@@ -17,9 +17,14 @@ import {
   Sparkles,
   FileText,
   Calendar,
+  Clock,
+  ArrowUpDown,
+  Eye,
+  RefreshCw,
+  XCircle,
 } from 'lucide-react';
 import { AgentCard } from '../components/hub/AgentCard';
-import { useHubAgent } from '../hooks/useHubApi';
+import { useHubAgent, useAgentTasks, type AgentTask } from '../hooks/useHubApi';
 import { hubApiClient, type WorkflowResult } from '../services/hubApi';
 
 export function AgentPanel() {
@@ -28,6 +33,12 @@ export function AgentPanel() {
   const companyAgent = useHubAgent('company');
   const contactAgent = useHubAgent('contact');
   const strategyAgent = useHubAgent('strategy');
+
+  // Agent task polling (every 5 seconds)
+  const { data: taskData, loading: tasksLoading, refetch: refetchTasks } = useAgentTasks(5000);
+  const [expandedTask, setExpandedTask] = useState<string | null>(null);
+  const [sortField, setSortField] = useState<'created_at' | 'status' | 'crew_type'>('created_at');
+  const [sortAsc, setSortAsc] = useState(false);
 
   // Workflow state
   const [workflowLoading, setWorkflowLoading] = useState<string | null>(null);
@@ -303,6 +314,172 @@ export function AgentPanel() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* Task History */}
+      <div className="mt-8 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-slate-100">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="h-5 w-5 text-slate-600" />
+              <span className="font-semibold text-slate-900">Task History</span>
+              {taskData && taskData.total > 0 && (
+                <span className="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                  {taskData.total}
+                </span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-400">Auto-refresh 5s</span>
+              <button
+                onClick={() => refetchTasks()}
+                className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+                title="Refresh now"
+              >
+                <RefreshCw className={`h-4 w-4 text-slate-500 ${tasksLoading ? 'animate-spin' : ''}`} />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {(!taskData || taskData.tasks.length === 0) && !tasksLoading && (
+          <div className="p-8 text-center text-slate-400">
+            <Bot className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No agent tasks yet. Trigger an agent or workflow above.</p>
+          </div>
+        )}
+
+        {taskData && taskData.tasks.length > 0 && (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Task ID
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700"
+                    onClick={() => { setSortField('crew_type'); setSortAsc(sortField === 'crew_type' ? !sortAsc : true); }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Type <ArrowUpDown className="h-3 w-3" />
+                    </div>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700"
+                    onClick={() => { setSortField('status'); setSortAsc(sortField === 'status' ? !sortAsc : true); }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Status <ArrowUpDown className="h-3 w-3" />
+                    </div>
+                  </th>
+                  <th
+                    className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider cursor-pointer hover:text-slate-700"
+                    onClick={() => { setSortField('created_at'); setSortAsc(sortField === 'created_at' ? !sortAsc : true); }}
+                  >
+                    <div className="flex items-center gap-1">
+                      Created <ArrowUpDown className="h-3 w-3" />
+                    </div>
+                  </th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-4 py-3 text-right text-xs font-medium text-slate-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {[...taskData.tasks]
+                  .sort((a, b) => {
+                    const aVal = a[sortField] || '';
+                    const bVal = b[sortField] || '';
+                    const cmp = String(aVal).localeCompare(String(bVal));
+                    return sortAsc ? cmp : -cmp;
+                  })
+                  .map((task: AgentTask) => {
+                    const statusConfig: Record<string, { color: string; bg: string; icon: typeof CheckCircle2 }> = {
+                      completed: { color: 'text-green-700', bg: 'bg-green-100', icon: CheckCircle2 },
+                      running: { color: 'text-blue-700', bg: 'bg-blue-100', icon: Loader2 },
+                      queued: { color: 'text-amber-700', bg: 'bg-amber-100', icon: Clock },
+                      failed: { color: 'text-red-700', bg: 'bg-red-100', icon: XCircle },
+                    };
+                    const cfg = statusConfig[task.status] || statusConfig.queued;
+                    const StatusIcon = cfg.icon;
+                    const created = new Date(task.created_at);
+                    const completed = task.completed_at ? new Date(task.completed_at) : null;
+                    const duration = completed
+                      ? ((completed.getTime() - created.getTime()) / 1000).toFixed(1) + 's'
+                      : task.status === 'running'
+                        ? ((Date.now() - created.getTime()) / 1000).toFixed(0) + 's...'
+                        : '-';
+
+                    return (
+                      <tr key={task.task_id} className="hover:bg-slate-50 transition-colors">
+                        <td className="px-4 py-3">
+                          <code className="text-xs font-mono text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded">
+                            {task.task_id.slice(0, 8)}
+                          </code>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className="px-2 py-1 bg-purple-100 text-purple-700 text-xs rounded-full font-medium capitalize">
+                            {task.crew_type.replace(/_/g, ' ')}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`inline-flex items-center gap-1 px-2 py-1 ${cfg.bg} ${cfg.color} text-xs rounded-full font-medium capitalize`}>
+                            <StatusIcon className={`h-3 w-3 ${task.status === 'running' ? 'animate-spin' : ''}`} />
+                            {task.status}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-600">
+                          {created.toLocaleTimeString()}
+                        </td>
+                        <td className="px-4 py-3 text-sm text-slate-600 font-mono">
+                          {duration}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          {(task.status === 'completed' || task.status === 'failed') && (
+                            <button
+                              onClick={() => setExpandedTask(expandedTask === task.task_id ? null : task.task_id)}
+                              className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors"
+                              title="View result"
+                            >
+                              <Eye className="h-4 w-4 text-slate-500" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+              </tbody>
+            </table>
+          </div>
+        )}
+
+        {/* Expanded Task Result */}
+        {expandedTask && taskData?.tasks.find(t => t.task_id === expandedTask) && (
+          <div className="border-t border-slate-200 p-4 bg-slate-50">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-slate-700">
+                Result for {expandedTask.slice(0, 8)}...
+              </span>
+              <button
+                onClick={() => setExpandedTask(null)}
+                className="text-xs text-slate-500 hover:text-slate-700"
+              >
+                Close
+              </button>
+            </div>
+            <pre className="text-xs text-slate-600 bg-white rounded-lg border border-slate-200 p-3 overflow-auto max-h-48 font-mono">
+              {JSON.stringify(
+                taskData.tasks.find(t => t.task_id === expandedTask),
+                null,
+                2
+              )}
+            </pre>
+          </div>
+        )}
       </div>
 
       {/* Tips */}

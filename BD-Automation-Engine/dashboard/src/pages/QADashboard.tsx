@@ -51,7 +51,7 @@ export function QADashboard() {
         hubApiClient.getQAReviewQueue({ limit: 50, status: filter === 'pending' ? 'pending' : undefined }),
       ]);
       setStats(statsRes);
-      setItems(queueRes.items as ReviewItem[]);
+      setItems(queueRes.items as unknown as ReviewItem[]);
       setTotal(queueRes.total);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load QA data');

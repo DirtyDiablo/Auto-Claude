@@ -6,7 +6,7 @@
  */
 
 import { useMemo, useState, useCallback } from 'react'
-import { GraphCanvas, type GraphNode, type GraphEdge, type NodePositionArgs } from 'reagraph'
+import { GraphCanvas, type GraphNode, type GraphEdge } from 'reagraph'
 
 interface OrgNode {
   id: string

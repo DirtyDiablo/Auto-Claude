@@ -429,15 +429,15 @@ export class HubApiClient {
       answer: string;
       query_type: string;
       systems_used: string[];
-      sources: Array<{ id: string; score: number; payload: Record<string, unknown>; collection: string }>;
+      sources: Array<{ text?: string; score: number; source?: string; collection?: string; id?: string; payload?: Record<string, unknown> }>;
       cache_hit: boolean;
     }>(`/ask/smart${params}`);
     return {
       answer: raw.answer,
       sources: (raw.sources || []).map((s) => ({
-        collection: s.collection || 'unknown',
-        id: s.id,
-        content: (s.payload?.name as string) || (s.payload?.title as string) || '',
+        collection: s.collection || s.source || 'unknown',
+        id: s.id || '',
+        content: s.text || (s.payload?.name as string) || (s.payload?.title as string) || '',
         score: s.score || 0,
       })),
       strategy_used: raw.systems_used?.join(', ') || strategy,
@@ -545,24 +545,39 @@ export class HubApiClient {
   // AGENTS
   // ---------------------------------------------------------------------------
 
+  private normalizeAgentResponse(raw: Partial<AgentResponse>, query: string): AgentResponse {
+    return {
+      agent: raw.agent || 'Unknown Agent',
+      query: raw.query || query,
+      response: raw.response || '',
+      confidence: raw.confidence ?? 0.5,
+      sources: raw.sources || [],
+      execution_time: raw.execution_time ?? 0,
+    };
+  }
+
   async runProgramAgent(query: string): Promise<AgentResponse> {
     const params = this.buildQueryString({ q: query });
-    return this.fetch<AgentResponse>(`/agent/program${params}`);
+    const raw = await this.fetch<Partial<AgentResponse>>(`/agent/program${params}`);
+    return this.normalizeAgentResponse(raw, query);
   }
 
   async runCompanyAgent(query: string): Promise<AgentResponse> {
     const params = this.buildQueryString({ q: query });
-    return this.fetch<AgentResponse>(`/agent/company${params}`);
+    const raw = await this.fetch<Partial<AgentResponse>>(`/agent/company${params}`);
+    return this.normalizeAgentResponse(raw, query);
   }
 
   async runContactAgent(query: string): Promise<AgentResponse> {
     const params = this.buildQueryString({ q: query });
-    return this.fetch<AgentResponse>(`/agent/contact${params}`);
+    const raw = await this.fetch<Partial<AgentResponse>>(`/agent/contact${params}`);
+    return this.normalizeAgentResponse(raw, query);
   }
 
   async runStrategyAgent(query: string): Promise<AgentResponse> {
     const params = this.buildQueryString({ q: query });
-    return this.fetch<AgentResponse>(`/agent/strategy${params}`);
+    const raw = await this.fetch<Partial<AgentResponse>>(`/agent/strategy${params}`);
+    return this.normalizeAgentResponse(raw, query);
   }
 
   // ---------------------------------------------------------------------------
@@ -572,14 +587,14 @@ export class HubApiClient {
   async analyzeProgram(programName: string): Promise<WorkflowResult> {
     return this.fetch<WorkflowResult>('/agents/analyze-program', {
       method: 'POST',
-      body: JSON.stringify({ program: programName }),
+      body: JSON.stringify({ program_name: programName }),
     });
   }
 
   async prepareOutreach(contactName: string, context?: string): Promise<WorkflowResult> {
     return this.fetch<WorkflowResult>('/agents/prepare-outreach', {
       method: 'POST',
-      body: JSON.stringify({ contact: contactName, context }),
+      body: JSON.stringify({ contact_name: contactName, context }),
     });
   }
 
@@ -666,6 +681,14 @@ export class HubApiClient {
 
   async getAlerts(limit: number = 20): Promise<{ alerts: Array<Record<string, unknown>>; count: number }> {
     return this.fetch(`/alerts?limit=${limit}`);
+  }
+
+  async getAgentTasks(): Promise<{ total: number; tasks: Array<Record<string, unknown>> }> {
+    return this.fetch('/agents/tasks');
+  }
+
+  async getAgentStatus(taskId: string): Promise<Record<string, unknown>> {
+    return this.fetch(`/agents/status/${encodeURIComponent(taskId)}`);
   }
 
   // ---------------------------------------------------------------------------

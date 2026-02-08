@@ -43,7 +43,7 @@ export function PipelineStatus() {
     setError(null);
     try {
       const res = await hubApiClient.getPipelineStatus();
-      setData(res as PipelineData);
+      setData(res as unknown as PipelineData);
     } catch (e) {
       setError(e instanceof Error ? e.message : 'Failed to load pipeline status');
     } finally {

@@ -9,15 +9,11 @@ import {
   CheckCircle2,
   Clock,
   Target,
-  FileText,
-  Phone,
   Calendar,
   ArrowUpRight,
-  ArrowDownRight,
   Zap,
   Shield,
   UserCheck,
-  MapPin,
 } from 'lucide-react';
 import {
   BarChart,
@@ -30,8 +26,6 @@ import {
   PieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
   Legend,
   AreaChart,
   Area,
@@ -250,13 +244,13 @@ export function AccountTakeover() {
                 paddingAngle={2}
                 dataKey="weeklySpread"
                 nameKey="company"
-                label={({ company, percentage }) => `${company} (${percentage.toFixed(0)}%)`}
+                label={(props) => `${(props as unknown as { company: string }).company || ''} (${((props as unknown as { percentage: number }).percentage || 0).toFixed(0)}%)`}
               >
                 {data.revenueByCompany.map((_, index) => (
                   <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                 ))}
               </Pie>
-              <Tooltip formatter={(value: number) => [`$${value.toLocaleString()}`, 'Weekly']} />
+              <Tooltip formatter={(value) => [`$${(value as number).toLocaleString()}`, 'Weekly']} />
             </PieChart>
           </ResponsiveContainer>
         </div>

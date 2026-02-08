@@ -457,6 +457,49 @@ export function useBDInsights(
 }
 
 // =============================================================================
+// HOOK: useAgentTasks
+// =============================================================================
+
+export interface AgentTask {
+  task_id: string;
+  status: 'queued' | 'running' | 'completed' | 'failed';
+  crew_type: string;
+  created_at: string;
+  completed_at: string | null;
+  result?: unknown;
+  error?: string | null;
+}
+
+export function useAgentTasks(pollInterval: number = 5000): UseHubQueryState<{ total: number; tasks: AgentTask[] }> {
+  const [data, setData] = useState<{ total: number; tasks: AgentTask[] } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTasks = useCallback(async () => {
+    try {
+      setError(null);
+      const result = await hubApiClient.getAgentTasks() as unknown as { total: number; tasks: AgentTask[] };
+      setData(result);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch agent tasks');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTasks();
+
+    if (pollInterval > 0) {
+      const interval = setInterval(fetchTasks, pollInterval);
+      return () => clearInterval(interval);
+    }
+  }, [fetchTasks, pollInterval]);
+
+  return { data, loading, error, refetch: fetchTasks };
+}
+
+// =============================================================================
 // HOOK: useHubConnection
 // =============================================================================
 
@@ -507,6 +550,7 @@ export default {
   useHubGraphStats,
   useSmartQuery,
   useHubAgent,
+  useAgentTasks,
   useProgramEcosystem,
   useContactNetwork,
   useTeamingPath,
