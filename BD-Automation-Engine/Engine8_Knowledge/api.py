@@ -31,6 +31,7 @@ except ImportError:
 
 # Import existing modules
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore, SearchResult
+from qdrant_client.models import Filter, FieldCondition, MatchValue
 from Engine8_Knowledge.scripts.rag_engine import BDRAGEngine, RAGResponse
 from Engine8_Knowledge.scripts.indexer import BDIndexer
 
@@ -420,6 +421,176 @@ async def get_stats():
 
 
 # =========================================
+# DASHBOARD ENDPOINTS
+# =========================================
+
+class FilterRequest(BaseModel):
+    query: Optional[str] = Field(None, description="Optional text search query")
+    limit: int = Field(20, ge=1, le=200, description="Max results")
+    offset: int = Field(0, ge=0, description="Pagination offset")
+    program: Optional[str] = Field(None, description="Filter by program name")
+    prime: Optional[str] = Field(None, description="Filter by prime contractor")
+    agency: Optional[str] = Field(None, description="Filter by agency")
+    clearance: Optional[str] = Field(None, description="Filter by clearance level")
+    status: Optional[str] = Field(None, description="Filter by status")
+    company: Optional[str] = Field(None, description="Filter by company")
+    location: Optional[str] = Field(None, description="Filter by location")
+
+
+def _build_qdrant_filter(request: FilterRequest, field_map: Dict[str, str]) -> Optional[Filter]:
+    """Build Qdrant Filter from FilterRequest using a field mapping."""
+    conditions = []
+    for param_name, payload_field in field_map.items():
+        value = getattr(request, param_name, None)
+        if value:
+            conditions.append(FieldCondition(
+                key=payload_field,
+                match=MatchValue(value=value)
+            ))
+    return Filter(must=conditions) if conditions else None
+
+
+@app.post("/contacts/filter")
+async def filter_contacts(request: FilterRequest):
+    """Filter contacts by payload fields. Use query for semantic search + filters, or omit for filter-only scroll."""
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+
+    field_map = {
+        "program": "Programs",
+        "prime": "Primes",
+        "clearance": "Clearances",
+        "status": "Status",
+        "company": "Primes",
+    }
+
+    try:
+        if request.query:
+            filters = {}
+            for param, payload_field in field_map.items():
+                val = getattr(request, param, None)
+                if val:
+                    filters[payload_field] = val
+
+            results = store.search(
+                query=request.query,
+                collection="contacts",
+                limit=request.limit,
+                filters=filters if filters else None,
+            )
+            return {
+                "contacts": [{"id": r.id, "score": r.score, **r.payload} for r in results],
+                "count": len(results),
+                "query": request.query,
+                "timestamp": datetime.now().isoformat(),
+            }
+        else:
+            qdrant_filter = _build_qdrant_filter(request, field_map)
+            results, _next = store.client.scroll(
+                collection_name="contacts",
+                scroll_filter=qdrant_filter,
+                limit=request.limit,
+                offset=request.offset if request.offset else None,
+                with_payload=True,
+                with_vectors=False,
+            )
+            return {
+                "contacts": [{"id": str(p.id), **p.payload} for p in results],
+                "count": len(results),
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Filter contacts error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/programs/filter")
+async def filter_programs(request: FilterRequest):
+    """Filter programs by payload fields. Use query for semantic search + filters, or omit for filter-only scroll."""
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+
+    field_map = {
+        "prime": '"Prime Contractor"',
+        "agency": "Agency",
+        "clearance": "clearance",
+        "program": '"Program Name"',
+    }
+
+    try:
+        if request.query:
+            filters = {}
+            for param, payload_field in field_map.items():
+                val = getattr(request, param, None)
+                if val:
+                    filters[payload_field] = val
+
+            results = store.search(
+                query=request.query,
+                collection="programs",
+                limit=request.limit,
+                filters=filters if filters else None,
+            )
+            return {
+                "programs": [{"id": r.id, "score": r.score, **r.payload} for r in results],
+                "count": len(results),
+                "query": request.query,
+                "timestamp": datetime.now().isoformat(),
+            }
+        else:
+            qdrant_filter = _build_qdrant_filter(request, field_map)
+            results, _next = store.client.scroll(
+                collection_name="programs",
+                scroll_filter=qdrant_filter,
+                limit=request.limit,
+                offset=request.offset if request.offset else None,
+                with_payload=True,
+                with_vectors=False,
+            )
+            return {
+                "programs": [{"id": str(p.id), **p.payload} for p in results],
+                "count": len(results),
+                "timestamp": datetime.now().isoformat(),
+            }
+    except Exception as e:
+        logger.error(f"Filter programs error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/dashboard/stats")
+async def dashboard_stats():
+    """Consolidated stats endpoint for the dashboard home page."""
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+
+    try:
+        collection_stats = store.get_collection_stats()
+
+        total_vectors = sum(
+            s.get("points_count", 0) for s in collection_stats.values() if isinstance(s, dict) and "points_count" in s
+        )
+
+        all_green = all(
+            s.get("status", "").upper() == "GREEN"
+            for s in collection_stats.values()
+            if isinstance(s, dict) and "status" in s
+        )
+
+        return {
+            "collections": collection_stats,
+            "total_vectors": total_vectors,
+            "total_collections": len(collection_stats),
+            "all_healthy": all_green,
+            "memory": memory.get_stats() if memory else {},
+            "graph": graph.get_stats() if graph else {},
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"Dashboard stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================
 # SMART QUERY ENDPOINTS
 # =========================================
 
@@ -432,7 +603,15 @@ async def smart_ask(
     if use_cache and cache:
         cached = cache.get(q)
         if cached:
-            return {"answer": cached.get("result", {}).get("answer", ""), "cache_hit": True, **cached}
+            # Return the cached response in the standard shape
+            result_data = cached.get("result", cached)
+            return {
+                "answer": result_data.get("answer", ""),
+                "query_type": result_data.get("query_type", "factual"),
+                "systems_used": result_data.get("systems_used", []),
+                "sources": result_data.get("sources", [])[:5],
+                "cache_hit": True
+            }
 
     result = await router.smart_query(q)
 
