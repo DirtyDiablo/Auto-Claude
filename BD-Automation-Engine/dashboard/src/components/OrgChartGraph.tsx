@@ -21,6 +21,7 @@ interface OrgChartGraphProps {
   nodes: OrgNode[]
   title?: string
   height?: number
+  colorMode?: 'tier' | 'bdpriority'
 }
 
 const TIER_COLORS: Record<string, string> = {
@@ -36,7 +37,15 @@ const TIER_COLORS: Record<string, string> = {
   'Emerging': '#6b7280',
 }
 
-export function OrgChartGraph({ nodes, title = 'Org Chart', height = 500 }: OrgChartGraphProps) {
+function getBDPriorityColor(score: number): string {
+  if (score >= 80) return '#dc2626' // red-600 - critical
+  if (score >= 60) return '#ea580c' // orange-600 - high
+  if (score >= 40) return '#ca8a04' // yellow-600 - medium
+  if (score >= 20) return '#16a34a' // green-600 - moderate
+  return '#6b7280' // gray-500 - low
+}
+
+export function OrgChartGraph({ nodes, title = 'Org Chart', height = 500, colorMode = 'tier' }: OrgChartGraphProps) {
   const [collapsedNodes, setCollapsedNodes] = useState<Set<string>>(new Set())
 
   const toggleCollapse = useCallback((nodeId: string) => {
@@ -82,10 +91,16 @@ export function OrgChartGraph({ nodes, title = 'Org Chart', height = 500 }: OrgC
       const tierId = `tier-${node.tier}`
       if (collapsedNodes.has(tierId)) continue
 
+      const fill = colorMode === 'bdpriority' && node.score !== undefined
+        ? getBDPriorityColor(node.score)
+        : TIER_COLORS[node.tier] || '#6b7280'
+
       leafNodes.push({
         id: node.id,
-        label: node.label,
-        fill: TIER_COLORS[node.tier] || '#6b7280',
+        label: colorMode === 'bdpriority' && node.score !== undefined
+          ? `${node.label} (${node.score})`
+          : node.label,
+        fill,
         size: node.score ? Math.max(5, Math.min(12, node.score / 10)) : 8,
       })
       leafEdges.push({
@@ -99,7 +114,7 @@ export function OrgChartGraph({ nodes, title = 'Org Chart', height = 500 }: OrgC
       graphNodes: [rootNode, ...tierNodes, ...leafNodes],
       graphEdges: [...rootEdges, ...leafEdges],
     }
-  }, [nodes, title, collapsedNodes])
+  }, [nodes, title, collapsedNodes, colorMode])
 
   if (nodes.length === 0) {
     return (

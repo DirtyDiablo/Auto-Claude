@@ -10,6 +10,7 @@ interface ProgramsProps {
   onNavigateToContractor?: (contractorName: string) => void;
   onNavigateToLocation?: (location: string) => void;
   onNavigateToMindMap?: (entityType: NativeNodeType, entityId: string, entityLabel: string) => void;
+  onNavigateToProgramDetail?: (programName: string) => void;
 }
 
 function getPriorityBadge(priority: string): { color: string; label: string } {
@@ -43,11 +44,13 @@ function ProgramCard({
   onNavigateToContractor,
   onNavigateToLocation,
   onNavigateToMindMap,
+  onNavigateToProgramDetail,
 }: {
   program: Program;
   onNavigateToContractor?: (contractorName: string) => void;
   onNavigateToLocation?: (location: string) => void;
   onNavigateToMindMap?: (entityType: NativeNodeType, entityId: string, entityLabel: string) => void;
+  onNavigateToProgramDetail?: (programName: string) => void;
 }) {
   const priority = getPriorityBadge(program.bd_priority);
   const hiringBadge = getHiringVelocityBadge(program.hiring_velocity);
@@ -88,8 +91,20 @@ function ProgramCard({
           </div>
           {/* Program Name and Acronym */}
           <h3 className="font-semibold text-slate-900 line-clamp-2">
-            {program.name}
-            {program.acronym && <span className="text-slate-500 ml-1">({program.acronym})</span>}
+            {onNavigateToProgramDetail ? (
+              <button
+                onClick={() => onNavigateToProgramDetail(program.name)}
+                className="text-left hover:text-blue-600 transition-colors"
+              >
+                {program.name}
+                {program.acronym && <span className="text-slate-500 ml-1">({program.acronym})</span>}
+              </button>
+            ) : (
+              <>
+                {program.name}
+                {program.acronym && <span className="text-slate-500 ml-1">({program.acronym})</span>}
+              </>
+            )}
           </h3>
           {/* Agency */}
           {program.agency && (
@@ -222,6 +237,7 @@ export function Programs({
   onNavigateToContractor,
   onNavigateToLocation,
   onNavigateToMindMap,
+  onNavigateToProgramDetail,
 }: ProgramsProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [agencyFilter, setAgencyFilter] = useState<string>('all');
@@ -445,6 +461,7 @@ export function Programs({
                 onNavigateToContractor={onNavigateToContractor}
                 onNavigateToLocation={onNavigateToLocation}
                 onNavigateToMindMap={onNavigateToMindMap}
+                onNavigateToProgramDetail={onNavigateToProgramDetail}
               />
             ))}
           </div>

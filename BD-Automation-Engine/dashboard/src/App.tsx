@@ -30,6 +30,9 @@ import { KnowledgeGraph } from './pages/KnowledgeGraph';
 import { AgentPanel } from './pages/AgentPanel';
 import { MemoryContext } from './pages/MemoryContext';
 import { SystemHealth } from './pages/SystemHealth';
+// Detail Pages
+import { ContactDetail } from './pages/ContactDetail';
+import { ProgramDetail } from './pages/ProgramDetail';
 import { useAppData } from './hooks/useAppData';
 import { CommandPalette } from './components/CommandPalette';
 import type { TabId } from './types';
@@ -56,6 +59,8 @@ function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [crossNavFilter, setCrossNavFilter] = useState<CrossNavFilter | null>(null);
   const [mindMapNav, setMindMapNav] = useState<MindMapNav | null>(null);
+  const [selectedContact, setSelectedContact] = useState<string | null>(null);
+  const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
 
   // Cross-navigation handlers
   const handleNavigateToProgram = useCallback((programName: string) => {
@@ -73,6 +78,18 @@ function App() {
     setActiveTab('locations');
   }, []);
 
+  // Navigate to Contact Detail page
+  const handleNavigateToContactDetail = useCallback((contactName: string) => {
+    setSelectedContact(contactName);
+    setActiveTab('contactdetail');
+  }, []);
+
+  // Navigate to Program Detail page
+  const handleNavigateToProgramDetail = useCallback((programName: string) => {
+    setSelectedProgram(programName);
+    setActiveTab('programdetail');
+  }, []);
+
   // Navigate to Mind Map with a specific entity
   const handleNavigateToMindMap = useCallback(
     (entityType: NativeNodeType, entityId: string, entityLabel: string) => {
@@ -86,6 +103,8 @@ function App() {
   const handleTabChange = useCallback((tab: TabId) => {
     setCrossNavFilter(null);
     setMindMapNav(null);
+    setSelectedContact(null);
+    setSelectedProgram(null);
     setActiveTab(tab);
   }, []);
 
@@ -160,6 +179,7 @@ function App() {
             onNavigateToContractor={handleNavigateToContractor}
             onNavigateToLocation={handleNavigateToLocation}
             onNavigateToMindMap={handleNavigateToMindMap}
+            onNavigateToProgramDetail={handleNavigateToProgramDetail}
           />
         );
       case 'contacts':
@@ -170,8 +190,25 @@ function App() {
             initialCompanyFilter={crossNavFilter?.type === 'company' ? crossNavFilter.value : undefined}
             onNavigateToProgram={handleNavigateToProgram}
             onNavigateToMindMap={handleNavigateToMindMap}
+            onNavigateToContact={handleNavigateToContactDetail}
           />
         );
+      case 'contactdetail':
+        return selectedContact ? (
+          <ContactDetail
+            contactName={selectedContact}
+            onBack={() => handleTabChange('contacts')}
+            onNavigateToProgram={handleNavigateToProgramDetail}
+          />
+        ) : null;
+      case 'programdetail':
+        return selectedProgram ? (
+          <ProgramDetail
+            programName={selectedProgram}
+            onBack={() => handleTabChange('programs')}
+            onNavigateToContact={handleNavigateToContactDetail}
+          />
+        ) : null;
       case 'contractors':
         return (
           <Contractors

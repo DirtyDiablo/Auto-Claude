@@ -692,6 +692,56 @@ export class HubApiClient {
   }
 
   // ---------------------------------------------------------------------------
+  // FILTERED COLLECTION DATA (for Detail Pages)
+  // ---------------------------------------------------------------------------
+
+  async filterContacts(params: {
+    query?: string;
+    limit?: number;
+    offset?: number;
+    program?: string;
+    prime?: string;
+    company?: string;
+    clearance?: string;
+    status?: string;
+  }): Promise<{ contacts: Array<Record<string, unknown>>; count: number }> {
+    return this.fetch('/contacts/filter', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: params.query || null,
+        limit: params.limit || 50,
+        offset: params.offset || 0,
+        program: params.program || null,
+        prime: params.prime || null,
+        company: params.company || null,
+        clearance: params.clearance || null,
+        status: params.status || null,
+      }),
+    });
+  }
+
+  async filterPrograms(params: {
+    query?: string;
+    limit?: number;
+    offset?: number;
+    prime?: string;
+    agency?: string;
+    program?: string;
+  }): Promise<{ programs: Array<Record<string, unknown>>; count: number }> {
+    return this.fetch('/programs/filter', {
+      method: 'POST',
+      body: JSON.stringify({
+        query: params.query || null,
+        limit: params.limit || 50,
+        offset: params.offset || 0,
+        prime: params.prime || null,
+        agency: params.agency || null,
+        program: params.program || null,
+      }),
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // CONFIGURATION
   // ---------------------------------------------------------------------------
 

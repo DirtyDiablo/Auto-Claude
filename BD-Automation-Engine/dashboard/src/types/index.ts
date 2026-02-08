@@ -133,6 +133,8 @@ export type TabId =
   | 'jobs'
   | 'programs'
   | 'contacts'
+  | 'contactdetail'
+  | 'programdetail'
   | 'contractors'
   | 'locations'
   | 'events'
