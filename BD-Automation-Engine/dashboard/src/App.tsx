@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { DataFreshness } from './components/DataFreshness';
 import { ExecutiveSummary } from './pages/ExecutiveSummary';
@@ -21,6 +21,8 @@ import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
 import { PlacementsPage } from './pages/PlacementsPage';
 import CallIntelligence from './pages/CallIntelligence';
 import { AccountTakeover } from './pages/AccountTakeover';
+import { OutreachManager } from './pages/OutreachManager';
+import { Analytics } from './pages/Analytics';
 // Operations Pages
 import { QADashboard } from './pages/QADashboard';
 import { PipelineStatus } from './pages/PipelineStatus';
@@ -35,6 +37,8 @@ import { ContactDetail } from './pages/ContactDetail';
 import { ProgramDetail } from './pages/ProgramDetail';
 import { useAppData } from './hooks/useAppData';
 import { CommandPalette } from './components/CommandPalette';
+import { ErrorBoundary } from './components/ErrorBoundary';
+import { Breadcrumb, getPageLabel } from './components/Breadcrumb';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
 import './index.css';
@@ -107,6 +111,29 @@ function App() {
     setSelectedProgram(null);
     setActiveTab(tab);
   }, []);
+
+  // Keyboard shortcuts: Alt+1..9 for quick navigation
+  useEffect(() => {
+    const shortcuts: Record<string, TabId> = {
+      '1': 'executive',
+      '2': 'jobs',
+      '3': 'contacts',
+      '4': 'programs',
+      '5': 'outreach',
+      '6': 'analytics',
+      '7': 'smartquery',
+      '8': 'agents',
+      '9': 'settings',
+    };
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && !e.ctrlKey && !e.metaKey && shortcuts[e.key]) {
+        e.preventDefault();
+        handleTabChange(shortcuts[e.key]);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [handleTabChange]);
 
   const handleRefresh = useCallback(async () => {
     setIsRefreshing(true);
@@ -195,19 +222,41 @@ function App() {
         );
       case 'contactdetail':
         return selectedContact ? (
-          <ContactDetail
-            contactName={selectedContact}
-            onBack={() => handleTabChange('contacts')}
-            onNavigateToProgram={handleNavigateToProgramDetail}
-          />
+          <div className="h-full overflow-auto">
+            <div className="px-6 pt-4">
+              <Breadcrumb
+                items={[
+                  { label: 'Contacts', tabId: 'contacts' },
+                  { label: selectedContact },
+                ]}
+                onNavigate={handleTabChange}
+              />
+            </div>
+            <ContactDetail
+              contactName={selectedContact}
+              onBack={() => handleTabChange('contacts')}
+              onNavigateToProgram={handleNavigateToProgramDetail}
+            />
+          </div>
         ) : null;
       case 'programdetail':
         return selectedProgram ? (
-          <ProgramDetail
-            programName={selectedProgram}
-            onBack={() => handleTabChange('programs')}
-            onNavigateToContact={handleNavigateToContactDetail}
-          />
+          <div className="h-full overflow-auto">
+            <div className="px-6 pt-4">
+              <Breadcrumb
+                items={[
+                  { label: 'Programs', tabId: 'programs' },
+                  { label: selectedProgram },
+                ]}
+                onNavigate={handleTabChange}
+              />
+            </div>
+            <ProgramDetail
+              programName={selectedProgram}
+              onBack={() => handleTabChange('programs')}
+              onNavigateToContact={handleNavigateToContactDetail}
+            />
+          </div>
         ) : null;
       case 'contractors':
         return (
@@ -279,6 +328,10 @@ function App() {
         return <CallIntelligence />;
       case 'accounttakeover':
         return <AccountTakeover />;
+      case 'outreach':
+        return <OutreachManager loading={loading} />;
+      case 'analytics':
+        return <Analytics loading={loading} />;
       // Operations Pages
       case 'qadashboard':
         return <QADashboard />;
@@ -319,7 +372,11 @@ function App() {
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <main className="flex-1 overflow-hidden">{renderContent()}</main>
+      <main className="flex-1 overflow-hidden">
+        <ErrorBoundary key={activeTab}>
+          {renderContent()}
+        </ErrorBoundary>
+      </main>
       <DataFreshness />
       <CommandPalette onNavigate={handleTabChange} />
     </div>

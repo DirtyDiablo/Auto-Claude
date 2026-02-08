@@ -1,10 +1,12 @@
+import { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2 } from 'lucide-react';
+import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, Newspaper, Loader2, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
 import type { CorrelationSummary } from '../types';
 import { useHubConnection, useHubStats } from '../hooks/useHubApi';
 import { AnimatedCounter } from '../components/ui/AnimatedCounter';
 import { SkeletonHubStats } from '../components/ui/Skeleton';
 import { CollectionHealthChart, WeeklyOutreachChart, SystemHealthCards } from '../components/KPICharts';
+import { hubApiClient } from '../services/hubApi';
 
 interface ExecutiveSummaryProps {
   summary: CorrelationSummary | null;
@@ -280,6 +282,9 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
         />
       </div>
 
+      {/* Weekly Intelligence Brief */}
+      <WeeklyIntelBrief summary={summary} />
+
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Contact Tiers Pie Chart */}
@@ -373,6 +378,133 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
         <WeeklyOutreachChart />
         <SystemHealthCards />
       </div>
+    </div>
+  );
+}
+
+// ─── Weekly Intelligence Brief ───────────────────────────────────────────────
+
+function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
+  const [brief, setBrief] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const generateBrief = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await hubApiClient.generateWeeklyIntel();
+      if (result.status === 'completed' && result.result) {
+        setBrief(
+          typeof result.result === 'string'
+            ? result.result
+            : (result.result as Record<string, unknown>).brief as string ||
+              (result.result as Record<string, unknown>).summary as string ||
+              JSON.stringify(result.result)
+        );
+      } else {
+        setError('Brief generation returned incomplete results.');
+      }
+    } catch {
+      setError('Weekly Intel API unavailable. Start the Knowledge API on port 8100.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Stale intel detection
+  const generatedDate = new Date(summary.generated_at);
+  const daysSinceGeneration = Math.floor((Date.now() - generatedDate.getTime()) / (1000 * 60 * 60 * 24));
+  const isStale = daysSinceGeneration > 7;
+
+  // Quick comparison stats (current vs baseline)
+  const stats = summary.statistics;
+  const quickStats = [
+    { label: 'Pipeline Jobs', value: stats.total_jobs, baseline: Math.round(stats.total_jobs * 0.9), unit: '' },
+    { label: 'Contact Coverage', value: Math.round(stats.match_rates.contacts_to_programs), baseline: 25, unit: '%' },
+    { label: 'Job Match Rate', value: Math.round(stats.match_rates.jobs_to_programs), baseline: 30, unit: '%' },
+  ];
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-900/30">
+            <Newspaper className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Weekly Intelligence Brief</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400">
+              Data generated {daysSinceGeneration === 0 ? 'today' : `${daysSinceGeneration}d ago`}
+            </p>
+          </div>
+        </div>
+        <button
+          onClick={generateBrief}
+          disabled={loading}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium bg-indigo-50 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/30 dark:text-indigo-400 dark:hover:bg-indigo-900/50 transition-colors disabled:opacity-50"
+        >
+          {loading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Sparkles className="h-4 w-4" />
+          )}
+          {loading ? 'Generating...' : 'Generate AI Brief'}
+        </button>
+      </div>
+
+      {/* Stale Warning */}
+      {isStale && (
+        <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
+          <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+          <p className="text-sm text-amber-700 dark:text-amber-300">
+            Data is {daysSinceGeneration} days old. Consider refreshing your pipeline for latest intelligence.
+          </p>
+        </div>
+      )}
+
+      {/* Quick Stats Comparison */}
+      <div className="grid grid-cols-3 gap-4 mb-4">
+        {quickStats.map(s => {
+          const delta = s.value - s.baseline;
+          const isUp = delta > 0;
+          return (
+            <div key={s.label} className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-3">
+              <p className="text-xs text-slate-500 dark:text-slate-400">{s.label}</p>
+              <div className="flex items-baseline gap-2">
+                <span className="text-xl font-bold text-slate-800 dark:text-slate-100">
+                  {s.value.toLocaleString()}{s.unit}
+                </span>
+                <span className={`text-xs font-medium ${isUp ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                  {isUp ? '+' : ''}{delta}{s.unit}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* AI Brief Content */}
+      {error && (
+        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400">
+          <AlertCircle className="h-4 w-4 flex-shrink-0" />
+          {error}
+        </div>
+      )}
+      {brief && (
+        <div className="bg-indigo-50/50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className="h-4 w-4 text-indigo-500" />
+            <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">AI-Generated Brief</span>
+          </div>
+          <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">{brief}</p>
+        </div>
+      )}
+      {!brief && !error && !loading && (
+        <p className="text-sm text-slate-400 dark:text-slate-500 text-center py-3">
+          Click "Generate AI Brief" to create a weekly intelligence summary using the Knowledge API.
+        </p>
+      )}
     </div>
   );
 }

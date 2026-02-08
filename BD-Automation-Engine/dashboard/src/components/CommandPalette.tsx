@@ -52,6 +52,8 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'knowledgegraph', label: 'Knowledge Graph', icon: Database, keywords: ['graph', 'knowledge', 'vectors'] },
   { id: 'agents', label: 'AI Agents', icon: Bot, keywords: ['agents', 'crew', 'ai', 'automation'] },
   { id: 'memory', label: 'Memory Context', icon: Brain, keywords: ['memory', 'mem0', 'context'] },
+  { id: 'outreach', label: 'Outreach Manager', icon: Target, keywords: ['outreach', 'sequence', 'email', 'cadence'] },
+  { id: 'analytics', label: 'Analytics', icon: BarChart3, keywords: ['analytics', 'charts', 'metrics', 'trends'] },
   { id: 'qadashboard', label: 'QA Dashboard', icon: Activity, keywords: ['quality', 'qa', 'alerts'] },
   { id: 'pipelinestatus', label: 'Pipeline Status', icon: Activity, keywords: ['pipeline', 'status', 'engines'] },
   { id: 'dataquality', label: 'Data Quality', icon: BarChart3, keywords: ['quality', 'vectors', 'collections'] },

@@ -149,6 +149,8 @@ export type TabId =
   | 'placements'
   | 'callintelligence'
   | 'accounttakeover'
+  | 'outreach'
+  | 'analytics'
   | 'smartquery'
   | 'knowledgegraph'
   | 'agents'
