@@ -384,10 +384,123 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
 
 // ─── Weekly Intelligence Brief ───────────────────────────────────────────────
 
+const BRIEF_CACHE_KEY = 'bd_weekly_intel_brief';
+const BRIEF_CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CachedBrief {
+  brief: string;
+  sections: BriefSection[];
+  generatedAt: number;
+  stalePrograms: string[];
+}
+
+interface BriefSection {
+  title: string;
+  icon: string;
+  content: string;
+}
+
+function loadCachedBrief(): CachedBrief | null {
+  try {
+    const raw = localStorage.getItem(BRIEF_CACHE_KEY);
+    if (!raw) return null;
+    const cached: CachedBrief = JSON.parse(raw);
+    if (Date.now() - cached.generatedAt > BRIEF_CACHE_TTL) {
+      localStorage.removeItem(BRIEF_CACHE_KEY);
+      return null;
+    }
+    return cached;
+  } catch { return null; }
+}
+
+function parseBriefSections(text: string): BriefSection[] {
+  const sections: BriefSection[] = [];
+  const sectionDefs = [
+    { pattern: /(?:new\s+opportunities|opportunities)/i, title: 'New Opportunities', icon: '🎯' },
+    { pattern: /(?:program\s+updates|program\s+changes)/i, title: 'Program Updates', icon: '📋' },
+    { pattern: /(?:contact\s+activity|contact\s+updates|key\s+contacts)/i, title: 'Contact Activity', icon: '👥' },
+    { pattern: /(?:competitive\s+moves|competitor|competitive)/i, title: 'Competitive Moves', icon: '⚔️' },
+  ];
+
+  // Try to extract sections from the text
+  const lines = text.split('\n');
+  let currentSection: BriefSection | null = null;
+  const contentLines: string[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+
+    const matchedDef = sectionDefs.find(d => d.pattern.test(trimmed));
+    if (matchedDef || /^#{1,3}\s/.test(trimmed) || /^\*\*[^*]+\*\*$/.test(trimmed)) {
+      if (currentSection && contentLines.length > 0) {
+        currentSection.content = contentLines.join('\n');
+        sections.push(currentSection);
+        contentLines.length = 0;
+      }
+      const def = matchedDef || { title: trimmed.replace(/^#{1,3}\s*|\*\*/g, ''), icon: '📌' };
+      currentSection = { title: def.title, icon: def.icon, content: '' };
+    } else if (currentSection) {
+      contentLines.push(trimmed);
+    } else {
+      contentLines.push(trimmed);
+    }
+  }
+  if (currentSection && contentLines.length > 0) {
+    currentSection.content = contentLines.join('\n');
+    sections.push(currentSection);
+  }
+
+  // Fallback: if no sections were parsed, create one from the whole text
+  if (sections.length === 0 && text.trim()) {
+    sections.push({ title: 'Intelligence Summary', icon: '📊', content: text.trim() });
+  }
+
+  return sections;
+}
+
 function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
   const [brief, setBrief] = useState<string | null>(null);
+  const [sections, setSections] = useState<BriefSection[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [stalePrograms, setStalePrograms] = useState<string[]>([]);
+
+  // Load cached brief on mount
+  useEffect(() => {
+    const cached = loadCachedBrief();
+    if (cached) {
+      setBrief(cached.brief);
+      setSections(cached.sections);
+      setStalePrograms(cached.stalePrograms);
+    }
+  }, []);
+
+  // Per-program stale intel check
+  useEffect(() => {
+    async function checkStalePrograms() {
+      try {
+        const topPrograms = summary.top_programs_by_jobs.slice(0, 5).map(p => p.name);
+        const stale: string[] = [];
+        for (const prog of topPrograms) {
+          try {
+            const results = await hubApiClient.search(prog, 'programs', 1);
+            if (results.length === 0) {
+              stale.push(prog);
+            } else {
+              const lastUpdated = results[0].metadata?.updated_at as string || results[0].metadata?.last_updated as string;
+              if (lastUpdated) {
+                const daysSince = Math.floor((Date.now() - new Date(lastUpdated).getTime()) / (1000 * 60 * 60 * 24));
+                if (daysSince > 14) stale.push(prog);
+              }
+            }
+          } catch { /* skip */ }
+        }
+        setStalePrograms(stale);
+      } catch { /* skip */ }
+    }
+    checkStalePrograms();
+  }, [summary]);
 
   const generateBrief = useCallback(async () => {
     setLoading(true);
@@ -395,13 +508,23 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
     try {
       const result = await hubApiClient.generateWeeklyIntel();
       if (result.status === 'completed' && result.result) {
-        setBrief(
+        const briefText =
           typeof result.result === 'string'
             ? result.result
             : (result.result as Record<string, unknown>).brief as string ||
               (result.result as Record<string, unknown>).summary as string ||
-              JSON.stringify(result.result)
-        );
+              JSON.stringify(result.result);
+        const parsedSections = parseBriefSections(briefText);
+        setBrief(briefText);
+        setSections(parsedSections);
+        // Cache the brief
+        const cached: CachedBrief = {
+          brief: briefText,
+          sections: parsedSections,
+          generatedAt: Date.now(),
+          stalePrograms,
+        };
+        localStorage.setItem(BRIEF_CACHE_KEY, JSON.stringify(cached));
       } else {
         setError('Brief generation returned incomplete results.');
       }
@@ -410,7 +533,7 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [stalePrograms]);
 
   // Stale intel detection
   const generatedDate = new Date(summary.generated_at);
@@ -425,6 +548,9 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
     { label: 'Job Match Rate', value: Math.round(stats.match_rates.jobs_to_programs), baseline: 30, unit: '%' },
   ];
 
+  const cachedBrief = loadCachedBrief();
+  const cachedAgeHours = cachedBrief ? Math.round((Date.now() - cachedBrief.generatedAt) / (1000 * 60 * 60)) : null;
+
   return (
     <div className="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700 p-6">
       <div className="flex items-center justify-between mb-4">
@@ -436,6 +562,9 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Weekly Intelligence Brief</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400">
               Data generated {daysSinceGeneration === 0 ? 'today' : `${daysSinceGeneration}d ago`}
+              {cachedAgeHours !== null && (
+                <span className="ml-2 text-xs text-slate-400">• Cached {cachedAgeHours}h ago</span>
+              )}
             </p>
           </div>
         </div>
@@ -449,7 +578,7 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
           ) : (
             <Sparkles className="h-4 w-4" />
           )}
-          {loading ? 'Generating...' : 'Generate AI Brief'}
+          {loading ? 'Generating...' : brief ? 'Regenerate Brief' : 'Generate AI Brief'}
         </button>
       </div>
 
@@ -460,6 +589,17 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
           <p className="text-sm text-amber-700 dark:text-amber-300">
             Data is {daysSinceGeneration} days old. Consider refreshing your pipeline for latest intelligence.
           </p>
+        </div>
+      )}
+
+      {/* Per-program stale alerts */}
+      {stalePrograms.length > 0 && (
+        <div className="mb-4 flex items-start gap-2 px-3 py-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800">
+          <RefreshCw className="h-4 w-4 text-orange-600 dark:text-orange-400 flex-shrink-0 mt-0.5" />
+          <div className="text-sm text-orange-700 dark:text-orange-300">
+            <span className="font-medium">Stale intel on {stalePrograms.length} program{stalePrograms.length > 1 ? 's' : ''}:</span>{' '}
+            {stalePrograms.join(', ')}
+          </div>
         </div>
       )}
 
@@ -484,20 +624,24 @@ function WeeklyIntelBrief({ summary }: { summary: CorrelationSummary }) {
         })}
       </div>
 
-      {/* AI Brief Content */}
+      {/* AI Brief Content — Sectioned Output */}
       {error && (
         <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-50 dark:bg-red-900/20 text-sm text-red-600 dark:text-red-400">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           {error}
         </div>
       )}
-      {brief && (
-        <div className="bg-indigo-50/50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
-          <div className="flex items-center gap-2 mb-2">
-            <Sparkles className="h-4 w-4 text-indigo-500" />
-            <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">AI-Generated Brief</span>
-          </div>
-          <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">{brief}</p>
+      {sections.length > 0 && (
+        <div className="space-y-3">
+          {sections.map((section, i) => (
+            <div key={i} className="bg-indigo-50/50 dark:bg-indigo-900/20 rounded-lg p-4 border border-indigo-100 dark:border-indigo-800">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-base">{section.icon}</span>
+                <span className="text-sm font-semibold text-indigo-700 dark:text-indigo-300">{section.title}</span>
+              </div>
+              <p className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">{section.content}</p>
+            </div>
+          ))}
         </div>
       )}
       {!brief && !error && !loading && (

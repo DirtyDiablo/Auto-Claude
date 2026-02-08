@@ -1,3 +1,4 @@
+import { useState, useEffect, useCallback } from 'react';
 import {
   LayoutDashboard,
   Briefcase,
@@ -30,6 +31,8 @@ import {
   Layers,
   Send,
   TrendingUp,
+  Moon,
+  Sun,
 } from 'lucide-react';
 import type { TabId } from '../types';
 
@@ -89,6 +92,27 @@ export function Sidebar({
   collapsed,
   onToggleCollapse,
 }: SidebarProps) {
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('bd_dark_mode') === 'true' || document.documentElement.classList.contains('dark');
+    }
+    return false;
+  });
+
+  const toggleDarkMode = useCallback(() => {
+    setDarkMode(prev => {
+      const next = !prev;
+      document.documentElement.classList.toggle('dark', next);
+      localStorage.setItem('bd_dark_mode', String(next));
+      return next;
+    });
+  }, []);
+
+  // Apply dark mode on mount
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', darkMode);
+  }, [darkMode]);
+
   return (
     <aside
       className={`bg-slate-900 text-white flex flex-col transition-all duration-300 ${
@@ -183,7 +207,18 @@ export function Sidebar({
       </nav>
 
       {/* Footer */}
-      <div className="p-3 border-t border-slate-700/50 bg-slate-900/50">
+      <div className="p-3 border-t border-slate-700/50 bg-slate-900/50 space-y-2">
+        {/* Dark Mode Toggle */}
+        <button
+          onClick={toggleDarkMode}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-all duration-200"
+          title={collapsed ? (darkMode ? 'Light Mode' : 'Dark Mode') : undefined}
+        >
+          {darkMode ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          {!collapsed && <span className="text-sm font-medium">{darkMode ? 'Light Mode' : 'Dark Mode'}</span>}
+        </button>
+
+        {/* Refresh Button */}
         <button
           onClick={onRefresh}
           disabled={isRefreshing}
@@ -198,7 +233,7 @@ export function Sidebar({
           {!collapsed && <span className="text-sm font-medium">{isRefreshing ? 'Refreshing...' : 'Refresh Data'}</span>}
         </button>
         {!collapsed && lastUpdated && (
-          <p className="mt-2 text-[10px] text-slate-500 text-center">
+          <p className="mt-1 text-[10px] text-slate-500 text-center">
             Updated: {lastUpdated.toLocaleTimeString()}
           </p>
         )}

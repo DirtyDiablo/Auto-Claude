@@ -58,13 +58,21 @@ interface MindMapNav {
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('executive');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth < 1024);
   const { data, loading, error, refresh, lastUpdated, isConfigured } = useAppData();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [crossNavFilter, setCrossNavFilter] = useState<CrossNavFilter | null>(null);
   const [mindMapNav, setMindMapNav] = useState<MindMapNav | null>(null);
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+
+  // Responsive: auto-collapse sidebar under 1024px
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 1024px)');
+    const handler = (e: MediaQueryListEvent) => setSidebarCollapsed(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   // Cross-navigation handlers
   const handleNavigateToProgram = useCallback((programName: string) => {
@@ -195,6 +203,7 @@ function App() {
             onNavigateToProgram={handleNavigateToProgram}
             onNavigateToLocation={handleNavigateToLocation}
             onNavigateToMindMap={handleNavigateToMindMap}
+            onNavigateToContact={handleNavigateToContactDetail}
           />
         );
       case 'programs':

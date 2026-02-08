@@ -1,411 +1,323 @@
 /**
  * Outreach Sequence Manager
  *
- * Connects to the outreach sequence engine on Terminal C (port 8300).
- * Falls back to mock data when the service is unavailable.
+ * Connects to the N8N-Builder outreach API on :8300.
+ * Two views: Sequence Timeline (per contact) and Portfolio Overview.
  */
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Mail,
-  Plus,
-  Calendar,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  ChevronRight,
-  Send,
-  X,
-  LayoutGrid,
-  List,
-  Phone,
-  User,
-  Building2,
-  Loader2,
-  PauseCircle,
-  PlayCircle,
-  Trash2,
+  Mail, Plus, Calendar, Clock, CheckCircle2, AlertCircle,
+  Send, X, List, LayoutGrid, Phone, User, Building2,
+  Loader2, PauseCircle, PlayCircle, ChevronRight, Linkedin,
+  Users, Sparkles, ArrowRight, ExternalLink,
 } from 'lucide-react';
+import { hubApiClient } from '../services/hubApi';
+import { SkeletonCard, SkeletonListItem } from '../components/ui/Skeleton';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface OutreachStep {
-  id: string;
-  type: 'email' | 'call' | 'linkedin' | 'meeting';
-  subject: string;
-  scheduled_date: string;
-  status: 'pending' | 'sent' | 'completed' | 'skipped';
-  notes?: string;
+  step_number: number;
+  type: 'email' | 'call' | 'linkedin' | 'case_study' | 'breakup';
+  label: string;
+  day: number;
+  status: 'pending' | 'sent' | 'completed' | 'skipped' | 'bounced';
+  sent_at?: string;
+  content?: string;
 }
 
 interface OutreachSequence {
   id: string;
   contact_name: string;
-  company: string;
+  contact_email?: string;
+  contact_phone?: string;
   program: string;
-  status: 'active' | 'paused' | 'completed' | 'draft';
-  created_at: string;
-  steps: OutreachStep[];
+  tier: number;
+  status: 'not_started' | 'active' | 'paused' | 'completed' | 'bounced';
   current_step: number;
-  priority: 'high' | 'medium' | 'low';
+  steps: OutreachStep[];
+  created_at: string;
+  updated_at?: string;
+  next_action_due?: string;
+}
+
+interface DueAction {
+  sequence_id: string;
+  contact_name: string;
+  program: string;
+  step: OutreachStep;
+  due_date: string;
 }
 
 interface OutreachManagerProps {
   loading?: boolean;
+  onNavigateToContact?: (name: string) => void;
 }
 
-// ─── Mock Data ───────────────────────────────────────────────────────────────
+// ─── BD Formula Steps Template ───────────────────────────────────────────────
 
-const MOCK_SEQUENCES: OutreachSequence[] = [
-  {
-    id: 'seq-001',
-    contact_name: 'Sarah Mitchell',
-    company: 'Leidos',
-    program: 'DCGS-A',
-    status: 'active',
-    created_at: '2025-01-15',
-    current_step: 1,
-    priority: 'high',
-    steps: [
-      { id: 's1', type: 'email', subject: 'Introduction - PTS capabilities on DCGS', scheduled_date: '2025-01-15', status: 'completed' },
-      { id: 's2', type: 'call', subject: 'Follow-up call re: staffing needs', scheduled_date: '2025-01-22', status: 'pending' },
-      { id: 's3', type: 'email', subject: 'Case study: ISR analysts placed at Ft. Liberty', scheduled_date: '2025-01-29', status: 'pending' },
-      { id: 's4', type: 'meeting', subject: 'In-person intro at Leidos HQ', scheduled_date: '2025-02-05', status: 'pending' },
-    ],
-  },
-  {
-    id: 'seq-002',
-    contact_name: 'James Rodriguez',
-    company: 'Northrop Grumman',
-    program: 'GBSD',
-    status: 'active',
-    created_at: '2025-01-18',
-    current_step: 0,
-    priority: 'high',
-    steps: [
-      { id: 's1', type: 'email', subject: 'PTS intro for GBSD cleared talent', scheduled_date: '2025-01-18', status: 'pending' },
-      { id: 's2', type: 'linkedin', subject: 'LinkedIn connection request + message', scheduled_date: '2025-01-20', status: 'pending' },
-      { id: 's3', type: 'call', subject: 'Warm call - reference shared connection', scheduled_date: '2025-01-25', status: 'pending' },
-    ],
-  },
-  {
-    id: 'seq-003',
-    contact_name: 'Maria Chen',
-    company: 'GDIT',
-    program: 'DCGS-N',
-    status: 'paused',
-    created_at: '2025-01-10',
-    current_step: 2,
-    priority: 'medium',
-    steps: [
-      { id: 's1', type: 'email', subject: 'Intro to PTS Navy ISR capabilities', scheduled_date: '2025-01-10', status: 'completed' },
-      { id: 's2', type: 'call', subject: 'Discovery call', scheduled_date: '2025-01-14', status: 'completed' },
-      { id: 's3', type: 'email', subject: 'Proposal: 5 SIGINT analysts', scheduled_date: '2025-01-21', status: 'pending' },
-    ],
-  },
-  {
-    id: 'seq-004',
-    contact_name: 'David Park',
-    company: 'Raytheon',
-    program: 'JSTARS',
-    status: 'completed',
-    created_at: '2024-12-20',
-    current_step: 3,
-    priority: 'low',
-    steps: [
-      { id: 's1', type: 'email', subject: 'Cold intro - JSTARS staffing', scheduled_date: '2024-12-20', status: 'completed' },
-      { id: 's2', type: 'call', subject: 'Follow-up call', scheduled_date: '2024-12-27', status: 'completed' },
-      { id: 's3', type: 'meeting', subject: 'Meeting at Robins AFB', scheduled_date: '2025-01-08', status: 'completed' },
-    ],
-  },
-  {
-    id: 'seq-005',
-    contact_name: 'Karen Williams',
-    company: 'BAE Systems',
-    program: 'DCGS-AF',
-    status: 'draft',
-    created_at: '2025-01-20',
-    current_step: 0,
-    priority: 'medium',
-    steps: [
-      { id: 's1', type: 'email', subject: 'Introduction email', scheduled_date: '2025-01-25', status: 'pending' },
-      { id: 's2', type: 'call', subject: 'Qualification call', scheduled_date: '2025-02-01', status: 'pending' },
-    ],
-  },
+const BD_FORMULA_STEPS: Omit<OutreachStep, 'status'>[] = [
+  { step_number: 1, type: 'email', label: 'Day 1 Intro Email', day: 1 },
+  { step_number: 2, type: 'email', label: 'Day 3 Follow-up', day: 3 },
+  { step_number: 3, type: 'call', label: 'Day 5 Call', day: 5 },
+  { step_number: 4, type: 'linkedin', label: 'Day 7 LinkedIn', day: 7 },
+  { step_number: 5, type: 'case_study', label: 'Day 10 Case Study', day: 10 },
+  { step_number: 6, type: 'breakup', label: 'Day 14 Breakup Email', day: 14 },
 ];
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Style Helpers ───────────────────────────────────────────────────────────
 
-const STATUS_STYLES: Record<string, { bg: string; text: string; icon: typeof CheckCircle2 }> = {
-  active: { bg: 'bg-green-50 border-green-200', text: 'text-green-700', icon: PlayCircle },
-  paused: { bg: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-700', icon: PauseCircle },
-  completed: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', icon: CheckCircle2 },
-  draft: { bg: 'bg-slate-50 border-slate-200', text: 'text-slate-600', icon: Clock },
+const STATUS_STYLES: Record<string, { bg: string; text: string; label: string }> = {
+  not_started: { bg: 'bg-slate-50 border-slate-200', text: 'text-slate-600', label: 'Not Started' },
+  active: { bg: 'bg-green-50 border-green-200', text: 'text-green-700', label: 'Active' },
+  paused: { bg: 'bg-yellow-50 border-yellow-200', text: 'text-yellow-700', label: 'Paused' },
+  completed: { bg: 'bg-blue-50 border-blue-200', text: 'text-blue-700', label: 'Completed' },
+  bounced: { bg: 'bg-red-50 border-red-200', text: 'text-red-700', label: 'Bounced' },
 };
 
-const PRIORITY_STYLES: Record<string, string> = {
-  high: 'bg-red-100 text-red-700',
-  medium: 'bg-yellow-100 text-yellow-700',
-  low: 'bg-slate-100 text-slate-600',
+const STEP_STATUS_STYLES: Record<string, { bg: string; text: string }> = {
+  pending: { bg: 'bg-slate-100', text: 'text-slate-600' },
+  sent: { bg: 'bg-blue-100', text: 'text-blue-700' },
+  completed: { bg: 'bg-green-100', text: 'text-green-700' },
+  skipped: { bg: 'bg-gray-100', text: 'text-gray-500' },
+  bounced: { bg: 'bg-red-100', text: 'text-red-700' },
 };
 
-const STEP_TYPE_ICON: Record<string, typeof Mail> = {
-  email: Mail,
-  call: Phone,
-  linkedin: User,
-  meeting: Calendar,
+const STEP_ICONS: Record<string, typeof Mail> = {
+  email: Mail, call: Phone, linkedin: Linkedin, case_study: Send, breakup: X,
 };
 
-function formatDate(d: string): string {
-  return new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+const TIER_COLORS = ['', 'bg-red-500', 'bg-orange-500', 'bg-yellow-500', 'bg-green-500', 'bg-blue-500', 'bg-gray-400'];
+
+// ─── API helpers ─────────────────────────────────────────────────────────────
+
+async function fetchSequences(): Promise<OutreachSequence[]> {
+  const res = await fetch('/outreach/sequences', { signal: AbortSignal.timeout(5000) });
+  if (!res.ok) throw new Error('Failed to fetch sequences');
+  const data = await res.json();
+  return data.sequences || data || [];
+}
+
+async function fetchDueActions(): Promise<DueAction[]> {
+  const res = await fetch('/outreach/sequences/due', { signal: AbortSignal.timeout(5000) });
+  if (!res.ok) return [];
+  const data = await res.json();
+  return data.due || data || [];
+}
+
+async function createSequence(body: Record<string, unknown>): Promise<OutreachSequence> {
+  const res = await fetch('/outreach/sequences', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error('Failed to create sequence');
+  return res.json();
+}
+
+async function advanceStep(seqId: string, result: string): Promise<OutreachSequence> {
+  const res = await fetch(`/outreach/sequences/${seqId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ result }),
+  });
+  if (!res.ok) throw new Error('Failed to advance step');
+  return res.json();
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
 
-export function OutreachManager({ loading = false }: OutreachManagerProps) {
+export function OutreachManager({ loading = false, onNavigateToContact }: OutreachManagerProps) {
   const [sequences, setSequences] = useState<OutreachSequence[]>([]);
+  const [dueActions, setDueActions] = useState<DueAction[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [serviceOnline, setServiceOnline] = useState(false);
   const [viewMode, setViewMode] = useState<'timeline' | 'portfolio'>('timeline');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [selectedSequence, setSelectedSequence] = useState<OutreachSequence | null>(null);
+  const [generatingContent, setGeneratingContent] = useState<string | null>(null);
+  const [generatedContent, setGeneratedContent] = useState<Record<string, string>>({});
 
-  // Try to connect to Terminal C (port 8300), fall back to mock data
+  // Load data
   useEffect(() => {
-    async function loadSequences() {
+    async function load() {
       try {
-        const res = await fetch('/sequences', { signal: AbortSignal.timeout(3000) });
-        if (res.ok) {
-          const data = await res.json();
-          setSequences(data.sequences || data);
-          setServiceOnline(true);
-        } else {
-          throw new Error('Service returned non-OK');
-        }
+        // Check outreach health first
+        const healthRes = await fetch('/outreach/health', { signal: AbortSignal.timeout(3000) });
+        if (!healthRes.ok) throw new Error();
+        setServiceOnline(true);
+
+        const [seqs, due] = await Promise.all([fetchSequences(), fetchDueActions()]);
+        setSequences(seqs);
+        setDueActions(due);
       } catch {
-        // Fall back to mock data
-        setSequences(MOCK_SEQUENCES);
         setServiceOnline(false);
+        // Generate mock data so the UI is usable
+        setSequences(generateMockSequences());
       } finally {
         setDataLoading(false);
       }
     }
-    loadSequences();
+    load();
   }, []);
 
-  const filteredSequences = useMemo(() => {
-    if (statusFilter === 'all') return sequences;
-    return sequences.filter(s => s.status === statusFilter);
-  }, [sequences, statusFilter]);
+  const selected = useMemo(
+    () => sequences.find(s => s.id === selectedId) || null,
+    [sequences, selectedId]
+  );
 
-  const dueToday = useMemo(() => {
-    const today = new Date().toISOString().slice(0, 10);
-    const items: { sequence: OutreachSequence; step: OutreachStep }[] = [];
-    sequences.forEach(seq => {
-      if (seq.status !== 'active') return;
-      seq.steps.forEach(step => {
-        if (step.status === 'pending' && step.scheduled_date <= today) {
-          items.push({ sequence: seq, step });
-        }
-      });
-    });
-    return items;
-  }, [sequences]);
+  const handleAdvance = useCallback(async (seqId: string) => {
+    if (!serviceOnline) {
+      // Optimistic local advance
+      setSequences(prev => prev.map(s => {
+        if (s.id !== seqId) return s;
+        const steps = [...s.steps];
+        if (steps[s.current_step]) steps[s.current_step] = { ...steps[s.current_step], status: 'sent' };
+        return { ...s, steps, current_step: Math.min(s.current_step + 1, steps.length - 1) };
+      }));
+      return;
+    }
+    try {
+      const updated = await advanceStep(seqId, 'sent');
+      setSequences(prev => prev.map(s => s.id === seqId ? updated : s));
+    } catch { /* keep current state */ }
+  }, [serviceOnline]);
 
-  const stats = useMemo(() => ({
-    active: sequences.filter(s => s.status === 'active').length,
-    paused: sequences.filter(s => s.status === 'paused').length,
-    completed: sequences.filter(s => s.status === 'completed').length,
-    draft: sequences.filter(s => s.status === 'draft').length,
-    totalSteps: sequences.reduce((sum, s) => sum + s.steps.length, 0),
-    completedSteps: sequences.reduce((sum, s) => sum + s.steps.filter(st => st.status === 'completed').length, 0),
-  }), [sequences]);
+  const handleGenerateContent = useCallback(async (seqId: string, contactName: string, program: string) => {
+    setGeneratingContent(seqId);
+    try {
+      const result = await hubApiClient.prepareOutreach(contactName, program);
+      const content = typeof result.result === 'string' ? result.result :
+        (result.result as Record<string, unknown>)?.content as string || JSON.stringify(result.result);
+      setGeneratedContent(prev => ({ ...prev, [seqId]: content }));
+    } catch {
+      setGeneratedContent(prev => ({ ...prev, [seqId]: 'Content generation unavailable. Start the Hub API on :8100.' }));
+    } finally {
+      setGeneratingContent(null);
+    }
+  }, []);
 
-  const handleCreateSequence = useCallback((newSeq: Partial<OutreachSequence>) => {
+  const handleCreate = useCallback(async (body: Record<string, unknown>) => {
+    if (serviceOnline) {
+      try {
+        const seq = await createSequence(body);
+        setSequences(prev => [seq, ...prev]);
+        setShowCreateModal(false);
+        return;
+      } catch { /* fall through */ }
+    }
+    // Local creation
     const seq: OutreachSequence = {
-      id: `seq-${Date.now()}`,
-      contact_name: newSeq.contact_name || '',
-      company: newSeq.company || '',
-      program: newSeq.program || '',
-      status: 'draft',
-      created_at: new Date().toISOString().slice(0, 10),
+      id: `local-${Date.now()}`,
+      contact_name: String(body.contact_name || ''),
+      contact_email: String(body.contact_email || ''),
+      contact_phone: String(body.contact_phone || ''),
+      program: String(body.program || ''),
+      tier: Number(body.tier || 3),
+      status: 'not_started',
       current_step: 0,
-      priority: (newSeq.priority as 'high' | 'medium' | 'low') || 'medium',
-      steps: [
-        { id: `s-${Date.now()}`, type: 'email', subject: 'Introduction email', scheduled_date: new Date().toISOString().slice(0, 10), status: 'pending' },
-      ],
+      steps: BD_FORMULA_STEPS.map(s => ({ ...s, status: 'pending' as const })),
+      created_at: new Date().toISOString(),
     };
     setSequences(prev => [seq, ...prev]);
     setShowCreateModal(false);
-  }, []);
-
-  const handleDeleteSequence = useCallback((id: string) => {
-    setSequences(prev => prev.filter(s => s.id !== id));
-    if (selectedSequence?.id === id) setSelectedSequence(null);
-  }, [selectedSequence]);
-
-  const handleTogglePause = useCallback((id: string) => {
-    setSequences(prev => prev.map(s =>
-      s.id === id ? { ...s, status: s.status === 'paused' ? 'active' : 'paused' } as OutreachSequence : s
-    ));
-  }, []);
+  }, [serviceOnline]);
 
   if (loading || dataLoading) {
     return (
-      <div className="p-6 flex items-center justify-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      <div className="p-6 space-y-4">
+        <div className="h-10 w-64 bg-slate-200 dark:bg-slate-700 rounded animate-pulse" />
+        <div className="grid grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+        <div className="flex gap-4">
+          <div className="w-80 space-y-2">{Array.from({ length: 5 }).map((_, i) => <SkeletonListItem key={i} />)}</div>
+          <div className="flex-1"><SkeletonCard /></div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="p-6 space-y-6 overflow-auto h-full">
+    <div className="p-6 space-y-5 overflow-auto h-full">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
-            <Send className="h-7 w-7 text-blue-500" />
-            Outreach Manager
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <Send className="h-7 w-7 text-blue-500" /> Outreach Manager
           </h1>
-          <p className="text-slate-500 mt-1">
-            {sequences.length} sequences &middot; {stats.completedSteps}/{stats.totalSteps} steps completed
+          <p className="text-slate-500 dark:text-slate-400">
+            {sequences.length} sequences &middot; {dueActions.length} due actions
             {!serviceOnline && (
               <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded">
-                Offline mode (mock data)
+                Offline — mock data
               </span>
             )}
           </p>
         </div>
         <div className="flex gap-3">
-          {/* View Toggle */}
-          <div className="flex gap-1 bg-slate-100 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode('timeline')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'timeline' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
+          <div className="flex gap-1 bg-slate-100 dark:bg-slate-800 rounded-lg p-1">
+            <button onClick={() => setViewMode('timeline')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'timeline' ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' : 'text-slate-500'}`}>
               <List className="h-4 w-4" /> Timeline
             </button>
-            <button
-              onClick={() => setViewMode('portfolio')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
-                viewMode === 'portfolio' ? 'bg-white shadow text-slate-800' : 'text-slate-500 hover:text-slate-700'
-              }`}
-            >
+            <button onClick={() => setViewMode('portfolio')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'portfolio' ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' : 'text-slate-500'}`}>
               <LayoutGrid className="h-4 w-4" /> Portfolio
             </button>
           </div>
-          <button
-            onClick={() => setShowCreateModal(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
-          >
+          <button onClick={() => setShowCreateModal(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm">
             <Plus className="h-4 w-4" /> New Sequence
           </button>
         </div>
       </div>
 
-      {/* Stats Row */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {[
-          { label: 'Active', value: stats.active, color: 'text-green-600', bg: 'bg-green-50' },
-          { label: 'Paused', value: stats.paused, color: 'text-yellow-600', bg: 'bg-yellow-50' },
-          { label: 'Completed', value: stats.completed, color: 'text-blue-600', bg: 'bg-blue-50' },
-          { label: 'Draft', value: stats.draft, color: 'text-slate-600', bg: 'bg-slate-50' },
-        ].map(s => (
-          <div key={s.label} className={`${s.bg} rounded-xl p-4 border border-slate-200`}>
-            <p className="text-sm text-slate-500">{s.label}</p>
-            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Due Today */}
-      {dueToday.length > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
-          <h3 className="font-semibold text-orange-800 flex items-center gap-2 mb-3">
-            <AlertCircle className="h-5 w-5" />
-            Due Today ({dueToday.length})
+      {/* Due Actions Banner */}
+      {dueActions.length > 0 && (
+        <div className="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-xl p-4">
+          <h3 className="font-semibold text-orange-800 dark:text-orange-300 flex items-center gap-2 mb-2">
+            <AlertCircle className="h-5 w-5" /> Due Today ({dueActions.length})
           </h3>
-          <div className="space-y-2">
-            {dueToday.map(({ sequence, step }) => {
-              const StepIcon = STEP_TYPE_ICON[step.type] || Mail;
-              return (
-                <div
-                  key={`${sequence.id}-${step.id}`}
-                  className="flex items-center justify-between bg-white rounded-lg p-3 border border-orange-100 cursor-pointer hover:shadow-sm transition-shadow"
-                  onClick={() => setSelectedSequence(sequence)}
-                >
-                  <div className="flex items-center gap-3">
-                    <StepIcon className="h-4 w-4 text-orange-600" />
-                    <div>
-                      <p className="font-medium text-slate-800">{step.subject}</p>
-                      <p className="text-sm text-slate-500">{sequence.contact_name} &middot; {sequence.company}</p>
-                    </div>
-                  </div>
-                  <ChevronRight className="h-4 w-4 text-slate-400" />
+          <div className="space-y-1">
+            {dueActions.slice(0, 5).map((a, i) => (
+              <div key={i} className="flex items-center justify-between bg-white dark:bg-slate-800 rounded-lg p-2 border border-orange-100 dark:border-orange-800 cursor-pointer hover:shadow-sm"
+                onClick={() => { setSelectedId(a.sequence_id); setViewMode('timeline'); }}>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4 text-orange-600" />
+                  <span className="text-sm font-medium text-slate-800 dark:text-slate-100">{a.contact_name}</span>
+                  <span className="text-xs text-slate-500">{a.step.label}</span>
                 </div>
-              );
-            })}
+                <ChevronRight className="h-4 w-4 text-slate-400" />
+              </div>
+            ))}
           </div>
         </div>
       )}
 
-      {/* Filter Row */}
-      <div className="flex gap-2">
-        {['all', 'active', 'paused', 'completed', 'draft'].map(f => (
-          <button
-            key={f}
-            onClick={() => setStatusFilter(f)}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-              statusFilter === f
-                ? 'bg-blue-600 text-white'
-                : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-            }`}
-          >
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
-      </div>
-
-      {/* Main Content */}
-      <div className="flex gap-6">
-        <div className="flex-1">
-          {viewMode === 'timeline' ? (
-            <TimelineView
-              sequences={filteredSequences}
-              selectedId={selectedSequence?.id || null}
-              onSelect={setSelectedSequence}
-              onTogglePause={handleTogglePause}
-              onDelete={handleDeleteSequence}
-            />
-          ) : (
-            <PortfolioView
-              sequences={filteredSequences}
-              selectedId={selectedSequence?.id || null}
-              onSelect={setSelectedSequence}
-            />
-          )}
-        </div>
-
-        {/* Detail Panel */}
-        {selectedSequence && (
-          <SequenceDetail
-            sequence={selectedSequence}
-            onClose={() => setSelectedSequence(null)}
-            onTogglePause={handleTogglePause}
-          />
-        )}
-      </div>
-
-      {/* Create Modal */}
-      {showCreateModal && (
-        <CreateSequenceModal
-          onClose={() => setShowCreateModal(false)}
-          onCreate={handleCreateSequence}
+      {/* Views */}
+      {viewMode === 'timeline' ? (
+        <TimelineView
+          sequences={sequences}
+          selected={selected}
+          onSelect={setSelectedId}
+          onAdvance={handleAdvance}
+          onGenerateContent={handleGenerateContent}
+          generatingContent={generatingContent}
+          generatedContent={generatedContent}
+          onNavigateToContact={onNavigateToContact}
+        />
+      ) : (
+        <PortfolioView
+          sequences={sequences}
+          onSelect={id => { setSelectedId(id); setViewMode('timeline'); }}
+          onNavigateToContact={onNavigateToContact}
         />
       )}
+
+      {/* Create Modal */}
+      {showCreateModal && <CreateModal onClose={() => setShowCreateModal(false)} onCreate={handleCreate} />}
     </div>
   );
 }
@@ -413,123 +325,152 @@ export function OutreachManager({ loading = false }: OutreachManagerProps) {
 // ─── Timeline View ───────────────────────────────────────────────────────────
 
 function TimelineView({
-  sequences,
-  selectedId,
-  onSelect,
-  onTogglePause,
-  onDelete,
+  sequences, selected, onSelect, onAdvance, onGenerateContent,
+  generatingContent, generatedContent, onNavigateToContact,
 }: {
   sequences: OutreachSequence[];
-  selectedId: string | null;
-  onSelect: (s: OutreachSequence) => void;
-  onTogglePause: (id: string) => void;
-  onDelete: (id: string) => void;
+  selected: OutreachSequence | null;
+  onSelect: (id: string | null) => void;
+  onAdvance: (id: string) => void;
+  onGenerateContent: (id: string, contact: string, program: string) => void;
+  generatingContent: string | null;
+  generatedContent: Record<string, string>;
+  onNavigateToContact?: (name: string) => void;
 }) {
   return (
-    <div className="space-y-3">
-      {sequences.length === 0 && (
-        <div className="text-center py-12 text-slate-500">
-          <Mail className="h-12 w-12 mx-auto mb-3 text-slate-300" />
-          <p className="font-medium">No sequences found</p>
-          <p className="text-sm">Create a new outreach sequence to get started.</p>
-        </div>
-      )}
-      {sequences.map(seq => {
-        const style = STATUS_STYLES[seq.status] || STATUS_STYLES.draft;
-        const StatusIcon = style.icon;
-        const progress = seq.steps.length > 0
-          ? Math.round((seq.steps.filter(s => s.status === 'completed').length / seq.steps.length) * 100)
-          : 0;
-
-        return (
-          <div
-            key={seq.id}
-            onClick={() => onSelect(seq)}
-            className={`bg-white rounded-xl border p-4 cursor-pointer transition-all hover:shadow-md ${
-              selectedId === seq.id ? 'ring-2 ring-blue-500 shadow-md' : 'border-slate-200'
-            }`}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${style.bg} border`}>
-                  <StatusIcon className={`h-5 w-5 ${style.text}`} />
-                </div>
-                <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-slate-800">{seq.contact_name}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${PRIORITY_STYLES[seq.priority]}`}>
-                      {seq.priority}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-slate-500 mt-0.5">
-                    <Building2 className="h-3.5 w-3.5" />
-                    <span>{seq.company}</span>
-                    <span>&middot;</span>
-                    <span>{seq.program}</span>
-                  </div>
-                </div>
+    <div className="flex gap-6 min-h-[500px]">
+      {/* Left: sequence list */}
+      <div className="w-80 flex-shrink-0 space-y-2 overflow-y-auto max-h-[calc(100vh-300px)]">
+        {sequences.map(seq => {
+          const style = STATUS_STYLES[seq.status] || STATUS_STYLES.not_started;
+          const isSelected = selected?.id === seq.id;
+          return (
+            <div key={seq.id} onClick={() => onSelect(seq.id)}
+              className={`p-3 rounded-lg border cursor-pointer transition-all ${isSelected ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-900/20 border-blue-200' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 hover:shadow-sm'}`}>
+              <div className="flex items-center gap-2 mb-1">
+                <div className={`w-2 h-2 rounded-full ${TIER_COLORS[seq.tier] || 'bg-gray-400'}`} />
+                <span className="font-medium text-sm text-slate-800 dark:text-slate-100 truncate">{seq.contact_name}</span>
               </div>
-              <div className="flex items-center gap-1" onClick={e => e.stopPropagation()}>
-                <button
-                  onClick={() => onTogglePause(seq.id)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors"
-                  title={seq.status === 'paused' ? 'Resume' : 'Pause'}
-                >
-                  {seq.status === 'paused' ? (
-                    <PlayCircle className="h-4 w-4 text-green-600" />
-                  ) : (
-                    <PauseCircle className="h-4 w-4 text-yellow-600" />
-                  )}
-                </button>
-                <button
-                  onClick={() => onDelete(seq.id)}
-                  className="p-1.5 rounded-lg hover:bg-red-50 transition-colors"
-                  title="Delete"
-                >
-                  <Trash2 className="h-4 w-4 text-red-400 hover:text-red-600" />
-                </button>
+              <div className="flex items-center gap-2 text-xs text-slate-500">
+                <span>{seq.program}</span>
+                <span>&middot;</span>
+                <span className={`px-1.5 py-0.5 rounded ${style.bg} ${style.text} border text-[10px] font-medium`}>{style.label}</span>
+              </div>
+              <div className="mt-1.5 flex gap-0.5">
+                {seq.steps.map((step, i) => (
+                  <div key={i} className={`flex-1 h-1 rounded-full ${step.status === 'completed' || step.status === 'sent' ? 'bg-green-400' : i === seq.current_step ? 'bg-blue-400' : 'bg-slate-200 dark:bg-slate-600'}`} />
+                ))}
               </div>
             </div>
+          );
+        })}
+        {sequences.length === 0 && (
+          <div className="text-center py-12 text-slate-400">
+            <Send className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm">No sequences yet</p>
+          </div>
+        )}
+      </div>
 
-            {/* Progress + Steps Timeline */}
-            <div className="mt-3">
-              <div className="flex items-center justify-between mb-1">
-                <span className="text-xs text-slate-500">
-                  Step {seq.steps.filter(s => s.status === 'completed').length} of {seq.steps.length}
-                </span>
-                <span className="text-xs font-medium text-slate-600">{progress}%</span>
+      {/* Right: timeline detail */}
+      {selected ? (
+        <div className="flex-1 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 overflow-y-auto max-h-[calc(100vh-300px)]">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">{selected.contact_name}</h2>
+              <div className="flex items-center gap-3 mt-1 text-sm text-slate-500">
+                <span className="flex items-center gap-1"><Building2 className="h-4 w-4" /> {selected.program}</span>
+                <span>Tier {selected.tier}</span>
+                {selected.contact_email && <span>{selected.contact_email}</span>}
               </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5">
-                <div
-                  className="bg-blue-500 h-1.5 rounded-full transition-all"
-                  style={{ width: `${progress}%` }}
-                />
-              </div>
-              <div className="flex gap-1 mt-2">
-                {seq.steps.map(step => {
-                  const StepIcon = STEP_TYPE_ICON[step.type] || Mail;
-                  return (
-                    <div
-                      key={step.id}
-                      className={`flex items-center gap-1 px-2 py-1 rounded text-xs ${
-                        step.status === 'completed'
-                          ? 'bg-green-50 text-green-700'
-                          : step.status === 'pending'
-                          ? 'bg-slate-50 text-slate-600'
-                          : 'bg-slate-50 text-slate-400'
-                      }`}
-                      title={`${step.type}: ${step.subject}`}
-                    >
-                      <StepIcon className="h-3 w-3" />
-                      <span>{formatDate(step.scheduled_date)}</span>
-                    </div>
-                  );
-                })}
-              </div>
+            </div>
+            <div className="flex gap-2">
+              {onNavigateToContact && (
+                <button onClick={() => onNavigateToContact(selected.contact_name)}
+                  className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+                  <ExternalLink className="h-3 w-3" /> View Contact
+                </button>
+              )}
+              <button onClick={() => onSelect(null)}
+                className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">
+                <X className="h-5 w-5 text-slate-400" />
+              </button>
             </div>
           </div>
-        );
-      })}
+
+          {/* Steps timeline */}
+          <div className="space-y-0">
+            {selected.steps.map((step, idx) => {
+              const Icon = STEP_ICONS[step.type] || Mail;
+              const stepStyle = STEP_STATUS_STYLES[step.status] || STEP_STATUS_STYLES.pending;
+              const isCurrent = idx === selected.current_step && selected.status === 'active';
+
+              return (
+                <div key={idx} className="flex gap-4">
+                  {/* Timeline line */}
+                  <div className="flex flex-col items-center">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center ${isCurrent ? 'bg-blue-500 text-white' : step.status === 'completed' || step.status === 'sent' ? 'bg-green-500 text-white' : 'bg-slate-200 dark:bg-slate-600 text-slate-500'}`}>
+                      {step.status === 'completed' || step.status === 'sent' ? <CheckCircle2 className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                    </div>
+                    {idx < selected.steps.length - 1 && <div className="w-0.5 flex-1 bg-slate-200 dark:bg-slate-600 my-1" />}
+                  </div>
+
+                  {/* Step content */}
+                  <div className={`flex-1 pb-6 ${idx === selected.steps.length - 1 ? 'pb-0' : ''}`}>
+                    <div className={`rounded-lg p-4 border ${isCurrent ? 'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800' : 'bg-slate-50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-700'}`}>
+                      <div className="flex items-center justify-between mb-1">
+                        <h4 className="font-medium text-sm text-slate-800 dark:text-slate-100">{step.label}</h4>
+                        <span className={`text-[10px] font-medium px-2 py-0.5 rounded ${stepStyle.bg} ${stepStyle.text}`}>
+                          {step.status}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-500 mb-2">Day {step.day} &middot; {step.type}</p>
+
+                      {step.content && (
+                        <p className="text-sm text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 rounded p-2 mb-2 border border-slate-100 dark:border-slate-700">
+                          {step.content}
+                        </p>
+                      )}
+
+                      {generatedContent[`${selected.id}-${idx}`] && (
+                        <div className="text-sm text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 rounded p-2 mb-2 border border-indigo-100 dark:border-indigo-800">
+                          <div className="flex items-center gap-1 mb-1">
+                            <Sparkles className="h-3 w-3" /> <span className="text-xs font-medium">AI Generated</span>
+                          </div>
+                          {generatedContent[`${selected.id}-${idx}`]}
+                        </div>
+                      )}
+
+                      {isCurrent && (
+                        <div className="flex gap-2 mt-2">
+                          <button onClick={() => onAdvance(selected.id)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700">
+                            <ArrowRight className="h-3 w-3" /> Advance
+                          </button>
+                          <button
+                            onClick={() => onGenerateContent(`${selected.id}-${idx}`, selected.contact_name, selected.program)}
+                            disabled={generatingContent === `${selected.id}-${idx}`}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300 rounded-lg text-xs font-medium hover:bg-indigo-100 disabled:opacity-50">
+                            {generatingContent === `${selected.id}-${idx}` ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+                            Generate Content
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 flex items-center justify-center text-slate-400 dark:text-slate-500">
+          <div className="text-center">
+            <Users className="h-12 w-12 mx-auto mb-3 opacity-40" />
+            <p>Select a sequence to view timeline</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -537,307 +478,179 @@ function TimelineView({
 // ─── Portfolio View ──────────────────────────────────────────────────────────
 
 function PortfolioView({
-  sequences,
-  selectedId,
-  onSelect,
+  sequences, onSelect, onNavigateToContact,
 }: {
   sequences: OutreachSequence[];
-  selectedId: string | null;
-  onSelect: (s: OutreachSequence) => void;
+  onSelect: (id: string) => void;
+  onNavigateToContact?: (name: string) => void;
 }) {
-  const columns: { status: string; label: string }[] = [
-    { status: 'draft', label: 'Draft' },
-    { status: 'active', label: 'Active' },
-    { status: 'paused', label: 'Paused' },
-    { status: 'completed', label: 'Completed' },
-  ];
+  const [sortBy, setSortBy] = useState<'program' | 'tier' | 'created' | 'status'>('tier');
+
+  const sorted = useMemo(() => {
+    const copy = [...sequences];
+    switch (sortBy) {
+      case 'tier': return copy.sort((a, b) => a.tier - b.tier);
+      case 'program': return copy.sort((a, b) => a.program.localeCompare(b.program));
+      case 'created': return copy.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      case 'status': return copy.sort((a, b) => a.status.localeCompare(b.status));
+      default: return copy;
+    }
+  }, [sequences, sortBy]);
 
   return (
-    <div className="grid grid-cols-4 gap-4">
-      {columns.map(col => {
-        const colSeqs = sequences.filter(s => s.status === col.status);
-        const style = STATUS_STYLES[col.status] || STATUS_STYLES.draft;
-
-        return (
-          <div key={col.status} className="space-y-3">
-            <div className={`rounded-lg px-3 py-2 border ${style.bg} flex items-center justify-between`}>
-              <span className={`font-semibold text-sm ${style.text}`}>{col.label}</span>
-              <span className={`text-xs font-bold ${style.text}`}>{colSeqs.length}</span>
-            </div>
-            {colSeqs.map(seq => (
-              <div
-                key={seq.id}
-                onClick={() => onSelect(seq)}
-                className={`bg-white rounded-lg border p-3 cursor-pointer transition-all hover:shadow-md ${
-                  selectedId === seq.id ? 'ring-2 ring-blue-500' : 'border-slate-200'
-                }`}
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <h4 className="font-medium text-sm text-slate-800 truncate">{seq.contact_name}</h4>
-                  <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${PRIORITY_STYLES[seq.priority]}`}>
-                    {seq.priority}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-500 truncate">{seq.company} &middot; {seq.program}</p>
-                <div className="mt-2 flex gap-0.5">
-                  {seq.steps.map(step => (
-                    <div
-                      key={step.id}
-                      className={`flex-1 h-1.5 rounded-full ${
-                        step.status === 'completed' ? 'bg-green-400' : 'bg-slate-200'
-                      }`}
-                    />
-                  ))}
-                </div>
-              </div>
-            ))}
-            {colSeqs.length === 0 && (
-              <div className="text-center py-8 text-xs text-slate-400">No sequences</div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
-
-// ─── Sequence Detail Panel ───────────────────────────────────────────────────
-
-function SequenceDetail({
-  sequence,
-  onClose,
-  onTogglePause,
-}: {
-  sequence: OutreachSequence;
-  onClose: () => void;
-  onTogglePause: (id: string) => void;
-}) {
-  const style = STATUS_STYLES[sequence.status] || STATUS_STYLES.draft;
-
-  return (
-    <div className="w-96 bg-white rounded-xl shadow-sm border border-slate-200 p-6 h-fit sticky top-6">
-      <div className="flex items-start justify-between mb-4">
-        <div>
-          <h3 className="text-xl font-bold text-slate-800">{sequence.contact_name}</h3>
-          <div className="flex items-center gap-2 mt-1 text-sm text-slate-500">
-            <Building2 className="h-4 w-4" />
-            <span>{sequence.company}</span>
-          </div>
-        </div>
-        <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-          <X className="h-5 w-5 text-slate-400" />
-        </button>
+    <div>
+      <div className="flex items-center gap-3 mb-4">
+        <span className="text-sm text-slate-500">Sort by:</span>
+        {(['tier', 'program', 'status', 'created'] as const).map(s => (
+          <button key={s} onClick={() => setSortBy(s)}
+            className={`px-3 py-1 rounded-lg text-xs font-medium ${sortBy === s ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'}`}>
+            {s.charAt(0).toUpperCase() + s.slice(1)}
+          </button>
+        ))}
       </div>
 
-      <div className="flex gap-2 mb-4">
-        <span className={`px-2 py-1 rounded text-xs font-medium border ${style.bg} ${style.text}`}>
-          {sequence.status}
-        </span>
-        <span className={`px-2 py-1 rounded text-xs font-medium ${PRIORITY_STYLES[sequence.priority]}`}>
-          {sequence.priority} priority
-        </span>
-      </div>
-
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="bg-slate-50 rounded-lg p-3">
-          <p className="text-xs text-slate-500">Program</p>
-          <p className="font-semibold text-slate-800 text-sm">{sequence.program}</p>
-        </div>
-        <div className="bg-slate-50 rounded-lg p-3">
-          <p className="text-xs text-slate-500">Created</p>
-          <p className="font-semibold text-slate-800 text-sm">{formatDate(sequence.created_at)}</p>
-        </div>
-      </div>
-
-      {/* Steps */}
-      <h4 className="font-semibold text-slate-700 text-sm mb-3">Sequence Steps</h4>
-      <div className="space-y-2">
-        {sequence.steps.map((step, idx) => {
-          const StepIcon = STEP_TYPE_ICON[step.type] || Mail;
-          const isCurrent = idx === sequence.current_step && sequence.status === 'active';
-
-          return (
-            <div
-              key={step.id}
-              className={`flex items-start gap-3 p-3 rounded-lg border transition-colors ${
-                isCurrent
-                  ? 'bg-blue-50 border-blue-200'
-                  : step.status === 'completed'
-                  ? 'bg-green-50 border-green-100'
-                  : 'bg-slate-50 border-slate-100'
-              }`}
-            >
-              <div className={`mt-0.5 p-1.5 rounded ${
-                step.status === 'completed' ? 'bg-green-100' : isCurrent ? 'bg-blue-100' : 'bg-slate-100'
-              }`}>
-                {step.status === 'completed' ? (
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
-                ) : (
-                  <StepIcon className={`h-4 w-4 ${isCurrent ? 'text-blue-600' : 'text-slate-400'}`} />
-                )}
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium ${step.status === 'completed' ? 'text-green-800' : 'text-slate-800'}`}>
-                  {step.subject}
-                </p>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-xs text-slate-500">{step.type}</span>
-                  <span className="text-xs text-slate-400">&middot;</span>
-                  <span className="text-xs text-slate-500">{formatDate(step.scheduled_date)}</span>
-                </div>
-              </div>
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Actions */}
-      <div className="mt-4 flex gap-2">
-        <button
-          onClick={() => onTogglePause(sequence.id)}
-          className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${
-            sequence.status === 'paused'
-              ? 'bg-green-50 text-green-700 hover:bg-green-100'
-              : 'bg-yellow-50 text-yellow-700 hover:bg-yellow-100'
-          }`}
-        >
-          {sequence.status === 'paused' ? 'Resume' : 'Pause'}
-        </button>
-        <button
-          onClick={onClose}
-          className="flex-1 py-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
-        >
-          Close
-        </button>
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-50 dark:bg-slate-900/50">
+            <tr>
+              <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Contact</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Program</th>
+              <th className="text-center px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Tier</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Step</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Status</th>
+              <th className="text-left px-4 py-3 font-medium text-slate-600 dark:text-slate-300">Created</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
+            {sorted.map(seq => {
+              const style = STATUS_STYLES[seq.status] || STATUS_STYLES.not_started;
+              return (
+                <tr key={seq.id} onClick={() => onSelect(seq.id)}
+                  className="cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <button onClick={e => { e.stopPropagation(); onNavigateToContact?.(seq.contact_name); }}
+                      className="font-medium text-blue-600 dark:text-blue-400 hover:underline">{seq.contact_name}</button>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">{seq.program}</td>
+                  <td className="px-4 py-3 text-center">
+                    <span className={`inline-block w-6 h-6 rounded-full text-white text-xs font-bold leading-6 text-center ${TIER_COLORS[seq.tier] || 'bg-gray-400'}`}>
+                      {seq.tier}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                    {seq.steps[seq.current_step]?.label || `Step ${seq.current_step + 1}`}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-0.5 rounded text-xs font-medium border ${style.bg} ${style.text}`}>
+                      {style.label}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-400 text-xs">{new Date(seq.created_at).toLocaleDateString()}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+        {sorted.length === 0 && (
+          <div className="text-center py-12 text-slate-400">No sequences found</div>
+        )}
       </div>
     </div>
   );
 }
 
-// ─── Create Sequence Modal ───────────────────────────────────────────────────
+// ─── Create Modal ────────────────────────────────────────────────────────────
 
-function CreateSequenceModal({
-  onClose,
-  onCreate,
-}: {
-  onClose: () => void;
-  onCreate: (seq: Partial<OutreachSequence>) => void;
-}) {
-  const [formData, setFormData] = useState({
-    contact_name: '',
-    company: '',
-    program: '',
-    priority: 'medium',
-  });
+function CreateModal({ onClose, onCreate }: { onClose: () => void; onCreate: (body: Record<string, unknown>) => void }) {
+  const [form, setForm] = useState({ contact_name: '', contact_email: '', contact_phone: '', program: '', tier: '3' });
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.contact_name || !formData.company) return;
+    if (!form.contact_name) return;
     setSubmitting(true);
-
-    // Try posting to Terminal C, fall back to local creation
-    try {
-      const res = await fetch('/sequences', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-        signal: AbortSignal.timeout(3000),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        onCreate(data);
-        return;
-      }
-    } catch {
-      // Fall through to local creation
-    }
-
-    onCreate(formData);
+    await onCreate({ ...form, tier: parseInt(form.tier) });
     setSubmitting(false);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl shadow-2xl w-full max-w-md p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-slate-800">Create New Sequence</h2>
-          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-lg transition-colors">
-            <X className="h-5 w-5 text-slate-400" />
-          </button>
+          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">New Outreach Sequence</h2>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg"><X className="h-5 w-5 text-slate-400" /></button>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Contact Name *</label>
-            <input
-              type="text"
-              required
-              value={formData.contact_name}
-              onChange={e => setFormData(prev => ({ ...prev, contact_name: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Sarah Mitchell"
-            />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Contact Name *</label>
+            <input required value={form.contact_name} onChange={e => setForm(p => ({ ...p, contact_name: e.target.value }))}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 dark:text-slate-100" placeholder="Sarah Mitchell" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Company *</label>
-            <input
-              type="text"
-              required
-              value={formData.company}
-              onChange={e => setFormData(prev => ({ ...prev, company: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., Leidos"
-            />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Email</label>
+            <input type="email" value={form.contact_email} onChange={e => setForm(p => ({ ...p, contact_email: e.target.value }))}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 dark:text-slate-100" placeholder="sarah@leidos.com" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Program</label>
-            <input
-              type="text"
-              value={formData.program}
-              onChange={e => setFormData(prev => ({ ...prev, program: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="e.g., DCGS-A"
-            />
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Phone</label>
+            <input value={form.contact_phone} onChange={e => setForm(p => ({ ...p, contact_phone: e.target.value }))}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 dark:text-slate-100" placeholder="703-555-0123" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Priority</label>
-            <select
-              value={formData.priority}
-              onChange={e => setFormData(prev => ({ ...prev, priority: e.target.value }))}
-              className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="high">High</option>
-              <option value="medium">Medium</option>
-              <option value="low">Low</option>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Program *</label>
+            <select value={form.program} onChange={e => setForm(p => ({ ...p, program: e.target.value }))}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 dark:text-slate-100">
+              <option value="">Select program...</option>
+              {['AF DCGS - Langley', 'AF DCGS - Wright-Patt', 'AF DCGS - PACAF', 'Army DCGS-A', 'Navy DCGS-N', 'GBSD', 'JSTARS', 'Enterprise Security'].map(p => (
+                <option key={p} value={p}>{p}</option>
+              ))}
             </select>
           </div>
-
+          <div>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Tier</label>
+            <select value={form.tier} onChange={e => setForm(p => ({ ...p, tier: e.target.value }))}
+              className="w-full px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 dark:text-slate-100">
+              {[1,2,3,4,5,6].map(t => <option key={t} value={t}>Tier {t}</option>)}
+            </select>
+          </div>
           <div className="flex gap-3 pt-2">
-            <button
-              type="submit"
-              disabled={submitting || !formData.contact_name || !formData.company}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Plus className="h-4 w-4" />
-              )}
-              Create Sequence
+            <button type="submit" disabled={submitting || !form.contact_name}
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+              {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Plus className="h-4 w-4" />} Create
             </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2.5 text-slate-600 hover:text-slate-800 transition-colors"
-            >
-              Cancel
-            </button>
+            <button type="button" onClick={onClose} className="px-4 py-2.5 text-slate-600 dark:text-slate-300">Cancel</button>
           </div>
         </form>
       </div>
     </div>
   );
+}
+
+// ─── Mock Data ───────────────────────────────────────────────────────────────
+
+function generateMockSequences(): OutreachSequence[] {
+  const contacts = [
+    { name: 'Sarah Mitchell', email: 'sarah.m@leidos.com', program: 'AF DCGS - Langley', tier: 2 },
+    { name: 'James Rodriguez', email: 'j.rodriguez@ng.com', program: 'Army DCGS-A', tier: 1 },
+    { name: 'Maria Chen', email: 'maria.chen@gdit.com', program: 'Navy DCGS-N', tier: 3 },
+    { name: 'David Park', email: 'd.park@raytheon.com', program: 'GBSD', tier: 2 },
+    { name: 'Karen Williams', email: 'k.williams@bae.com', program: 'AF DCGS - PACAF', tier: 4 },
+  ];
+
+  return contacts.map((c, i) => ({
+    id: `mock-${i + 1}`,
+    contact_name: c.name,
+    contact_email: c.email,
+    program: c.program,
+    tier: c.tier,
+    status: (['active', 'active', 'paused', 'completed', 'not_started'] as const)[i],
+    current_step: [2, 1, 3, 5, 0][i],
+    steps: BD_FORMULA_STEPS.map((s, si) => ({
+      ...s,
+      status: si < [2, 1, 3, 5, 0][i] ? 'completed' as const : si === [2, 1, 3, 5, 0][i] ? 'pending' as const : 'pending' as const,
+    })),
+    created_at: new Date(Date.now() - (i + 1) * 5 * 86400000).toISOString(),
+  }));
 }
 
 export default OutreachManager;

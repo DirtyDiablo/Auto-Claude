@@ -66,12 +66,20 @@ export function CommandPalette({ onNavigate }: CommandPaletteProps) {
   const [aiLoading, setAiLoading] = useState(false)
   const [aiResult, setAiResult] = useState<AIResult | null>(null)
 
-  // Ctrl+K / Cmd+K handler
+  // Ctrl+K / Cmd+K or / handler
   useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === 'k' && (e.metaKey || e.ctrlKey)) {
         e.preventDefault()
         setOpen((prev) => !prev)
+      }
+      // '/' to open search (unless typing in an input)
+      if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const tag = (e.target as HTMLElement)?.tagName?.toLowerCase()
+        if (tag !== 'input' && tag !== 'textarea' && !(e.target as HTMLElement)?.isContentEditable) {
+          e.preventDefault()
+          setOpen(true)
+        }
       }
     }
     document.addEventListener('keydown', down)
