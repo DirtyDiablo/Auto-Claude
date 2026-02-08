@@ -31,7 +31,7 @@ except ImportError:
 
 # Import existing modules
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore, SearchResult
-from qdrant_client.models import Filter, FieldCondition, MatchValue
+from qdrant_client.models import Filter, FieldCondition, MatchValue, MatchText
 from Engine8_Knowledge.scripts.rag_engine import BDRAGEngine, RAGResponse
 from Engine8_Knowledge.scripts.indexer import BDIndexer
 
@@ -437,16 +437,25 @@ class FilterRequest(BaseModel):
     location: Optional[str] = Field(None, description="Filter by location")
 
 
-def _build_qdrant_filter(request: FilterRequest, field_map: Dict[str, str]) -> Optional[Filter]:
-    """Build Qdrant Filter from FilterRequest using a field mapping."""
+def _build_qdrant_filter(request: FilterRequest, field_map: Dict[str, str], text_match_fields: set = None) -> Optional[Filter]:
+    """Build Qdrant Filter from FilterRequest using a field mapping.
+    Fields listed in text_match_fields use MatchText (substring) instead of MatchValue (exact).
+    """
     conditions = []
+    text_match_fields = text_match_fields or set()
     for param_name, payload_field in field_map.items():
         value = getattr(request, param_name, None)
         if value:
-            conditions.append(FieldCondition(
-                key=payload_field,
-                match=MatchValue(value=value)
-            ))
+            if payload_field in text_match_fields:
+                conditions.append(FieldCondition(
+                    key=payload_field,
+                    match=MatchText(text=value)
+                ))
+            else:
+                conditions.append(FieldCondition(
+                    key=payload_field,
+                    match=MatchValue(value=value)
+                ))
     return Filter(must=conditions) if conditions else None
 
 
@@ -466,26 +475,23 @@ async def filter_contacts(request: FilterRequest):
 
     try:
         if request.query:
-            filters = {}
-            for param, payload_field in field_map.items():
-                val = getattr(request, param, None)
-                if val:
-                    filters[payload_field] = val
-
-            results = store.search(
-                query=request.query,
-                collection="contacts",
+            qdrant_filter = _build_qdrant_filter(request, field_map, text_match_fields={"Programs", "Primes", "Clearances"})
+            query_embedding = store._generate_embedding(request.query)
+            search_result = store.client.query_points(
+                collection_name="contacts",
+                query=query_embedding,
+                query_filter=qdrant_filter,
                 limit=request.limit,
-                filters=filters if filters else None,
+                with_payload=True,
             )
             return {
-                "contacts": [{"id": r.id, "score": r.score, **r.payload} for r in results],
-                "count": len(results),
+                "contacts": [{"id": str(p.id), "score": p.score, **p.payload} for p in search_result.points],
+                "count": len(search_result.points),
                 "query": request.query,
                 "timestamp": datetime.now().isoformat(),
             }
         else:
-            qdrant_filter = _build_qdrant_filter(request, field_map)
+            qdrant_filter = _build_qdrant_filter(request, field_map, text_match_fields={"Programs", "Primes", "Clearances"})
             results, _next = store.client.scroll(
                 collection_name="contacts",
                 scroll_filter=qdrant_filter,
@@ -2073,37 +2079,101 @@ def get_dashboard_summary():
     return result
 
 
+def _determine_job_stage(payload: dict) -> str:
+    """Determine pipeline stage from job payload fields."""
+    stage = payload.get("pipeline_stage")
+    if stage:
+        return stage
+    if payload.get("mapped_program") or payload.get("Mapped Program"):
+        if payload.get("contact") or payload.get("key_contact"):
+            return "contacts_found"
+        return "mapped"
+    return "scraped"
+
+
 @app.get("/pipeline/status")
 async def get_pipeline_status():
-    """Get pipeline execution status and history."""
-    state_file = Path(__file__).parent.parent / "outputs" / "pipeline_state.json"
-    if not state_file.exists():
-        return {
-            "is_running": False,
-            "current_run": None,
-            "last_run": None,
-            "history": [],
-            "stats": {"total_runs": 0, "success_rate": 0.0, "avg_duration": 0.0},
-        }
+    """Get job pipeline stage counts from Qdrant jobs collection for the Kanban board."""
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+
     try:
-        with open(state_file, "r") as f:
-            state = json.load(f)
-        history = state.get("history", [])
-        successes = sum(1 for r in history if r.get("success"))
-        durations = [r.get("duration_seconds", 0) for r in history if r.get("duration_seconds")]
+        stages = {
+            "scraped": {"count": 0, "latest": None},
+            "mapped": {"count": 0, "latest": None},
+            "contacts_found": {"count": 0, "latest": None},
+            "outreach_active": {"count": 0, "latest": None},
+            "meeting_set": {"count": 0, "latest": None},
+            "req_obtained": {"count": 0, "latest": None},
+        }
+        total_jobs = 0
+        last_scrape = None
+        offset = None
+
+        while True:
+            results, next_offset = store.client.scroll(
+                collection_name="jobs",
+                limit=1000,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for point in results:
+                total_jobs += 1
+                payload = point.payload or {}
+                stage = _determine_job_stage(payload)
+                if stage in stages:
+                    stages[stage]["count"] += 1
+                    date_val = payload.get("indexed_at") or payload.get("date_scraped") or payload.get("date_posted")
+                    if date_val:
+                        if not stages[stage]["latest"] or date_val > stages[stage]["latest"]:
+                            stages[stage]["latest"] = date_val
+                        if not last_scrape or date_val > last_scrape:
+                            last_scrape = date_val
+                else:
+                    stages["scraped"]["count"] += 1
+
+            if next_offset is None:
+                break
+            offset = next_offset
+
         return {
-            "is_running": bool(state.get("current_run")),
-            "current_run": state.get("current_run"),
-            "last_run": state.get("last_completed_run"),
-            "history": history[-10:],
-            "stats": {
-                "total_runs": len(history),
-                "success_rate": round(successes / len(history), 2) if history else 0.0,
-                "avg_duration": round(sum(durations) / len(durations), 1) if durations else 0.0,
-            },
+            "stages": stages,
+            "total_jobs": total_jobs,
+            "last_scrape": last_scrape,
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Pipeline status error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+class StageUpdateRequest(BaseModel):
+    stage: str = Field(..., description="Pipeline stage")
+
+
+VALID_STAGES = {"scraped", "mapped", "contacts_found", "outreach_active", "meeting_set", "req_obtained"}
+
+
+@app.patch("/jobs/{point_id}/stage")
+async def update_job_stage(point_id: str, request: StageUpdateRequest):
+    """Update a job's pipeline_stage in Qdrant without re-embedding."""
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+    if request.stage not in VALID_STAGES:
+        raise HTTPException(status_code=400, detail=f"Invalid stage. Must be one of: {sorted(VALID_STAGES)}")
+
+    try:
+        # Handle both int and UUID point IDs
+        pid = int(point_id) if point_id.isdigit() else point_id
+        store.client.set_payload(
+            collection_name="jobs",
+            payload={"pipeline_stage": request.stage, "stage_updated_at": datetime.now().isoformat()},
+            points=[pid],
+        )
+        return {"success": True, "point_id": point_id, "stage": request.stage}
+    except Exception as e:
+        logger.error(f"Update job stage error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -2161,6 +2231,166 @@ async def get_alerts(limit: int = Query(20, ge=1, le=100)):
     except Exception as e:
         logger.error(f"Alerts error: {e}")
         return {"alerts": [], "count": 0, "error": str(e)}
+
+
+# =========================================
+# ANALYTICS & AGENT STATS ENDPOINTS
+# =========================================
+
+import time as _time
+
+_analytics_cache: Dict[str, Any] = {"data": None, "expires": 0.0}
+
+
+@app.get("/analytics/summary")
+async def analytics_summary():
+    """Pre-aggregated analytics data with 5-minute cache."""
+    now = _time.time()
+    if _analytics_cache["data"] and now < _analytics_cache["expires"]:
+        return _analytics_cache["data"]
+
+    if not store:
+        raise HTTPException(status_code=503, detail="Store not initialized")
+
+    try:
+        contacts_by_program: Dict[str, int] = {}
+        contacts_by_tier: Dict[str, int] = {}
+        priority_distribution: Dict[str, Dict[str, int]] = {}
+        offset = None
+
+        while True:
+            results, next_offset = store.client.scroll(
+                collection_name="contacts",
+                limit=500,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for point in results:
+                payload = point.payload or {}
+                programs_str = payload.get("Programs", "")
+                progs = [p.strip() for p in programs_str.split(",") if p.strip()] if programs_str else []
+
+                for prog in progs:
+                    contacts_by_program[prog] = contacts_by_program.get(prog, 0) + 1
+
+                tier = payload.get("influence_tier") or payload.get("Tier") or "Unknown"
+                contacts_by_tier[tier] = contacts_by_tier.get(tier, 0) + 1
+
+                priority = payload.get("priority") or "standard"
+                for prog in progs:
+                    if prog not in priority_distribution:
+                        priority_distribution[prog] = {}
+                    priority_distribution[prog][priority] = priority_distribution[prog].get(priority, 0) + 1
+
+            if next_offset is None:
+                break
+            offset = next_offset
+
+        # Jobs by stage
+        jobs_by_stage: Dict[str, int] = {}
+        offset = None
+        while True:
+            results, next_offset = store.client.scroll(
+                collection_name="jobs",
+                limit=1000,
+                offset=offset,
+                with_payload=True,
+                with_vectors=False,
+            )
+            for point in results:
+                stage = _determine_job_stage(point.payload or {})
+                jobs_by_stage[stage] = jobs_by_stage.get(stage, 0) + 1
+            if next_offset is None:
+                break
+            offset = next_offset
+
+        # Collection health
+        collection_health = []
+        try:
+            coll_stats = store.get_collection_stats()
+            for name, stats in coll_stats.items():
+                if isinstance(stats, dict):
+                    collection_health.append({
+                        "name": name,
+                        "vectors": stats.get("points_count", 0),
+                        "status": stats.get("status", "unknown").lower(),
+                    })
+        except Exception:
+            pass
+
+        # Limit and sort
+        contacts_by_program = dict(sorted(contacts_by_program.items(), key=lambda x: x[1], reverse=True)[:50])
+        priority_distribution = dict(sorted(priority_distribution.items(), key=lambda x: sum(x[1].values()), reverse=True)[:20])
+
+        result = {
+            "contacts_by_program": contacts_by_program,
+            "contacts_by_tier": contacts_by_tier,
+            "priority_distribution": priority_distribution,
+            "jobs_by_stage": jobs_by_stage,
+            "collection_health": collection_health,
+            "timestamp": datetime.now().isoformat(),
+        }
+
+        _analytics_cache["data"] = result
+        _analytics_cache["expires"] = now + 300
+        return result
+    except Exception as e:
+        logger.error(f"Analytics summary error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/agents/tasks/stats")
+async def get_agent_task_stats():
+    """Aggregated agent task statistics for the Analytics dashboard."""
+    try:
+        tasks_file = Path(__file__).parent.parent / "outputs" / "agent_tasks.json"
+        if not tasks_file.exists():
+            return {
+                "total_tasks": 0,
+                "by_type": {},
+                "by_status": {},
+                "by_date": {},
+                "avg_duration_seconds": 0,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        with open(tasks_file, "r") as f:
+            tasks = json.load(f)
+
+        by_type: Dict[str, int] = {}
+        by_status: Dict[str, int] = {}
+        by_date: Dict[str, int] = {}
+        durations: list = []
+
+        task_list = tasks if isinstance(tasks, list) else tasks.get("tasks", [])
+        for task in task_list:
+            task_type = task.get("type", "unknown")
+            by_type[task_type] = by_type.get(task_type, 0) + 1
+
+            status = task.get("status", "unknown")
+            by_status[status] = by_status.get(status, 0) + 1
+
+            started = task.get("started_at", "")
+            if started:
+                date_key = started[:10]
+                by_date[date_key] = by_date.get(date_key, 0) + 1
+
+            duration = task.get("duration_seconds")
+            if duration:
+                durations.append(duration)
+
+        return {
+            "total_tasks": len(task_list),
+            "by_type": by_type,
+            "by_status": by_status,
+            "by_date": dict(sorted(by_date.items(), reverse=True)[:30]),
+            "avg_duration_seconds": round(sum(durations) / len(durations), 1) if durations else 0,
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        logger.error(f"Agent tasks stats error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # =========================================
