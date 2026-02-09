@@ -1,9 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   User, ArrowLeft, Mail, Phone, Linkedin, Building2, Shield, Star,
-  FileText, Users, MessageSquare, RefreshCw, Network,
+  FileText, Users, MessageSquare, RefreshCw, Network, Sparkles, Send, Eye,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
+import { InlineAgentTrigger } from '../components/agent-cards';
 
 interface ContactDetailProps {
   contactName: string;
@@ -305,6 +306,35 @@ export function ContactDetail({ contactName, onBack, onNavigateToProgram }: Cont
           </div>
         </div>
       </div>
+
+      {/* Agent Actions */}
+      <InlineAgentTrigger
+        entityName={contactName}
+        onNavigateToProgram={onNavigateToProgram}
+        actions={[
+          {
+            label: 'Enrich Contact',
+            type: 'contact_enrichment',
+            query: 'Enrich contact profile for {entity}. Find all programs, relationships, past performance, and outreach angles.',
+            icon: Sparkles,
+            color: 'bg-purple-600',
+          },
+          {
+            label: 'Draft Outreach',
+            type: 'outreach_draft',
+            query: 'Generate a personalized outreach message for {entity}. Consider their role, programs, and relationship history.',
+            icon: Send,
+            color: 'bg-blue-600',
+          },
+          {
+            label: 'HUMINT Analysis',
+            type: 'humint_analysis',
+            query: 'Analyze all human intelligence on {entity}. Include call notes, meeting history, relationship strength, and engagement patterns.',
+            icon: Eye,
+            color: 'bg-emerald-600',
+          },
+        ]}
+      />
 
       {/* Tab Navigation */}
       <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">

@@ -22,10 +22,23 @@ import {
   Eye,
   RefreshCw,
   XCircle,
+  Zap,
+  Play,
 } from 'lucide-react';
 import { AgentCard } from '../components/hub/AgentCard';
 import { useHubAgent, useAgentTasks, type AgentTask } from '../hooks/useHubApi';
 import { hubApiClient, type WorkflowResult } from '../services/hubApi';
+import { useAgentTask, type AgentTaskType } from '../hooks/useAgentTask';
+import { AgentTaskProgress, AgentResultRenderer } from '../components/agent-cards';
+
+const QUICK_LAUNCH_TYPES: Array<{ value: AgentTaskType; label: string }> = [
+  { value: 'program_analysis', label: 'Program Analysis' },
+  { value: 'contact_enrichment', label: 'Contact Enrichment' },
+  { value: 'competitive_report', label: 'Competitive Report' },
+  { value: 'outreach_draft', label: 'Outreach Draft' },
+  { value: 'strategy_brief', label: 'Strategy Brief' },
+  { value: 'humint_analysis', label: 'HUMINT Analysis' },
+];
 
 export function AgentPanel() {
   // Agent hooks
@@ -33,6 +46,11 @@ export function AgentPanel() {
   const companyAgent = useHubAgent('company');
   const contactAgent = useHubAgent('contact');
   const strategyAgent = useHubAgent('strategy');
+
+  // Streaming agent task
+  const agentTask = useAgentTask();
+  const [quickLaunchQuery, setQuickLaunchQuery] = useState('');
+  const [quickLaunchType, setQuickLaunchType] = useState<AgentTaskType>('program_analysis');
 
   // Agent task polling (every 5 seconds)
   const { data: taskData, loading: tasksLoading, refetch: refetchTasks } = useAgentTasks(5000);
@@ -45,6 +63,11 @@ export function AgentPanel() {
   const [workflowResult, setWorkflowResult] = useState<WorkflowResult | null>(null);
   const [workflowError, setWorkflowError] = useState<string | null>(null);
   const [workflowInput, setWorkflowInput] = useState('');
+
+  const handleQuickLaunch = () => {
+    if (!quickLaunchQuery.trim()) return;
+    agentTask.startTask(quickLaunchType, quickLaunchQuery);
+  };
 
   // Workflow handlers
   const handleAnalyzeProgram = async () => {
@@ -154,6 +177,76 @@ export function AgentPanel() {
           result={strategyAgent.data}
           error={strategyAgent.error}
         />
+      </div>
+
+      {/* Quick Launch - SSE Streaming Agent */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+        <div className="p-4 border-b border-slate-100 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="flex items-center gap-2">
+            <Zap className="h-5 w-5 text-blue-600" />
+            <span className="font-semibold text-slate-900">Quick Launch Agent Task</span>
+            <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-medium">Streaming</span>
+          </div>
+          <p className="text-sm text-slate-500 mt-1">
+            Launch a task with real-time SSE progress updates and structured results
+          </p>
+        </div>
+        <div className="p-4">
+          <div className="flex gap-3 mb-4">
+            <select
+              value={quickLaunchType}
+              onChange={(e) => setQuickLaunchType(e.target.value as AgentTaskType)}
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+            >
+              {QUICK_LAUNCH_TYPES.map(t => (
+                <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+            </select>
+            <input
+              type="text"
+              value={quickLaunchQuery}
+              onChange={(e) => setQuickLaunchQuery(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleQuickLaunch()}
+              placeholder="Enter query (e.g., AF DCGS, Leidos, John Smith)..."
+              className="flex-1 px-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+            />
+            <button
+              onClick={handleQuickLaunch}
+              disabled={agentTask.isRunning || !quickLaunchQuery.trim()}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+            >
+              {agentTask.isRunning ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Play className="h-4 w-4" />
+              )}
+              {agentTask.isRunning ? 'Running...' : 'Launch'}
+            </button>
+          </div>
+
+          {/* Live Progress */}
+          {(agentTask.isRunning || agentTask.isCompleted || agentTask.isError) && (
+            <div className="space-y-3">
+              <AgentTaskProgress
+                task={agentTask.task}
+                onCancel={agentTask.cancel}
+              />
+              {agentTask.isCompleted && agentTask.task.result && (
+                <AgentResultRenderer task={agentTask.task} />
+              )}
+              {(agentTask.isCompleted || agentTask.isError) && (
+                <div className="flex justify-end">
+                  <button
+                    onClick={agentTask.reset}
+                    className="text-xs text-slate-500 hover:text-slate-700 px-3 py-1 rounded hover:bg-slate-100"
+                  >
+                    Clear result
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Workflows Section */}

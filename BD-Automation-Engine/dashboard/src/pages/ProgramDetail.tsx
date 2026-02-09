@@ -2,8 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Building2, ArrowLeft, Users, Briefcase, Shield, Target, Star,
   FileText, RefreshCw, MapPin, Calendar, DollarSign, TrendingUp,
+  Search, Swords, Newspaper,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
+import { InlineAgentTrigger } from '../components/agent-cards';
 
 interface ProgramDetailProps {
   programName: string;
@@ -285,6 +287,35 @@ export function ProgramDetail({ programName, onBack, onNavigateToContact }: Prog
           </div>
         </div>
       </div>
+
+      {/* Agent Actions */}
+      <InlineAgentTrigger
+        entityName={programName}
+        onNavigateToContact={onNavigateToContact}
+        actions={[
+          {
+            label: 'Research Program',
+            type: 'program_analysis',
+            query: 'Deep research on {entity}. Include prime contractors, key contacts, contract details, competitive landscape, and BD opportunities.',
+            icon: Search,
+            color: 'bg-blue-600',
+          },
+          {
+            label: 'Competitive Analysis',
+            type: 'competitive_report',
+            query: 'Competitive analysis for {entity}. Identify competitors, win themes, differentiators, threats, and capture strategy.',
+            icon: Swords,
+            color: 'bg-red-600',
+          },
+          {
+            label: 'Weekly Update',
+            type: 'strategy_brief',
+            query: 'Generate a weekly intelligence update for {entity}. Include new developments, job postings, contact movements, and action items.',
+            icon: Newspaper,
+            color: 'bg-amber-600',
+          },
+        ]}
+      />
 
       {/* Tab Navigation */}
       <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
