@@ -16,6 +16,8 @@ from qdrant_client import QdrantClient
 from qdrant_client.models import PointStruct
 import logging
 
+from utils.llm_retry import openai_retry
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -24,6 +26,7 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
 
+@openai_retry
 def generate_embedding(text: str) -> list:
     """Generate embedding using OpenAI API."""
     client = openai.OpenAI(api_key=OPENAI_API_KEY)

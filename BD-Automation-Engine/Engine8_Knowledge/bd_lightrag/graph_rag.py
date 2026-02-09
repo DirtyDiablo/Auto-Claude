@@ -10,6 +10,10 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from lightrag import LightRAG, QueryParam
+from utils.llm_retry import anthropic_retry
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 class QueryMode(str, Enum):
@@ -162,10 +166,11 @@ class BDGraphRAG:
                 model_name=model_name
             )
         except Exception as e:
-            print(f"[WARN] Embedding function creation failed: {e}")
+            logger.warning("embedding_function_creation_failed", error=str(e))
             # Return None - LightRAG will fail but we'll handle in caller
             return None
 
+    @anthropic_retry
     async def _anthropic_complete(
         self,
         prompt: str,
@@ -191,7 +196,7 @@ class BDGraphRAG:
             )
             return response.content[0].text
         except Exception as e:
-            print(f"[WARN] Anthropic completion failed: {e}")
+            logger.warning("anthropic_completion_failed", error=str(e))
             return ""
 
     async def insert_documents(self, documents: List[str], metadata: List[Dict] = None) -> Dict:

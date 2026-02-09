@@ -6,6 +6,9 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict
 import os
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 try:
     from .graph_rag import BDGraphRAG, QueryMode, QueryResult
@@ -40,27 +43,27 @@ class EntityRequest(BaseModel):
 async def get_graph_rag() -> BDGraphRAG:
     """Get or create BDGraphRAG instance (async to ensure storage init)."""
     global _graph_rag
-    print(f"[DEBUG] get_graph_rag called, _graph_rag is None: {_graph_rag is None}")
+    logger.debug("get_graph_rag_called", graph_rag_is_none=(_graph_rag is None))
 
     if _graph_rag is None:
         # Get absolute path for working directory
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         working_dir = os.path.join(base_dir, "data", "lightrag")
 
-        print(f"[DEBUG] Creating BDGraphRAG at: {working_dir}")
+        logger.debug("creating_graph_rag", working_dir=working_dir)
         _graph_rag = BDGraphRAG(
             working_dir=working_dir,
             use_qdrant=False,  # Use NanoVectorDB for simplicity
             llm_provider="openai"
         )
-        print(f"[OK] LightRAG created at: {working_dir}")
+        logger.info("lightrag_created", working_dir=working_dir)
 
     # Ensure storages are initialized
-    print(f"[DEBUG] _storage_initialized: {_graph_rag._storage_initialized}")
+    logger.debug("storage_init_check", storage_initialized=_graph_rag._storage_initialized)
     if not _graph_rag._storage_initialized:
-        print("[DEBUG] Calling initialize()...")
+        logger.debug("calling_initialize")
         await _graph_rag.initialize()
-        print("[DEBUG] initialize() completed")
+        logger.debug("initialize_completed")
 
     return _graph_rag
 

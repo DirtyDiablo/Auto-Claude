@@ -29,6 +29,13 @@ except ImportError:
     CHUNKER_AVAILABLE = False
     logger.warning("Docling chunker not available, using simple splitting")
 
+try:
+    from utils.llm_retry import openai_retry
+except ImportError:
+    # Fallback: identity decorator if utils not on path
+    def openai_retry(fn):
+        return fn
+
 
 def _get_converter() -> "DocumentConverter":
     """Create a Docling converter optimized for federal documents."""
@@ -126,6 +133,13 @@ def process_document(
     }
 
 
+@openai_retry
+def _embed_batch(openai_client, model_name: str, texts: List[str]):
+    """Generate embeddings for a batch of texts with retry."""
+    resp = openai_client.embeddings.create(model=model_name, input=texts)
+    return [d.embedding for d in resp.data]
+
+
 def ingest_document_to_qdrant(
     file_path: str,
     store,
@@ -157,8 +171,7 @@ def ingest_document_to_qdrant(
         batch_chunks = result["chunks"][start : start + batch_size]
 
         try:
-            resp = openai_client.embeddings.create(model=model_name, input=batch)
-            embeddings = [d.embedding for d in resp.data]
+            embeddings = _embed_batch(openai_client, model_name, batch)
         except Exception as e:
             logger.error("Embedding batch failed: %s", e)
             errors += len(batch)

@@ -48,6 +48,8 @@ from qdrant_client.models import (
     Filter, FieldCondition, MatchValue
 )
 
+from utils.llm_retry import openai_retry
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger('EnrichReindex')
 
@@ -87,6 +89,7 @@ def make_id(collection: str, *parts) -> str:
     return str(uuid.uuid5(NAMESPACE, content))
 
 
+@openai_retry
 def _embed_one_batch(batch_texts: list[str]) -> list:
     truncated = [t[:8000] for t in batch_texts]
     for attempt in range(5):

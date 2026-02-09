@@ -9,6 +9,9 @@ from rank_bm25 import BM25Okapi
 from typing import List, Dict, Optional, Tuple
 from dataclasses import dataclass
 from datetime import datetime
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -137,7 +140,7 @@ class PageIndex:
                 ))
                 indexed += 1
             except Exception as e:
-                print(f"Error indexing page {page_id}: {e}")
+                logger.error("page_indexing_failed", page_id=page_id, error=str(e))
 
         self.conn.commit()
         self._rebuild_bm25_index()

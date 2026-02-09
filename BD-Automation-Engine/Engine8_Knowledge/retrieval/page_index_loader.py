@@ -5,6 +5,9 @@ from pathlib import Path
 from typing import List, Dict
 import fitz  # PyMuPDF
 import hashlib
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 
 def extract_pdf_pages(pdf_path: str) -> List[Dict]:
@@ -55,11 +58,11 @@ def index_pdf_folder(page_index, folder_path: str, recursive: bool = True) -> Di
 
             stats["indexed"] += 1
             stats["pages"] += num_indexed
-            print(f"[OK] Indexed {pdf_path.name}: {num_indexed} pages")
+            logger.info("pdf_indexed", filename=pdf_path.name, pages_indexed=num_indexed)
 
         except Exception as e:
             stats["errors"].append({"file": str(pdf_path), "error": str(e)})
-            print(f"[FAIL] Error indexing {pdf_path.name}: {e}")
+            logger.error("pdf_indexing_failed", filename=pdf_path.name, error=str(e))
 
     return stats
 

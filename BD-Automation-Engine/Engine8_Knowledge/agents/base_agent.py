@@ -18,6 +18,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from scripts.memory_layer import get_memory
 from scripts.lightrag_engine import get_knowledge_graph
 from scripts.hybrid_retriever import get_hybrid_retriever
+from utils.llm_retry import anthropic_retry
 
 try:
     import anthropic
@@ -77,6 +78,7 @@ Guidelines:
     async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
         pass
 
+    @anthropic_retry
     async def _call_claude(self, prompt: str, context: str = "", max_tokens: int = 2000) -> str:
         if not self.client:
             return "Claude API not available. Please set ANTHROPIC_API_KEY."

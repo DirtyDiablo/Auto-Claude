@@ -9,7 +9,7 @@ Base URL: http://localhost:80/api (default Docker setup)
 
 import os
 import asyncio
-import logging
+import structlog
 from pathlib import Path
 from typing import Dict, List, Optional, Any, AsyncGenerator
 from dataclasses import dataclass, field
@@ -17,7 +17,7 @@ from enum import Enum
 
 import httpx
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class ChunkMethod(str, Enum):
@@ -127,7 +127,7 @@ class RAGflowClient:
             base_url=f"{self.config.base_url}/api/v1"
         )
         self._initialized = True
-        logger.info(f"RAGflow client initialized: {self.config.base_url}")
+        logger.info("ragflow_client_initialized", base_url=self.config.base_url)
 
     async def close(self) -> None:
         """Close the HTTP client."""
@@ -161,7 +161,7 @@ class RAGflowClient:
                 return {"status": "healthy", "data": response.json()}
             return {"status": "unhealthy", "code": response.status_code}
         except Exception as e:
-            logger.error(f"Health check failed: {e}")
+            logger.error("health_check_failed", error=str(e))
             return {"status": "error", "error": str(e)}
 
     # =========================================================================
@@ -209,7 +209,7 @@ class RAGflowClient:
 
         data = response.json()
         kb_id = data.get("data", {}).get("id") or data.get("id")
-        logger.info(f"Created knowledge base: {name} (ID: {kb_id})")
+        logger.info("knowledge_base_created", name=name, kb_id=kb_id)
         return kb_id
 
     async def list_knowledge_bases(self) -> List[Dict[str, Any]]:
@@ -239,9 +239,9 @@ class RAGflowClient:
         success = response.status_code in (200, 204)
 
         if success:
-            logger.info(f"Deleted knowledge base: {kb_id}")
+            logger.info("knowledge_base_deleted", kb_id=kb_id)
         else:
-            logger.warning(f"Failed to delete KB {kb_id}: {response.status_code}")
+            logger.warning("knowledge_base_delete_failed", kb_id=kb_id, status_code=response.status_code)
 
         return success
 
@@ -327,7 +327,7 @@ class RAGflowClient:
 
         result = response.json()
         doc_id = result.get("data", {}).get("id") or result.get("id")
-        logger.info(f"Uploaded document: {path.name} -> {doc_id}")
+        logger.info("document_uploaded", filename=path.name, doc_id=doc_id)
         return doc_id
 
     async def upload_documents_batch(
@@ -357,7 +357,7 @@ class RAGflowClient:
                         "status": "uploaded"
                     }
                 except Exception as e:
-                    logger.error(f"Failed to upload {file_path}: {e}")
+                    logger.error("document_upload_failed", file_path=file_path, error=str(e))
                     return {
                         "file_path": file_path,
                         "doc_id": None,
@@ -369,7 +369,7 @@ class RAGflowClient:
         results = await asyncio.gather(*tasks)
 
         success_count = sum(1 for r in results if r["status"] == "uploaded")
-        logger.info(f"Batch upload complete: {success_count}/{len(file_paths)} succeeded")
+        logger.info("batch_upload_complete", succeeded=success_count, total=len(file_paths))
 
         return list(results)
 
@@ -414,7 +414,7 @@ class RAGflowClient:
 
             await asyncio.sleep(poll_interval)
 
-        logger.warning(f"Timeout waiting for document {doc_id} to parse")
+        logger.warning("document_parsing_timeout", doc_id=doc_id)
         return DocumentStatus.PENDING
 
     async def get_document_chunks(
@@ -653,7 +653,7 @@ class RAGflowClient:
         response.raise_for_status()
 
         chat_id = response.json().get("data", {}).get("id")
-        logger.info(f"Created chat assistant: {name} (ID: {chat_id})")
+        logger.info("chat_assistant_created", name=name, chat_id=chat_id)
         return chat_id
 
     async def send_message(
@@ -745,7 +745,7 @@ class RAGflowClient:
         response.raise_for_status()
 
         task_id = response.json().get("data", {}).get("task_id")
-        logger.info(f"Started KG build for KB {kb_id}: task {task_id}")
+        logger.info("knowledge_graph_build_started", kb_id=kb_id, task_id=task_id)
         return task_id
 
     async def get_graph_status(self, kb_id: str) -> Dict[str, Any]:

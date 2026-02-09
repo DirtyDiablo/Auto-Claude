@@ -9,10 +9,9 @@ import hashlib
 from typing import Dict, List, Optional, Any, Set
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
-import logging
+import structlog
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Import base agent
 try:
@@ -345,6 +344,6 @@ if __name__ == "__main__":
             "Check quality",
             context={"records": test_records, "collection_type": "contacts"}
         )
-        print(result.content)
+        logger.info("quality_report_generated", content=result.content)
 
     asyncio.run(test())

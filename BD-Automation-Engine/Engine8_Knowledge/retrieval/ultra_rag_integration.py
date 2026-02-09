@@ -2,6 +2,9 @@
 Integration layer connecting UltraRAG to existing retrieval infrastructure.
 """
 from typing import List, Dict, Optional
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 try:
     from .ultra_rag import UltraRAG, PipelineConfig, RetrievalStrategy
@@ -9,6 +12,13 @@ try:
 except ImportError:
     from ultra_rag import UltraRAG, PipelineConfig, RetrievalStrategy
     from page_index import PageIndex
+
+try:
+    from utils.llm_retry import openai_retry
+except ImportError:
+    # Fallback: identity decorator if utils not on path
+    def openai_retry(fn):
+        return fn
 
 
 class BDUltraRAG:
@@ -83,9 +93,9 @@ class BDUltraRAG:
                             #     })
                             pass
                         except Exception as e:
-                            print(f"Qdrant search error for {coll}: {e}")
+                            logger.error("qdrant_search_error", collection=coll, error=str(e))
             except Exception as e:
-                print(f"Vector search error: {e}")
+                logger.error("vector_search_error", error=str(e))
 
         if strategy in ["bm25", "hybrid"]:
             # BM25 search
@@ -96,7 +106,7 @@ class BDUltraRAG:
                     # results.extend(bm25_results)
                     pass
             except Exception as e:
-                print(f"BM25 search error: {e}")
+                logger.error("bm25_search_error", error=str(e))
 
         # PageIndex: use for "pageindex" strategy OR as fallback for "hybrid" when no other results
         if self.page_index and (strategy == "pageindex" or (strategy == "hybrid" and len(results) == 0)):
@@ -113,7 +123,7 @@ class BDUltraRAG:
                         "matched_terms": r.matched_terms
                     })
             except Exception as e:
-                print(f"PageIndex search error: {e}")
+                logger.error("page_index_search_error", error=str(e))
 
         if strategy == "knowledge_graph" and self.kg:
             # Knowledge graph search
@@ -123,10 +133,11 @@ class BDUltraRAG:
                 # results.extend(kg_results)
                 pass
             except Exception as e:
-                print(f"KG search error: {e}")
+                logger.error("knowledge_graph_search_error", error=str(e))
 
         return results
 
+    @openai_retry
     def _llm_generate(self, prompt: str) -> str:
         """Generate text using configured LLM."""
         if not self.llm:
@@ -155,7 +166,7 @@ class BDUltraRAG:
                 return self.llm(prompt)
 
         except Exception as e:
-            print(f"LLM generation error: {e}")
+            logger.error("llm_generation_error", error=str(e))
 
         return ""
 

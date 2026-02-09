@@ -19,6 +19,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from dotenv import load_dotenv
 load_dotenv()
 
+from utils.llm_retry import anthropic_retry
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger('BDAutoTagger')
@@ -241,6 +243,7 @@ class LLMTagger:
             self.client = None
             logger.warning("Claude client not available")
 
+    @anthropic_retry
     def classify(self, text: str, metadata: Optional[Dict] = None) -> TagResult:
         """
         Extract tags using Claude LLM.

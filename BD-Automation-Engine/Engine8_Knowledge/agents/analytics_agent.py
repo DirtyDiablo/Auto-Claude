@@ -9,10 +9,9 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from collections import Counter, defaultdict
-import logging
+import structlog
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Import base agent
 try:
@@ -345,6 +344,6 @@ if __name__ == "__main__":
             "Generate analytics report",
             context={"jobs": test_jobs, "contacts": test_contacts, "period": "weekly"}
         )
-        print(result.content)
+        logger.info("analytics_report_generated", content=result.content)
 
     asyncio.run(test())

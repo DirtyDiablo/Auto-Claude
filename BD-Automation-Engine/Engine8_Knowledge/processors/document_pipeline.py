@@ -8,10 +8,10 @@ from typing import List, Dict, Optional, Union
 from dataclasses import dataclass
 import hashlib
 import json
-import logging
+import structlog
 from datetime import datetime
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -42,9 +42,9 @@ class BDDocumentPipeline:
             try:
                 from docling.document_converter import DocumentConverter
                 self._docling_converter = DocumentConverter()
-                print("[OK] Docling initialized")
+                logger.info("docling_initialized")
             except ImportError:
-                print("[WARN] Docling not available, using PyMuPDF fallback")
+                logger.warning("docling_not_available", fallback="PyMuPDF")
                 self.use_docling = False
 
     def _generate_doc_id(self, file_path: str) -> str:
@@ -168,7 +168,7 @@ class BDDocumentPipeline:
             try:
                 return self._process_with_docling(file_path)
             except Exception as e:
-                print(f"Docling failed, falling back to PyMuPDF: {e}")
+                logger.warning("docling_processing_failed", fallback="PyMuPDF", error=str(e))
 
         # Fallback to PyMuPDF for PDFs
         if path.suffix.lower() == '.pdf':
@@ -232,12 +232,12 @@ def batch_process_folder(folder_path: str,
                 })
                 results["total_pages"] += result["num_pages"]
                 results["total_tables"] += result["tables_count"]
-                print(f"[OK] Processed: {file_path.name}")
+                logger.info("document_processed", filename=file_path.name)
             except Exception as e:
                 results["failed"].append({
                     "file": file_path.name,
                     "error": str(e)
                 })
-                print(f"[FAIL] {file_path.name} - {e}")
+                logger.error("document_processing_failed", filename=file_path.name, error=str(e))
 
     return results

@@ -8,10 +8,9 @@ import os
 import re
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
-import logging
+import structlog
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 # Import base agent
 try:
@@ -256,7 +255,7 @@ class ContactClassifierAgent(BDAgent):
             }
             results.append(classified_contact)
 
-        logger.info(f"Classified {len(results)} contacts")
+        logger.info("contacts_classified", count=len(results))
         return results
 
     async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
@@ -300,10 +299,10 @@ if __name__ == "__main__":
         state="VA",
     )
 
-    print(f"Classification Result:")
-    print(f"  Tier: {result.tier_label}")
-    print(f"  Program: {result.program}")
-    print(f"  Priority: {result.bd_priority}")
-    print(f"  Location Hub: {result.location_hub}")
-    print(f"  Confidence: {result.confidence:.2f}")
-    print(f"  Signals: {result.signals}")
+    logger.info("classification_result",
+               tier=result.tier_label,
+               program=result.program,
+               priority=result.bd_priority,
+               location_hub=result.location_hub,
+               confidence=round(result.confidence, 2),
+               signals=result.signals)

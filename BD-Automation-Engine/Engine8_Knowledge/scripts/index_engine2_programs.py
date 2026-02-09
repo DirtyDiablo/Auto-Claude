@@ -19,6 +19,8 @@ import openai
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
+from utils.llm_retry import openai_retry
+
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-3-small"
@@ -32,11 +34,13 @@ ENGINE2_DATA = BASE_DIR / "engine_data" / "Engine2_ProgramMapping"
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s', datefmt='%H:%M:%S')
 logger = logging.getLogger(__name__)
 
+@openai_retry
 def get_embedding(text: str) -> list:
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
     response = client.embeddings.create(model=EMBEDDING_MODEL, input=text[:8000])
     return response.data[0].embedding
 
+@openai_retry
 def get_embeddings_batch(texts: list) -> list:
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
     truncated = [t[:8000] if t else "empty" for t in texts]

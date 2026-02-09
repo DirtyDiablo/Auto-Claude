@@ -29,7 +29,7 @@ try:
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
-    print("FastAPI not installed. Install with: pip install fastapi uvicorn")
+    logging.error("FastAPI not installed. Install with: pip install fastapi uvicorn")
     sys.exit(1)
 
 # Import existing modules
@@ -2748,13 +2748,12 @@ def main():
 
     args = parser.parse_args()
 
-    print(f"\n{'='*60}")
-    print(f"BD Intelligence Hub API v2.0")
-    print(f"{'='*60}")
-    print(f"Starting at http://{args.host}:{args.port}")
-    print(f"API docs: http://{args.host}:{args.port}/docs")
-    print(f"50+ endpoints available")
-    print(f"{'='*60}\n")
+    logger.info("server_startup",
+               version="2.0",
+               host=args.host,
+               port=args.port,
+               docs_url=f"http://{args.host}:{args.port}/docs",
+               endpoints="50+")
 
     if args.reload:
         uvicorn.run(

@@ -17,6 +17,8 @@ from qdrant_client.models import Distance, VectorParams, PointStruct
 import logging
 import uuid
 
+from utils.llm_retry import openai_retry
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,7 @@ EMBEDDING_DIM = 1536
 
 DATA_DIR = Path(__file__).parent.parent.parent / "engine_data" / "dashboard_public"
 
+@openai_retry
 def generate_embedding(text: str) -> list:
     """Generate embedding using OpenAI API."""
     client = openai.OpenAI(api_key=OPENAI_API_KEY)

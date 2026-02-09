@@ -30,6 +30,13 @@ from qdrant_client.models import (
     SparseVector,
 )
 
+try:
+    from utils.llm_retry import openai_retry
+except ImportError:
+    # Fallback: identity decorator if utils not on path
+    def openai_retry(fn):
+        return fn
+
 logger = logging.getLogger("BDKnowledgeAPI.hybrid")
 
 router = APIRouter(tags=["hybrid"])
@@ -131,6 +138,13 @@ def _get_openai_client():
     return store.openai_client, store.model_name
 
 
+@openai_retry
+def _generate_query_embedding(openai_client, model_name: str, query: str):
+    """Generate embedding for a search query with retry."""
+    resp = openai_client.embeddings.create(model=model_name, input=query)
+    return resp.data[0].embedding
+
+
 # =========================================
 # 1. Hybrid Search (Qdrant-native Prefetch + RRF)
 # =========================================
@@ -175,8 +189,7 @@ async def hybrid_search_v2(request: HybridSearchRequest):
     # Generate dense embedding for query
     openai_client, model_name = _get_openai_client()
     try:
-        resp = openai_client.embeddings.create(model=model_name, input=request.query)
-        query_vector = resp.data[0].embedding
+        query_vector = _generate_query_embedding(openai_client, model_name, request.query)
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Embedding error: {e}")
 
@@ -590,6 +603,13 @@ async def index_bullhorn_notes(
     )
 
 
+@openai_retry
+def _embed_bullhorn_texts(openai_client, model_name: str, texts: List[str]):
+    """Generate embeddings for bullhorn texts with retry."""
+    response = openai_client.embeddings.create(model=model_name, input=texts)
+    return [d.embedding for d in response.data]
+
+
 def _upsert_bullhorn_batch(
     client,
     openai_client,
@@ -601,8 +621,7 @@ def _upsert_bullhorn_batch(
     """Embed and upsert a batch of bullhorn notes with dense + sparse vectors."""
     try:
         # Batch dense embeddings via OpenAI
-        response = openai_client.embeddings.create(model=model_name, input=texts)
-        embeddings = [d.embedding for d in response.data]
+        embeddings = _embed_bullhorn_texts(openai_client, model_name, texts)
     except Exception as e:
         logger.error(f"OpenAI batch embedding error: {e}")
         return 0, len(texts)

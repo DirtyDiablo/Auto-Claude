@@ -44,6 +44,13 @@ except ImportError:
     QDRANT_AVAILABLE = False
     logger.warning("qdrant_client not available")
 
+try:
+    from utils.llm_retry import openai_retry
+except ImportError:
+    # Fallback: identity decorator if utils not on path
+    def openai_retry(fn):
+        return fn
+
 
 @dataclass
 class SearchResult:
@@ -157,6 +164,7 @@ class HybridRetriever:
         vals = [str(v) for v in payload.values() if v and isinstance(v, str) and len(str(v)) > 3]
         return ' | '.join(vals[:5]) if vals else ''
 
+    @openai_retry
     def _generate_embedding(self, text: str) -> List[float]:
         """Generate embedding using OpenAI API (1536 dimensions)."""
         if not self.openai_client:

@@ -18,6 +18,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore, SearchResult
+from utils.llm_retry import anthropic_retry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -219,6 +220,7 @@ class BDRAGEngine:
         question = f"Summarize job opportunities that match: {criteria}"
         return self.ask(question, collection='jobs', limit=15)
 
+    @anthropic_retry
     def _generate_response(
         self,
         question: str,

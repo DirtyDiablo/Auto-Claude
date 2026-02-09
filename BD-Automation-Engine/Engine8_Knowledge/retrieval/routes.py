@@ -5,6 +5,9 @@ Import this into main api.py during integration step.
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 from pathlib import Path
+import structlog
+
+logger = structlog.get_logger(__name__)
 
 try:
     from .page_index import PageIndex, PageIndexRAG
@@ -28,7 +31,7 @@ def get_page_index() -> PageIndex:
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         db_path = os.path.join(base_dir, "data", "page_index.db")
         _page_index = PageIndex(db_path=db_path)
-        print(f"[OK] PageIndex loaded from: {db_path}")
+        logger.info("page_index_loaded", db_path=db_path)
     return _page_index
 
 

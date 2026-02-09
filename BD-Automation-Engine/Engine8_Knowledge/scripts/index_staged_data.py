@@ -43,6 +43,8 @@ import openai
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 
+from utils.llm_retry import openai_retry
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 logger = logging.getLogger('StagedDataIndexer')
 
@@ -113,6 +115,7 @@ FILE_WORKERS = 1              # Sequential files (API is the bottleneck)
 BATCH_SLEEP = 3               # Seconds between embed batches (pace TPM)
 
 
+@openai_retry
 def _embed_one_batch(batch_texts: list[str]) -> list:
     """Embed a single batch with retries + adaptive splitting."""
     truncated = [t[:8000] for t in batch_texts]

@@ -24,6 +24,8 @@ import openai
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct, OptimizersConfigDiff
 
+from utils.llm_retry import openai_retry
+
 # Configuration
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -69,6 +71,7 @@ def get_openai_client():
     """Get OpenAI client."""
     return openai.OpenAI(api_key=OPENAI_API_KEY)
 
+@openai_retry
 def generate_embeddings_batch(texts: List[str]) -> List[List[float]]:
     """Generate embeddings for a batch of texts."""
     client = get_openai_client()
