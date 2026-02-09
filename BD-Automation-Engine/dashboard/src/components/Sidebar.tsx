@@ -40,6 +40,7 @@ import {
   GitMerge,
   Plug,
   Radio,
+  Microscope,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -64,6 +65,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'agents', label: 'BD Agents', icon: Bot, section: 'Hub AI' },
   { id: 'memory', label: 'Memory Context', icon: Brain, section: 'Hub AI' },
   { id: 'graphanalytics', label: 'Graph Analytics', icon: BarChart3, section: 'Hub AI' },
+  { id: 'searchquality', label: 'Search Quality', icon: Microscope, section: 'Hub AI' },
   // Intelligence Section
   { id: 'intelligence', label: 'Job Intelligence', icon: Sparkles },
   { id: 'jobs', label: 'Jobs Pipeline', icon: Briefcase },

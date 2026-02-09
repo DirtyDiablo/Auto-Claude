@@ -169,6 +169,7 @@ export type TabId =
   | 'integrations'
   | 'graphanalytics'
   | 'realtime'
+  | 'searchquality'
   | 'systemhealth'
   | 'settings';
 

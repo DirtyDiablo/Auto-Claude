@@ -478,6 +478,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 17A realtime routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.embeddings.routes import router as embeddings_router
+    app.include_router(embeddings_router)
+    logger.info("Phase 18A embeddings routes enabled: /embeddings/embed, /embeddings/benchmark, /embeddings/status")
+except ImportError as e:
+    logger.warning(f"Phase 18A embeddings routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

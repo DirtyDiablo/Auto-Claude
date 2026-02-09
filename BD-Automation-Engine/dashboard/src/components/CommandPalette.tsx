@@ -64,6 +64,7 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'integrations', label: 'Integrations', icon: Database, keywords: ['slack', 'crm', 'bullhorn', 'integrations', 'sync'] },
   { id: 'graphanalytics', label: 'Graph Analytics', icon: BarChart3, keywords: ['pagerank', 'influence', 'community', 'centrality', 'graph', 'rag'] },
   { id: 'realtime', label: 'Real-Time Ops', icon: Activity, keywords: ['realtime', 'websocket', 'live', 'events', 'streaming'] },
+  { id: 'searchquality', label: 'Search Quality', icon: Search, keywords: ['embeddings', 'benchmark', 'acronym', 'domain', 'search', 'quality'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['settings', 'config', 'api'] },
 ]
 
