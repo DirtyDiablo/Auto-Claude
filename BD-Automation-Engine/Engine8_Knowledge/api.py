@@ -19,10 +19,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form
+    from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request
     from fastapi.middleware.cors import CORSMiddleware
+    from fastapi.responses import StreamingResponse
     from pydantic import BaseModel, Field
     import uvicorn
+    import asyncio
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
@@ -582,6 +584,31 @@ async def dashboard_stats():
             if isinstance(s, dict) and "status" in s
         )
 
+        # Field distribution sampling for analytics
+        field_distributions = {}
+        for coll_name in ["contacts", "programs", "jobs"]:
+            try:
+                sample, _ = store.client.scroll(
+                    collection_name=coll_name,
+                    limit=500,
+                    with_payload=True,
+                    with_vectors=False,
+                )
+                distributions: Dict[str, Dict[str, int]] = {}
+                for point in sample:
+                    for key, value in (point.payload or {}).items():
+                        if isinstance(value, str) and 0 < len(value) < 100:
+                            if key not in distributions:
+                                distributions[key] = {}
+                            distributions[key][value] = distributions[key].get(value, 0) + 1
+                # Keep only top 20 values per field
+                for key in distributions:
+                    sorted_vals = sorted(distributions[key].items(), key=lambda x: -x[1])[:20]
+                    distributions[key] = dict(sorted_vals)
+                field_distributions[coll_name] = distributions
+            except Exception:
+                field_distributions[coll_name] = {}
+
         return {
             "collections": collection_stats,
             "total_vectors": total_vectors,
@@ -589,6 +616,7 @@ async def dashboard_stats():
             "all_healthy": all_green,
             "memory": memory.get_stats() if memory else {},
             "graph": graph.get_stats() if graph else {},
+            "field_distributions": field_distributions,
             "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
@@ -2391,6 +2419,179 @@ async def get_agent_task_stats():
     except Exception as e:
         logger.error(f"Agent tasks stats error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================
+# SSE STREAMING ENDPOINTS FOR AGENT TASKS
+# =========================================
+
+_task_events: Dict[str, list] = {}  # task_id -> list of events
+
+
+@app.post("/agents/tasks/create")
+async def create_agent_task(request: Request):
+    """Create a new agent task and return task_id for SSE streaming."""
+    body = await request.json()
+    task_type = body.get("type", "research")
+    query = body.get("query", "")
+    task_id = f"task_{int(_time.time() * 1000)}"
+
+    _task_events[task_id] = [{
+        "event": "created",
+        "data": {"task_id": task_id, "type": task_type, "query": query, "status": "pending"}
+    }]
+
+    return {"task_id": task_id, "status": "created"}
+
+
+@app.post("/agents/tasks/{task_id}/event")
+async def push_task_event(task_id: str, request: Request):
+    """Push an event to a task's stream (called by agent workers)."""
+    body = await request.json()
+    if task_id not in _task_events:
+        _task_events[task_id] = []
+    _task_events[task_id].append(body)
+    return {"ok": True}
+
+
+@app.get("/agents/tasks/{task_id}/stream")
+async def stream_task(task_id: str):
+    """SSE endpoint - frontend connects for real-time agent updates."""
+    async def event_generator():
+        sent = 0
+        timeout = 300
+        start = _time.time()
+
+        while _time.time() - start < timeout:
+            events = _task_events.get(task_id, [])
+            while sent < len(events):
+                event = events[sent]
+                event_type = event.get("event", "update")
+                data = json.dumps(event.get("data", event))
+                yield f"event: {event_type}\ndata: {data}\n\n"
+                sent += 1
+
+                if event_type in ("complete", "error"):
+                    return
+
+            await asyncio.sleep(0.5)
+
+        yield f"event: timeout\ndata: {json.dumps({'message': 'Stream timed out'})}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
+
+# =========================================
+# AI CHAT COMPLETION PROXY (RAG + OpenAI)
+# =========================================
+
+_openai_client = None
+
+
+def _get_openai():
+    global _openai_client
+    if _openai_client is None:
+        from openai import OpenAI
+        _openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+    return _openai_client
+
+
+_BD_SYSTEM_PROMPT = (
+    "You are the PTS BD Intelligence Assistant. You have access to data about "
+    "federal defense programs, contacts at prime contractors (GDIT, Leidos, SAIC, NGC, etc.), "
+    "job postings, and outreach sequences. Answer questions using the context provided. "
+    "Always be specific — mention names, programs, locations, and tier levels when available. "
+    "If you reference a contact, include their program and tier."
+)
+
+
+def _rag_retrieve(user_msg: str, collection: str = "contacts", limit: int = 5) -> str:
+    """Retrieve RAG context from Qdrant for the user message."""
+    if not store or not user_msg:
+        return ""
+    try:
+        query_embedding = store._generate_embedding(user_msg)
+        search_result = store.client.query_points(
+            collection_name=collection,
+            query=query_embedding,
+            limit=limit,
+            with_payload=True,
+        )
+        chunks = []
+        for pt in search_result.points:
+            p = pt.payload or {}
+            name = p.get("Name", p.get("name", p.get("Program Name", p.get("title", ""))))
+            text = p.get("text", p.get("content", str(p)[:500]))
+            chunks.append(f"[{name}]: {text[:300]}")
+        return "\n".join(chunks)
+    except Exception as e:
+        return f"(RAG search failed: {e})"
+
+
+@app.post("/ai/chat")
+async def ai_chat(request: Request):
+    """Non-streaming chat with RAG context from Qdrant."""
+    body = await request.json()
+    messages = body.get("messages", [])
+    collection = body.get("collection", "contacts")
+    use_rag = body.get("use_rag", True)
+
+    user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+
+    rag_context = _rag_retrieve(user_msg, collection) if use_rag else ""
+
+    system_prompt = _BD_SYSTEM_PROMPT
+    if rag_context:
+        system_prompt += f"\n\nRelevant context from the BD database:\n{rag_context}"
+
+    full_messages = [{"role": "system", "content": system_prompt}] + messages
+
+    return {"messages": full_messages, "rag_context": rag_context}
+
+
+@app.post("/ai/chat/stream")
+async def ai_chat_stream(request: Request):
+    """Streaming chat with RAG — returns SSE with OpenAI completions."""
+    body = await request.json()
+    messages = body.get("messages", [])
+    collection = body.get("collection", "contacts")
+    user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+
+    rag_context = _rag_retrieve(user_msg, collection)
+
+    system_prompt = _BD_SYSTEM_PROMPT
+    if rag_context:
+        system_prompt += f"\n\nRelevant context from the BD database:\n{rag_context}"
+
+    full_messages = [{"role": "system", "content": system_prompt}] + messages
+
+    client = _get_openai()
+
+    async def generate():
+        try:
+            stream = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=full_messages,
+                stream=True,
+                max_tokens=1500,
+            )
+            for chunk in stream:
+                if chunk.choices[0].delta.content:
+                    data = json.dumps({"content": chunk.choices[0].delta.content})
+                    yield f"data: {data}\n\n"
+            yield f"data: {json.dumps({'done': True})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'error': str(e)})}\n\n"
+
+    return StreamingResponse(generate(), media_type="text/event-stream")
 
 
 # =========================================
