@@ -53,6 +53,7 @@ const ContactDetail = lazy(() => import('./pages/ContactDetail').then(m => ({ de
 const ProgramDetail = lazy(() => import('./pages/ProgramDetail').then(m => ({ default: m.ProgramDetail })));
 const GeographicDashboard = lazy(() => import('./pages/GeographicDashboard').then(m => ({ default: m.GeographicDashboard })));
 const RelationshipExplorer = lazy(() => import('./pages/RelationshipExplorer').then(m => ({ default: m.RelationshipExplorer })));
+const PredictiveInsights = lazy(() => import('./pages/PredictiveInsights').then(m => ({ default: m.PredictiveInsights })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -422,6 +423,8 @@ function App() {
             onNavigateToProgram={handleNavigateToProgramDetail}
           />
         );
+      case 'predictions':
+        return <PredictiveInsights />;
       case 'systemhealth':
         return <SystemHealth />;
       case 'settings':

@@ -443,6 +443,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 10A report routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.ml.routes import router as ml_router
+    app.include_router(ml_router)
+    logger.info("Phase 13A ML routes enabled: /ml/predict-response, /ml/hiring-signals, /ml/model-status")
+except ImportError as e:
+    logger.warning(f"Phase 13A ML routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

@@ -164,6 +164,7 @@ export type TabId =
   | 'revenue'
   | 'geographic'
   | 'relationships'
+  | 'predictions'
   | 'systemhealth'
   | 'settings';
 
