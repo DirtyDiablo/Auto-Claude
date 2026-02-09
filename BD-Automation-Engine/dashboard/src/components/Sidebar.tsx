@@ -38,6 +38,7 @@ import {
   DollarSign,
   Globe,
   GitMerge,
+  Plug,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -95,6 +96,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'mindmap', label: 'Mind Map', icon: Network },
   { id: 'dataquality', label: 'Data Quality', icon: BarChart3 },
   // System Section
+  { id: 'integrations', label: 'Integrations', icon: Plug, section: 'System' },
   { id: 'systemhealth', label: 'System Health', icon: Activity, section: 'System' },
   { id: 'settings', label: 'Settings', icon: Settings, section: 'System' },
 ];

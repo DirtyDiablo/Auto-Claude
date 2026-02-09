@@ -450,6 +450,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 13A ML routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.integrations.routes import router as integrations_router
+    app.include_router(integrations_router)
+    logger.info("Phase 14A integration routes enabled: /integrations/slack/*, /integrations/crm/*")
+except ImportError as e:
+    logger.warning(f"Phase 14A integration routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
