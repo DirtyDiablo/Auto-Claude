@@ -1,18 +1,20 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, Newspaper, Loader2, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
-import type { CorrelationSummary } from '../types';
+import type { CorrelationSummary, TabId } from '../types';
 import { useHubConnection, useHubStats } from '../hooks/useHubApi';
 import { AnimatedCounter } from '../components/ui/AnimatedCounter';
 import { SkeletonHubStats } from '../components/ui/Skeleton';
 import { CollectionHealthChart, WeeklyOutreachChart, SystemHealthCards } from '../components/KPICharts';
 import { DataHealthBanner } from '../components/DataHealthBanner';
 import { PageFreshnessBadge } from '../components/PageFreshnessBadge';
+import { PipelineWidget } from '../components/PipelineWidget';
 import { hubApiClient } from '../services/hubApi';
 
 interface ExecutiveSummaryProps {
   summary: CorrelationSummary | null;
   loading: boolean;
+  onTabChange?: (tab: TabId) => void;
 }
 
 const TIER_COLORS = ['#7c3aed', '#2563eb', '#0891b2', '#059669', '#ca8a04', '#6b7280'];
@@ -104,7 +106,7 @@ function MatchRateCard({
   );
 }
 
-export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
+export function ExecutiveSummary({ summary, loading, onTabChange }: ExecutiveSummaryProps) {
   // Hub connection status
   const { isConnected: hubConnected, isChecking: hubChecking } = useHubConnection();
   const { data: hubStats } = useHubStats(60000); // Refresh every minute
@@ -168,8 +170,13 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
         </div>
       </div>
 
-      {/* Data Health Banner */}
-      <DataHealthBanner />
+      {/* Data Health Banner + Pipeline Widget */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-2">
+          <DataHealthBanner />
+        </div>
+        <PipelineWidget onNavigate={() => onTabChange?.('pipelinestatus')} />
+      </div>
 
       {/* Hub API Status Card */}
       {hubChecking && (

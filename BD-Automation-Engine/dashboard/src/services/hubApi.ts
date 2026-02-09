@@ -673,10 +673,17 @@ export class HubApiClient {
     test_mode?: boolean;
     hot_leads_only?: boolean;
   }): Promise<{ success: boolean; run_id: string; status: string }> {
-    return this.fetch('/pipeline/trigger', {
+    return this.fetch('/pipeline/run', {
       method: 'POST',
       body: JSON.stringify(params || {}),
     });
+  }
+
+  async getPipelineHistory(limit: number = 20): Promise<{
+    runs: Array<Record<string, unknown>>;
+    total: number;
+  }> {
+    return this.fetch(`/pipeline/history?limit=${limit}`);
   }
 
   async getAlerts(limit: number = 20): Promise<{ alerts: Array<Record<string, unknown>>; count: number }> {

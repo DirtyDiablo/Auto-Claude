@@ -218,7 +218,7 @@ function App() {
 
     switch (activeTab) {
       case 'executive':
-        return <ExecutiveSummary summary={data?.summary ?? null} loading={loading} />;
+        return <ExecutiveSummary summary={data?.summary ?? null} loading={loading} onTabChange={setActiveTab} />;
       case 'intelligence':
         return (
           <JobIntelligence

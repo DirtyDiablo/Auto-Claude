@@ -6,6 +6,7 @@ BD Knowledge API - Enhanced FastAPI server for BD Intelligence Hub.
 import os
 import sys
 import json
+import asyncio
 import logging
 from pathlib import Path
 from datetime import datetime
@@ -309,7 +310,24 @@ async def lifespan(app: FastAPI):
 
     logger.info("BD Intelligence Hub API initialized with 50+ endpoints")
 
+    # Start background staleness auto-alerts (Phase 8A)
+    staleness_task = None
+    try:
+        from Engine8_Knowledge.api_routers.phase8a_pipeline import staleness_auto_alerts
+        staleness_task = asyncio.create_task(staleness_auto_alerts(interval_seconds=3600))
+        logger.info("Background staleness auto-alerts started (1h interval)")
+    except ImportError:
+        logger.warning("Phase 8A staleness checker not available")
+
     yield
+
+    # Cancel background tasks
+    if staleness_task and not staleness_task.done():
+        staleness_task.cancel()
+        try:
+            await staleness_task
+        except asyncio.CancelledError:
+            pass
 
     logger.info("Shutting down BD Intelligence Hub API")
 
@@ -403,6 +421,13 @@ try:
     logger.info("Phase 7 routes enabled: /data/freshness, /notifications, /webhooks/*, /ai/memories, /ai/costs")
 except ImportError as e:
     logger.warning(f"Phase 7 endpoints not available: {e}")
+
+try:
+    from Engine8_Knowledge.api_routers.phase8a_pipeline import router as phase8a_router
+    app.include_router(phase8a_router)
+    logger.info("Phase 8A routes enabled: /pipeline/run, /pipeline/status, /pipeline/history")
+except ImportError as e:
+    logger.warning(f"Phase 8A pipeline routes not available: {e}")
 
 
 # =========================================
