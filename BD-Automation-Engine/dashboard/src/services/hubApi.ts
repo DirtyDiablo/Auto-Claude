@@ -742,6 +742,102 @@ export class HubApiClient {
   }
 
   // ---------------------------------------------------------------------------
+  // DATA FRESHNESS (Phase 7)
+  // ---------------------------------------------------------------------------
+
+  async getDataFreshness(): Promise<{
+    collections: Record<string, { count: number; last_indexed: string | null; staleness_days: number | null; status: string }>;
+    scraper_last_run: string | null;
+    tango_last_sync: string | null;
+    alerts: Array<{ level: string; message: string }>;
+    timestamp: string;
+  }> {
+    return this.fetch('/data/freshness');
+  }
+
+  // ---------------------------------------------------------------------------
+  // NOTIFICATIONS (Phase 7)
+  // ---------------------------------------------------------------------------
+
+  async getNotifications(unread: boolean = false, limit: number = 50): Promise<{
+    notifications: Array<{
+      id: string;
+      type: string;
+      title: string;
+      message: string;
+      entity_type: string | null;
+      entity_id: string | null;
+      created_at: string;
+      read_at: string | null;
+      priority: string;
+    }>;
+    count: number;
+  }> {
+    const params = this.buildQueryString({ unread, limit });
+    return this.fetch(`/notifications${params}`);
+  }
+
+  async markNotificationRead(id: string): Promise<{ success: boolean }> {
+    return this.fetch(`/notifications/${encodeURIComponent(id)}/read`, { method: 'PATCH' });
+  }
+
+  // ---------------------------------------------------------------------------
+  // AI MEMORIES (Phase 7)
+  // ---------------------------------------------------------------------------
+
+  async storeMemory(body: {
+    entity_type: string;
+    entity_name: string;
+    summary: string;
+    confidence?: number;
+  }): Promise<{ success: boolean; id: string; entity_name: string }> {
+    return this.fetch('/ai/memories', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  }
+
+  async getEntityMemories(entityType: string, entityName: string, limit: number = 20): Promise<{
+    memories: Array<{
+      id: string;
+      entity_type: string;
+      entity_name: string;
+      summary: string;
+      confidence: number;
+      last_updated: string;
+      source_interaction: string;
+    }>;
+    count: number;
+    entity_name: string;
+  }> {
+    return this.fetch(`/ai/memories/${encodeURIComponent(entityType)}/${encodeURIComponent(entityName)}?limit=${limit}`);
+  }
+
+  async deleteMemory(id: string): Promise<{ success: boolean }> {
+    return this.fetch(`/ai/memories/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  }
+
+  // ---------------------------------------------------------------------------
+  // LLM COSTS (Phase 7)
+  // ---------------------------------------------------------------------------
+
+  async getLLMCosts(days: number = 30): Promise<{
+    daily: Array<{ date: string; input_tokens: number; output_tokens: number; cost_usd: number; queries: number }>;
+    by_endpoint: Array<{ endpoint: string; cost_usd: number }>;
+    recent_queries: Array<{ timestamp: string; endpoint: string; model: string; input_tokens: number; output_tokens: number; cost_usd: number }>;
+    summary: {
+      total_cost_usd: number;
+      total_input_tokens: number;
+      total_output_tokens: number;
+      total_queries: number;
+      projected_30d_usd: number;
+      period_days: number;
+    };
+  }> {
+    return this.fetch(`/ai/costs?days=${days}`);
+  }
+
+  // ---------------------------------------------------------------------------
   // CONFIGURATION
   // ---------------------------------------------------------------------------
 

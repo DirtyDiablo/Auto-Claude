@@ -2,10 +2,11 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   Building2, ArrowLeft, Users, Briefcase, Shield, Target, Star,
   FileText, RefreshCw, MapPin, Calendar, DollarSign, TrendingUp,
-  Search, Swords, Newspaper,
+  Search, Swords, Newspaper, Brain,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
 import { InlineAgentTrigger } from '../components/agent-cards';
+import { AIMemoryPanel } from '../components/AIMemoryPanel';
 
 interface ProgramDetailProps {
   programName: string;
@@ -13,7 +14,7 @@ interface ProgramDetailProps {
   onNavigateToContact?: (contactName: string) => void;
 }
 
-type DetailTab = 'overview' | 'contacts' | 'laborgaps' | 'competitive' | 'intelligence';
+type DetailTab = 'overview' | 'contacts' | 'laborgaps' | 'competitive' | 'intelligence' | 'memory';
 
 const TABS: Array<{ id: DetailTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'overview', label: 'Overview', icon: Building2 },
@@ -21,6 +22,7 @@ const TABS: Array<{ id: DetailTab; label: string; icon: React.ComponentType<{ cl
   { id: 'laborgaps', label: 'Labor Gaps', icon: Briefcase },
   { id: 'competitive', label: 'Competitive', icon: Target },
   { id: 'intelligence', label: 'Intelligence', icon: Star },
+  { id: 'memory', label: 'AI Memory', icon: Brain },
 ];
 
 interface ProgramData {
@@ -347,6 +349,7 @@ export function ProgramDetail({ programName, onBack, onNavigateToContact }: Prog
         {activeTab === 'laborgaps' && <LaborGapsTab jobs={jobs} loading={jobsLoading} />}
         {activeTab === 'competitive' && <CompetitiveTab competitors={competitors} loading={competitorsLoading} program={program} />}
         {activeTab === 'intelligence' && <ProgramIntelligenceTab intel={intel} memoryCtx={memoryCtx} loading={intelLoading} />}
+        {activeTab === 'memory' && <AIMemoryPanel entityType="program" entityName={programName} />}
       </div>
     </div>
   );

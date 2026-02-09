@@ -6,6 +6,8 @@ import { useHubConnection, useHubStats } from '../hooks/useHubApi';
 import { AnimatedCounter } from '../components/ui/AnimatedCounter';
 import { SkeletonHubStats } from '../components/ui/Skeleton';
 import { CollectionHealthChart, WeeklyOutreachChart, SystemHealthCards } from '../components/KPICharts';
+import { DataHealthBanner } from '../components/DataHealthBanner';
+import { PageFreshnessBadge } from '../components/PageFreshnessBadge';
 import { hubApiClient } from '../services/hubApi';
 
 interface ExecutiveSummaryProps {
@@ -152,7 +154,10 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Executive Summary</h1>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Executive Summary</h1>
+            <PageFreshnessBadge />
+          </div>
           <p className="text-slate-500 dark:text-slate-400">
             BD Intelligence Overview &bull; Generated {new Date(summary.generated_at).toLocaleDateString()}
           </p>
@@ -162,6 +167,9 @@ export function ExecutiveSummary({ summary, loading }: ExecutiveSummaryProps) {
           <span className="text-sm font-medium">Live Data</span>
         </div>
       </div>
+
+      {/* Data Health Banner */}
+      <DataHealthBanner />
 
       {/* Hub API Status Card */}
       {hubChecking && (

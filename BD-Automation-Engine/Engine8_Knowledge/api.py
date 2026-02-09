@@ -397,6 +397,13 @@ try:
 except ImportError as e:
     logger.warning(f"CrewAI agent routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.api_routers.phase7_endpoints import router as phase7_router
+    app.include_router(phase7_router)
+    logger.info("Phase 7 routes enabled: /data/freshness, /notifications, /webhooks/*, /ai/memories, /ai/costs")
+except ImportError as e:
+    logger.warning(f"Phase 7 endpoints not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

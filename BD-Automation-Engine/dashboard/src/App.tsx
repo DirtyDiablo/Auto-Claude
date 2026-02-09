@@ -1,42 +1,6 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, lazy, Suspense } from 'react';
 import { Sidebar } from './components/Sidebar';
 import { DataFreshness } from './components/DataFreshness';
-import { ExecutiveSummary } from './pages/ExecutiveSummary';
-import { JobIntelligence } from './pages/JobIntelligence';
-import { JobsPipeline } from './pages/JobsPipeline';
-import { Programs } from './pages/Programs';
-import { Contacts } from './pages/Contacts';
-import { Contractors } from './pages/Contractors';
-import { Locations } from './pages/Locations';
-import { BDEvents } from './pages/BDEvents';
-import { Opportunities } from './pages/Opportunities';
-import { EnrichmentDashboard } from './pages/EnrichmentDashboard';
-import { DailyPlaybook } from './pages/DailyPlaybook';
-import { MindMap } from './pages/MindMap';
-import { Settings } from './pages/Settings';
-import { DataQualityDashboard } from './pages/DataQualityDashboard';
-import { PastPerformance } from './pages/PastPerformance';
-import { PrimeOrgChart } from './pages/PrimeOrgChart';
-import { ContactOrgChartPage } from './pages/ContactOrgChartPage';
-import { PlacementsPage } from './pages/PlacementsPage';
-import CallIntelligence from './pages/CallIntelligence';
-import { AccountTakeover } from './pages/AccountTakeover';
-import { OutreachManager } from './pages/OutreachManager';
-import { MeetingCalendar } from './pages/MeetingCalendar';
-import { GraphExplorer } from './pages/GraphExplorer';
-import { Analytics } from './pages/Analytics';
-// Operations Pages
-import { QADashboard } from './pages/QADashboard';
-import { PipelineStatus } from './pages/PipelineStatus';
-// Hub AI Pages
-import { SmartQuery } from './pages/SmartQuery';
-import { KnowledgeGraph } from './pages/KnowledgeGraph';
-import { AgentPanel } from './pages/AgentPanel';
-import { MemoryContext } from './pages/MemoryContext';
-import { SystemHealth } from './pages/SystemHealth';
-// Detail Pages
-import { ContactDetail } from './pages/ContactDetail';
-import { ProgramDetail } from './pages/ProgramDetail';
 import { useAppData } from './hooks/useAppData';
 import { CommandPalette } from './components/CommandPalette';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -47,18 +11,80 @@ import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
 import './index.css';
 
-// Cross-navigation filter state
+// =============================================================================
+// LAZY-LOADED PAGES (Code Splitting)
+// =============================================================================
+
+const ExecutiveSummary = lazy(() => import('./pages/ExecutiveSummary').then(m => ({ default: m.ExecutiveSummary })));
+const JobIntelligence = lazy(() => import('./pages/JobIntelligence').then(m => ({ default: m.JobIntelligence })));
+const JobsPipeline = lazy(() => import('./pages/JobsPipeline').then(m => ({ default: m.JobsPipeline })));
+const Programs = lazy(() => import('./pages/Programs').then(m => ({ default: m.Programs })));
+const Contacts = lazy(() => import('./pages/Contacts').then(m => ({ default: m.Contacts })));
+const Contractors = lazy(() => import('./pages/Contractors').then(m => ({ default: m.Contractors })));
+const Locations = lazy(() => import('./pages/Locations').then(m => ({ default: m.Locations })));
+const BDEvents = lazy(() => import('./pages/BDEvents').then(m => ({ default: m.BDEvents })));
+const Opportunities = lazy(() => import('./pages/Opportunities').then(m => ({ default: m.Opportunities })));
+const EnrichmentDashboard = lazy(() => import('./pages/EnrichmentDashboard').then(m => ({ default: m.EnrichmentDashboard })));
+const DailyPlaybook = lazy(() => import('./pages/DailyPlaybook').then(m => ({ default: m.DailyPlaybook })));
+const MindMap = lazy(() => import('./pages/MindMap').then(m => ({ default: m.MindMap })));
+const Settings = lazy(() => import('./pages/Settings').then(m => ({ default: m.Settings })));
+const DataQualityDashboard = lazy(() => import('./pages/DataQualityDashboard').then(m => ({ default: m.DataQualityDashboard })));
+const PastPerformance = lazy(() => import('./pages/PastPerformance').then(m => ({ default: m.PastPerformance })));
+const PrimeOrgChart = lazy(() => import('./pages/PrimeOrgChart').then(m => ({ default: m.PrimeOrgChart })));
+const ContactOrgChartPage = lazy(() => import('./pages/ContactOrgChartPage').then(m => ({ default: m.ContactOrgChartPage })));
+const PlacementsPage = lazy(() => import('./pages/PlacementsPage').then(m => ({ default: m.PlacementsPage })));
+const CallIntelligence = lazy(() => import('./pages/CallIntelligence'));
+const AccountTakeover = lazy(() => import('./pages/AccountTakeover').then(m => ({ default: m.AccountTakeover })));
+const OutreachManager = lazy(() => import('./pages/OutreachManager').then(m => ({ default: m.OutreachManager })));
+const MeetingCalendar = lazy(() => import('./pages/MeetingCalendar').then(m => ({ default: m.MeetingCalendar })));
+const GraphExplorer = lazy(() => import('./pages/GraphExplorer').then(m => ({ default: m.GraphExplorer })));
+const Analytics = lazy(() => import('./pages/Analytics').then(m => ({ default: m.Analytics })));
+const QADashboard = lazy(() => import('./pages/QADashboard').then(m => ({ default: m.QADashboard })));
+const PipelineStatus = lazy(() => import('./pages/PipelineStatus').then(m => ({ default: m.PipelineStatus })));
+const SmartQuery = lazy(() => import('./pages/SmartQuery').then(m => ({ default: m.SmartQuery })));
+const KnowledgeGraph = lazy(() => import('./pages/KnowledgeGraph').then(m => ({ default: m.KnowledgeGraph })));
+const AgentPanel = lazy(() => import('./pages/AgentPanel').then(m => ({ default: m.AgentPanel })));
+const MemoryContext = lazy(() => import('./pages/MemoryContext').then(m => ({ default: m.MemoryContext })));
+const SystemHealth = lazy(() => import('./pages/SystemHealth').then(m => ({ default: m.SystemHealth })));
+const ContactDetail = lazy(() => import('./pages/ContactDetail').then(m => ({ default: m.ContactDetail })));
+const ProgramDetail = lazy(() => import('./pages/ProgramDetail').then(m => ({ default: m.ProgramDetail })));
+
+// =============================================================================
+// LOADING SPINNER
+// =============================================================================
+
+function PageLoadingSpinner() {
+  return (
+    <div className="flex items-center justify-center h-full">
+      <div className="flex flex-col items-center gap-3">
+        <div className="relative">
+          <div className="w-10 h-10 border-3 border-slate-200 dark:border-slate-700 rounded-full" />
+          <div className="absolute inset-0 w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="text-sm text-slate-400 dark:text-slate-500">Loading...</p>
+      </div>
+    </div>
+  );
+}
+
+// =============================================================================
+// APP STATE TYPES
+// =============================================================================
+
 interface CrossNavFilter {
   type: 'program' | 'contractor' | 'company' | 'location';
   value: string;
 }
 
-// Mind map navigation state
 interface MindMapNav {
   entityType: NativeNodeType;
   entityId: string;
   entityLabel: string;
 }
+
+// =============================================================================
+// APP COMPONENT
+// =============================================================================
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabId>('executive');
@@ -97,19 +123,16 @@ function App() {
     setActiveTab('locations');
   }, []);
 
-  // Navigate to Contact Detail page
   const handleNavigateToContactDetail = useCallback((contactName: string) => {
     setSelectedContact(contactName);
     setActiveTab('contactdetail');
   }, []);
 
-  // Navigate to Program Detail page
   const handleNavigateToProgramDetail = useCallback((programName: string) => {
     setSelectedProgram(programName);
     setActiveTab('programdetail');
   }, []);
 
-  // Navigate to Mind Map with a specific entity
   const handleNavigateToMindMap = useCallback(
     (entityType: NativeNodeType, entityId: string, entityLabel: string) => {
       setMindMapNav({ entityType, entityId, entityLabel });
@@ -118,7 +141,6 @@ function App() {
     []
   );
 
-  // Clear filter when manually changing tabs
   const handleTabChange = useCallback((tab: TabId) => {
     setCrossNavFilter(null);
     setMindMapNav(null);
@@ -362,12 +384,10 @@ function App() {
         );
       case 'analytics':
         return <Analytics loading={loading} />;
-      // Operations Pages
       case 'qadashboard':
         return <QADashboard />;
       case 'pipelinestatus':
         return <PipelineStatus />;
-      // Hub AI Pages
       case 'smartquery':
         return <SmartQuery loading={loading} />;
       case 'knowledgegraph':
@@ -404,7 +424,9 @@ function App() {
       />
       <main className={`flex-1 overflow-hidden transition-[margin] duration-300 ${copilotOpen ? 'sm:mr-80' : ''}`}>
         <ErrorBoundary key={activeTab}>
-          {renderContent()}
+          <Suspense fallback={<PageLoadingSpinner />}>
+            {renderContent()}
+          </Suspense>
         </ErrorBoundary>
       </main>
 

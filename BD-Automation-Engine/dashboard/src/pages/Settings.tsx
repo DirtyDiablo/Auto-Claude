@@ -17,6 +17,7 @@ import {
   Palette,
 } from 'lucide-react';
 import { ThemeSwitcher } from '../components/ThemeSwitcher';
+import { LLMCostsTab } from '../components/LLMCostsTab';
 import {
   setNotionToken,
   clearNotionToken,
@@ -544,6 +545,15 @@ export function Settings({ onRefresh, isRefreshing, lastUpdated }: SettingsProps
           icon={Palette}
         >
           <ThemeSwitcher />
+        </SettingSection>
+
+        {/* LLM Costs */}
+        <SettingSection
+          title="LLM Costs"
+          description="Track AI token usage and spending"
+          icon={Database}
+        >
+          <LLMCostsTab />
         </SettingSection>
 
         {/* About */}

@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   User, ArrowLeft, Mail, Phone, Linkedin, Building2, Shield, Star,
-  FileText, Users, MessageSquare, RefreshCw, Network, Sparkles, Send, Eye,
+  FileText, Users, MessageSquare, RefreshCw, Network, Sparkles, Send, Eye, Brain,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
 import { InlineAgentTrigger } from '../components/agent-cards';
+import { AIMemoryPanel } from '../components/AIMemoryPanel';
 
 interface ContactDetailProps {
   contactName: string;
@@ -12,7 +13,7 @@ interface ContactDetailProps {
   onNavigateToProgram?: (programName: string) => void;
 }
 
-type DetailTab = 'overview' | 'intelligence' | 'relationships' | 'outreach' | 'documents';
+type DetailTab = 'overview' | 'intelligence' | 'relationships' | 'outreach' | 'documents' | 'memory';
 
 const TABS: Array<{ id: DetailTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'overview', label: 'Overview', icon: User },
@@ -20,6 +21,7 @@ const TABS: Array<{ id: DetailTab; label: string; icon: React.ComponentType<{ cl
   { id: 'relationships', label: 'Relationships', icon: Users },
   { id: 'outreach', label: 'Outreach History', icon: MessageSquare },
   { id: 'documents', label: 'Documents', icon: FileText },
+  { id: 'memory', label: 'AI Memory', icon: Brain },
 ];
 
 interface ContactData {
@@ -373,6 +375,9 @@ export function ContactDetail({ contactName, onBack, onNavigateToProgram }: Cont
         )}
         {activeTab === 'documents' && (
           <DocumentsTab docs={docs} loading={docsLoading} />
+        )}
+        {activeTab === 'memory' && (
+          <AIMemoryPanel entityType="contact" entityName={contactName} />
         )}
       </div>
     </div>

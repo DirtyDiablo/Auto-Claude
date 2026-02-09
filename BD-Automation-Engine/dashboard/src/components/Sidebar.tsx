@@ -35,6 +35,8 @@ import {
   Sun,
 } from 'lucide-react';
 import type { TabId } from '../types';
+import { NotificationCenter } from './NotificationCenter';
+import { DensityToggle } from './DensityToggle';
 
 interface SidebarProps {
   activeTab: TabId;
@@ -44,6 +46,7 @@ interface SidebarProps {
   lastUpdated: Date | null;
   collapsed: boolean;
   onToggleCollapse: () => void;
+  onNavigateToEntity?: (entityType: string, entityId: string) => void;
 }
 
 const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }>; section?: string }> = [
@@ -93,6 +96,7 @@ export function Sidebar({
   lastUpdated,
   collapsed,
   onToggleCollapse,
+  onNavigateToEntity,
 }: SidebarProps) {
   const [darkMode, setDarkMode] = useState(() => {
     if (typeof window !== 'undefined') {
@@ -141,17 +145,20 @@ export function Sidebar({
             <Sparkles className="h-4 w-4 text-white" />
           </div>
         )}
-        <button
-          onClick={onToggleCollapse}
-          className={`p-1.5 rounded-lg hover:bg-slate-700 transition-all duration-200 group ${collapsed ? 'mt-2' : ''}`}
-          aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? (
-            <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
-          ) : (
-            <ChevronLeft className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
-          )}
-        </button>
+        <div className="flex items-center gap-1">
+          <NotificationCenter onNavigateToEntity={onNavigateToEntity} />
+          <button
+            onClick={onToggleCollapse}
+            className={`p-1.5 rounded-lg hover:bg-slate-700 transition-all duration-200 group ${collapsed ? 'mt-2' : ''}`}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            {collapsed ? (
+              <ChevronRight className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+            ) : (
+              <ChevronLeft className="h-4 w-4 text-slate-500 group-hover:text-white transition-colors" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Navigation */}
@@ -210,6 +217,12 @@ export function Sidebar({
 
       {/* Footer */}
       <div className="p-3 border-t border-slate-700/50 bg-slate-900/50 space-y-2">
+        {/* Density Toggle */}
+        <div className={`flex items-center ${collapsed ? 'justify-center' : 'justify-between px-1'}`}>
+          {!collapsed && <span className="text-[10px] text-slate-500 uppercase tracking-wider">Density</span>}
+          <DensityToggle collapsed={collapsed} />
+        </div>
+
         {/* Dark Mode Toggle */}
         <button
           onClick={toggleDarkMode}
