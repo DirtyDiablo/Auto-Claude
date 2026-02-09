@@ -59,6 +59,7 @@ const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ defa
 const GraphAnalytics = lazy(() => import('./pages/GraphAnalytics').then(m => ({ default: m.GraphAnalytics })));
 const RealtimeDashboard = lazy(() => import('./pages/RealtimeDashboard').then(m => ({ default: m.RealtimeDashboard })));
 const SearchQuality = lazy(() => import('./pages/SearchQuality').then(m => ({ default: m.SearchQuality })));
+const AutomationCenter = lazy(() => import('./pages/AutomationCenter').then(m => ({ default: m.AutomationCenter })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -440,6 +441,8 @@ function App() {
         return <RealtimeDashboard />;
       case 'searchquality':
         return <SearchQuality />;
+      case 'automation':
+        return <AutomationCenter />;
       case 'systemhealth':
         return <SystemHealth />;
       case 'settings':

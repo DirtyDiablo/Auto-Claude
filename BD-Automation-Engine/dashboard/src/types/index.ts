@@ -170,6 +170,7 @@ export type TabId =
   | 'graphanalytics'
   | 'realtime'
   | 'searchquality'
+  | 'automation'
   | 'systemhealth'
   | 'settings';
 

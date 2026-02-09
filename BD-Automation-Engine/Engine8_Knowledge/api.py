@@ -485,6 +485,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 18A embeddings routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.automation.routes import router as automation_router
+    app.include_router(automation_router)
+    logger.info("Phase 19A automation routes enabled: /automation/schedule, /automation/workflows/*, /automation/claude/*")
+except ImportError as e:
+    logger.warning(f"Phase 19A automation routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
