@@ -605,6 +605,17 @@ export class HubApiClient {
   }
 
   // ---------------------------------------------------------------------------
+  // WEEKLY BD REPORT (Phase 10A)
+  // ---------------------------------------------------------------------------
+
+  async generateWeeklyReport(weeksBack: number = 1): Promise<Record<string, unknown>> {
+    return this.fetch<Record<string, unknown>>('/reports/weekly', {
+      method: 'POST',
+      body: JSON.stringify({ weeks_back: weeksBack }),
+    });
+  }
+
+  // ---------------------------------------------------------------------------
   // COLLECTION DATA (for DataAdapter)
   // ---------------------------------------------------------------------------
 

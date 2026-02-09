@@ -161,6 +161,7 @@ export type TabId =
   | 'pipelinestatus'
   | 'competitive'
   | 'alerthistory'
+  | 'revenue'
   | 'systemhealth'
   | 'settings';
 

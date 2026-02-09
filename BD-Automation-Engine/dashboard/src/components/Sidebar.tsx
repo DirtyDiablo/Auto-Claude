@@ -35,6 +35,7 @@ import {
   Sun,
   Swords,
   Bell,
+  DollarSign,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -80,6 +81,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   // Operations Section
   { id: 'qadashboard', label: 'QA Dashboard', icon: ShieldCheck, section: 'Operations' },
   { id: 'pipelinestatus', label: 'Pipeline Status', icon: Layers, section: 'Operations' },
+  { id: 'revenue', label: 'Revenue Pipeline', icon: DollarSign, section: 'Operations' },
   { id: 'alerthistory', label: 'Alert History', icon: Bell, section: 'Operations' },
   // Takeover Section
   { id: 'accounttakeover', label: 'Account Takeover', icon: UserMinus, section: 'Takeover' },

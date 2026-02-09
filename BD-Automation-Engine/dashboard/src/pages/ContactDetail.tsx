@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import {
   User, ArrowLeft, Mail, Phone, Linkedin, Building2, Shield, Star,
   FileText, Users, MessageSquare, RefreshCw, Network, Sparkles, Send, Eye, Brain,
+  Activity, Calendar, StickyNote,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
 import { InlineAgentTrigger } from '../components/agent-cards';
@@ -13,13 +14,14 @@ interface ContactDetailProps {
   onNavigateToProgram?: (programName: string) => void;
 }
 
-type DetailTab = 'overview' | 'intelligence' | 'relationships' | 'outreach' | 'documents' | 'memory';
+type DetailTab = 'overview' | 'intelligence' | 'relationships' | 'outreach' | 'documents' | 'memory' | 'activity';
 
 const TABS: Array<{ id: DetailTab; label: string; icon: React.ComponentType<{ className?: string }> }> = [
   { id: 'overview', label: 'Overview', icon: User },
   { id: 'intelligence', label: 'Intelligence', icon: Star },
   { id: 'relationships', label: 'Relationships', icon: Users },
   { id: 'outreach', label: 'Outreach History', icon: MessageSquare },
+  { id: 'activity', label: 'Activity Log', icon: Activity },
   { id: 'documents', label: 'Documents', icon: FileText },
   { id: 'memory', label: 'AI Memory', icon: Brain },
 ];
@@ -164,7 +166,7 @@ export function ContactDetail({ contactName, onBack, onNavigateToProgram }: Cont
 
   // Load memory context on outreach tab
   useEffect(() => {
-    if (activeTab === 'outreach' && !memoryCtx && !memoryLoading) {
+    if ((activeTab === 'outreach' || activeTab === 'activity') && !memoryCtx && !memoryLoading) {
       setMemoryLoading(true);
       hubApiClient.getContactContext(contactName)
         .then(res => setMemoryCtx(res))
@@ -372,6 +374,9 @@ export function ContactDetail({ contactName, onBack, onNavigateToProgram }: Cont
         )}
         {activeTab === 'outreach' && (
           <OutreachTab ctx={memoryCtx} loading={memoryLoading} />
+        )}
+        {activeTab === 'activity' && (
+          <ActivityLogTab ctx={memoryCtx} loading={memoryLoading} />
         )}
         {activeTab === 'documents' && (
           <DocumentsTab docs={docs} loading={docsLoading} />
@@ -632,6 +637,161 @@ function OutreachTab({ ctx, loading }: { ctx: MemoryContext | null; loading: boo
       )}
     </div>
   );
+}
+
+// =============================================================================
+// DOCUMENTS TAB
+// =============================================================================
+
+// =============================================================================
+// ACTIVITY LOG TAB
+// =============================================================================
+
+interface ActivityEntry {
+  id: string;
+  timestamp: string;
+  type: 'call' | 'outreach' | 'meeting' | 'note' | 'insight';
+  description: string;
+  outcome?: string;
+}
+
+const ACTIVITY_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  call: Phone,
+  outreach: Mail,
+  meeting: Calendar,
+  note: StickyNote,
+  insight: Sparkles,
+};
+
+const ACTIVITY_COLORS: Record<string, string> = {
+  call: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400',
+  outreach: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400',
+  meeting: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400',
+  note: 'bg-slate-100 text-slate-700 dark:bg-slate-700 dark:text-slate-300',
+  insight: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400',
+};
+
+function buildActivityLog(ctx: MemoryContext): ActivityEntry[] {
+  const entries: ActivityEntry[] = [];
+
+  // Call history
+  for (const call of ctx.call_history) {
+    entries.push({
+      id: `call-${call.date}-${entries.length}`,
+      timestamp: call.date,
+      type: 'call',
+      description: call.notes,
+      outcome: call.outcome,
+    });
+  }
+
+  // Interactions
+  for (const int of ctx.interactions) {
+    const type = int.type.toLowerCase().includes('meeting') ? 'meeting' as const
+      : int.type.toLowerCase().includes('outreach') || int.type.toLowerCase().includes('email') ? 'outreach' as const
+      : int.type.toLowerCase().includes('note') ? 'note' as const
+      : 'outreach' as const;
+    entries.push({
+      id: `int-${int.date}-${entries.length}`,
+      timestamp: int.date,
+      type,
+      description: int.summary,
+    });
+  }
+
+  // Insights (no date, use current)
+  for (const insight of ctx.insights) {
+    entries.push({
+      id: `insight-${entries.length}`,
+      timestamp: new Date().toISOString(),
+      type: 'insight',
+      description: insight,
+    });
+  }
+
+  // Sort by date descending
+  entries.sort((a, b) => {
+    const da = new Date(a.timestamp).getTime() || 0;
+    const db = new Date(b.timestamp).getTime() || 0;
+    return db - da;
+  });
+
+  return entries;
+}
+
+function ActivityLogTab({ ctx, loading }: { ctx: MemoryContext | null; loading: boolean }) {
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <RefreshCw className="w-6 h-6 animate-spin text-blue-600 mr-3" />
+        <span className="text-slate-600 dark:text-slate-400">Loading activity log...</span>
+      </div>
+    );
+  }
+
+  if (!ctx) return null;
+
+  const entries = buildActivityLog(ctx);
+
+  if (entries.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <Activity className="w-10 h-10 mx-auto mb-3 text-slate-300" />
+        <p className="text-sm text-slate-500">No activity recorded for this contact</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="px-5 py-4 border-b border-slate-100 dark:border-slate-700">
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Activity Log</h3>
+        <p className="text-sm text-slate-500">{entries.length} events</p>
+      </div>
+      <div className="divide-y divide-slate-100 dark:divide-slate-700">
+        {entries.map(entry => {
+          const Icon = ACTIVITY_ICONS[entry.type] || Activity;
+          const colorClass = ACTIVITY_COLORS[entry.type] || ACTIVITY_COLORS.note;
+          return (
+            <div key={entry.id} className="px-5 py-3 flex items-start gap-3">
+              <div className={`p-1.5 rounded-lg flex-shrink-0 mt-0.5 ${colorClass}`}>
+                <Icon className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm text-slate-800 dark:text-slate-200">{entry.description}</p>
+                {entry.outcome && (
+                  <p className="text-xs text-slate-500 mt-0.5">Outcome: {entry.outcome}</p>
+                )}
+              </div>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <span className={`text-[10px] px-1.5 py-0.5 rounded capitalize ${colorClass}`}>
+                  {entry.type}
+                </span>
+                <span className="text-[10px] text-slate-400">
+                  {formatActivityDate(entry.timestamp)}
+                </span>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function formatActivityDate(dateStr: string): string {
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    const now = Date.now();
+    const diff = now - d.getTime();
+    if (diff < 86400000) return 'Today';
+    if (diff < 2 * 86400000) return 'Yesterday';
+    if (diff < 7 * 86400000) return `${Math.floor(diff / 86400000)}d ago`;
+    return d.toLocaleDateString();
+  } catch {
+    return dateStr;
+  }
 }
 
 // =============================================================================

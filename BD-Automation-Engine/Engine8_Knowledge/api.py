@@ -436,6 +436,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 9A competitive routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.api_routers.phase10a_reports import router as phase10a_router
+    app.include_router(phase10a_router)
+    logger.info("Phase 10A routes enabled: /reports/weekly")
+except ImportError as e:
+    logger.warning(f"Phase 10A report routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

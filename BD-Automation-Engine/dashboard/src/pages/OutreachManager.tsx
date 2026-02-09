@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
 import { SkeletonCard, SkeletonListItem } from '../components/ui/Skeleton';
+import { ComposeModal } from '../components/ComposeModal';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -138,6 +139,7 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [generatingContent, setGeneratingContent] = useState<string | null>(null);
   const [generatedContent, setGeneratedContent] = useState<Record<string, string>>({});
+  const [composeTarget, setComposeTarget] = useState<{ seq: OutreachSequence; stepIdx: number } | null>(null);
 
   // Load data
   useEffect(() => {
@@ -311,6 +313,7 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
           generatingContent={generatingContent}
           generatedContent={generatedContent}
           onNavigateToContact={onNavigateToContact}
+          onCompose={(seq, stepIdx) => setComposeTarget({ seq, stepIdx })}
         />
       ) : viewMode === 'gantt' ? (
         <GanttView sequences={sequences} onSelect={id => { setSelectedId(id); setViewMode('timeline'); }} />
@@ -324,6 +327,16 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
 
       {/* Create Modal */}
       {showCreateModal && <CreateModal onClose={() => setShowCreateModal(false)} onCreate={handleCreate} />}
+
+      {composeTarget && (
+        <ComposeModal
+          sequence={composeTarget.seq}
+          stepIndex={composeTarget.stepIdx}
+          onClose={() => setComposeTarget(null)}
+          onSent={(seqId) => { handleAdvance(seqId); setComposeTarget(null); }}
+          generatedContent={generatedContent[`${composeTarget.seq.id}-${composeTarget.stepIdx}`]}
+        />
+      )}
     </div>
   );
 }
@@ -332,7 +345,7 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
 
 function TimelineView({
   sequences, selected, onSelect, onAdvance, onGenerateContent,
-  generatingContent, generatedContent, onNavigateToContact,
+  generatingContent, generatedContent, onNavigateToContact, onCompose,
 }: {
   sequences: OutreachSequence[];
   selected: OutreachSequence | null;
@@ -342,6 +355,7 @@ function TimelineView({
   generatingContent: string | null;
   generatedContent: Record<string, string>;
   onNavigateToContact?: (name: string) => void;
+  onCompose?: (seq: OutreachSequence, stepIdx: number) => void;
 }) {
   return (
     <div className="flex gap-6 min-h-[500px]">
@@ -449,6 +463,10 @@ function TimelineView({
 
                       {isCurrent && (
                         <div className="flex gap-2 mt-2">
+                          <button onClick={() => onCompose?.(selected, idx)}
+                            className="flex items-center gap-1 px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700">
+                            <Mail className="h-3 w-3" /> Compose
+                          </button>
                           <button onClick={() => onAdvance(selected.id)}
                             className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white rounded-lg text-xs font-medium hover:bg-blue-700">
                             <ArrowRight className="h-3 w-3" /> Advance
