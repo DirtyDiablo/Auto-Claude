@@ -60,6 +60,7 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'geographic', label: 'Geographic Map', icon: MapPin, keywords: ['map', 'geographic', 'location', 'leaflet'] },
   { id: 'predictions', label: 'Predictive Insights', icon: Brain, keywords: ['ml', 'predict', 'response', 'hiring', 'signals'] },
   { id: 'relationships', label: 'Relationships', icon: Network, keywords: ['relationships', 'network', 'introduction', 'path'] },
+  { id: 'autonomousagents', label: 'Autonomous Agents', icon: Bot, keywords: ['autonomous', 'scheduler', 'briefing', 'enrichment'] },
   { id: 'integrations', label: 'Integrations', icon: Database, keywords: ['slack', 'crm', 'bullhorn', 'integrations', 'sync'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['settings', 'config', 'api'] },
 ]

@@ -457,6 +457,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 14A integration routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.agents.autonomous.routes import router as autonomous_router
+    app.include_router(autonomous_router)
+    logger.info("Phase 15A autonomous agent routes enabled: /agents/autonomous/*")
+except ImportError as e:
+    logger.warning(f"Phase 15A autonomous agent routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

@@ -81,6 +81,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'meetingcalendar', label: 'Meeting Calendar', icon: CalendarCheck },
   { id: 'graphexplorer', label: 'Graph Explorer', icon: GitBranch },
   { id: 'relationships', label: 'Relationships', icon: GitMerge },
+  { id: 'autonomousagents', label: 'Auto Agents', icon: Bot },
   { id: 'competitive', label: 'Competitive Intel', icon: Swords },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   { id: 'predictions', label: 'Predictive Insights', icon: TrendingUp },

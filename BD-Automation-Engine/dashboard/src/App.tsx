@@ -54,6 +54,7 @@ const ProgramDetail = lazy(() => import('./pages/ProgramDetail').then(m => ({ de
 const GeographicDashboard = lazy(() => import('./pages/GeographicDashboard').then(m => ({ default: m.GeographicDashboard })));
 const RelationshipExplorer = lazy(() => import('./pages/RelationshipExplorer').then(m => ({ default: m.RelationshipExplorer })));
 const PredictiveInsights = lazy(() => import('./pages/PredictiveInsights').then(m => ({ default: m.PredictiveInsights })));
+const AutonomousAgents = lazy(() => import('./pages/AutonomousAgents').then(m => ({ default: m.AutonomousAgents })));
 const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ default: m.Integrations })));
 
 // =============================================================================
@@ -426,6 +427,8 @@ function App() {
         );
       case 'predictions':
         return <PredictiveInsights />;
+      case 'autonomousagents':
+        return <AutonomousAgents />;
       case 'integrations':
         return <Integrations />;
       case 'systemhealth':
