@@ -464,6 +464,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 15A autonomous agent routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.graph.analytics_routes import router as graph_analytics_router
+    app.include_router(graph_analytics_router)
+    logger.info("Phase 16A graph analytics routes enabled: /graph/influence/*, /graph/communities/*, /graph/rag-query")
+except ImportError as e:
+    logger.warning(f"Phase 16A graph analytics routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

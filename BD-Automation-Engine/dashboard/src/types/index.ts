@@ -167,6 +167,7 @@ export type TabId =
   | 'predictions'
   | 'autonomousagents'
   | 'integrations'
+  | 'graphanalytics'
   | 'systemhealth'
   | 'settings';
 

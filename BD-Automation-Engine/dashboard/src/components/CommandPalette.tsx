@@ -62,6 +62,7 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'relationships', label: 'Relationships', icon: Network, keywords: ['relationships', 'network', 'introduction', 'path'] },
   { id: 'autonomousagents', label: 'Autonomous Agents', icon: Bot, keywords: ['autonomous', 'scheduler', 'briefing', 'enrichment'] },
   { id: 'integrations', label: 'Integrations', icon: Database, keywords: ['slack', 'crm', 'bullhorn', 'integrations', 'sync'] },
+  { id: 'graphanalytics', label: 'Graph Analytics', icon: BarChart3, keywords: ['pagerank', 'influence', 'community', 'centrality', 'graph', 'rag'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['settings', 'config', 'api'] },
 ]
 

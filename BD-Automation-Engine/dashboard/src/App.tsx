@@ -56,6 +56,7 @@ const RelationshipExplorer = lazy(() => import('./pages/RelationshipExplorer').t
 const PredictiveInsights = lazy(() => import('./pages/PredictiveInsights').then(m => ({ default: m.PredictiveInsights })));
 const AutonomousAgents = lazy(() => import('./pages/AutonomousAgents').then(m => ({ default: m.AutonomousAgents })));
 const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ default: m.Integrations })));
+const GraphAnalytics = lazy(() => import('./pages/GraphAnalytics').then(m => ({ default: m.GraphAnalytics })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -431,6 +432,8 @@ function App() {
         return <AutonomousAgents />;
       case 'integrations':
         return <Integrations />;
+      case 'graphanalytics':
+        return <GraphAnalytics />;
       case 'systemhealth':
         return <SystemHealth />;
       case 'settings':
