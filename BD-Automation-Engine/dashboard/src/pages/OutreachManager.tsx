@@ -10,7 +10,7 @@ import {
   Mail, Plus, CheckCircle2, AlertCircle,
   Send, X, List, LayoutGrid, Phone, Building2,
   Loader2, ChevronRight, Linkedin,
-  Users, Sparkles, ArrowRight, ExternalLink,
+  Users, Sparkles, ArrowRight, ExternalLink, GanttChart,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
 import { SkeletonCard, SkeletonListItem } from '../components/ui/Skeleton';
@@ -133,7 +133,7 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
   const [dueActions, setDueActions] = useState<DueAction[]>([]);
   const [dataLoading, setDataLoading] = useState(true);
   const [serviceOnline, setServiceOnline] = useState(false);
-  const [viewMode, setViewMode] = useState<'timeline' | 'portfolio'>('timeline');
+  const [viewMode, setViewMode] = useState<'timeline' | 'portfolio' | 'gantt'>('timeline');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [generatingContent, setGeneratingContent] = useState<string | null>(null);
@@ -266,6 +266,10 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'portfolio' ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' : 'text-slate-500'}`}>
               <LayoutGrid className="h-4 w-4" /> Portfolio
             </button>
+            <button onClick={() => setViewMode('gantt')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${viewMode === 'gantt' ? 'bg-white dark:bg-slate-700 shadow text-slate-800 dark:text-slate-100' : 'text-slate-500'}`}>
+              <GanttChart className="h-4 w-4" /> Gantt
+            </button>
           </div>
           <button onClick={() => setShowCreateModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 shadow-sm">
@@ -308,6 +312,8 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
           generatedContent={generatedContent}
           onNavigateToContact={onNavigateToContact}
         />
+      ) : viewMode === 'gantt' ? (
+        <GanttView sequences={sequences} onSelect={id => { setSelectedId(id); setViewMode('timeline'); }} />
       ) : (
         <PortfolioView
           sequences={sequences}
@@ -554,6 +560,113 @@ function PortfolioView({
         {sorted.length === 0 && (
           <div className="text-center py-12 text-slate-400">No sequences found</div>
         )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Gantt View ─────────────────────────────────────────────────────────────
+
+function GanttView({ sequences, onSelect }: { sequences: OutreachSequence[]; onSelect: (id: string) => void }) {
+  const days = useMemo(() => {
+    const result: Date[] = [];
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(start);
+      d.setDate(d.getDate() + i);
+      result.push(d);
+    }
+    return result;
+  }, []);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  return (
+    <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-x-auto">
+      <table className="w-full text-xs min-w-[800px]">
+        <thead>
+          <tr className="border-b border-slate-200 dark:border-slate-700">
+            <th className="text-left px-3 py-2 font-medium text-slate-600 dark:text-slate-300 w-48 sticky left-0 bg-white dark:bg-slate-800 z-10">Contact</th>
+            {days.map((d, i) => {
+              const isToday = d.getTime() === today.getTime();
+              return (
+                <th key={i} className={`text-center px-1 py-2 font-medium min-w-[48px] ${isToday ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' : 'text-slate-500'}`}>
+                  <div>{d.toLocaleDateString('en-US', { weekday: 'short' })}</div>
+                  <div className="text-[10px]">{d.getDate()}</div>
+                </th>
+              );
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {sequences.map(seq => {
+            const created = new Date(seq.created_at);
+            created.setHours(0, 0, 0, 0);
+
+            const statusBg = seq.status === 'completed' ? 'bg-blue-50/50 dark:bg-blue-900/10'
+              : seq.status === 'paused' ? 'bg-yellow-50/50 dark:bg-yellow-900/10'
+              : '';
+
+            return (
+              <tr key={seq.id} className={`border-b border-slate-100 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700/30 cursor-pointer ${statusBg}`}
+                onClick={() => onSelect(seq.id)}>
+                <td className="px-3 py-2 sticky left-0 bg-white dark:bg-slate-800 z-10">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-2 h-2 rounded-full ${TIER_COLORS[seq.tier] || 'bg-gray-400'}`} />
+                    <div>
+                      <p className="font-medium text-slate-800 dark:text-slate-100 truncate max-w-[160px]">{seq.contact_name}</p>
+                      <p className="text-[10px] text-slate-400 truncate max-w-[160px]">{seq.program}</p>
+                    </div>
+                  </div>
+                </td>
+                {days.map((day, di) => {
+                  const dayOffset = Math.floor((day.getTime() - created.getTime()) / 86400000);
+                  const step = seq.steps.find(s => s.day === dayOffset || s.day === dayOffset + 1);
+                  const isToday = day.getTime() === today.getTime();
+
+                  let dot = null;
+                  if (step) {
+                    const color = step.status === 'completed' || step.status === 'sent'
+                      ? 'bg-green-500' : step.status === 'pending'
+                      ? (dayOffset < 0 ? 'bg-red-500' : 'bg-blue-500')
+                      : step.status === 'skipped' ? 'bg-gray-400'
+                      : 'bg-yellow-500';
+                    const Icon = STEP_ICONS[step.type] || Mail;
+                    dot = (
+                      <div className="relative group">
+                        <div className={`w-5 h-5 rounded-full ${color} flex items-center justify-center mx-auto`}>
+                          <Icon className="h-2.5 w-2.5 text-white" />
+                        </div>
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 hidden group-hover:block z-20 whitespace-nowrap bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg">
+                          {step.label} — {step.status}
+                        </div>
+                      </div>
+                    );
+                  }
+
+                  return (
+                    <td key={di} className={`text-center px-1 py-2 ${isToday ? 'bg-blue-50/50 dark:bg-blue-900/10' : ''}`}>
+                      {dot}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+      {sequences.length === 0 && (
+        <div className="text-center py-12 text-slate-400">No sequences to display</div>
+      )}
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 px-4 py-2 border-t border-slate-200 dark:border-slate-700 text-[10px] text-slate-500">
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-green-500 inline-block" /> Completed</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-blue-500 inline-block" /> Scheduled</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-red-500 inline-block" /> Overdue</span>
+        <span className="flex items-center gap-1"><span className="w-2.5 h-2.5 rounded-full bg-yellow-500 inline-block" /> Pending</span>
       </div>
     </div>
   );

@@ -22,6 +22,8 @@ import { PlacementsPage } from './pages/PlacementsPage';
 import CallIntelligence from './pages/CallIntelligence';
 import { AccountTakeover } from './pages/AccountTakeover';
 import { OutreachManager } from './pages/OutreachManager';
+import { MeetingCalendar } from './pages/MeetingCalendar';
+import { GraphExplorer } from './pages/GraphExplorer';
 import { Analytics } from './pages/Analytics';
 // Operations Pages
 import { QADashboard } from './pages/QADashboard';
@@ -348,6 +350,16 @@ function App() {
         return <AccountTakeover />;
       case 'outreach':
         return <OutreachManager loading={loading} />;
+      case 'meetingcalendar':
+        return <MeetingCalendar onNavigateToContact={handleNavigateToContactDetail} />;
+      case 'graphexplorer':
+        return (
+          <GraphExplorer
+            onNavigateToContact={handleNavigateToContactDetail}
+            onNavigateToProgram={handleNavigateToProgramDetail}
+            onNavigateToOutreach={() => handleTabChange('outreach')}
+          />
+        );
       case 'analytics':
         return <Analytics loading={loading} />;
       // Operations Pages

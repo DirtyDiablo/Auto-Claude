@@ -155,6 +155,8 @@ export type TabId =
   | 'knowledgegraph'
   | 'agents'
   | 'memory'
+  | 'graphexplorer'
+  | 'meetingcalendar'
   | 'qadashboard'
   | 'pipelinestatus'
   | 'systemhealth'

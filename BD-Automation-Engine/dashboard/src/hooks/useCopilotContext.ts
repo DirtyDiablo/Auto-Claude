@@ -44,6 +44,8 @@ export function useCopilotContext(
       executive: 'The user is on the Executive Summary dashboard. Provide high-level BD intelligence and strategic recommendations.',
       smartquery: 'The user is on the Smart Query page for semantic search. Help refine search queries and interpret results.',
       agents: 'The user is on the Agent Panel page managing AI agents. Help with task orchestration and agent status.',
+      graphexplorer: 'The user is on the Graph Explorer page viewing a network visualization of contacts and programs. Help identify key relationships and clusters.',
+      meetingcalendar: 'The user is on the Meeting Calendar page planning BD meetings. Help with meeting prep and talking points.',
     };
 
     return {

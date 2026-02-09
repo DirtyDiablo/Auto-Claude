@@ -68,6 +68,8 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'placements', label: 'Placements', icon: FileSpreadsheet },
   { id: 'callintelligence', label: 'Call Intelligence', icon: Phone },
   { id: 'outreach', label: 'Outreach Manager', icon: Send },
+  { id: 'meetingcalendar', label: 'Meeting Calendar', icon: CalendarCheck },
+  { id: 'graphexplorer', label: 'Graph Explorer', icon: GitBranch },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   // Operations Section
   { id: 'qadashboard', label: 'QA Dashboard', icon: ShieldCheck, section: 'Operations' },

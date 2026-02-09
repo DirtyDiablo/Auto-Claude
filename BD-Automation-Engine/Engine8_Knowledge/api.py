@@ -2595,6 +2595,98 @@ async def ai_chat_stream(request: Request):
 
 
 # =========================================
+# GRAPH DATA ENDPOINT
+# =========================================
+
+@app.get("/graph/data")
+async def get_graph_data(limit: int = 500):
+    """Return graph-ready nodes and edges for the frontend Graph Explorer."""
+    if not store:
+        raise HTTPException(status_code=503, detail="Knowledge store not initialized")
+
+    nodes = []
+    edges = []
+    program_ids = set()
+
+    try:
+        # Get contacts
+        contacts, _ = store.client.scroll(
+            collection_name="contacts", limit=limit, with_payload=True
+        )
+
+        for c in contacts:
+            p = c.payload or {}
+            name = p.get("\ufeffContact Name", p.get("Contact Name", p.get("name", "")))
+            node_id = f"contact_{c.id}"
+            nodes.append({
+                "id": node_id,
+                "type": "contact",
+                "name": name,
+                "title": p.get("Job Title", p.get("title", "")),
+                "tier": p.get("Hierarchy Tier", p.get("tier", "")),
+                "priority": p.get("BD Priority", ""),
+                "program": p.get("Programs", p.get("program", "")),
+                "company": p.get("Company", p.get("company", "")),
+                "location": p.get("Location Hub", p.get("location", "")),
+                "email": p.get("email", ""),
+                "phone": p.get("phone", ""),
+                "linkedin": p.get("linkedin", ""),
+            })
+            # Create edges to programs
+            programs_str = p.get("Programs", p.get("program", ""))
+            if programs_str:
+                for prog in str(programs_str).split(","):
+                    prog = prog.strip()
+                    if prog:
+                        prog_id = f"program_{prog}"
+                        program_ids.add(prog)
+                        edges.append({"source": node_id, "target": prog_id})
+
+        # Get programs
+        programs, _ = store.client.scroll(
+            collection_name="programs", limit=100, with_payload=True
+        )
+
+        for pr in programs:
+            p = pr.payload or {}
+            name = p.get("Program Name", p.get("name", ""))
+            prime = p.get("Prime Contractor", p.get("prime", ""))
+            nodes.append({
+                "id": f"program_{name}",
+                "type": "program",
+                "name": name,
+                "prime": prime,
+                "value": p.get("Contract Value", ""),
+                "agency": p.get("Agency Owner", p.get("agency", "")),
+                "acronym": p.get("Acronym", ""),
+            })
+            # Remove from missing set
+            program_ids.discard(name)
+
+        # Create placeholder program nodes for any referenced but not in collection
+        for prog_name in program_ids:
+            nodes.append({
+                "id": f"program_{prog_name}",
+                "type": "program",
+                "name": prog_name,
+                "prime": "",
+                "value": "",
+                "agency": "",
+                "acronym": "",
+            })
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error building graph: {str(e)}")
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "total_nodes": len(nodes),
+        "total_edges": len(edges),
+    }
+
+
+# =========================================
 # MAIN
 # =========================================
 
