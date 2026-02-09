@@ -2,6 +2,8 @@
 FastAPI routes for Document Processing.
 Import this into main api.py during integration step.
 """
+import os
+import structlog
 from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
 from typing import Optional, List
 from pathlib import Path
@@ -12,6 +14,13 @@ try:
     from .document_pipeline import BDDocumentPipeline, process_document, batch_process_folder
 except ImportError:
     from document_pipeline import BDDocumentPipeline, process_document, batch_process_folder
+
+try:
+    from .docling_processor import ingest_document_to_qdrant
+except ImportError:
+    from docling_processor import ingest_document_to_qdrant
+
+logger = structlog.get_logger(__name__)
 
 router = APIRouter(prefix="/documents", tags=["Document Processing"])
 
@@ -53,6 +62,83 @@ async def upload_and_process(file: UploadFile = File(...)):
         return result
     finally:
         Path(tmp_path).unlink(missing_ok=True)
+
+
+@router.post("/ingest")
+async def ingest_document(
+    file: UploadFile = File(...),
+    collection: str = "documents",
+    doc_type: str = "unknown",
+):
+    """Upload a document, parse with Docling, embed, and index into Qdrant."""
+    suffix = Path(file.filename).suffix
+    with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+        shutil.copyfileobj(file.file, tmp)
+        tmp_path = tmp.name
+
+    try:
+        # Get or build a lightweight store object for Qdrant + OpenAI access
+        store = _get_ingest_store()
+        if store is None:
+            raise HTTPException(
+                status_code=503,
+                detail="Qdrant/OpenAI not available for ingestion",
+            )
+
+        result = ingest_document_to_qdrant(
+            file_path=tmp_path,
+            store=store,
+            collection=collection,
+            doc_type=doc_type,
+            metadata={"original_filename": file.filename},
+        )
+
+        if "error" in result and not result.get("chunks"):
+            raise HTTPException(status_code=422, detail=result["error"])
+
+        result["original_filename"] = file.filename
+        logger.info(
+            "document_ingested",
+            file=file.filename,
+            collection=collection,
+            chunks=result.get("total_chunks", 0),
+            indexed=result.get("indexed", 0),
+        )
+        return result
+    finally:
+        Path(tmp_path).unlink(missing_ok=True)
+
+
+# Lightweight store for ingest endpoint
+_ingest_store = None
+
+
+def _get_ingest_store():
+    """Build a minimal store object with .client, .openai_client, .model_name."""
+    global _ingest_store
+    if _ingest_store is not None:
+        return _ingest_store
+
+    try:
+        from qdrant_client import QdrantClient
+        import openai
+
+        qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+        client = QdrantClient(url=qdrant_url, timeout=30)
+        openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+        class _IngestStore:
+            pass
+
+        store = _IngestStore()
+        store.client = client
+        store.openai_client = openai_client
+        store.model_name = "text-embedding-3-small"
+        _ingest_store = store
+        return store
+    except Exception as e:
+        logger.warning("ingest_store_init_failed", error=str(e))
+        return None
 
 
 @router.post("/batch")

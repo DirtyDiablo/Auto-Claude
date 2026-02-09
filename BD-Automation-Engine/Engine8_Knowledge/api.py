@@ -2560,10 +2560,43 @@ _BD_SYSTEM_PROMPT = (
 
 
 def _rag_retrieve(user_msg: str, collection: str = "contacts", limit: int = 5) -> str:
-    """Retrieve RAG context from Qdrant for the user message."""
+    """Retrieve RAG context using hybrid search (BM25 + dense + RRF) with memory."""
     if not store or not user_msg:
         return ""
     try:
+        chunks: list[str] = []
+
+        # 1. Memory context — prepend relevant memories
+        if memory:
+            try:
+                mem_results = memory.get_context(user_msg, limit=3)
+                for r in mem_results:
+                    mem_text = r.get("memory", r.get("content", str(r)))
+                    if mem_text:
+                        chunks.append(f"[Memory]: {str(mem_text)[:300]}")
+            except Exception as e:
+                logger.debug("memory_context_failed", error=str(e))
+
+        # 2. Hybrid search (BM25 + semantic + RRF) with dense-only fallback
+        if retriever:
+            try:
+                results = retriever.search(
+                    query=user_msg,
+                    collection=collection,
+                    limit=limit,
+                    use_hybrid=True,
+                    use_rerank=False,
+                )
+                for r in results:
+                    name = r.metadata.get("Name", r.metadata.get("name",
+                           r.metadata.get("Program Name", r.metadata.get("title", ""))))
+                    text = r.text[:300] if r.text else ""
+                    chunks.append(f"[{name}] ({r.source}): {text}")
+                return "\n".join(chunks)
+            except Exception as e:
+                logger.debug("hybrid_search_failed_falling_back", error=str(e))
+
+        # 3. Dense-only fallback
         query_embedding = store._generate_embedding(user_msg)
         search_result = store.client.query_points(
             collection_name=collection,
@@ -2571,7 +2604,6 @@ def _rag_retrieve(user_msg: str, collection: str = "contacts", limit: int = 5) -
             limit=limit,
             with_payload=True,
         )
-        chunks = []
         for pt in search_result.points:
             p = pt.payload or {}
             name = p.get("Name", p.get("name", p.get("Program Name", p.get("title", ""))))
