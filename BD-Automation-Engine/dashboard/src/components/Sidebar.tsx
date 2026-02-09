@@ -39,6 +39,7 @@ import {
   Globe,
   GitMerge,
   Plug,
+  Radio,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -87,6 +88,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   { id: 'predictions', label: 'Predictive Insights', icon: TrendingUp },
   // Operations Section
+  { id: 'realtime', label: 'Real-Time Ops', icon: Radio, section: 'Operations' },
   { id: 'qadashboard', label: 'QA Dashboard', icon: ShieldCheck, section: 'Operations' },
   { id: 'pipelinestatus', label: 'Pipeline Status', icon: Layers, section: 'Operations' },
   { id: 'revenue', label: 'Revenue Pipeline', icon: DollarSign, section: 'Operations' },

@@ -57,6 +57,7 @@ const PredictiveInsights = lazy(() => import('./pages/PredictiveInsights').then(
 const AutonomousAgents = lazy(() => import('./pages/AutonomousAgents').then(m => ({ default: m.AutonomousAgents })));
 const Integrations = lazy(() => import('./pages/Integrations').then(m => ({ default: m.Integrations })));
 const GraphAnalytics = lazy(() => import('./pages/GraphAnalytics').then(m => ({ default: m.GraphAnalytics })));
+const RealtimeDashboard = lazy(() => import('./pages/RealtimeDashboard').then(m => ({ default: m.RealtimeDashboard })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -434,6 +435,8 @@ function App() {
         return <Integrations />;
       case 'graphanalytics':
         return <GraphAnalytics />;
+      case 'realtime':
+        return <RealtimeDashboard />;
       case 'systemhealth':
         return <SystemHealth />;
       case 'settings':

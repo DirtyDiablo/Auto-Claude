@@ -168,6 +168,7 @@ export type TabId =
   | 'autonomousagents'
   | 'integrations'
   | 'graphanalytics'
+  | 'realtime'
   | 'systemhealth'
   | 'settings';
 

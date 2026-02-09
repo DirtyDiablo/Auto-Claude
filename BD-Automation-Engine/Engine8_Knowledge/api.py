@@ -471,6 +471,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 16A graph analytics routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.realtime.routes import router as realtime_router
+    app.include_router(realtime_router)
+    logger.info("Phase 17A realtime routes enabled: /ws/dashboard, /sse/*, /realtime/*")
+except ImportError as e:
+    logger.warning(f"Phase 17A realtime routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
