@@ -31,7 +31,9 @@ ENTITY_TYPES = {
     "Contact": ["name", "title", "company", "tier", "priority", "clearance", "email"],
     "Job": ["title", "location", "clearance", "program", "company", "bd_score"],
     "Skill": ["name", "category", "clearance_level", "demand_level"],
-    "Location": ["city", "state", "base_name", "region"]
+    "Location": ["city", "state", "base_name", "region"],
+    "Meeting": ["title", "date", "attendees", "program", "notes"],
+    "Placement": ["candidate", "job_title", "prime_contractor", "start_date", "status"],
 }
 
 RELATIONSHIP_TYPES = {
@@ -62,6 +64,11 @@ RELATIONSHIP_TYPES = {
     # Skill relationships
     "REQUIRES_SKILL": ("Program", "Skill"),       # Program requires skill
     "HAS_SKILL": ("Contact", "Skill"),            # Contact has skill
+
+    # Placement & Meeting relationships
+    "PLACED_BY_PTS": ("Placement", "Contractor"), # PTS placed candidate at contractor
+    "ATTENDED": ("Contact", "Meeting"),           # Contact attended meeting
+    "ABOUT_PROGRAM": ("Meeting", "Program"),      # Meeting was about a program
 }
 
 

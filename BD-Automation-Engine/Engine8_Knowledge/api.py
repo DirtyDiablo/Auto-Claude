@@ -1102,6 +1102,67 @@ async def bdgraph_populate_from_store():
     return {"success": True, "stats": bg.get_stats()}
 
 
+@app.get("/bdgraph/graph")
+async def bdgraph_full_graph(limit: int = Query(500, description="Max entities to return")):
+    """Return full graph as nodes + edges for visualization."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    # Export entities as nodes (limited)
+    all_entities = list(bg._entity_cache.values())[:limit]
+    nodes = []
+    entity_ids = set()
+    for e in all_entities:
+        nodes.append({
+            "id": e.id,
+            "type": e.type.lower(),
+            "name": e.name,
+            **e.properties,
+        })
+        entity_ids.add(e.id)
+
+    # Export relationships as edges (only between included nodes)
+    edges = []
+    cursor = bg.conn.execute(
+        "SELECT from_entity_id, to_entity_id, type FROM relationships"
+    )
+    for row in cursor:
+        if row[0] in entity_ids and row[1] in entity_ids:
+            edges.append({
+                "source": row[0],
+                "target": row[1],
+                "type": row[2],
+            })
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "total_nodes": len(bg._entity_cache),
+        "total_edges": sum(1 for _ in bg.conn.execute("SELECT COUNT(*) FROM relationships").fetchone()),
+    }
+
+
+@app.get("/bdgraph/introduction-path/{from_contact}/{to_contact}")
+async def bdgraph_introduction_path(
+    from_contact: str,
+    to_contact: str,
+    max_depth: int = Query(5, description="Max hops to search"),
+):
+    """Find shortest warm introduction path between two contacts."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
+
+    path = bg.find_teaming_path(from_contact, to_contact, max_depth)
+
+    # Check if path contains an error
+    if path and isinstance(path[0], dict) and "error" in path[0]:
+        return {"from": from_contact, "to": to_contact, "path": [], "hops": 0, "error": path[0]["error"]}
+
+    return {"from": from_contact, "to": to_contact, "path": path, "hops": max(0, len(path) - 1)}
+
+
 @app.get("/bdgraph/types")
 async def bdgraph_list_types():
     """List available entity and relationship types."""

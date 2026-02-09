@@ -57,6 +57,8 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'qadashboard', label: 'QA Dashboard', icon: Activity, keywords: ['quality', 'qa', 'alerts'] },
   { id: 'pipelinestatus', label: 'Pipeline Status', icon: Activity, keywords: ['pipeline', 'status', 'engines'] },
   { id: 'dataquality', label: 'Data Quality', icon: BarChart3, keywords: ['quality', 'vectors', 'collections'] },
+  { id: 'geographic', label: 'Geographic Map', icon: MapPin, keywords: ['map', 'geographic', 'location', 'leaflet'] },
+  { id: 'relationships', label: 'Relationships', icon: Network, keywords: ['relationships', 'network', 'introduction', 'path'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['settings', 'config', 'api'] },
 ]
 

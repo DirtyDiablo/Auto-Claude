@@ -51,6 +51,8 @@ const AlertHistory = lazy(() => import('./pages/AlertHistory').then(m => ({ defa
 const RevenuePipeline = lazy(() => import('./pages/RevenuePipeline').then(m => ({ default: m.RevenuePipeline })));
 const ContactDetail = lazy(() => import('./pages/ContactDetail').then(m => ({ default: m.ContactDetail })));
 const ProgramDetail = lazy(() => import('./pages/ProgramDetail').then(m => ({ default: m.ProgramDetail })));
+const GeographicDashboard = lazy(() => import('./pages/GeographicDashboard').then(m => ({ default: m.GeographicDashboard })));
+const RelationshipExplorer = lazy(() => import('./pages/RelationshipExplorer').then(m => ({ default: m.RelationshipExplorer })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -405,6 +407,21 @@ function App() {
         return <AgentPanel />;
       case 'memory':
         return <MemoryContext />;
+      case 'geographic':
+        return (
+          <GeographicDashboard
+            contacts={data?.contacts ?? {}}
+            programs={data?.programs ?? []}
+            loading={loading}
+          />
+        );
+      case 'relationships':
+        return (
+          <RelationshipExplorer
+            onNavigateToContact={handleNavigateToContactDetail}
+            onNavigateToProgram={handleNavigateToProgramDetail}
+          />
+        );
       case 'systemhealth':
         return <SystemHealth />;
       case 'settings':

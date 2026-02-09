@@ -36,6 +36,8 @@ import {
   Swords,
   Bell,
   DollarSign,
+  Globe,
+  GitMerge,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -66,6 +68,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'contacts', label: 'Contact Intelligence', icon: Users },
   { id: 'contractors', label: 'Contractors', icon: Factory },
   { id: 'locations', label: 'Locations', icon: MapPin },
+  { id: 'geographic', label: 'Geographic Map', icon: Globe },
   { id: 'events', label: 'BD Events', icon: Calendar },
   { id: 'opportunities', label: 'BD Opportunities', icon: Target },
   { id: 'pastperformance', label: 'Past Performance', icon: Trophy },
@@ -76,6 +79,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'outreach', label: 'Outreach Manager', icon: Send },
   { id: 'meetingcalendar', label: 'Meeting Calendar', icon: CalendarCheck },
   { id: 'graphexplorer', label: 'Graph Explorer', icon: GitBranch },
+  { id: 'relationships', label: 'Relationships', icon: GitMerge },
   { id: 'competitive', label: 'Competitive Intel', icon: Swords },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   // Operations Section

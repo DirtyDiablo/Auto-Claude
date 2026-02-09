@@ -162,6 +162,8 @@ export type TabId =
   | 'competitive'
   | 'alerthistory'
   | 'revenue'
+  | 'geographic'
+  | 'relationships'
   | 'systemhealth'
   | 'settings';
 
