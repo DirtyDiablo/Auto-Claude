@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   User, ArrowLeft, Mail, Phone, Linkedin, Building2, Shield, Star,
-  FileText, Users, MessageSquare, Search, RefreshCw, Network,
+  FileText, Users, MessageSquare, RefreshCw, Network,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';
 

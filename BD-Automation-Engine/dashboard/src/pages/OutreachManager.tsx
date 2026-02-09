@@ -7,9 +7,9 @@
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import {
-  Mail, Plus, Calendar, Clock, CheckCircle2, AlertCircle,
-  Send, X, List, LayoutGrid, Phone, User, Building2,
-  Loader2, PauseCircle, PlayCircle, ChevronRight, Linkedin,
+  Mail, Plus, CheckCircle2, AlertCircle,
+  Send, X, List, LayoutGrid, Phone, Building2,
+  Loader2, ChevronRight, Linkedin,
   Users, Sparkles, ArrowRight, ExternalLink,
 } from 'lucide-react';
 import { hubApiClient } from '../services/hubApi';

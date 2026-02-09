@@ -198,7 +198,7 @@ function JobCard({
   onNavigateToProgram,
   onNavigateToLocation,
   onNavigateToMindMap,
-  onNavigateToContact,
+  onNavigateToContact: _onNavigateToContact,
 }: {
   job: Job;
   onNavigateToProgram?: (name: string) => void;

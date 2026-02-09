@@ -44,7 +44,7 @@ const STAGE_COLORS = ['#6366f1', '#3b82f6', '#8b5cf6', '#f59e0b', '#f97316', '#1
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 interface ContactsByProgram { program: string; count: number }
-interface ContactsByTier { tier: string; count: number; fill: string }
+interface ContactsByTier { tier: string; count: number; fill: string; [key: string]: string | number }
 interface PriorityRow { program: string; critical: number; high: number; medium: number; low: number }
 interface FunnelStage { stage: string; count: number; pct: number; color: string }
 interface AgentActivity { date: string; tasks: number; completed: number }
@@ -275,7 +275,7 @@ export function Analytics({ loading: parentLoading = false }: AnalyticsProps) {
                 <YAxis type="category" dataKey="program" tick={{ fontSize: 11, fill: 'currentColor' }} width={140} className="text-slate-500 dark:text-slate-400" />
                 <Tooltip
                   contentStyle={{ backgroundColor: 'var(--color-white, #fff)', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                  formatter={(value: number) => [value.toLocaleString(), 'Contacts']}
+                  formatter={(value: number | undefined) => [(value ?? 0).toLocaleString(), 'Contacts']}
                 />
                 <Bar dataKey="count" radius={[0, 4, 4, 0]}>
                   {contactsByProgram.map((_, idx) => (
@@ -310,7 +310,7 @@ export function Analytics({ loading: parentLoading = false }: AnalyticsProps) {
                   </Pie>
                   <Tooltip
                     contentStyle={{ backgroundColor: 'var(--color-white, #fff)', border: '1px solid #e2e8f0', borderRadius: '8px' }}
-                    formatter={(value: number) => [value.toLocaleString(), 'Contacts']}
+                    formatter={(value: number | undefined) => [(value ?? 0).toLocaleString(), 'Contacts']}
                   />
                 </PieChart>
               </ResponsiveContainer>

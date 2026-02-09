@@ -95,7 +95,6 @@ export function ProgramDetail({ programName, onBack, onNavigateToContact }: Prog
   const [intel, setIntel] = useState<IntelResult | null>(null);
   const [intelLoading, setIntelLoading] = useState(false);
   const [memoryCtx, setMemoryCtx] = useState<ProgramMemoryContext | null>(null);
-  const [memoryLoading, setMemoryLoading] = useState(false);
   const [competitors, setCompetitors] = useState<Array<{ name: string; score: number; content: string }>>([]);
   const [competitorsLoading, setCompetitorsLoading] = useState(false);
 

@@ -38,7 +38,7 @@ import { ProgramDetail } from './pages/ProgramDetail';
 import { useAppData } from './hooks/useAppData';
 import { CommandPalette } from './components/CommandPalette';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { Breadcrumb, getPageLabel } from './components/Breadcrumb';
+import { Breadcrumb } from './components/Breadcrumb';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
 import './index.css';
