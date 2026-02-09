@@ -106,7 +106,12 @@ def get_config(args) -> GitHubRunnerConfig:
 
     token = args.token or os.environ.get("GITHUB_TOKEN", "")
     bot_token = args.bot_token or os.environ.get("GITHUB_BOT_TOKEN")
-    repo = args.repo or os.environ.get("GITHUB_REPO", "")
+
+    # Repo detection priority:
+    # 1. Explicit --repo flag (highest priority)
+    # 2. Auto-detect from project's git remote (primary for multi-project setups)
+    # 3. GITHUB_REPO env var (fallback only)
+    repo = args.repo  # Only use explicit CLI flag initially
 
     # Find gh CLI - use get_gh_executable for cross-platform support
     gh_path = get_gh_executable()
@@ -131,8 +136,8 @@ def get_config(args) -> GitHubRunnerConfig:
         except FileNotFoundError:
             pass  # gh not installed or not in PATH
 
+    # Auto-detect repo from project's git remote (takes priority over env var)
     if not repo and gh_path:
-        # Try to detect from git remote
         try:
             result = subprocess.run(
                 [
@@ -155,6 +160,10 @@ def get_config(args) -> GitHubRunnerConfig:
         except FileNotFoundError:
             pass  # gh not installed or not in PATH
 
+    # Fall back to environment variable only if auto-detection failed
+    if not repo:
+        repo = os.environ.get("GITHUB_REPO", "")
+
     if not token:
         safe_print(
             "Error: No GitHub token found. Set GITHUB_TOKEN or run 'gh auth login'"
@@ -173,6 +182,7 @@ def get_config(args) -> GitHubRunnerConfig:
         bot_token=bot_token,
         model=args.model,
         thinking_level=args.thinking_level,
+        fast_mode=getattr(args, "fast_mode", False),
         auto_fix_enabled=getattr(args, "auto_fix_enabled", False),
         auto_fix_labels=getattr(args, "auto_fix_labels", ["auto-fix"]),
         auto_post_reviews=getattr(args, "auto_post", False),
@@ -679,8 +689,13 @@ def main():
         "--thinking-level",
         type=str,
         default="medium",
-        choices=["none", "low", "medium", "high"],
+        choices=["low", "medium", "high"],
         help="Thinking level for extended reasoning",
+    )
+    parser.add_argument(
+        "--fast-mode",
+        action="store_true",
+        help="Enable Fast Mode for faster Opus 4.6 output",
     )
 
     subparsers = parser.add_subparsers(dest="command", help="Command to run")

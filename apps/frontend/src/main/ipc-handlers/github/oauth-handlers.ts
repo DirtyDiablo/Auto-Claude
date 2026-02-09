@@ -117,7 +117,7 @@ const GITHUB_DEVICE_URL = 'https://github.com/login/device';
  */
 function parseDeviceCode(output: string): string | null {
   const match = output.match(DEVICE_CODE_PATTERN);
-  if (match && match[1]) {
+  if (match?.[1]) {
     // Normalize: replace space with hyphen (GitHub expects XXXX-XXXX format)
     const normalizedCode = match[1].replace(' ', '-');
     debugLog('Device code extracted successfully (code redacted for security)');
@@ -350,7 +350,7 @@ export function registerStartGhAuth(): void {
           };
 
           ghProcess.stdout?.on('data', (data) => {
-            const chunk = data.toString();
+            const chunk = data.toString('utf-8');
             output += chunk;
             debugLog('gh stdout:', chunk);
             // Try to extract device code as data comes in
@@ -359,7 +359,7 @@ export function registerStartGhAuth(): void {
           });
 
           ghProcess.stderr?.on('data', (data) => {
-            const chunk = data.toString();
+            const chunk = data.toString('utf-8');
             errorOutput += chunk;
             debugLog('gh stderr:', chunk);
             // gh often outputs to stderr, so check there too

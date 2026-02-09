@@ -65,11 +65,11 @@ export class VersionSuggester {
       let errorOutput = '';
 
       childProcess.stdout?.on('data', (data: Buffer) => {
-        output += data.toString();
+        output += data.toString('utf-8');
       });
 
       childProcess.stderr?.on('data', (data: Buffer) => {
-        errorOutput += data.toString();
+        errorOutput += data.toString('utf-8');
       });
 
       childProcess.on('exit', (code: number | null) => {
@@ -198,7 +198,6 @@ except Exception as e:
       case 'minor':
         newVersion = `${major}.${minor + 1}.0`;
         break;
-      case 'patch':
       default:
         newVersion = `${major}.${minor}.${patch + 1}`;
         break;
