@@ -429,6 +429,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 8A pipeline routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.api_routers.phase9a_competitive import router as phase9a_router
+    app.include_router(phase9a_router)
+    logger.info("Phase 9A routes enabled: /contracts/awards, /contracts/expiring, /competitive/summary")
+except ImportError as e:
+    logger.warning(f"Phase 9A competitive routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

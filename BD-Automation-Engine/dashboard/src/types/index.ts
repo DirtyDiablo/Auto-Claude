@@ -159,6 +159,8 @@ export type TabId =
   | 'meetingcalendar'
   | 'qadashboard'
   | 'pipelinestatus'
+  | 'competitive'
+  | 'alerthistory'
   | 'systemhealth'
   | 'settings';
 

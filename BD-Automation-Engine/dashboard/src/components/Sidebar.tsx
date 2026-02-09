@@ -33,6 +33,8 @@ import {
   TrendingUp,
   Moon,
   Sun,
+  Swords,
+  Bell,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -73,10 +75,12 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'outreach', label: 'Outreach Manager', icon: Send },
   { id: 'meetingcalendar', label: 'Meeting Calendar', icon: CalendarCheck },
   { id: 'graphexplorer', label: 'Graph Explorer', icon: GitBranch },
+  { id: 'competitive', label: 'Competitive Intel', icon: Swords },
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   // Operations Section
   { id: 'qadashboard', label: 'QA Dashboard', icon: ShieldCheck, section: 'Operations' },
   { id: 'pipelinestatus', label: 'Pipeline Status', icon: Layers, section: 'Operations' },
+  { id: 'alerthistory', label: 'Alert History', icon: Bell, section: 'Operations' },
   // Takeover Section
   { id: 'accounttakeover', label: 'Account Takeover', icon: UserMinus, section: 'Takeover' },
   { id: 'enrichment', label: 'Auto-Enrichment', icon: Zap },

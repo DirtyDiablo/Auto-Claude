@@ -845,6 +845,45 @@ export class HubApiClient {
   }
 
   // ---------------------------------------------------------------------------
+  // COMPETITIVE INTELLIGENCE (Phase 9A)
+  // ---------------------------------------------------------------------------
+
+  async getContractAwards(days: number = 90, agency?: string, keyword?: string): Promise<{
+    awards: Array<{
+      id: string; title: string; agency: string; contractor: string;
+      value_usd: number; award_date: string; period: string; naics: string;
+    }>;
+    total: number;
+  }> {
+    const params = this.buildQueryString({ days, agency, keyword });
+    return this.fetch(`/contracts/awards${params}`);
+  }
+
+  async getExpiringContracts(months: number = 6): Promise<{
+    contracts: Array<{
+      id: string; title: string; agency: string; incumbent: string;
+      value_usd: number; expiry_date: string; months_remaining: number; recompete_likely: boolean;
+    }>;
+    total: number;
+    total_value_usd: number;
+  }> {
+    return this.fetch(`/contracts/expiring?months=${months}`);
+  }
+
+  async getCompetitiveSummary(): Promise<{
+    competitors: Array<{
+      name: string; recent_awards: number; total_value_usd: number;
+      hiring_activity: number; top_locations: Array<[string, number]>;
+      latest_award: string | null;
+    }>;
+    market_share: Array<{ name: string; value_usd: number; share_pct: number }>;
+    total_market_value: number;
+    expiring_soon: number;
+  }> {
+    return this.fetch('/competitive/summary');
+  }
+
+  // ---------------------------------------------------------------------------
   // CONFIGURATION
   // ---------------------------------------------------------------------------
 

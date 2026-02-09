@@ -46,6 +46,8 @@ const KnowledgeGraph = lazy(() => import('./pages/KnowledgeGraph').then(m => ({ 
 const AgentPanel = lazy(() => import('./pages/AgentPanel').then(m => ({ default: m.AgentPanel })));
 const MemoryContext = lazy(() => import('./pages/MemoryContext').then(m => ({ default: m.MemoryContext })));
 const SystemHealth = lazy(() => import('./pages/SystemHealth').then(m => ({ default: m.SystemHealth })));
+const CompetitiveLandscape = lazy(() => import('./pages/CompetitiveLandscape').then(m => ({ default: m.CompetitiveLandscape })));
+const AlertHistory = lazy(() => import('./pages/AlertHistory').then(m => ({ default: m.AlertHistory })));
 const ContactDetail = lazy(() => import('./pages/ContactDetail').then(m => ({ default: m.ContactDetail })));
 const ProgramDetail = lazy(() => import('./pages/ProgramDetail').then(m => ({ default: m.ProgramDetail })));
 
@@ -388,6 +390,10 @@ function App() {
         return <QADashboard />;
       case 'pipelinestatus':
         return <PipelineStatus />;
+      case 'competitive':
+        return <CompetitiveLandscape />;
+      case 'alerthistory':
+        return <AlertHistory />;
       case 'smartquery':
         return <SmartQuery loading={loading} />;
       case 'knowledgegraph':

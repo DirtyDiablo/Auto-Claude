@@ -9,6 +9,7 @@ import { CollectionHealthChart, WeeklyOutreachChart, SystemHealthCards } from '.
 import { DataHealthBanner } from '../components/DataHealthBanner';
 import { PageFreshnessBadge } from '../components/PageFreshnessBadge';
 import { PipelineWidget } from '../components/PipelineWidget';
+import { RecentAlertsCard, CompetitivePulseCard, UpcomingMeetingsCard } from '../components/ExecutiveInsightCards';
 import { hubApiClient } from '../services/hubApi';
 
 interface ExecutiveSummaryProps {
@@ -176,6 +177,13 @@ export function ExecutiveSummary({ summary, loading, onTabChange }: ExecutiveSum
           <DataHealthBanner />
         </div>
         <PipelineWidget onNavigate={() => onTabChange?.('pipelinestatus')} />
+      </div>
+
+      {/* Insight Cards Row */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <RecentAlertsCard onNavigate={() => onTabChange?.('alerthistory')} />
+        <CompetitivePulseCard onNavigate={() => onTabChange?.('competitive')} />
+        <UpcomingMeetingsCard onNavigate={() => onTabChange?.('meetingcalendar')} />
       </div>
 
       {/* Hub API Status Card */}
