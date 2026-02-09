@@ -118,6 +118,10 @@ export default defineConfig({
         target: 'http://127.0.0.1:8100',
         changeOrigin: true,
       },
+      '/ai': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
       '/outreach': {
         target: 'http://127.0.0.1:8300',
         changeOrigin: true,

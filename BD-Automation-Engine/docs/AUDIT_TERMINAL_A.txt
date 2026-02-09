@@ -1,0 +1,139 @@
+FULL CAPABILITIES & STATE AUDIT — BD-Automation-Engine (Hub)
+
+Output a structured report in this EXACT format. Do not skip any section. Be exhaustive.
+
+═══ SECTION 1: PROJECT METADATA ═══
+Run these and report results:
+- Git remote URL: git remote -v
+- Current branch: git branch --show-current
+- Last commit: git log -1 --format="%h %s (%ar)"
+- Total files: find . -type f -not -path "*/.git/*" -not -path "*/node_modules/*" -not -path "*/__pycache__/*" | wc -l
+- Python files: find . -name "*.py" -not -path "*/node_modules/*" | wc -l
+- JS/TS files: find . \( -name "*.ts" -o -name "*.tsx" -o -name "*.js" -o -name "*.jsx" \) -not -path "*/node_modules/*" | wc -l
+- Disk size: du -sh . --exclude=node_modules --exclude=.git
+- .env exists and in .gitignore: test -f .env && echo "exists" ; grep -q ".env" .gitignore && echo "gitignored"
+- requirements.txt exists: test -f requirements.txt && echo "yes" || echo "no"
+- package.json locations: find . -name "package.json" -not -path "*/node_modules/*"
+
+═══ SECTION 2: QDRANT STATE ═══
+```bash
+python -c "
+from qdrant_client import QdrantClient
+c = QdrantClient(host='localhost', port=6333)
+total = 0
+for col in c.get_collections().collections:
+    info = c.get_collection(col.name)
+    count = info.points_count
+    total += count
+    dim = info.config.params.vectors.size if hasattr(info.config.params.vectors, 'size') else 'multi'
+    indexes = list(info.payload_schema.keys()) if info.payload_schema else []
+    print(f'{col.name}: {count:,} vectors, dim={dim}, indexes={indexes}')
+print(f'TOTAL: {total:,} vectors')
+"
+```
+
+═══ SECTION 3: API ENDPOINTS ═══
+```bash
+python -c "
+import sys; sys.path.insert(0, '.')
+try:
+    from Engine8_Knowledge.api import app
+    routes = []
+    for route in app.routes:
+        if hasattr(route, 'methods'):
+            for method in route.methods:
+                routes.append(f'{method:7} {route.path}')
+    for r in sorted(routes):
+        print(r)
+    print(f'\nTotal: {len(routes)} endpoints')
+except Exception as e:
+    print(f'Failed to load app: {e}')
+    import subprocess
+    result = subprocess.run(['grep', '-rn', '@app.', '--include=*.py', 'Engine8_Knowledge/'], capture_output=True, text=True)
+    print(result.stdout[:3000])
+"
+```
+
+═══ SECTION 4: CREWAI AGENTS ═══
+```bash
+echo "=== Agent Definitions ==="
+grep -rn "Agent(" --include="*.py" Engine8_Knowledge/agents/ 2>/dev/null | head -20
+
+echo "=== Pydantic Output Models ==="
+grep -rn "class.*BaseModel" --include="*.py" Engine8_Knowledge/ 2>/dev/null | head -20
+
+echo "=== Crew Definitions ==="
+grep -rn "Crew(" --include="*.py" Engine8_Knowledge/ 2>/dev/null | head -10
+```
+
+═══ SECTION 5: INSTALLED PYTHON PACKAGES ═══
+```bash
+pip list 2>/dev/null | grep -iE "crewai|qdrant|mem0|graphiti|neo4j|openai|anthropic|langchain|langgraph|fastapi|uvicorn|docling|tenacity|structlog|pydantic|httpx|apify|sentence.transform|cross.encoder"
+```
+
+═══ SECTION 6: FRONTEND STATE ═══
+```bash
+for pkg in $(find . -name "package.json" -not -path "*/node_modules/*" | head -3); do
+  echo "=== $pkg ==="
+  node -e "const p=require('$pkg'); const d={...p.dependencies,...p.devDependencies}; Object.entries(d).sort().forEach(([k,v])=>console.log('  '+k+': '+v))" 2>/dev/null || python -c "import json; d=json.load(open('$pkg')); deps={**d.get('dependencies',{}),**d.get('devDependencies',{})}; [print(f'  {k}: {v}') for k,v in sorted(deps.items())]"
+done
+```
+
+═══ SECTION 7: NEO4J STATE ═══
+```bash
+python -c "
+from neo4j import GraphDatabase
+d = GraphDatabase.driver('bolt://localhost:7687', auth=('neo4j', 'password'))
+with d.session() as s:
+    print(f'Nodes: {s.run(\"MATCH (n) RETURN count(n) as c\").single()[\"c\"]}')
+    print(f'Relationships: {s.run(\"MATCH ()-[r]->() RETURN count(r) as c\").single()[\"c\"]}')
+    print(f'Labels: {s.run(\"CALL db.labels() YIELD label RETURN collect(label)\").single()[0]}')
+    print(f'RelTypes: {s.run(\"CALL db.relationshipTypes() YIELD relationshipType RETURN collect(relationshipType)\").single()[0]}')
+d.close()
+" 2>/dev/null || echo "Neo4j not accessible"
+```
+
+═══ SECTION 8: MEM0 STATE ═══
+```bash
+python -c "
+from qdrant_client import QdrantClient
+c = QdrantClient(host='localhost', port=6333)
+try:
+    info = c.get_collection('bd_memories')
+    print(f'bd_memories: {info.points_count} memories')
+    results = c.scroll('bd_memories', limit=3)
+    for pt in results[0]:
+        print(f'  Memory: {str(pt.payload)[:200]}')
+except: print('bd_memories not found')
+"
+```
+
+═══ SECTION 9: DIRECTORY STRUCTURE (2 levels) ═══
+```bash
+find . -maxdepth 2 -type d -not -path "*/node_modules/*" -not -path "*/__pycache__/*" -not -path "*/.git/*" | sort
+```
+
+═══ SECTION 10: DOCKER / SERVICES ═══
+```bash
+docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null || echo "Docker not running"
+```
+
+═══ SECTION 11: PORT CHECK ═══
+```bash
+netstat -ano | findstr ":8100 :6333 :7687 :5173" 2>/dev/null || echo "Use: netstat -tlnp on Linux"
+```
+
+═══ PHASE COMPLETION ═══
+Save this full report as: docs/TERMINAL_A_AUDIT_20260207.md
+Then output:
+
+═══ PHASE COMPLETION SUMMARY ═══
+Terminal: A
+Phase: Capabilities Audit
+Status: COMPLETE
+
+COPY-PASTE FOR ORCHESTRATOR:
+[Paste a one-paragraph summary here with: Qdrant total vectors + collection count, API endpoint count, CrewAI agent count, Neo4j node/rel count, Mem0 memory count, frontend package count, git branch + last commit]
+═══ END SUMMARY ═══
+
+Commit: git add docs/ && git commit -m "audit: Terminal A full capabilities report Feb 7 2026"

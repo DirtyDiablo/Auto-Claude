@@ -39,6 +39,8 @@ import { useAppData } from './hooks/useAppData';
 import { CommandPalette } from './components/CommandPalette';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { Breadcrumb } from './components/Breadcrumb';
+import { CopilotSidebar } from './components/CopilotSidebar';
+import { useCopilotContext } from './hooks/useCopilotContext';
 import type { TabId } from './types';
 import type { NativeNodeType } from './configs/nativeNodeConfigs';
 import './index.css';
@@ -65,6 +67,9 @@ function App() {
   const [mindMapNav, setMindMapNav] = useState<MindMapNav | null>(null);
   const [selectedContact, setSelectedContact] = useState<string | null>(null);
   const [selectedProgram, setSelectedProgram] = useState<string | null>(null);
+  const [copilotOpen, setCopilotOpen] = useState(false);
+
+  const copilotContext = useCopilotContext(activeTab, selectedContact, selectedProgram);
 
   // Responsive: auto-collapse sidebar under 1024px
   useEffect(() => {
@@ -120,7 +125,7 @@ function App() {
     setActiveTab(tab);
   }, []);
 
-  // Keyboard shortcuts: Alt+1..9 for quick navigation
+  // Keyboard shortcuts: Alt+1..9 for quick navigation, Ctrl+/ for copilot
   useEffect(() => {
     const shortcuts: Record<string, TabId> = {
       '1': 'executive',
@@ -137,6 +142,10 @@ function App() {
       if (e.altKey && !e.ctrlKey && !e.metaKey && shortcuts[e.key]) {
         e.preventDefault();
         handleTabChange(shortcuts[e.key]);
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        setCopilotOpen((prev) => !prev);
       }
     };
     document.addEventListener('keydown', handleKeyDown);
@@ -381,11 +390,36 @@ function App() {
         collapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
       />
-      <main className="flex-1 overflow-hidden">
+      <main className={`flex-1 overflow-hidden transition-[margin] duration-300 ${copilotOpen ? 'sm:mr-80' : ''}`}>
         <ErrorBoundary key={activeTab}>
           {renderContent()}
         </ErrorBoundary>
       </main>
+
+      {/* Copilot toggle button */}
+      {!copilotOpen && (
+        <button
+          onClick={() => setCopilotOpen(true)}
+          className="fixed bottom-6 right-6 z-30 w-12 h-12 rounded-full
+            bg-gradient-to-br from-blue-500 to-purple-600 text-white shadow-lg
+            hover:shadow-xl hover:scale-105 transition-all
+            flex items-center justify-center"
+          title="Open BD Copilot (Ctrl+/)"
+        >
+          <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+          </svg>
+        </button>
+      )}
+
+      <CopilotSidebar
+        isOpen={copilotOpen}
+        onToggle={() => setCopilotOpen(false)}
+        context={copilotContext}
+        onNavigateToContact={handleNavigateToContactDetail}
+        onNavigateToProgram={handleNavigateToProgramDetail}
+        onNavigateToJobs={() => handleTabChange('jobs')}
+      />
       <DataFreshness />
       <CommandPalette onNavigate={handleTabChange} />
     </div>

@@ -1,0 +1,122 @@
+[
+  {
+    "name": "Home",
+    "path": "/",
+    "status": "PASS",
+    "textLength": 2078,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "OK (2078 chars)",
+    "screenshot": "Home.png"
+  },
+  {
+    "name": "SmartQuery",
+    "path": "/search",
+    "status": "PASS",
+    "textLength": 87,
+    "jsErrors": 0,
+    "consoleErrors": 2,
+    "details": "Console errors: 2",
+    "screenshot": "SmartQuery.png"
+  },
+  {
+    "name": "Contacts",
+    "path": "/contacts",
+    "status": "PASS",
+    "textLength": 22,
+    "jsErrors": 0,
+    "consoleErrors": 1,
+    "details": "Console errors: 1",
+    "screenshot": "Contacts.png"
+  },
+  {
+    "name": "Programs",
+    "path": "/programs",
+    "status": "PASS",
+    "textLength": 39673,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "OK (39673 chars)",
+    "screenshot": "Programs.png"
+  },
+  {
+    "name": "Jobs_Kanban",
+    "path": "/jobs",
+    "status": "PASS",
+    "textLength": 22,
+    "jsErrors": 0,
+    "consoleErrors": 1,
+    "details": "Console errors: 1",
+    "screenshot": "Jobs_Kanban.png"
+  },
+  {
+    "name": "Outreach",
+    "path": "/outreach",
+    "status": "PASS",
+    "textLength": 22,
+    "jsErrors": 0,
+    "consoleErrors": 1,
+    "details": "Console errors: 1",
+    "screenshot": "Outreach.png"
+  },
+  {
+    "name": "Analytics",
+    "path": "/analytics",
+    "status": "PASS",
+    "textLength": 2078,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "OK (2078 chars)",
+    "screenshot": "Analytics.png"
+  },
+  {
+    "name": "OrgChart",
+    "path": "/org-chart",
+    "status": "PASS",
+    "textLength": 2078,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "OK (2078 chars)",
+    "screenshot": "OrgChart.png"
+  },
+  {
+    "name": "Agents",
+    "path": "/agents",
+    "status": "PASS",
+    "textLength": 22,
+    "jsErrors": 0,
+    "consoleErrors": 1,
+    "details": "Console errors: 1",
+    "screenshot": "Agents.png"
+  },
+  {
+    "name": "DarkMode",
+    "path": "-",
+    "status": "PASS",
+    "textLength": 0,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "Dark class applied (toggle: svg-icon-button)",
+    "screenshot": "DarkMode.png"
+  },
+  {
+    "name": "Keyboard_CtrlK",
+    "path": "-",
+    "status": "PASS",
+    "textLength": 0,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "Command palette opened",
+    "screenshot": "CommandPalette.png"
+  },
+  {
+    "name": "Responsive_1024x768",
+    "path": "-",
+    "status": "PASS",
+    "textLength": 2079,
+    "jsErrors": 0,
+    "consoleErrors": 0,
+    "details": "Renders at 1024x768 (2079 chars)",
+    "screenshot": "Responsive_1024x768.png"
+  }
+]
