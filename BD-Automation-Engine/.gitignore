@@ -1,100 +1,43 @@
-# Environment files (contain secrets)
+# Environment files (secrets)
 .env
 .env.*
 .env.local
 .env.production
 .env.*.local
-
-# Keep .env.example as template
+*.env
 !.env.example
-
-# MCP configuration (may contain secrets)
-.mcp.json
-mcp_config.json
-
-# Secrets and vault
-*.secret
-secrets/
-.vault/
 
 # Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
-build/
-develop-eggs/
-dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-
-# Virtual environments
-venv/
-ENV/
-env/
+*.pyc
 .venv/
 
-# Test caches
-.pytest_cache/
-.coverage
-htmlcov/
-
-# Node.js / Frontend
+# Node
 node_modules/
 dist/
-build/
-.vite/
-
-# IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
 
 # OS
 .DS_Store
-Thumbs.db
 
 # Logs
 *.log
-logs/
 
-# Temporary files
-tmp/
-temp/
-*.tmp
-tmpclaude-*-cwd
+# Windows artifacts
+nul
 
-# Jupyter Notebook
-.ipynb_checkpoints/
-
-# Database files
+# Large binary databases (use Git LFS if needed later)
 *.db
 *.sqlite
 *.sqlite3
 
-# Credentials and keys
-*.pem
-*.key
-credentials.json
-token.json
+# Duplicate data directories (canonical locations are in Engine dirs)
+# Canonical qdrant: Engine8_Knowledge/data/qdrant/
+# These are stale copies:
+/data/qdrant/
+/qdrant/
+# Canonical bullhorn: Engine7_BullhornETL/data/bullhorn_master.db
+# This is a stale copy:
+/data/bullhorn_master.db
 
-# Auto Claude data directory
-.auto-claude/
-tmpclaude-*
-# Temp/runtime files
+# Qdrant lock files
 *.lock
-*.pdf
-nul
