@@ -608,6 +608,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 34A relationship routes not available: {e}")
 
+# Phase 35A: Proposal & Capture Automation (capability statements, past performance, compliance, pricing)
+try:
+    from src.api.proposal_api import include_proposal_router
+    include_proposal_router(app)
+    logger.info("Phase 35A proposal routes enabled: /proposals/* (10 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 35A proposal routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
