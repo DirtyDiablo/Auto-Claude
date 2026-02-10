@@ -600,6 +600,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 33A NLQ routes not available: {e}")
 
+# Phase 34A: Relationship Intelligence (strength scoring, PageRank, path routing, network analysis)
+try:
+    from src.api.relationship_api import include_relationship_router
+    include_relationship_router(app)
+    logger.info("Phase 34A relationship routes enabled: /relationships/* (14 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 34A relationship routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
