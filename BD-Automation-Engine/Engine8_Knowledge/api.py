@@ -624,6 +624,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 36A revenue routes not available: {e}")
 
+# Phase 37A: Multi-Tenant SaaS + RBAC (tenant management, auth, RBAC, middleware)
+try:
+    from src.api.tenant_api import include_tenant_router
+    include_tenant_router(app)
+    logger.info("Phase 37A tenant routes enabled: /tenants/* + /auth/* (21 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 37A tenant routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
