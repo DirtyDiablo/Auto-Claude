@@ -520,6 +520,38 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 23A workflow routes not available: {e}")
 
+# Phase 24A: Scrape API v2 (Crawl4AI, SAM.gov, federal docs)
+try:
+    from Engine8_Knowledge.api_routers.scrape_api_v2 import router as scrape_v2_router
+    app.include_router(scrape_v2_router)
+    logger.info("Phase 24A scrape routes enabled: /scrape/*, /sam/*, /federal-docs/*")
+except ImportError as e:
+    logger.warning(f"Phase 24A scrape routes not available: {e}")
+
+# Phase 25A: Memory API (Mem0, 5-layer memory, lifecycle)
+try:
+    from Engine8_Knowledge.api_routers.memory_api import router as memory_v2_router
+    app.include_router(memory_v2_router)
+    logger.info("Phase 25A memory routes enabled: /memory/add, /memory/search, /memory/lifecycle/*")
+except ImportError as e:
+    logger.warning(f"Phase 25A memory routes not available: {e}")
+
+# Phase 26A: MCP Server API (FastMCP tools, config generator)
+try:
+    from Engine8_Knowledge.api_routers.mcp_api import router as mcp_router
+    app.include_router(mcp_router)
+    logger.info("Phase 26A MCP routes enabled: /mcp/health, /mcp/tools, /mcp/config")
+except ImportError as e:
+    logger.warning(f"Phase 26A MCP routes not available: {e}")
+
+# Phase 27A: Org Chart API (generation, inference, export)
+try:
+    from Engine8_Knowledge.api_routers.org_chart_api import router as org_chart_router
+    app.include_router(org_chart_router)
+    logger.info("Phase 27A org chart routes enabled: /org-chart/generate, /org-chart/export/*")
+except ImportError as e:
+    logger.warning(f"Phase 27A org chart routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

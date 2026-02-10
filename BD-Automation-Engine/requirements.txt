@@ -142,6 +142,16 @@ langgraph>=0.4.0
 langgraph-checkpoint-sqlite>=1.0.0
 aiosqlite>=0.19.0
 
+# ============================================
+# AI-NATIVE SCRAPING (Phase 24A)
+# ============================================
+crawl4ai>=0.4.0
+
+# ============================================
+# MCP SERVER (Phase 26A)
+# ============================================
+fastmcp>=2.0.0
+
 # Evaluation Framework
 ragas>=0.1.0
 datasets>=2.16.0

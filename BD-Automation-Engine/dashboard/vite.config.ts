@@ -191,6 +191,26 @@ export default defineConfig({
         target: 'http://127.0.0.1:8100',
         changeOrigin: true,
       },
+      '/scrape': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/sam': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/federal-docs': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/org-chart': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/mcp': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
     },
   },
 })
