@@ -632,6 +632,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 37A tenant routes not available: {e}")
 
+# Phase 38A: Autonomous Data Quality Engine (quality monitoring, self-healing, lineage, rules DSL)
+try:
+    from src.api.data_quality_api import include_data_quality_router
+    include_data_quality_router(app)
+    logger.info("Phase 38A data quality routes enabled: /data-quality/* (17 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 38A data quality routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
