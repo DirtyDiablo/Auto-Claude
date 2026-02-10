@@ -592,6 +592,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 32A predictive routes not available: {e}")
 
+# Phase 33A: Natural Language Query Engine (conversational BI, autocomplete)
+try:
+    from src.api.nlq_api import include_nlq_router
+    include_nlq_router(app)
+    logger.info("Phase 33A NLQ routes enabled: /nlq/* (9 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 33A NLQ routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
