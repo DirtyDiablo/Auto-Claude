@@ -66,6 +66,7 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'realtime', label: 'Real-Time Ops', icon: Activity, keywords: ['realtime', 'websocket', 'live', 'events', 'streaming'] },
   { id: 'searchquality', label: 'Search Quality', icon: Search, keywords: ['embeddings', 'benchmark', 'acronym', 'domain', 'search', 'quality'] },
   { id: 'automation', label: 'Automation Center', icon: Activity, keywords: ['automation', 'scheduler', 'cron', 'workflow', 'claude', 'tasks'] },
+  { id: 'systemoverview', label: 'System Overview', icon: BarChart3, keywords: ['system', 'overview', 'health', 'status', 'platform', 'mission', 'control'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['settings', 'config', 'api'] },
 ]
 

@@ -1,4 +1,33 @@
+# BD Intelligence Platform — Full Stack Docker Compose
+# Phase 20A
+#
+# Usage:
+#   docker compose up -d              # Start all services
+#   docker compose logs -f hub_api    # Watch API logs
+#   docker compose down               # Stop all services
+#   docker compose down -v            # Stop and remove volumes
+
 services:
+  # ── Vector Database ───────────────────────────────────
+  qdrant:
+    image: qdrant/qdrant:latest
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    networks:
+      - bd_network
+    restart: unless-stopped
+
+  # ── Graph Database ────────────────────────────────────
   neo4j:
     image: neo4j:5.26.0
     environment:
@@ -11,6 +40,93 @@ services:
       - "7687:7687"
     volumes:
       - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+    networks:
+      - bd_network
+    restart: unless-stopped
+
+  # ── Cache / Event Bus ─────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - bd_network
+    restart: unless-stopped
+
+  # ── Hub API (FastAPI) ─────────────────────────────────
+  hub_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      - QDRANT_URL=http://qdrant:6333
+      - REDIS_URL=redis://redis:6379/0
+      - NEO4J_URI=bolt://neo4j:7687
+      - NEO4J_USER=neo4j
+      - NEO4J_PASSWORD=pts_bd_2026
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - SLACK_BOT_TOKEN=${SLACK_BOT_TOKEN:-}
+      - SLACK_SIGNING_SECRET=${SLACK_SIGNING_SECRET:-}
+      - BULLHORN_CLIENT_ID=${BULLHORN_CLIENT_ID:-}
+      - BULLHORN_CLIENT_SECRET=${BULLHORN_CLIENT_SECRET:-}
+      - API_HOST=0.0.0.0
+      - API_PORT=8100
+    volumes:
+      - ./Engine8_Knowledge/data:/app/Engine8_Knowledge/data
+      - ./Engine7_BullhornETL/data:/app/Engine7_BullhornETL/data
+    depends_on:
+      qdrant:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8100/health"]
+      interval: 30s
+      timeout: 10s
+      start_period: 20s
+      retries: 3
+    networks:
+      - bd_network
+    restart: unless-stopped
+
+  # ── Dashboard (Nginx + React) ─────────────────────────
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      hub_api:
+        condition: service_healthy
+    networks:
+      - bd_network
+    restart: unless-stopped
+
+networks:
+  bd_network:
+    driver: bridge
 
 volumes:
+  qdrant_data:
+    driver: local
   neo4j_data:
+    driver: local
+  redis_data:
+    driver: local

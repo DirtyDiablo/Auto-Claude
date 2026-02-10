@@ -171,6 +171,7 @@ export type TabId =
   | 'realtime'
   | 'searchquality'
   | 'automation'
+  | 'systemoverview'
   | 'systemhealth'
   | 'settings';
 

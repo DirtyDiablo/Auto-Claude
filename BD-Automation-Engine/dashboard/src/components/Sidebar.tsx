@@ -42,6 +42,7 @@ import {
   Radio,
   Microscope,
   Cpu,
+  Home,
 } from 'lucide-react';
 import type { TabId } from '../types';
 import { NotificationCenter } from './NotificationCenter';
@@ -59,6 +60,7 @@ interface SidebarProps {
 }
 
 const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ className?: string }>; section?: string }> = [
+  { id: 'systemoverview', label: 'System Overview', icon: Home },
   { id: 'executive', label: 'Executive Summary', icon: LayoutDashboard },
   // Hub AI Section
   { id: 'smartquery', label: 'Smart Query', icon: Search, section: 'Hub AI' },

@@ -492,6 +492,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 19A automation routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.platform.stats_api import router as platform_router
+    app.include_router(platform_router)
+    logger.info("Phase 20A platform routes enabled: /platform/stats, /platform/services")
+except ImportError as e:
+    logger.warning(f"Phase 20A platform routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

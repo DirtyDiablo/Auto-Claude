@@ -1,0 +1,41 @@
+# BD Intelligence Platform — Development Overrides
+# Phase 20A
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Enables hot-reload for API and dashboard development.
+
+services:
+  hub_api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - ./Engine8_Knowledge:/app/Engine8_Knowledge
+      - ./Engine2_ProgramMapping:/app/Engine2_ProgramMapping
+      - ./Engine3_OrgChart:/app/Engine3_OrgChart
+      - ./Engine5_Scoring:/app/Engine5_Scoring
+      - ./Engine7_BullhornETL:/app/Engine7_BullhornETL
+      - ./data:/app/data
+    command: >
+      python -m uvicorn Engine8_Knowledge.api:app
+      --host 0.0.0.0 --port 8100 --reload
+      --reload-dir /app/Engine8_Knowledge
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - LOG_LEVEL=debug
+
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+      target: builder
+    command: npm run dev -- --host 0.0.0.0 --port 3000
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./dashboard/src:/app/src
+      - ./dashboard/index.html:/app/index.html
+    environment:
+      - VITE_API_BASE=http://hub_api:8100
