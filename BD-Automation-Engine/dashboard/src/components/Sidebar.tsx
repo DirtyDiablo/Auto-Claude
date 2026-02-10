@@ -94,6 +94,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'analytics', label: 'Analytics', icon: TrendingUp },
   { id: 'predictions', label: 'Predictive Insights', icon: TrendingUp },
   // Operations Section
+  { id: 'workflowcontrol', label: 'Workflow Control', icon: Activity, section: 'Operations' },
   { id: 'automation', label: 'Automation Center', icon: Cpu, section: 'Operations' },
   { id: 'realtime', label: 'Real-Time Ops', icon: Radio, section: 'Operations' },
   { id: 'qadashboard', label: 'QA Dashboard', icon: ShieldCheck, section: 'Operations' },

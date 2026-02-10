@@ -513,6 +513,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 22A search routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.workflows.workflow_routes import router as workflow_v2_router
+    app.include_router(workflow_v2_router)
+    logger.info("Phase 23A workflow routes enabled: /workflows/start, /workflows/active, /workflows/approvals, /workflows/stats")
+except ImportError as e:
+    logger.warning(f"Phase 23A workflow routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

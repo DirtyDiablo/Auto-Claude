@@ -173,6 +173,7 @@ export type TabId =
   | 'automation'
   | 'systemoverview'
   | 'searchlab'
+  | 'workflowcontrol'
   | 'systemhealth'
   | 'settings';
 

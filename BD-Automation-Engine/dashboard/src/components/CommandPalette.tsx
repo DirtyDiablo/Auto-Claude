@@ -67,6 +67,7 @@ const PAGES: { id: TabId; label: string; icon: typeof Users; keywords: string[] 
   { id: 'searchquality', label: 'Search Quality', icon: Search, keywords: ['embeddings', 'benchmark', 'acronym', 'domain', 'search', 'quality'] },
   { id: 'searchlab', label: 'Search Lab', icon: Search, keywords: ['search', 'hybrid', 'graphrag', 'bm25', 'sparse', 'benchmark', 'rerank'] },
   { id: 'automation', label: 'Automation Center', icon: Activity, keywords: ['automation', 'scheduler', 'cron', 'workflow', 'claude', 'tasks'] },
+  { id: 'workflowcontrol', label: 'Workflow Control', icon: Activity, keywords: ['workflow', 'langgraph', 'checkpoint', 'approval', 'hitl', 'orchestrator'] },
   { id: 'systemoverview', label: 'System Overview', icon: BarChart3, keywords: ['system', 'overview', 'health', 'status', 'platform', 'mission', 'control'] },
   { id: 'settings', label: 'Settings', icon: Settings, keywords: ['settings', 'config', 'api'] },
 ]

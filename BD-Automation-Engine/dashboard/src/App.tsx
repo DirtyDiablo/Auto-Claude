@@ -62,6 +62,7 @@ const SearchQuality = lazy(() => import('./pages/SearchQuality').then(m => ({ de
 const AutomationCenter = lazy(() => import('./pages/AutomationCenter').then(m => ({ default: m.AutomationCenter })));
 const SystemOverview = lazy(() => import('./pages/SystemOverview').then(m => ({ default: m.SystemOverview })));
 const SearchLab = lazy(() => import('./pages/SearchLab').then(m => ({ default: m.SearchLab })));
+const WorkflowControl = lazy(() => import('./pages/WorkflowControl').then(m => ({ default: m.WorkflowControl })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -447,6 +448,8 @@ function App() {
         return <SearchLab />;
       case 'automation':
         return <AutomationCenter />;
+      case 'workflowcontrol':
+        return <WorkflowControl />;
       case 'systemoverview':
         return <SystemOverview />;
       case 'systemhealth':
