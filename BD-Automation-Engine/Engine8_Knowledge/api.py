@@ -584,6 +584,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 31A streaming routes not available: {e}")
 
+# Phase 32A: Predictive Intelligence (win probability, opportunity scorer, forecaster, budget)
+try:
+    from src.api.predictive_api import include_predictive_router
+    include_predictive_router(app)
+    logger.info("Phase 32A predictive routes enabled: /predict/* (14 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 32A predictive routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
