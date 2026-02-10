@@ -576,6 +576,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 30A monitoring routes not available: {e}")
 
+# Phase 31A: Real-Time Event Streaming (event bus, processors, WebSocket, orchestrator)
+try:
+    from src.api.streaming_api import include_streaming_v2_router
+    include_streaming_v2_router(app)
+    logger.info("Phase 31A streaming routes enabled: /streaming/* (14 REST + 4 WebSocket)")
+except ImportError as e:
+    logger.warning(f"Phase 31A streaming routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
