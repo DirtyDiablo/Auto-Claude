@@ -499,6 +499,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 20A platform routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.graph.neo4j_routes import router as neo4j_router
+    app.include_router(neo4j_router)
+    logger.info("Phase 21A Neo4j graph routes enabled: /neo4j/health, /neo4j/stats, /neo4j/ingest/*, /neo4j/contacts/*, /neo4j/path/*")
+except ImportError as e:
+    logger.warning(f"Phase 21A Neo4j graph routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
