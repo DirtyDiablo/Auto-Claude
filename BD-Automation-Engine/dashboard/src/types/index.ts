@@ -172,6 +172,7 @@ export type TabId =
   | 'searchquality'
   | 'automation'
   | 'systemoverview'
+  | 'searchlab'
   | 'systemhealth'
   | 'settings';
 

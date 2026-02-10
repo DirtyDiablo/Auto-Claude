@@ -69,6 +69,7 @@ const tabs: Array<{ id: TabId; label: string; icon: React.ComponentType<{ classN
   { id: 'memory', label: 'Memory Context', icon: Brain, section: 'Hub AI' },
   { id: 'graphanalytics', label: 'Graph Analytics', icon: BarChart3, section: 'Hub AI' },
   { id: 'searchquality', label: 'Search Quality', icon: Microscope, section: 'Hub AI' },
+  { id: 'searchlab', label: 'Search Lab', icon: Search, section: 'Hub AI' },
   // Intelligence Section
   { id: 'intelligence', label: 'Job Intelligence', icon: Sparkles },
   { id: 'jobs', label: 'Jobs Pipeline', icon: Briefcase },

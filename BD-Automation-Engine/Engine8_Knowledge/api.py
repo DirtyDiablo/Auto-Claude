@@ -506,6 +506,13 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 21A Neo4j graph routes not available: {e}")
 
+try:
+    from Engine8_Knowledge.search.search_routes import router as search_v2_router
+    app.include_router(search_v2_router)
+    logger.info("Phase 22A search routes enabled: /search/v2, /search/v2/hybrid, /search/v2/graph, /search/v2/graphrag, /search/v2/benchmark")
+except ImportError as e:
+    logger.warning(f"Phase 22A search routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

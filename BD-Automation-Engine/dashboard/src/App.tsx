@@ -61,6 +61,7 @@ const RealtimeDashboard = lazy(() => import('./pages/RealtimeDashboard').then(m 
 const SearchQuality = lazy(() => import('./pages/SearchQuality').then(m => ({ default: m.SearchQuality })));
 const AutomationCenter = lazy(() => import('./pages/AutomationCenter').then(m => ({ default: m.AutomationCenter })));
 const SystemOverview = lazy(() => import('./pages/SystemOverview').then(m => ({ default: m.SystemOverview })));
+const SearchLab = lazy(() => import('./pages/SearchLab').then(m => ({ default: m.SearchLab })));
 
 // =============================================================================
 // LOADING SPINNER
@@ -442,6 +443,8 @@ function App() {
         return <RealtimeDashboard />;
       case 'searchquality':
         return <SearchQuality />;
+      case 'searchlab':
+        return <SearchLab />;
       case 'automation':
         return <AutomationCenter />;
       case 'systemoverview':
