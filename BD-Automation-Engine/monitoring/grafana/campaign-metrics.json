@@ -1,0 +1,33 @@
+{
+  "dashboard": {
+    "title": "PTS BD - Campaign Metrics",
+    "uid": "campaigns",
+    "tags": ["pts-bd", "campaigns"],
+    "panels": [
+      {
+        "title": "Active Campaigns",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 0},
+        "targets": [{"expr": "pts_active_campaigns"}]
+      },
+      {
+        "title": "Total Contacts",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 0},
+        "targets": [{"expr": "pts_contacts_total"}]
+      },
+      {
+        "title": "Scrape Jobs by Source",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 4},
+        "targets": [{"expr": "rate(pts_scrape_jobs_total[1h])", "legendFormat": "{{source}}"}]
+      },
+      {
+        "title": "Neo4j Node Count",
+        "type": "stat",
+        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 0},
+        "targets": [{"expr": "pts_neo4j_nodes_total"}]
+      }
+    ]
+  }
+}

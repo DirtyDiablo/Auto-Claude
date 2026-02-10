@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hub-api
+  namespace: pts-bd
+  labels:
+    app: hub-api
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8100
+      targetPort: 8100
+      protocol: TCP
+      name: http
+  selector:
+    app: hub-api

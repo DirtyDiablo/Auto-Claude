@@ -159,3 +159,17 @@ datasets>=2.16.0
 # Hugging Face Transformers (for CrossEncoder reranking)
 transformers>=4.35.0
 httpx>=0.25.0
+
+# ============================================
+# ML INTELLIGENCE (Phase 28A)
+# ============================================
+# spacy>=3.7.0          # Defense NER (optional, pattern fallback available)
+# bertopic>=0.16.0      # Topic modeling (optional, keyword fallback available)
+xgboost>=2.0.0
+shap>=0.45.0
+
+# ============================================
+# MONITORING (Phase 30A)
+# ============================================
+prometheus-client>=0.20.0
+psutil>=5.9.0

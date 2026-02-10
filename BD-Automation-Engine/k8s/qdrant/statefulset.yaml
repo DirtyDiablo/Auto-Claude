@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: qdrant
+  namespace: pts-bd
+spec:
+  serviceName: qdrant
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qdrant
+  template:
+    metadata:
+      labels:
+        app: qdrant
+    spec:
+      containers:
+        - name: qdrant
+          image: qdrant/qdrant:v1.16.3
+          ports:
+            - containerPort: 6333
+              name: http
+            - containerPort: 6334
+              name: grpc
+          resources:
+            requests:
+              cpu: "1"
+              memory: "4Gi"
+            limits:
+              cpu: "2"
+              memory: "8Gi"
+          volumeMounts:
+            - name: qdrant-data
+              mountPath: /qdrant/storage
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: 6333
+            initialDelaySeconds: 10
+            periodSeconds: 30
+  volumeClaimTemplates:
+    - metadata:
+        name: qdrant-data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 50Gi

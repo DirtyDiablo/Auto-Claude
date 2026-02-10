@@ -211,6 +211,14 @@ export default defineConfig({
         target: 'http://127.0.0.1:8100',
         changeOrigin: true,
       },
+      '/optimizer': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
+      '/monitoring': {
+        target: 'http://127.0.0.1:8100',
+        changeOrigin: true,
+      },
     },
   },
 })

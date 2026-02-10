@@ -1,0 +1,12 @@
+apiVersion: v2
+name: pts-bd
+description: PTS BD Intelligence Platform Helm Chart
+type: application
+version: 1.0.0
+appVersion: "30.0"
+keywords:
+  - bd-intelligence
+  - defense
+  - ai-platform
+maintainers:
+  - name: PTS Engineering

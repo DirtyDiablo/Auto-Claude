@@ -1,0 +1,27 @@
+{
+  "dashboard": {
+    "title": "PTS BD - Agent Activity",
+    "uid": "agent-activity",
+    "tags": ["pts-bd", "agents"],
+    "panels": [
+      {
+        "title": "Workflow Executions",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "targets": [{"expr": "rate(pts_workflow_executions_total[5m])", "legendFormat": "{{workflow}} - {{status}}"}]
+      },
+      {
+        "title": "ML Predictions",
+        "type": "timeseries",
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "targets": [{"expr": "rate(pts_ml_predictions_total[5m])", "legendFormat": "{{model}}"}]
+      },
+      {
+        "title": "Memory Operations by Layer",
+        "type": "barchart",
+        "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+        "targets": [{"expr": "rate(pts_memory_operations_total[5m])", "legendFormat": "{{layer}} - {{operation}}"}]
+      }
+    ]
+  }
+}

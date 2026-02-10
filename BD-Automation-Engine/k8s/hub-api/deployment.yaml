@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hub-api
+  namespace: pts-bd
+  labels:
+    app: hub-api
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: hub-api
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: hub-api
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8100"
+        prometheus.io/path: "/metrics"
+    spec:
+      containers:
+        - name: hub-api
+          image: pts-bd/hub-api:latest
+          ports:
+            - containerPort: 8100
+              name: http
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          env:
+            - name: ANTHROPIC_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pts-bd-secrets
+                  key: anthropic-api-key
+            - name: OPENAI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: pts-bd-secrets
+                  key: openai-api-key
+            - name: QDRANT_URL
+              value: "http://qdrant:6333"
+            - name: NEO4J_URI
+              value: "bolt://neo4j:7687"
+            - name: REDIS_URL
+              value: "redis://redis:6379"
+          livenessProbe:
+            httpGet:
+              path: /monitoring/live
+              port: 8100
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /monitoring/ready
+              port: 8100
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /app/data
+      volumes:
+        - name: data
+          emptyDir: {}

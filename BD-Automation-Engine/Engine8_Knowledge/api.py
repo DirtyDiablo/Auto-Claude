@@ -552,6 +552,30 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 27A org chart routes not available: {e}")
 
+# Phase 28A: ML API v2 (Defense NER, topic modeling, placement prediction, embeddings)
+try:
+    from Engine8_Knowledge.api_routers.ml_api import router as ml_v2_router
+    app.include_router(ml_v2_router)
+    logger.info("Phase 28A ML routes enabled: /ml/ner/*, /ml/topics/*, /ml/predict/*, /ml/embeddings/*")
+except ImportError as e:
+    logger.warning(f"Phase 28A ML routes not available: {e}")
+
+# Phase 29A: Optimizer API (self-assessment, auto-optimizer, regression detector, retrain)
+try:
+    from Engine8_Knowledge.api_routers.optimizer_api import router as optimizer_router
+    app.include_router(optimizer_router)
+    logger.info("Phase 29A optimizer routes enabled: /optimizer/assess, /optimizer/recommendations, /optimizer/retrain/*")
+except ImportError as e:
+    logger.warning(f"Phase 29A optimizer routes not available: {e}")
+
+# Phase 30A: Monitoring API (health probes, resource usage, Prometheus metrics)
+try:
+    from Engine8_Knowledge.api_routers.monitoring_api import router as monitoring_router
+    app.include_router(monitoring_router)
+    logger.info("Phase 30A monitoring routes enabled: /monitoring/health, /monitoring/ready, /monitoring/live, /metrics")
+except ImportError as e:
+    logger.warning(f"Phase 30A monitoring routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
