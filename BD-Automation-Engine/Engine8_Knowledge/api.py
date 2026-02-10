@@ -616,6 +616,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 35A proposal routes not available: {e}")
 
+# Phase 36A: Revenue Intelligence (revenue tracking, deal lifecycle, ROI, executive analytics)
+try:
+    from src.api.revenue_api import include_revenue_router
+    include_revenue_router(app)
+    logger.info("Phase 36A revenue routes enabled: /revenue/* (16 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 36A revenue routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
