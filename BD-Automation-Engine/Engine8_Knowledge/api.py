@@ -648,6 +648,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 39A knowledge routes not available: {e}")
 
+# Phase 40A: Agentic RAG + Self-RAG + ColBERT Reranker + Query Decomposition
+try:
+    from src.api.rag_api import include_rag_router
+    include_rag_router(app)
+    logger.info("Phase 40A RAG routes enabled: /rag/* (10 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 40A RAG routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
