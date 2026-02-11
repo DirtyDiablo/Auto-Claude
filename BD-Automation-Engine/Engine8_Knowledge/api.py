@@ -664,6 +664,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 41A swarm routes not available: {e}")
 
+# Phase 42A: Unified Memory Cortex — episodic/semantic/procedural
+try:
+    from src.api.memory_api import include_memory_router
+    include_memory_router(app)
+    logger.info("Phase 42A memory routes enabled: /memory/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 42A memory routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
