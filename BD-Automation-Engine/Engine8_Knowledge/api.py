@@ -704,6 +704,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 46A voice routes not available: {e}")
 
+# Phase 47A: Domain Embedding Fine-Tuner — synthetic data, fine-tuning, benchmarks
+try:
+    from src.api.embeddings_api import include_embeddings_router
+    include_embeddings_router(app)
+    logger.info("Phase 47A embeddings routes enabled: /api/embeddings/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 47A embeddings routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
