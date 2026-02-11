@@ -744,6 +744,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 51A simulation routes not available: {e}")
 
+# Phase 52A: Zero-Trust Security — ABAC policy enforcement, audit trail, encryption at rest
+try:
+    from src.api.security_api import include_security_router
+    include_security_router(app)
+    logger.info("Phase 52A security routes enabled: /api/security/* (14 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 52A security routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
