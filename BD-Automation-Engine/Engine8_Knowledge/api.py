@@ -656,6 +656,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 40A RAG routes not available: {e}")
 
+# Phase 41A: Agent Swarm Coordinator + Task Decomposition + Workers
+try:
+    from src.api.swarm_api import include_swarm_router
+    include_swarm_router(app)
+    logger.info("Phase 41A swarm routes enabled: /swarm/* (10 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 41A swarm routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
