@@ -720,6 +720,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 48A geo routes not available: {e}")
 
+# Phase 49A: Workflow Intelligence — Temporal durable workflows, cross-project orchestrator, NL-to-workflow
+try:
+    from src.api.workflows_api import include_workflows_router
+    include_workflows_router(app)
+    logger.info("Phase 49A workflow routes enabled: /api/workflows/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 49A workflow routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
