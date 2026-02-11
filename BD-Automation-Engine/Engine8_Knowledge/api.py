@@ -696,6 +696,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 45A MCP routes not available: {e}")
 
+# Phase 46A: Voice Intelligence — call briefings, transcript analysis
+try:
+    from src.api.voice_api import include_voice_router
+    include_voice_router(app)
+    logger.info("Phase 46A voice routes enabled: /api/voice/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 46A voice routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
