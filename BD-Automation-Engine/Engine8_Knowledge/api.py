@@ -680,6 +680,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 43A governance routes not available: {e}")
 
+# Phase 44A: Meta-Learning, Strategic Patterns, Insight Compiler
+try:
+    from src.api.intelligence_api import include_intelligence_router
+    include_intelligence_router(app)
+    logger.info("Phase 44A intelligence routes enabled: /api/intelligence/* (13 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 44A intelligence routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
