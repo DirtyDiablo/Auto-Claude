@@ -728,6 +728,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 49A workflow routes not available: {e}")
 
+# Phase 50A: Real-Time Collaboration — Yjs rooms, contact claiming, shared intel feed
+try:
+    from src.api.collaboration_api import include_collaboration_router
+    include_collaboration_router(app)
+    logger.info("Phase 50A collaboration routes enabled: /api/collab/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 50A collaboration routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
