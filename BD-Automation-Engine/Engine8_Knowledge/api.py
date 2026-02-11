@@ -640,6 +640,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 38A data quality routes not available: {e}")
 
+# Phase 39A: Temporal Knowledge Graph + Entity Resolution + Knowledge Compiler
+try:
+    from src.api.knowledge_api import include_knowledge_router
+    include_knowledge_router(app)
+    logger.info("Phase 39A knowledge routes enabled: /knowledge/* (15 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 39A knowledge routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
