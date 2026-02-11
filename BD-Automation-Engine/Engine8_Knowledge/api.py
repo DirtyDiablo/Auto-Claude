@@ -736,6 +736,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 50A collaboration routes not available: {e}")
 
+# Phase 51A: Simulation & Causal Intelligence — causal inference, digital twin, scenario analysis
+try:
+    from src.api.simulation_api import include_simulation_router
+    include_simulation_router(app)
+    logger.info("Phase 51A simulation routes enabled: /api/causal/*, /api/twin/*, /api/scenario/*, /api/simulation/* (14 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 51A simulation routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
