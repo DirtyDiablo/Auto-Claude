@@ -776,6 +776,22 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 55A experimentation routes not available: {e}")
 
+# Phase 57A: Scaling — connection pools, read replicas, cache layers, auto-scaling
+try:
+    from src.api.scaling_api import include_scaling_router
+    include_scaling_router(app)
+    logger.info("Phase 57A scaling routes enabled: /api/scaling/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 57A scaling routes not available: {e}")
+
+# Phase 58A: PWA — progressive web app, push notifications, responsive API
+try:
+    from src.api.pwa_api import include_pwa_router
+    include_pwa_router(app)
+    logger.info("Phase 58A PWA routes enabled: /api/pwa/* (10 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 58A PWA routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
