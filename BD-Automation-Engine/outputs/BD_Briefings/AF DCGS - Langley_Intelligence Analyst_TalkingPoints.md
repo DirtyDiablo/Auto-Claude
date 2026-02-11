@@ -4,23 +4,22 @@
 
 ### Program Knowledge
 - AF DCGS - Langley is a US Air Force program
-- Prime contractor: Unknown
+- Prime contractor: BAE Systems
 - Location: Hampton, VA
-- Clearance: TS/SCI w/ CI Poly
+- Clearance: Top Secret
 
 ### Our Strengths
-- Active pipeline of TS/SCI w/ CI Poly-cleared candidates
+- Active pipeline of Top Secret-cleared candidates
 - Experience supporting US Air Force programs
 - Rapid candidate deployment (typically 2-3 weeks)
 - Strong retention rates on cleared programs
 
 ### Pain Points to Address
-- Address: High clearance requirement limits candidate pool significantly
-- Address: TS/SCI requirement reduces available talent by ~90%
+- Address: Standard staffing need - competitive market
 
 ### Competitive Positioning
 - Position against incumbent gaps
-- Emphasize TS/SCI w/ CI Poly pipeline strength
+- Emphasize Top Secret pipeline strength
 - Highlight Hampton, VA local presence/remote capabilities
 - Differentiate on speed and quality
 
@@ -38,4 +37,4 @@
 4. Propose teaming arrangement (if applicable)
 
 ---
-*Priority: Hot | BD Score: 99/100*
+*Priority: Hot | BD Score: 80/100*

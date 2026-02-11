@@ -299,7 +299,11 @@ async def lifespan(app: FastAPI):
     retriever = get_hybrid_retriever()
     router = QueryRouter()
     pageindex = get_pageindex()
-    cache = get_cache()
+    try:
+        cache = get_cache()
+    except Exception as e:
+        logger.warning(f"Cache init failed (continuing without): {e}")
+        cache = None
 
     # Initialize agents
     program_agent = ProgramIntelAgent()

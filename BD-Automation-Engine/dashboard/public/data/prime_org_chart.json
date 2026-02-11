@@ -60,26 +60,26 @@
       }
     ],
     "programs": [
-      "Global Service Management \u2013 Operations II",
-      "Defense Enclave Services",
-      "DTRA IT Modernization / Support Services",
-      "NGEN-R SMIT (Already normalized \u2014 link-only reference row)",
-      "DIA Information Systems Engineering Office",
-      "Global Service Mgmt \u2013 Ops II (variant)",
-      "SSA IT Support Services Contract",
-      "Defense Enclave Services \u2013 Fourth Estate IT Consolidation",
-      "DISA GSM-O II",
-      "Marine Corps Enterprise Network",
-      "Global Network Operations (DISA GSM-O II)",
-      "DIA ISEO",
-      "Integrated Strategic & Expeditionary Operations (DIA ISEO variant)",
-      "DIA ISEO (IT Sustainment for DIA)",
-      "DISA GSM-O II (Surge Staffing Focus)",
-      "NGEN-R SMIT \u2013 Navy Next Generation Enterprise Network (Service Management, Integration & Transport)",
-      "Defense Health Agency Modernization / MHS GENESIS",
+      "DTRA IT Support Services",
+      "Global Solutions Management \u2013 Operations II",
       "DISA Global Service Mgmt \u2013 Ops II",
-      "Army ALTESS Cloud Hosting",
-      "DTRA IT Support Services"
+      "DIA Infrastructure Services Ops",
+      "Global Service Management \u2013 Operations II",
+      "Intelligence Systems Enterprise Operations",
+      "NGEN-R \u2014 Enterprise Network Program",
+      "Defense Health Agency Modernization / MHS GENESIS",
+      "DIA IT Sustainment & Engineering Office",
+      "Global Command and Control System \u2013 Joint (Variant)",
+      "DIA IT Sustainment & Enterprise Ops (Task Order)",
+      "DIA IT Sustainment (ISEO)",
+      "Global Service Mgmt \u2013 Ops II (variant)",
+      "Navy Enterprise Service Desk",
+      "DIA ISEO",
+      "Defense Enclave Services (DoDNet)",
+      "SSA IT Support Services Contract",
+      "DTRA IT Support Modernization",
+      "Information Technology Sustainment for Enhanced Ops",
+      "DIA Information Systems Engineering Office"
     ],
     "program_count": 42,
     "is_defense_prime": true,
@@ -135,12 +135,12 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Frank Finney",
+        "name": "Daniel Dunevant",
         "score": 52,
         "tier": "B - High Value"
       },
       {
-        "name": "Daniel Dunevant",
+        "name": "Erin Banks",
         "score": 52,
         "tier": "B - High Value"
       }
@@ -200,12 +200,12 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Frank Finney",
+        "name": "Daniel Dunevant",
         "score": 52,
         "tier": "B - High Value"
       },
       {
-        "name": "Daniel Dunevant",
+        "name": "Erin Banks",
         "score": 52,
         "tier": "B - High Value"
       }
@@ -226,12 +226,12 @@
     "top_contacts": [
       {
         "name": "Ivan Milovidov",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "Ryan Welch",
-        "score": 63,
+        "score": 58,
         "tier": "B - High Value"
       },
       {
@@ -276,25 +276,25 @@
       }
     ],
     "programs": [
-      "CMS Enterprise Cloud Infrastructure Services",
-      "NASA SENSE (Space Comms & Tracking)",
-      "SITEC III \u2013 Enterprise Operations & Maintenance",
       "Peraton NARSIL \u2013 Advanced System Intelligence",
-      "DFAS Enterprise IT Support \u2013 Secondary Row",
-      "Peraton ARCYBER Information Advantage Enterprise",
-      "DIMS (Peraton)",
-      "ARCYBER Information Advantage / Mission Support (general)",
-      "CBP Enterprise IT Support",
-      "JGLASS II \u2013 Shared Services",
-      "DC3 Cyber Crime Center \u2013 Secondary Row",
-      "Defense Cyber Crime Center",
       "DFAS Enterprise Support",
-      "Data Center & Cloud Optimization",
-      "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
+      "DC3 Cyber Crime Center \u2013 Secondary Row",
+      "JGLASS II \u2013 Shared Services",
+      "SITEC III \u2013 Enterprise Operations & Maintenance",
       "GRASP (Raytheon/Peraton)",
+      "CBP Enterprise IT Support",
+      "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
+      "Data Center & Cloud Optimization",
+      "Defense Cyber Crime Center",
       "DC3 \u2013 Defense Cyber Crime Center",
       "CAAC (Peraton)",
-      "NASA Space Network Evolution"
+      "Peraton ARCYBER Information Advantage Enterprise",
+      "ARCYBER Information Advantage / Mission Support (general)",
+      "DIMS (Peraton)",
+      "DFAS Enterprise IT Support \u2013 Secondary Row",
+      "NASA SENSE (Space Comms & Tracking)",
+      "NASA Space Network Evolution",
+      "CMS Enterprise Cloud Infrastructure Services"
     ],
     "program_count": 19,
     "is_defense_prime": true,
@@ -310,18 +310,18 @@
     "total_contacts": 35,
     "top_contacts": [
       {
-        "name": "Isaac Lopez",
+        "name": "Beckham De La Torre",
         "score": 63,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Isaac Lopez",
+        "score": 58,
         "tier": "B - High Value"
       },
       {
         "name": "Rolando Flores",
-        "score": 63,
-        "tier": "B - High Value"
-      },
-      {
-        "name": "Beckham De La Torre",
-        "score": 63,
+        "score": 58,
         "tier": "B - High Value"
       },
       {
@@ -538,7 +538,7 @@
       },
       {
         "name": "Erika Henkel",
-        "score": 38,
+        "score": 33,
         "tier": "C - Engaged"
       }
     ],
@@ -879,26 +879,26 @@
     "total_contacts": 0,
     "top_contacts": [],
     "programs": [
-      "BOA (Northrop Surge)",
-      "Sentinel ICBM / GBSD",
-      "Integrated Situational Awareness Environment",
-      "MDA Tactical Embedded Systems",
+      "Sentinel GBSD (AFNWC Hill AFB Variant)",
+      "BOA (General Staff Augmentation)",
       "Joint Tactical Ground Station System",
-      "Integrated Situational Awareness / Cyber Program",
-      "GMD Weapon System Modernization",
       "Joint Tactical Ground Station",
-      "Next-Gen OPIR (Ground + Payload)",
-      "NASA ETIS III",
-      "Joint Tactical Ground Stations",
-      "Command and Control, Battle Management & Communications (MDA)",
-      "Integrated Situational Awareness Tool Environment (Intel Cyber)",
-      "Intelligence Systems Infrastructure Tools & Enhancements",
-      "Basic Ordering Agreement (NG BOA)",
-      "Ground-Based Strategic Deterrent (Sentinel)",
+      "MDA Tactical Embedded Systems",
+      "Sentinel GBSD (LGM-35A)",
+      "NGOPIR / NGG / NGOPIR (already normalized \u2014 link row)",
+      "Sentinel Program Cybersecurity Core",
+      "Basic Ordering Agreement \u2013 Surge Staffing",
+      "Blanket Order Agreement \u2013 Staff Augmentation",
+      "Next-Generation Overhead Persistent Infrared",
+      "Integrated Battle Command System",
+      "Sentinel / GBSD",
       "Sentinel GBSD",
       "Business Operations & Analytics",
-      "Integrated Digital Engineering Environment",
-      "NextGen GEO (Network/Ops)"
+      "Integrated Situational Awareness Environment",
+      "Basic Ordering Agreement (NG Staff Augmentation)",
+      "Integrated Situational Awareness / Cyber Program",
+      "NGI \u2013 Next Generation Interceptor",
+      "SMORS \u2013 STRATCOM Mission Readiness Sustainment"
     ],
     "program_count": 43,
     "is_defense_prime": true,
@@ -1078,21 +1078,21 @@
     "total_contacts": 0,
     "top_contacts": [],
     "programs": [
-      "PAC-3 MSE (Deep Detail Variant; Consolidated)",
       "F-35 Sustainment",
-      "Conventional Prompt Strike \u2013 Secondary Row",
       "Air Force GIS Program (Lockheed Martin)",
+      "Command and Control, Battle Management, Communications",
       "Conventional Prompt Strike",
       "Next-Gen GEO OPIR",
-      "Command and Control, Battle Management, Communications",
-      "Multi-Mission Command & Control",
-      "Command & Control, Battle Mgmt & Comms",
-      "PAC-3 (Consolidated)",
-      "Aegis Ballistic Missile Defense / Aegis Program",
-      "Basic Ordering Agreement (Lockheed Martin)",
-      "Navy Aegis Combat System Modernization",
       "PAC-3 Missile Segment Enhancement (Deep Detail Variant)",
-      "C2BMC (Command & Control, Battle Mgmt, Comms)"
+      "Conventional Prompt Strike \u2013 Secondary Row",
+      "C2BMC (Command & Control, Battle Mgmt, Comms)",
+      "PAC-3 (Consolidated)",
+      "Multi-Mission Command & Control",
+      "Navy Aegis Combat System Modernization",
+      "PAC-3 MSE (Deep Detail Variant; Consolidated)",
+      "Basic Ordering Agreement (Lockheed Martin)",
+      "Command & Control, Battle Mgmt & Comms",
+      "Aegis Ballistic Missile Defense / Aegis Program"
     ],
     "program_count": 15,
     "is_defense_prime": true,

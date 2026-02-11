@@ -1,7 +1,8 @@
 {
   "last_fired": {
     "high_priority_contacts": "2026-02-06T15:35:34.165115",
-    "job_count_anomaly": "2026-02-06T15:35:34.809061"
+    "job_count_anomaly": "2026-02-06T15:35:34.809061",
+    "pipeline_failures": "2026-02-10T16:52:31.398774"
   },
   "history": [
     {
@@ -29,6 +30,34 @@
         "deviation": 0.401
       },
       "timestamp": "2026-02-06T15:35:34.808487"
+    },
+    {
+      "alert_id": "0feb10a6",
+      "rule_id": "pipeline_failures",
+      "severity": "AlertSeverity.CRITICAL",
+      "title": "Pipeline failed with 1 error(s)",
+      "message": "Last run errors: Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead.",
+      "data": {
+        "errors": [
+          "Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead."
+        ],
+        "run_id": "RUN_20260210_150631"
+      },
+      "timestamp": "2026-02-10T15:06:49.202296"
+    },
+    {
+      "alert_id": "61434723",
+      "rule_id": "pipeline_failures",
+      "severity": "AlertSeverity.CRITICAL",
+      "title": "Pipeline failed with 1 error(s)",
+      "message": "Last run errors: Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead.",
+      "data": {
+        "errors": [
+          "Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead."
+        ],
+        "run_id": "RUN_20260210_165213"
+      },
+      "timestamp": "2026-02-10T16:52:31.398774"
     }
   ],
   "baselines": {

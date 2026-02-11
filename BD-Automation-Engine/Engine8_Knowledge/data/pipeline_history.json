@@ -1,0 +1,278 @@
+[
+  {
+    "run_id": "7f3152ce",
+    "test_mode": true,
+    "status": "completed",
+    "started_at": "2026-02-09T15:18:33.971066",
+    "completed_at": "2026-02-09T15:18:35.588664",
+    "duration_seconds": 1.62,
+    "current_step": 8,
+    "total_steps": 8,
+    "steps": [
+      {
+        "step_id": "scrape",
+        "step_name": "Scrape Jobs",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:33.971066",
+        "completed_at": "2026-02-09T15:18:34.164876",
+        "duration_seconds": 0.19,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "scrape simulated"
+        }
+      },
+      {
+        "step_id": "standardize",
+        "step_name": "Standardize",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:34.164876",
+        "completed_at": "2026-02-09T15:18:34.366279",
+        "duration_seconds": 0.2,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "standardize simulated"
+        }
+      },
+      {
+        "step_id": "map",
+        "step_name": "Map Programs",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:34.366279",
+        "completed_at": "2026-02-09T15:18:34.574564",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "map simulated"
+        }
+      },
+      {
+        "step_id": "classify",
+        "step_name": "Classify Contacts",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:34.574564",
+        "completed_at": "2026-02-09T15:18:34.779791",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "classify simulated"
+        }
+      },
+      {
+        "step_id": "score",
+        "step_name": "Score Leads",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:34.779791",
+        "completed_at": "2026-02-09T15:18:34.974477",
+        "duration_seconds": 0.19,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "score simulated"
+        }
+      },
+      {
+        "step_id": "alert",
+        "step_name": "QA Alerts",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:34.974477",
+        "completed_at": "2026-02-09T15:18:35.183400",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "alert simulated"
+        }
+      },
+      {
+        "step_id": "sync",
+        "step_name": "CRM Sync",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:35.183400",
+        "completed_at": "2026-02-09T15:18:35.386741",
+        "duration_seconds": 0.2,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "sync simulated"
+        }
+      },
+      {
+        "step_id": "freshness",
+        "step_name": "Update Freshness",
+        "status": "completed",
+        "started_at": "2026-02-09T15:18:35.386741",
+        "completed_at": "2026-02-09T15:18:35.588305",
+        "duration_seconds": 0.2,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "freshness simulated"
+        }
+      }
+    ],
+    "errors": [],
+    "summary": {
+      "steps_completed": 8,
+      "steps_failed": 0,
+      "total_records": 0
+    }
+  },
+  {
+    "run_id": "ccf3023c",
+    "test_mode": true,
+    "status": "completed",
+    "started_at": "2026-02-09T15:19:31.346763",
+    "completed_at": "2026-02-09T15:19:32.983696",
+    "duration_seconds": 1.64,
+    "current_step": 8,
+    "total_steps": 8,
+    "steps": [
+      {
+        "step_id": "scrape",
+        "step_name": "Scrape Jobs",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:31.348270",
+        "completed_at": "2026-02-09T15:19:31.561227",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "scrape simulated"
+        }
+      },
+      {
+        "step_id": "standardize",
+        "step_name": "Standardize",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:31.561227",
+        "completed_at": "2026-02-09T15:19:31.753503",
+        "duration_seconds": 0.19,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "standardize simulated"
+        }
+      },
+      {
+        "step_id": "map",
+        "step_name": "Map Programs",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:31.753503",
+        "completed_at": "2026-02-09T15:19:31.963732",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "map simulated"
+        }
+      },
+      {
+        "step_id": "classify",
+        "step_name": "Classify Contacts",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:31.963732",
+        "completed_at": "2026-02-09T15:19:32.172139",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "classify simulated"
+        }
+      },
+      {
+        "step_id": "score",
+        "step_name": "Score Leads",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:32.172139",
+        "completed_at": "2026-02-09T15:19:32.373491",
+        "duration_seconds": 0.2,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "score simulated"
+        }
+      },
+      {
+        "step_id": "alert",
+        "step_name": "QA Alerts",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:32.373491",
+        "completed_at": "2026-02-09T15:19:32.574754",
+        "duration_seconds": 0.2,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "alert simulated"
+        }
+      },
+      {
+        "step_id": "sync",
+        "step_name": "CRM Sync",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:32.574754",
+        "completed_at": "2026-02-09T15:19:32.782663",
+        "duration_seconds": 0.21,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "sync simulated"
+        }
+      },
+      {
+        "step_id": "freshness",
+        "step_name": "Update Freshness",
+        "status": "completed",
+        "started_at": "2026-02-09T15:19:32.782663",
+        "completed_at": "2026-02-09T15:19:32.983696",
+        "duration_seconds": 0.2,
+        "records_processed": 0,
+        "error": null,
+        "details": {
+          "records": 0,
+          "mode": "test",
+          "message": "freshness simulated"
+        }
+      }
+    ],
+    "errors": [],
+    "summary": {
+      "steps_completed": 8,
+      "steps_failed": 0,
+      "total_records": 0
+    }
+  }
+]

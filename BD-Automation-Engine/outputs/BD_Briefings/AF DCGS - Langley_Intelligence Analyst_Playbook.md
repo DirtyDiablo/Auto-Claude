@@ -1,8 +1,8 @@
 # BD Playbook: Intelligence Analyst
 ## AF DCGS - Langley Opportunity
 
-**Generated:** 2026-01-25 23:06
-**Priority:** 🔥 Hot (Score: 99/100)
+**Generated:** 2026-02-10 19:08
+**Priority:** 🔥 Hot (Score: 80/100)
 **Match Confidence:** 20% (inferred)
 
 ---
@@ -12,22 +12,20 @@
 ### Program Overview
 **Program:** AF DCGS - Langley
 **Customer Agency:** US Air Force
-**Prime Contractor:** Unknown
+**Prime Contractor:** BAE Systems
 **Location:** Hampton, VA
 
 ### Opportunity Details
 **Position:** Intelligence Analyst
-**Clearance Required:** TS/SCI w/ CI Poly
-**Company:** None
+**Clearance Required:** Top Secret
+**Company:** BAE Systems
 
 ### Match Signals
 - Location match: Hampton -> AF DCGS - Langley
-- 'des' in description
-- 'des' in description
-- DCGS keyword: '480th'
+- DCGS keyword: 'dgs-'
 
 ### Job Description
-This Intelligence Analyst position provides critical intelligence analysis support to the 480th ISR Wing at Langley Air Force Base. The role involves conducting comprehensive all-source intelligence analysis, preparing various intelligence products for leadership consumption, and delivering briefings to senior military leadership. The analyst will play a key role in supporting Intelligence, Surveillance, and Reconnaissance (ISR) mission planning and execution activities, contributing to the wing's operational effectiveness and mission success.
+Provide intelligence analysis for DGS-1...
 
 ---
 
@@ -48,13 +46,12 @@ No decision makers identified. Target Tier 1-3 contacts.
 ## 3. Pain Points & Opportunities
 
 ### Identified Pain Points
-- High clearance requirement limits candidate pool significantly
-- TS/SCI requirement reduces available talent by ~90%
+- Standard staffing need - competitive market
 
 ### Staffing Signals
-- **Clearance Level:** TS/SCI w/ CI Poly (indicates highest-value position, very limited candidate pool)
+- **Clearance Level:** Top Secret (indicates significant clearance requirement, moderately competitive)
 - **Location:** Hampton, VA (market conditions: competitive ISR market, established presence)
-- **Technologies:** DCGS, Analyst Notebook, Palantir
+- **Technologies:** Not specified
 
 ### Certification Requirements
 - No specific certifications required
@@ -64,16 +61,15 @@ No decision makers identified. Target Tier 1-3 contacts.
 ## 4. Competitive Landscape
 
 ### Current Landscape
-**Prime Contractor:** Unknown
-**Our Position:** Direct bid opportunity
+**Prime Contractor:** BAE Systems
+**Our Position:** Potential subcontractor/teaming partner
 
 ### Win Themes
-- **Cleared Talent Pipeline:** Emphasize active pool of high-clearance candidates
 - **Pain Point Solutions:** Address identified staffing challenges directly
 - **Local Presence:** Highlight Hampton, VA capabilities or remote flexibility
 
 ### Competitive Differentiators
-- Active TS/SCI w/ CI Poly candidate pipeline (vs. starting from scratch)
+- Active Top Secret candidate pipeline (vs. starting from scratch)
 - Past performance on US Air Force programs
 - Retention-focused approach (reduces customer risk)
 - Rapid deployment capability (2-3 week typical)
@@ -84,7 +80,7 @@ No decision makers identified. Target Tier 1-3 contacts.
 
 ### Immediate Actions
 1. **IMMEDIATE:** Reach out to identified contacts within 24 hours
-2. Research None BD/capture team contacts
+2. Research BAE Systems BD/capture team contacts
 3. Prepare AF DCGS - Langley capabilities one-pager
 4. Track AF DCGS - Langley news and contract announcements
 5. Update CRM with opportunity details
@@ -101,15 +97,13 @@ No decision makers identified. Target Tier 1-3 contacts.
 ### BD Recommendations
 - Immediate outreach recommended - Hot opportunity
 - Escalate to BD leadership for review
-- High-value cleared position - prioritize
-- DCGS program alignment - leverage existing relationships
 
 ---
 
 ## Source Information
 
-**Job URL:** https://example.com/job/sample-002
-**Date Posted:** 2025-01-08
+**Job URL:** https://example.com/job2
+**Date Posted:** N/A
 **Scraped:** N/A
 
 ---

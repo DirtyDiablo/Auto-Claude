@@ -1,11 +1,139 @@
 {
-  "current_run": {
-    "run_id": "d33b0a74",
-    "started_at": "2026-02-07T13:20:31.656017",
-    "config": {
-      "input_file": null,
-      "test_mode": true,
-      "hot_leads_only": false
+  "current_run": null,
+  "last_completed_run": {
+    "run_id": "RUN_20260210_194534",
+    "timestamp": "2026-02-10T19:45:34.048037",
+    "success": true,
+    "duration_seconds": 2251.828713,
+    "stats": {
+      "jobs_processed": 3,
+      "hot_leads": 2,
+      "warm_leads": 1,
+      "cold_leads": 0,
+      "briefings_generated": 3,
+      "qa_approved": 0,
+      "qa_needs_review": 3
+    },
+    "errors": []
+  },
+  "history": [
+    {
+      "run_id": "RUN_20260210_140333",
+      "timestamp": "2026-02-10T14:03:33.122438",
+      "success": true,
+      "duration_seconds": 3065.505779,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
+    },
+    {
+      "run_id": "RUN_20260210_150631",
+      "timestamp": "2026-02-10T15:06:31.662237",
+      "success": false,
+      "duration_seconds": 20.697323,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": [
+        "Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead."
+      ]
+    },
+    {
+      "run_id": "RUN_20260210_160147",
+      "timestamp": "2026-02-10T16:01:47.593325",
+      "success": false,
+      "duration_seconds": 21.839403,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": [
+        "Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead."
+      ]
+    },
+    {
+      "run_id": "RUN_20260210_160209",
+      "timestamp": "2026-02-10T16:02:09.374052",
+      "success": true,
+      "duration_seconds": 3741.827806,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
+    },
+    {
+      "run_id": "RUN_20260210_165213",
+      "timestamp": "2026-02-10T16:52:13.872106",
+      "success": false,
+      "duration_seconds": 33.019615,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": [
+        "Knowledge indexing error: Storage folder C:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\Engine8_Knowledge\\data\\qdrant is already accessed by another instance of Qdrant client. If you require concurrent access, use Qdrant server instead."
+      ]
+    },
+    {
+      "run_id": "RUN_20260210_172046",
+      "timestamp": "2026-02-10T17:20:46.489828",
+      "success": true,
+      "duration_seconds": 2699.073964,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
+    },
+    {
+      "run_id": "RUN_20260210_194534",
+      "timestamp": "2026-02-10T19:45:34.048037",
+      "success": true,
+      "duration_seconds": 2251.828713,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
     }
-  }
+  ]
 }

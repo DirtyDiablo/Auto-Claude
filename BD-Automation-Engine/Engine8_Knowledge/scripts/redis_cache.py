@@ -81,7 +81,7 @@ class SemanticCache:
                 self.redis = redis.from_url(redis_url)
                 self.redis.ping()
                 self.backend = "redis"
-            except (ConnectionError, OSError) as e:
+            except Exception as e:
                 logger.warning("redis_connection_failed, falling back to memory: %s", e)
                 self.redis = InMemoryCache()
                 self.backend = "memory"

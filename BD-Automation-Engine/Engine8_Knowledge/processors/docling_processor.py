@@ -25,7 +25,7 @@ except ImportError:
 try:
     from docling_core.transforms.chunker import HybridChunker
     CHUNKER_AVAILABLE = True
-except ImportError:
+except (ImportError, RuntimeError):
     CHUNKER_AVAILABLE = False
     logger.warning("Docling chunker not available, using simple splitting")
 

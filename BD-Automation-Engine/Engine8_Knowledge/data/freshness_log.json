@@ -1,0 +1,11 @@
+{
+  "collections": {
+    "jobs": {
+      "count": 100,
+      "last_indexed": "2026-02-09T15:19:13.389458",
+      "source": "test"
+    }
+  },
+  "scraper_last_run": "2026-02-09T15:19:13.398580",
+  "tango_last_sync": null
+}
