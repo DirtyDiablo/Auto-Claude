@@ -688,6 +688,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 44A intelligence routes not available: {e}")
 
+# Phase 45A: MCP Ecosystem — tool registry, apps renderer, orchestrator
+try:
+    from src.api.mcp_api import include_mcp_router
+    include_mcp_router(app)
+    logger.info("Phase 45A MCP routes enabled: /api/mcp/* (10 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 45A MCP routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
