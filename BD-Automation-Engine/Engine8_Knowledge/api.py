@@ -760,6 +760,22 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 53A observability routes not available: {e}")
 
+# Phase 54A: Resilience — circuit breakers, chaos engineering, bulkheads, graceful degradation
+try:
+    from src.api.resilience_api import include_resilience_router
+    include_resilience_router(app)
+    logger.info("Phase 54A resilience routes enabled: /api/resilience/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 54A resilience routes not available: {e}")
+
+# Phase 55A: Experimentation — feature flags, A/B testing, experiment analytics
+try:
+    from src.api.experimentation_api import include_experimentation_router
+    include_experimentation_router(app)
+    logger.info("Phase 55A experimentation routes enabled: /api/experimentation/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 55A experimentation routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
