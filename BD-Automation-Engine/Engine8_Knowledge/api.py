@@ -712,6 +712,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 47A embeddings routes not available: {e}")
 
+# Phase 48A: Geographic Intelligence — geocoding, spatial queries, proximity analytics
+try:
+    from src.api.geo_api import include_geo_router
+    include_geo_router(app)
+    logger.info("Phase 48A geo routes enabled: /api/geo/* (10 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 48A geo routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
