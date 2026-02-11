@@ -672,6 +672,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 42A memory routes not available: {e}")
 
+# Phase 43A: Data Governance — catalog, schema registry, contracts, SLAs
+try:
+    from src.api.governance_api import include_governance_router
+    include_governance_router(app)
+    logger.info("Phase 43A governance routes enabled: /governance/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 43A governance routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
