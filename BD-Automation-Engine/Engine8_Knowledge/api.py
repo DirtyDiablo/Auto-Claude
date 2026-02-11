@@ -752,6 +752,14 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 52A security routes not available: {e}")
 
+# Phase 53A: Observability — distributed tracing, metrics pipeline, SLO engine
+try:
+    from src.api.observability_api import include_observability_router
+    include_observability_router(app)
+    logger.info("Phase 53A observability routes enabled: /api/observability/* (12 endpoints)")
+except ImportError as e:
+    logger.warning(f"Phase 53A observability routes not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
