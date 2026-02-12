@@ -10,20 +10,20 @@ Desktop.ini
 nul
 
 # ===========================
-# Security - Environment & Secrets (DISABLED FOR TESTING)
+# Security - Environment & Secrets
 # ===========================
-# .env
-# .env.*
+.env
+.env.*
 !.env.example
-# /config.json
-# *.pem
-# *.key
-# *.crt
-# *.p12
-# *.pfx
-# .secrets
-# secrets/
-# credentials/
+/config.json
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+.secrets
+secrets/
+credentials/
 
 # ===========================
 # IDE & Editors
