@@ -12,7 +12,6 @@ Usage:
 """
 
 import logging
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +74,20 @@ NODE_TYPES = {
             "action", "status", "note_body",
         ],
     },
+    "File": {
+        "description": "Data file tracked for lineage (CSV, JSON, SQLite, etc.)",
+        "properties": [
+            "path", "name", "type", "extension", "size_bytes", "hash",
+            "modified", "engine", "is_input", "is_output",
+        ],
+    },
+    "Process": {
+        "description": "Script or pipeline step that transforms data",
+        "properties": [
+            "name", "script_path", "engine", "description",
+            "last_run", "run_count", "avg_duration_seconds",
+        ],
+    },
 }
 
 
@@ -105,6 +118,11 @@ RELATIONSHIP_TYPES = {
     "BETWEEN": {"from": "Interaction", "to": "Person", "props": []},
     "ABOUT": {"from": "Interaction", "to": "Program", "props": []},
     "BY_USER": {"from": "Interaction", "to": "Person", "props": []},
+    # Lineage relationships (File/Process tracking)
+    "DERIVED_FROM": {"from": "File", "to": "File", "props": ["transform", "timestamp", "process_name"]},
+    "DEPENDS_ON": {"from": "File", "to": "File", "props": ["dependency_type"]},
+    "READS": {"from": "Process", "to": "File", "props": ["role"]},
+    "WRITES": {"from": "Process", "to": "File", "props": ["role"]},
 }
 
 

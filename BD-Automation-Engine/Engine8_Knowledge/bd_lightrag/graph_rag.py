@@ -5,7 +5,7 @@ Provides graph-based reasoning on top of existing Qdrant vectors.
 import os
 import asyncio
 from enum import Enum
-from typing import List, Dict, Optional, Any
+from typing import List, Dict
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -46,6 +46,10 @@ class BDGraphRAG:
         working_dir: str = None,
         use_qdrant: bool = False,
         qdrant_url: str = "http://localhost:6333",
+        use_neo4j: bool = False,
+        neo4j_uri: str = "bolt://localhost:7687",
+        neo4j_user: str = "neo4j",
+        neo4j_password: str = None,
         llm_provider: str = "openai",  # "openai", "anthropic", or "ollama"
         embedding_model: str = "all-MiniLM-L6-v2"
     ):
@@ -56,6 +60,10 @@ class BDGraphRAG:
             working_dir: Directory for LightRAG data storage
             use_qdrant: Whether to use Qdrant for vector storage
             qdrant_url: URL for Qdrant server (if use_qdrant=True)
+            use_neo4j: Whether to use Neo4j for graph storage (instead of default NetworkX)
+            neo4j_uri: Neo4j bolt URI (if use_neo4j=True)
+            neo4j_user: Neo4j username (if use_neo4j=True)
+            neo4j_password: Neo4j password (if use_neo4j=True, reads NEO4J_PASSWORD env if None)
             llm_provider: LLM provider for entity extraction
             embedding_model: Sentence transformer model for embeddings
         """
@@ -67,10 +75,8 @@ class BDGraphRAG:
         self.working_dir = working_dir
         Path(working_dir).mkdir(parents=True, exist_ok=True)
 
-        # Configure storage
+        # Configure vector storage
         vector_storage = "QdrantVectorDBStorage" if use_qdrant else "NanoVectorDBStorage"
-
-        # Configure vector storage kwargs for Qdrant
         vector_db_kwargs = {}
         if use_qdrant:
             vector_db_kwargs = {
@@ -78,12 +84,32 @@ class BDGraphRAG:
                 "collection_name": "bd_lightrag"
             }
 
+        # Configure graph storage (Neo4j or default NetworkX)
+        graph_storage = "NetworkXStorage"
+        graph_db_kwargs = {}
+        if use_neo4j:
+            try:
+                from lightrag.kg.neo4j_impl import Neo4JStorage  # noqa: F401
+                graph_storage = "Neo4JStorage"
+                graph_db_kwargs = {
+                    "uri": neo4j_uri,
+                    "user": neo4j_user,
+                    "password": neo4j_password or os.environ.get("NEO4J_PASSWORD", ""),
+                }
+                logger.info("lightrag_neo4j_backend_enabled", uri=neo4j_uri)
+            except ImportError:
+                logger.warning(
+                    "lightrag_neo4j_not_available",
+                    msg="Neo4JStorage not found in lightrag. Falling back to NetworkX. "
+                        "Install with: pip install 'lightrag-hku[neo4j]'"
+                )
+
         # Get LLM and embedding functions
         llm_func = self._get_llm_func(llm_provider)
         embedding_func = self._get_embedding_func(embedding_model)
 
-        # Initialize LightRAG
-        self.rag = LightRAG(
+        # Build LightRAG kwargs
+        rag_kwargs = dict(
             working_dir=working_dir,
             vector_storage=vector_storage,
             vector_db_storage_cls_kwargs=vector_db_kwargs,
@@ -93,10 +119,18 @@ class BDGraphRAG:
             chunk_overlap_token_size=100,
             entity_extract_max_gleaning=1,
             top_k=20,
-            cosine_threshold=0.2
+            cosine_threshold=0.2,
         )
+        if graph_storage != "NetworkXStorage":
+            rag_kwargs["graph_storage"] = graph_storage
+            if graph_db_kwargs:
+                rag_kwargs["graph_db_storage_cls_kwargs"] = graph_db_kwargs
+
+        # Initialize LightRAG
+        self.rag = LightRAG(**rag_kwargs)
 
         self.llm_provider = llm_provider
+        self.graph_storage_type = graph_storage
         self._initialized = False  # Will be True after async init
         self._storage_initialized = False
 
@@ -488,6 +522,7 @@ class BDGraphRAG:
             stats = {
                 "working_dir": self.working_dir,
                 "llm_provider": self.llm_provider,
+                "graph_storage": self.graph_storage_type,
                 "initialized": self._initialized
             }
 
