@@ -9,9 +9,8 @@ Migrates the Phase 15 pipeline_manager_workflow to production architecture with:
 - Trend tracking vs last 4 weeks for pipeline velocity
 """
 
-import asyncio
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import structlog
 
@@ -115,7 +114,7 @@ async def check_upcoming_deadlines(state: Dict[str, Any]) -> Dict[str, Any]:
     # Check for typical deadline patterns
     for opp in opportunities:
         # Programs with known recompete dates
-        program = opp.get("program", "").upper()
+        opp.get("program", "").upper()
         status = opp.get("status", "")
 
         if status in ("proposal_due", "rfp_response", "deadline"):

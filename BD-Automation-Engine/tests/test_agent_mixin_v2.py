@@ -3,7 +3,7 @@
 import pytest
 import pytest_asyncio
 
-from src.memory.cortex import MemoryCortex, Memory, MemoryType
+from src.memory.cortex import MemoryCortex, Memory
 from src.memory.agent_mixin_v2 import MemoryAwareAgentV2
 
 

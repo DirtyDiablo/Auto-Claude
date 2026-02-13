@@ -4,7 +4,7 @@ Hybrid Retriever: Semantic + BM25 + CrossEncoder Reranking
 """
 
 import os
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass
 import numpy as np
 import logging
@@ -38,7 +38,6 @@ except ImportError:
 
 try:
     from qdrant_client import QdrantClient
-    from qdrant_client.models import Filter, FieldCondition, MatchValue
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False

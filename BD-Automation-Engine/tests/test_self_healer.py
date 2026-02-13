@@ -4,7 +4,6 @@ import pytest
 
 from src.data_quality.self_healer import (
     SelfHealingPipeline,
-    AutoFixResult,
     FixStatus,
     fix_email_normalize,
     fix_phone_format,

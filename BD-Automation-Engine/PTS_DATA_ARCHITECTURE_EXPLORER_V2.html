@@ -1,0 +1,2271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PTS Data Architecture Explorer V2</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cytoscape/3.28.1/cytoscape.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dagre/0.8.5/dagre.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/cytoscape-dagre@2.5.0/cytoscape-dagre.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-primary: #0a0e1a;
+  --bg-secondary: #111827;
+  --bg-tertiary: #1a2235;
+  --bg-card: #161e2e;
+  --border: #2a3654;
+  --border-bright: #3b4f75;
+  --text-primary: #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent-blue: #3b82f6;
+  --accent-cyan: #06b6d4;
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --accent-violet: #8b5cf6;
+  --accent-orange: #f97316;
+  --cat-federal: #3b82f6;
+  --cat-procurement: #10b981;
+  --cat-org: #f97316;
+  --cat-bd: #8b5cf6;
+  --cat-ref: #64748b;
+  --cat-meta: #06b6d4;
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { 
+  font-family: 'DM Sans', sans-serif; 
+  background: var(--bg-primary); 
+  color: var(--text-primary); 
+  overflow: hidden;
+  height: 100vh;
+}
+#app {
+  display: grid;
+  grid-template-columns: 280px 1fr 400px;
+  grid-template-rows: 56px 1fr 40px;
+  height: 100vh;
+  gap: 0;
+}
+#header {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 10;
+}
+#header h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--accent-cyan);
+}
+#header h1 span { color: var(--text-muted); font-weight: 300; }
+.header-stats {
+  display: flex;
+  gap: 24px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+.header-stats .stat { color: var(--text-muted); }
+.header-stats .stat strong { color: var(--text-primary); font-weight: 600; }
+#sidebar {
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 12px;
+}
+.sidebar-section { margin-bottom: 16px; }
+.sidebar-section h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.category-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-secondary);
+  transition: all 0.15s;
+  margin-bottom: 2px;
+}
+.category-filter:hover { background: var(--bg-tertiary); }
+.category-filter.active { color: var(--text-primary); background: var(--bg-tertiary); }
+.category-filter .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.category-filter .count {
+  margin-left: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+#search {
+  width: 100%;
+  padding: 8px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+#search::placeholder { color: var(--text-muted); }
+.node-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  border-radius: 3px;
+  transition: all 0.1s;
+  font-family: 'JetBrains Mono', monospace;
+}
+.node-list-item:hover { background: var(--bg-tertiary); color: var(--text-primary); }
+.node-list-item .pip { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+.node-list-item .props { margin-left: auto; font-size: 9px; color: var(--text-muted); }
+#cy {
+  background: var(--bg-primary);
+  background-image: radial-gradient(circle at 1px 1px, #1a2235 1px, transparent 0);
+  background-size: 30px 30px;
+}
+#detail-panel {
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border);
+  overflow-y: auto;
+  padding: 16px;
+}
+#empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 12px;
+  gap: 8px;
+}
+#empty-state .icon { font-size: 32px; opacity: 0.3; }
+#detail-content { display: none; }
+.detail-header { margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.detail-header h2 { font-size: 18px; font-weight: 600; margin: 4px 0; }
+.detail-header .subtitle { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.node-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.detail-section { margin-bottom: 16px; }
+.detail-section h4 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border);
+}
+.source-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin: 2px 4px 2px 0;
+}
+.prop-table { width: 100%; font-size: 11px; }
+.prop-table tr { border-bottom: 1px solid #1a223510; }
+.prop-table tr:hover { background: var(--bg-tertiary); }
+.prop-table td { padding: 3px 4px; vertical-align: top; }
+.prop-name { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent-cyan); white-space: nowrap; }
+.prop-type { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--accent-amber); white-space: nowrap; }
+.prop-note { font-size: 10px; color: var(--text-muted); }
+.rel-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  margin-bottom: 2px;
+}
+.rel-item:hover { background: var(--bg-tertiary); }
+.rel-arrow { color: var(--text-muted); }
+.rel-label { color: var(--accent-emerald); font-weight: 500; }
+.alias-item {
+  padding: 3px 6px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+.alias-from { color: var(--accent-rose); text-decoration: line-through; opacity: 0.7; }
+.alias-to { color: var(--accent-cyan); }
+#footer {
+  grid-column: 1 / -1;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+.view-btn {
+  padding: 4px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-left: 4px;
+}
+.view-btn:hover { border-color: var(--border-bright); color: var(--text-primary); }
+.view-btn.active { border-color: var(--accent-cyan); color: var(--accent-cyan); background: #06b6d410; }
+.v2-badge { 
+  display:inline-block; padding:1px 6px; border-radius:3px; font-size:9px; 
+  background: #f43f5e20; color: #f43f5e; border: 1px solid #f43f5e40; 
+  font-weight:600; letter-spacing:0.5px; margin-left:8px; vertical-align:middle;
+}
+</style>
+</head>
+<body>
+<div id="app">
+<div id="header">
+  <h1>PTS DATA ARCHITECTURE EXPLORER <span>// 3-Project Unified Schema</span><span class="v2-badge">V2</span></h1>
+  <div class="header-stats">
+    <div class="stat">Entities: <strong id="stat-nodes">0</strong></div>
+    <div class="stat">Edges: <strong id="stat-edges">0</strong></div>
+    <div class="stat">Properties: <strong id="stat-props">0</strong></div>
+    <div class="stat">Sources: <strong>BD-Engine + data-scraper + N8N-Builder</strong></div>
+  </div>
+</div>
+<div id="sidebar">
+  <div class="sidebar-section">
+    <h3>Search</h3>
+    <input id="search" type="text" placeholder="Search nodes, properties, aliases...">
+  </div>
+  <div class="sidebar-section">
+    <h3>Categories</h3>
+    <div id="category-filters"></div>
+  </div>
+  <div class="sidebar-section">
+    <h3>Entities</h3>
+    <div id="node-list"></div>
+  </div>
+</div>
+<div id="cy"></div>
+<div id="detail-panel">
+  <div id="empty-state">
+    <div class="icon">&#9672;</div>
+    <div>Click a node to explore</div>
+    <div style="font-size:10px;margin-top:4px">64 entities &middot; 1000+ properties &middot; 100+ relationships</div>
+  </div>
+  <div id="detail-content"></div>
+</div>
+<div id="footer">
+  <div>PTS Unified Data Architecture &middot; BD-Automation-Engine + data-scraper + N8N-Builder &middot; Feb 2026</div>
+  <div>
+    Layout:
+    <button class="view-btn active" onclick="setLayout('dagre')">Hierarchy</button>
+    <button class="view-btn" onclick="setLayout('cose')">Force</button>
+    <button class="view-btn" onclick="setLayout('grid')">Grid</button>
+    <button class="view-btn" onclick="setLayout('concentric')">Radial</button>
+  </div>
+</div>
+</div>
+<script>
+// ═══════════════════════════════════════════════════
+// DATA MODEL V3 — 64 entities, 1000+ properties, 90+ relationships
+// Sourced from: data_architecture_bd_engine.json V3, MASTER_PROPERTY_ARCHITECTURE.md,
+// DATA_AUDIT_REPORT.md, TANGO_AND_DATA_INVENTORY, FULL_CODESPACE_AUDIT, Engine8 API routers
+// ═══════════════════════════════════════════════════
+
+const CATEGORIES = {
+  'Federal Awards': { color: '#3b82f6', nodes: ['Contract', 'Subaward', 'Task Order', 'OTA', 'Transaction', 'Federal Account'] },
+  'Procurement': { color: '#10b981', nodes: ['Opportunity', 'Forecast', 'Notice', 'IDV', 'Contract Vehicle', 'Grant', 'Recompete', 'Contract Watch', 'Recompete Prediction', 'Proposal Artifact'] },
+  'Organizations': { color: '#f97316', nodes: ['Prime', 'Vendor', 'Agency'] },
+  'BD Intelligence': { color: '#8b5cf6', nodes: ['Contact', 'Job', 'Activity', 'Program', 'BD Target', 'Competitor', 'Note', 'Placement', 'Document', 'Insight', 'Weekly Report', 'Call Briefing', 'Transcript Intel', 'Relationship Score', 'Win Probability', 'Hiring Forecast', 'Revenue Placement', 'Strategic Pattern'] },
+  'Reference': { color: '#64748b', nodes: ['NAICS Code', 'PSC Code', 'Location', 'Technology', 'Certification'] },
+  'Meta/Ops': { color: '#06b6d4', nodes: ['Author', 'Scrape Run', 'Fiscal Phase', 'Past Performance', 'Capability', 'Enrichment Run', 'Intelligence Report', 'Memory', 'Interaction', 'Graph Entity', 'Graph Relationship', 'Source File', 'Data Quality Log', 'Processing Stats', 'Notification', 'Alert', 'Swarm Task', 'Workflow Run', 'Contact Claim', 'Streaming Event', 'File Node', 'Process Node'] }
+};
+
+const NODES = {
+  // ═══════════════════════════════════════════════════
+  // BD INTELLIGENCE (18 entities)
+  // ═══════════════════════════════════════════════════
+  'Job': {
+    pk: 'job_id + source', records: '16,496 vectors + 700 Bullhorn', category: 'BD Intelligence',
+    desc: 'Job posting from staffing portals, contractor career sites, or Bullhorn CRM. Enriched with program mapping, BD scoring, and clearance detection.',
+    sources: ['Insight Global', 'Apex Systems', 'TEKsystems', 'Bullhorn CRM', 'GDIT Careers', 'Apify Scrapers', 'Qdrant jobs collection'],
+    propCount: 76,
+    properties: [
+      { name: 'job_id', type: 'string PK', note: 'Unique per source portal' },
+      { name: 'title', type: 'string', note: 'Raw title from source' },
+      { name: 'title_clean', type: 'string', note: 'Clearance/noise stripped' },
+      { name: 'source_url', type: 'string', note: 'Full listing URL' },
+      { name: 'source_portal', type: 'enum', note: 'IG, Apex, TEK, CACI, Bullhorn' },
+      { name: 'city', type: 'string', note: 'Parsed city' },
+      { name: 'state', type: 'string', note: 'Full state name' },
+      { name: 'state_abbrev', type: 'string', note: '2-letter code' },
+      { name: 'date_posted_iso', type: 'datetime', note: 'ISO 8601 normalized' },
+      { name: 'employment_type', type: 'enum', note: 'Perm/Contract/C2P' },
+      { name: 'clearance_level', type: 'enum', note: 'TS/SCI, TS, Secret, None' },
+      { name: 'clearance_required', type: 'bool', note: 'True/False' },
+      { name: 'salary_min', type: 'float', note: 'Parsed minimum' },
+      { name: 'salary_max', type: 'float', note: 'Parsed maximum' },
+      { name: 'salary_annual_min', type: 'float', note: 'Annualized (hourly x 2080)' },
+      { name: 'experience_min_years', type: 'int', note: 'Minimum years' },
+      { name: 'education_level', type: 'string', note: 'Normalized level' },
+      { name: 'certs_required', type: 'string', note: 'Pipe-delimited list' },
+      { name: 'technologies', type: 'string', note: 'Detected tech stack' },
+      { name: 'functional_area', type: 'enum', note: '21 categories' },
+      { name: 'seniority_level', type: 'enum', note: 'Jr/Mid/Sr/Lead/Principal' },
+      { name: 'domain_signals', type: 'string', note: 'Agency domain signals' },
+      { name: 'is_dod', type: 'bool', note: 'DoD domain detected' },
+      { name: 'is_cleared', type: 'bool', note: 'Any clearance needed' },
+      { name: 'is_cyber', type: 'bool', note: 'Cybersecurity role' },
+      { name: 'work_arrangement', type: 'enum', note: 'On-site/Remote/Hybrid' },
+      { name: 'mapped_program', type: 'string FK', note: 'Best-match program' },
+      { name: 'program_confidence', type: 'float', note: '0.0-1.0 match score' },
+      { name: 'bd_score', type: 'int', note: '0-100 BD priority' },
+      { name: 'bd_tier', type: 'enum', note: 'HIGH/MEDIUM/LOW' },
+      { name: 'content_hash', type: 'string', note: 'MD5 dedup hash' },
+      { name: 'description', type: 'text', note: 'Full job description' },
+      { name: 'company', type: 'string FK', note: 'Hiring company' },
+      { name: 'pay_rate', type: 'string', note: 'Bullhorn pay rate' },
+      { name: 'client_bill_rate', type: 'string', note: 'Client bill rate' },
+      { name: 'perm_fee', type: 'float', note: 'Perm fee percentage' },
+      { name: 'owner', type: 'string', note: 'Bullhorn job owner' },
+      { name: 'open_closed', type: 'enum', note: 'Open/Closed status' },
+    ],
+    aliases: [
+      { from: 'job_number', to: 'job_id' }, { from: 'job_title', to: 'title' },
+      { from: 'url', to: 'source_url' }, { from: 'location_raw', to: 'location_raw' },
+      { from: 'pay_rate_raw', to: 'pay_rate_raw' }, { from: 'clearance_scraper', to: 'clearance_raw' },
+      { from: 'years_experience_min', to: 'experience_min_years' }, { from: 'Date Added', to: 'date_posted_iso' },
+      { from: 'Pay Rate', to: 'pay_rate' }, { from: 'Client Bill Rate', to: 'client_bill_rate' },
+    ]
+  },
+  'Contact': {
+    pk: 'contact_id', records: '211,267 vectors + 1,198 CSV + 965 Notion', category: 'BD Intelligence',
+    desc: 'Individual person from Bullhorn CRM, ZoomInfo, SAM.gov POC, or LinkedIn. Classified into 6-tier hierarchy for BD outreach sequencing.',
+    sources: ['Bullhorn CRM', 'ZoomInfo', 'SAM.gov POCs', 'LinkedIn', 'Notion DCGS Contacts', 'Qdrant contacts collection'],
+    propCount: 38,
+    properties: [
+      { name: 'contact_id', type: 'string PK', note: 'CRM ID or ZoomInfo ID' },
+      { name: 'name', type: 'string', note: 'Full name' },
+      { name: 'first_name', type: 'string', note: 'First name' },
+      { name: 'last_name', type: 'string', note: 'Last name' },
+      { name: 'title', type: 'string', note: 'Job title' },
+      { name: 'prime_name', type: 'string FK', note: 'Company name' },
+      { name: 'email', type: 'string', note: 'Email address' },
+      { name: 'phone', type: 'string', note: 'Phone number' },
+      { name: 'direct_phone', type: 'string', note: 'Direct phone' },
+      { name: 'mobile_phone', type: 'string', note: 'Mobile phone' },
+      { name: 'linkedin_url', type: 'string', note: 'LinkedIn profile URL' },
+      { name: 'city', type: 'string', note: 'Person city' },
+      { name: 'state', type: 'string', note: 'Person state' },
+      { name: 'hierarchy_tier', type: 'enum', note: 'Tier 1-6 (Executive to IC)' },
+      { name: 'bd_priority', type: 'enum', note: 'Critical/High/Medium/Standard' },
+      { name: 'program', type: 'enum', note: 'AF DCGS/Army DCGS-A/Navy DCGS-N/etc' },
+      { name: 'functional_area', type: 'multi-select', note: 'PM/NetEng/Cyber/ISR/etc' },
+      { name: 'location_hub', type: 'enum', note: 'Hampton Roads/San Diego/DC Metro/etc' },
+      { name: 'status', type: 'enum', note: 'New Lead/Active/Placed/DNC' },
+      { name: 'note_count', type: 'int', note: 'Associated CRM notes' },
+      { name: 'role_level', type: 'string', note: 'Inferred seniority from title' },
+      { name: 'associated_programs', type: 'string', note: 'Program affiliations' },
+      { name: 'last_activity', type: 'date', note: 'Most recent engagement' },
+      { name: 'intelligence_summary', type: 'text', note: 'AI-generated summary' },
+      { name: 'is_fair_game', type: 'bool', note: 'Available for outreach' },
+      { name: 'engagement_score', type: 'float', note: 'Engagement metric' },
+      { name: 'department', type: 'string', note: 'ZoomInfo department' },
+      { name: 'job_function', type: 'string', note: 'ZoomInfo job function' },
+      { name: 'education', type: 'string', note: 'Highest education level' },
+    ],
+    aliases: [
+      { from: 'contact_name', to: 'name' }, { from: 'job_title', to: 'title' },
+      { from: 'company', to: 'prime_name' }, { from: 'Person City', to: 'city' },
+      { from: 'Person State', to: 'state' }, { from: 'Email Address', to: 'email' },
+      { from: 'Phone Number', to: 'phone' }, { from: 'Direct Phone Number', to: 'direct_phone' },
+      { from: 'Mobile phone', to: 'mobile_phone' }, { from: 'LinkedIn Contact Profile URL', to: 'linkedin_url' },
+      { from: 'Job Title', to: 'title' }, { from: 'Company Name', to: 'prime_name' },
+    ]
+  },
+  'Program': {
+    pk: 'program_name', records: '68,103 vectors + 388 CSV + 2,655 discovered', category: 'BD Intelligence',
+    desc: 'Federal program/system (e.g., DCGS-A, NGEN, Maven). Enriched with Tango contract data, FPDS, USASpending, and PWS analysis.',
+    sources: ['programs.yaml', 'Bullhorn', 'program_intelligence', 'Tango SDK', 'FPDS', 'USASpending', 'Federal Programs MASTER V4', 'Qdrant programs collection'],
+    propCount: 62,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Short name/acronym' },
+      { name: 'full_name', type: 'string', note: 'Expanded name' },
+      { name: 'acronym', type: 'string', note: 'Program acronym' },
+      { name: 'agency', type: 'string FK', note: 'Owning agency' },
+      { name: 'prime_contractors', type: 'list[str]', note: 'Known primes' },
+      { name: 'known_subcontractors', type: 'string', note: 'Known subs' },
+      { name: 'search_keywords', type: 'list[str]', note: 'Matching keywords' },
+      { name: 'locations', type: 'list[str]', note: 'Geographic centers' },
+      { name: 'clearance_requirement', type: 'enum', note: 'Typical clearance' },
+      { name: 'key_technologies', type: 'list[str]', note: 'Tech stack' },
+      { name: 'total_jobs', type: 'int', note: 'Job posting count' },
+      { name: 'hiring_velocity', type: 'string', note: 'Trend indicator' },
+      { name: 'total_award_value', type: 'float', note: 'Dollar value' },
+      { name: 'contract_value', type: 'string', note: 'Contract value string' },
+      { name: 'contract_vehicle', type: 'string', note: 'Contract vehicle/type' },
+      { name: 'primary_location', type: 'string', note: 'Main PoP' },
+      { name: 'importance_weight', type: 'float', note: '0.8-1.2 scoring' },
+      { name: 'pts_involvement', type: 'enum', note: 'Current/Past/Target/None' },
+      { name: 'bd_priority', type: 'enum', note: 'Program BD priority level' },
+      { name: 'pain_points', type: 'text', note: 'Known program pain points' },
+      { name: 'recompete_date', type: 'date', note: 'Expected recompete date' },
+      { name: 'program_type', type: 'string', note: 'Program classification type' },
+      { name: 'confidence_level', type: 'string', note: 'Data confidence' },
+      { name: 'typical_roles', type: 'string', note: 'Common job titles' },
+      { name: 'source_evidence', type: 'string', note: 'Intelligence source' },
+      { name: 'tango_piid', type: 'string', note: 'Tango contract PIID match' },
+      { name: 'tango_description', type: 'string', note: 'Tango contract desc' },
+      { name: 'match_confidence', type: 'string', note: 'Tango match confidence' },
+      { name: 'match_score', type: 'float', note: 'Tango match score' },
+      { name: 'pop_city', type: 'string', note: 'Tango PoP city' },
+      { name: 'pop_state', type: 'string', note: 'Tango PoP state' },
+      { name: 'obligated', type: 'float', note: 'Tango obligated amount' },
+      { name: 'recipient_uei', type: 'string FK', note: 'Contractor UEI from Tango' },
+      { name: 'naics_code', type: 'string FK', note: 'Primary NAICS from Tango' },
+      { name: 'psc_code', type: 'string FK', note: 'PSC from Tango' },
+      { name: 'awarding_office', type: 'string', note: 'Tango awarding office' },
+      { name: 'parent_piid', type: 'string FK', note: 'Parent IDV from Tango' },
+      { name: 'tech_stack_pws', type: 'string', note: 'Tech from PWS analysis' },
+      { name: 'labor_categories_pws', type: 'string', note: 'Labor cats from PWS' },
+      { name: 'clearances_pws', type: 'string', note: 'Clearances from PWS' },
+      { name: 'fpds_signed_date', type: 'date', note: 'FPDS signed date' },
+      { name: 'fpds_completion_date', type: 'date', note: 'FPDS completion' },
+      { name: 'fpds_base_options_value', type: 'float', note: 'FPDS total value' },
+      { name: 'usaspending_contract_number', type: 'string', note: 'USASpending ID' },
+      { name: 'usaspending_value', type: 'float', note: 'USASpending value' },
+      { name: 'contractor_poc_names', type: 'string', note: 'POC names from entity API' },
+      { name: 'contractor_poc_emails', type: 'string', note: 'POC emails' },
+    ],
+    aliases: [
+      { from: 'program_name', to: 'name' }, { from: 'program_acronym', to: 'acronym' },
+      { from: 'weight', to: 'importance_weight' }, { from: 'Agency Owner', to: 'agency' },
+      { from: 'Prime Contractor', to: 'prime_contractors' }, { from: 'Key Locations', to: 'locations' },
+      { from: 'Contract Value', to: 'contract_value' }, { from: 'PTS Involvement', to: 'pts_involvement' },
+      { from: 'Recompete Date', to: 'recompete_date' },
+    ]
+  },
+  'Activity': {
+    pk: 'date + contact', records: '445,972 vectors + 2,687 CSV', category: 'BD Intelligence',
+    desc: 'CRM activity record from Bullhorn tracking calls, emails, meetings. Extracted into timeline with program/company/role mentions.',
+    sources: ['Bullhorn CRM', 'colton_scurry_analysis', 'master_notes.csv', 'Qdrant activities collection'],
+    propCount: 23,
+    properties: [
+      { name: 'date', type: 'date', note: 'Activity date' },
+      { name: 'contact', type: 'string FK', note: 'Contact name' },
+      { name: 'author', type: 'string FK', note: 'Note author (BD rep)' },
+      { name: 'action', type: 'enum', note: 'Call/Email/Meeting/Note' },
+      { name: 'type', type: 'string', note: 'Activity type classification' },
+      { name: 'status', type: 'enum', note: 'Outcome status' },
+      { name: 'companies', type: 'string', note: 'Extracted company names' },
+      { name: 'programs', type: 'string', note: 'Extracted program names' },
+      { name: 'locations', type: 'string', note: 'Extracted locations' },
+      { name: 'roles', type: 'string', note: 'Extracted roles discussed' },
+      { name: 'headcount', type: 'int', note: 'Headcount mentioned' },
+      { name: 'bill_rates', type: 'string', note: 'Extracted bill rates' },
+      { name: 'skills', type: 'string', note: 'Skills mentioned' },
+      { name: 'experience_required', type: 'string', note: 'Experience levels' },
+      { name: 'summary', type: 'text', note: 'Note summary' },
+      { name: 'note_body_raw', type: 'text', note: 'Raw note content' },
+      { name: 'source_sheet', type: 'string', note: 'Bullhorn source sheet' },
+      { name: 'department', type: 'string', note: 'Department context' },
+      { name: 'extracted_emails', type: 'string', note: 'Emails found in notes' },
+      { name: 'extracted_phones', type: 'string', note: 'Phones found in notes' },
+    ],
+    aliases: [
+      { from: 'note_author', to: 'author' }, { from: 'date_added', to: 'date' },
+      { from: 'about', to: 'contact' }, { from: 'note_body_clean', to: 'summary' },
+      { from: 'extracted_primes', to: 'companies' }, { from: 'extracted_programs', to: 'programs' },
+    ]
+  },
+  'BD Target': {
+    pk: 'piid + bd_score', records: '300+ scored', category: 'BD Intelligence',
+    desc: 'Contract scored and prioritized for BD pursuit. Inherits Contract properties plus BD enrichment from 7-database series (db1-db7).',
+    sources: ['bd_databases db1-db7', 'master_bd_targets', 'bd_scored_targets', 'bd_it_services'],
+    propCount: 19,
+    properties: [
+      { name: 'piid', type: 'string FK', note: 'Source contract PIID' },
+      { name: 'bd_score', type: 'int', note: '0-100 priority score' },
+      { name: 'bd_tier', type: 'enum', note: 'CRITICAL/HIGH/MED/LOW' },
+      { name: 'bd_reasons', type: 'string', note: 'Scoring rationale' },
+      { name: 'priority_tier', type: 'string', note: 'Priority classification' },
+      { name: 'size_tier', type: 'string', note: 'Contract size tier' },
+      { name: 'lifecycle_phase', type: 'string', note: 'Contract lifecycle phase' },
+      { name: 'runway_years', type: 'float', note: 'Years until completion' },
+      { name: 'is_base_year', type: 'bool', note: 'In base period' },
+      { name: 'recompete_flag', type: 'bool', note: 'Recompete opportunity' },
+      { name: 'recompete_date', type: 'date', note: 'Expected recompete' },
+      { name: 'recommended_action', type: 'string', note: 'BD action item' },
+      { name: 'incumbent', type: 'string', note: 'Current holder' },
+      { name: 'competitors', type: 'string', note: 'Known competitors' },
+      { name: 'competitor_present', type: 'bool', note: 'Competitor in agency' },
+      { name: 'matched_jobs', type: 'int', note: 'Matching job postings' },
+      { name: 'subaward_count', type: 'int', note: 'Subaward count' },
+      { name: 'staffing_firm_subs', type: 'int', note: 'Staffing firm subs' },
+      { name: 'is_it_services', type: 'bool', note: 'IT services contract' },
+    ],
+    aliases: [
+      { from: 'score', to: 'bd_score' }, { from: 'tier', to: 'bd_tier' },
+    ]
+  },
+  'Competitor': {
+    pk: 'name', records: '20+ tracked', category: 'BD Intelligence',
+    desc: 'Competitor company tracked for competitive intelligence. Analyzed from db7_competitor_analysis and contract presence data.',
+    sources: ['competitor_analysis', 'bd_databases db7', 'bd_competitor_contract_presence'],
+    propCount: 12,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Company name' },
+      { name: 'search_alias', type: 'string', note: 'Search alias/variant' },
+      { name: 'agencies', type: 'string', note: 'Agencies present in' },
+      { name: 'agency_count', type: 'int', note: 'Agency presence count' },
+      { name: 'as_prime_count', type: 'int', note: 'Contracts as prime' },
+      { name: 'as_prime_value', type: 'float', note: 'Prime contract value' },
+      { name: 'as_sub_count', type: 'int', note: 'Contracts as sub' },
+      { name: 'as_sub_value', type: 'float', note: 'Sub contract value' },
+      { name: 'total_dod_presence', type: 'int', note: 'DoD contract count' },
+      { name: 'total_dod_value', type: 'float', note: 'Total DoD value' },
+      { name: 'prime_contractors', type: 'string', note: 'Primes they sub under' },
+      { name: 'win_rate', type: 'float', note: 'Win percentage' },
+    ],
+    aliases: [
+      { from: 'competitor', to: 'name' }, { from: 'prime_contractor_count', to: 'as_prime_count' },
+    ]
+  },
+  'Note': {
+    pk: 'note_id', records: '50,710 vectors + 2,687 extracted', category: 'BD Intelligence',
+    desc: 'CRM note from Bullhorn with NLP-extracted entities: primes, programs, contracts, roles, locations, headcount, bill rates.',
+    sources: ['Bullhorn CRM', 'colton_scurry_analysis', 'Qdrant bullhorn_notes collection'],
+    propCount: 23,
+    properties: [
+      { name: 'note_id', type: 'string PK', note: 'CRM note ID' },
+      { name: 'date_added', type: 'date', note: 'Note creation date' },
+      { name: 'note_author', type: 'string FK', note: 'Author (BD rep)' },
+      { name: 'about', type: 'string FK', note: 'Contact referenced' },
+      { name: 'source_sheet', type: 'string', note: 'Bullhorn sheet name' },
+      { name: 'department', type: 'string', note: 'Department context' },
+      { name: 'type', type: 'string', note: 'Note type classification' },
+      { name: 'action', type: 'string', note: 'Action taken' },
+      { name: 'status', type: 'string', note: 'Outcome status' },
+      { name: 'note_body_raw', type: 'text', note: 'Raw note content' },
+      { name: 'note_body_clean', type: 'text', note: 'Cleaned note text' },
+      { name: 'extracted_primes', type: 'string', note: 'NLP: prime contractors' },
+      { name: 'extracted_programs', type: 'string', note: 'NLP: program names' },
+      { name: 'extracted_contracts', type: 'string', note: 'NLP: contract refs' },
+      { name: 'extracted_roles', type: 'string', note: 'NLP: job titles/roles' },
+      { name: 'extracted_locations', type: 'string', note: 'NLP: locations' },
+      { name: 'extracted_headcount', type: 'string', note: 'NLP: headcount numbers' },
+      { name: 'extracted_bill_rates', type: 'string', note: 'NLP: bill rates' },
+      { name: 'extracted_skills', type: 'string', note: 'NLP: skills/certs' },
+      { name: 'extracted_acronyms', type: 'string', note: 'NLP: acronyms found' },
+      { name: 'extracted_emails', type: 'string', note: 'NLP: email addresses' },
+      { name: 'extracted_phone_numbers', type: 'string', note: 'NLP: phone numbers' },
+      { name: 'extracted_dates_mentioned', type: 'string', note: 'NLP: dates found' },
+    ],
+    aliases: [
+      { from: 'note_body', to: 'note_body_raw' }, { from: 'body', to: 'note_body_raw' },
+    ]
+  },
+  'Placement': {
+    pk: 'placement_id', records: '100+ tracked', category: 'BD Intelligence',
+    desc: 'Successful staffing placement linking a contact to a job at a prime contractor program. Tracked in Bullhorn and dashboard.',
+    sources: ['Bullhorn CRM', 'placement_tracking.json', 'dashboard feeds'],
+    propCount: 12,
+    properties: [
+      { name: 'placement_id', type: 'string PK', note: 'Placement tracking ID' },
+      { name: 'contact_name', type: 'string FK', note: 'Placed candidate' },
+      { name: 'job_id', type: 'string FK', note: 'Source job' },
+      { name: 'prime_name', type: 'string FK', note: 'Client company' },
+      { name: 'program', type: 'string FK', note: 'Federal program' },
+      { name: 'start_date', type: 'date', note: 'Placement start' },
+      { name: 'end_date', type: 'date', note: 'Placement end' },
+      { name: 'bill_rate', type: 'float', note: 'Billing rate' },
+      { name: 'pay_rate', type: 'float', note: 'Pay rate' },
+      { name: 'location', type: 'string', note: 'Work location' },
+      { name: 'status', type: 'enum', note: 'Active/Completed/Terminated' },
+      { name: 'revenue', type: 'float', note: 'Total revenue generated' },
+    ],
+    aliases: []
+  },
+
+  'Document': {
+    pk: 'doc_id', records: '205 indexed', category: 'BD Intelligence',
+    desc: 'Processed documents: SOWs, RFPs, past performance records, briefings. Chunked and embedded via Docling processor.',
+    sources: ['Filesystem', 'Docling processor', 'Qdrant documents collection'],
+    propCount: 13,
+    properties: [
+      { name: 'doc_id', type: 'string PK', note: 'Document unique ID' },
+      { name: 'filename', type: 'string', note: 'Source filename' },
+      { name: 'filepath', type: 'string', note: 'Full file path' },
+      { name: 'doc_type', type: 'string', note: 'SOW/RFP/PastPerf/Briefing' },
+      { name: 'title', type: 'string', note: 'Document title' },
+      { name: 'summary', type: 'string', note: 'AI-generated summary' },
+      { name: 'content', type: 'text', note: 'Full or chunk content' },
+      { name: 'chunk_index', type: 'int', note: 'Chunk position' },
+      { name: 'total_chunks', type: 'int', note: 'Total chunks in doc' },
+      { name: 'tags', type: 'list[str]', note: 'Classification tags' },
+      { name: 'type', type: 'string', note: 'MIME type' },
+      { name: '_indexed_at', type: 'string', note: 'Qdrant index timestamp' },
+      { name: '_embedding_model', type: 'string', note: 'text-embedding-3-small' },
+    ],
+    aliases: []
+  },
+  'Insight': {
+    pk: 'id', records: 'agent-generated', category: 'BD Intelligence',
+    desc: 'BD insights (opportunities, risks, relationships) stored by AI agents. Typed by entity and scored by confidence.',
+    sources: ['AI Agents', 'Intelligence API'],
+    propCount: 7,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Auto-increment ID' },
+      { name: 'entity_type', type: 'string', note: 'Contact/Program/Prime' },
+      { name: 'entity_name', type: 'string FK', note: 'Referenced entity' },
+      { name: 'insight', type: 'text', note: 'Insight content' },
+      { name: 'source', type: 'string', note: 'Agent or data source' },
+      { name: 'confidence', type: 'float', note: '0.0-1.0 confidence score' },
+      { name: 'timestamp', type: 'timestamp', note: 'When detected' },
+    ],
+    aliases: []
+  },
+  'Weekly Report': {
+    pk: 'period', records: 'weekly cadence', category: 'BD Intelligence',
+    desc: 'Weekly BD reports with pipeline, outreach, competitive, and action items. Generated by Phase 10A API.',
+    sources: ['Phase 10A API', 'BD Pipeline'],
+    propCount: 9,
+    properties: [
+      { name: 'period', type: 'string PK', note: 'Week period (2026-W07)' },
+      { name: 'generated_at', type: 'datetime', note: 'Generation timestamp' },
+      { name: 'pipeline_summary', type: 'json', note: 'Pipeline status snapshot' },
+      { name: 'outreach_activity', type: 'json', note: 'Outreach metrics' },
+      { name: 'meetings', type: 'json', note: 'Meeting summary' },
+      { name: 'competitive_changes', type: 'json', note: 'Market intel changes' },
+      { name: 'top_opportunities', type: 'list', note: 'Ranked opportunities' },
+      { name: 'action_items', type: 'list', note: 'Action items list' },
+      { name: 'executive_summary', type: 'text', note: 'AI-generated summary' },
+    ],
+    aliases: []
+  },
+  'Call Briefing': {
+    pk: 'id', records: 'per-call generated', category: 'BD Intelligence',
+    desc: 'Pre-call briefings with talking points, pain points, and relationship context. Voice Intelligence API.',
+    sources: ['Voice Intelligence API', 'Contact data'],
+    propCount: 11,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Briefing ID' },
+      { name: 'contact_id', type: 'string FK', note: 'Target contact' },
+      { name: 'contact_name', type: 'string', note: 'Contact display name' },
+      { name: 'pain_points', type: 'list', note: 'Known pain points' },
+      { name: 'recent_interactions', type: 'list', note: 'Recent engagement' },
+      { name: 'open_jobs', type: 'list', note: 'Current open jobs' },
+      { name: 'talking_points', type: 'list', note: 'Suggested topics' },
+      { name: 'relationship_map', type: 'list', note: 'Related contacts' },
+      { name: 'priority', type: 'string', note: 'Call priority level' },
+      { name: 'summary', type: 'text', note: 'Briefing summary' },
+      { name: 'created_at', type: 'datetime', note: 'When generated' },
+    ],
+    aliases: []
+  },
+  'Transcript Intel': {
+    pk: 'id', records: 'per-call extracted', category: 'BD Intelligence',
+    desc: 'Intelligence extracted from call transcripts via NLP — sentiment, pain points, budget signals, competitor mentions.',
+    sources: ['Voice Intelligence API', 'NLP Pipeline'],
+    propCount: 14,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Transcript intel ID' },
+      { name: 'call_id', type: 'string FK', note: 'Source call ID' },
+      { name: 'contact_id', type: 'string FK', note: 'Contact on call' },
+      { name: 'sentiment', type: 'string', note: 'Positive/Neutral/Negative' },
+      { name: 'sentiment_score', type: 'float', note: '-1.0 to 1.0' },
+      { name: 'pain_points', type: 'list', note: 'Detected pain points' },
+      { name: 'job_openings', type: 'list', note: 'Mentioned openings' },
+      { name: 'budget_signals', type: 'list', note: 'Budget/funding signals' },
+      { name: 'competitor_mentions', type: 'list', note: 'Competitors discussed' },
+      { name: 'action_items', type: 'list', note: 'Follow-up actions' },
+      { name: 'key_topics', type: 'list', note: 'Main discussion topics' },
+      { name: 'summary', type: 'text', note: 'AI call summary' },
+      { name: 'duration_sec', type: 'int', note: 'Call duration' },
+      { name: 'created_at', type: 'datetime', note: 'When extracted' },
+    ],
+    aliases: []
+  },
+  'Relationship Score': {
+    pk: 'contact_id', records: 'per-contact computed', category: 'BD Intelligence',
+    desc: 'Relationship strength scores between contacts with decay tracking. Multi-factor: recency, frequency, quality, reciprocity, depth, outcome.',
+    sources: ['Relationship Intelligence API'],
+    propCount: 11,
+    properties: [
+      { name: 'contact_id', type: 'string PK', note: 'Contact scored' },
+      { name: 'total_score', type: 'float', note: 'Composite score 0-100' },
+      { name: 'recency_score', type: 'float', note: 'Recent contact factor' },
+      { name: 'frequency_score', type: 'float', note: 'Interaction frequency' },
+      { name: 'quality_score', type: 'float', note: 'Interaction quality' },
+      { name: 'reciprocity_score', type: 'float', note: 'Two-way engagement' },
+      { name: 'depth_score', type: 'float', note: 'Relationship depth' },
+      { name: 'outcome_score', type: 'float', note: 'Positive outcomes' },
+      { name: 'days_since_contact', type: 'int', note: 'Days since last touch' },
+      { name: 'risk_level', type: 'string', note: 'Low/Medium/High/Critical' },
+      { name: 'recommended_action', type: 'string', note: 'Suggested next step' },
+    ],
+    aliases: []
+  },
+  'Win Probability': {
+    pk: 'opportunity_id', records: 'per-opportunity computed', category: 'BD Intelligence',
+    desc: 'ML-predicted win probability for BD opportunities. Multi-factor model with contact tier, relationship depth, clearance match.',
+    sources: ['Predictive Intelligence API'],
+    propCount: 12,
+    properties: [
+      { name: 'opportunity_id', type: 'string PK', note: 'Opportunity scored' },
+      { name: 'win_probability', type: 'float', note: '0.0-1.0 win chance' },
+      { name: 'confidence', type: 'float', note: 'Model confidence' },
+      { name: 'top_factors', type: 'list', note: 'Key drivers' },
+      { name: 'recommended_actions', type: 'list', note: 'Suggested actions' },
+      { name: 'optimal_timing', type: 'json', note: 'Best engagement window' },
+      { name: 'contact_tier', type: 'int', note: 'Best contact tier 1-6' },
+      { name: 'relationship_depth', type: 'float', note: 'Relationship factor' },
+      { name: 'days_since_last_contact', type: 'int', note: 'Recency factor' },
+      { name: 'clearance_match', type: 'float', note: 'Clearance alignment' },
+      { name: 'role_match_score', type: 'float', note: 'Role fit score' },
+      { name: 'competitor_density', type: 'float', note: 'Competitive pressure' },
+    ],
+    aliases: []
+  },
+  'Hiring Forecast': {
+    pk: 'entity + program', records: 'per-program computed', category: 'BD Intelligence',
+    desc: 'Hiring forecasts, ramp signals, and optimal timing recommendations from Predictive Intelligence API.',
+    sources: ['Predictive Intelligence API', 'Historical hiring data'],
+    propCount: 8,
+    properties: [
+      { name: 'entity', type: 'string PK', note: 'Program or contractor' },
+      { name: 'horizon_days', type: 'int', note: 'Forecast horizon' },
+      { name: 'current_rate', type: 'float', note: 'Current hiring rate' },
+      { name: 'forecasted_rate', type: 'float', note: 'Predicted rate' },
+      { name: 'trend', type: 'string', note: 'Up/Down/Stable' },
+      { name: 'trend_strength', type: 'float', note: 'Trend magnitude' },
+      { name: 'seasonal_pattern', type: 'json', note: 'Seasonal factors' },
+      { name: 'confidence', type: 'float', note: 'Forecast confidence' },
+    ],
+    aliases: []
+  },
+  'Revenue Placement': {
+    pk: 'id', records: 'active placements', category: 'BD Intelligence',
+    desc: 'Revenue-tracked placements with margin analysis and ROI metrics. Revenue Intelligence API.',
+    sources: ['Revenue Intelligence API', 'Bullhorn CRM'],
+    propCount: 14,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Revenue placement ID' },
+      { name: 'contractor_name', type: 'string', note: 'Placed contractor' },
+      { name: 'client', type: 'string FK', note: 'Client company' },
+      { name: 'program', type: 'string FK', note: 'Federal program' },
+      { name: 'role_title', type: 'string', note: 'Position title' },
+      { name: 'bill_rate', type: 'float', note: 'Billing rate' },
+      { name: 'pay_rate', type: 'float', note: 'Pay rate' },
+      { name: 'start_date', type: 'date', note: 'Placement start' },
+      { name: 'end_date', type: 'date', note: 'Placement end' },
+      { name: 'rep', type: 'string', note: 'BD rep name' },
+      { name: 'contact_id', type: 'string FK', note: 'Source contact' },
+      { name: 'location', type: 'string', note: 'Work location' },
+      { name: 'clearance', type: 'string', note: 'Clearance level' },
+      { name: 'hours_per_week', type: 'int', note: 'Weekly hours' },
+    ],
+    aliases: []
+  },
+  'Strategic Pattern': {
+    pk: 'id', records: 'agent-detected', category: 'BD Intelligence',
+    desc: 'Strategic patterns detected by meta-learning engine — hiring surges, budget shifts, competitive moves.',
+    sources: ['Intelligence API', 'Meta-Learning Engine'],
+    propCount: 9,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Pattern ID' },
+      { name: 'pattern_type', type: 'string', note: 'Hiring/Budget/Competitive/Market' },
+      { name: 'title', type: 'string', note: 'Pattern title' },
+      { name: 'description', type: 'text', note: 'Full description' },
+      { name: 'program', type: 'string FK', note: 'Related program' },
+      { name: 'confidence', type: 'float', note: '0.0-1.0 confidence' },
+      { name: 'detected_at', type: 'datetime', note: 'Detection timestamp' },
+      { name: 'expires_at', type: 'datetime', note: 'Pattern expiry' },
+      { name: 'tags', type: 'list[str]', note: 'Classification tags' },
+    ],
+    aliases: []
+  },
+
+  // ═══════════════════════════════════════════════════
+  // FEDERAL AWARDS (6 entities)
+  // ═══════════════════════════════════════════════════
+  'Contract': {
+    pk: 'piid', records: '107,902 vectors + 272 Tango enriched', category: 'Federal Awards',
+    desc: 'Federal contract award from FPDS, USASpending, or Tango SDK. Enriched with Tango match data, subaward counts, and BD scoring.',
+    sources: ['FPDS', 'USASpending', 'Tango SDK', 'SAM.gov', 'Qdrant federal_contracts collection'],
+    propCount: 68,
+    properties: [
+      { name: 'piid', type: 'string PK', note: 'Procurement Instrument ID' },
+      { name: 'contract_key', type: 'string', note: 'USASpending unique key' },
+      { name: 'parent_idv_piid', type: 'string FK', note: 'Parent IDV for task orders' },
+      { name: 'recipient_name', type: 'string', note: 'Contractor name' },
+      { name: 'recipient_uei', type: 'string FK', note: 'Unique Entity ID (SAM)' },
+      { name: 'awarding_agency', type: 'string FK', note: 'Awarding agency' },
+      { name: 'funding_agency', type: 'string FK', note: 'Funding agency' },
+      { name: 'awarding_office', type: 'string', note: 'Awarding office name' },
+      { name: 'funding_office', type: 'string', note: 'Funding office name' },
+      { name: 'obligated_amount', type: 'float', note: 'This action obligation' },
+      { name: 'ceiling_value', type: 'float', note: 'Base + all options' },
+      { name: 'total_obligation', type: 'float', note: 'Total federal obligation' },
+      { name: 'total_contract_value', type: 'float', note: 'Tango total contract value' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS classification' },
+      { name: 'psc_code', type: 'string FK', note: 'Product/Service Code' },
+      { name: 'pop_city', type: 'string', note: 'Place of performance city' },
+      { name: 'pop_state', type: 'string', note: 'PoP state' },
+      { name: 'pop_zip', type: 'string', note: 'PoP zip code' },
+      { name: 'pop_country', type: 'string', note: 'PoP country' },
+      { name: 'start_date', type: 'date', note: 'Performance start / period_start' },
+      { name: 'end_date', type: 'date', note: 'Current completion date' },
+      { name: 'ultimate_completion', type: 'date', note: 'Ultimate completion date' },
+      { name: 'contract_type', type: 'enum', note: 'FFP, CPFF, T&M, Cost-Plus' },
+      { name: 'set_aside_type', type: 'enum', note: 'SB, 8(a), HUBZone, SDVOSB' },
+      { name: 'mapped_program', type: 'string FK', note: 'Matched program' },
+      { name: 'description', type: 'text', note: 'Contract description' },
+      { name: 'is_dod', type: 'bool', note: 'DoD contract flag' },
+      { name: 'fiscal_year', type: 'int', note: 'Federal FY' },
+      { name: 'source_api', type: 'enum', note: 'FPDS/USASpending/SAM/Tango' },
+      { name: 'subawards_count', type: 'int', note: 'Tango subaward count' },
+      { name: 'subawards_total', type: 'float', note: 'Tango subaward total value' },
+      { name: 'parent_piid', type: 'string FK', note: 'Parent IDV PIID from Tango' },
+      { name: 'parent_description', type: 'string', note: 'Parent IDV description' },
+      { name: 'tango_piid', type: 'string', note: 'Tango matched PIID' },
+      { name: 'tango_description', type: 'string', note: 'Tango contract description' },
+      { name: 'match_confidence', type: 'string', note: 'Tango match confidence' },
+      { name: 'match_score', type: 'float', note: 'Tango match score 0-100' },
+    ],
+    aliases: [
+      { from: 'PIID', to: 'piid' }, { from: 'contract_id', to: 'piid' },
+      { from: 'award_id', to: 'piid' }, { from: 'contract_number', to: 'piid' },
+      { from: 'award_amount', to: 'obligated_amount' }, { from: 'date_signed', to: 'start_date' },
+      { from: 'vendor_name', to: 'recipient_name' }, { from: 'vendor_uei', to: 'recipient_uei' },
+      { from: 'base_and_all_options', to: 'ceiling_value' }, { from: 'obligated', to: 'obligated_amount' },
+    ]
+  },
+  'Subaward': {
+    pk: 'subaward_number', records: '672 detailed records', category: 'Federal Awards',
+    desc: 'Federal subaward under a prime contract. 672 fully detailed records with prime/sub relationships, amounts, and performance locations.',
+    sources: ['USASpending', 'Tango SDK', 'Contract_N0001920C0032_Sub-Awards_1.csv'],
+    propCount: 18,
+    properties: [
+      { name: 'subaward_number', type: 'string PK', note: 'Sub number' },
+      { name: 'subaward_amount', type: 'float', note: 'Dollar amount' },
+      { name: 'subaward_date', type: 'date', note: 'Award date' },
+      { name: 'description', type: 'text', note: 'Subaward description' },
+      { name: 'prime_award_piid', type: 'string FK', note: 'Parent contract PIID' },
+      { name: 'prime_uei', type: 'string FK', note: 'Prime contractor UEI' },
+      { name: 'prime_name', type: 'string', note: 'Prime contractor name' },
+      { name: 'prime_duns', type: 'string', note: 'Prime DUNS number' },
+      { name: 'sub_uei', type: 'string FK', note: 'Sub contractor UEI' },
+      { name: 'sub_name', type: 'string', note: 'Sub contractor name' },
+      { name: 'sub_duns', type: 'string', note: 'Sub DUNS number' },
+      { name: 'pop_city', type: 'string', note: 'PoP city' },
+      { name: 'pop_state', type: 'string', note: 'PoP state' },
+      { name: 'pop_zip', type: 'string', note: 'PoP zip' },
+      { name: 'pop_country', type: 'string', note: 'PoP country' },
+      { name: 'naics_code', type: 'string FK', note: 'Sub NAICS code' },
+      { name: 'is_staffing_firm', type: 'bool', note: 'Staffing firm sub flag' },
+      { name: 'extraction_date', type: 'date', note: 'When extracted' },
+    ],
+    aliases: [
+      { from: 'subawardee_name', to: 'sub_name' }, { from: 'subawardee_uei', to: 'sub_uei' },
+      { from: 'prime_recipient', to: 'prime_name' }, { from: 'prime_value', to: 'subaward_amount' },
+      { from: 'sub_recipient_name', to: 'sub_name' }, { from: 'sub_recipient_uei', to: 'sub_uei' },
+    ]
+  },
+  'Task Order': {
+    pk: 'task_order_piid', records: '100s', category: 'Federal Awards',
+    desc: 'Task/delivery order under a parent IDV contract. Links to specific primes with NAICS/PSC classification.',
+    sources: ['FPDS', 'USASpending', 'Tango SDK'],
+    propCount: 10,
+    properties: [
+      { name: 'task_order_piid', type: 'string PK', note: 'TO PIID' },
+      { name: 'description', type: 'text', note: 'TO description' },
+      { name: 'value', type: 'float', note: 'TO value' },
+      { name: 'parent_idv_piid', type: 'string FK', note: 'Parent IDV' },
+      { name: 'contractor_uei', type: 'string FK', note: 'Awardee UEI' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS' },
+      { name: 'psc_code', type: 'string FK', note: 'PSC' },
+      { name: 'award_date', type: 'date', note: 'Award date' },
+      { name: 'end_date', type: 'date', note: 'Completion date' },
+      { name: 'pop_state', type: 'string', note: 'Performance location' },
+    ],
+    aliases: []
+  },
+  'OTA': {
+    pk: 'ota_id', records: 'from Tango 09_ota_tables.sql', category: 'Federal Awards',
+    desc: 'Other Transaction Agreement — non-FAR based award mechanism used for prototyping/R&D. Schema from Tango SQL tables.',
+    sources: ['Tango SDK', '09_ota_tables.sql'],
+    propCount: 14,
+    properties: [
+      { name: 'ota_id', type: 'string PK', note: 'OTA agreement ID' },
+      { name: 'title', type: 'string', note: 'Agreement title' },
+      { name: 'description', type: 'text', note: 'Agreement description' },
+      { name: 'agency', type: 'string FK', note: 'Awarding agency' },
+      { name: 'recipient_name', type: 'string FK', note: 'Recipient' },
+      { name: 'recipient_uei', type: 'string FK', note: 'Recipient UEI' },
+      { name: 'award_amount', type: 'float', note: 'Award value' },
+      { name: 'award_date', type: 'date', note: 'Award date' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS code' },
+      { name: 'pop_state', type: 'string', note: 'Performance state' },
+      { name: 'ota_type', type: 'enum', note: 'Prototype/Production/Follow-on' },
+      { name: 'consortium', type: 'string', note: 'OTA consortium name' },
+      { name: 'related_contract', type: 'string FK', note: 'Related PIID if any' },
+      { name: 'status', type: 'enum', note: 'Active/Completed/Terminated' },
+    ],
+    aliases: []
+  },
+  'Transaction': {
+    pk: 'transaction_id', records: '~15,000 for 1 contract', category: 'Federal Awards',
+    desc: 'Transaction-level spend record from USASpending. Granular modifications, obligations, and deobligations per contract.',
+    sources: ['USASpending', 'Contract_N0001920C0032_TransactionHistory_1.csv'],
+    propCount: 12,
+    properties: [
+      { name: 'transaction_id', type: 'string PK', note: 'Transaction unique ID' },
+      { name: 'piid', type: 'string FK', note: 'Parent contract PIID' },
+      { name: 'modification_number', type: 'string', note: 'Mod number' },
+      { name: 'action_date', type: 'date', note: 'Action date' },
+      { name: 'action_type', type: 'enum', note: 'New/Modification/Deobligation' },
+      { name: 'obligated_amount', type: 'float', note: 'Amount obligated' },
+      { name: 'fiscal_year', type: 'int', note: 'Federal fiscal year' },
+      { name: 'awarding_agency', type: 'string FK', note: 'Agency' },
+      { name: 'description', type: 'text', note: 'Transaction description' },
+      { name: 'funding_office', type: 'string', note: 'Funding office' },
+      { name: 'is_fpds', type: 'bool', note: 'From FPDS source' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS code' },
+    ],
+    aliases: []
+  },
+  'Federal Account': {
+    pk: 'account_id', records: '~600 for 1 contract', category: 'Federal Awards',
+    desc: 'Federal account funding detail linking treasury accounts to contract obligations.',
+    sources: ['USASpending', 'Contract_N0001920C0032_FederalAccountFunding_1.csv'],
+    propCount: 8,
+    properties: [
+      { name: 'account_id', type: 'string PK', note: 'Account identifier' },
+      { name: 'piid', type: 'string FK', note: 'Parent contract PIID' },
+      { name: 'federal_account_name', type: 'string', note: 'Treasury account name' },
+      { name: 'federal_account_code', type: 'string', note: 'Treasury account code' },
+      { name: 'obligated_amount', type: 'float', note: 'Amount from this account' },
+      { name: 'fiscal_year', type: 'int', note: 'Federal fiscal year' },
+      { name: 'agency_name', type: 'string FK', note: 'Owning agency' },
+      { name: 'program_activity', type: 'string', note: 'Program activity code' },
+    ],
+    aliases: []
+  },
+
+  // ═══════════════════════════════════════════════════
+  // PROCUREMENT (10 entities)
+  // ═══════════════════════════════════════════════════
+  'Opportunity': {
+    pk: 'notice_id', records: '500+ expected from Tango Phase 4', category: 'Procurement',
+    desc: 'Active procurement opportunity/solicitation from SAM.gov. 217K+ available in Tango. Zero redundancy with existing data.',
+    sources: ['SAM.gov', 'Tango SDK (217K records)', 'bd_databases db3', '04_opportunity_tables.sql'],
+    propCount: 31,
+    properties: [
+      { name: 'notice_id', type: 'string PK', note: 'SAM notice ID' },
+      { name: 'solicitation_number', type: 'string', note: 'Sol number' },
+      { name: 'title', type: 'string', note: 'Opportunity title' },
+      { name: 'description', type: 'text', note: 'Full description' },
+      { name: 'notice_type', type: 'enum', note: 'Presol/Combined/Award/Intent' },
+      { name: 'notice_code', type: 'string', note: 'Notice type code' },
+      { name: 'posted_date', type: 'date', note: 'When posted' },
+      { name: 'response_deadline', type: 'datetime', note: 'Due date/time' },
+      { name: 'archive_date', type: 'date', note: 'Archive date' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS classification' },
+      { name: 'naics_description', type: 'string', note: 'NAICS text' },
+      { name: 'psc_code', type: 'string FK', note: 'PSC classification' },
+      { name: 'set_aside', type: 'enum', note: 'Set-aside type' },
+      { name: 'agency_name', type: 'string FK', note: 'Agency' },
+      { name: 'department_name', type: 'string', note: 'Department' },
+      { name: 'office_name', type: 'string', note: 'Office' },
+      { name: 'pop_city', type: 'string', note: 'Performance location' },
+      { name: 'pop_state', type: 'string', note: 'Performance state' },
+      { name: 'contract_type', type: 'string', note: 'Contract type' },
+      { name: 'estimated_value', type: 'float', note: 'Estimated value' },
+      { name: 'contracting_officer', type: 'object', note: 'CO contact info' },
+      { name: 'attachments', type: 'list[str]', note: 'Attachment URLs' },
+      { name: 'sam_url', type: 'string', note: 'SAM.gov URL' },
+      { name: 'related_notices', type: 'list[str]', note: 'Related notices' },
+      { name: 'is_active', type: 'bool', note: 'Currently active' },
+      { name: 'is_it_services', type: 'bool', note: 'IT services flag' },
+    ],
+    aliases: [
+      { from: 'opportunity_id', to: 'notice_id' }, { from: 'sol_number', to: 'solicitation_number' },
+      { from: 'agency_code', to: 'agency_name' },
+    ]
+  },
+  'Forecast': {
+    pk: 'forecast_id', records: '14,700+ in Tango', category: 'Procurement',
+    desc: 'Planned procurement forecast from Tango API. Critical for BD pipeline planning — zero redundancy with existing data.',
+    sources: ['Tango SDK (14.7K records)', 'phase3_opportunities_tango.csv'],
+    propCount: 14,
+    properties: [
+      { name: 'forecast_id', type: 'string PK', note: 'Forecast unique ID' },
+      { name: 'title', type: 'string', note: 'Forecast title' },
+      { name: 'description', type: 'text', note: 'Procurement description' },
+      { name: 'agency', type: 'string FK', note: 'Planning agency' },
+      { name: 'estimated_value', type: 'float', note: 'Estimated award value' },
+      { name: 'estimated_award_date', type: 'date', note: 'Expected award' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS code' },
+      { name: 'psc_code', type: 'string FK', note: 'PSC code' },
+      { name: 'set_aside', type: 'enum', note: 'Set-aside type' },
+      { name: 'contract_type', type: 'enum', note: 'FFP/T&M/Cost-Plus' },
+      { name: 'pop_state', type: 'string', note: 'Performance state' },
+      { name: 'incumbent', type: 'string', note: 'Current contractor' },
+      { name: 'fiscal_year', type: 'int', note: 'Planned FY' },
+      { name: 'source', type: 'string', note: 'Tango/agency source' },
+    ],
+    aliases: []
+  },
+  'Notice': {
+    pk: 'notice_id', records: 'from Tango reports', category: 'Procurement',
+    desc: 'Federal business notice (FedBizOpps/SAM) including pre-solicitation, sources sought, and special notices.',
+    sources: ['SAM.gov', 'Tango SDK tangoapi_notices.txt'],
+    propCount: 10,
+    properties: [
+      { name: 'notice_id', type: 'string PK', note: 'Notice ID' },
+      { name: 'title', type: 'string', note: 'Notice title' },
+      { name: 'type', type: 'enum', note: 'PreSol/SourcesSought/Special/Intent' },
+      { name: 'agency', type: 'string FK', note: 'Agency' },
+      { name: 'posted_date', type: 'date', note: 'Post date' },
+      { name: 'response_date', type: 'date', note: 'Response deadline' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS' },
+      { name: 'set_aside', type: 'string', note: 'Set-aside type' },
+      { name: 'related_opportunity', type: 'string FK', note: 'Related opportunity' },
+      { name: 'description', type: 'text', note: 'Notice description' },
+    ],
+    aliases: []
+  },
+  'IDV': {
+    pk: 'idv_piid', records: '250+ expected from Phase 5', category: 'Procurement',
+    desc: 'Indefinite Delivery Vehicle (BPA, BOA, GWAC). Analyzed from Tango SDK with full parent-child relationships.',
+    sources: ['FPDS', 'Tango SDK tangoapi_idvs.txt'],
+    propCount: 10,
+    properties: [
+      { name: 'idv_piid', type: 'string PK', note: 'IDV PIID' },
+      { name: 'description', type: 'text', note: 'IDV description' },
+      { name: 'idv_type_code', type: 'enum', note: 'BPA/BOA/GWAC/FSS' },
+      { name: 'total_value', type: 'float', note: 'Total value' },
+      { name: 'recipient_uei', type: 'string FK', note: 'Awardee' },
+      { name: 'agency', type: 'string FK', note: 'Awarding agency' },
+      { name: 'last_date_to_order', type: 'date', note: 'Ordering deadline' },
+      { name: 'child_award_count', type: 'int', note: 'Task orders under this IDV' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS' },
+      { name: 'psc_code', type: 'string FK', note: 'PSC' },
+    ],
+    aliases: []
+  },
+  'Contract Vehicle': {
+    pk: 'vehicle_uuid', records: '50+ expected from Phase 5', category: 'Procurement',
+    desc: 'Named contract vehicle (Alliant 2, OASIS+, CIO-SP4, SEWP). Analyzed from Tango vehicle endpoint.',
+    sources: ['Tango SDK tangoapi_vehicles.txt', 'manual reference'],
+    propCount: 8,
+    properties: [
+      { name: 'vehicle_name', type: 'string', note: 'Vehicle name (OASIS+, etc.)' },
+      { name: 'vehicle_type', type: 'enum', note: 'GWAC/IDIQ/BPA' },
+      { name: 'award_date', type: 'date', note: 'Vehicle award date' },
+      { name: 'last_date_to_order', type: 'date', note: 'Ordering deadline' },
+      { name: 'awardee_count', type: 'int', note: 'Number of awardees' },
+      { name: 'total_obligations', type: 'float', note: 'Total orders placed' },
+      { name: 'managing_agency', type: 'string FK', note: 'Managing agency (GSA, etc.)' },
+      { name: 'scope', type: 'string', note: 'Services/Products scope' },
+    ],
+    aliases: []
+  },
+  'Grant': {
+    pk: 'grant_id', records: 'from Tango 06_grant_tables.sql', category: 'Procurement',
+    desc: 'Federal grant award. Schema defined in Tango SQL grant tables.',
+    sources: ['Tango SDK', '06_grant_tables.sql', 'USASpending'],
+    propCount: 12,
+    properties: [
+      { name: 'grant_id', type: 'string PK', note: 'Grant ID' },
+      { name: 'title', type: 'string', note: 'Grant title' },
+      { name: 'description', type: 'text', note: 'Grant description' },
+      { name: 'agency', type: 'string FK', note: 'Granting agency' },
+      { name: 'recipient_name', type: 'string', note: 'Recipient org' },
+      { name: 'recipient_uei', type: 'string FK', note: 'Recipient UEI' },
+      { name: 'award_amount', type: 'float', note: 'Grant amount' },
+      { name: 'award_date', type: 'date', note: 'Award date' },
+      { name: 'period_start', type: 'date', note: 'Performance start' },
+      { name: 'period_end', type: 'date', note: 'Performance end' },
+      { name: 'cfda_number', type: 'string', note: 'CFDA program number' },
+      { name: 'pop_state', type: 'string', note: 'Performance state' },
+    ],
+    aliases: []
+  },
+  'Recompete': {
+    pk: 'recompete_id', records: 'from RECOMPETE_TRACKER.csv', category: 'Procurement',
+    desc: 'Tracked recompete opportunity — existing contract approaching end of performance, representing BD opportunity.',
+    sources: ['RECOMPETE_TRACKER.csv', 'CONTRACT_OPPORTUNITY_CALENDAR.md', 'bd_databases'],
+    propCount: 14,
+    properties: [
+      { name: 'recompete_id', type: 'string PK', note: 'Tracking ID' },
+      { name: 'contract_piid', type: 'string FK', note: 'Source contract' },
+      { name: 'program', type: 'string FK', note: 'Program name' },
+      { name: 'incumbent', type: 'string FK', note: 'Current prime contractor' },
+      { name: 'estimated_value', type: 'float', note: 'Estimated recompete value' },
+      { name: 'current_end_date', type: 'date', note: 'Current contract end' },
+      { name: 'expected_solicitation', type: 'date', note: 'Expected RFP date' },
+      { name: 'expected_award', type: 'date', note: 'Expected award date' },
+      { name: 'vehicle', type: 'string FK', note: 'Expected vehicle' },
+      { name: 'naics_code', type: 'string FK', note: 'NAICS code' },
+      { name: 'set_aside', type: 'string', note: 'Expected set-aside' },
+      { name: 'bd_priority', type: 'enum', note: 'BD priority level' },
+      { name: 'pts_strategy', type: 'text', note: 'PTS pursuit strategy' },
+      { name: 'status', type: 'enum', note: 'Tracking/Pursuing/Won/Lost' },
+    ],
+    aliases: []
+  },
+
+  'Contract Watch': {
+    pk: 'watch_id', records: 'user-configured', category: 'Procurement',
+    desc: 'SAM.gov contract monitoring watches with keyword/NAICS filters. Triggers alerts on new matching opportunities.',
+    sources: ['SAM.gov Sync', 'Streaming Pipeline'],
+    propCount: 10,
+    properties: [
+      { name: 'watch_id', type: 'string PK', note: 'Watch configuration ID' },
+      { name: 'name', type: 'string', note: 'Watch name' },
+      { name: 'keywords', type: 'list[str]', note: 'Keyword filters' },
+      { name: 'naics_codes', type: 'list[str]', note: 'NAICS code filters' },
+      { name: 'companies', type: 'list[str]', note: 'Company name filters' },
+      { name: 'agencies', type: 'list[str]', note: 'Agency filters' },
+      { name: 'min_value', type: 'float', note: 'Minimum contract value' },
+      { name: 'alert_on', type: 'list[str]', note: 'Event types to alert' },
+      { name: 'enabled', type: 'bool', note: 'Active/Inactive toggle' },
+      { name: 'created_at', type: 'datetime', note: 'Watch creation date' },
+    ],
+    aliases: []
+  },
+  'Recompete Prediction': {
+    pk: 'contract_id', records: 'per-expiring contract', category: 'Procurement',
+    desc: 'Predicted recompete timelines for expiring contracts — RFI/RFP/award dates with probability scores.',
+    sources: ['Predictive Intelligence API'],
+    propCount: 10,
+    properties: [
+      { name: 'contract_id', type: 'string PK', note: 'Source contract' },
+      { name: 'contract_name', type: 'string', note: 'Contract name' },
+      { name: 'current_pop_end', type: 'date', note: 'Current end date' },
+      { name: 'options_remaining', type: 'int', note: 'Option periods left' },
+      { name: 'predicted_rfi_date', type: 'date', note: 'Predicted RFI date' },
+      { name: 'predicted_rfp_date', type: 'date', note: 'Predicted RFP date' },
+      { name: 'predicted_award_date', type: 'date', note: 'Predicted award date' },
+      { name: 'recompete_probability', type: 'float', note: '0.0-1.0 probability' },
+      { name: 'months_to_action', type: 'int', note: 'Months until BD action' },
+      { name: 'recommended_actions', type: 'list', note: 'Suggested BD actions' },
+    ],
+    aliases: []
+  },
+  'Proposal Artifact': {
+    pk: 'id', records: 'per-proposal generated', category: 'Procurement',
+    desc: 'Proposal artifacts: capability statements, compliance matrices, rate cards, past performance volumes.',
+    sources: ['Proposal API', 'BD Playbooks'],
+    propCount: 7,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Artifact ID' },
+      { name: 'artifact_type', type: 'string', note: 'CapStatement/Matrix/RateCard/PastPerf' },
+      { name: 'program', type: 'string FK', note: 'Target program' },
+      { name: 'agency', type: 'string FK', note: 'Target agency' },
+      { name: 'solicitation', type: 'string FK', note: 'Solicitation number' },
+      { name: 'content', type: 'json', note: 'Artifact content' },
+      { name: 'generated_at', type: 'datetime', note: 'Generation timestamp' },
+    ],
+    aliases: []
+  },
+
+  // ═══════════════════════════════════════════════════
+  // ORGANIZATIONS (3 entities)
+  // ═══════════════════════════════════════════════════
+  'Prime': {
+    pk: 'uei', records: '100+ tracked + 40+ to be enriched', category: 'Organizations',
+    desc: 'Prime contractor or staffing firm. Top 20 include Leidos, SAIC, GDIT, Booz Allen, etc. 8 already Tango-enriched, 10 planned for gap-fill.',
+    sources: ['Bullhorn CRM', 'SAM.gov', 'USASpending', 'Tango SDK', 'enrichment', 'CONTRACTOR_REDUNDANCY_ANALYSIS'],
+    propCount: 48,
+    properties: [
+      { name: 'uei', type: 'string PK', note: 'SAM Unique Entity ID' },
+      { name: 'name', type: 'string', note: 'Company name' },
+      { name: 'legal_business_name', type: 'string', note: 'Legal SAM name' },
+      { name: 'dba_name', type: 'string', note: 'Doing business as name' },
+      { name: 'cage_code', type: 'string', note: 'CAGE code' },
+      { name: 'sam_status', type: 'enum', note: 'Active/Inactive' },
+      { name: 'primary_naics', type: 'string FK', note: 'Primary NAICS' },
+      { name: 'all_naics_codes', type: 'list[str]', note: 'All NAICS codes' },
+      { name: 'business_types', type: 'list[str]', note: 'SB, SDVOSB, 8(a), HUBZone' },
+      { name: 'contact_count', type: 'int', note: 'Known contacts in DB' },
+      { name: 'program_count', type: 'int', note: 'Program associations' },
+      { name: 'relationship_strength', type: 'float', note: '0-100 relationship score' },
+      { name: 'total_contract_value', type: 'float', note: 'Total dollar value' },
+      { name: 'federal_obligations', type: 'float', note: 'Total federal obligations' },
+      { name: 'placements', type: 'int', note: 'Successful PTS placements' },
+      { name: 'intelligence_summary', type: 'text', note: 'AI-generated narrative' },
+      { name: 'relationship_tier', type: 'string', note: 'Tier classification' },
+      { name: 'physical_address', type: 'string', note: 'Physical address' },
+      { name: 'mailing_address', type: 'string', note: 'Mailing address' },
+      { name: 'email_address', type: 'string', note: 'Entity email' },
+      { name: 'entity_url', type: 'string', note: 'Company website' },
+      { name: 'congressional_district', type: 'string', note: 'Congressional district' },
+      { name: 'sam_activation_date', type: 'date', note: 'SAM registration date' },
+      { name: 'sam_expiration', type: 'date', note: 'SAM expiry date' },
+      { name: 'highest_owner_uei', type: 'string', note: 'Top-level parent UEI' },
+      { name: 'highest_owner_name', type: 'string', note: 'Top-level parent name' },
+      { name: 'immediate_owner_uei', type: 'string', note: 'Direct parent UEI' },
+      { name: 'immediate_owner_name', type: 'string', note: 'Direct parent name' },
+      { name: 'total_mentions', type: 'int', note: 'CRM note mentions' },
+      { name: 'roles_needed', type: 'string', note: 'Common role needs' },
+      { name: 'contract_types', type: 'string', note: 'FFP/T&M/etc preference' },
+    ],
+    aliases: [
+      { from: 'prime_name', to: 'name' }, { from: 'vendor_name', to: 'name' },
+      { from: 'recipient_name', to: 'name' }, { from: 'duns', to: 'duns_number' },
+      { from: 'company_name', to: 'name' }, { from: 'prime_awardee_uei', to: 'uei' },
+    ]
+  },
+  'Vendor': {
+    pk: 'uei', records: '1.7M in Tango + 150+ unknown subs to enrich', category: 'Organizations',
+    desc: 'SAM.gov registered entity with full profile. Phase 6 will enrich 150+ unknown subcontractors from 672 subaward records.',
+    sources: ['SAM.gov', 'Tango SDK (1.7M entities)', 'VendorProfileSchema', 'PHASE5_VENDOR_POCS'],
+    propCount: 25,
+    properties: [
+      { name: 'uei', type: 'string PK', note: 'SAM Unique Entity ID' },
+      { name: 'legal_business_name', type: 'string', note: 'Legal name' },
+      { name: 'dba_name', type: 'string', note: 'Doing business as' },
+      { name: 'cage_code', type: 'string', note: 'CAGE' },
+      { name: 'registration_status', type: 'enum', note: 'Active/Inactive' },
+      { name: 'registration_date', type: 'date', note: 'SAM registration' },
+      { name: 'expiration_date', type: 'date', note: 'SAM expiry' },
+      { name: 'physical_address', type: 'string', note: 'Physical address' },
+      { name: 'city', type: 'string', note: 'City' },
+      { name: 'state', type: 'string', note: 'State' },
+      { name: 'zip', type: 'string', note: 'Zip code' },
+      { name: 'primary_naics', type: 'string FK', note: 'Primary NAICS' },
+      { name: 'naics_codes', type: 'list[str]', note: 'All NAICS codes' },
+      { name: 'psc_codes', type: 'list[str]', note: 'All PSC codes' },
+      { name: 'business_types', type: 'list[str]', note: 'SB designations' },
+      { name: 'poc_name', type: 'string', note: 'Primary POC' },
+      { name: 'poc_email', type: 'string', note: 'POC email' },
+      { name: 'poc_phone', type: 'string', note: 'POC phone' },
+      { name: 'govt_poc_name', type: 'string', note: 'Government POC' },
+      { name: 'govt_poc_email', type: 'string', note: 'Govt POC email' },
+      { name: 'elec_poc_name', type: 'string', note: 'Electronic POC' },
+      { name: 'elec_poc_email', type: 'string', note: 'Electronic POC email' },
+      { name: 'source_url', type: 'string', note: 'SAM.gov profile URL' },
+      { name: 'highest_owner_uei', type: 'string', note: 'Parent company UEI' },
+      { name: 'immediate_owner_uei', type: 'string', note: 'Direct parent UEI' },
+    ],
+    aliases: [
+      { from: 'vendor_name', to: 'legal_business_name' }, { from: 'sam_url', to: 'source_url' },
+      { from: 'sam_expiration', to: 'expiration_date' }, { from: 'sam_activation_date', to: 'registration_date' },
+    ]
+  },
+  'Agency': {
+    pk: 'agency_name', records: '20+ DoD/IC + 1,496 in Tango', category: 'Organizations',
+    desc: 'Federal government agency (awarding or funding). Reference data — audit found this is publicly available and should be cached.',
+    sources: ['FPDS', 'USASpending', 'Tango SDK (1,496 agencies)', 'SAM.gov', '01_reference_tables.sql'],
+    propCount: 13,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Agency name' },
+      { name: 'code', type: 'string', note: 'FPDS agency code' },
+      { name: 'department_code', type: 'string', note: 'Department code' },
+      { name: 'department_name', type: 'string', note: 'Parent department' },
+      { name: 'sub_agency', type: 'string', note: 'Sub-agency name' },
+      { name: 'total_prime_value', type: 'float', note: 'Prime contract total' },
+      { name: 'total_subaward_value', type: 'float', note: 'Sub total' },
+      { name: 'it_services_pct', type: 'float', note: 'IT services percentage' },
+      { name: 'top_primes', type: 'string', note: 'Top contractors' },
+      { name: 'contract_count', type: 'int', note: 'Total contracts' },
+      { name: 'is_dod', type: 'bool', note: 'DoD agency flag' },
+    ],
+    aliases: [
+      { from: 'agency_name', to: 'name' }, { from: 'contracting_agency', to: 'name' },
+      { from: 'awarding_agency', to: 'name' }, { from: 'funding_agency', to: 'name' },
+    ]
+  },
+
+  // ═══════════════════════════════════════════════════
+  // REFERENCE (5 entities)
+  // ═══════════════════════════════════════════════════
+  'NAICS Code': {
+    pk: 'code', records: '100s + 541512 heavily represented', category: 'Reference',
+    desc: 'North American Industry Classification System code. Key codes: 541512 (IT Consultant), 541330 (Engineering), 541715 (R&D).',
+    sources: ['FPDS', 'USASpending', 'SAM.gov', 'Tango SDK', 'DIIG-CSIS Lookup Tables'],
+    propCount: 6,
+    properties: [
+      { name: 'code', type: 'string PK', note: 'NAICS code (e.g., 541512)' },
+      { name: 'description', type: 'string', note: 'NAICS description' },
+      { name: 'sector_code', type: 'string', note: 'Sector (54=Professional)' },
+      { name: 'size_standard', type: 'string', note: 'SBA size standard' },
+      { name: 'dod_spending', type: 'float', note: 'DoD spending in code' },
+      { name: 'capability_category', type: 'string', note: 'BD capability mapping' },
+    ],
+    aliases: [{ from: 'naics_code', to: 'code' }, { from: 'naics_description', to: 'description' }]
+  },
+  'PSC Code': {
+    pk: 'code', records: '100s', category: 'Reference',
+    desc: 'Product Service Code for contract classification.',
+    sources: ['FPDS', 'USASpending', 'ProdServPlatformNAICS.csv (39MB)'],
+    propCount: 5,
+    properties: [
+      { name: 'code', type: 'string PK', note: 'PSC code' },
+      { name: 'description', type: 'string', note: 'PSC description' },
+      { name: 'category', type: 'string', note: 'Category grouping' },
+      { name: 'is_services', type: 'bool', note: 'Services vs products' },
+      { name: 'contract_count', type: 'int', note: 'Contracts using this PSC' },
+    ],
+    aliases: [{ from: 'psc_code', to: 'code' }, { from: 'psc_description', to: 'description' }]
+  },
+  'Location': {
+    pk: 'city + state', records: '179 mapped + PHASE5_DOD_BY_STATE', category: 'Reference',
+    desc: 'Geographic location for jobs, contracts, or programs. Enriched with DoD spending and contract counts by state.',
+    sources: ['program_intelligence', 'PHASE5_DOD_BY_STATE', 'location_intelligence.json'],
+    propCount: 11,
+    properties: [
+      { name: 'city', type: 'string PK', note: 'City name' },
+      { name: 'state', type: 'string PK', note: 'State name' },
+      { name: 'state_abbrev', type: 'string', note: '2-letter code' },
+      { name: 'country', type: 'string', note: 'Country' },
+      { name: 'zip', type: 'string', note: 'Zip code' },
+      { name: 'county', type: 'string', note: 'County' },
+      { name: 'congressional_district', type: 'string', note: 'District' },
+      { name: 'location_type', type: 'enum', note: 'Base/Office/Field/Remote' },
+      { name: 'team_function', type: 'string', note: 'Primary team function' },
+      { name: 'dod_spending', type: 'float', note: 'DoD spending in state' },
+      { name: 'contract_count', type: 'int', note: 'Contracts at location' },
+    ],
+    aliases: [
+      { from: 'pop_city', to: 'city' }, { from: 'vendor_city', to: 'city' },
+      { from: 'physical_city', to: 'city' }, { from: 'Person City', to: 'city' },
+    ]
+  },
+  'Technology': {
+    pk: 'name', records: '60 categories', category: 'Reference',
+    desc: 'Technology/tool extracted from job descriptions via regex patterns. Mapped across programs.',
+    sources: ['ig_job_parser TECHNOLOGIES dict (60 entries)', 'TECHNOLOGY_DEMAND_MAP_COMPREHENSIVE.md'],
+    propCount: 5,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Technology name' },
+      { name: 'category', type: 'string', note: 'Category grouping' },
+      { name: 'detection_pattern', type: 'regex', note: 'Regex pattern' },
+      { name: 'job_count', type: 'int', note: 'Mention frequency' },
+      { name: 'program_associations', type: 'list[str]', note: 'Associated programs' },
+    ],
+    aliases: []
+  },
+  'Certification': {
+    pk: 'name', records: '30 types', category: 'Reference',
+    desc: 'Professional certification extracted from jobs (Security+, CISSP, PMP, CEH, etc.).',
+    sources: ['ig_job_parser CERTIFICATIONS dict (30 entries)'],
+    propCount: 3,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Cert name' },
+      { name: 'detection_pattern', type: 'regex', note: 'Regex pattern' },
+      { name: 'job_count', type: 'int', note: 'Mention frequency' },
+    ],
+    aliases: []
+  },
+
+  // ═══════════════════════════════════════════════════
+  // META/OPS (22 entities)
+  // ═══════════════════════════════════════════════════
+  'Author': {
+    pk: 'author_name', records: '36+ BD reps', category: 'Meta/Ops',
+    desc: 'Internal PTS team member tracked via Bullhorn notes activity. Performance metrics include contacts reached, outcomes, success rate.',
+    sources: ['AUTHOR_PERFORMANCE', 'Bullhorn notes'],
+    propCount: 9,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Author name' },
+      { name: 'total_notes', type: 'int', note: 'Total CRM notes written' },
+      { name: 'contacts_reached', type: 'int', note: 'Unique contacts engaged' },
+      { name: 'programs_mentioned', type: 'int', note: 'Programs discussed' },
+      { name: 'programs_list', type: 'string', note: 'Program names list' },
+      { name: 'positive_outcomes', type: 'int', note: 'Positive results' },
+      { name: 'negative_outcomes', type: 'int', note: 'Negative results' },
+      { name: 'neutral_outcomes', type: 'int', note: 'Neutral results' },
+      { name: 'success_rate', type: 'float', note: 'Win percentage' },
+    ],
+    aliases: [{ from: 'note_author', to: 'name' }, { from: 'author', to: 'name' }]
+  },
+  'Scrape Run': {
+    pk: 'run_id', records: 'per-run', category: 'Meta/Ops',
+    desc: 'Metadata for a scraping/enrichment run from Apify actors or custom scrapers.',
+    sources: ['run_report.json', 'Apify actor runs', 'scrape metadata'],
+    propCount: 8,
+    properties: [
+      { name: 'run_id', type: 'string PK', note: 'Unique run ID (Apify or custom)' },
+      { name: 'source_portal', type: 'enum', note: 'IG/Apex/TEK/CACI/GDIT' },
+      { name: 'started_at', type: 'datetime', note: 'Run start time' },
+      { name: 'completed_at', type: 'datetime', note: 'Run end time' },
+      { name: 'jobs_scraped', type: 'int', note: 'Total jobs found' },
+      { name: 'jobs_new', type: 'int', note: 'New unique jobs' },
+      { name: 'errors', type: 'int', note: 'Error count' },
+      { name: 'config', type: 'dict', note: 'Actor/scraper configuration' },
+    ],
+    aliases: []
+  },
+  'Fiscal Phase': {
+    pk: 'quarter + phase', records: '4 quarters x phases', category: 'Meta/Ops',
+    desc: 'Federal fiscal year phase calendar mapping quarters to BD hiring signals and actions.',
+    sources: ['fiscal_year_calendar.json', 'BD strategy docs'],
+    propCount: 6,
+    properties: [
+      { name: 'quarter', type: 'string PK', note: 'Q1/Q2/Q3/Q4' },
+      { name: 'months', type: 'list[int]', note: 'Month numbers' },
+      { name: 'phase', type: 'string', note: 'Budget phase name' },
+      { name: 'description', type: 'string', note: 'Phase description' },
+      { name: 'hiring_signal', type: 'string', note: 'Hiring activity pattern' },
+      { name: 'bd_actions', type: 'list[str]', note: 'Recommended BD actions' },
+    ],
+    aliases: []
+  },
+  'Past Performance': {
+    pk: 'pp_id', records: '23MB SQLite + past_performance.json', category: 'Meta/Ops',
+    desc: 'PTS past performance record documenting successful contract work. Used in BD formula step 4-6 to establish credibility.',
+    sources: ['bullhorn_past_performance.db (23MB)', 'past_performance.json', 'Prime_Past_Performance_Deep_Research.docx'],
+    propCount: 14,
+    properties: [
+      { name: 'pp_id', type: 'string PK', note: 'Past performance ID' },
+      { name: 'program_name', type: 'string FK', note: 'Program name' },
+      { name: 'prime_contractor', type: 'string FK', note: 'Prime worked under' },
+      { name: 'contract_name', type: 'string', note: 'Contract name' },
+      { name: 'role_category', type: 'string', note: 'Role type provided' },
+      { name: 'clearance_level', type: 'string', note: 'Clearance required' },
+      { name: 'location', type: 'string', note: 'Work location' },
+      { name: 'start_date', type: 'date', note: 'Performance start' },
+      { name: 'end_date', type: 'date', note: 'Performance end' },
+      { name: 'headcount', type: 'int', note: 'Positions filled' },
+      { name: 'revenue', type: 'float', note: 'Revenue generated' },
+      { name: 'description', type: 'text', note: 'Performance summary' },
+      { name: 'relevance_score', type: 'float', note: 'BD relevance score' },
+      { name: 'key_programs', type: 'string', note: 'BICES, GSM-O, SOCOM, etc.' },
+    ],
+    aliases: []
+  },
+  'Capability': {
+    pk: 'name', records: 'mapped from NAICS/PSC/Tech', category: 'Meta/Ops',
+    desc: 'PTS capability domain mapping technologies, certifications, and clearances to program needs.',
+    sources: ['contractor capabilities', 'BD playbooks', 'keywords_signals'],
+    propCount: 6,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Capability name' },
+      { name: 'category', type: 'string', note: 'Domain category' },
+      { name: 'technologies', type: 'list[str]', note: 'Associated technologies' },
+      { name: 'certifications', type: 'list[str]', note: 'Required certs' },
+      { name: 'program_alignment', type: 'list[str]', note: 'Matching programs' },
+      { name: 'naics_codes', type: 'list[str]', note: 'Related NAICS' },
+    ],
+    aliases: []
+  },
+  'Enrichment Run': {
+    pk: 'enrichment_id', records: '~25 used + 99 planned', category: 'Meta/Ops',
+    desc: 'Tango/MakeGov API enrichment execution. Tracks 99-request budget allocation per audit optimization plan.',
+    sources: ['Enrichment Runs Log Notion DB', 'run_strategic_99_enrichment.py', 'DATA_AUDIT_REPORT.md'],
+    propCount: 12,
+    properties: [
+      { name: 'enrichment_id', type: 'string PK', note: 'Run ID' },
+      { name: 'phase', type: 'enum', note: 'Phase 1-6 per optimized plan' },
+      { name: 'request_type', type: 'enum', note: 'Entity/Contract/Opp/IDV/etc' },
+      { name: 'api_requests_used', type: 'int', note: 'API calls consumed' },
+      { name: 'records_enriched', type: 'int', note: 'Records processed' },
+      { name: 'records_new', type: 'int', note: 'New records added' },
+      { name: 'records_updated', type: 'int', note: 'Records updated' },
+      { name: 'redundancy_pct', type: 'float', note: 'Redundancy percentage' },
+      { name: 'started_at', type: 'datetime', note: 'Run start' },
+      { name: 'completed_at', type: 'datetime', note: 'Run end' },
+      { name: 'output_file', type: 'string', note: 'Output CSV/JSON path' },
+      { name: 'status', type: 'enum', note: 'Planned/Running/Complete/Failed' },
+    ],
+    aliases: []
+  },
+  'Intelligence Report': {
+    pk: 'report_id', records: '2,229 vectors + 268 Bullhorn intel files', category: 'Meta/Ops',
+    desc: 'AI-generated intelligence report — playbooks, battlecards, meeting prep, competitive intel. 268 files across 5 categories.',
+    sources: ['Qdrant intelligence_reports collection', 'N8N-Builder output/intelligence/ (268 files)', 'BD playbooks'],
+    propCount: 10,
+    properties: [
+      { name: 'report_id', type: 'string PK', note: 'Report ID' },
+      { name: 'title', type: 'string', note: 'Report title' },
+      { name: 'type', type: 'enum', note: 'Playbook/Battlecard/MeetingPrep/Intel/Strategy' },
+      { name: 'program', type: 'string FK', note: 'Target program' },
+      { name: 'company', type: 'string FK', note: 'Target company' },
+      { name: 'generated_date', type: 'date', note: 'Generation date' },
+      { name: 'content', type: 'text', note: 'Report content' },
+      { name: 'data_sources', type: 'list[str]', note: 'Source data used' },
+      { name: 'agent', type: 'string', note: 'AI agent that generated' },
+      { name: 'confidence', type: 'float', note: 'Confidence score' },
+    ],
+    aliases: []
+  },
+  'Memory': {
+    pk: 'id', records: 'agent-generated', category: 'Meta/Ops',
+    desc: 'Long-term agent memories with 5-layer system (working, episodic, semantic, procedural, strategic). Mem0-backed.',
+    sources: ['AI Agents', 'Mem0', 'Memory API'],
+    propCount: 17,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Memory ID' },
+      { name: 'content', type: 'text', note: 'Memory content' },
+      { name: 'memory_type', type: 'string', note: 'Category type' },
+      { name: 'importance', type: 'float', note: '0.0-1.0 importance' },
+      { name: 'layer', type: 'string', note: 'Working/Episodic/Semantic/Procedural/Strategic' },
+      { name: 'entities', type: 'list[str]', note: 'Referenced entities' },
+      { name: 'programs', type: 'list[str]', note: 'Referenced programs' },
+      { name: 'contacts', type: 'list[str]', note: 'Referenced contacts' },
+      { name: 'source', type: 'string', note: 'Memory origin' },
+      { name: 'tags', type: 'list[str]', note: 'Tags' },
+      { name: 'confidence', type: 'float', note: 'Memory confidence' },
+      { name: 'access_count', type: 'int', note: 'Times accessed' },
+      { name: 'user_id', type: 'string', note: 'User scope' },
+      { name: 'agent_id', type: 'string', note: 'Agent scope' },
+      { name: 'metadata', type: 'json', note: 'Extra metadata' },
+      { name: 'created_at', type: 'timestamp', note: 'Created timestamp' },
+      { name: 'last_accessed', type: 'timestamp', note: 'Last access time' },
+    ],
+    aliases: []
+  },
+  'Interaction': {
+    pk: 'id', records: 'agent-logged', category: 'Meta/Ops',
+    desc: 'Agent interaction logs tracking contact engagement history — type, sentiment, outcome.',
+    sources: ['AI Agents', 'CRM Integration'],
+    propCount: 8,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Auto-increment ID' },
+      { name: 'contact_id', type: 'string FK', note: 'Contact engaged' },
+      { name: 'contact_name', type: 'string', note: 'Contact display name' },
+      { name: 'interaction_type', type: 'string', note: 'Call/Email/Meeting/Note' },
+      { name: 'summary', type: 'text', note: 'Interaction summary' },
+      { name: 'sentiment', type: 'string', note: 'Positive/Neutral/Negative' },
+      { name: 'outcome', type: 'string', note: 'Outcome classification' },
+      { name: 'timestamp', type: 'timestamp', note: 'When occurred' },
+    ],
+    aliases: []
+  },
+  'Graph Entity': {
+    pk: 'id', records: 'LightRAG extracted', category: 'Meta/Ops',
+    desc: 'Knowledge graph entities from LightRAG bd_graph.db. Typed nodes with attributes.',
+    sources: ['LightRAG', 'bd_graph.db'],
+    propCount: 4,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Entity ID' },
+      { name: 'entity_type', type: 'string', note: 'Person/Org/Program/etc' },
+      { name: 'entity_name', type: 'string', note: 'Entity name' },
+      { name: 'attributes', type: 'json', note: 'Entity attributes' },
+    ],
+    aliases: []
+  },
+  'Graph Relationship': {
+    pk: 'id', records: 'LightRAG extracted', category: 'Meta/Ops',
+    desc: 'Knowledge graph relationships from LightRAG bd_graph.db. Weighted edges between graph entities.',
+    sources: ['LightRAG', 'bd_graph.db'],
+    propCount: 6,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Relationship ID' },
+      { name: 'source_entity', type: 'string FK', note: 'Source entity name' },
+      { name: 'target_entity', type: 'string FK', note: 'Target entity name' },
+      { name: 'relationship_type', type: 'string', note: 'Relation label' },
+      { name: 'weight', type: 'float', note: 'Edge weight' },
+      { name: 'attributes', type: 'json', note: 'Edge attributes' },
+    ],
+    aliases: []
+  },
+  'Source File': {
+    pk: 'id', records: 'per-ETL run', category: 'Meta/Ops',
+    desc: 'ETL source file tracking for audit trail and data lineage. Tracks every ingested file with checksums.',
+    sources: ['ETL Pipeline', 'Bullhorn ETL'],
+    propCount: 11,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Tracking ID' },
+      { name: 'filename', type: 'string', note: 'Source filename' },
+      { name: 'file_path', type: 'string', note: 'Full path' },
+      { name: 'file_size_bytes', type: 'int', note: 'File size' },
+      { name: 'file_type', type: 'string', note: 'CSV/JSON/XLSX/DB' },
+      { name: 'entity_type', type: 'string', note: 'What entity it feeds' },
+      { name: 'record_count', type: 'int', note: 'Records in file' },
+      { name: 'processed_date', type: 'datetime', note: 'When processed' },
+      { name: 'processing_status', type: 'string', note: 'Success/Failed/Partial' },
+      { name: 'error_message', type: 'text', note: 'Error details' },
+      { name: 'checksum', type: 'string', note: 'File MD5/SHA256' },
+    ],
+    aliases: []
+  },
+  'Data Quality Log': {
+    pk: 'id', records: 'per-issue logged', category: 'Meta/Ops',
+    desc: 'Data quality issue tracking for ETL pipeline validation. Severity-classified issues with resolution status.',
+    sources: ['QA Agent', 'Engine6_QA'],
+    propCount: 8,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Issue ID' },
+      { name: 'source_file', type: 'string FK', note: 'Source file' },
+      { name: 'table_name', type: 'string', note: 'Affected table' },
+      { name: 'record_identifier', type: 'string', note: 'Record with issue' },
+      { name: 'issue_type', type: 'string', note: 'Missing/Invalid/Duplicate' },
+      { name: 'issue_description', type: 'text', note: 'Issue details' },
+      { name: 'severity', type: 'string', note: 'Critical/Warning/Info' },
+      { name: 'resolved', type: 'bool', note: 'Resolution status' },
+    ],
+    aliases: []
+  },
+  'Processing Stats': {
+    pk: 'id', records: 'per-ETL run', category: 'Meta/Ops',
+    desc: 'ETL pipeline processing statistics per run. Tracks records read, inserted, updated, errored.',
+    sources: ['ETL Pipeline', 'Bullhorn ETL'],
+    propCount: 11,
+    properties: [
+      { name: 'id', type: 'int PK', note: 'Stats ID' },
+      { name: 'run_id', type: 'string FK', note: 'ETL run ID' },
+      { name: 'source_file', type: 'string FK', note: 'Source file' },
+      { name: 'table_name', type: 'string', note: 'Target table' },
+      { name: 'records_read', type: 'int', note: 'Total read' },
+      { name: 'records_inserted', type: 'int', note: 'New records' },
+      { name: 'records_updated', type: 'int', note: 'Updated records' },
+      { name: 'records_skipped', type: 'int', note: 'Skipped records' },
+      { name: 'records_error', type: 'int', note: 'Error records' },
+      { name: 'duplicates_found', type: 'int', note: 'Dupes detected' },
+      { name: 'processing_time_seconds', type: 'float', note: 'Duration' },
+    ],
+    aliases: []
+  },
+  'Notification': {
+    pk: 'id', records: 'system-generated', category: 'Meta/Ops',
+    desc: 'System notifications from webhooks, alerts, and pipeline events. Read/unread tracking.',
+    sources: ['Phase 7 API', 'Webhook System'],
+    propCount: 9,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Notification ID' },
+      { name: 'type', type: 'string', note: 'Alert/Info/Warning/Action' },
+      { name: 'title', type: 'string', note: 'Notification title' },
+      { name: 'message', type: 'text', note: 'Full message body' },
+      { name: 'entity_type', type: 'string', note: 'Related entity type' },
+      { name: 'entity_id', type: 'string FK', note: 'Related entity ID' },
+      { name: 'priority', type: 'string', note: 'High/Medium/Low' },
+      { name: 'read', type: 'bool', note: 'Read status' },
+      { name: 'created_at', type: 'timestamp', note: 'When created' },
+    ],
+    aliases: []
+  },
+  'Alert': {
+    pk: 'alert_id', records: 'event-triggered', category: 'Meta/Ops',
+    desc: 'QA and BD-significant event alerts with severity tracking. Rule-based triggering.',
+    sources: ['Engine6_QA', 'Phase 7 API', 'Streaming Pipeline'],
+    propCount: 7,
+    properties: [
+      { name: 'alert_id', type: 'string PK', note: 'Alert unique ID' },
+      { name: 'rule_id', type: 'string FK', note: 'Triggering rule' },
+      { name: 'severity', type: 'string', note: 'Critical/High/Medium/Low' },
+      { name: 'title', type: 'string', note: 'Alert title' },
+      { name: 'message', type: 'text', note: 'Alert details' },
+      { name: 'data', type: 'json', note: 'Alert context data' },
+      { name: 'timestamp', type: 'datetime', note: 'When triggered' },
+    ],
+    aliases: []
+  },
+  'Swarm Task': {
+    pk: 'swarm_id', records: 'per-swarm execution', category: 'Meta/Ops',
+    desc: 'Multi-agent swarm task execution with DAG decomposition. Tracks workers, tokens, quality.',
+    sources: ['Swarm API', 'Agent Orchestrator'],
+    propCount: 10,
+    properties: [
+      { name: 'swarm_id', type: 'string PK', note: 'Swarm execution ID' },
+      { name: 'description', type: 'text', note: 'Task description' },
+      { name: 'task_type', type: 'string', note: 'Research/Analysis/Report' },
+      { name: 'coordination_mode', type: 'string', note: 'DAG/Map-Reduce/Pipeline' },
+      { name: 'quality_threshold', type: 'float', note: 'Min quality bar' },
+      { name: 'status', type: 'string', note: 'Running/Complete/Failed' },
+      { name: 'workers_used', type: 'int', note: 'Agent workers count' },
+      { name: 'total_tokens', type: 'int', note: 'Total tokens consumed' },
+      { name: 'quality_score', type: 'float', note: 'Output quality 0-1' },
+      { name: 'output', type: 'json', note: 'Swarm output data' },
+    ],
+    aliases: []
+  },
+  'Workflow Run': {
+    pk: 'run_id', records: 'per-execution', category: 'Meta/Ops',
+    desc: 'LangGraph workflow executions with state persistence. Tracks input/output, thread, and timing.',
+    sources: ['Workflow API', 'LangGraph'],
+    propCount: 9,
+    properties: [
+      { name: 'run_id', type: 'string PK', note: 'Run unique ID' },
+      { name: 'workflow_id', type: 'string FK', note: 'Workflow definition ID' },
+      { name: 'workflow_name', type: 'string', note: 'Workflow name' },
+      { name: 'thread_id', type: 'string', note: 'Conversation thread' },
+      { name: 'status', type: 'string', note: 'Running/Success/Failed/Paused' },
+      { name: 'input_state', type: 'json', note: 'Input state' },
+      { name: 'output_data', type: 'json', note: 'Output result' },
+      { name: 'started_at', type: 'timestamp', note: 'Start time' },
+      { name: 'completed_at', type: 'timestamp', note: 'End time' },
+    ],
+    aliases: []
+  },
+  'Contact Claim': {
+    pk: 'id', records: 'per-claim', category: 'Meta/Ops',
+    desc: 'Contact ownership claims for BD team collaboration. Prevents duplicate outreach.',
+    sources: ['Collaboration API', 'BD Team'],
+    propCount: 10,
+    properties: [
+      { name: 'id', type: 'string PK', note: 'Claim ID' },
+      { name: 'contact_id', type: 'string FK', note: 'Claimed contact' },
+      { name: 'contact_name', type: 'string', note: 'Contact name' },
+      { name: 'owner_id', type: 'string FK', note: 'Claiming user ID' },
+      { name: 'owner_name', type: 'string', note: 'Claiming user name' },
+      { name: 'status', type: 'string', note: 'Active/Expired/Released' },
+      { name: 'reason', type: 'string', note: 'Claim reason' },
+      { name: 'program', type: 'string FK', note: 'Related program' },
+      { name: 'created_at', type: 'datetime', note: 'Claim start' },
+      { name: 'expires_at', type: 'datetime', note: 'Claim expiry' },
+    ],
+    aliases: []
+  },
+  'Streaming Event': {
+    pk: 'event_id', records: 'real-time flow', category: 'Meta/Ops',
+    desc: 'Real-time streaming events from SAM.gov, FPDS, and Bullhorn. Pathway pipeline events.',
+    sources: ['Streaming Pipeline', 'Event Bus', 'SAM.gov', 'FPDS', 'Bullhorn'],
+    propCount: 7,
+    properties: [
+      { name: 'event_id', type: 'string PK', note: 'Event unique ID' },
+      { name: 'event_type', type: 'string', note: 'Contract/Opportunity/Activity' },
+      { name: 'source', type: 'string', note: 'SAM/FPDS/Bullhorn' },
+      { name: 'timestamp', type: 'datetime', note: 'Event timestamp' },
+      { name: 'payload', type: 'json', note: 'Event data payload' },
+      { name: 'priority', type: 'string', note: 'Urgent/Normal/Low' },
+      { name: 'metadata', type: 'json', note: 'Processing metadata' },
+    ],
+    aliases: []
+  },
+  'File Node': {
+    pk: 'path', records: '4,221 tracked', category: 'Meta/Ops',
+    desc: 'Neo4j file lineage nodes tracking code files and data dependencies. Input/output classification.',
+    sources: ['Neo4j Graph', 'Code Scanner'],
+    propCount: 10,
+    properties: [
+      { name: 'path', type: 'string PK', note: 'Full file path' },
+      { name: 'name', type: 'string', note: 'Filename' },
+      { name: 'type', type: 'string', note: 'Script/Data/Config/Output' },
+      { name: 'extension', type: 'string', note: 'File extension' },
+      { name: 'size_bytes', type: 'int', note: 'File size' },
+      { name: 'hash', type: 'string', note: 'Content hash' },
+      { name: 'modified', type: 'datetime', note: 'Last modified' },
+      { name: 'engine', type: 'string', note: 'Owning engine (1-8)' },
+      { name: 'is_input', type: 'bool', note: 'Data input file' },
+      { name: 'is_output', type: 'bool', note: 'Generated output file' },
+    ],
+    aliases: []
+  },
+  'Process Node': {
+    pk: 'name', records: 'per-script tracked', category: 'Meta/Ops',
+    desc: 'Neo4j process lineage nodes tracking script executions. Run counts and durations.',
+    sources: ['Neo4j Graph', 'Pipeline Runner'],
+    propCount: 7,
+    properties: [
+      { name: 'name', type: 'string PK', note: 'Process name' },
+      { name: 'script_path', type: 'string', note: 'Script file path' },
+      { name: 'engine', type: 'string', note: 'Owning engine (1-8)' },
+      { name: 'description', type: 'text', note: 'Process description' },
+      { name: 'last_run', type: 'datetime', note: 'Last execution' },
+      { name: 'run_count', type: 'int', note: 'Total executions' },
+      { name: 'avg_duration_seconds', type: 'float', note: 'Avg run time' },
+    ],
+    aliases: []
+  },
+};
+
+// ═══════════════════════════════════════════════════
+// RELATIONSHIPS — 90+ edges
+// ═══════════════════════════════════════════════════
+
+const RELATIONSHIPS = [
+  // Job relationships
+  { from: 'Job', to: 'Program', label: 'mapped_to', type: 'FK' },
+  { from: 'Job', to: 'Prime', label: 'posted_by', type: 'FK' },
+  { from: 'Job', to: 'Location', label: 'located_at', type: 'FK' },
+  { from: 'Job', to: 'Technology', label: 'requires', type: 'many' },
+  { from: 'Job', to: 'Certification', label: 'requires', type: 'many' },
+  { from: 'Job', to: 'Scrape Run', label: 'scraped_in', type: 'FK' },
+  { from: 'Job', to: 'BD Target', label: 'signals', type: 'derived' },
+
+  // Contract relationships
+  { from: 'Contract', to: 'Agency', label: 'awarded_by', type: 'FK' },
+  { from: 'Contract', to: 'Prime', label: 'awarded_to', type: 'FK' },
+  { from: 'Contract', to: 'Program', label: 'mapped_to', type: 'FK' },
+  { from: 'Contract', to: 'NAICS Code', label: 'classified_by', type: 'FK' },
+  { from: 'Contract', to: 'PSC Code', label: 'classified_by', type: 'FK' },
+  { from: 'Contract', to: 'Location', label: 'performed_at', type: 'FK' },
+  { from: 'Contract', to: 'Subaward', label: 'has_subawards', type: 'one-many' },
+  { from: 'Contract', to: 'BD Target', label: 'scored_as', type: 'derived' },
+  { from: 'Contract', to: 'IDV', label: 'ordered_under', type: 'FK' },
+  { from: 'Contract', to: 'Task Order', label: 'has_task_orders', type: 'one-many' },
+  { from: 'Contract', to: 'Transaction', label: 'has_transactions', type: 'one-many' },
+  { from: 'Contract', to: 'Federal Account', label: 'funded_by', type: 'one-many' },
+  { from: 'Contract', to: 'Recompete', label: 'tracked_as', type: 'one-one' },
+
+  // Program relationships
+  { from: 'Program', to: 'Agency', label: 'owned_by', type: 'FK' },
+  { from: 'Program', to: 'Prime', label: 'has_primes', type: 'many' },
+  { from: 'Program', to: 'Location', label: 'located_at', type: 'many' },
+  { from: 'Program', to: 'Technology', label: 'uses', type: 'many' },
+  { from: 'Program', to: 'Past Performance', label: 'has_past_perf', type: 'one-many' },
+  { from: 'Program', to: 'Intelligence Report', label: 'analyzed_in', type: 'one-many' },
+
+  // Prime relationships
+  { from: 'Prime', to: 'Contact', label: 'has_contacts', type: 'one-many' },
+  { from: 'Prime', to: 'Vendor', label: 'registered_as', type: 'one-one' },
+  { from: 'Prime', to: 'Competitor', label: 'competes_with', type: 'many' },
+
+  // Contact relationships
+  { from: 'Contact', to: 'Program', label: 'associated_with', type: 'many' },
+  { from: 'Contact', to: 'Author', label: 'engaged_by', type: 'many' },
+  { from: 'Contact', to: 'Activity', label: 'has_activities', type: 'one-many' },
+  { from: 'Contact', to: 'Note', label: 'mentioned_in', type: 'one-many' },
+  { from: 'Contact', to: 'Location', label: 'located_at', type: 'FK' },
+  { from: 'Contact', to: 'Placement', label: 'placed_as', type: 'one-many' },
+
+  // Author relationships
+  { from: 'Author', to: 'Activity', label: 'writes', type: 'one-many' },
+  { from: 'Author', to: 'Note', label: 'authors', type: 'one-many' },
+
+  // Subaward relationships
+  { from: 'Subaward', to: 'Prime', label: 'prime_is', type: 'FK' },
+  { from: 'Subaward', to: 'Vendor', label: 'sub_is', type: 'FK' },
+  { from: 'Subaward', to: 'Location', label: 'performed_at', type: 'FK' },
+  { from: 'Subaward', to: 'NAICS Code', label: 'classified_by', type: 'FK' },
+
+  // Opportunity relationships
+  { from: 'Opportunity', to: 'Agency', label: 'posted_by', type: 'FK' },
+  { from: 'Opportunity', to: 'NAICS Code', label: 'classified_by', type: 'FK' },
+  { from: 'Opportunity', to: 'PSC Code', label: 'categorized_by', type: 'FK' },
+  { from: 'Opportunity', to: 'Location', label: 'located_at', type: 'FK' },
+  { from: 'Opportunity', to: 'Notice', label: 'has_notices', type: 'one-many' },
+
+  // Forecast relationships
+  { from: 'Forecast', to: 'Agency', label: 'planned_by', type: 'FK' },
+  { from: 'Forecast', to: 'NAICS Code', label: 'classified_by', type: 'FK' },
+  { from: 'Forecast', to: 'PSC Code', label: 'categorized_by', type: 'FK' },
+
+  // OTA relationships
+  { from: 'OTA', to: 'Agency', label: 'awarded_by', type: 'FK' },
+  { from: 'OTA', to: 'Prime', label: 'awarded_to', type: 'FK' },
+  { from: 'OTA', to: 'Contract', label: 'related_to', type: 'FK' },
+
+  // Grant relationships
+  { from: 'Grant', to: 'Agency', label: 'granted_by', type: 'FK' },
+  { from: 'Grant', to: 'Vendor', label: 'awarded_to', type: 'FK' },
+
+  // Recompete relationships
+  { from: 'Recompete', to: 'Prime', label: 'incumbent_is', type: 'FK' },
+  { from: 'Recompete', to: 'Program', label: 'for_program', type: 'FK' },
+  { from: 'Recompete', to: 'Contract Vehicle', label: 'expected_vehicle', type: 'FK' },
+
+  // BD Target relationships
+  { from: 'BD Target', to: 'Competitor', label: 'has_competitors', type: 'many' },
+  { from: 'BD Target', to: 'Recompete', label: 'recompete_as', type: 'one-one' },
+
+  // IDV relationships
+  { from: 'IDV', to: 'Task Order', label: 'parent_of', type: 'one-many' },
+  { from: 'IDV', to: 'Vendor', label: 'awarded_to', type: 'many' },
+  { from: 'IDV', to: 'Contract Vehicle', label: 'managed_by', type: 'FK' },
+  { from: 'IDV', to: 'Agency', label: 'managed_by', type: 'FK' },
+
+  // Task Order
+  { from: 'Task Order', to: 'Prime', label: 'awarded_to', type: 'FK' },
+
+  // Vendor self-ref (ownership)
+  { from: 'Vendor', to: 'Agency', label: 'registered_with', type: 'FK' },
+
+  // Placement relationships
+  { from: 'Placement', to: 'Job', label: 'fills', type: 'FK' },
+  { from: 'Placement', to: 'Prime', label: 'at_company', type: 'FK' },
+  { from: 'Placement', to: 'Program', label: 'on_program', type: 'FK' },
+
+  // Past Performance
+  { from: 'Past Performance', to: 'Prime', label: 'with_prime', type: 'FK' },
+
+  // Enrichment Run
+  { from: 'Enrichment Run', to: 'Contract', label: 'enriches', type: 'one-many' },
+
+  // Note
+  { from: 'Note', to: 'Program', label: 'mentions', type: 'many' },
+  { from: 'Note', to: 'Prime', label: 'mentions', type: 'many' },
+
+  // Intelligence Report
+  { from: 'Intelligence Report', to: 'Prime', label: 'analyzes', type: 'FK' },
+
+  // Document relationships
+  { from: 'Document', to: 'Program', label: 'about_program', type: 'FK' },
+  { from: 'Document', to: 'Prime', label: 'about_contractor', type: 'FK' },
+
+  // Insight relationships
+  { from: 'Insight', to: 'Graph Entity', label: 'about_entity', type: 'FK' },
+
+  // Weekly Report relationships
+  { from: 'Weekly Report', to: 'Program', label: 'covers', type: 'many' },
+
+  // Call Briefing relationships
+  { from: 'Call Briefing', to: 'Contact', label: 'briefs_on', type: 'FK' },
+
+  // Transcript Intel relationships
+  { from: 'Transcript Intel', to: 'Contact', label: 'from_call_with', type: 'FK' },
+
+  // Relationship Score relationships
+  { from: 'Relationship Score', to: 'Contact', label: 'scores', type: 'one-one' },
+
+  // Win Probability relationships
+  { from: 'Win Probability', to: 'BD Target', label: 'predicts', type: 'one-one' },
+
+  // Hiring Forecast relationships
+  { from: 'Hiring Forecast', to: 'Program', label: 'forecasts_for', type: 'FK' },
+
+  // Revenue Placement relationships
+  { from: 'Revenue Placement', to: 'Program', label: 'on_program', type: 'FK' },
+  { from: 'Revenue Placement', to: 'Contact', label: 'of_contractor', type: 'FK' },
+
+  // Strategic Pattern relationships
+  { from: 'Strategic Pattern', to: 'Program', label: 'about_program', type: 'FK' },
+
+  // Contract Watch relationships
+  { from: 'Contract Watch', to: 'Contract', label: 'monitors', type: 'many' },
+  { from: 'Contract Watch', to: 'Opportunity', label: 'monitors', type: 'many' },
+
+  // Recompete Prediction relationships
+  { from: 'Recompete Prediction', to: 'Recompete', label: 'predicts', type: 'one-one' },
+  { from: 'Recompete Prediction', to: 'Program', label: 'for_program', type: 'FK' },
+
+  // Proposal Artifact relationships
+  { from: 'Proposal Artifact', to: 'Program', label: 'for_program', type: 'FK' },
+  { from: 'Proposal Artifact', to: 'Agency', label: 'targeting', type: 'FK' },
+
+  // Memory relationships
+  { from: 'Memory', to: 'Contact', label: 'references', type: 'many' },
+  { from: 'Memory', to: 'Program', label: 'references', type: 'many' },
+
+  // Interaction relationships
+  { from: 'Interaction', to: 'Contact', label: 'with_contact', type: 'FK' },
+
+  // Graph Entity / Graph Relationship
+  { from: 'Graph Entity', to: 'Graph Relationship', label: 'has_edges', type: 'one-many' },
+
+  // Source File / Data Quality / Processing Stats
+  { from: 'Source File', to: 'Processing Stats', label: 'has_stats', type: 'one-many' },
+  { from: 'Source File', to: 'Data Quality Log', label: 'has_issues', type: 'one-many' },
+
+  // Swarm / Workflow
+  { from: 'Swarm Task', to: 'Workflow Run', label: 'executes_via', type: 'one-many' },
+
+  // Contact Claim relationships
+  { from: 'Contact Claim', to: 'Contact', label: 'claims', type: 'FK' },
+
+  // File Node / Process Node lineage
+  { from: 'File Node', to: 'File Node', label: 'derived_from', type: 'many' },
+  { from: 'Process Node', to: 'File Node', label: 'reads', type: 'many' },
+  { from: 'Process Node', to: 'File Node', label: 'writes', type: 'many' },
+];
+
+// ═══════════════════════════════════════════════════
+// BUILD CYTOSCAPE GRAPH
+// ═══════════════════════════════════════════════════
+
+function getCategoryColor(nodeName) {
+  for (const [cat, data] of Object.entries(CATEGORIES)) {
+    if (data.nodes.includes(nodeName)) return data.color;
+  }
+  return '#64748b';
+}
+
+function getCategoryName(nodeName) {
+  for (const [cat, data] of Object.entries(CATEGORIES)) {
+    if (data.nodes.includes(nodeName)) return cat;
+  }
+  return 'Unknown';
+}
+
+function buildElements() {
+  const elements = [];
+  for (const [name, data] of Object.entries(NODES)) {
+    const color = getCategoryColor(name);
+    const cat = getCategoryName(name);
+    elements.push({
+      data: {
+        id: name, label: name, category: cat, color: color,
+        propCount: data.propCount, records: data.records, pk: data.pk,
+        nodeSize: Math.max(35, Math.min(75, 25 + data.propCount * 0.55)),
+      }
+    });
+  }
+  RELATIONSHIPS.forEach((rel, i) => {
+    if (NODES[rel.from] && NODES[rel.to]) {
+      elements.push({
+        data: { id: `e${i}`, source: rel.from, target: rel.to, label: rel.label, relType: rel.type }
+      });
+    }
+  });
+  return elements;
+}
+
+const cy = cytoscape({
+  container: document.getElementById('cy'),
+  elements: buildElements(),
+  style: [
+    { selector: 'node', style: {
+      'label': 'data(label)', 'width': 'data(nodeSize)', 'height': 'data(nodeSize)',
+      'background-color': 'data(color)', 'background-opacity': 0.15,
+      'border-width': 2, 'border-color': 'data(color)', 'border-opacity': 0.7,
+      'color': '#e2e8f0', 'font-size': '9px', 'font-family': 'JetBrains Mono, monospace',
+      'font-weight': 500, 'text-valign': 'center', 'text-halign': 'center',
+      'text-wrap': 'wrap', 'text-max-width': '80px',
+      'text-outline-color': '#0a0e1a', 'text-outline-width': 2, 'z-index': 10,
+    }},
+    { selector: 'edge', style: {
+      'width': 1.5, 'line-color': '#2a3654', 'target-arrow-color': '#2a3654',
+      'target-arrow-shape': 'triangle', 'arrow-scale': 0.8, 'curve-style': 'bezier',
+      'label': 'data(label)', 'font-size': '7px', 'font-family': 'JetBrains Mono, monospace',
+      'color': '#4a5c80', 'text-rotation': 'autorotate', 'text-margin-y': -8,
+      'text-outline-color': '#0a0e1a', 'text-outline-width': 1.5, 'opacity': 0.6,
+    }},
+    { selector: 'node:selected', style: { 'border-width': 3, 'border-opacity': 1, 'background-opacity': 0.3, 'z-index': 20 }},
+    { selector: 'node.highlighted', style: { 'border-width': 3, 'border-opacity': 1, 'background-opacity': 0.35 }},
+    { selector: 'edge.highlighted', style: { 'width': 2.5, 'line-color': '#06b6d4', 'target-arrow-color': '#06b6d4', 'opacity': 1, 'z-index': 15 }},
+    { selector: 'node.dimmed', style: { 'opacity': 0.15 }},
+    { selector: 'edge.dimmed', style: { 'opacity': 0.05 }},
+    { selector: 'node.hidden', style: { 'display': 'none' }},
+  ],
+  layout: { name: 'dagre', rankDir: 'TB', nodeSep: 55, rankSep: 70, edgeSep: 25 },
+  wheelSensitivity: 0.3, minZoom: 0.15, maxZoom: 4,
+});
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR: CATEGORY FILTERS
+// ═══════════════════════════════════════════════════
+const activeCategories = new Set(Object.keys(CATEGORIES));
+
+function renderCategoryFilters() {
+  const container = document.getElementById('category-filters');
+  container.innerHTML = '';
+  for (const [cat, data] of Object.entries(CATEGORIES)) {
+    const div = document.createElement('div');
+    div.className = `category-filter ${activeCategories.has(cat) ? 'active' : ''}`;
+    div.innerHTML = `<div class="dot" style="background:${data.color}"></div><span>${cat}</span><span class="count">${data.nodes.length}</span>`;
+    div.addEventListener('click', () => toggleCategory(cat));
+    container.appendChild(div);
+  }
+}
+
+function toggleCategory(cat) {
+  if (activeCategories.has(cat)) activeCategories.delete(cat);
+  else activeCategories.add(cat);
+  renderCategoryFilters();
+  applyFilters();
+}
+
+function applyFilters() {
+  cy.nodes().forEach(node => {
+    const cat = node.data('category');
+    if (activeCategories.has(cat)) node.removeClass('hidden');
+    else node.addClass('hidden');
+  });
+  renderNodeList();
+}
+
+// ═══════════════════════════════════════════════════
+// SIDEBAR: NODE LIST
+// ═══════════════════════════════════════════════════
+function renderNodeList() {
+  const container = document.getElementById('node-list');
+  const search = document.getElementById('search').value.toLowerCase();
+  container.innerHTML = '';
+  for (const [name, data] of Object.entries(NODES)) {
+    const cat = getCategoryName(name);
+    if (!activeCategories.has(cat)) continue;
+    if (search) {
+      const matchName = name.toLowerCase().includes(search);
+      const matchProps = data.properties.some(p => p.name.toLowerCase().includes(search) || p.note.toLowerCase().includes(search));
+      const matchAliases = data.aliases.some(a => a.from.toLowerCase().includes(search) || a.to.toLowerCase().includes(search));
+      const matchDesc = data.desc.toLowerCase().includes(search);
+      const matchSources = data.sources.some(s => s.toLowerCase().includes(search));
+      if (!matchName && !matchProps && !matchAliases && !matchDesc && !matchSources) continue;
+    }
+    const color = getCategoryColor(name);
+    const div = document.createElement('div');
+    div.className = 'node-list-item';
+    div.innerHTML = `<div class="pip" style="background:${color}"></div>${name}<span class="props">${data.propCount}p</span>`;
+    div.addEventListener('click', () => {
+      selectNode(name);
+      cy.getElementById(name).select();
+      cy.animate({ center: { eles: cy.getElementById(name) }, duration: 300 });
+    });
+    container.appendChild(div);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// DETAIL PANEL
+// ═══════════════════════════════════════════════════
+function selectNode(name) {
+  const data = NODES[name];
+  if (!data) return;
+  document.getElementById('empty-state').style.display = 'none';
+  const content = document.getElementById('detail-content');
+  content.style.display = 'block';
+  const color = getCategoryColor(name);
+  const cat = getCategoryName(name);
+  const outgoing = RELATIONSHIPS.filter(r => r.from === name);
+  const incoming = RELATIONSHIPS.filter(r => r.to === name);
+
+  cy.elements().removeClass('highlighted dimmed');
+  const node = cy.getElementById(name);
+  const neighborhood = node.neighborhood();
+  cy.elements().addClass('dimmed');
+  node.removeClass('dimmed').addClass('highlighted');
+  neighborhood.removeClass('dimmed');
+  neighborhood.edges().addClass('highlighted');
+
+  content.innerHTML = `
+    <div class="detail-header">
+      <div class="node-badge" style="background:${color}20;color:${color};border:1px solid ${color}40">${cat}</div>
+      <h2>${name}</h2>
+      <div class="subtitle">${data.desc}</div>
+      <div style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text-muted)">
+        PK: <span style="color:var(--accent-cyan)">${data.pk}</span> &middot;
+        <span style="color:var(--accent-amber)">${data.propCount} properties</span> &middot;
+        ${data.records} records
+      </div>
+    </div>
+    <div class="detail-section">
+      <h4>Data Sources</h4>
+      ${data.sources.map(s => `<span class="source-badge">${s}</span>`).join('')}
+    </div>
+    <div class="detail-section">
+      <h4>Properties (${data.properties.length} shown of ${data.propCount})</h4>
+      <table class="prop-table">
+        ${data.properties.map(p => `<tr><td class="prop-name">${p.name}</td><td class="prop-type">${p.type}</td><td class="prop-note">${p.note}</td></tr>`).join('')}
+      </table>
+    </div>
+    ${outgoing.length > 0 ? `<div class="detail-section"><h4>Outgoing Relationships (${outgoing.length})</h4>
+      ${outgoing.map(r => `<div class="rel-item" onclick="selectNode('${r.to}');cy.getElementById('${r.to}').select();">
+        <span style="color:${color}">${name}</span><span class="rel-arrow">&rarr;</span>
+        <span class="rel-label">${r.label}</span><span class="rel-arrow">&rarr;</span>
+        <span style="color:${getCategoryColor(r.to)}">${r.to}</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--text-muted)">${r.type}</span>
+      </div>`).join('')}</div>` : ''}
+    ${incoming.length > 0 ? `<div class="detail-section"><h4>Incoming Relationships (${incoming.length})</h4>
+      ${incoming.map(r => `<div class="rel-item" onclick="selectNode('${r.from}');cy.getElementById('${r.from}').select();">
+        <span style="color:${getCategoryColor(r.from)}">${r.from}</span><span class="rel-arrow">&rarr;</span>
+        <span class="rel-label">${r.label}</span><span class="rel-arrow">&rarr;</span>
+        <span style="color:${color}">${name}</span>
+        <span style="margin-left:auto;font-size:9px;color:var(--text-muted)">${r.type}</span>
+      </div>`).join('')}</div>` : ''}
+    ${data.aliases.length > 0 ? `<div class="detail-section"><h4>Alias Mappings (${data.aliases.length})</h4>
+      ${data.aliases.map(a => `<div class="alias-item"><span class="alias-from">${a.from}</span> &rarr; <span class="alias-to">${a.to}</span></div>`).join('')}</div>` : ''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════
+// LAYOUT CONTROLS
+// ═══════════════════════════════════════════════════
+let currentLayout = 'dagre';
+function setLayout(name) {
+  currentLayout = name;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const layouts = {
+    dagre: { name: 'dagre', rankDir: 'TB', nodeSep: 55, rankSep: 70, edgeSep: 25 },
+    cose: { name: 'cose', idealEdgeLength: 110, nodeOverlap: 25, animate: true, animationDuration: 500, randomize: false },
+    grid: { name: 'grid', rows: 5, cols: 8 },
+    concentric: { name: 'concentric', minNodeSpacing: 50, concentric: n => {
+      const cat = n.data('category');
+      if (cat === 'BD Intelligence') return 4;
+      if (cat === 'Organizations') return 3;
+      if (cat === 'Federal Awards') return 2;
+      if (cat === 'Procurement') return 1;
+      return 0;
+    }},
+  };
+  cy.layout(layouts[name]).run();
+}
+
+// ═══════════════════════════════════════════════════
+// EVENT HANDLERS
+// ═══════════════════════════════════════════════════
+cy.on('tap', 'node', evt => selectNode(evt.target.data('label')));
+cy.on('tap', evt => {
+  if (evt.target === cy) {
+    cy.elements().removeClass('highlighted dimmed');
+    document.getElementById('empty-state').style.display = 'flex';
+    document.getElementById('detail-content').style.display = 'none';
+  }
+});
+cy.on('mouseover', 'node', evt => evt.target.style('cursor', 'pointer'));
+
+document.getElementById('search').addEventListener('input', () => {
+  renderNodeList();
+  const search = document.getElementById('search').value.toLowerCase();
+  if (search.length > 1) {
+    cy.nodes().forEach(node => {
+      const name = node.data('label');
+      const data = NODES[name];
+      if (!data) return;
+      const match = name.toLowerCase().includes(search) ||
+        data.properties.some(p => p.name.toLowerCase().includes(search)) ||
+        data.aliases.some(a => a.from.toLowerCase().includes(search)) ||
+        data.desc.toLowerCase().includes(search) ||
+        data.sources.some(s => s.toLowerCase().includes(search));
+      if (match) node.removeClass('dimmed').addClass('highlighted');
+      else node.removeClass('highlighted').addClass('dimmed');
+    });
+    cy.edges().addClass('dimmed');
+  } else {
+    cy.elements().removeClass('highlighted dimmed');
+  }
+});
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+renderCategoryFilters();
+renderNodeList();
+
+// Stats
+const totalProps = Object.values(NODES).reduce((sum, n) => sum + n.propCount, 0);
+document.getElementById('stat-nodes').textContent = Object.keys(NODES).length;
+document.getElementById('stat-edges').textContent = RELATIONSHIPS.length;
+document.getElementById('stat-props').textContent = totalProps;
+</script>
+</body>
+</html>

@@ -9,12 +9,11 @@ from __future__ import annotations
 import math
 from collections import defaultdict
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from src.geographic.geocoding_engine import (
-    GeocodingEngine, GeoPoint, GeocodedEntity,
-    get_geocoding_engine, _FACILITIES, _CONTACTS,
-    _PROGRAM_LOCATIONS, _JOB_LOCATIONS,
+    GeocodingEngine, get_geocoding_engine, _FACILITIES,
+    _CONTACTS, _PROGRAM_LOCATIONS, _JOB_LOCATIONS,
 )
 
 

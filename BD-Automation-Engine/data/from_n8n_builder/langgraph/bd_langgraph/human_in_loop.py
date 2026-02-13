@@ -10,7 +10,6 @@ Reviews are stored as JSON files in data/human_reviews/ and can be:
 """
 
 import json
-import os
 import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime

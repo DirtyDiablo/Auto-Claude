@@ -24,7 +24,6 @@ Options:
     --dry-run       Show what would be indexed without indexing
 """
 
-import os
 import sys
 import json
 import csv
@@ -33,8 +32,7 @@ import sqlite3
 import hashlib
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Any, Optional, Generator
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from typing import Dict, List, Any, Generator
 
 # Add parent paths
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -332,7 +330,7 @@ def get_file_hash(content: str) -> str:
 
 def should_skip_file(file_path: Path) -> bool:
     """Check if file should be skipped."""
-    name = file_path.name
+    file_path.name
     for skip in SKIP_FILES:
         if skip in str(file_path):
             return True

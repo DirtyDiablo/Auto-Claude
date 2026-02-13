@@ -15,7 +15,7 @@ from datetime import datetime
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Query
 from pydantic import BaseModel, Field
 
-from .supermemory_client import BDMemoryManager, get_bd_memory_manager
+from .supermemory_client import get_bd_memory_manager
 
 logger = logging.getLogger(__name__)
 

@@ -8,7 +8,7 @@ import json
 import csv
 import logging
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
 
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"

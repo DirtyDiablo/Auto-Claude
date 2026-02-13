@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from src.api.proposal_api import router, configure_proposals
+from src.api.proposal_api import router
 
 
 # =========================================

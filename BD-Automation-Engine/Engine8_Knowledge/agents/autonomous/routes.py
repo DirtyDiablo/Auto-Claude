@@ -3,7 +3,6 @@ Autonomous Agent API Routes — Scheduler, briefings, enrichment.
 """
 
 import logging
-from typing import Optional
 from fastapi import APIRouter, HTTPException, Query
 
 logger = logging.getLogger(__name__)

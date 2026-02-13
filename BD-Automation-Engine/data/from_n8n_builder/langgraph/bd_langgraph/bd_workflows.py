@@ -12,8 +12,8 @@ from typing import Any, Dict, List, Optional
 
 from langgraph.graph import StateGraph, END
 
-from .states import BDProposalState, WorkflowStatus
-from .checkpointer import get_checkpointer, get_memory_checkpointer, CheckpointManager
+from .states import WorkflowStatus
+from .checkpointer import get_checkpointer, CheckpointManager
 from .nodes import (
     research_opportunity,
     gather_contacts,
@@ -277,9 +277,8 @@ def resume_bd_proposal_workflow(
         graph.update_state(config, state_update)
 
         # Continue execution
-        result = None
         for chunk in graph.stream(None, config):
-            result = chunk
+            pass
 
         # Get final state
         final_state = graph.get_state(config)

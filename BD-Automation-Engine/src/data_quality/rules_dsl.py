@@ -5,10 +5,9 @@ Supports parsing, validation, hot-reload, and rule conflict detection.
 """
 
 import logging
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional
 
 from src.data_quality.engine import DataQualityRule
 

@@ -6,7 +6,7 @@ Mocks Playwright and python-docx — no browser or Office tools required.
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import patch
 from pathlib import Path
 import sys
 

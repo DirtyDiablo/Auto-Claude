@@ -13,7 +13,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, DictMetaStore
 from Engine8_Knowledge.workflows.human_loop import (
     HumanInTheLoopManager, ApprovalRequest, ApprovalDecision,
-    get_hitl_manager,
 )
 
 

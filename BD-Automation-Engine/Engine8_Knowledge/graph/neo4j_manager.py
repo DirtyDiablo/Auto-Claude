@@ -13,15 +13,13 @@ Config from environment:
 import os
 import logging
 from typing import Optional, Any
-from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
 try:
-    from neo4j import GraphDatabase, Driver, Session, Result
+    from neo4j import GraphDatabase
     from neo4j.exceptions import (
         ServiceUnavailable,
-        AuthError,
         SessionExpired,
         TransientError,
     )

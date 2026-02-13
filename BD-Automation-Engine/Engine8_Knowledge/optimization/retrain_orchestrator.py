@@ -1,7 +1,7 @@
 """Phase 29A — Auto-Retrain Orchestrator"""
 import structlog
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from dataclasses import dataclass
+from typing import Dict, List
 from datetime import datetime
 import json
 logger = structlog.get_logger(__name__)

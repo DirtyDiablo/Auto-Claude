@@ -19,9 +19,7 @@ from Engine8_Knowledge.scrapers.federal_doc_pipeline import (
     ProcessedFederalDoc,
     BatchResult,
     DocumentAlert,
-    DOC_TYPE_KEYWORDS,
     MAX_FILE_SIZE,
-    get_federal_doc_pipeline,
 )
 from Engine8_Knowledge.scrapers.crawl4ai_engine import CrawlResult
 

@@ -7,11 +7,9 @@ to extract intelligence about programs, contacts, primes, and gaps.
 """
 
 import xlrd
-import os
 import re
 import json
 from collections import defaultdict
-from datetime import datetime
 from pathlib import Path
 import logging
 

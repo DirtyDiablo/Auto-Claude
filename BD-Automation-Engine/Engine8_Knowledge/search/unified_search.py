@@ -9,7 +9,6 @@ Routes queries to optimal channel based on query classification.
 import re
 import time
 import logging
-import asyncio
 from typing import Optional, Any
 from dataclasses import dataclass
 
@@ -20,7 +19,7 @@ from Engine8_Knowledge.search.hybrid_engine import (
     get_hybrid_search_engine,
 )
 from Engine8_Knowledge.search.graph_retriever import (
-    GraphRetriever, GraphResult, get_graph_retriever,
+    GraphRetriever, get_graph_retriever,
 )
 
 

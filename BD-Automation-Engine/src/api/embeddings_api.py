@@ -5,19 +5,19 @@ benchmarking, deployment, and A/B testing of domain-specific embeddings.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.embeddings.synthetic_data_generator import (
-    SyntheticDataGenerator, get_synthetic_generator,
+    get_synthetic_generator,
 )
 from src.embeddings.fine_tuner import (
-    EmbeddingFineTuner, TrainingConfig, get_fine_tuner,
+    TrainingConfig, get_fine_tuner,
 )
 from src.embeddings.benchmark_suite import (
-    EmbeddingBenchmarkSuite, GoldenQuery, get_benchmark_suite,
+    get_benchmark_suite,
 )
 
 logger = logging.getLogger(__name__)

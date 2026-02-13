@@ -310,7 +310,6 @@ class MemoryStore:
 
     async def _recall_episodic(self, query: str, ctx: MemoryContext) -> List[Dict[str, Any]]:
         if self.mem0:
-            from Engine8_Knowledge.memory.mem0_manager import Memory
             memories = await self.mem0.search(query, user_id=ctx.user_id, agent_id=ctx.agent_id)
             return [{"content": m.content, "score": m.score, "id": m.memory_id} for m in memories]
         q = query.lower()

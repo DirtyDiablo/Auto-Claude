@@ -9,11 +9,7 @@ import tempfile
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 from Engine8_Knowledge.graph.bd_knowledge_graph import (
-    BDKnowledgeGraph,
-    Entity,
-    Relationship,
-    ENTITY_TYPES,
-    RELATIONSHIP_TYPES
+    BDKnowledgeGraph
 )
 
 

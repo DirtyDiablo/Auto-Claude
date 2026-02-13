@@ -3,16 +3,14 @@ BD File Watcher - Monitor directories for new files and auto-process them.
 Watches Bullhorn exports, outputs, and other key directories.
 """
 
-import os
 import sys
-import json
 import time
 import logging
 import threading
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Set, Callable
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Callable
+from dataclasses import dataclass
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -28,7 +26,7 @@ logger = logging.getLogger('BDFileWatcher')
 # Check for watchdog
 try:
     from watchdog.observers import Observer
-    from watchdog.events import FileSystemEventHandler, FileCreatedEvent, FileModifiedEvent
+    from watchdog.events import FileSystemEventHandler
     WATCHDOG_AVAILABLE = True
 except ImportError:
     WATCHDOG_AVAILABLE = False

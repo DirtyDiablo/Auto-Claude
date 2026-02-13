@@ -1,18 +1,15 @@
 """Tests for Phase 31A - Event Processors (job intel, contract, contact, campaign, anomaly, health)."""
 
-import asyncio
 import pytest
 import sys
-from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from src.streaming.event_bus import Event, EventBus
 from src.streaming.processors import (
     AnomalyProcessor,
-    BaseProcessor,
     CampaignEventProcessor,
     ContactChangeProcessor,
     ContractIntelProcessor,

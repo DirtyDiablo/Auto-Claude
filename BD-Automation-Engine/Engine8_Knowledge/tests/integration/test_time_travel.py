@@ -12,11 +12,10 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.checkpoint_store import (
-    CheckpointStore, DictMetaStore, ThreadInfo, CheckpointSnapshot,
+    CheckpointStore, DictMetaStore,
 )
 from Engine8_Knowledge.workflows.time_travel import (
-    TimeTravelDebugger, ExecutionTimeline, NodeVisit, StateDiff,
-    get_time_travel_debugger,
+    TimeTravelDebugger, ExecutionTimeline, StateDiff, get_time_travel_debugger,
 )
 
 

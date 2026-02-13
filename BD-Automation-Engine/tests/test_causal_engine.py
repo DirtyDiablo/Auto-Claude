@@ -5,8 +5,6 @@ import pytest
 from src.simulation.causal_engine import (
     BDCausalEngine,
     CausalGraph,
-    CausalNode,
-    CausalEdge,
     CausalEstimate,
     CounterfactualResult,
     get_causal_engine,

@@ -5,7 +5,6 @@ from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
 from src.api.tenant_api import include_tenant_router
-from src.auth.rbac import Role
 
 
 # =========================================

@@ -16,7 +16,6 @@ from dataclasses import dataclass, field
 try:
     from Engine4_Playbook.scripts.bd_playbook_generator import (
         generate_playbooks_batch,
-        PlaybookOutput,
     )
     HAS_PLAYBOOK_GENERATOR = True
 except ImportError:
@@ -390,7 +389,6 @@ try:
         standardize_job_with_llm,
         normalize_location,
         normalize_clearance,
-        validate_standardized_job,
     )
     HAS_STANDARDIZER = True
 except ImportError:
@@ -399,7 +397,6 @@ except ImportError:
 try:
     from Engine2_ProgramMapping.scripts.program_mapper import (
         map_job_to_program,
-        process_jobs_batch as map_jobs_batch,
     )
     HAS_MAPPER = True
 except ImportError:
@@ -408,7 +405,6 @@ except ImportError:
 try:
     from Engine5_Scoring.scripts.bd_scoring import (
         calculate_bd_score,
-        score_batch,
     )
     HAS_SCORING = True
 except ImportError:
@@ -418,7 +414,6 @@ try:
     from Engine2_ProgramMapping.scripts.exporters import (
         NotionCSVExporter,
         N8nWebhookExporter,
-        export_batch as export_to_formats,
     )
     HAS_EXPORTERS = True
 except ImportError:

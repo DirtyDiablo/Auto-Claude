@@ -4,9 +4,8 @@ Phase 27A — Export Engine
 Export org charts to multiple formats: SVG, PNG, PDF, DOCX, JSON, Mermaid.
 """
 
-import json
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import structlog
 

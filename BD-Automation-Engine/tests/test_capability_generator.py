@@ -5,7 +5,6 @@ import pytest
 from src.proposals.capability_generator import (
     CapabilityStatementGenerator,
     CapabilityStatement,
-    CapabilitySection,
     TemplateVariant,
     COMPANY_PROFILE,
     get_capability_generator,

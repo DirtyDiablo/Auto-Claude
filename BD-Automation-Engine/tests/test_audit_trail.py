@@ -7,9 +7,7 @@ from src.security.audit_trail import (
     AuditActor,
     AuditAction,
     AuditResource,
-    AuditEvent,
     AuditFilters,
-    ChainVerification,
     ComplianceReport,
     get_audit_trail,
 )

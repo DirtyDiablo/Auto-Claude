@@ -6,16 +6,16 @@ and facility queries.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.geographic.geocoding_engine import (
-    GeocodingEngine, get_geocoding_engine,
+    get_geocoding_engine,
 )
 from src.geographic.spatial_queries import (
-    SpatialQueryProcessor, get_spatial_processor,
+    get_spatial_processor,
 )
 
 logger = logging.getLogger(__name__)

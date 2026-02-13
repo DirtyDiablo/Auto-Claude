@@ -4,9 +4,7 @@ Phase 23A — Workflow API v2 Tests
 Tests all 18 FastAPI endpoints with mocked orchestrator, debugger, and HITL manager.
 """
 
-import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from dataclasses import asdict
+from unittest.mock import patch, AsyncMock
 from pathlib import Path
 import sys
 

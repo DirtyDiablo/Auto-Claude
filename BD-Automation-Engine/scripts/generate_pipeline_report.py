@@ -16,8 +16,7 @@ import json
 from datetime import datetime
 from pathlib import Path
 from openpyxl import load_workbook
-from openpyxl.styles import Font, Alignment, Border, Side, PatternFill
-from copy import copy
+from openpyxl.styles import Font, Border, Side
 
 BASE_DIR = Path(__file__).parent.parent
 
@@ -63,7 +62,7 @@ def identify_target_opportunities(gdit_jobs, ig_mapped):
     ]
 
     # Programs already being worked heavily
-    worked_programs = set(gdit_jobs['Program'].dropna().unique())
+    set(gdit_jobs['Program'].dropna().unique())
 
     # Filter Insight Global mapped jobs for opportunities
     opportunities = []

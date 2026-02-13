@@ -5,7 +5,7 @@ Repository: https://github.com/docling-project/docling (10,000+ stars)
 
 import os
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List
 from pathlib import Path
 import logging
 

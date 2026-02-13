@@ -6,7 +6,7 @@ Based on: program-mapping-skill.md and contact-classification-skill.md
 """
 
 import json
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 from dataclasses import dataclass
 from datetime import datetime
 

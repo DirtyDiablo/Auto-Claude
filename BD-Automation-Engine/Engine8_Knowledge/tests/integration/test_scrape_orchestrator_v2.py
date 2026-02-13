@@ -6,9 +6,8 @@ trigger/pause/resume, full cycle, stats, persistence, and singleton.
 All external dependencies are mocked.
 """
 
-import json
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import MagicMock, AsyncMock
 from pathlib import Path
 import sys
 

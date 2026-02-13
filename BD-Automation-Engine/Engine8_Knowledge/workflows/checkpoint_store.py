@@ -8,7 +8,6 @@ thread-based isolation, configurable retention, and export/import support.
 
 import json
 import os
-import time
 import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta

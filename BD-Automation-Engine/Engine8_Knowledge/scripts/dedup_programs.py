@@ -6,7 +6,6 @@ version (most non-empty fields), deletes the rest.
 """
 
 import os
-import sys
 from collections import defaultdict
 from qdrant_client import QdrantClient
 from qdrant_client.models import PointIdsList

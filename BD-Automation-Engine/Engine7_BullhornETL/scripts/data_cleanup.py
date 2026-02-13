@@ -6,7 +6,6 @@ Normalizes company names and improves data quality in the Bullhorn database.
 import sqlite3
 import re
 from pathlib import Path
-from datetime import datetime
 
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 

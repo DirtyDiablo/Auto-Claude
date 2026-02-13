@@ -10,7 +10,6 @@ Provides:
 """
 
 import os
-import sys
 import json
 import uuid
 import sqlite3
@@ -27,7 +26,6 @@ from qdrant_client.models import (
     Prefetch,
     Fusion,
     FusionQuery,
-    SparseVector,
 )
 
 try:
@@ -493,7 +491,6 @@ async def index_bullhorn_notes(
     client = store.client
 
     from Engine8_Knowledge.scripts.hybrid_collections import (
-        collection_has_sparse,
         get_sparse_encoder,
         create_hybrid_collection,
     )

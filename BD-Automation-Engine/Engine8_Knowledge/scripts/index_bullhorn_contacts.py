@@ -3,13 +3,12 @@ Index Bullhorn candidates to contacts collection.
 Indexes 426K+ candidates from bullhorn_master.db into Qdrant.
 """
 
-import os
 import sys
 import sqlite3
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -157,7 +156,7 @@ def index_bullhorn_contacts():
         total_errors += errors
 
         offset += BATCH_SIZE
-        batch_time = (datetime.now() - batch_start).total_seconds()
+        (datetime.now() - batch_start).total_seconds()
 
         # Progress update every 10 batches
         if (offset // BATCH_SIZE) % 10 == 0:

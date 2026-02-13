@@ -5,14 +5,11 @@ from datetime import datetime, timezone, timedelta
 
 from src.data_quality.lineage import (
     DataLineageTracker,
-    LineageNode,
-    LineageEdge,
     LineageGraph,
     DataSource,
     TransformProcess,
     ImpactAnalysis,
     FreshnessReport,
-    FreshnessEntry,
     NodeType,
     SourceType,
     TransformType,

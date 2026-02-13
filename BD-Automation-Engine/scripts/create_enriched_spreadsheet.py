@@ -10,7 +10,7 @@ import json
 import csv
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from collections import defaultdict
 
 

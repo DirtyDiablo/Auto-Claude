@@ -4,15 +4,13 @@ Parses Bullhorn XLS exports and generates comprehensive BD Playbook.
 Extracts: Contacts, Candidates, Clients, Jobs, Recruiters, Pipeline Status
 """
 
-import os
 import sys
 import json
 import xlrd
-import pandas as pd
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-from typing import Dict, List, Any, Optional
+from typing import Dict, Any
 import logging
 
 logger = logging.getLogger(__name__)

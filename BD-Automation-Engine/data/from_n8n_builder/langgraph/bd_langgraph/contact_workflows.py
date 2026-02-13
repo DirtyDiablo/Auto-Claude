@@ -8,11 +8,11 @@ Pipeline: Discover → Score → Approve → Generate Materials
 
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from langgraph.graph import StateGraph, END
 
-from .states import ContactOutreachState, WorkflowStatus
+from .states import WorkflowStatus
 from .checkpointer import get_checkpointer, CheckpointManager
 from .nodes import (
     discover_contacts,
@@ -245,9 +245,8 @@ def resume_contact_outreach_workflow(
 
         graph.update_state(config, state_update)
 
-        result = None
         for chunk in graph.stream(None, config):
-            result = chunk
+            pass
 
         final_state = graph.get_state(config)
         final_values = final_state.values if final_state else {}

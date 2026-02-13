@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from src.api.nlq_api import router, configure_nlq
+from src.api.nlq_api import router
 
 
 # =========================================

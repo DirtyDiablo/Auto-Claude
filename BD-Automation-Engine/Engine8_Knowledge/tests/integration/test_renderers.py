@@ -7,7 +7,6 @@ No external dependencies — tests HTML output structure.
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 from pathlib import Path
 import sys
 

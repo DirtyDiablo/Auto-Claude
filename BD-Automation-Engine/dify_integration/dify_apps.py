@@ -10,13 +10,11 @@ These app templates can be imported into Dify to quickly set up:
 Each app connects to your existing tools without duplicating data or logic.
 """
 
-import os
 import sys
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass
-from datetime import datetime
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -432,7 +430,7 @@ Be factual and cite your sources. Avoid speculation without data.""",
         }
         return suggestions.get(app_name, [])
 
-    async def initialize_in_dify(self, dify_api_url: str, dify_api_key: str) -> Dict[str, str]:
+    async def initialize_in_dify(self, _dify_api_url: str, _dify_api_key: str) -> Dict[str, str]:
         """
         Initialize all apps in a Dify instance.
 

@@ -3,14 +3,13 @@ BD Data Indexer - Index all BD intelligence data into Qdrant.
 Supports dashboard JSON files, Bullhorn exports, and processed documents.
 """
 
-import os
 import sys
 import csv
 import json
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List
 from dataclasses import dataclass
 
 # Add parent to path for imports

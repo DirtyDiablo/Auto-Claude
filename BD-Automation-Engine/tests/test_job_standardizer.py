@@ -3,7 +3,6 @@ Unit tests for Job Standardizer module.
 Tests schema expansion, preprocessing, normalization, and validation.
 """
 
-import pytest
 import sys
 from pathlib import Path
 
@@ -12,10 +11,8 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from Engine2_ProgramMapping.scripts.job_standardizer import (
     REQUIRED_FIELDS,
-    OPTIONAL_FIELDS,
     INTELLIGENCE_FIELDS,
     ENRICHMENT_FIELDS,
-    METADATA_FIELDS,
     ALL_FIELDS,
     EXTRACTION_FIELDS,
     VALID_CLEARANCE_LEVELS,

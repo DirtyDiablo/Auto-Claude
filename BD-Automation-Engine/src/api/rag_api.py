@@ -6,28 +6,23 @@ query decomposition, benchmarks, and retrieval traces.
 
 import logging
 from dataclasses import asdict
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from fastapi import APIRouter, FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.rag.agentic_rag import (
-    AgenticRAGOrchestrator,
-    BenchmarkResult,
     get_agentic_rag,
     run_benchmark,
 )
 from src.rag.self_rag import (
-    SelfReflectiveRAG,
     get_self_rag,
 )
 from src.rag.reranker import (
-    AdvancedReranker,
     ScoredDoc,
     get_reranker,
 )
 from src.rag.query_decomposer import (
-    QueryDecomposer,
     get_query_decomposer,
 )
 

@@ -10,7 +10,6 @@ All external API calls use tenacity for retry logic with exponential backoff.
 Logging uses structlog for structured, queryable log output.
 """
 
-import os
 import json
 import logging
 from datetime import datetime
@@ -503,7 +502,7 @@ def build_bd_strategy(
     opportunity: Dict[str, Any],
     market_intelligence: Dict[str, Any],
     contacts: List[Dict[str, Any]],
-    competitive_analysis: Dict[str, Any]
+    _competitive_analysis: Dict[str, Any]
 ) -> Dict[str, Any]:
     """
     Build BD strategy based on gathered intelligence.

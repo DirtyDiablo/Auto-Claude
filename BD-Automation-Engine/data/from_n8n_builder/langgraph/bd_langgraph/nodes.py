@@ -17,10 +17,6 @@ import uuid
 from .states import (
     WorkflowStatus,
     HumanReviewType,
-    BDProposalState,
-    ContactOutreachState,
-    RecompeteState,
-    WeeklyPipelineState,
 )
 from .integrations import (
     search_similar_contracts,
@@ -129,7 +125,7 @@ def gather_contacts(state: Dict[str, Any]) -> Dict[str, Any]:
     """
     logger.info(f"[gather_contacts] Starting contact gathering")
 
-    agency = state.get('agency')
+    state.get('agency')
     incumbent_name = state.get('incumbent_info', {}).get('company_name')
 
     # Search CRM contacts

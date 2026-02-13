@@ -7,7 +7,7 @@ No external services required — uses mocked backends.
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock
 from pathlib import Path
 import sys
 

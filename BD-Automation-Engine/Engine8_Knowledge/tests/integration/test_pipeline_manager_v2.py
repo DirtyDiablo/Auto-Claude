@@ -6,7 +6,6 @@ budget cycles, risk analysis, recommendations, and human approval gate.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
 from datetime import datetime, timedelta
 import sys
@@ -18,8 +17,7 @@ from Engine8_Knowledge.workflows.production.pipeline_manager import (
     scan_pipeline, check_stale_items, check_upcoming_deadlines,
     check_budget_cycles, merge_pipeline_state, analyze_risks,
     recommend_actions, review_recommendations, execute_approved_actions,
-    update_pipeline_db, generate_pipeline_report,
-    get_pipeline_manager_definition,
+    generate_pipeline_report, get_pipeline_manager_definition,
 )
 
 

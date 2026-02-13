@@ -7,7 +7,7 @@ Uses DictMetaStore fallback — no aiosqlite required.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch
 from pathlib import Path
 import sys
 
@@ -16,10 +16,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from Engine8_Knowledge.workflows.checkpoint_store import (
     CheckpointStore,
     DictMetaStore,
-    InMemoryCheckpointer,
-    ThreadInfo,
-    CheckpointSnapshot,
-    get_checkpoint_store,
 )
 
 

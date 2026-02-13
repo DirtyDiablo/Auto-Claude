@@ -11,7 +11,6 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from Engine5_Scoring.scripts.bd_scoring import (
-    BD_SCORE_CONFIG,
     TIER_THRESHOLDS,
     ScoringResult,
     calculate_clearance_boost,

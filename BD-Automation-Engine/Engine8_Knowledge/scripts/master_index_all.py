@@ -2,8 +2,6 @@
 Master Index All - Sequential Runner
 Runs all indexers in sequence to avoid rate limits
 """
-import os
-import sys
 import time
 import subprocess
 from pathlib import Path

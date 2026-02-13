@@ -4,8 +4,7 @@ AI Enrichment Engine - Core logic for enriching Notion records with AI
 import os
 import json
 import re
-from typing import Dict, List, Optional, Any, Tuple
-from datetime import datetime
+from typing import Dict, List, Optional
 from anthropic import Anthropic
 from dotenv import load_dotenv
 
@@ -196,7 +195,7 @@ class EnrichmentEngine:
         name = NotionClient.extract_title(props.get('Name', props.get('Contact Name', {})))
         title = NotionClient.extract_rich_text(props.get('Title', props.get('Job Title', {})))
         company = NotionClient.extract_rich_text(props.get('Company', props.get('Organization', {})))
-        email = props.get('Email', {}).get('email', '')
+        props.get('Email', {}).get('email', '')
 
         # 1. Classify tier based on title
         tier = self._classify_contact_tier(title)

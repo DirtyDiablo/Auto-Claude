@@ -17,7 +17,6 @@ from src.data_quality.engine import (
     DataIssue,
     classify_title_tier,
     PROGRAM_LOCATION_MAP,
-    VALID_CLEARANCE_LEVELS,
 )
 
 logger = logging.getLogger(__name__)
@@ -600,7 +599,6 @@ class SelfHealingPipeline:
         """Validate and auto-fix a batch of records before import."""
         results = []
         for record in records:
-            record_issues = []
             fixes = []
 
             # Quick validation per field

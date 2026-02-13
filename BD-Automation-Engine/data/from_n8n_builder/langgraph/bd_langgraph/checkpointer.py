@@ -9,7 +9,6 @@ Provides durable checkpointing so workflows can:
 - Track execution history
 """
 
-import os
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 from datetime import datetime

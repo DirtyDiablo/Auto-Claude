@@ -9,7 +9,6 @@ Labor category builder and pricing intelligence:
 """
 
 import logging
-import math
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum

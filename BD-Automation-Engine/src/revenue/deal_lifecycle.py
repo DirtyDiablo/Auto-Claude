@@ -12,7 +12,7 @@ Track deals from first contact to first dollar:
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from enum import IntEnum
 from typing import Any, Dict, List, Optional
 

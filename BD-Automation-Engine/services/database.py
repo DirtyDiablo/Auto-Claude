@@ -7,8 +7,8 @@ import os
 import json
 import logging
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass, asdict
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 from contextlib import contextmanager
 from dotenv import load_dotenv
 
@@ -19,7 +19,7 @@ logger = logging.getLogger('BD-Database')
 # Try to import psycopg2
 try:
     import psycopg2
-    from psycopg2.extras import RealDictCursor, execute_values
+    from psycopg2.extras import RealDictCursor
     HAS_POSTGRES = True
 except ImportError:
     HAS_POSTGRES = False

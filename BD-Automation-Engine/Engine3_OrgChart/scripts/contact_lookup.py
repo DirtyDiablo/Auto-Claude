@@ -2,7 +2,7 @@
 Contact Lookup Engine - Retrieves relevant contacts for programs and prime contractors.
 """
 import csv
-from typing import Dict, List, Optional
+from typing import List
 from dataclasses import dataclass, field
 from pathlib import Path
 

@@ -1,7 +1,6 @@
 """Tests for Phase 41A — Swarm API."""
 
 import pytest
-from unittest.mock import AsyncMock, patch
 
 from fastapi import FastAPI
 from fastapi.testclient import TestClient

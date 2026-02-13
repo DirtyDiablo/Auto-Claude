@@ -12,8 +12,8 @@ Real-time streaming capabilities for BD intelligence:
 import pathway as pw
 from pathway.xpacks.llm.vector_store import VectorStoreServer
 from pathway.xpacks.llm.embedders import OpenAIEmbedder
-from datetime import datetime, timedelta
-from typing import List, Optional, Dict, Any
+from datetime import datetime
+from typing import List, Optional, Dict
 import json
 import requests
 import logging
@@ -725,7 +725,7 @@ class BDStreamingPipeline:
         # Create data streams
         opportunities = self.create_sam_opportunity_stream(sam_source)
         contracts = self.create_fpds_contract_stream(fpds_source)
-        activities = self.create_bullhorn_activity_stream(bullhorn_source)
+        self.create_bullhorn_activity_stream(bullhorn_source)
 
         # Apply analytics
         relevant_opps = self.detect_relevant_opportunities(

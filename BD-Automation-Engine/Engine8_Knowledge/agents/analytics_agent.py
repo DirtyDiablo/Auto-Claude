@@ -4,11 +4,10 @@ Analytics Agent - Generates insights, trends, and forecasts from BD data.
 Part of the 8-agent CrewAI system for BD Intelligence.
 """
 
-import os
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
-from datetime import datetime, timedelta
-from collections import Counter, defaultdict
+from dataclasses import dataclass
+from datetime import datetime
+from collections import Counter
 import structlog
 
 logger = structlog.get_logger(__name__)

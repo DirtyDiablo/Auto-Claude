@@ -47,10 +47,9 @@ def run_basic_contact_enrichment():
             props = page.get('properties', {})
 
             # Get name for display
-            name = ''
             for key, val in props.items():
                 if val.get('type') == 'title':
-                    name = ''.join([t.get('plain_text', '') for t in val.get('title', [])])
+                    ''.join([t.get('plain_text', '') for t in val.get('title', [])])
                     break
 
             # Run enrichment (without AI)
@@ -70,8 +69,8 @@ def run_basic_contact_enrichment():
                         print(f"  [{i+1}] FAILED: {result.get('message')[:50]}")
                 else:
                     success += 1
-                    tier = enriched.get('Tier', {}).get('select', {}).get('name', '?')
-                    value = enriched.get('Contact Value', {}).get('number', 0)
+                    enriched.get('Tier', {}).get('select', {}).get('name', '?')
+                    enriched.get('Contact Value', {}).get('number', 0)
 
                     # Progress every 100 records
                     if (i + 1) % 100 == 0:

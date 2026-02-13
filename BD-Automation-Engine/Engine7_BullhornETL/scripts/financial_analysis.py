@@ -8,7 +8,7 @@ import json
 import csv
 import logging
 from pathlib import Path
-from datetime import datetime, timedelta
+from datetime import datetime
 from collections import defaultdict
 
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
@@ -27,7 +27,7 @@ def calculate_placement_revenue(placement: dict) -> dict:
     """Calculate revenue metrics for a single placement."""
     bill_rate = placement.get('bill_rate') or 0
     pay_rate = placement.get('pay_rate') or 0
-    salary = placement.get('salary') or 0
+    placement.get('salary') or 0
     start_date = placement.get('start_date')
     end_date = placement.get('end_date')
 

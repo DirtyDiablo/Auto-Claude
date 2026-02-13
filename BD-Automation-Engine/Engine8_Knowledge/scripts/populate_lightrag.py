@@ -5,10 +5,7 @@ Reads all records from Qdrant via the API and inserts them
 as text documents into LightRAG for graph-based reasoning.
 """
 
-import sys
-import time
 import requests
-from pathlib import Path
 from typing import Dict, List, Any
 
 # Configuration
@@ -287,7 +284,7 @@ def populate_collection(collection: str, converter: callable, expected_count: in
         batch_num = i // BATCH_SIZE + 1
         try:
             print(f"    Inserting batch {batch_num}/{total_batches} ({len(batch)} docs)...", end=" ", flush=True)
-            result = insert_batch(batch)
+            insert_batch(batch)
             inserted += len(batch)
             print("OK")
         except Exception as e:

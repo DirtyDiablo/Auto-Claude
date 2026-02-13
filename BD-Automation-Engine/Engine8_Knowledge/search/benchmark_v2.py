@@ -7,7 +7,6 @@ Computes P@5, P@10, R@10, MRR, NDCG@10, latency.
 """
 
 import json
-import time
 import math
 import logging
 from pathlib import Path

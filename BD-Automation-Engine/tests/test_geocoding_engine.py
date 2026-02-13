@@ -4,7 +4,6 @@ import pytest
 
 from src.geographic.geocoding_engine import (
     GeocodingEngine,
-    GeoPoint,
     GeocodedEntity,
     BatchResult,
     get_geocoding_engine,

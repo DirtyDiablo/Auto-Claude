@@ -33,16 +33,16 @@ except ImportError:
     sys.exit(1)
 
 # Import existing modules
-from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore, SearchResult
+from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
 from qdrant_client.models import Filter, FieldCondition, MatchValue, MatchText
-from Engine8_Knowledge.scripts.rag_engine import BDRAGEngine, RAGResponse
+from Engine8_Knowledge.scripts.rag_engine import BDRAGEngine
 from Engine8_Knowledge.scripts.indexer import BDIndexer
 
 # Import new enhanced modules
 from Engine8_Knowledge.scripts.memory_layer import get_memory
 from Engine8_Knowledge.scripts.lightrag_engine import get_knowledge_graph
 from Engine8_Knowledge.scripts.hybrid_retriever import get_hybrid_retriever
-from Engine8_Knowledge.scripts.query_router import QueryRouter, QueryType
+from Engine8_Knowledge.scripts.query_router import QueryRouter
 from Engine8_Knowledge.scripts.pageindex_engine import get_pageindex
 from Engine8_Knowledge.scripts.redis_cache import get_cache
 
@@ -88,14 +88,13 @@ except ImportError as e:
     logger.warning(f"LightRAG router not available: {e}")
 
 try:
-    from streaming.streaming_api import router as streaming_router, include_streaming_router
+    from streaming.streaming_api import router as streaming_router
     STREAMING_AVAILABLE = True
 except ImportError as e:
     STREAMING_AVAILABLE = False
     logger.warning(f"Streaming router not available: {e}")
 
 try:
-    from memory.routes import router as memory_router
     MEMORY_AVAILABLE = True
 except ImportError as e:
     MEMORY_AVAILABLE = False
@@ -1292,7 +1291,6 @@ async def analyze_network(company: str = Query(..., description="Company name"))
 try:
     from Engine8_Knowledge.graph.bd_knowledge_graph import (
         get_knowledge_graph as get_bd_graph,
-        BDKnowledgeGraph,
         ENTITY_TYPES,
         RELATIONSHIP_TYPES
     )
@@ -2138,7 +2136,6 @@ async def index_collection(collection: str):
 # Import CrewAI workflows
 try:
     from Engine8_Knowledge.agents.workflows import (
-        get_workflows,
         analyze_program as run_analyze_program,
         prepare_outreach as run_prepare_outreach,
         generate_weekly_intel as run_weekly_intel

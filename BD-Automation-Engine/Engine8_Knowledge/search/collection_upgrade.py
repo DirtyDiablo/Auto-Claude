@@ -18,7 +18,6 @@ import time
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 

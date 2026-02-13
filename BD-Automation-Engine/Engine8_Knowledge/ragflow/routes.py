@@ -23,7 +23,6 @@ from pydantic import BaseModel, Field
 from .ragflow_client import (
     RAGflowClient,
     RAGflowConfig,
-    ChunkMethod,
     get_ragflow_client,
 )
 from .bd_knowledge_manager import (

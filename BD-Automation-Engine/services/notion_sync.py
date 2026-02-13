@@ -11,7 +11,7 @@ import logging
 import requests
 from datetime import datetime
 from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from dotenv import load_dotenv
 
 load_dotenv()

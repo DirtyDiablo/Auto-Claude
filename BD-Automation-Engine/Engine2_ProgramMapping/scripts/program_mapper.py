@@ -11,7 +11,6 @@ import re
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from pathlib import Path
-import os
 
 # Try to import pandas for CSV loading
 try:
@@ -22,7 +21,6 @@ except ImportError:
 
 # Try to import OpenAI for embeddings
 try:
-    import openai
     HAS_OPENAI = True
 except ImportError:
     HAS_OPENAI = False
@@ -780,7 +778,6 @@ def extract_keyword_signals(
 
     # Check for DCGS-specific keywords (always check for these)
     dcgs_keywords = ['dcgs', '480th', 'dgs-', 'distributed common ground', 'isr']
-    dcgs_matched = False
     for kw in dcgs_keywords:
         if kw in full_text:
             # Only add DCGS Family signal if not already matched through dynamic keywords
@@ -790,7 +787,6 @@ def extract_keyword_signals(
                     SCORING_WEIGHTS['dcgs_specific_keyword'],
                     f"DCGS keyword: '{kw}'"
                 ))
-            dcgs_matched = True
             break
 
     return signals

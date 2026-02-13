@@ -6,15 +6,14 @@ Uses mocking — does not require Qdrant, Neo4j, or OpenAI.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.unified_search import (
-    UnifiedSearch, SEARCH_MODES,
-    get_unified_search,
+    UnifiedSearch,
 )
 from Engine8_Knowledge.search.hybrid_engine import SearchResponse, SearchResult
 

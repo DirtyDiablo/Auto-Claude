@@ -25,8 +25,7 @@ try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
         Filter, FieldCondition, MatchValue, MatchText,
-        Prefetch, FusionQuery, Fusion, Query,
-        SparseVector,
+        Prefetch, FusionQuery, Fusion, SparseVector,
     )
     QDRANT_AVAILABLE = True
 except ImportError:
@@ -377,7 +376,6 @@ class HybridSearchEngine:
         except Exception:
             # Try legacy search method
             try:
-                from qdrant_client.models import PointStruct
                 results = self.qdrant.search(
                     collection_name=collection,
                     query_vector=dense_vec,

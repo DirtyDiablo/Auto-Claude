@@ -2,15 +2,13 @@
 
 import pytest
 
-from src.embeddings.synthetic_data_generator import SyntheticDataGenerator, Triplet
+from src.embeddings.synthetic_data_generator import SyntheticDataGenerator
 from src.embeddings.fine_tuner import (
     EmbeddingFineTuner,
     TrainingConfig,
     FineTuneJob,
-    EmbeddingModel,
     EvalMetrics,
     ABTest,
-    ModelStatus,
     get_fine_tuner,
 )
 
@@ -149,7 +147,7 @@ def test_evaluate_baseline(tuner, triplets):
 
 
 def test_evaluate_fine_tuned(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ft_model = [m for m in models if not m["is_baseline"]][0]
     metrics = tuner.evaluate_model(ft_model["id"], triplets, 768)
@@ -171,7 +169,7 @@ def test_eval_metrics_to_dict(tuner, triplets):
 # =========================================
 
 def test_compare_models(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     baseline = tuner.get_deployed_model()
     models = tuner.list_models()
     ft_model = [m for m in models if not m["is_baseline"]][0]
@@ -183,7 +181,7 @@ def test_compare_models(tuner, triplets):
 
 
 def test_compare_returns_both_metrics(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ids = [m["id"] for m in models]
     result = tuner.compare_models(ids[0], ids[1], triplets)
@@ -202,7 +200,7 @@ def test_compare_not_found(tuner, triplets):
 # =========================================
 
 def test_deploy_model(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ft_model = [m for m in models if not m["is_baseline"]][0]
 
@@ -217,7 +215,7 @@ def test_deploy_not_found(tuner):
 
 
 def test_deploy_changes_status(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ft_model = [m for m in models if not m["is_baseline"]][0]
 
@@ -231,7 +229,7 @@ def test_deploy_changes_status(tuner, triplets):
 # =========================================
 
 def test_start_ab_test(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ids = [m["id"] for m in models]
 
@@ -242,7 +240,7 @@ def test_start_ab_test(tuner, triplets):
 
 
 def test_ab_test_has_results(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ids = [m["id"] for m in models]
 
@@ -251,7 +249,7 @@ def test_ab_test_has_results(tuner, triplets):
 
 
 def test_ab_test_complete(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ids = [m["id"] for m in models]
 
@@ -261,7 +259,7 @@ def test_ab_test_complete(tuner, triplets):
 
 
 def test_ab_results(tuner, triplets):
-    job = tuner.start_fine_tuning(triplets)
+    tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
     ids = [m["id"] for m in models]
 

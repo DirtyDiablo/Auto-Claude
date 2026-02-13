@@ -4,9 +4,8 @@ Contact Classifier Agent - Automatically classifies contacts by tier, program, p
 Part of the 8-agent CrewAI system for BD Intelligence.
 """
 
-import os
 import re
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from dataclasses import dataclass
 import structlog
 
@@ -285,7 +284,7 @@ class ContactClassifierAgent(BDAgent):
 
 # CLI test
 if __name__ == "__main__":
-    import asyncio
+    pass
 
     agent = ContactClassifierAgent()
 

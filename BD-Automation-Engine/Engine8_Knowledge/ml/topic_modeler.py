@@ -6,7 +6,7 @@ across job postings, call notes, and BD documents.
 import structlog
 from collections import Counter
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 logger = structlog.get_logger(__name__)
 

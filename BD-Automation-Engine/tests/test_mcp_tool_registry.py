@@ -5,15 +5,9 @@ import pytest
 from src.mcp.tool_registry import (
     MCPToolRegistry,
     MCPServerConfig,
-    MCPServerEntry,
     MCPTool,
-    MCPRoutingResult,
-    HealthStatus,
     HealthMonitor,
     UsageTracker,
-    UsageRecord,
-    CostTier,
-    TransportType,
     get_tool_registry,
 )
 

@@ -5,10 +5,6 @@ import pytest
 from src.governance.catalog import (
     DataCatalog,
     DataAsset,
-    AssetType,
-    AssetStatus,
-    DataLineage,
-    QualityMetrics,
     get_data_catalog,
 )
 

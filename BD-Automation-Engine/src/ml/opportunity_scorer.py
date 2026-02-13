@@ -13,7 +13,7 @@ import logging
 import math
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from src.ml.win_probability import WinProbabilityModel, get_win_model
 

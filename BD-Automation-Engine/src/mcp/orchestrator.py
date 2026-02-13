@@ -301,7 +301,7 @@ class MCPOrchestrator:
         return execution_result
 
     def _execute_step(self, step: MCPExecutionStep,
-                      prior_results: Dict[str, Any]) -> Dict[str, Any]:
+                      _prior_results: Dict[str, Any]) -> Dict[str, Any]:
         """Execute a single step. Simulates actual MCP tool call."""
         step.status = StepStatus.RUNNING.value
 

@@ -8,7 +8,7 @@ and changes (title, company, location) that require re-classification.
 import os
 import json
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from pathlib import Path
 from typing import Dict, List, Optional, Any
@@ -131,8 +131,8 @@ class ContactEnrichmentAgent:
             List of detected changes/issues
         """
         changes: List[ContactChange] = []
-        contact_id = contact.get("id", "")
-        contact_name = contact.get("name", "Unknown")
+        contact.get("id", "")
+        contact.get("name", "Unknown")
 
         # 1. Staleness detection
         stale_change = self._check_staleness(contact)

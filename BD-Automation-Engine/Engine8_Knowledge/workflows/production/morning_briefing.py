@@ -9,9 +9,8 @@ Migrates the Phase 15 morning_briefing_workflow to production architecture with:
 - Scheduled via agent_orchestrator at 6:00 AM daily
 """
 
-import asyncio
-from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional
+from datetime import datetime
+from typing import Any, Dict
 
 import structlog
 

@@ -4,7 +4,7 @@ Extracts contractors, programs, contacts, locations, and technologies.
 """
 import re
 from enum import Enum
-from typing import List, Dict, Optional, Set
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 
 

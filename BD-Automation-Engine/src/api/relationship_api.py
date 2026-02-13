@@ -18,9 +18,9 @@ POST   /relationships/recompute                      — Force recomputation
 
 import logging
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from src.graph.relationship_engine import RelationshipStrengthModel, get_relationship_model

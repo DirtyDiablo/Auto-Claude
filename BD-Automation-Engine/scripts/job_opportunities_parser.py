@@ -9,9 +9,8 @@ matches contacts, and generates data pull requests for gaps.
 import csv
 import json
 import os
-import re
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 # ============================================================================
 # PROGRAM MAPPING RULES
@@ -385,7 +384,7 @@ def match_contacts_to_job(job: Dict, contacts: List[Dict], mapped_program: str, 
     matched = []
 
     job_location = location.lower()
-    job_title_lower = (job.get("jobTitle", "") or "").lower()
+    (job.get("jobTitle", "") or "").lower()
 
     for contact in contacts:
         contact_program = (contact.get("Program", "") or "").lower()

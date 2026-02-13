@@ -1,9 +1,8 @@
 """Phase 30A — Monitoring API Router (8 endpoints)"""
 import time
 import platform
-from typing import Any, Dict
 import structlog
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["monitoring"])

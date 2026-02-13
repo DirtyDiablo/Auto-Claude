@@ -7,7 +7,6 @@ and federal document processing. Uses TestClient with mocked backends.
 
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
-from dataclasses import asdict
 from pathlib import Path
 import sys
 
@@ -27,9 +26,6 @@ from Engine8_Knowledge.scrapers.sam_gov_sync import (
     ContractOpportunity,
     ContractAlert,
     WatchConfig,
-    ContractDetail,
-    SearchQuery,
-    SyncResult,
 )
 from Engine8_Knowledge.scrapers.federal_doc_pipeline import (
     DocumentRef,

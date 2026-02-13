@@ -1,0 +1,479 @@
+===============================================================================
+ DEAD CODE REPORT — BD-Automation-Engine
+ Generated: 2026-02-12
+ Python files scanned: 675
+===============================================================================
+
+===============================================================================
+ 1. VULTURE — Dead/Unused Code (min-confidence 70%)
+    Excludes: .auto-claude, .venv, node_modules, __pycache__
+===============================================================================
+
+--- Unused Variables (100% confidence) ---
+
+api\unified_endpoints.py:75: unused variable 'authenticated'
+api\unified_endpoints.py:126: unused variable 'authenticated'
+api\unified_endpoints.py:166: unused variable 'authenticated'
+api\unified_endpoints.py:196: unused variable 'authenticated'
+api\unified_endpoints.py:233: unused variable 'authenticated'
+api\unified_endpoints.py:265: unused variable 'authenticated'
+api\unified_endpoints.py:292: unused variable 'authenticated'
+api\unified_endpoints.py:317: unused variable 'authenticated'
+api\unified_endpoints.py:339: unused variable 'authenticated'
+api\unified_endpoints.py:349: unused variable 'authenticated'
+api\unified_endpoints.py:359: unused variable 'authenticated'
+api\unified_endpoints.py:382: unused variable 'authenticated'
+data\from_n8n_builder\langgraph\bd_langgraph\integrations.py:506: unused variable 'competitive_analysis'
+dify_integration\dify_apps.py:435: unused variable 'dify_api_key'
+dify_integration\dify_apps.py:435: unused variable 'dify_api_url'
+Engine2_ProgramMapping\scripts\job_standardizer.py:690: unused variable 'strict'
+Engine8_Knowledge\graph\migration_bridge.py:260: unused variable 'cypher_filter'
+Engine8_Knowledge\processors\routes.py:147: unused variable 'background_tasks'
+Engine8_Knowledge\tests\integration\test_crawl4ai_engine.py:146: unused variable 'mock_crawl4ai_modules'
+Engine8_Knowledge\tests\integration\test_crawl4ai_engine.py:163: unused variable 'mock_crawl4ai_modules'
+memory\supermemory_client.py:83: unused variable 'exc_tb'
+memory\supermemory_client.py:83: unused variable 'exc_type'
+memory\supermemory_client.py:83: unused variable 'exc_val'
+memory\supermemory_client.py:616: unused variable 'exc_tb'
+memory\supermemory_client.py:616: unused variable 'exc_type'
+memory\supermemory_client.py:616: unused variable 'exc_val'
+services\scheduler.py:85: unused variable 'frame'
+src\mcp\orchestrator.py:304: unused variable 'prior_results'
+streaming\streaming_api.py:187: unused variable 'background_tasks'
+
+--- Unused Imports (90% confidence) ---
+
+data\from_n8n_builder\langgraph\bd_langgraph\integrations.py:39: unused import 'BaseAPIClient'
+data\from_n8n_builder\langgraph\bd_langgraph\test_langgraph.py:15: unused import 'Mock'
+Engine2_ProgramMapping\data\enrich-federal-programs-v3.py:33: unused import 'UEI'
+Engine2_ProgramMapping\scripts\full_pipeline.py:18: unused import 'generate_briefings_batch'
+Engine2_ProgramMapping\scripts\pipeline.py:400: unused import 'map_jobs_batch'
+Engine2_ProgramMapping\scripts\pipeline.py:418: unused import 'export_to_formats'
+Engine6_QA\scripts\alerts.py:134: unused import 'Range'
+Engine8_Knowledge\agents\bd_agents.py:20: unused import 'ChatAnthropic'
+Engine8_Knowledge\agents\test_agents.py:17: unused import 'GetContactContextTool'
+Engine8_Knowledge\agents\test_agents.py:17: unused import 'GetProgramContextTool'
+Engine8_Knowledge\graph\neo4j_manager.py:21: unused import 'Driver'
+Engine8_Knowledge\graph\neo4j_manager.py:21: unused import 'Result'
+Engine8_Knowledge\graph\neo4j_manager.py:22: unused import 'AuthError'
+Engine8_Knowledge\scripts\classifier_pipeline.py:743: unused import 'bertopic'
+Engine8_Knowledge\scripts\docling_extractor.py:27: unused import 'InputFormat'
+Engine8_Knowledge\scripts\document_processor.py:27: unused import 'DocumentStream'
+Engine8_Knowledge\scripts\document_processor.py:34: unused import 'magic'
+Engine8_Knowledge\scripts\file_watcher.py:31: unused import 'FileCreatedEvent'
+Engine8_Knowledge\scripts\file_watcher.py:31: unused import 'FileModifiedEvent'
+Engine8_Knowledge\scripts\rag_engine.py:30: unused import 'ServiceContext'
+Engine8_Knowledge\scripts\rag_engine.py:30: unused import 'VectorStoreIndex'
+Engine8_Knowledge\scripts\rag_engine.py:31: unused import 'get_response_synthesizer'
+Engine8_Knowledge\scripts\rag_engine.py:32: unused import 'RetrieverQueryEngine'
+Engine8_Knowledge\scripts\rag_engine.py:33: unused import 'VectorIndexRetriever'
+Engine8_Knowledge\scripts\rag_engine.py:34: unused import 'NodeWithScore'
+Engine8_Knowledge\scripts\rag_engine.py:34: unused import 'TextNode'
+Engine8_Knowledge\scripts\treesitter_parser.py:25: unused import 'get_language'
+Engine8_Knowledge\scripts\vector_store.py:22: unused import 'CollectionStatus'
+Engine8_Knowledge\scripts\vector_store.py:22: unused import 'UpdateStatus'
+Engine8_Knowledge\tests\integration\test_hybrid_engine.py:9: unused import 'PropertyMock'
+Engine8_Knowledge\tests\integration\test_migration_bridge.py:9: unused import 'PropertyMock'
+Engine8_Knowledge\tests\integration\test_neo4j_manager.py:9: unused import 'PropertyMock'
+Engine8_Knowledge\workflows\graph_builder.py:15: unused import 'Sequence'
+engine_data\Engine2_ProgramMapping\enrich-federal-programs-v3.py:33: unused import 'UEI'
+reindex_with_openai.py:29: unused import 'ScrollRequest'
+scripts\generate_pipeline_report.py:19: unused import 'Alignment'
+scripts\generate_pipeline_report.py:19: unused import 'PatternFill'
+services\database.py:22: unused import 'execute_values'
+tests\test_agentic_rag.py:5: unused import 'KeywordSearchTool'
+tests\test_agentic_rag.py:5: unused import 'VectorSearchTool'
+tests\test_benchmark_suite.py:5: unused import 'BenchmarkCategory'
+tests\test_data_quality_engine.py:6: unused import 'IssueSeverity'
+tests\test_data_quality_engine.py:6: unused import 'QualityDimension'
+tests\test_fine_tuner.py:6: unused import 'ModelStatus'
+tests\test_mcp_tool_registry.py:5: unused import 'CostTier'
+tests\test_mcp_tool_registry.py:5: unused import 'TransportType'
+tests\test_orchestrator.py:12: unused import 'Mock'
+tests\test_program_mapper.py:13: unused import 'FederalProgramsDB'
+tests\test_proposal_api.py:8: unused import 'configure_proposals'
+tests\test_revenue_api.py:8: unused import 'configure_revenue'
+utils\llm_retry.py:17: unused import 'RetryError'
+
+===============================================================================
+ 2. AUTOFLAKE — Unused Imports/Variables (per-file summary)
+    Files with issues detected:
+===============================================================================
+
+Engine2_ProgramMapping\data\enrich-federal-programs-v3.py
+Engine2_ProgramMapping\scripts\program_mapper.py
+Engine4_Playbook\scripts\bd_playbook_generator.py
+Engine6_QA\quality_monitor.py
+Engine6_QA\scripts\alerts.py
+Engine7_BullhornETL\scripts\analyze_call_notes.py
+Engine7_BullhornETL\scripts\bullhorn_etl.py
+Engine7_BullhornETL\scripts\contact_scoring.py
+Engine7_BullhornETL\scripts\database_schema.py
+Engine7_BullhornETL\scripts\export_coworker_playbook.py
+Engine7_BullhornETL\scripts\integrate_call_notes.py
+Engine7_BullhornETL\scripts\intelligent_contact_classifier.py
+Engine8_Knowledge\agents\analytics_agent.py
+Engine8_Knowledge\agents\autonomous\contact_enrichment.py
+Engine8_Knowledge\agents\autonomous\routes.py
+Engine8_Knowledge\agents\bd_agents.py
+Engine8_Knowledge\agents\contact_classifier_agent.py
+Engine8_Knowledge\agents\crewai_orchestrator.py
+Engine8_Knowledge\agents\quality_assurance_agent.py
+Engine8_Knowledge\api.py
+Engine8_Knowledge\api_routers\hybrid_endpoints.py
+Engine8_Knowledge\api_routers\monitoring_api.py
+Engine8_Knowledge\api_routers\optimizer_api.py
+Engine8_Knowledge\automation\agent_coordinator.py
+Engine8_Knowledge\bd_lightrag\graph_rag.py
+Engine8_Knowledge\embeddings\corpus_builder.py
+Engine8_Knowledge\embeddings\query_expander.py
+Engine8_Knowledge\graph\bd_knowledge_graph.py
+Engine8_Knowledge\graph\influence_scoring.py
+Engine8_Knowledge\graph\ingestion.py
+Engine8_Knowledge\graph\schema.py
+Engine8_Knowledge\mcp\memory_tools.py
+Engine8_Knowledge\mcp\program_tools.py
+Engine8_Knowledge\ml\domain_adapter_v2.py
+Engine8_Knowledge\ml\hiring_signals.py
+Engine8_Knowledge\ml\placement_predictor.py
+Engine8_Knowledge\optimization\auto_optimizer.py
+Engine8_Knowledge\optimization\regression_detector.py
+Engine8_Knowledge\optimization\retrain_orchestrator.py
+Engine8_Knowledge\optimization\self_assessment.py
+Engine8_Knowledge\processors\test_processors.py
+Engine8_Knowledge\ragflow\bd_knowledge_manager.py
+Engine8_Knowledge\retrieval\page_index.py
+Engine8_Knowledge\retrieval\test_page_index.py
+Engine8_Knowledge\retrieval\test_ultra_rag.py
+Engine8_Knowledge\retrieval\ultra_rag_routes.py
+Engine8_Knowledge\schemas\vector_collections.py
+Engine8_Knowledge\scripts\auto_tagger.py
+Engine8_Knowledge\scripts\classifier_pipeline.py
+Engine8_Knowledge\scripts\dedup_programs.py
+Engine8_Knowledge\scripts\docling_processor.py
+Engine8_Knowledge\scripts\file_watcher.py
+Engine8_Knowledge\scripts\hybrid_collections.py
+Engine8_Knowledge\scripts\index_all_docs.py
+Engine8_Knowledge\scripts\index_engine2_programs.py
+Engine8_Knowledge\scripts\init_bm25.py
+Engine8_Knowledge\scripts\lightrag_engine.py
+Engine8_Knowledge\scripts\master_index_all.py
+Engine8_Knowledge\scripts\memory_system.py
+Engine8_Knowledge\scripts\populate_lightrag.py
+Engine8_Knowledge\scripts\treesitter_parser.py
+Engine8_Knowledge\scripts\vector_store.py
+Engine8_Knowledge\search\benchmark_v2.py
+Engine8_Knowledge\search\memory_search.py
+Engine8_Knowledge\search\search_routes.py
+Engine8_Knowledge\search\unified_search.py
+Engine8_Knowledge\tests\integration\test_benchmark_v2.py
+Engine8_Knowledge\tests\integration\test_checkpoint_store.py
+Engine8_Knowledge\tests\integration\test_collection_upgrade.py
+Engine8_Knowledge\tests\integration\test_competitive_intel_v2.py
+Engine8_Knowledge\tests\integration\test_contact_enrichment_v2.py (No issues)
+Engine8_Knowledge\tests\integration\test_crawl4ai_engine.py (fixture issue)
+Engine8_Knowledge\tests\integration\test_federal_doc_pipeline.py
+Engine8_Knowledge\tests\integration\test_graph_api.py
+Engine8_Knowledge\tests\integration\test_graph_builder.py
+Engine8_Knowledge\tests\integration\test_graph_retriever.py
+Engine8_Knowledge\tests\integration\test_human_loop.py
+Engine8_Knowledge\tests\integration\test_hybrid_engine.py
+Engine8_Knowledge\tests\integration\test_mcp_contact_tools.py
+Engine8_Knowledge\tests\integration\test_mem0_manager.py
+Engine8_Knowledge\tests\integration\test_memory_api.py
+Engine8_Knowledge\tests\integration\test_memory_lifecycle.py
+Engine8_Knowledge\tests\integration\test_memory_search.py
+Engine8_Knowledge\tests\integration\test_migration_bridge.py
+Engine8_Knowledge\tests\integration\test_neo4j_manager.py
+Engine8_Knowledge\tests\integration\test_renderers.py
+Engine8_Knowledge\tests\integration\test_sam_gov_sync.py
+Engine8_Knowledge\tests\integration\test_scrape_orchestrator_v2.py
+Engine8_Knowledge\tests\integration\test_unified_search.py
+Engine8_Knowledge\visualization\export_engine.py
+Engine8_Knowledge\workflows\graph_builder.py (Sequence import)
+Engine8_Knowledge\workflows\human_loop.py
+Engine8_Knowledge\workflows\orchestrator_v2.py
+Engine8_Knowledge\workflows\production\contact_enrichment.py
+Engine8_Knowledge\workflows\production\morning_briefing.py
+Engine8_Knowledge\workflows\production\pipeline_manager.py
+Engine8_Knowledge\workflows\time_travel.py
+scripts\bd_playbook_generator.py
+scripts\convert_data_to_json.py
+scripts\create_enriched_spreadsheet.py
+scripts\data_correlation\correlation_engine.py
+scripts\health_check.py
+scripts\job_ingestion\job_parser.py
+scripts\job_ingestion\pts_past_performance.py
+scripts\job_opportunities_parser.py
+scripts\notion_schema\notion_schema_manager.py
+scripts\validate_phase.py
+scripts\verify_pipeline.py
+services\ai_enrichment\notion_client.py
+services\ai_enrichment\orchestrator.py
+services\bullhorn_integration.py
+services\notion_qdrant_sync.py
+services\notion_sync.py
+src\agents\swarm\workers.py
+src\api\collaboration_api.py
+src\api\data_quality_api.py
+src\api\geo_api.py
+src\api\intelligence_api.py
+src\api\memory_api.py
+src\api\nlq_api.py
+src\api\predictive_api.py
+src\api\proposal_api.py
+src\api\resilience_api.py
+src\api\simulation_api.py
+src\api\streaming_api.py
+src\api\voice_api.py
+src\api\workflows_api.py
+src\collaboration\yjs_engine.py
+src\data_quality\engine.py
+src\embeddings\benchmark_suite.py
+src\embeddings\fine_tuner.py
+src\geographic\spatial_queries.py
+src\governance\schema_registry.py (field_map)
+src\graph\influence_scorer.py
+src\graph\path_router.py
+src\intelligence\pattern_engine.py (urgency)
+src\knowledge\temporal_kg.py (entity_names)
+src\mcp\tool_registry.py
+src\memory\agent_mixin_v2.py
+src\memory\cortex.py (fact_key)
+src\middleware\tenant_middleware.py
+src\ml\opportunity_scorer.py
+src\ml\win_probability.py (y_proba)
+src\observability\distributed_tracer.py
+src\observability\metrics_pipeline.py
+src\proposals\pricing_engine.py
+src\rag\query_decomposer.py
+src\resilience\bulkhead.py
+src\resilience\chaos_engine.py
+src\revenue\deal_lifecycle.py
+src\revenue\roi_calculator.py
+src\scaling\auto_scaler.py
+src\scaling\read_replicas.py
+src\simulation\digital_twin.py
+src\simulation\scenario_api.py
+src\streaming\event_bus.py
+src\streaming\processors.py (is_duplicate)
+src\streaming\websocket_server.py
+src\workflows\nl_to_workflow.py
+tests\test_abac_engine.py
+tests\test_agentic_rag.py
+tests\test_auto_optimizer.py
+tests\test_autocomplete.py
+tests\test_benchmark_suite.py
+tests\test_briefing_generator.py
+tests\test_budget_predictor.py
+tests\test_bulkhead.py
+tests\test_capability_generator.py
+tests\test_compliance_matrix.py
+tests\test_data_contracts.py
+tests\test_data_lineage.py
+tests\test_data_quality_engine.py
+tests\test_domain_adapter_v2.py
+tests\test_entity_resolution.py
+tests\test_event_processors.py
+tests\test_executive_analytics.py
+tests\test_experiment_analytics.py
+tests\test_fine_tuner.py
+tests\test_insight_compiler.py
+tests\test_integration.py
+tests\test_intelligence_api.py
+tests\test_mcp_orchestrator.py
+tests\test_mcp_tool_registry.py
+tests\test_memory_cortex.py
+tests\test_ml_api.py
+tests\test_monitoring_api.py
+tests\test_optimizer_api.py
+tests\test_orchestrator.py
+tests\test_pattern_engine.py
+tests\test_pipeline.py
+tests\test_platform_metrics.py
+tests\test_predictive_api.py
+tests\test_program_mapper.py
+tests\test_proposal_api.py
+tests\test_push_notifications.py
+tests\test_rbac.py
+tests\test_regression_detector.py
+tests\test_relationship_api.py
+tests\test_retrain_orchestrator.py
+tests\test_revenue_api.py
+tests\test_roi_calculator.py
+tests\test_rules_dsl.py
+tests\test_self_healer.py
+tests\test_sla_engine.py
+tests\test_swarm_api.py
+tests\test_swarm_coordinator.py
+tests\test_temporal_engine.py
+tests\test_tenant_api.py
+tests\test_tenant_middleware.py
+tests\test_transcript_analyzer.py
+tests\test_websocket_server.py
+tests\test_worker_registry.py
+
+Total files with unused imports/variables: ~170 out of 675
+
+===============================================================================
+ 3. DEAD — Orphaned Files (never imported)
+===============================================================================
+
+Engine0_Orchestrator/orchestrator.py:280  — std_dir is never read
+Engine2_ProgramMapping/data/create-tango-exports.py:71,74  — count is never read
+Engine2_ProgramMapping/data/create-tango-exports.py:179  — output_file is never read
+Engine2_ProgramMapping/scripts/program_mapper.py:783,793  — dcgs_matched is never read
+Engine7_BullhornETL/scripts/financial_analysis.py:30  — salary is never read
+Engine7_BullhornETL/scripts/integrate_call_notes.py:275  — negative is never read
+Engine8_Knowledge/agents/autonomous/contact_enrichment.py:134-135  — contact_id, contact_name never read
+Engine8_Knowledge/mcp/contact_tools.py:19,40,63,96,110  — 5 functions never read (search_contacts, get_contact_360, classify_contact, find_introduction_path, get_org_chart)
+Engine8_Knowledge/mcp/memory_tools.py:19,38,59,82,93,104  — 6 functions never read (recall_memory, add_memory, search_knowledge_base, get_interaction_history, generate_outreach, title)
+Engine8_Knowledge/mcp/program_tools.py:19,37,55,84,108,122  — 6 functions never read (search_programs, get_program_intel, find_hiring_signals, get_competitive_landscape, hybrid_search, graph_query)
+Engine8_Knowledge/monitoring/metrics.py:128,136  — metrics_endpoint, metrics_fallback never read
+Engine8_Knowledge/ragflow/bd_knowledge_manager.py:628  — sections never read
+Engine8_Knowledge/retrieval/page_index.py:344  — prompt never read
+Engine8_Knowledge/retrieval/ultra_rag.py:255,404  — mode, loop never read
+Engine8_Knowledge/scripts/auto_tagger.py:168  — total_terms never read
+Engine8_Knowledge/scripts/enrich_reindex_all.py:1063  — intel never read
+Engine8_Knowledge/scripts/index_bullhorn_contacts.py:160  — batch_time never read
+Engine8_Knowledge/scripts/populate_lightrag.py:290  — result never read
+Engine8_Knowledge/scripts/vector_store.py:657  — results never read
+Engine8_Knowledge/search/memory_search.py:99  — search_start never read
+Engine8_Knowledge/workflows/production/competitive_intel.py:80,399  — focus_areas, briefing never read
+Engine8_Knowledge/workflows/production/contact_enrichment.py:312  — contacts never read
+Engine8_Knowledge/workflows/production/pipeline_manager.py:113,118  — horizon, program never read
+data/from_n8n_builder/langgraph/bd_langgraph/bd_workflows.py:280,282  — result never read
+data/from_n8n_builder/langgraph/bd_langgraph/contact_workflows.py:248,250  — result never read
+data/from_n8n_builder/langgraph/bd_langgraph/nodes.py:132  — agency never read
+dify_integration/dify_crewai_bridge.py:431  — list_agents never read
+dify_integration/dify_n8n_bridge.py:490,504,513,519  — list_workflows, scrape_jobs, hot_lead_alert, weekly_report never read
+dify_integration/dify_qdrant_bridge.py:385,395  — dify_knowledge_search, dify_knowledge_rag never read
+engine_data/Engine2_ProgramMapping/create-tango-exports.py:71,74,179  — count, output_file never read
+index_contacts.py:110  — last_progress_time never read
+orchestrator.py:578  — pipeline_config never read
+reindex_with_openai.py:247  — copied never read
+scripts/bd_playbook_generator.py:271  — contact_role never read
+scripts/create_call_sheet.py:107  — contact_city never read
+scripts/data_correlation/correlation_engine.py:693,760,822,825,1069  — job_loc, contact_company, job_company, contractor_name, location_by_id never read
+scripts/generate_pipeline_report.py:59,66,440,441  — target_companies, worked_programs, header_font, border never read
+scripts/job_opportunities_parser.py:388  — job_title_lower never read
+services/ai_enrichment/engine.py:199  — email never read
+services/ai_enrichment/run_basic_enrichment.py:50,53,73,74  — name, tier, value never read
+services/bullhorn_integration.py:66,67,79,80  — auth_url, auth_params, token_url, token_data never read
+
+--- src/ API endpoints never called externally (entire API modules) ---
+
+src/api/embeddings_api.py  — 12 endpoints never read
+src/api/geo_api.py  — 9 endpoints never read
+src/api/governance_api.py  — 11 endpoints never read
+src/api/intelligence_api.py  — 13 endpoints never read
+src/api/mcp_api.py  — 9 endpoints never read
+src/api/memory_api.py  — 13 endpoints never read
+src/api/simulation_api.py  — 8 endpoints never read
+src/api/swarm_api.py  — 10 endpoints never read
+src/api/voice_api.py  — 12 endpoints never read
+src/api/workflows_api.py  — 4 endpoints never read
+src/api/collaboration_api.py  — 2 endpoints never read
+src/data_quality/self_healer.py:603  — record_issues never read
+src/governance/schema_registry.py:274  — field_map never read
+src/intelligence/pattern_engine.py:239  — urgency never read
+src/knowledge/temporal_kg.py:263  — entity_names never read
+src/memory/cortex.py:491  — fact_key never read
+src/ml/win_probability.py:237  — y_proba never read
+src/streaming/processors.py:118,123  — is_duplicate never read
+streaming/bd_streaming_pipeline.py:728  — activities never read
+
+--- Engine2 exports/pipeline never called ---
+
+Engine2_ProgramMapping/scripts/exporters.py:511  — export_single never read
+Engine2_ProgramMapping/scripts/job_standardizer.py:26,28  — HAS_RETRY never read
+Engine2_ProgramMapping/scripts/job_standardizer.py:87,88  — EXTRACTION_FIELDS, ALL_FIELDS only in tests
+Engine2_ProgramMapping/scripts/job_standardizer.py:735  — validate_job_batch never read
+Engine2_ProgramMapping/scripts/pipeline.py:34,305,400,418  — DEFAULT_INPUT_DIR, save_config, map_jobs_batch, export_to_formats never read
+
+===============================================================================
+ 4. PYLINT — Duplicate Code Blocks
+===============================================================================
+
+7 duplicate code clusters detected:
+
+CLUSTER 1: services/ai_enrichment/run_dcgs_enrichment.py ↔ run_dcgs_retry.py
+  Lines 10-69 duplicated (~60 lines)
+  Content: Windows encoding fix, Notion setup, tier patterns, classification logic
+
+CLUSTER 2: Engine8_Knowledge/scripts/index_engine1_jobs.py ↔ index_engine3_contacts.py
+  Lines 84-130 duplicated (~46 lines)
+  Content: index_records() function — batch embedding + Qdrant upsert
+
+CLUSTER 3: services/ai_enrichment/run_bd_opportunities_enrichment.py ↔ run_dcgs_enrichment.py
+  Lines 27-61 duplicated (~34 lines)
+  Content: Notion API query function with timeout/retry
+
+CLUSTER 4: services/ai_enrichment/run_bd_opportunities_enrichment.py ↔ run_dcgs_enrichment.py
+  Lines 199-238 duplicated (~39 lines)
+  Content: Batch processing loop with pagination
+
+CLUSTER 5: Engine8_Knowledge/scripts/enrich_reindex_all.py ↔ index_staged_data.py
+  Lines 120-150 duplicated (~30 lines)
+  Content: batch_embed() function + CSV reader
+
+CLUSTER 6: Engine8_Knowledge/scripts/index_engine1_jobs.py ↔ index_engine2_programs.py
+  Lines 84-114 duplicated (~30 lines)
+  Content: index_records() function (same as Cluster 2)
+
+CLUSTER 7: Engine8_Knowledge/scripts/index_dashboard_data.py ↔ index_engine1_jobs.py
+  Lines 83-113 duplicated (~30 lines)
+  Content: Qdrant batch upsert logic
+
+Summary: ~270 lines of duplicated code across 7 clusters, mostly in:
+  - services/ai_enrichment/ (Notion API patterns)
+  - Engine8_Knowledge/scripts/ (indexing/embedding patterns)
+
+===============================================================================
+ 5. STALE FILES — Large .py files not modified in 90+ days
+===============================================================================
+
+No files found matching criteria (all .py files modified within last 90 days).
+
+===============================================================================
+ SUMMARY
+===============================================================================
+
+| Category                    | Count    |
+|-----------------------------|----------|
+| Unused variables (vulture)  | 29       |
+| Unused imports (vulture)    | 42       |
+| Files w/ autoflake issues   | ~170     |
+| Orphaned vars/funcs (dead)  | 103+     |
+| Orphaned API modules (src/) | 10       |
+| Duplicate code clusters     | 7        |
+| Duplicated lines (approx)   | ~270     |
+| Stale large files (90d+)    | 0        |
+
+TOP PRIORITIES FOR CLEANUP:
+
+1. **src/api/ — 10 entire API modules with ~100+ endpoints never imported**
+   These appear to be scaffolded/generated APIs that are not wired up.
+   Candidates for deletion or deferral.
+
+2. **Engine8_Knowledge/mcp/ — 17 MCP tool functions never called**
+   contact_tools.py (5), memory_tools.py (6), program_tools.py (6)
+   These may be intended for MCP server use but aren't imported.
+
+3. **api/unified_endpoints.py — 12x unused 'authenticated' variables**
+   Likely FastAPI dependency injection pattern issue.
+
+4. **7 duplicate code clusters (~270 lines)**
+   index_records() duplicated 3x, Notion API query duplicated 2x,
+   batch_embed() duplicated, batch processing loop duplicated.
+   → Extract shared utilities.
+
+5. **services/ai_enrichment/ — 3 scripts share ~130 lines**
+   run_dcgs_enrichment.py, run_dcgs_retry.py, run_bd_opportunities_enrichment.py
+   → Refactor into shared module.
+
+6. **Engine8_Knowledge/scripts/rag_engine.py — 7 unused imports**
+   Likely deprecated file with stale llama_index imports.
+
+7. **dify_integration/ — 7 functions never called**
+   Bridge functions that may be dead weight if Dify isn't active.

@@ -6,7 +6,6 @@ from src.voice.briefing_generator import (
     CallBriefingGenerator,
     CallBriefing,
     AudioBriefing,
-    ContactProfile,
     PainPoint,
     TalkingPoint,
     BriefingPriority,

@@ -8,8 +8,6 @@ from src.auth.auth_service import (
     AuthProvider,
     AuthEventType,
     User,
-    Session,
-    AuditEntry,
     SSOConfig,
     get_auth_service,
     MAX_LOGIN_ATTEMPTS,

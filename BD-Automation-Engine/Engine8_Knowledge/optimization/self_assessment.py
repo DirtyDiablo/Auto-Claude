@@ -1,7 +1,7 @@
 """Phase 29A — Self-Assessment Engine"""
 import structlog
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 from datetime import datetime, timedelta
 import json
 logger = structlog.get_logger(__name__)

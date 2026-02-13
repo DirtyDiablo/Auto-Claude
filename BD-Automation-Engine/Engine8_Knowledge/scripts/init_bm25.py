@@ -6,7 +6,7 @@ Reads existing vectors from Qdrant and populates the BM25 keyword index.
 import os
 import sys
 import logging
-from typing import Dict, List, Any
+from typing import Dict, List
 
 # Add parent to path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

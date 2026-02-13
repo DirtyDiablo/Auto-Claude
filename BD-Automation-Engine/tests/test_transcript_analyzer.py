@@ -5,11 +5,7 @@ import pytest
 from src.voice.transcript_analyzer import (
     TranscriptIntelligenceExtractor,
     TranscriptIntel,
-    CallRecord,
-    ExtractedIntel,
-    ActionItem,
     Sentiment,
-    IntelType,
     get_transcript_analyzer,
 )
 

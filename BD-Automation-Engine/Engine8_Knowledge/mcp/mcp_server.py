@@ -5,7 +5,6 @@ Custom MCP server exposing the PTS BD platform as native Claude Desktop tools.
 21 tools across contact, program, search, and memory domains.
 """
 
-import os
 from typing import Any, Dict, List, Optional
 
 import structlog

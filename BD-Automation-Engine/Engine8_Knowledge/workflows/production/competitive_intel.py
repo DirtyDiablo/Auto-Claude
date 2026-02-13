@@ -9,10 +9,8 @@ Migrates the Phase 15 competitive_intel_workflow to production architecture with
 - PTS BD reporting format
 """
 
-import asyncio
-import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 import structlog
 
@@ -77,7 +75,7 @@ async def scrape_job_boards(state: Dict[str, Any]) -> Dict[str, Any]:
     """Scrape job boards for competitive hiring signals."""
     plan = state.get("collection_plan", {})
     competitors = plan.get("competitors", [])
-    focus_areas = plan.get("focus_areas", [])
+    plan.get("focus_areas", [])
     results = []
 
     try:
@@ -396,7 +394,7 @@ async def generate_briefing(state: Dict[str, Any]) -> Dict[str, Any]:
 
 async def distribute_briefing(state: Dict[str, Any]) -> Dict[str, Any]:
     """Distribute briefing via dashboard and notifications."""
-    briefing = state.get("briefing", {})
+    state.get("briefing", {})
 
     state["distribution_results"] = {
         **state.get("distribution_results", {}),

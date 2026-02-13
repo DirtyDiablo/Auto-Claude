@@ -5,7 +5,6 @@ import pytest
 from src.experimentation.experiment_analytics import (
     ExperimentAnalytics,
     AnalyticsEvent,
-    FunnelStep,
     get_experiment_analytics,
 )
 

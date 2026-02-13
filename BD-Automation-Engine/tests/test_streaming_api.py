@@ -1,12 +1,10 @@
 """Tests for Phase 31A - Streaming API (14 REST + 4 WebSocket endpoints)."""
 
-import asyncio
-import json
 import pytest
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -15,7 +13,7 @@ from fastapi.testclient import TestClient
 
 from src.streaming.event_bus import Event, EventBus, StreamStats
 from src.streaming.processors import EventProcessorRegistry
-from src.streaming.stream_orchestrator import StreamOrchestrator, WorkflowExecution, WorkflowStatus
+from src.streaming.stream_orchestrator import StreamOrchestrator
 from src.streaming.websocket_server import RealtimeServer
 from src.api.streaming_api import (
     router,

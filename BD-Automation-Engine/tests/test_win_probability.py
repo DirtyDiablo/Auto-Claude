@@ -1,7 +1,6 @@
 """Tests for Phase 32A — Win Probability Model."""
 
 import pytest
-from unittest.mock import patch, MagicMock
 
 from src.ml.win_probability import (
     WinProbabilityModel,

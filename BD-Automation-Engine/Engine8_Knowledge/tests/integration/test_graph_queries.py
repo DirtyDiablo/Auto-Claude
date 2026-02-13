@@ -12,7 +12,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from Engine8_Knowledge.graph.queries import GraphQueries, get_graph_queries
+from Engine8_Knowledge.graph.queries import GraphQueries
 
 
 # ---------------------------------------------------------------------------

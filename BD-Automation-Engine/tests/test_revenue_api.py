@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from src.api.revenue_api import router, configure_revenue
+from src.api.revenue_api import router
 
 
 # =========================================

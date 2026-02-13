@@ -13,8 +13,7 @@ Usage:
     reranked = rerank("query", documents)
 """
 
-import os
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -184,7 +183,7 @@ def rerank(
 
 # CLI usage
 if __name__ == "__main__":
-    import json
+    pass
 
     # Test the reranker
     test_docs = [

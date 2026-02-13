@@ -5,7 +5,7 @@ import pytest
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from src.api.relationship_api import router, configure_relationships
+from src.api.relationship_api import router
 
 
 # =========================================

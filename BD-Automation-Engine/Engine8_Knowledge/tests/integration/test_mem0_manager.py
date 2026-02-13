@@ -6,13 +6,12 @@ Uses fallback in-memory store (no Mem0/Qdrant required).
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
-from Engine8_Knowledge.memory.mem0_manager import Mem0Manager, Memory, MemoryStats
+from Engine8_Knowledge.memory.mem0_manager import Mem0Manager, MemoryStats
 
 
 # ---------------------------------------------------------------------------

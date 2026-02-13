@@ -38,7 +38,6 @@ def create_bd_research_crew(
     )
     from Engine8_Knowledge.agents.models import (
         ProgramIntelligence,
-        ContactProfile,
         CompetitiveReport,
         OutreachPlan,
         BDResearchBundle,

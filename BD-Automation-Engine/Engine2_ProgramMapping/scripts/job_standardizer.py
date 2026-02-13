@@ -687,7 +687,7 @@ def validate_standardized_job(
     job: Dict,
     validate_enrichment: bool = False,
     validate_metadata: bool = False,
-    strict: bool = False
+    _strict: bool = False
 ) -> Tuple[bool, List[str]]:
     """
     Validate that standardized job has all required fields and proper formats.

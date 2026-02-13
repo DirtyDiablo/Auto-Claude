@@ -10,7 +10,6 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 import logging
-import json
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,19 +17,14 @@ logger = logging.getLogger(__name__)
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 try:
-    from crewai import Agent, Task, Crew, Process
+    from crewai import Task, Crew, Process
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
     logger.warning("CrewAI not available")
 
 from .bd_agents import (
-    get_bd_agent_team,
-    create_research_agent,
-    create_analyst_agent,
-    create_strategy_agent,
-    create_writer_agent,
-    BDAgentTeam
+    get_bd_agent_team
 )
 from Engine8_Knowledge.scripts.memory_system import get_memory_system
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore

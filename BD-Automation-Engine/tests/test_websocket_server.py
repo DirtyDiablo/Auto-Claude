@@ -1,12 +1,10 @@
 """Tests for Phase 31A - WebSocket Server (connections, subscriptions, broadcast, filtering)."""
 
-import asyncio
-import json
 import pytest
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock, MagicMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 

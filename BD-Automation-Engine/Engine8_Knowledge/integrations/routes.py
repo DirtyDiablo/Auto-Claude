@@ -4,7 +4,7 @@ Integration API Routes — FastAPI router for Slack and CRM sync endpoints.
 
 import logging
 from typing import Dict, Any, List, Optional
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)

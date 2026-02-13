@@ -7,12 +7,11 @@ campaign effectiveness reviews.
 
 from __future__ import annotations
 
-import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from typing import Any, Dict, List, Optional
 
-from src.intelligence.meta_learner import MetaLearningEngine, MetaInsight, get_meta_learner
+from src.intelligence.meta_learner import MetaLearningEngine, get_meta_learner
 from src.intelligence.pattern_engine import (
     StrategicPatternEngine,
     StrategicPattern,

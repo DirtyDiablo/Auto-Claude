@@ -22,7 +22,7 @@ import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Any
 from dataclasses import dataclass, field
 
 # Add parent directories for imports
@@ -31,7 +31,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 try:
     from Engine3_OrgChart.scripts.contact_lookup import (
         lookup_contacts,
-        format_contacts_for_briefing,
         format_contacts_json,
     )
     HAS_CONTACT_LOOKUP = True

@@ -5,7 +5,6 @@ trees with 20+ engineered features from graph, program, job, timing, and
 campaign data. Falls back to heuristic scoring when XGBoost is unavailable.
 """
 
-import math
 import logging
 from dataclasses import dataclass, field
 from datetime import datetime, timezone

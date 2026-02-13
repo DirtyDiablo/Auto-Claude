@@ -7,7 +7,6 @@ import json
 from typing import List, Dict, Optional, Callable
 from dataclasses import dataclass, field
 from enum import Enum
-from datetime import datetime
 import asyncio
 import time
 import logging
@@ -252,7 +251,7 @@ Return as JSON array: ["sub_question_1", "sub_question_2", ...]"""
             result["success"] = True
 
         elif step_type == "synthesize":
-            mode = step.get("mode", "default")
+            step.get("mode", "default")
 
             # Gather all retrieved results
             all_retrieved = []
@@ -401,7 +400,7 @@ Improved Answer:"""
     def query_sync(self, query: str, pipeline: str = "auto") -> QueryPlan:
         """Synchronous wrapper for query()."""
         try:
-            loop = asyncio.get_running_loop()
+            asyncio.get_running_loop()
             # If there's a running loop, create a new thread
             import concurrent.futures
             with concurrent.futures.ThreadPoolExecutor() as pool:

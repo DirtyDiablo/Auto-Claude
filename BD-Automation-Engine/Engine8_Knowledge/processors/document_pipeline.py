@@ -4,10 +4,9 @@ Processes PDFs, DOCX, PPTX into structured data for indexing.
 """
 import fitz  # PyMuPDF as fallback
 from pathlib import Path
-from typing import List, Dict, Optional, Union
+from typing import List, Dict
 from dataclasses import dataclass
 import hashlib
-import json
 import structlog
 from datetime import datetime
 

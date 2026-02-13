@@ -4,12 +4,10 @@ Tests the master orchestrator, all engines, and service integrations.
 """
 
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import patch
 
 import pytest
 
@@ -250,7 +248,7 @@ class TestWebhookDelivery:
         config = OrchestratorConfig(n8n_webhook_url='https://test.webhook.com')
         delivery = WebhookDelivery(config)
 
-        result = delivery.deliver_jobs(enriched_jobs)
+        delivery.deliver_jobs(enriched_jobs)
 
         assert mock_post.called
 

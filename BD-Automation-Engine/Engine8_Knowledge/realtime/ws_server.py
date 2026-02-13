@@ -19,10 +19,10 @@ import time
 import uuid
 from typing import Dict, List, Optional, Any, Set
 from datetime import datetime
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from collections import deque
 
-from fastapi import WebSocket, WebSocketDisconnect
+from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
 

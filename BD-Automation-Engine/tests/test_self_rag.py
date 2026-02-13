@@ -8,7 +8,6 @@ from src.rag.self_rag import (
     RelevanceScore,
     SupportScore,
     UtilityScore,
-    RetrievalRound,
     reformulate_query,
     get_self_rag,
     _compute_token_overlap,

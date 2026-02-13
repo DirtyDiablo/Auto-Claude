@@ -4,7 +4,7 @@ Phase 26A — MCP Contact Tools
 5 contact-focused tools for Claude Desktop integration.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import structlog
 

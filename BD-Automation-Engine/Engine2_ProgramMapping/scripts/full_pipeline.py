@@ -1,12 +1,10 @@
 """
 Full BD Automation Pipeline - 8-Stage pipeline integrating all engines.
 """
-import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
@@ -15,8 +13,8 @@ from Engine2_ProgramMapping.scripts.pipeline import (
     parse_and_standardize, match_to_programs, calculate_bd_scores, export_results
 )
 from Engine3_OrgChart.scripts.contact_lookup import lookup_contacts, format_contacts_json
-from Engine4_Briefing.scripts.briefing_generator import generate_briefing, generate_briefings_batch
-from Engine6_QA.scripts.qa_feedback import QAConfig, run_qa_workflow, BatchQAReport
+from Engine4_Briefing.scripts.briefing_generator import generate_briefing
+from Engine6_QA.scripts.qa_feedback import QAConfig, run_qa_workflow
 
 @dataclass
 class FullPipelineConfig(BasePipelineConfig):

@@ -5,7 +5,6 @@ import pytest
 from src.pwa.push_notifications import (
     PushNotificationService,
     NotificationTopic,
-    NotificationPriority,
     NotificationStatus,
     get_push_service,
 )

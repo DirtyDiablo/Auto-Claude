@@ -12,7 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from langgraph.graph import StateGraph, END
 
-from .states import WeeklyPipelineState, WorkflowStatus
+from .states import WorkflowStatus
 from .checkpointer import get_checkpointer, CheckpointManager
 from .nodes import (
     scrape_opportunities_node,

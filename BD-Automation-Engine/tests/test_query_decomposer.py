@@ -5,7 +5,6 @@ import pytest
 from src.rag.query_decomposer import (
     QueryDecomposer,
     DecompositionPlan,
-    SubQuery,
     DependencyGraph,
     get_query_decomposer,
     _extract_entities,

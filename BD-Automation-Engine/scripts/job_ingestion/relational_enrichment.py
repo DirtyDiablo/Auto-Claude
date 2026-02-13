@@ -14,12 +14,11 @@ Matching Strategy:
 5. Prime contractor detection from job description
 """
 
-import os
 import re
 import csv
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 

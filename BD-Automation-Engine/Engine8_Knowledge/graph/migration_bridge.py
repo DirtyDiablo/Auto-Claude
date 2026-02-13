@@ -257,7 +257,7 @@ def _write_rel_batch(mgr: Any, batch: list[dict]) -> None:
             pass
 
 
-def import_neo4j_subgraph_to_networkx(cypher_filter: str = "MATCH (n) RETURN n LIMIT 1000") -> Any:
+def import_neo4j_subgraph_to_networkx(_cypher_filter: str = "MATCH (n) RETURN n LIMIT 1000") -> Any:
     """Import a Neo4j subgraph into a NetworkX graph."""
     try:
         import networkx as nx

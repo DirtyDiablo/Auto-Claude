@@ -1,7 +1,7 @@
 """Tests for Phase 50A — Contact Claiming System."""
 
 import pytest
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from src.collaboration.contact_claiming import (
     ContactClaimingSystem,

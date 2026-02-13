@@ -2,9 +2,9 @@
 
 import pytest
 
-from src.intelligence.meta_learner import MetaLearningEngine, get_meta_learner
+from src.intelligence.meta_learner import MetaLearningEngine
 from src.intelligence.pattern_engine import (
-    StrategicPatternEngine, StrategicPattern, PatternType, get_pattern_engine,
+    StrategicPatternEngine,
 )
 from src.intelligence.insight_compiler import (
     InsightCompiler,

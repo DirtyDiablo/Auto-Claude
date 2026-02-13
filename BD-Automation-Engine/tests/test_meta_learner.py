@@ -7,10 +7,8 @@ from src.intelligence.meta_learner import (
     MetaInsight,
     OutreachInsight,
     ProgramInsight,
-    ContactInsight,
     TransferReport,
     InsightDomain,
-    InsightSeverity,
     get_meta_learner,
 )
 

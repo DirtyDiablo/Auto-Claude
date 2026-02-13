@@ -6,8 +6,6 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from src.api.intelligence_api import include_intelligence_router
-from src.intelligence.meta_learner import MetaLearningEngine, get_meta_learner
-from src.intelligence.pattern_engine import StrategicPatternEngine, get_pattern_engine
 
 
 @pytest.fixture

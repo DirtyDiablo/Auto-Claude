@@ -250,18 +250,17 @@ class TestTalkingPointsStructure:
             result = generate_playbook(sample_job)
 
             # Playbook should have some form of content
-            has_content = False
 
             if hasattr(result, 'talking_points') and result.talking_points:
                 # If talking_points exists and is non-empty, check it's a list
-                has_content = isinstance(result.talking_points, list)
+                isinstance(result.talking_points, list)
             if hasattr(result, 'playbook') and result.playbook:
                 # Alternative: check playbook content
-                has_content = True
+                pass
             if hasattr(result, 'content') and result.content:
-                has_content = True
+                pass
             if hasattr(result, 'data') and result.data:
-                has_content = True
+                pass
 
             # At minimum, result should exist
             assert result is not None, "Playbook result should not be None"

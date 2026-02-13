@@ -5,9 +5,9 @@ These endpoints provide unified access to all Qdrant collections
 and are the primary interface for the dashboard and external tools.
 """
 
-from fastapi import APIRouter, Query, Depends, HTTPException, Request
+from fastapi import APIRouter, Query, Depends, HTTPException
 from fastapi.security import APIKeyHeader
-from typing import Optional, List
+from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import Filter, FieldCondition, MatchValue
 from openai import OpenAI
@@ -72,7 +72,7 @@ async def unified_search(
     query: str = Query(..., min_length=2),
     collections: Optional[str] = Query(None, description="Comma-separated collection names"),
     limit: int = Query(10, ge=1, le=100),
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """
     Search across all or specific unified collections.
@@ -123,7 +123,7 @@ async def list_contacts(
     location: Optional[str] = None,
     limit: int = Query(50, ge=1, le=500),
     offset: int = Query(0, ge=0),
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """List contacts with filtering."""
     qdrant = get_qdrant()
@@ -163,7 +163,7 @@ async def list_contacts(
 async def search_contacts(
     query: str = Query(..., min_length=2),
     limit: int = Query(20, ge=1, le=100),
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """Semantic search across contacts."""
     qdrant = get_qdrant()
@@ -193,7 +193,7 @@ async def list_programs(
     pts_involvement: Optional[str] = None,
     priority: Optional[str] = None,
     limit: int = Query(50, ge=1, le=500),
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """List federal programs with filtering."""
     qdrant = get_qdrant()
@@ -230,7 +230,7 @@ async def list_jobs(
     program: Optional[str] = None,
     clearance: Optional[str] = None,
     limit: int = Query(50, ge=1, le=500),
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """List jobs with filtering."""
     qdrant = get_qdrant()
@@ -262,7 +262,7 @@ async def list_jobs(
 # ====== PIPELINE ======
 
 @router.get("/pipeline")
-async def get_pipeline(authenticated: bool = Depends(verify_api_key)):
+async def get_pipeline(_authenticated: bool = Depends(verify_api_key)):
     """Get BD pipeline overview by stage."""
     qdrant = get_qdrant()
 
@@ -289,7 +289,7 @@ async def get_pipeline(authenticated: bool = Depends(verify_api_key)):
 # ====== ANALYTICS ======
 
 @router.get("/analytics/overview")
-async def analytics_overview(authenticated: bool = Depends(verify_api_key)):
+async def analytics_overview(_authenticated: bool = Depends(verify_api_key)):
     """Get cross-collection analytics overview."""
     qdrant = get_qdrant()
 
@@ -314,7 +314,7 @@ async def analytics_overview(authenticated: bool = Depends(verify_api_key)):
 # ====== COLLECTIONS MANAGEMENT ======
 
 @router.get("/collections/stats")
-async def collection_stats(authenticated: bool = Depends(verify_api_key)):
+async def collection_stats(_authenticated: bool = Depends(verify_api_key)):
     """Get stats for all unified collections."""
     qdrant = get_qdrant()
     stats = {}
@@ -336,7 +336,7 @@ async def collection_stats(authenticated: bool = Depends(verify_api_key)):
 @router.post("/tools/trigger-scrape")
 async def trigger_scrape(
     scraper_name: str = "insight_global",
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """Trigger a job scraper run (proxied to Data-Scraper)."""
     logger.info("scrape_triggered", scraper=scraper_name)
@@ -346,7 +346,7 @@ async def trigger_scrape(
 @router.post("/tools/trigger-enrichment")
 async def trigger_enrichment(
     program_id: str,
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """Trigger program enrichment (proxied to N8N-Builder)."""
     logger.info("enrichment_triggered", program=program_id)
@@ -356,7 +356,7 @@ async def trigger_enrichment(
 # ====== SYNC OPERATIONS ======
 
 @router.get("/sync/status")
-async def sync_status(authenticated: bool = Depends(verify_api_key)):
+async def sync_status(_authenticated: bool = Depends(verify_api_key)):
     """Get sync status for all collections."""
     qdrant = get_qdrant()
     status = {}
@@ -379,7 +379,7 @@ async def sync_status(authenticated: bool = Depends(verify_api_key)):
 @router.post("/sync/notion-to-qdrant")
 async def trigger_notion_sync(
     source_db: str = "dcgs_contacts",
-    authenticated: bool = Depends(verify_api_key),
+    _authenticated: bool = Depends(verify_api_key),
 ):
     """Trigger Notion -> Qdrant sync for a specific database."""
     logger.info("notion_sync_triggered", source=source_db)

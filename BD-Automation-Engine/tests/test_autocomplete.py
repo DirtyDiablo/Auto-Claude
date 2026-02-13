@@ -106,7 +106,7 @@ class TestIndexBuilding:
 
     async def test_custom_entities(self, autocomplete):
         autocomplete.add_custom_entities("custom", ["CustomEntity1", "CustomEntity2"])
-        count = await autocomplete.build_suggestion_index()
+        await autocomplete.build_suggestion_index()
         entities = [s.text for s in autocomplete._index if s.metadata.get("type") == "custom"]
         assert "CustomEntity1" in entities
         assert "CustomEntity2" in entities

@@ -8,7 +8,6 @@ from src.governance.sla_engine import (
     SLATarget,
     SLAStatus,
     AlertLevel,
-    SLAAlert,
     SLACheckResult,
     get_sla_engine,
 )

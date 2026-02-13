@@ -4,14 +4,13 @@
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import APIRouter, FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.tenants.tenant_manager import (
     Tenant,
-    TenantConfig,
     TenantStatus,
     get_tenant_manager,
 )
@@ -19,18 +18,10 @@ from src.auth.rbac import (
     Action,
     Resource,
     Role,
-    Scope,
     get_rbac_manager,
 )
 from src.auth.auth_service import (
-    AuthProvider,
-    AuthEventType,
     get_auth_service,
-)
-from src.middleware.tenant_middleware import (
-    TenantContext,
-    TenantMiddleware,
-    get_tenant_middleware,
 )
 
 logger = logging.getLogger(__name__)

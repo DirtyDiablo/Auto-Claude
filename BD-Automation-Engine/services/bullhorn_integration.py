@@ -8,8 +8,8 @@ import json
 import logging
 import requests
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -63,7 +63,7 @@ class BullhornClient:
 
         try:
             # Step 1: Get authorization code
-            auth_url = f"{self.config.api_url}/oauth/authorize"
+            f"{self.config.api_url}/oauth/authorize"
             auth_params = {
                 'client_id': self.config.client_id,
                 'response_type': 'code',
@@ -76,7 +76,7 @@ class BullhornClient:
             # This is a simplified version for server-to-server auth
 
             # Step 2: Exchange code for access token
-            token_url = f"{self.config.api_url}/oauth/token"
+            f"{self.config.api_url}/oauth/token"
             token_data = {
                 'grant_type': 'password',
                 'client_id': self.config.client_id,

@@ -5,10 +5,8 @@ import pytest
 from src.ml.opportunity_scorer import (
     OpportunityScorer,
     ScoredOpportunity,
-    DimensionScore,
     PipelineReview,
     DIMENSION_WEIGHTS,
-    PTS_PRIORITY_PROGRAMS,
     get_opportunity_scorer,
 )
 

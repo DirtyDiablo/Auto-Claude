@@ -6,7 +6,7 @@ from pathlib import Path
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from ultra_rag import UltraRAG, PipelineConfig, QueryPlan
+from ultra_rag import UltraRAG
 
 
 def mock_retriever(query, strategy="hybrid", top_k=5, collection=None):

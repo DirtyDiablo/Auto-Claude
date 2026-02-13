@@ -184,7 +184,7 @@ async def get_pipeline_status() -> PipelineStatus:
 @router.post("/start", response_model=PipelineStatus)
 async def start_pipeline(
     config: PipelineConfig,
-    background_tasks: BackgroundTasks,
+    _background_tasks: BackgroundTasks,
 ) -> PipelineStatus:
     """
     Start the streaming pipeline.

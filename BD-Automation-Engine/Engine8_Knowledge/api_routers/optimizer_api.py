@@ -1,8 +1,6 @@
 """Phase 29A — Optimizer API Router (10 endpoints)"""
-from typing import Any, Dict, List, Optional
 import structlog
 from fastapi import APIRouter, HTTPException, Query
-from pydantic import BaseModel
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["optimizer"])

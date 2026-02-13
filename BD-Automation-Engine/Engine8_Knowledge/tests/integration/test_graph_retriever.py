@@ -13,7 +13,7 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.graph_retriever import (
-    GraphRetriever, GraphResult, get_graph_retriever,
+    GraphRetriever, GraphResult,
 )
 
 

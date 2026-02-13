@@ -11,14 +11,13 @@ Enterprise authentication:
 
 import hashlib
 import hmac
-import json
 import logging
 import secrets
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone, timedelta
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 from src.auth.rbac import Role, get_rbac_manager
 

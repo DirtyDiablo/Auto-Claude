@@ -7,7 +7,6 @@ from src.embeddings.benchmark_suite import (
     GoldenQuery,
     BenchmarkRun,
     QueryResult,
-    BenchmarkCategory,
     get_benchmark_suite,
 )
 

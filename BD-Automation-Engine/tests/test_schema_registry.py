@@ -6,11 +6,7 @@ from src.governance.schema_registry import (
     SchemaRegistry,
     DataSchema,
     SchemaField,
-    FieldType,
-    CompatibilityMode,
     EvolutionType,
-    ValidationResult,
-    CompatibilityReport,
     get_schema_registry,
     _infer_type,
 )

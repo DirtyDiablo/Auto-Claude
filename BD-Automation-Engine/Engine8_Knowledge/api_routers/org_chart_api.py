@@ -4,10 +4,10 @@ Phase 27A — Org Chart API
 10 endpoints for org chart generation, team queries, export, and caching.
 """
 
-from typing import Any, Dict, Optional
+from typing import Optional
 
 import structlog
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 

@@ -5,7 +5,6 @@ Generates a CSV with AF DCGS contacts and simulated BD call notes for HUMINT gat
 """
 
 import csv
-import json
 import os
 from datetime import datetime
 import random

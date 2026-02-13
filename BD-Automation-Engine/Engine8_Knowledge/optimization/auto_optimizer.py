@@ -1,7 +1,7 @@
 """Phase 29A — Auto-Optimizer"""
 import structlog
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 from datetime import datetime
 import json
 logger = structlog.get_logger(__name__)

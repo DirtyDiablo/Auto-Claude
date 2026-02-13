@@ -3,7 +3,6 @@ Unit tests for Exporters module.
 Tests Notion CSV and n8n JSON export formatting.
 """
 
-import pytest
 import sys
 import json
 import csv
@@ -62,7 +61,7 @@ class TestNotionCSVExporter:
         """Should create output directory if it doesn't exist."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "notion_output"
-            exporter = NotionCSVExporter(str(output_dir))
+            NotionCSVExporter(str(output_dir))
             assert output_dir.exists()
 
     def test_exporter_creates_csv_file(self):
@@ -169,7 +168,7 @@ class TestN8nWebhookExporter:
         """Should create output directory if it doesn't exist."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_dir = Path(tmpdir) / "n8n_output"
-            exporter = N8nWebhookExporter(str(output_dir))
+            N8nWebhookExporter(str(output_dir))
             assert output_dir.exists()
 
     def test_exporter_creates_json_file(self):

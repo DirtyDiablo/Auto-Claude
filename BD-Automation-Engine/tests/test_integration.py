@@ -9,9 +9,6 @@ End-to-end tests for:
 """
 
 import pytest
-import asyncio
-from datetime import datetime
-from typing import Dict, List
 
 # Test data
 SAMPLE_CONTACTS = [

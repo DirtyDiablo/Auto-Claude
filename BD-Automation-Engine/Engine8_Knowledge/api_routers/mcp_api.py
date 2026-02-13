@@ -5,8 +5,7 @@ Phase 26A — MCP Server API
 tool testing, stats, and SSE transport.
 """
 
-import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 import structlog
 from fastapi import APIRouter, HTTPException

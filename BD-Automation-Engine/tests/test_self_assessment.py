@@ -1,11 +1,8 @@
 """Tests for Phase 29A - Self-Assessment Engine."""
-import os
 import sys
 import json
-import asyncio
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
 from dataclasses import asdict
 
 # Add project root to path

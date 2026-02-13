@@ -7,8 +7,6 @@ Paste the output into the Claude orchestrator chat to update context.
 Usage: python scripts/health_check.py
 """
 
-import json
-import sys
 import os
 from datetime import datetime
 

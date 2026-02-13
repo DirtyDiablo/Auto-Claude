@@ -8,13 +8,10 @@ from src.knowledge.temporal_kg import (
     Episode,
     EpisodeType,
     Entity,
-    EntityType,
     EdgeType,
     TemporalFact,
     EpisodeResult,
     EntityTimeline,
-    ChangeEvent,
-    Contradiction,
     ContradictionType,
     extract_entities_simple,
     extract_relationships_simple,
@@ -135,7 +132,7 @@ def test_ingest_episode_creates_facts(kg):
 def test_ingest_episode_resolves_existing(kg):
     ep1 = Episode(content="John Smith works at GDIT.")
     ep2 = Episode(content="John Smith manages the analytics team.")
-    r1 = kg.ingest_episode(ep1)
+    kg.ingest_episode(ep1)
     r2 = kg.ingest_episode(ep2)
     # Second ingestion should resolve John Smith, not create new
     assert r2.entities_resolved >= 1

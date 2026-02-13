@@ -4,7 +4,6 @@ Scraper Monitor Agent - Monitors and analyzes job scrape results.
 Part of the 8-agent CrewAI system for BD Intelligence.
 """
 
-import os
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass
 from datetime import datetime, timedelta

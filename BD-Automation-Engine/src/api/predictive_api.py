@@ -17,10 +17,9 @@ POST   /predict/retrain                     — Trigger model retraining
 """
 
 import logging
-from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from src.ml.win_probability import WinProbabilityModel, get_win_model

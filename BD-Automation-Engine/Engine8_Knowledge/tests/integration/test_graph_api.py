@@ -6,7 +6,7 @@ Uses TestClient with mocked dependencies — no Neo4j required.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 import sys
 

@@ -7,12 +7,11 @@ import os
 import sys
 import json
 import sqlite3
-from typing import Dict, List, Optional, Any, Tuple, Set
-from dataclasses import dataclass, field, asdict
+from typing import Dict, List, Optional, Any, Set
+from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 import logging
-from enum import Enum
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

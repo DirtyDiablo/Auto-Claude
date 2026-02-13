@@ -18,8 +18,6 @@ from Engine8_Knowledge.scrapers.crawl4ai_engine import (
     CrawlResult,
     JobExtraction,
     ContractExtraction,
-    ContactExtraction,
-    COMPETITOR_CAREER_CONFIGS,
     get_crawl4ai_engine,
 )
 

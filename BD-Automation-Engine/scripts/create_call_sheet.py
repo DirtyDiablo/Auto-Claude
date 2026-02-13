@@ -7,8 +7,6 @@ Script: George Maranville approach - approved GDIT supplier reaching out to hiri
 import json
 import csv
 from pathlib import Path
-from collections import defaultdict
-import re
 
 BASE_DIR = Path(__file__).parent.parent
 DATA_DIR = BASE_DIR / "dashboard" / "public" / "data"
@@ -104,7 +102,7 @@ def match_contact_to_job(contact, job):
 
     contact_title = (contact.get('jobTitle') or '').lower()
     contact_state = contact.get('state', '')
-    contact_city = (contact.get('city') or '').lower()
+    (contact.get('city') or '').lower()
     contact_tier = contact.get('tier', 6)
 
     job_title = job.get('title', '')

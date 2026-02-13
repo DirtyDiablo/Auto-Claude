@@ -6,7 +6,7 @@ Uses mocking — does not require Qdrant or OpenAI.
 """
 
 import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock
 from pathlib import Path
 import sys
 
@@ -14,7 +14,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.hybrid_engine import (
     HybridSearchEngine, SearchResult, SearchResponse,
-    get_hybrid_search_engine, RRF_K,
 )
 
 

@@ -3,7 +3,6 @@ BD Document Processor - Process documents for knowledge base ingestion.
 Uses Docling for high-accuracy document processing (97.9% table accuracy).
 """
 
-import os
 import sys
 import json
 import hashlib
@@ -11,7 +10,7 @@ import logging
 import csv
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any, Generator
+from typing import Dict, List, Optional, Tuple, Any
 from dataclasses import dataclass, field
 
 # Add parent to path for imports
@@ -24,14 +23,12 @@ logger = logging.getLogger('BDDocumentProcessor')
 # Check for optional dependencies
 try:
     from docling.document_converter import DocumentConverter
-    from docling.datamodel.base_models import DocumentStream
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False
     logger.warning("docling not installed. Install with: pip install docling")
 
 try:
-    import magic
     MAGIC_AVAILABLE = True
 except ImportError:
     MAGIC_AVAILABLE = False

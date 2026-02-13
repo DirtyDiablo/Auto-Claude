@@ -6,7 +6,6 @@ quality check, fallback, and delivery.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
 import sys
 
@@ -17,7 +16,7 @@ from Engine8_Knowledge.workflows.production.morning_briefing import (
     gather_pipeline_updates, gather_new_jobs, gather_competitive_intel,
     gather_contact_changes, gather_graph_insights, merge_all_sections,
     prioritize_items, format_briefing, quality_check, quality_router,
-    fallback_briefing, deliver, get_morning_briefing_definition,
+    deliver, get_morning_briefing_definition,
 )
 
 

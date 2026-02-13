@@ -3,7 +3,6 @@ Unit tests for Program Mapper module.
 Tests Federal Programs database, location/keyword extraction, and scoring.
 """
 
-import pytest
 import sys
 from pathlib import Path
 
@@ -11,15 +10,11 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from Engine2_ProgramMapping.scripts.program_mapper import (
-    FederalProgram,
-    FederalProgramsDB,
     get_federal_programs_db,
-    load_federal_programs,
     DCGS_LOCATIONS,
     IC_DOD_LOCATIONS,
     ALL_LOCATIONS,
     PROGRAM_KEYWORDS,
-    SCORING_WEIGHTS,
     MappingResult,
     extract_location_signal,
     extract_keyword_signals,

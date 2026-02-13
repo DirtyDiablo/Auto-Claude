@@ -7,11 +7,9 @@ matching, company+title overlap, and embedding similarity.
 
 import logging
 import re
-import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

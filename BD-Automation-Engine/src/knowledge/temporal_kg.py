@@ -5,14 +5,13 @@ Supports episode ingestion, temporal queries, entity timelines, change detection
 and contradiction detection.
 """
 
-import hashlib
 import logging
 import re
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone, timedelta
+from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

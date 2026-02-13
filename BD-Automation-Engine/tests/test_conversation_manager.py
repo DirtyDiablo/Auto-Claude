@@ -7,8 +7,6 @@ from src.nlq.query_executor import QueryExecutor
 from src.nlq.conversation_manager import (
     ConversationManager,
     ConversationResponse,
-    ConversationSession,
-    ConversationTurn,
 )
 
 

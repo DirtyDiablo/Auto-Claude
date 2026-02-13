@@ -13,9 +13,7 @@ Background Task:
 
 import asyncio
 import logging
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Optional
+from datetime import datetime
 
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel

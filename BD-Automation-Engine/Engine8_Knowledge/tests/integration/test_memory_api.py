@@ -6,8 +6,7 @@ Uses TestClient with mocked backends.
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
-from dataclasses import asdict
+from unittest.mock import patch, AsyncMock
 from pathlib import Path
 import sys
 
@@ -22,13 +21,11 @@ except ImportError:
 
 from Engine8_Knowledge.api_routers.memory_api import router
 from Engine8_Knowledge.memory.memory_store import (
-    MemoryStore,
-    MemoryContext,
     MemoryRecall,
     ContactMemory,
     LayerStats,
 )
-from Engine8_Knowledge.memory.mem0_manager import Mem0Manager, Memory, MemoryVersion, MemoryStats
+from Engine8_Knowledge.memory.mem0_manager import Memory, MemoryVersion, MemoryStats
 from Engine8_Knowledge.memory.lifecycle import LifecycleReport
 
 

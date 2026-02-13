@@ -6,7 +6,6 @@ from datetime import datetime, timedelta, timezone
 from src.graph.relationship_engine import (
     RelationshipStrengthModel,
     RelationshipScore,
-    DecayingRelationship,
     RankedPath,
     DIMENSION_WEIGHTS,
     INTERACTION_QUALITY,

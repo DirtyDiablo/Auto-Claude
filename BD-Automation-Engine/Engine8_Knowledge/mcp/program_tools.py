@@ -4,7 +4,7 @@ Phase 26A — MCP Program & Search Tools
 6 program/search tools for Claude Desktop integration.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import structlog
 

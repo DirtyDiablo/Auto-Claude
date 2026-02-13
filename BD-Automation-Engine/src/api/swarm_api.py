@@ -5,21 +5,19 @@ worker management, and execution monitoring.
 """
 
 import logging
-from dataclasses import asdict
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.agents.swarm.coordinator import (
-    SwarmCoordinator, SwarmTask, SwarmResult, SwarmStatus,
-    CoordinationMode, get_swarm_coordinator,
+    SwarmTask, SwarmResult, get_swarm_coordinator,
 )
 from src.agents.swarm.decomposer import (
-    TaskDecomposer, TaskDAG, get_task_decomposer,
+    TaskDAG, get_task_decomposer,
 )
 from src.agents.swarm.workers import (
-    WorkerRegistry, get_worker_registry,
+    get_worker_registry,
 )
 
 logger = logging.getLogger(__name__)

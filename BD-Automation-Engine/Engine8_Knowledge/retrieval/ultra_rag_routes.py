@@ -3,14 +3,11 @@ FastAPI routes for UltraRAG multi-step reasoning.
 Import this into main api.py during integration step.
 """
 from fastapi import APIRouter, HTTPException
-from typing import Optional
 
 try:
-    from .ultra_rag import UltraRAG, PipelineConfig
     from .ultra_rag_integration import BDUltraRAG
     from .page_index import PageIndex
 except ImportError:
-    from ultra_rag import UltraRAG, PipelineConfig
     from ultra_rag_integration import BDUltraRAG
     from page_index import PageIndex
 

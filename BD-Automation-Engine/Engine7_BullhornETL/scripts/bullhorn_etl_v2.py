@@ -11,16 +11,13 @@ FILE TYPES SUPPORTED:
 6. Notes Summary (4 cols) - Aggregated counts
 """
 
-import os
 import sys
 import re
 import json
 import hashlib
-import sqlite3
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any
-from collections import defaultdict
+from typing import Dict, List, Optional, Tuple
 import pandas as pd
 
 # Add parent to path for imports

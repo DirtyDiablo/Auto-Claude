@@ -5,8 +5,7 @@ Tests connection management, health checks, query execution, retry logic.
 Uses mocking — does not require running Neo4j instance.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+from unittest.mock import MagicMock, patch
 from pathlib import Path
 import sys
 

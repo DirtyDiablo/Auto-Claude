@@ -7,9 +7,8 @@ import os
 import asyncio
 import json
 import logging
-from typing import Dict, List, Optional
+from typing import Dict, List
 from datetime import datetime
-from dataclasses import dataclass, asdict
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

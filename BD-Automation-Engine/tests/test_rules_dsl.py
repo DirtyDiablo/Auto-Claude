@@ -4,12 +4,8 @@ import pytest
 
 from src.data_quality.rules_dsl import (
     QualityRulesDSL,
-    RuleParseError,
     ValidationResult,
     ReloadResult,
-    VALID_DIMENSIONS,
-    VALID_DOMAINS,
-    VALID_SEVERITIES,
     get_rules_dsl,
 )
 from src.data_quality.engine import DataQualityRule

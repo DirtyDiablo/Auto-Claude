@@ -12,22 +12,18 @@ This unlocks:
 """
 
 import csv
-import json
 import re
 import os
 import requests
-import time
 import pandas as pd
-from typing import Dict, List, Any, Optional
-from datetime import datetime
+from typing import Dict, List, Optional
 
 # Try to import libraries
 try:
-    import PyPDF2
+    pass
 except ImportError:
     print("PyPDF2 not installed. Installing...")
     os.system("pip install PyPDF2")
-    import PyPDF2
 
 try:
     from procurement_tools import UEI

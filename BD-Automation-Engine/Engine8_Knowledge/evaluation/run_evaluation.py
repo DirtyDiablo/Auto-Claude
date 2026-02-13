@@ -5,7 +5,7 @@ import asyncio
 import sys
 import os
 from datetime import datetime
-from typing import List, Dict
+from typing import Dict
 
 # Add parent paths
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))

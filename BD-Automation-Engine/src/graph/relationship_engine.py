@@ -13,7 +13,7 @@ import logging
 import math
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +192,7 @@ class RelationshipStrengthModel:
         self, threshold: float = 30.0, days: int = 14,
     ) -> List[DecayingRelationship]:
         """Find relationships at risk of decay."""
-        now = datetime.now(timezone.utc)
+        datetime.now(timezone.utc)
         decaying = []
 
         for key, score in self._scores_cache.items():

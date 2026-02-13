@@ -6,7 +6,6 @@ Generates personalized BD pitches with PTS past performance and labor solutions.
 """
 
 import csv
-import json
 import os
 from datetime import datetime
 import random
@@ -268,7 +267,7 @@ def match_contacts_to_jobs(contacts, jobs):
     for contact in contacts:
         contact_program = (contact.get("program") or "").lower()
         contact_location = (contact.get("location") or "").lower()
-        contact_role = (contact.get("role") or "").lower()
+        (contact.get("role") or "").lower()
 
         matched_jobs = []
 

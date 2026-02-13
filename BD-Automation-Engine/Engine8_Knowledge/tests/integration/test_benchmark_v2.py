@@ -5,8 +5,6 @@ Tests golden query set, metrics computation, report export.
 Uses mocking — does not require running search backends.
 """
 
-import pytest
-import json
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 import sys

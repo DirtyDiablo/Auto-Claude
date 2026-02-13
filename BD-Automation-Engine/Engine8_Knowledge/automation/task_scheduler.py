@@ -15,7 +15,7 @@ import threading
 import logging
 from pathlib import Path
 from datetime import datetime, timedelta
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, asdict
 from typing import Optional, Callable, Awaitable, Any
 
 logger = logging.getLogger(__name__)

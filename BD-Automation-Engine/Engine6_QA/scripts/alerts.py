@@ -12,7 +12,6 @@ Delivery channels: Slack webhook, n8n webhook, log file.
 import json
 import logging
 import os
-import sys
 import uuid
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field, asdict
@@ -131,7 +130,7 @@ class AlertEngine:
         """Alert when new Tier 1 contacts are detected in Qdrant."""
         try:
             from qdrant_client import QdrantClient
-            from qdrant_client.models import Filter, FieldCondition, MatchValue, Range
+            from qdrant_client.models import Filter, FieldCondition, MatchValue
 
             client = QdrantClient(url="http://localhost:6333", timeout=10)
             # Count Tier 1 contacts

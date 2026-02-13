@@ -4,7 +4,7 @@ Phase 26A — MCP Memory & Intelligence Tools
 5 memory/intelligence tools for Claude Desktop integration.
 """
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import structlog
 
@@ -101,7 +101,7 @@ def register_memory_tools(mcp, hub) -> int:
 
         contact = contacts[0] if contacts else {"name": contact_name}
         name = contact.get("name", contact_name)
-        title = contact.get("title", "")
+        contact.get("title", "")
         company = contact.get("company", "")
         program = contact.get("program", "")
 

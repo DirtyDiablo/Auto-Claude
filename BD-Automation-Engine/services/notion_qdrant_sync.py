@@ -13,7 +13,7 @@ import os
 import hashlib
 import json
 from datetime import datetime
-from typing import Optional, Dict, List, Any
+from typing import Dict, List, Any
 from dotenv import load_dotenv
 
 load_dotenv()

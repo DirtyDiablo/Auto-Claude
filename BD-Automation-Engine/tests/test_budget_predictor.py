@@ -8,7 +8,6 @@ from src.ml.budget_predictor import (
     SpendingWindow,
     RecompetePrediction,
     BDCalendar,
-    CalendarEvent,
     AGENCY_PATTERNS,
     DEFAULT_PATTERN,
     FEDERAL_CONFERENCES,

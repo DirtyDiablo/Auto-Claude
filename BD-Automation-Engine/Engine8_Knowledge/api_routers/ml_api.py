@@ -4,7 +4,7 @@ FastAPI router exposing NER prediction/training, topic clustering,
 placement prediction, and embedding training/benchmark endpoints.
 """
 from dataclasses import asdict
-from typing import Any, Dict, List, Optional
+from typing import List
 
 import structlog
 from fastapi import APIRouter, HTTPException, Query

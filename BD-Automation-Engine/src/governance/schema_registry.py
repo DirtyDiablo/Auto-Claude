@@ -5,14 +5,12 @@ evolution with backward compatibility checks, and auto-generation
 from existing data.
 """
 
-import copy
 import logging
 import re
-import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 

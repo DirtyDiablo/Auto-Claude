@@ -1,0 +1,256 @@
+================================================================================
+PTS DATA ARCHITECTURE EXTRACTION SYSTEM — COMPLETE PACKAGE
+================================================================================
+
+Generated: 2026-02-12
+Total Files: 8 markdown documents (~130KB)
+Purpose: Extract data architecture from 3 PTS projects into interactive explorer
+
+================================================================================
+WHAT YOU'VE RECEIVED
+================================================================================
+
+✅ Complete three-terminal extraction system for:
+   • BD-Automation-Engine (Qdrant, Bullhorn, Dashboard, 8 engines)
+   • Data-Scraper (Tango API, Scrapers, Federal APIs, 33 domains)
+   • N8N-Builder (50+ workflows, API integrations, contact enrichment)
+
+✅ 20 known node types already documented (from prior session)
+   → Just verify they exist + add missing properties
+
+✅ 35+ relationship types already documented
+   → Include in merged output
+
+✅ Clear priority levels for each project
+   🔴 CRITICAL (must get) | 🟠 HIGH (should get) | 🟡 MEDIUM (nice to have)
+
+✅ JSON output templates showing exact expected format
+
+✅ Progress tracking checklists for all 3 terminals
+
+✅ Quick reference commands for fast extraction
+
+================================================================================
+THE 8 FILES (READ IN THIS ORDER)
+================================================================================
+
+1. FILE_INDEX.md (THIS FILE)
+   ├─ Complete index of all documents
+   ├─ Reading order and workflow
+   └─ Success metrics and getting started
+
+2. README_START_HERE.md
+   ├─ Executive summary (5 min read)
+   ├─ Mission and deliverables
+   ├─ Timeline and success criteria
+   └─ THEN READ: MASTER_ARCHITECTURE_EXTRACTION_GUIDE.md
+
+3. MASTER_ARCHITECTURE_EXTRACTION_GUIDE.md
+   ├─ Central orchestration document
+   ├─ What's been done + what's missing
+   ├─ 10 critical gaps per project
+   ├─ How to run 3 terminals
+   ├─ How to merge outputs
+   └─ Quality checks and validation
+
+4. EXTRACT_BD_ENGINE.md
+   ├─ Terminal 1 detailed prompt
+   ├─ 14 targeted discovery sections
+   ├─ Critical priorities (🔴)
+   ├─ High priorities (🟠)
+   ├─ Output: data_architecture_bd_engine.json
+   └─ Time: 30-45 minutes
+
+5. EXTRACT_DATA_SCRAPER.md
+   ├─ Terminal 2 detailed prompt
+   ├─ 14 targeted discovery sections
+   ├─ Focus: Tango API, scrapers, Federal APIs
+   ├─ 22 known node types to verify
+   ├─ Output: data_architecture_data_scraper.json
+   └─ Time: 30-45 minutes
+
+6. EXTRACT_N8N_BUILDER.md
+   ├─ Terminal 3 detailed prompt
+   ├─ 8 targeted discovery sections
+   ├─ Focus: Workflows, API calls, contact enrichment
+   ├─ Notion database operations
+   ├─ Output: data_architecture_n8n_builder.json
+   └─ Time: 20-30 minutes
+
+7. TERMINAL_QUICK_REFERENCE.md
+   ├─ Quick reference cards (keep open during extraction)
+   ├─ One-line Python commands for each terminal
+   ├─ Critical/High/Medium checklists
+   ├─ Troubleshooting guide
+   ├─ General 4-phase extraction workflow
+   └─ Success checklist
+
+8. JSON_OUTPUT_TEMPLATES.md
+   ├─ Exact JSON structure for all 3 outputs
+   ├─ Terminal 1 JSON template (full example)
+   ├─ Terminal 2 JSON template (full example)
+   ├─ Terminal 3 JSON template (full example)
+   ├─ Field definitions and valid values
+   └─ Validation checklist
+
+9. EXTRACTION_PROGRESS_TRACKER.md
+   ├─ Checkbox templates for all 3 terminals
+   ├─ Detailed extraction checklist
+   ├─ Statistics tracking
+   ├─ New discoveries section
+   ├─ Final consolidation checklist
+   └─ Submission quality checks
+
+================================================================================
+QUICK START (NEXT 5 MINUTES)
+================================================================================
+
+1. Read README_START_HERE.md (5 min)
+   ↓
+2. Read MASTER_ARCHITECTURE_EXTRACTION_GUIDE.md (10 min)
+   ↓
+3. Open 3 terminals and point to 3 projects:
+   - Terminal 1 → cd bd-automation-engine/
+   - Terminal 2 → cd data-scraper/
+   - Terminal 3 → cd n8n-builder/
+   ↓
+4. Load appropriate EXTRACT_*.md into each terminal
+   ↓
+5. Follow extraction steps (30-45 min per terminal)
+   ↓
+6. Merge outputs and update Cytoscape.js explorer
+
+Total time: 2-3 hours
+
+================================================================================
+WHAT YOU'LL EXTRACT
+================================================================================
+
+TERMINAL 1: BD-AUTOMATION-ENGINE
+├─ Qdrant Collections (12 total, 1.42M vectors)
+│  ├─ Payload field schemas
+│  ├─ Vector sizes
+│  └─ Record counts
+├─ Bullhorn SQLite (306MB)
+│  ├─ All table schemas
+│  ├─ All column definitions
+│  └─ Row counts
+├─ Dashboard JSON Feeds (25 files)
+│  ├─ Field lists
+│  ├─ Data types
+│  └─ Example values
+├─ FastAPI Endpoints (152+)
+│  ├─ Request models
+│  ├─ Response models
+│  └─ Query parameters
+├─ Dashboard TypeScript (React interfaces)
+├─ Engine Pipeline Stages (Engines 1-8)
+├─ AI Agents (15+)
+└─ LangGraph Workflows
+
+TERMINAL 2: DATA-SCRAPER
+├─ Tango API SQL Schemas (11 files)
+│  ├─ CREATE TABLE statements
+│  ├─ Column definitions
+│  └─ Foreign keys
+├─ Pydantic Models (models/ — 3 files)
+├─ Scraper Output Schema (64 columns)
+│  ├─ Insight Global parser
+│  └─ Apex Systems parser
+├─ Federal API Response Shapes
+│  ├─ Tango API
+│  ├─ USASpending
+│  ├─ FPDS
+│  └─ SAM.gov
+├─ src/ Domain Models (33 domains)
+├─ Hub Client Sync Schema
+├─ BD Target Databases (7 databases)
+├─ Knowledge Base Structure
+└─ Pipeline Stage Schemas
+
+TERMINAL 3: N8N-BUILDER
+├─ N8N Workflow JSON (50+ workflows)
+│  ├─ Node definitions
+│  ├─ Node connections
+│  └─ Data flows
+├─ API Integration Nodes
+│  ├─ Bullhorn calls
+│  ├─ Notion operations
+│  ├─ ZoomInfo search
+│  ├─ Apify actors
+│  └─ SAM.gov queries
+├─ Contact Enrichment Output Schema
+├─ Code Node Transformations
+├─ Notion Database Operations
+├─ Webhook Trigger Schemas
+└─ API Integration Patterns
+
+================================================================================
+EXPECTED OUTPUT
+================================================================================
+
+Three JSON files (one per terminal):
+├─ data_architecture_bd_engine.json (15-20 entities, 250-300 properties)
+├─ data_architecture_data_scraper.json (15-20 entities, 250-300 properties)
+└─ data_architecture_n8n_builder.json (workflows, nodes, api integrations)
+
+Merged file (all 3 combined):
+└─ data_architecture_merged_v3.json
+   ├─ 50+ entities
+   ├─ 700+ properties
+   ├─ 100+ relationships
+   ├─ 400+ aliases
+   └─ 20+ data flows
+
+Final visualization:
+└─ Updated Cytoscape.js explorer with complete architecture graph
+
+================================================================================
+KEY REMINDERS
+================================================================================
+
+✅ DO:
+   • Scan EVERYTHING (don't skip files)
+   • Follow imports to source
+   • Extract REAL data (not guesses)
+   • Note sources for every property
+   • Count actual records where possible
+   • Verify the 20 known node types exist
+
+❌ DON'T:
+   • Re-extract 20 known node types (just verify + add properties)
+   • Hallucinate fields that don't exist
+   • Assume all fields are strings
+   • Forget to document data sources
+   • Skip over enum values (they're critical!)
+
+================================================================================
+SUCCESS CRITERIA
+================================================================================
+
+When all 3 terminals complete, you will have:
+
+✅ Three separate JSON files (no errors)
+✅ All required fields populated in each JSON
+✅ Statistics that make sense
+✅ New discoveries documented
+✅ Successful merge into single V3 JSON
+✅ Cytoscape.js explorer rendering with all entities
+✅ Relationships displaying correctly on graph
+✅ Filters and search working
+✅ Color coding applied by category
+✅ Zoom/pan functionality working
+
+================================================================================
+NEXT STEP
+================================================================================
+
+→ Read README_START_HERE.md (5 minutes)
+→ Then read MASTER_ARCHITECTURE_EXTRACTION_GUIDE.md (10 minutes)
+→ Then choose your terminal and open EXTRACT_*.md
+
+Total preparation time: 15 minutes
+Total extraction time: 2-3 hours
+Total value: Single source of truth for entire PTS data architecture
+
+================================================================================

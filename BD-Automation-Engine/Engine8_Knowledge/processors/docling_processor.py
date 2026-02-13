@@ -5,7 +5,6 @@ Converts PDF/DOCX files into chunked, embedded vectors for Qdrant ingestion.
 Optimized for federal defense documents with accurate table extraction.
 """
 
-import os
 import uuid
 import logging
 from pathlib import Path

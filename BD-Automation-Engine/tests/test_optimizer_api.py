@@ -1,11 +1,8 @@
 """Tests for Phase 29A - Optimizer API Router."""
-import os
 import sys
-import json
 import pytest
 from pathlib import Path
 from unittest.mock import patch, MagicMock, AsyncMock
-from dataclasses import asdict
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

@@ -22,7 +22,7 @@ import httpx
 import mimetypes
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Optional, Any
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
@@ -80,7 +80,7 @@ class SupermemoryClient:
         """Async context manager entry."""
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, _exc_type, _exc_val, _exc_tb) -> None:
         """Async context manager exit."""
         await self.close()
 
@@ -613,7 +613,7 @@ class BDMemoryManager:
         """Async context manager entry."""
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb) -> None:
+    async def __aexit__(self, _exc_type, _exc_val, _exc_tb) -> None:
         """Async context manager exit."""
         await self.close()
 

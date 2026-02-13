@@ -11,11 +11,11 @@ import structlog
 logger = structlog.get_logger(__name__)
 
 try:
-    from .graph_rag import BDGraphRAG, QueryMode, QueryResult
-    from .entity_extractor import BDEntityExtractor, EntityType
+    from .graph_rag import BDGraphRAG, QueryMode
+    from .entity_extractor import BDEntityExtractor
 except ImportError:
-    from graph_rag import BDGraphRAG, QueryMode, QueryResult
-    from entity_extractor import BDEntityExtractor, EntityType
+    from graph_rag import BDGraphRAG, QueryMode
+    from entity_extractor import BDEntityExtractor
 
 router = APIRouter(prefix="/lightrag", tags=["LightRAG Graph Reasoning"])
 

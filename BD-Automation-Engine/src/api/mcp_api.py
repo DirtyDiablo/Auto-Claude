@@ -4,22 +4,19 @@ REST endpoints for tool registry, MCP Apps rendering, and orchestration.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.mcp.tool_registry import (
-    MCPToolRegistry, MCPServerConfig, MCPServerEntry, MCPTool,
-    MCPRoutingResult, HealthStatus, get_tool_registry,
+    MCPServerConfig, MCPServerEntry, MCPTool, get_tool_registry,
 )
 from src.mcp.apps_renderer import (
-    MCPAppsRenderer, MCPAppResponse, MCPAppAction, RenderedApp,
-    get_apps_renderer,
+    MCPAppResponse, MCPAppAction, RenderedApp, get_apps_renderer,
 )
 from src.mcp.orchestrator import (
-    MCPOrchestrator, MCPExecutionPlan, MCPExecutionStep,
-    MCPExecutionResult, get_orchestrator,
+    MCPExecutionStep, MCPExecutionResult, get_orchestrator,
 )
 
 logger = logging.getLogger(__name__)

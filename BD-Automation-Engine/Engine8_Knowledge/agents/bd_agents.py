@@ -17,7 +17,6 @@ except ImportError:
     logger.warning("CrewAI not available")
 
 try:
-    from langchain_anthropic import ChatAnthropic
     LANGCHAIN_ANTHROPIC_AVAILABLE = True
 except ImportError:
     LANGCHAIN_ANTHROPIC_AVAILABLE = False

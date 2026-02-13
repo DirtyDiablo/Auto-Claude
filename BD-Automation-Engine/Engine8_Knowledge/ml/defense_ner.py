@@ -1,7 +1,7 @@
 """Phase 28A — Defense NER v2 (Custom Trained)"""
 import structlog
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 logger = structlog.get_logger(__name__)
 

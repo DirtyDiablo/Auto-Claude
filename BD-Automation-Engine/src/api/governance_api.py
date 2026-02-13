@@ -4,20 +4,20 @@ REST endpoints for data catalog, schema registry, contracts, and SLAs.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
-from src.governance.catalog import DataCatalog, DataAsset, get_data_catalog
+from src.governance.catalog import DataAsset, get_data_catalog
 from src.governance.schema_registry import (
-    SchemaRegistry, DataSchema, SchemaField, get_schema_registry,
+    DataSchema, get_schema_registry,
 )
 from src.governance.contracts import (
-    DataContractsEngine, DataContract, QualityTerm, get_contracts_engine,
+    DataContract, get_contracts_engine,
 )
 from src.governance.sla_engine import (
-    SLAEngine, QualitySLA, SLATarget, SLAAlert, get_sla_engine,
+    QualitySLA, SLAAlert, get_sla_engine,
 )
 
 logger = logging.getLogger(__name__)

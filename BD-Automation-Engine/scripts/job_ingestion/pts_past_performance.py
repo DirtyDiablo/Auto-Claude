@@ -10,8 +10,8 @@ Identifies:
 import os
 import re
 import logging
-from dataclasses import dataclass, field
-from typing import Dict, List, Optional, Set, Tuple
+from dataclasses import dataclass
+from typing import Dict, List
 import requests
 from dotenv import load_dotenv
 

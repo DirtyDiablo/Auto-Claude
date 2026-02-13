@@ -7,7 +7,6 @@ Creates SQLite database with comprehensive schema for:
 
 import sqlite3
 from pathlib import Path
-from datetime import datetime
 
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 

@@ -6,8 +6,8 @@ offline sync, and responsive API adaptation.
 
 from __future__ import annotations
 
-from fastapi import FastAPI, APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
+from fastapi import FastAPI, APIRouter
+from pydantic import BaseModel
 from typing import Any, Dict, List, Optional
 
 router = APIRouter()

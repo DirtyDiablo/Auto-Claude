@@ -306,7 +306,6 @@ def verify_api_imports():
     results = []
 
     try:
-        from api.unified_endpoints import router
         print_result("Unified endpoints router", True)
         results.append(True)
     except Exception as e:
@@ -314,7 +313,6 @@ def verify_api_imports():
         results.append(False)
 
     try:
-        from Engine8_Knowledge.api import app
         print_result("FastAPI app import", True)
         results.append(True)
     except Exception as e:

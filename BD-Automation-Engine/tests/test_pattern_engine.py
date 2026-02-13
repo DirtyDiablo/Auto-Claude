@@ -8,7 +8,6 @@ from src.intelligence.pattern_engine import (
     OpportunityScore,
     StrategicAlert,
     PatternType,
-    AlertPriority,
     get_pattern_engine,
 )
 

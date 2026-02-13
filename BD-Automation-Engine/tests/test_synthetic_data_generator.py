@@ -4,9 +4,7 @@ import pytest
 
 from src.embeddings.synthetic_data_generator import (
     SyntheticDataGenerator,
-    Triplet,
     GenerationJob,
-    QueryStrategy,
     get_synthetic_generator,
 )
 

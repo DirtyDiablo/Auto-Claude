@@ -3,14 +3,13 @@ Coworker Takeover Export Script
 Generates comprehensive output files for BD takeover analysis.
 """
 
-import os
 import sys
 import json
 import csv
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-from typing import Dict, List, Any
+from typing import Dict
 
 # Add project root to path
 PROJECT_ROOT = Path(__file__).parent.parent.parent

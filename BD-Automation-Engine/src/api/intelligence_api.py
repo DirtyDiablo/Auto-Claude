@@ -5,22 +5,20 @@ and insight compilation.
 """
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict
 
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.intelligence.meta_learner import (
-    MetaLearningEngine, MetaInsight, OutreachInsight, ProgramInsight,
-    ContactInsight, TransferReport, get_meta_learner,
+    MetaInsight, OutreachInsight, ProgramInsight, ContactInsight,
+    get_meta_learner,
 )
 from src.intelligence.pattern_engine import (
-    StrategicPatternEngine, StrategicPattern, OpportunityScore,
-    StrategicAlert, get_pattern_engine,
+    StrategicPattern, get_pattern_engine,
 )
 from src.intelligence.insight_compiler import (
-    InsightCompiler, WeeklyBrief, MonthlyAssessment, FlashReport,
-    CampaignReview, get_insight_compiler,
+    WeeklyBrief, MonthlyAssessment, FlashReport, get_insight_compiler,
 )
 
 logger = logging.getLogger(__name__)

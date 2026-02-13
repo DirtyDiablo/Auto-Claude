@@ -4,7 +4,6 @@ Predicts placement probability for BD contacts using an XGBoost classifier.
 Falls back to a heuristic scoring model when XGBoost is not installed or
 when no trained model is available.
 """
-import json
 import structlog
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional

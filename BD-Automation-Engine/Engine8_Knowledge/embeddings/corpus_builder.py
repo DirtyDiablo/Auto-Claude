@@ -20,7 +20,7 @@ import sqlite3
 import logging
 import hashlib
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 

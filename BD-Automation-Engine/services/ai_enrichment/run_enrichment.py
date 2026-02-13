@@ -18,7 +18,6 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from services.ai_enrichment.orchestrator import EnrichmentOrchestrator, EnrichmentType
-from services.ai_enrichment.notion_client import NotionClient
 
 
 def main():

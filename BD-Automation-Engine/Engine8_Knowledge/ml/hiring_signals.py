@@ -6,7 +6,7 @@ by analyzing job posting patterns over time.
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from dataclasses import dataclass, field, asdict
 from typing import Dict, List, Optional, Any
 from collections import defaultdict

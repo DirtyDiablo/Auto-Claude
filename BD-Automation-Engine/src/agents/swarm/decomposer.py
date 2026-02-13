@@ -8,9 +8,9 @@ import logging
 import re
 import uuid
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
-from src.agents.swarm.workers import SubTask, WorkerType, DEFAULT_CAPABILITIES
+from src.agents.swarm.workers import SubTask, DEFAULT_CAPABILITIES
 
 logger = logging.getLogger(__name__)
 

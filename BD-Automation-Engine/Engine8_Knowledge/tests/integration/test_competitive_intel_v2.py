@@ -6,7 +6,6 @@ merging, LLM analysis, human validation, and briefing generation.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
 import sys
 
@@ -16,8 +15,7 @@ from Engine8_Knowledge.workflows.production.competitive_intel import (
     COMPETITIVE_INTEL_STATE,
     plan_collection, scrape_job_boards, scrape_sam_gov, scrape_linkedin,
     scrape_news, merge_raw_intel, analyze_with_llm, validate_findings,
-    cross_reference_neo4j, update_intel_database, generate_briefing,
-    distribute_briefing, get_competitive_intel_definition,
+    generate_briefing, get_competitive_intel_definition,
 )
 
 

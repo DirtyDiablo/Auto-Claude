@@ -166,7 +166,7 @@ def test_vector_schema():
     print("=" * 60 + "\n")
 
     try:
-        from Engine8_Knowledge.schemas.vector_collections import COLLECTIONS, get_vector_store
+        from Engine8_Knowledge.schemas.vector_collections import COLLECTIONS
 
         # Test collections definition
         expected_collections = ["jobs", "contacts", "programs", "documents", "memories", "knowledge_graph"]

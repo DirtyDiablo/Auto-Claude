@@ -11,12 +11,12 @@ import uuid
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from src.agents.swarm.decomposer import TaskDecomposer, TaskDAG, CostEstimate, get_task_decomposer
 from src.agents.swarm.workers import (
-    WorkerRegistry, WorkerAgent, WorkerHandle, WorkerStatus,
-    SubTask, WorkerType, get_worker_registry,
+    WorkerRegistry, WorkerHandle, WorkerStatus, SubTask,
+    get_worker_registry,
 )
 
 logger = logging.getLogger(__name__)

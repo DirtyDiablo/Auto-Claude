@@ -65,7 +65,7 @@ class TestPipelineStats:
 
     def test_stats_duration(self):
         """Should calculate duration correctly."""
-        from datetime import datetime, timedelta
+        from datetime import timedelta
         stats = PipelineStats()
         stats.end_time = stats.start_time + timedelta(seconds=5)
         assert stats.duration_seconds == 5.0

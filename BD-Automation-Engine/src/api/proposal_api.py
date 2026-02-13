@@ -22,8 +22,6 @@ from src.proposals.capability_generator import (
 )
 from src.proposals.past_performance import (
     PastPerformanceBuilder,
-    PastPerformanceEntry,
-    CPARSMetrics,
     get_past_performance_builder,
 )
 from src.proposals.compliance_matrix import (

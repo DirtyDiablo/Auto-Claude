@@ -12,9 +12,7 @@ Uses MERGE for idempotency and batch processing (500 per tx).
 """
 
 import csv
-import json
 import logging
-import sqlite3
 from pathlib import Path
 from datetime import datetime
 from typing import Optional
@@ -73,7 +71,6 @@ class GraphIngestionEngine:
     """Bulk data ingestion from BD platform sources into Neo4j."""
 
     def __init__(self, manager: "Neo4jManager") -> None:
-        from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
         self._mgr = manager
         self._stats: dict[str, int] = {}
 

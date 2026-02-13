@@ -7,9 +7,7 @@ Usage: python scripts/validate_phase.py [1|2|3]
 """
 
 import sys
-import json
 import os
-import subprocess
 
 class Colors:
     GREEN = "\033[92m"

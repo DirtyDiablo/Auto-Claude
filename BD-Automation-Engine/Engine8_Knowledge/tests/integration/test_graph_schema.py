@@ -4,8 +4,7 @@ Phase 21A — Graph Schema Tests
 Tests schema definitions, constraint application, and index creation.
 """
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 from pathlib import Path
 import sys
 

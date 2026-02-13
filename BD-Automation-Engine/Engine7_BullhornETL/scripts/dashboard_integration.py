@@ -10,7 +10,6 @@ import csv
 from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
-import re
 
 # Paths
 ENGINE7_DB = Path(__file__).parent.parent / "data" / "bullhorn_master.db"

@@ -68,10 +68,9 @@ def export_subaward_intelligence(programs):
     for p in programs:
         if p.get('subawards_count'):
             try:
-                count = int(p.get('subawards_count', 0))
+                int(p.get('subawards_count', 0))
             except (ValueError, TypeError) as e:
                 logger.debug("subaward_count_parse_failed: %s", e)
-                count = 0
 
             subaward_data.append({
                 'Program Name': p.get('Program Name', ''),
@@ -176,7 +175,7 @@ def export_vendor_uei_lookup(programs):
 
 def export_naics_psc_analysis(programs):
     """Export NAICS and PSC code analysis."""
-    output_file = EXPORTS_DIR / "naics_psc_analysis.csv"
+    EXPORTS_DIR / "naics_psc_analysis.csv"
 
     # Aggregate by NAICS
     naics_counts = defaultdict(int)

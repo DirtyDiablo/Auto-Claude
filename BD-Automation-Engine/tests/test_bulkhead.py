@@ -4,7 +4,6 @@ import pytest
 
 from src.resilience.bulkhead import (
     BulkheadManager,
-    Bulkhead,
     BulkheadType,
     GracefulDegradation,
     DegradationLevel,

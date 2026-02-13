@@ -8,7 +8,6 @@ throughput, and agent utilization.
 from __future__ import annotations
 
 import logging
-import math
 import time
 import uuid
 from dataclasses import dataclass, field

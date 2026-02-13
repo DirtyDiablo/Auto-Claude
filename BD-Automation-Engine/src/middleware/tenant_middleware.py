@@ -10,13 +10,13 @@ Middleware stack:
 
 import logging
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from src.auth.rbac import Action, Resource, Role, Scope, get_rbac_manager
-from src.auth.auth_service import AuthService, Session, get_auth_service
-from src.tenants.tenant_manager import Tenant, TenantStatus, get_tenant_manager
+from src.auth.auth_service import get_auth_service
+from src.tenants.tenant_manager import TenantStatus, get_tenant_manager
 
 logger = logging.getLogger(__name__)
 

@@ -10,9 +10,8 @@ Migrates the Phase 15 contact_enrichment_workflow to production architecture wit
 """
 
 import asyncio
-import time
 from datetime import datetime
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Dict
 
 import structlog
 
@@ -309,7 +308,7 @@ async def enrich_from_linkedin(state: Dict[str, Any]) -> Dict[str, Any]:
 
 async def enrich_from_zoominfo(state: Dict[str, Any]) -> Dict[str, Any]:
     """Enrich contacts with ZoomInfo data (rate-limited)."""
-    contacts = state.get("contacts_merged", [])
+    state.get("contacts_merged", [])
     enriched = {}
 
     # ZoomInfo enrichment is optional — graceful degradation

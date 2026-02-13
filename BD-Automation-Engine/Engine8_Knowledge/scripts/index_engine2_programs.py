@@ -4,7 +4,6 @@ Federal Programs, Contractors, Contract Vehicles, BD Opportunities
 """
 import os
 import sys
-import json
 import csv
 import uuid
 import logging

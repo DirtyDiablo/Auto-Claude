@@ -53,7 +53,7 @@ class TestDefenseNERInit:
         """DefenseNER should initialize gracefully when spaCy is not available."""
         with patch.dict("sys.modules", {"spacy": None}):
             with patch("Engine8_Knowledge.ml.defense_ner.DefenseNER._load_model") as mock_load:
-                instance = DefenseNER()
+                DefenseNER()
                 mock_load.assert_called_once()
 
     def test_init_default_model_path_is_none(self):

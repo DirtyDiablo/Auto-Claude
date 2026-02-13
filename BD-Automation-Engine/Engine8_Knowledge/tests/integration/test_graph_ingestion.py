@@ -9,14 +9,11 @@ import pytest
 from unittest.mock import MagicMock, patch, mock_open
 from pathlib import Path
 import sys
-import csv
-import io
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.graph.ingestion import (
-    GraphIngestionEngine, LOCATION_COORDS, BATCH_SIZE,
-    CONTACTS_CSV, FEDERAL_PROGRAMS, MASTER_NOTES,
+    GraphIngestionEngine, LOCATION_COORDS,
 )
 
 
@@ -171,7 +168,7 @@ class TestProgramIngestion:
         mock_mgr.write_query.side_effect = Exception("cypher error")
         with patch.object(Path, "exists", return_value=True), \
              patch("builtins.open", mock_open(read_data=csv_data)):
-            result = engine.ingest_programs()
+            engine.ingest_programs()
         assert engine._stats["errors"] >= 1
 
 
@@ -300,7 +297,7 @@ class TestIngestAll:
              patch.object(engine, "ingest_programs", return_value={"status": "completed"}) as m_prg, \
              patch.object(engine, "ingest_jobs", return_value={"status": "completed"}) as m_job, \
              patch.object(engine, "ingest_interactions", return_value={"status": "completed"}) as m_int:
-            result = engine.ingest_all()
+            engine.ingest_all()
         m_loc.assert_called_once()
         m_con.assert_called_once()
         m_prg.assert_called_once()

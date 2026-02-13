@@ -6,7 +6,6 @@ Outputs to dashboard/public/data/
 
 import json
 import csv
-import os
 from pathlib import Path
 
 # Paths

@@ -31,7 +31,7 @@ from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Query, WebSocket
 from pydantic import BaseModel, Field
 
-from src.streaming.event_bus import Event, EventBus, StreamStats, get_event_bus
+from src.streaming.event_bus import Event, EventBus, get_event_bus
 from src.streaming.processors import EventProcessorRegistry
 from src.streaming.stream_orchestrator import StreamOrchestrator
 from src.streaming.websocket_server import RealtimeServer

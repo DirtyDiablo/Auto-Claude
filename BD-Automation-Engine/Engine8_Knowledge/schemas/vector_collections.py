@@ -5,7 +5,7 @@ All collections unified with consistent metadata fields
 
 import os
 import logging
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

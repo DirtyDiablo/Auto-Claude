@@ -10,13 +10,9 @@ allowing both CI and local development testing.
 
 import os
 import sys
-import json
-import uuid
-import asyncio
 import pytest
 from pathlib import Path
 from datetime import datetime
-from unittest.mock import patch, MagicMock, AsyncMock
 
 # Ensure project root is on path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))

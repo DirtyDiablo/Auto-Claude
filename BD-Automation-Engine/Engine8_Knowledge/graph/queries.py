@@ -15,7 +15,6 @@ class GraphQueries:
     """Pre-built Cypher queries for BD Intelligence."""
 
     def __init__(self, manager: "Neo4jManager") -> None:
-        from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
         self._mgr = manager
 
     # ── 1. Contacts by program ───────────────────────────

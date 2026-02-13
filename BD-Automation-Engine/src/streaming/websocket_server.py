@@ -13,7 +13,6 @@ Clients can subscribe to specific event types and apply filters.
 import asyncio
 import json
 import logging
-import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional, Set
 

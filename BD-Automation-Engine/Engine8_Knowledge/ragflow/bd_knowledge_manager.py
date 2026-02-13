@@ -10,7 +10,6 @@ Manages BD-specific knowledge bases and retrieval, including:
 - Contact profiles
 """
 
-import os
 import asyncio
 import logging
 from pathlib import Path

@@ -7,22 +7,18 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import APIRouter, FastAPI, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.data_quality.engine import (
-    DataQualityEngine,
     get_quality_engine,
 )
 from src.data_quality.self_healer import (
-    SelfHealingPipeline,
     get_self_healer,
 )
 from src.data_quality.lineage import (
-    DataLineageTracker,
     get_lineage_tracker,
 )
 from src.data_quality.rules_dsl import (
-    QualityRulesDSL,
     get_rules_dsl,
 )
 

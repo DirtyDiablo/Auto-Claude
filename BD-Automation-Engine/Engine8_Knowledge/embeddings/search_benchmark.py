@@ -12,7 +12,7 @@ import json
 import math
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Callable, Any
+from typing import Dict, List, Optional, Callable
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 

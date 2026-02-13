@@ -13,7 +13,6 @@ Takes the analyzed call notes data and integrates it into the Bullhorn master da
 import sqlite3
 import json
 from pathlib import Path
-from datetime import datetime
 from collections import defaultdict
 
 # Paths
@@ -272,7 +271,7 @@ def insert_contact_activity(conn: sqlite3.Connection, contacts: list, gap_contac
         # Calculate engagement score (0-100)
         total = data['total']
         positive = data['positive']
-        negative = data['negative'] + data['no_answer']
+        data['negative'] + data['no_answer']
 
         if total > 0:
             engagement = int((positive / total) * 100)

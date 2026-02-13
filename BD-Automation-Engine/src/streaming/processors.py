@@ -12,7 +12,6 @@ Six processors handle different intelligence domains:
 
 import asyncio
 import logging
-import time
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
@@ -115,12 +114,10 @@ class JobIntelProcessor(BaseProcessor):
 
         # Step 1: Dedup check
         content_hash = payload.get("content_hash")
-        is_duplicate = False
         if content_hash and "search" in self.services:
             try:
                 existing = await self._check_duplicate(content_hash)
                 if existing:
-                    is_duplicate = True
                     logger.info("Duplicate job detected, skipping", extra={"hash": content_hash})
                     return
             except Exception as e:

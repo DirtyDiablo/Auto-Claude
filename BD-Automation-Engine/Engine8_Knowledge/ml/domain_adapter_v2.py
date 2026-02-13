@@ -4,8 +4,8 @@ Upgraded domain embeddings with hard negative mining and defense-domain
 synonym expansion for improved semantic search over PTS BD data.
 """
 import structlog
-from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass
+from typing import Dict, List, Optional
 
 logger = structlog.get_logger(__name__)
 

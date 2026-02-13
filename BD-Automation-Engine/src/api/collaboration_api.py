@@ -8,18 +8,17 @@ import logging
 from typing import Any, Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from src.collaboration.yjs_engine import (
-    YjsCollaborationEngine, get_yjs_engine,
-    RoomType, PresenceStatus,
+    get_yjs_engine, RoomType,
 )
 from src.collaboration.contact_claiming import (
-    ContactClaimingSystem, get_claiming_system, ClaimStatus,
+    get_claiming_system,
 )
 from src.collaboration.shared_intel_feed import (
-    SharedIntelligenceFeed, get_intel_feed,
-    IntelType, IntelPriority,
+    get_intel_feed, IntelType,
+    IntelPriority,
 )
 
 logger = logging.getLogger(__name__)

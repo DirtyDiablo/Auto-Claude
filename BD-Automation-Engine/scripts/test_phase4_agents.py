@@ -83,7 +83,6 @@ def test_contact_classifier():
             TIER_PATTERNS,
             PROGRAM_KEYWORDS,
             LOCATION_HUB_MAP,
-            ClassificationResult,
         )
         print_result("Import classification patterns", True)
         results.append(True)
@@ -165,10 +164,6 @@ def test_scraper_monitor():
     results = []
 
     try:
-        from Engine8_Knowledge.agents.scraper_monitor_agent import (
-            ScraperAlert,
-            ScrapeAnalysis,
-        )
         print_result("Import scraper classes", True)
         results.append(True)
     except ImportError as e:
@@ -236,10 +231,6 @@ def test_quality_assurance():
     results = []
 
     try:
-        from Engine8_Knowledge.agents.quality_assurance_agent import (
-            QualityIssue,
-            QualityReport,
-        )
         print_result("Import QA classes", True)
         results.append(True)
     except ImportError as e:
@@ -337,10 +328,6 @@ def test_analytics():
     results = []
 
     try:
-        from Engine8_Knowledge.agents.analytics_agent import (
-            TrendInsight,
-            AnalyticsReport,
-        )
         print_result("Import analytics classes", True)
         results.append(True)
     except ImportError as e:

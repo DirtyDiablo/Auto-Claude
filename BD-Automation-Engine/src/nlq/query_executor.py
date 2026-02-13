@@ -8,9 +8,8 @@ content generation pipelines.
 import asyncio
 import logging
 import time
-from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any, List
 
 from src.nlq.query_router import QueryIntent, QueryPlan, QueryResult
 

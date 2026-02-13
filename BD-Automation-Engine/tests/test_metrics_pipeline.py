@@ -4,9 +4,7 @@ import pytest
 
 from src.observability.metrics_pipeline import (
     MetricsPipeline,
-    Metric,
     MetricType,
-    Alert,
     AlertRule,
     get_metrics,
 )

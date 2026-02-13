@@ -1,7 +1,7 @@
 """Phase 30A — Prometheus Metrics"""
 import time
 import structlog
-from typing import Any, Dict, Optional
+from typing import Dict
 from dataclasses import dataclass
 logger = structlog.get_logger(__name__)
 
@@ -91,7 +91,6 @@ class PlatformMetrics:
         try:
             from starlette.middleware.base import BaseHTTPMiddleware
             from starlette.requests import Request
-            from starlette.responses import Response
 
             class MetricsMiddleware(BaseHTTPMiddleware):
                 async def dispatch(self, request: Request, call_next):

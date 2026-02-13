@@ -6,7 +6,7 @@ import sqlite3
 import json
 from pathlib import Path
 from rank_bm25 import BM25Okapi
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional
 from dataclasses import dataclass
 from datetime import datetime
 import structlog

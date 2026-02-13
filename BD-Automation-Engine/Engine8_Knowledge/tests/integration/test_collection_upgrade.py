@@ -5,8 +5,6 @@ Tests BM25 sparse vector upgrade, verify, rollback, dry-run.
 Uses mocking — does not require running Qdrant.
 """
 
-import pytest
-import json
 from unittest.mock import MagicMock, patch
 from pathlib import Path
 import sys

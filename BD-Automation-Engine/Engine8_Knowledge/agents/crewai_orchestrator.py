@@ -3,9 +3,7 @@ CrewAI Orchestration for BD Intelligence Hub
 Repository: https://github.com/crewAIInc/crewAI (43,100+ stars)
 """
 
-import os
-import asyncio
-from typing import Dict, List, Optional, Any
+from typing import Dict, List
 from dataclasses import dataclass
 import logging
 
@@ -13,7 +11,7 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 try:
-    from crewai import Agent, Task, Crew, Process
+    from crewai import Agent
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False

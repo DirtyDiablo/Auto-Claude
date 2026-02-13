@@ -6,7 +6,6 @@ interrupt handling, and singleton.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
 import sys
 
@@ -15,7 +14,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 from Engine8_Knowledge.workflows.graph_builder import (
     ProductionGraphBuilder, CompiledProductionGraph,
     WorkflowDefinition, NodeSpec, EdgeSpec, RetryConfig,
-    WorkflowInfo, get_graph_builder,
+    get_graph_builder,
 )
 from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, DictMetaStore
 

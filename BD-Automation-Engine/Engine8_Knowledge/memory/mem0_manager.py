@@ -6,7 +6,6 @@ Provides add, search, update, delete, history, and stats operations
 scoped by user_id and agent_id.
 """
 
-import os
 import uuid
 from dataclasses import dataclass, field
 from datetime import datetime

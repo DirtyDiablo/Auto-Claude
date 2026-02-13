@@ -11,9 +11,9 @@ from src.middleware.tenant_middleware import (
     require_role,
     get_tenant_middleware,
 )
-from src.auth.rbac import Action, Resource, Role, Scope, get_rbac_manager
-from src.auth.auth_service import AuthService, get_auth_service
-from src.tenants.tenant_manager import TenantManager, get_tenant_manager
+from src.auth.rbac import Action, Resource, Role, get_rbac_manager
+from src.auth.auth_service import AuthService
+from src.tenants.tenant_manager import TenantManager
 
 
 # =========================================

@@ -1,16 +1,16 @@
 """
 Integration layer connecting UltraRAG to existing retrieval infrastructure.
 """
-from typing import List, Dict, Optional
+from typing import List, Dict
 import structlog
 
 logger = structlog.get_logger(__name__)
 
 try:
-    from .ultra_rag import UltraRAG, PipelineConfig, RetrievalStrategy
+    from .ultra_rag import UltraRAG, PipelineConfig
     from .page_index import PageIndex
 except ImportError:
-    from ultra_rag import UltraRAG, PipelineConfig, RetrievalStrategy
+    from ultra_rag import UltraRAG, PipelineConfig
     from page_index import PageIndex
 
 try:

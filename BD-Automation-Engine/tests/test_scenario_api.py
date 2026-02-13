@@ -7,7 +7,6 @@ from src.simulation.scenario_api import (
     ScenarioAnalysis,
     SensitivityResult,
     ScenarioMethod,
-    ScenarioPreset,
     get_scenario_api,
 )
 

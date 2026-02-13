@@ -14,7 +14,7 @@ import os
 import json
 import logging
 import re
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field, asdict
 from collections import defaultdict
@@ -690,7 +690,7 @@ class DataCorrelator:
             best_score = 0.0
 
             # Try location matching first
-            job_loc = self._normalize_text(job.location)
+            self._normalize_text(job.location)
             for loc_key, progs in program_lookup.items():
                 for prog in progs:
                     loc_score = self._location_similarity(job.location, prog.location)
@@ -757,7 +757,7 @@ class DataCorrelator:
 
             # Fallback to company match
             if not best_match:
-                contact_company = self._normalize_text(contact.company)
+                self._normalize_text(contact.company)
                 for program in programs:
                     if self._company_similarity(contact.company, program.prime_contractor) >= 0.8:
                         best_match = program
@@ -819,10 +819,10 @@ class DataCorrelator:
         contractor_job_counts = defaultdict(int)
 
         for job in jobs:
-            job_company = self._normalize_text(job.company)
+            self._normalize_text(job.company)
 
             for contractor in contractors:
-                contractor_name = self._normalize_text(contractor.name)
+                self._normalize_text(contractor.name)
                 if self._company_similarity(job.company, contractor.name) >= 0.8:
                     contractor_job_counts[contractor.id] += 1
                     job.matched_contractor_id = contractor.id
@@ -1091,12 +1091,10 @@ class TaskOrderInferencer:
                     continue
 
                 # Find matching location
-                location = None
                 location_id = ""
                 location_name = ""
                 for loc in locations:
                     if self._normalize_location_key(loc.name) == loc_key:
-                        location = loc
                         location_id = loc.id
                         location_name = loc.name
                         break

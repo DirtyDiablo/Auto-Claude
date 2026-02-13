@@ -6,7 +6,7 @@ Provides execution timelines, state diffs, and what-if analysis.
 """
 
 import uuid
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
 

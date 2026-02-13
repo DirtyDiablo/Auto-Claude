@@ -4,7 +4,6 @@ import pytest
 
 from src.workflows.nl_to_workflow import (
     NLToWorkflowEngine,
-    ParsedIntent,
     IntentType,
     ValidationStatus,
     NLExecutionResult,

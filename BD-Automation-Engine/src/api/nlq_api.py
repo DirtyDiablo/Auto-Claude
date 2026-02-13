@@ -15,7 +15,7 @@ import logging
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
 from src.nlq.query_router import NLQueryRouter, QueryIntent, EXAMPLE_QUERIES

@@ -4,9 +4,6 @@ import pytest
 
 from src.knowledge.entity_resolution import (
     EntityResolutionEngine,
-    ResolutionResult,
-    ResolutionCandidate,
-    MergeResult,
     GlobalResolutionReport,
     MatchOutcome,
     PersonResolver,

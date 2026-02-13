@@ -7,8 +7,8 @@ and auto-scaling policies.
 from __future__ import annotations
 
 from fastapi import FastAPI, APIRouter, HTTPException, Query
-from pydantic import BaseModel, Field
-from typing import Any, Dict, List, Optional
+from pydantic import BaseModel
+from typing import Any, List, Optional
 
 router = APIRouter()
 

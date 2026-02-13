@@ -1,12 +1,11 @@
 """Tests for Phase 31A - Event Bus Core (Redis Streams pub/sub, consumer groups, replay, chains)."""
 
-import asyncio
 import json
 import pytest
 import sys
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import AsyncMock
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -15,8 +14,6 @@ from src.streaming.event_bus import (
     EventBus,
     StreamConfig,
     StreamStats,
-    DLQ_SUFFIX,
-    MAX_RETRIES,
     _generate_event_id,
     get_event_bus,
 )

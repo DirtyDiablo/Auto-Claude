@@ -7,7 +7,7 @@ Routes queries to optimal retrieval strategy:
 - Auto: Auto-select based on query analysis
 """
 
-from typing import Literal, List, Dict, Optional, Any
+from typing import List, Dict, Optional
 from enum import Enum
 from dataclasses import dataclass
 import logging

@@ -1060,7 +1060,7 @@ def phase_c(client: QdrantClient):
                 top = results.points[0]
                 score = top.score
                 source = (top.payload or {}).get('_source', '?')[:40]
-                intel = (top.payload or {}).get('intel_category', [])
+                (top.payload or {}).get('intel_category', [])
                 status = "PASS" if score >= target else "MISS"
                 if status == "PASS":
                     passed += 1

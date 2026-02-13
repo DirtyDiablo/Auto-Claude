@@ -1,12 +1,11 @@
 """Tests for Phase 32A — Predictive Intelligence API (14 endpoints)."""
 
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from fastapi.testclient import TestClient
 from fastapi import FastAPI
 
-from src.api.predictive_api import router, configure_predictive
+from src.api.predictive_api import router
 
 
 # =========================================

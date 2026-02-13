@@ -4,7 +4,7 @@ Pathway Configuration for BD Streaming Pipeline.
 Centralized configuration for Kafka, PostgreSQL, S3, and embedding settings.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional, Dict, Any
 import os
 

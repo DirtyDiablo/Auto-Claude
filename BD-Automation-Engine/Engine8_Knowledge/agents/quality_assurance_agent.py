@@ -4,10 +4,9 @@ Quality Assurance Agent - Validates data quality across all collections.
 Part of the 8-agent CrewAI system for BD Intelligence.
 """
 
-import os
 import hashlib
-from typing import Dict, List, Optional, Any, Set
-from dataclasses import dataclass, field
+from typing import Dict, List, Optional, Set
+from dataclasses import dataclass
 from datetime import datetime, timedelta
 import structlog
 

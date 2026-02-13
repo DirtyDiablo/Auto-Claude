@@ -6,12 +6,11 @@ Uses Qdrant in embedded mode for zero-setup deployment.
 import os
 import sys
 import json
-import hashlib
 import logging
 import uuid
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple, Union
+from typing import Dict, List, Optional, Any, Tuple
 from dataclasses import dataclass, field
 
 # Add parent to path for imports
@@ -21,8 +20,7 @@ try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
         Distance, VectorParams, PointStruct,
-        Filter, FieldCondition, MatchValue, MatchAny,
-        UpdateStatus, CollectionStatus
+        Filter, FieldCondition, MatchValue, MatchAny
     )
     QDRANT_AVAILABLE = True
 except ImportError:
@@ -654,7 +652,6 @@ class BDKnowledgeStore:
             raise ValueError(f"Unknown collection: {collection}")
 
         # Use scroll to get all points
-        results = []
         scroll_result = self.client.scroll(
             collection_name=collection,
             limit=limit,

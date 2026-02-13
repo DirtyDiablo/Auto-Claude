@@ -4,15 +4,14 @@ Tests for LightRAG graph-based reasoning integration.
 import pytest
 import os
 import tempfile
-import shutil
 
 # Test imports
 try:
     from .graph_rag import BDGraphRAG, QueryMode, QueryResult
-    from .entity_extractor import BDEntityExtractor, EntityType, Entity, Relationship
+    from .entity_extractor import BDEntityExtractor, EntityType
 except ImportError:
     from graph_rag import BDGraphRAG, QueryMode, QueryResult
-    from entity_extractor import BDEntityExtractor, EntityType, Entity, Relationship
+    from entity_extractor import BDEntityExtractor, EntityType
 
 
 class TestEntityExtractor:

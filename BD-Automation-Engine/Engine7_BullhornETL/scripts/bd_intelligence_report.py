@@ -7,7 +7,6 @@ import sqlite3
 import json
 from pathlib import Path
 from datetime import datetime
-from collections import defaultdict
 
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 OUTPUT_DIR = Path(__file__).parent.parent / "outputs"

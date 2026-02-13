@@ -25,11 +25,9 @@ from Engine8_Knowledge.ragflow.ragflow_client import (
     RAGflowClient,
     RAGflowConfig,
     ChunkMethod,
-    DocumentStatus,
     QueryResult,
 )
 from Engine8_Knowledge.ragflow.bd_knowledge_manager import (
-    BDKnowledgeManager,
     BD_KNOWLEDGE_BASES,
     ProgramIntelligence,
     ContactContext,

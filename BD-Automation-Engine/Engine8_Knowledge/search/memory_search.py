@@ -96,7 +96,7 @@ class MemoryAwareSearch:
         result.memory_time_ms = round((time.time() - mem_start) * 1000, 2)
 
         # Step 3: Run standard unified search
-        search_start = time.time()
+        time.time()
         if self.unified_search:
             try:
                 if hasattr(self.unified_search, "search"):

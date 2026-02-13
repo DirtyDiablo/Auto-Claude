@@ -363,7 +363,7 @@ class HybridSearch:
 
 # CLI usage
 if __name__ == "__main__":
-    import json
+    pass
 
     search = HybridSearch()
 

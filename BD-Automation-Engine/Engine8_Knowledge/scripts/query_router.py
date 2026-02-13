@@ -3,8 +3,7 @@ Query Router - Routes queries to optimal retrieval system(s)
 """
 
 import re
-import asyncio
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from enum import Enum
 from dataclasses import dataclass
 import logging

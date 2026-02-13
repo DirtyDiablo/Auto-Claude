@@ -7,13 +7,11 @@ consolidate, reflect, forget, and query across all memory tiers.
 import logging
 from typing import Any, Dict, List, Optional
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import FastAPI, Query
 from pydantic import BaseModel, Field
 
 from src.memory.cortex import (
-    MemoryCortex,
     Memory,
-    MemoryType,
     AgentContext,
     get_memory_cortex,
 )

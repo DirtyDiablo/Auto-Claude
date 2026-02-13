@@ -7,10 +7,8 @@ Uses in-memory fallback — no Redis, Neo4j, or Qdrant required.
 """
 
 import pytest
-from unittest.mock import patch, AsyncMock, MagicMock
 from pathlib import Path
 import sys
-import tempfile
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 

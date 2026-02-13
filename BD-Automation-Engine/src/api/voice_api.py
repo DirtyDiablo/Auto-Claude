@@ -11,12 +11,10 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.voice.briefing_generator import (
-    CallBriefingGenerator, CallBriefing, AudioBriefing,
-    get_briefing_generator,
+    CallBriefing, AudioBriefing, get_briefing_generator,
 )
 from src.voice.transcript_analyzer import (
-    TranscriptIntelligenceExtractor, TranscriptIntel, CallRecord,
-    get_transcript_analyzer,
+    TranscriptIntel, get_transcript_analyzer,
 )
 
 logger = logging.getLogger(__name__)

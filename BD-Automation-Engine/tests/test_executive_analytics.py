@@ -5,7 +5,6 @@ import pytest
 from src.revenue.executive_analytics import (
     ExecutiveAnalytics,
     ExecutiveSummary,
-    QuotaAttainment,
     DiversificationScore,
     PeriodComparison,
     get_executive_analytics,

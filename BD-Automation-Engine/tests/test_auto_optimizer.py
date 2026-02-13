@@ -1,11 +1,7 @@
 """Tests for Phase 29A - Auto-Optimizer."""
-import os
 import sys
-import json
 import pytest
 from pathlib import Path
-from unittest.mock import patch, MagicMock
-from dataclasses import asdict
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

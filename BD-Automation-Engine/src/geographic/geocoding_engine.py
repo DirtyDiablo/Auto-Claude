@@ -8,11 +8,10 @@ and jobs.  All coordinates use WGS-84 (lat/lng).
 from __future__ import annotations
 
 import hashlib
-import math
 import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 
 
 # =========================================

@@ -5,11 +5,7 @@ import pytest
 from src.governance.contracts import (
     DataContractsEngine,
     DataContract,
-    QualityTerm,
-    ContractStatus,
     BreachSeverity,
-    ContractBreach,
-    ContractCheckResult,
     get_contracts_engine,
 )
 

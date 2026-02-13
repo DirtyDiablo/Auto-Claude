@@ -4,17 +4,13 @@ Comprehensive data extraction, transformation, and loading for all Bullhorn expo
 Handles: Jobs, Candidates, Placements, Activities, Notes
 """
 
-import os
 import sys
 import re
-import csv
 import json
 import hashlib
-import sqlite3
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Tuple, Any
-from collections import defaultdict
+from typing import Dict, List, Optional, Tuple
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent))

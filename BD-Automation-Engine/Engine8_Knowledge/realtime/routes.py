@@ -52,7 +52,6 @@ async def realtime_status():
     events = server.get_recent_events(50)
     events_per_min = 0
     if events:
-        import time
         from datetime import datetime
         try:
             newest = datetime.fromisoformat(events[0].get("timestamp", ""))

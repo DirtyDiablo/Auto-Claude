@@ -7,12 +7,10 @@ relevance scoring, and Neo4j sync.
 All external dependencies (httpx, file I/O) are mocked.
 """
 
-import json
 import pytest
 from unittest.mock import patch, MagicMock, AsyncMock
 from pathlib import Path
 import sys
-import tempfile
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
@@ -26,7 +24,6 @@ from Engine8_Knowledge.scrapers.sam_gov_sync import (
     SearchQuery,
     OpportunityQuery,
     SyncResult,
-    get_sam_gov_sync,
 )
 
 

@@ -5,7 +5,6 @@ Import this into main api.py during integration step.
 import os
 import structlog
 from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
-from typing import Optional, List
 from pathlib import Path
 import tempfile
 import shutil
@@ -144,7 +143,7 @@ def _get_ingest_store():
 @router.post("/batch")
 async def api_batch_process(
     folder_path: str,
-    background_tasks: BackgroundTasks,
+    _background_tasks: BackgroundTasks,
     recursive: bool = True
 ):
     """Process all documents in a folder."""

@@ -5,11 +5,10 @@ Uses LlamaIndex with Qdrant vector store and Claude for response generation.
 
 import os
 import sys
-import json
 import logging
 from pathlib import Path
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
+from typing import Dict, List, Optional
 
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -27,11 +26,6 @@ logger = logging.getLogger('BDRAGEngine')
 # Check for optional dependencies
 LLAMAINDEX_AVAILABLE = False
 try:
-    from llama_index.core import VectorStoreIndex, Settings, ServiceContext
-    from llama_index.core.response_synthesizers import get_response_synthesizer
-    from llama_index.core.query_engine import RetrieverQueryEngine
-    from llama_index.core.retrievers import VectorIndexRetriever
-    from llama_index.core.schema import TextNode, NodeWithScore
     LLAMAINDEX_AVAILABLE = True
 except ImportError:
     logger.warning("llama-index not installed. Using simple RAG mode.")

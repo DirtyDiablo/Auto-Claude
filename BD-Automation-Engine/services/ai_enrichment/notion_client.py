@@ -3,10 +3,9 @@ Notion API Client with rate limiting and batch operations
 """
 import os
 import time
-import json
 import logging
 import requests
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional
 from datetime import datetime
 from dotenv import load_dotenv
 
