@@ -81,30 +81,36 @@ def load_arch() -> dict:
 # Live service probes
 # ---------------------------------------------------------------------------
 def probe_service(url: str, timeout: float = 3.0) -> tuple:
-    """Returns (ok: bool, info: str)."""
+    """Returns (ok: bool, body: str). Full body for JSON parsing."""
     try:
         import urllib.request
         resp = urllib.request.urlopen(url, timeout=timeout)
         data = resp.read().decode("utf-8", errors="replace")
-        return True, data[:200]
+        return True, data
     except Exception as e:
-        return False, str(e)[:80]
+        return False, str(e)[:120]
 
 
 def probe_qdrant() -> dict:
-    ok, body = probe_service("http://localhost:6333/collections")
-    if not ok:
-        return {"online": False, "error": body}
-    data = json.loads(body)
-    collections = data.get("result", {}).get("collections", [])
-    result = {"online": True, "collections": {}}
-    for c in collections:
-        name = c["name"]
-        ok2, body2 = probe_service(f"http://localhost:6333/collections/{name}")
-        if ok2:
-            info = json.loads(body2)
-            result["collections"][name] = info["result"]["points_count"]
-    return result
+    try:
+        ok, body = probe_service("http://localhost:6333/collections")
+        if not ok:
+            return {"online": False, "error": body}
+        data = json.loads(body)
+        collections = data.get("result", {}).get("collections", [])
+        result = {"online": True, "collections": {}}
+        for c in collections:
+            name = c["name"]
+            try:
+                ok2, body2 = probe_service(f"http://localhost:6333/collections/{name}")
+                if ok2:
+                    info = json.loads(body2)
+                    result["collections"][name] = info["result"]["points_count"]
+            except Exception:
+                result["collections"][name] = -1
+        return result
+    except Exception as e:
+        return {"online": False, "error": str(e)[:120]}
 
 
 def probe_api() -> dict:
@@ -114,7 +120,7 @@ def probe_api() -> dict:
     try:
         return {"online": True, "health": json.loads(body)}
     except Exception:
-        return {"online": True, "health": body}
+        return {"online": True, "health": body[:200]}
 
 
 def probe_dashboard() -> dict:
