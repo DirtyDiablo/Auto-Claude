@@ -11,8 +11,9 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   DollarSign, Plus, X, Clock,
   GripVertical, Search, Target, Handshake, CheckCircle2, Banknote,
-  Mail,
+  Mail, TrendingUp, ArrowRight,
 } from 'lucide-react';
+import { hubApiClient } from '../services/hubApi';
 import {
   DndContext,
   DragOverlay,
@@ -267,11 +268,29 @@ function AddDealForm({ onAdd, onCancel }: { onAdd: (deal: RevenueDeal) => void; 
 
 // ─── Main Component ──────────────────────────────────────────────────────────
 
+interface FunnelStage {
+  stage: string;
+  count: number;
+  value: number;
+}
+
 export function RevenuePipeline() {
   const [deals, setDeals] = useState<RevenueDeal[]>(loadDeals);
   const [activeDealId, setActiveDealId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [funnelData, setFunnelData] = useState<FunnelStage[]>([]);
+  const [funnelRates, setFunnelRates] = useState<Record<string, number>>({});
+
+  // Fetch real funnel data from backend
+  useEffect(() => {
+    hubApiClient.getAnalyticsFunnel()
+      .then(data => {
+        setFunnelData(data.funnel || []);
+        setFunnelRates(data.conversion_rates || {});
+      })
+      .catch(() => {/* funnel endpoint not available yet */});
+  }, []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } })
@@ -368,6 +387,48 @@ export function RevenuePipeline() {
           </button>
         </div>
       </div>
+
+      {/* Backend Funnel (real data) */}
+      {funnelData.length > 0 && (
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 mb-4">
+          <div className="flex items-center gap-2 mb-3">
+            <TrendingUp className="h-4 w-4 text-indigo-500" />
+            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Intelligence Funnel</span>
+          </div>
+          <div className="flex items-center justify-between">
+            {funnelData.map((stage, i) => {
+              const maxCount = Math.max(...funnelData.map(s => s.count), 1);
+              const widthPct = Math.max(20, (stage.count / maxCount) * 100);
+              return (
+                <div key={stage.stage} className="flex items-center flex-1">
+                  <div className="flex-1 text-center">
+                    <div
+                      className="mx-auto rounded-lg bg-gradient-to-b from-indigo-500 to-indigo-600 text-white py-2 px-3 transition-all"
+                      style={{ width: `${widthPct}%`, minWidth: '80px' }}
+                    >
+                      <p className="text-lg font-bold">{stage.count}</p>
+                      <p className="text-[10px] opacity-80 capitalize">{stage.stage.replace(/_/g, ' ')}</p>
+                    </div>
+                    {stage.value > 0 && (
+                      <p className="text-[10px] text-slate-400 mt-1">{formatUSD(stage.value)}</p>
+                    )}
+                  </div>
+                  {i < funnelData.length - 1 && (
+                    <div className="flex flex-col items-center px-1">
+                      <ArrowRight className="h-4 w-4 text-slate-300" />
+                      {Object.keys(funnelRates).length > 0 && (
+                        <span className="text-[9px] text-slate-400">
+                          {Math.round((funnelRates[`${funnelData[i].stage}_to_${funnelData[i + 1].stage}`] || 0) * 100)}%
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Stage Summary Bar */}
       <div className="grid grid-cols-6 gap-2 mb-4">

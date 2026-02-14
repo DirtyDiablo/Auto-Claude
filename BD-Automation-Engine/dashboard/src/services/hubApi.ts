@@ -895,6 +895,145 @@ export class HubApiClient {
   }
 
   // ---------------------------------------------------------------------------
+  // DAILY ACTION ENGINE
+  // ---------------------------------------------------------------------------
+
+  async getDailyPlaybook(date?: string, maxActions: number = 30): Promise<{
+    date: string;
+    tasks: Array<Record<string, unknown>>;
+    stats: { total: number; byPriority: Record<string, number>; byType: Record<string, number> };
+    total: number;
+  }> {
+    const qs = this.buildQueryString({ date, max_actions: maxActions });
+    return this.fetch(`/daily-playbook${qs}`);
+  }
+
+  async getCallPrep(contactId: string, program?: string): Promise<Record<string, unknown>> {
+    const qs = this.buildQueryString({ program });
+    return this.fetch(`/call-prep/${contactId}${qs}`);
+  }
+
+  async getCallPrepByName(contactName: string, program?: string): Promise<Record<string, unknown>> {
+    const qs = this.buildQueryString({ contact: contactName, program });
+    return this.fetch(`/call-prep${qs}`);
+  }
+
+  async getClaimStatus(): Promise<{
+    summary: { total_programs: number; claimed: number; unclaimed: number; claim_rate: number };
+    claimed: Array<Record<string, unknown>>;
+    unclaimed: Array<Record<string, unknown>>;
+  }> {
+    return this.fetch('/claims/status');
+  }
+
+  async getUnclaimedPriority(limit: number = 20): Promise<{ unclaimed: Array<Record<string, unknown>> }> {
+    return this.fetch(`/claims/unclaimed-priority?limit=${limit}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // OUTREACH
+  // ---------------------------------------------------------------------------
+
+  async logOutreachActivity(data: {
+    contact_name: string;
+    activity_type: string;
+    notes?: string;
+    channel?: string;
+    program?: string;
+    outcome?: string;
+    company?: string;
+  }): Promise<{ success: boolean; local_id: number; bullhorn_synced: boolean }> {
+    return this.fetch('/outreach/log-activity', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    });
+  }
+
+  async getOutreachActivityLog(contact?: string, limit: number = 50): Promise<{
+    activities: Array<Record<string, unknown>>;
+  }> {
+    const qs = this.buildQueryString({ contact, limit });
+    return this.fetch(`/outreach/activity-log${qs}`);
+  }
+
+  async getOutreachStats(): Promise<{
+    total_logged: number;
+    bullhorn_synced: number;
+    unsynced: number;
+    by_type: Record<string, number>;
+    last_7_days: number;
+  }> {
+    return this.fetch('/outreach/stats');
+  }
+
+  async getClaimVelocity(days: number = 30): Promise<{
+    total_outreach_activities: number;
+    avg_per_week: number;
+    by_week: Record<string, number>;
+  }> {
+    return this.fetch(`/claims/velocity?days=${days}`);
+  }
+
+  // ---------------------------------------------------------------------------
+  // CROSS-REPO HEALTH (Section 4)
+  // ---------------------------------------------------------------------------
+
+  async getCrossRepoHealth(): Promise<{
+    bd_engine: { status: string; url: string; latency_ms: number };
+    n8n_builder: { status: string; url: string; latency_ms: number };
+    data_scraper: { status: string; url: string; latency_ms: number };
+    qdrant: { status: string; url: string; collections: number; total_vectors: number };
+    n8n_cloud: { status: string; url: string };
+    timestamp: string;
+  }> {
+    return this.fetch('/system/cross-repo-health');
+  }
+
+  // ---------------------------------------------------------------------------
+  // ANALYTICS FUNNEL (Section 4)
+  // ---------------------------------------------------------------------------
+
+  async getAnalyticsFunnel(): Promise<{
+    funnel: Array<{ stage: string; count: number; value: number }>;
+    conversion_rates: Record<string, number>;
+    timestamp: string;
+  }> {
+    return this.fetch('/analytics/funnel');
+  }
+
+  // ---------------------------------------------------------------------------
+  // PREDICTIONS (Section 4/5)
+  // ---------------------------------------------------------------------------
+
+  async getRecompetePredictions(months: number = 12): Promise<{
+    recompetes: Array<{
+      program: string;
+      expiry_date: string;
+      months_remaining: number;
+      value: number;
+      incumbent: string;
+      pts_past_performance: boolean;
+      priority: string;
+    }>;
+    total: number;
+    total_value: number;
+  }> {
+    return this.fetch(`/predictions/recompetes?months=${months}`);
+  }
+
+  async getBestChannels(): Promise<{
+    channels: Array<{
+      channel: string;
+      total: number;
+      success_rate: number;
+      avg_response_days: number;
+    }>;
+    recommendation: string;
+  }> {
+    return this.fetch('/predictions/best-channels');
+  }
+
+  // ---------------------------------------------------------------------------
   // CONFIGURATION
   // ---------------------------------------------------------------------------
 

@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from 'react';
 import {
   TrendingUp, Loader2, RefreshCw, AlertTriangle, CheckCircle2,
-  Zap, Shield, Briefcase, Brain, BarChart3,
+  Zap, Shield, Briefcase, Brain, BarChart3, Calendar, Phone,
 } from 'lucide-react';
+import { hubApiClient } from '../services/hubApi';
 
 // ─── Types ─────────────────────────────────────────────────────────────────
 
@@ -163,11 +164,31 @@ function QuickPredict() {
 
 // ─── Main Component ────────────────────────────────────────────────────────
 
+interface RecompetePrediction {
+  program: string;
+  expiry_date: string;
+  months_remaining: number;
+  value: number;
+  incumbent: string;
+  pts_past_performance: boolean;
+  priority: string;
+}
+
+interface ChannelAnalysis {
+  channel: string;
+  total: number;
+  success_rate: number;
+  avg_response_days: number;
+}
+
 export function PredictiveInsights() {
   const [modelStatus, setModelStatus] = useState<ModelStatus | null>(null);
   const [signals, setSignals] = useState<HiringSignal[]>([]);
   const [loading, setLoading] = useState(true);
   const [signalsLoading, setSignalsLoading] = useState(false);
+  const [recompetes, setRecompetes] = useState<RecompetePrediction[]>([]);
+  const [channels, setChannels] = useState<ChannelAnalysis[]>([]);
+  const [channelReco, setChannelReco] = useState('');
 
   // Fetch model status
   useEffect(() => {
@@ -181,6 +202,23 @@ export function PredictiveInsights() {
         setLoading(false);
       }
     })();
+  }, []);
+
+  // Fetch recompete predictions
+  useEffect(() => {
+    hubApiClient.getRecompetePredictions(18)
+      .then(data => setRecompetes(data.recompetes || []))
+      .catch(() => {/* endpoint not available */});
+  }, []);
+
+  // Fetch best channels
+  useEffect(() => {
+    hubApiClient.getBestChannels()
+      .then(data => {
+        setChannels(data.channels || []);
+        setChannelReco(data.recommendation || '');
+      })
+      .catch(() => {/* endpoint not available */});
   }, []);
 
   // Fetch hiring signals
@@ -432,6 +470,99 @@ export function PredictiveInsights() {
               <p className="text-xs text-slate-400 mt-1">Signals will appear when job posting anomalies are found</p>
             </div>
           )}
+        </div>
+
+        {/* Recompete Predictions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-orange-500" />
+                Upcoming Recompetes
+              </h3>
+            </div>
+            {recompetes.length > 0 ? (
+              <div className="divide-y divide-slate-100 dark:divide-slate-700">
+                {recompetes.slice(0, 8).map((rc, idx) => {
+                  const urgency = rc.months_remaining <= 6 ? 'text-red-600 bg-red-50 dark:bg-red-900/20' :
+                    rc.months_remaining <= 12 ? 'text-amber-600 bg-amber-50 dark:bg-amber-900/20' :
+                    'text-blue-600 bg-blue-50 dark:bg-blue-900/20';
+                  return (
+                    <div key={idx} className="px-5 py-3 flex items-center justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm font-medium text-slate-900 dark:text-white truncate">{rc.program}</p>
+                        <p className="text-xs text-slate-500">{rc.incumbent || 'Unknown incumbent'}</p>
+                      </div>
+                      <div className="flex items-center gap-3 ml-3">
+                        {rc.pts_past_performance && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-medium">
+                            PTS PP
+                          </span>
+                        )}
+                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${urgency}`}>
+                          {rc.months_remaining}mo
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <Calendar className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">No recompete data available</p>
+              </div>
+            )}
+          </div>
+
+          {/* Best Channels */}
+          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="px-5 py-4 border-b border-slate-200 dark:border-slate-700">
+              <h3 className="text-sm font-semibold text-slate-700 dark:text-slate-300 flex items-center gap-2">
+                <Phone className="w-4 h-4 text-green-500" />
+                Best Outreach Channels
+              </h3>
+            </div>
+            {channels.length > 0 ? (
+              <div className="p-5 space-y-4">
+                {channels.map((ch, idx) => {
+                  const maxTotal = Math.max(...channels.map(c => c.total), 1);
+                  return (
+                    <div key={idx}>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300 capitalize">{ch.channel}</span>
+                        <div className="flex items-center gap-3 text-xs text-slate-500">
+                          <span>{ch.total} activities</span>
+                          <span className={`font-medium ${ch.success_rate >= 0.3 ? 'text-green-600' : ch.success_rate >= 0.15 ? 'text-amber-600' : 'text-slate-400'}`}>
+                            {(ch.success_rate * 100).toFixed(0)}% success
+                          </span>
+                        </div>
+                      </div>
+                      <div className="w-full h-2 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-green-500 rounded-full transition-all"
+                          style={{ width: `${(ch.total / maxTotal) * 100}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+                {channelReco && (
+                  <div className="mt-3 p-3 rounded-lg bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800">
+                    <p className="text-xs text-indigo-700 dark:text-indigo-300">
+                      <span className="font-semibold">Recommendation:</span> {channelReco}
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="py-12 text-center">
+                <Phone className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+                <p className="text-sm text-slate-500">No channel data available</p>
+                <p className="text-xs text-slate-400 mt-1">Log outreach activities to see channel performance</p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

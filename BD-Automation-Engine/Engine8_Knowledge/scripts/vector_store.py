@@ -402,6 +402,61 @@ class BDKnowledgeStore:
         """
         return self._index_data('activities', activities, batch_size)
 
+    def bulk_upsert_from_scraper(
+        self,
+        collection: str,
+        records: List[Dict],
+        batch_size: int = 100,
+        source_tag: str = "data_scraper",
+    ) -> Tuple[int, int]:
+        """
+        Bulk upsert records from the data-scraper repo.
+
+        Normalizes field names from scraper format to BD-Engine format,
+        tags records with source metadata, and indexes into the specified collection.
+
+        Args:
+            collection: Target collection name (contacts, programs, jobs, etc.)
+            records: List of record dicts from data-scraper
+            batch_size: Batch size for indexing
+            source_tag: Source identifier for provenance tracking
+
+        Returns:
+            Tuple of (indexed_count, error_count)
+        """
+        # Normalize scraper field names to BD-Engine format
+        normalized = []
+        for rec in records:
+            item = dict(rec)
+
+            # Contact field normalization
+            if collection == "contacts":
+                item.setdefault("name", item.pop("Name", item.get("name", "")))
+                item.setdefault("company", item.pop("Company", item.pop("prime_name", item.get("company", ""))))
+                item.setdefault("title", item.pop("Title", item.pop("occupation", item.get("title", ""))))
+                item.setdefault("tier", item.pop("hierarchy_tier_num", item.get("tier")))
+                item.setdefault("bd_priority", item.pop("bd_priority", None))
+
+            # Program field normalization
+            elif collection == "programs":
+                item.setdefault("name", item.pop("Name", item.pop("program_name", item.get("name", ""))))
+                item.setdefault("prime_contractor", item.pop("Prime", item.pop("primes", item.get("prime_contractor", ""))))
+                item.setdefault("agency", item.pop("Agency", item.get("agency", "")))
+
+            # Job field normalization
+            elif collection == "jobs":
+                item.setdefault("title", item.pop("Title", item.get("title", "")))
+                item.setdefault("company", item.pop("Company", item.get("company", "")))
+                item.setdefault("program_name", item.pop("Program", item.pop("mapped_program", item.get("program_name", ""))))
+
+            # Tag with source
+            item["_source"] = source_tag
+            item["_ingested_from_scraper"] = True
+
+            normalized.append(item)
+
+        return self._index_data(collection, normalized, batch_size)
+
     def _index_data(
         self,
         collection: str,

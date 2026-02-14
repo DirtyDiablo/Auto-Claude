@@ -14,7 +14,7 @@ import {
 import type { NotionJob, NotionProgram, NotionContact } from '../services/notionApi';
 import { enrichAllJobs, getEnrichmentStats } from '../services/enrichmentEngine';
 import type { EnrichedJob } from '../services/enrichmentEngine';
-import { generateDailyPlaybook } from '../services/playbookGenerator';
+import { generateDailyPlaybook, fetchBackendPlaybook } from '../services/playbookGenerator';
 import type { DailyPlaybook } from '../services/playbookGenerator';
 
 interface UseBDPlaybookReturn {
@@ -52,19 +52,35 @@ export function useBDPlaybook(): UseBDPlaybookReturn {
   const [isConfigured, setIsConfigured] = useState(false);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  // Load all data
+  // Load all data — tries backend API first, falls back to Notion
   const loadData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Try backend-generated playbook first
+      const dateStr = currentDate.toISOString().split('T')[0];
+      const backendPlaybook = await fetchBackendPlaybook(dateStr);
+
+      if (backendPlaybook && backendPlaybook.tasks.length > 0) {
+        setPlaybook(backendPlaybook);
+        setIsConfigured(true);
+        setLoading(false);
+        return;
+      }
+    } catch {
+      // Backend unavailable, fall through to Notion
+    }
+
+    // Fall back to Notion-based generation
     const configured = isNotionConfigured();
     setIsConfigured(configured);
 
     if (!configured) {
       setLoading(false);
-      setError('Notion not configured. Please add your Notion token in Settings.');
+      setError('Backend API and Notion both unavailable. Please check your connections.');
       return;
     }
-
-    setLoading(true);
-    setError(null);
 
     try {
       // Fetch all data in parallel
@@ -97,7 +113,7 @@ export function useBDPlaybook(): UseBDPlaybookReturn {
 
     } catch (err) {
       console.error('Error loading BD data:', err);
-      setError(err instanceof Error ? err.message : 'Failed to load data from Notion');
+      setError(err instanceof Error ? err.message : 'Failed to load data');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, Newspaper, Loader2, AlertTriangle, Sparkles, RefreshCw } from 'lucide-react';
+import { Briefcase, Building2, Users, Factory, TrendingUp, AlertCircle, Server, CheckCircle2, Newspaper, Loader2, AlertTriangle, Sparkles, RefreshCw, Target, Shield } from 'lucide-react';
 import type { CorrelationSummary, TabId } from '../types';
 import { useHubConnection, useHubStats } from '../hooks/useHubApi';
 import { AnimatedCounter } from '../components/ui/AnimatedCounter';
@@ -111,6 +111,20 @@ export function ExecutiveSummary({ summary, loading, onTabChange }: ExecutiveSum
   // Hub connection status
   const { isConnected: hubConnected, isChecking: hubChecking } = useHubConnection();
   const { data: hubStats } = useHubStats(60000); // Refresh every minute
+
+  // Claim tracker KPIs
+  const [claimData, setClaimData] = useState<{
+    total_programs: number;
+    claimed: number;
+    unclaimed: number;
+    claim_rate: number;
+  } | null>(null);
+
+  useEffect(() => {
+    hubApiClient.getClaimStatus()
+      .then(data => setClaimData(data.summary))
+      .catch(() => {/* Claim tracker not available yet */});
+  }, []);
 
   if (loading) {
     return (
@@ -282,6 +296,40 @@ export function ExecutiveSummary({ summary, loading, onTabChange }: ExecutiveSum
           subtitle="Prime & subs"
         />
       </div>
+
+      {/* Contract Claim KPIs */}
+      {claimData && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <StatCard
+            title="Claimed Contracts"
+            value={claimData.claimed}
+            icon={Shield}
+            color="bg-green-600"
+            subtitle={`${Math.round(claimData.claim_rate * 100)}% claim rate`}
+          />
+          <StatCard
+            title="Unclaimed"
+            value={claimData.unclaimed}
+            icon={Target}
+            color="bg-red-600"
+            subtitle="Needs outreach"
+          />
+          <StatCard
+            title="Total Programs"
+            value={claimData.total_programs}
+            icon={Building2}
+            color="bg-slate-600"
+            subtitle="Tracked"
+          />
+          <StatCard
+            title="Claim Rate"
+            value={`${Math.round(claimData.claim_rate * 100)}%`}
+            icon={TrendingUp}
+            color="bg-blue-600"
+            subtitle="Coverage"
+          />
+        </div>
+      )}
 
       {/* Match Rates */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

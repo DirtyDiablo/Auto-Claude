@@ -407,6 +407,95 @@ export function generateDailyPlaybook(
 }
 
 /**
+ * Fetch daily playbook from backend API.
+ * Falls back to client-side generation if backend is unavailable.
+ */
+export async function fetchBackendPlaybook(
+  date?: string,
+  maxActions: number = 30,
+): Promise<DailyPlaybook | null> {
+  const baseUrl = import.meta.env.VITE_API_BASE || '';
+  const params = new URLSearchParams();
+  if (date) params.set('date', date);
+  params.set('max_actions', String(maxActions));
+
+  try {
+    const response = await fetch(`${baseUrl}/daily-playbook?${params}`, {
+      signal: AbortSignal.timeout(15000),
+    });
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+
+    // Transform backend response to DailyPlaybook format
+    const tasks: PlaybookTask[] = (data.tasks || []).map((t: Record<string, unknown>) => ({
+      id: (t.id as string) || `backend_${Date.now()}_${Math.random().toString(36).substr(2, 5)}`,
+      time: t.time as string | undefined,
+      title: t.title as string || '',
+      description: t.description as string || '',
+      type: (t.type as TaskType) || 'research',
+      priority: (t.priority as TaskPriority) || 'medium',
+      completed: (t.completed as boolean) || false,
+      contact: t.contact as string | undefined,
+      contactId: t.contact_id as string | undefined,
+      program: t.program as string | undefined,
+      programId: t.program_id as string | undefined,
+      jobId: t.job_id as string | undefined,
+      sourceType: (t.source_type as PlaybookTask['sourceType']) || 'scheduled',
+    }));
+
+    const stats = data.stats || {};
+
+    return {
+      date: new Date(data.date || Date.now()),
+      tasks,
+      stats: {
+        total: stats.total || tasks.length,
+        byPriority: stats.byPriority || { critical: 0, high: 0, medium: 0, low: 0 },
+        byType: stats.byType || { call: 0, email: 0, meeting: 0, research: 0, 'follow-up': 0 },
+      },
+    };
+  } catch {
+    console.warn('Backend playbook unavailable, using client-side generation');
+    return null;
+  }
+}
+
+/**
+ * Fetch call prep brief from backend API.
+ */
+export async function fetchCallPrep(
+  contactId?: string,
+  contactName?: string,
+  program?: string,
+): Promise<Record<string, unknown> | null> {
+  const baseUrl = import.meta.env.VITE_API_BASE || '';
+
+  try {
+    let url: string;
+    if (contactId) {
+      const params = new URLSearchParams();
+      if (program) params.set('program', program);
+      url = `${baseUrl}/call-prep/${contactId}?${params}`;
+    } else if (contactName) {
+      const params = new URLSearchParams({ contact: contactName });
+      if (program) params.set('program', program);
+      url = `${baseUrl}/call-prep?${params}`;
+    } else {
+      return null;
+    }
+
+    const response = await fetch(url, { signal: AbortSignal.timeout(15000) });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    console.warn('Call prep API unavailable');
+    return null;
+  }
+}
+
+/**
  * Get priority label with emoji
  */
 export function getPriorityLabel(priority: TaskPriority): string {

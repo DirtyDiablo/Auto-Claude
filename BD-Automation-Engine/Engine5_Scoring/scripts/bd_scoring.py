@@ -363,6 +363,187 @@ def generate_scoring_report(scored_items: List[Dict]) -> Dict:
 
 
 # ============================================
+# SCORING FEEDBACK LOOP
+# ============================================
+
+def recalibrate(
+    conversion_data: List[Dict],
+    current_config: Dict = None,
+    learning_rate: float = 0.1,
+) -> Dict:
+    """
+    Recalibrate scoring weights based on actual conversion outcomes.
+
+    Compares BD scores at time of scoring against actual outcomes
+    (meeting booked, placement, no response) and adjusts weights to
+    better predict which contacts/opportunities convert.
+
+    Args:
+        conversion_data: List of dicts with keys:
+            - item: Original scored item dict
+            - outcome: "placement" | "meeting" | "response" | "no_response"
+            - original_score: BD score at time of scoring
+        current_config: Config to adjust (defaults to BD_SCORE_CONFIG)
+        learning_rate: How aggressively to adjust (0.0 - 1.0)
+
+    Returns:
+        Updated config dict with adjusted weights and calibration stats
+    """
+    config = current_config or BD_SCORE_CONFIG.copy()
+
+    if not conversion_data:
+        return {"config": config, "adjustments": [], "stats": {"total": 0}}
+
+    # Outcome reward values (higher = better outcome)
+    outcome_values = {
+        "placement": 1.0,
+        "meeting": 0.7,
+        "response": 0.4,
+        "email_opened": 0.2,
+        "no_response": 0.0,
+    }
+
+    # Analyze what factors correlated with successful outcomes
+    factor_hits = {
+        "clearance": {"success_sum": 0.0, "total": 0, "boost_sum": 0.0},
+        "program": {"success_sum": 0.0, "total": 0, "boost_sum": 0.0},
+        "location": {"success_sum": 0.0, "total": 0, "boost_sum": 0.0},
+        "tier": {"success_sum": 0.0, "total": 0, "boost_sum": 0.0},
+        "recency": {"success_sum": 0.0, "total": 0, "boost_sum": 0.0},
+    }
+
+    score_errors = []
+    adjustments = []
+
+    for entry in conversion_data:
+        item = entry.get("item", {})
+        outcome = entry.get("outcome", "no_response")
+        original_score = entry.get("original_score", 50)
+
+        reward = outcome_values.get(outcome, 0.0)
+        expected = original_score / 100.0
+
+        # Track prediction error
+        error = reward - expected
+        score_errors.append(error)
+
+        # Track which factors were present in successful outcomes
+        clearance_boost = calculate_clearance_boost(
+            item.get("clearance", item.get("Security Clearance", ""))
+        )
+        if clearance_boost > 0:
+            factor_hits["clearance"]["total"] += 1
+            factor_hits["clearance"]["success_sum"] += reward
+            factor_hits["clearance"]["boost_sum"] += clearance_boost
+
+        program_boost = calculate_program_boost(
+            item.get("program", item.get("Program", ""))
+        )
+        if program_boost > 0:
+            factor_hits["program"]["total"] += 1
+            factor_hits["program"]["success_sum"] += reward
+            factor_hits["program"]["boost_sum"] += program_boost
+
+        location_boost = calculate_location_boost(
+            item.get("location", item.get("Location", ""))
+        )
+        if location_boost > 0:
+            factor_hits["location"]["total"] += 1
+            factor_hits["location"]["success_sum"] += reward
+            factor_hits["location"]["boost_sum"] += location_boost
+
+        tier = item.get("tier", 5)
+        if isinstance(tier, str) and "Tier" in tier:
+            try:
+                tier = int(tier.split()[1])
+            except (IndexError, ValueError):
+                tier = 5
+        if isinstance(tier, (int, float)) and tier <= 3:
+            factor_hits["tier"]["total"] += 1
+            factor_hits["tier"]["success_sum"] += reward
+
+        recency_boost = calculate_recency_boost(
+            item.get("date_posted", item.get("Date Posted", ""))
+        )
+        if recency_boost > 0:
+            factor_hits["recency"]["total"] += 1
+            factor_hits["recency"]["success_sum"] += reward
+
+    # Calculate adjustments based on factor effectiveness
+    for factor_name, stats in factor_hits.items():
+        if stats["total"] < 3:
+            continue  # Need minimum sample
+
+        avg_success = stats["success_sum"] / stats["total"]
+
+        # If contacts with this factor convert well, boost the weight
+        # If they don't convert, reduce the weight
+        if avg_success > 0.5:
+            direction = "increase"
+            multiplier = 1.0 + (learning_rate * (avg_success - 0.5))
+        elif avg_success < 0.3:
+            direction = "decrease"
+            multiplier = 1.0 - (learning_rate * (0.3 - avg_success))
+        else:
+            continue  # Near baseline, no adjustment
+
+        adjustment = {
+            "factor": factor_name,
+            "direction": direction,
+            "multiplier": round(multiplier, 3),
+            "avg_success_rate": round(avg_success, 3),
+            "sample_size": stats["total"],
+        }
+        adjustments.append(adjustment)
+
+        # Apply adjustment to config
+        if factor_name == "clearance":
+            for level in config.get("clearance_boosts", {}):
+                config["clearance_boosts"][level] = int(
+                    config["clearance_boosts"][level] * multiplier
+                )
+        elif factor_name == "program":
+            for prog in config.get("program_boosts", {}):
+                config["program_boosts"][prog] = int(
+                    config["program_boosts"][prog] * multiplier
+                )
+        elif factor_name == "location":
+            for loc in config.get("location_boosts", {}):
+                config["location_boosts"][loc] = int(
+                    config["location_boosts"][loc] * multiplier
+                )
+        elif factor_name == "tier":
+            for t in config.get("tier_multipliers", {}):
+                if t <= 3:
+                    config["tier_multipliers"][t] = round(
+                        config["tier_multipliers"][t] * multiplier, 2
+                    )
+        elif factor_name == "recency":
+            for period in config.get("recency_boosts", {}):
+                config["recency_boosts"][period] = int(
+                    config["recency_boosts"][period] * multiplier
+                )
+
+    # Stats
+    avg_error = sum(score_errors) / max(len(score_errors), 1)
+    mae = sum(abs(e) for e in score_errors) / max(len(score_errors), 1)
+
+    return {
+        "config": config,
+        "adjustments": adjustments,
+        "stats": {
+            "total": len(conversion_data),
+            "avg_error": round(avg_error, 4),
+            "mean_absolute_error": round(mae, 4),
+            "outcomes": {
+                outcome: sum(1 for e in conversion_data if e.get("outcome") == outcome)
+                for outcome in outcome_values
+            },
+        },
+    }
+
+
+# ============================================
 # CLI INTERFACE
 # ============================================
 

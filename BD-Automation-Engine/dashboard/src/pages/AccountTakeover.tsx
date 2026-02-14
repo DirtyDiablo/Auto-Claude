@@ -15,6 +15,7 @@ import {
   Shield,
   UserCheck,
 } from 'lucide-react';
+import { hubApiClient } from '../services/hubApi';
 import {
   BarChart,
   Bar,
@@ -140,6 +141,10 @@ export function AccountTakeover() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [completedActions, setCompletedActions] = useState<Set<string>>(new Set());
+  const [claimData, setClaimData] = useState<{
+    total_programs: number; claimed: number; unclaimed: number; claim_rate: number;
+  } | null>(null);
+  const [unclaimedPriority, setUnclaimedPriority] = useState<Array<Record<string, unknown>>>([]);
 
   useEffect(() => {
     fetch('/data/scurry_takeover.json')
@@ -152,6 +157,13 @@ export function AccountTakeover() {
         console.error('Failed to load takeover data:', err);
         setLoading(false);
       });
+    // Fetch claim tracker data
+    hubApiClient.getClaimStatus()
+      .then(d => setClaimData(d.summary))
+      .catch(() => {/* not available */});
+    hubApiClient.getUnclaimedPriority(10)
+      .then(d => setUnclaimedPriority(d.unclaimed || []))
+      .catch(() => {/* not available */});
   }, []);
 
   const toggleAction = (action: string) => {
@@ -316,6 +328,63 @@ export function AccountTakeover() {
             ))}
         </div>
       </div>
+
+      {/* Contract Claim Tracker */}
+      {claimData && (
+        <div className="bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+          <h3 className="text-lg font-semibold mb-4 text-slate-900 dark:text-white flex items-center gap-2">
+            <Shield className="h-5 w-5 text-green-500" />
+            Contract Claim Progress
+          </h3>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <div className="bg-green-50 dark:bg-green-900/20 rounded-lg p-4 text-center">
+              <p className="text-3xl font-bold text-green-600">{claimData.claimed}</p>
+              <p className="text-sm text-green-700 dark:text-green-400">Claimed</p>
+            </div>
+            <div className="bg-red-50 dark:bg-red-900/20 rounded-lg p-4 text-center">
+              <p className="text-3xl font-bold text-red-600">{claimData.unclaimed}</p>
+              <p className="text-sm text-red-700 dark:text-red-400">Unclaimed</p>
+            </div>
+            <div className="bg-slate-50 dark:bg-slate-700 rounded-lg p-4 text-center">
+              <p className="text-3xl font-bold text-slate-900 dark:text-white">{claimData.total_programs}</p>
+              <p className="text-sm text-slate-600 dark:text-slate-400">Total Programs</p>
+            </div>
+            <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 text-center">
+              <p className="text-3xl font-bold text-blue-600">{Math.round(claimData.claim_rate * 100)}%</p>
+              <p className="text-sm text-blue-700 dark:text-blue-400">Claim Rate</p>
+            </div>
+          </div>
+          {/* Claim progress bar */}
+          <div className="mb-4">
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span className="text-slate-500 dark:text-slate-400">Capture Progress</span>
+              <span className="font-medium text-slate-900 dark:text-white">{Math.round(claimData.claim_rate * 100)}%</span>
+            </div>
+            <div className="w-full h-3 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-gradient-to-r from-green-500 to-emerald-500 rounded-full transition-all duration-500"
+                style={{ width: `${claimData.claim_rate * 100}%` }}
+              />
+            </div>
+          </div>
+          {/* Priority unclaimed */}
+          {unclaimedPriority.length > 0 && (
+            <div>
+              <p className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Top Unclaimed (Priority)</p>
+              <div className="space-y-2">
+                {unclaimedPriority.slice(0, 5).map((item, idx) => (
+                  <div key={idx} className="flex items-center justify-between p-2 bg-slate-50 dark:bg-slate-700 rounded-lg">
+                    <span className="text-sm text-slate-900 dark:text-white truncate">{String(item.name || item.program || 'Unknown')}</span>
+                    <span className="text-xs px-2 py-0.5 rounded bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 font-medium">
+                      Unclaimed
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 

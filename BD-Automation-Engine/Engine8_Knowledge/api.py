@@ -1912,6 +1912,250 @@ async def ingest_scraper_batch(
     return results
 
 
+@app.post("/ingest/scraper-bulk")
+async def ingest_scraper_bulk(request: Request):
+    """
+    Bulk ingest records from data-scraper via JSON.
+
+    Accepts: {"collection": "contacts|programs|jobs", "records": [...]}
+    Uses bulk_upsert_from_scraper() for field normalization.
+    """
+    try:
+        body = await request.json()
+        collection = body.get("collection")
+        records = body.get("records", [])
+
+        if not collection:
+            raise HTTPException(status_code=400, detail="collection is required")
+        if not records:
+            raise HTTPException(status_code=400, detail="records list is empty")
+
+        indexed, errors = store.bulk_upsert_from_scraper(
+            collection=collection,
+            records=records,
+            source_tag=body.get("source", "data_scraper"),
+        )
+
+        return {
+            "success": True,
+            "collection": collection,
+            "indexed": indexed,
+            "errors": errors,
+            "total_submitted": len(records),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Scraper bulk ingest error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# =========================================
+# DAILY ACTION ENGINE
+# =========================================
+
+_daily_engine = None
+_call_prep = None
+_claim_tracker = None
+_recompete_predictor = None
+
+
+def _get_recompete_predictor():
+    global _recompete_predictor
+    if _recompete_predictor is None:
+        from scripts.recompete_predictor import RecompetePredictor
+        _recompete_predictor = RecompetePredictor(store, memory)
+    return _recompete_predictor
+
+
+def _get_daily_engine():
+    global _daily_engine
+    if _daily_engine is None:
+        from scripts.daily_action_engine import DailyActionEngine
+        _daily_engine = DailyActionEngine(store, memory)
+    return _daily_engine
+
+
+def _get_call_prep():
+    global _call_prep
+    if _call_prep is None:
+        from scripts.call_prep_generator import CallPrepGenerator
+        _call_prep = CallPrepGenerator(store, memory)
+    return _call_prep
+
+
+def _get_claim_tracker():
+    global _claim_tracker
+    if _claim_tracker is None:
+        from scripts.claim_tracker import ClaimTracker
+        _claim_tracker = ClaimTracker(store, memory)
+    return _claim_tracker
+
+
+@app.get("/daily-playbook")
+async def get_daily_playbook(
+    date: str = Query(None, description="Target date (YYYY-MM-DD)"),
+    max_actions: int = Query(30, description="Max actions to generate"),
+):
+    """Generate prioritized daily playbook with contact context and recompete alerts."""
+    try:
+        engine = _get_daily_engine()
+        playbook = engine.generate_daily_playbook(
+            target_date=date,
+            max_actions=max_actions,
+        )
+
+        # Inject recompete alerts into the playbook
+        try:
+            predictor = _get_recompete_predictor()
+            recompete_tasks = predictor.get_recompete_alerts_for_playbook(
+                months=12, max_alerts=5,
+            )
+            if recompete_tasks:
+                playbook["tasks"].extend(recompete_tasks)
+                # Re-sort by priority score
+                playbook["tasks"].sort(
+                    key=lambda t: t.get("priority_score", 0), reverse=True
+                )
+                playbook["total"] = len(playbook["tasks"])
+                playbook["recompete_alerts"] = len(recompete_tasks)
+        except Exception as re_err:
+            logger.warning(f"Recompete alert injection failed: {re_err}")
+            playbook["recompete_alerts"] = 0
+
+        return playbook
+    except Exception as e:
+        logger.error(f"Daily playbook generation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/call-prep/{contact_id}")
+async def get_call_prep(
+    contact_id: str,
+    program: str = Query(None, description="Program context"),
+):
+    """Generate call preparation brief for a contact."""
+    try:
+        gen = _get_call_prep()
+        brief = gen.generate_brief(
+            contact_id=contact_id,
+            program_name=program,
+        )
+        return brief
+    except Exception as e:
+        logger.error(f"Call prep generation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/call-prep")
+async def get_call_prep_by_name(
+    contact: str = Query(..., description="Contact name"),
+    program: str = Query(None, description="Program context"),
+):
+    """Generate call preparation brief by contact name."""
+    try:
+        gen = _get_call_prep()
+        brief = gen.generate_brief(
+            contact_name=contact,
+            program_name=program,
+        )
+        return brief
+    except Exception as e:
+        logger.error(f"Call prep generation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/claims/status")
+async def get_claim_status():
+    """Get claimed vs unclaimed contract status."""
+    try:
+        tracker = _get_claim_tracker()
+        return tracker.get_claim_status()
+    except Exception as e:
+        logger.error(f"Claim status failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/claims/unclaimed-priority")
+async def get_unclaimed_priority(
+    limit: int = Query(20, description="Max results"),
+):
+    """Get highest-priority unclaimed contracts."""
+    try:
+        tracker = _get_claim_tracker()
+        return {"unclaimed": tracker.get_unclaimed_priority(limit=limit)}
+    except Exception as e:
+        logger.error(f"Unclaimed priority failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/outreach/log-activity")
+async def log_outreach_activity(request: Request):
+    """
+    Log an outreach activity to local DB and optionally Bullhorn.
+
+    Accepts: {contact_name, activity_type, notes, channel, program, outcome, ...}
+    """
+    try:
+        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+
+        body = await request.json()
+        bh_logger = BullhornActivityLogger()
+        result = bh_logger.log_outreach(
+            contact_name=body.get("contact_name", ""),
+            activity_type=body.get("activity_type", "note"),
+            notes=body.get("notes", ""),
+            contact_email=body.get("contact_email", ""),
+            company=body.get("company", ""),
+            channel=body.get("channel", ""),
+            program=body.get("program", ""),
+            outcome=body.get("outcome", ""),
+            sync_to_bullhorn=body.get("sync_to_bullhorn", True),
+        )
+        return result
+    except Exception as e:
+        logger.error(f"Outreach log failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/outreach/activity-log")
+async def get_outreach_activity_log(
+    contact: str = Query(None, description="Filter by contact name"),
+    limit: int = Query(50, description="Max results"),
+):
+    """Get outreach activity log."""
+    try:
+        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+        bh_logger = BullhornActivityLogger()
+        return {"activities": bh_logger.get_activity_log(contact_name=contact, limit=limit)}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/outreach/stats")
+async def get_outreach_stats():
+    """Get outreach activity statistics."""
+    try:
+        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+        bh_logger = BullhornActivityLogger()
+        return bh_logger.get_stats()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/claims/velocity")
+async def get_claim_velocity(
+    days: int = Query(30, description="Lookback period in days"),
+):
+    """Get claim velocity metrics."""
+    try:
+        tracker = _get_claim_tracker()
+        return tracker.get_velocity(days=days)
+    except Exception as e:
+        logger.error(f"Claim velocity failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 # =========================================
 # AGENT ENDPOINTS
 # =========================================
@@ -2822,6 +3066,213 @@ async def analytics_summary():
         return result
     except Exception as e:
         logger.error(f"Analytics summary error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/analytics/funnel")
+async def analytics_funnel():
+    """Revenue pipeline funnel: Discovered -> Scored -> Outreach -> Meeting -> Placement."""
+    try:
+        funnel = {
+            "discovered": 0,
+            "scored": 0,
+            "outreach": 0,
+            "meeting": 0,
+            "placement": 0,
+        }
+
+        # Count total programs/opportunities (discovered)
+        try:
+            prog_info = store.client.get_collection("programs")
+            funnel["discovered"] = prog_info.points_count or 0
+        except Exception:
+            pass
+
+        # Count scored items (jobs with bd_priority_score)
+        try:
+            job_info = store.client.get_collection("jobs")
+            funnel["scored"] = job_info.points_count or 0
+        except Exception:
+            pass
+
+        # Count outreach activities
+        try:
+            act_info = store.client.get_collection("activities")
+            funnel["outreach"] = min(act_info.points_count or 0, funnel["scored"])
+        except Exception:
+            pass
+
+        # Count meetings (from activity log)
+        try:
+            from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+            bh_logger = BullhornActivityLogger()
+            stats = bh_logger.get_stats()
+            funnel["meeting"] = stats.get("by_type", {}).get("meeting", 0)
+            funnel["placement"] = stats.get("by_type", {}).get("placement", 0)
+        except Exception:
+            pass
+
+        return {
+            "funnel": funnel,
+            "stages": ["discovered", "scored", "outreach", "meeting", "placement"],
+            "timestamp": datetime.now().isoformat(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/system/cross-repo-health")
+async def cross_repo_health():
+    """Check health of all 3 repos: BD-Engine, N8N-Builder, data-scraper."""
+    import httpx
+
+    services = {}
+
+    # BD-Engine (self)
+    services["bd_engine"] = {
+        "name": "BD-Engine",
+        "port": 8100,
+        "status": "online",
+        "url": "http://localhost:8100",
+    }
+
+    # N8N-Builder
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get("http://localhost:8300/health")
+            services["n8n_builder"] = {
+                "name": "N8N-Builder",
+                "port": 8300,
+                "status": "online" if resp.status_code == 200 else "degraded",
+                "url": "http://localhost:8300",
+            }
+    except Exception:
+        services["n8n_builder"] = {
+            "name": "N8N-Builder",
+            "port": 8300,
+            "status": "offline",
+            "url": "http://localhost:8300",
+        }
+
+    # data-scraper (no API, check if scheduler is running)
+    services["data_scraper"] = {
+        "name": "data-scraper",
+        "port": None,
+        "status": "no_api",
+        "url": None,
+        "note": "Data pipeline — no persistent API",
+    }
+
+    # Qdrant
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get("http://localhost:6333/collections")
+            data = resp.json()
+            collections = {
+                c["name"]: True for c in data.get("result", {}).get("collections", [])
+            }
+            services["qdrant"] = {
+                "name": "Qdrant",
+                "port": 6333,
+                "status": "online",
+                "collections": len(collections),
+            }
+    except Exception:
+        services["qdrant"] = {"name": "Qdrant", "port": 6333, "status": "offline"}
+
+    # N8N Cloud (optional)
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            resp = await client.get("https://n8n.cloud/api/v1/health")
+            services["n8n_cloud"] = {"name": "N8N Cloud", "status": "online"}
+    except Exception:
+        services["n8n_cloud"] = {"name": "N8N Cloud", "status": "unknown"}
+
+    # Overall status
+    online_count = sum(1 for s in services.values() if s.get("status") == "online")
+    total = len(services)
+
+    return {
+        "services": services,
+        "overall": "healthy" if online_count >= 3 else "degraded" if online_count >= 2 else "critical",
+        "online": online_count,
+        "total": total,
+        "timestamp": datetime.now().isoformat(),
+    }
+
+
+@app.get("/predictions/recompetes")
+async def get_recompete_predictions(months: int = Query(12, description="Months ahead")):
+    """Predict upcoming contract recompetes using the RecompetePredictor.
+
+    Scans Qdrant programs, N8N-Builder federal_programs.db, and Bullhorn
+    for contracts expiring within the horizon.  Cross-references PTS past
+    performance and assigns priority (critical/high/medium/low).
+    """
+    try:
+        predictor = _get_recompete_predictor()
+        predictions = predictor.get_recompete_predictions(months=months, limit=50)
+        return predictions
+    except Exception as e:
+        logger.error(f"Recompete prediction failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.get("/predictions/best-channels")
+async def get_best_channels():
+    """Get best outreach channels by analyzing activity outcomes.
+
+    Uses the RecompetePredictor's channel analysis, which queries the
+    Qdrant activities collection for outreach records and computes
+    per-channel success rates.  Falls back to Bullhorn activity stats.
+    """
+    try:
+        predictor = _get_recompete_predictor()
+        result = predictor.get_best_channels()
+        return result
+    except Exception as e:
+        logger.warning(f"Predictor best-channels failed, falling back: {e}")
+        # Fallback to Bullhorn activity logger
+        try:
+            from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+            bh_logger = BullhornActivityLogger()
+            stats = bh_logger.get_stats()
+            by_type = stats.get("by_type", {})
+
+            channels = []
+            for channel, count in sorted(by_type.items(), key=lambda x: x[1], reverse=True):
+                channels.append({
+                    "channel": channel,
+                    "total": count,
+                    "success_rate": 0.0,
+                    "avg_response_days": 0.0,
+                })
+
+            return {
+                "channels": channels,
+                "recommendation": "Using Bullhorn activity counts as fallback. Build more outreach history for channel effectiveness analysis.",
+                "data_points": stats.get("total_logged", 0),
+            }
+        except Exception as fallback_err:
+            raise HTTPException(status_code=500, detail=str(fallback_err))
+
+
+@app.post("/predictions/scoring-recalibrate")
+async def recalibrate_scoring(request: Request):
+    """Recalibrate BD scoring weights from conversion outcome data.
+
+    POST body: { "conversion_data": [ { "item": {...}, "outcome": "meeting", "original_score": 75 } ], "learning_rate": 0.1 }
+    """
+    try:
+        from Engine5_Scoring.scripts.bd_scoring import recalibrate
+        body = await request.json()
+        conversion_data = body.get("conversion_data", [])
+        learning_rate = body.get("learning_rate", 0.1)
+
+        result = recalibrate(conversion_data, learning_rate=learning_rate)
+        return result
+    except Exception as e:
+        logger.error(f"Scoring recalibration failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 

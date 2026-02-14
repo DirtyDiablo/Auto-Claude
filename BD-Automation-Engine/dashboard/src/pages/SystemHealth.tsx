@@ -35,8 +35,25 @@ import {
   useHubCacheStats,
   useHubGraphStats,
 } from '../hooks/useHubApi';
-import { getHubApiUrl } from '../services/hubApi';
+import { getHubApiUrl, hubApiClient } from '../services/hubApi';
 import { AnimatedCounter, Sparkline } from '../components/ui/AnimatedCounter';
+
+interface CrossRepoService {
+  status: string;
+  url: string;
+  latency_ms?: number;
+  collections?: number;
+  total_vectors?: number;
+}
+
+interface CrossRepoHealth {
+  bd_engine: CrossRepoService;
+  n8n_builder: CrossRepoService;
+  data_scraper: CrossRepoService;
+  qdrant: CrossRepoService;
+  n8n_cloud: CrossRepoService;
+  timestamp: string;
+}
 
 const REFRESH_INTERVALS = [
   { value: 0, label: 'Manual' },
@@ -61,6 +78,8 @@ export function SystemHealth() {
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [hitRateHistory, setHitRateHistory] = useState<number[]>([]);
   const [_requestHistory, setRequestHistory] = useState<number[]>([]);
+  const [crossRepoHealth, setCrossRepoHealth] = useState<CrossRepoHealth | null>(null);
+  const [crossRepoLoading, setCrossRepoLoading] = useState(false);
 
   // Update last refresh time and track history
   useEffect(() => {
@@ -77,11 +96,25 @@ export function SystemHealth() {
     }
   }, [cacheStats]);
 
+  // Fetch cross-repo health
+  const fetchCrossRepoHealth = () => {
+    setCrossRepoLoading(true);
+    hubApiClient.getCrossRepoHealth()
+      .then(data => setCrossRepoHealth(data))
+      .catch(() => setCrossRepoHealth(null))
+      .finally(() => setCrossRepoLoading(false));
+  };
+
+  useEffect(() => {
+    fetchCrossRepoHealth();
+  }, []);
+
   const handleRefreshAll = () => {
     refetchHealth();
     refetchStats();
     refetchCache();
     refetchGraph();
+    fetchCrossRepoHealth();
   };
 
   const getStatusColor = (status: string) => {
@@ -391,6 +424,63 @@ export function SystemHealth() {
               </div>
             ) : null}
           </div>
+        </div>
+      </div>
+
+      {/* Cross-Repo Health */}
+      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+        <div className="p-4 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center gap-2">
+            <Server className="h-5 w-5 text-indigo-600" />
+            <span className="font-semibold text-slate-900">Cross-Repo System Health</span>
+          </div>
+        </div>
+        <div className="p-4">
+          {crossRepoLoading && !crossRepoHealth ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+            </div>
+          ) : crossRepoHealth ? (
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+              {[
+                { key: 'bd_engine', label: 'BD Engine (8100)', data: crossRepoHealth.bd_engine },
+                { key: 'n8n_builder', label: 'N8N Builder (8300)', data: crossRepoHealth.n8n_builder },
+                { key: 'data_scraper', label: 'Data Scraper (8200)', data: crossRepoHealth.data_scraper },
+                { key: 'qdrant', label: 'Qdrant', data: crossRepoHealth.qdrant },
+                { key: 'n8n_cloud', label: 'N8N Cloud', data: crossRepoHealth.n8n_cloud },
+              ].map(({ key, label, data }) => {
+                const isUp = data.status === 'healthy' || data.status === 'online';
+                return (
+                  <div key={key} className={`p-4 rounded-lg border ${isUp ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
+                    <div className="flex items-center gap-2 mb-2">
+                      {isUp ? (
+                        <CheckCircle2 className="h-4 w-4 text-green-600" />
+                      ) : (
+                        <XCircle className="h-4 w-4 text-red-600" />
+                      )}
+                      <span className={`text-sm font-medium ${isUp ? 'text-green-800' : 'text-red-800'}`}>
+                        {label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-slate-500">{data.url}</p>
+                    {data.latency_ms !== undefined && data.latency_ms > 0 && (
+                      <p className="text-xs text-slate-400 mt-1">{data.latency_ms}ms latency</p>
+                    )}
+                    {data.total_vectors !== undefined && (
+                      <p className="text-xs text-slate-500 mt-1">
+                        {data.collections} collections &bull; {(data.total_vectors || 0).toLocaleString()} vectors
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="text-center py-8 text-slate-500">
+              <AlertCircle className="h-8 w-8 mx-auto mb-2" />
+              <p className="text-sm">Cross-repo health endpoint not available</p>
+            </div>
+          )}
         </div>
       </div>
 

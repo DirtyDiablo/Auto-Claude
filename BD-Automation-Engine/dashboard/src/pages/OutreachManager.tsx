@@ -141,11 +141,11 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
   const [generatedContent, setGeneratedContent] = useState<Record<string, string>>({});
   const [composeTarget, setComposeTarget] = useState<{ seq: OutreachSequence; stepIdx: number } | null>(null);
 
-  // Load data
+  // Load data — tries N8N outreach API (:8300) first, falls back to BD-Engine activity log
   useEffect(() => {
     async function load() {
+      // Try N8N-Builder outreach service first
       try {
-        // Check outreach health first
         const healthRes = await fetch('/outreach/health', { signal: AbortSignal.timeout(3000) });
         if (!healthRes.ok) throw new Error();
         setServiceOnline(true);
@@ -153,13 +153,25 @@ export function OutreachManager({ loading = false, onNavigateToContact }: Outrea
         const [seqs, due] = await Promise.all([fetchSequences(), fetchDueActions()]);
         setSequences(seqs);
         setDueActions(due);
-      } catch {
-        setServiceOnline(false);
-        // Generate mock data so the UI is usable
-        setSequences(generateMockSequences());
-      } finally {
         setDataLoading(false);
+        return;
+      } catch {
+        // N8N outreach service offline
       }
+
+      // Try BD-Engine outreach activity log as fallback
+      try {
+        const stats = await hubApiClient.getOutreachStats();
+        if (stats.total_logged > 0) {
+          setServiceOnline(true); // BD-Engine outreach available
+        }
+      } catch {
+        // BD-Engine also unavailable
+      }
+
+      setServiceOnline(false);
+      setSequences(generateMockSequences());
+      setDataLoading(false);
     }
     load();
   }, []);
