@@ -1,0 +1,257 @@
+"""Hand-curated entities and relationships not present in any architecture JSON.
+
+These represent domain knowledge from the V2 HTML visualization that supplements
+the machine-scanned JSON data. 14 entities + 45+ relationships.
+"""
+
+V2_ONLY_ENTITIES = {
+    'Author': {
+        'pk': 'name', 'records': '12 BD reps', 'category': 'Meta/Ops',
+        'desc': 'BD representative who authors CRM notes and activities. Tracks rep productivity and relationship ownership.',
+        'sources': ['Bullhorn CRM', 'colton_scurry_analysis'],
+        'properties': [
+            {'name': 'name', 'type': 'string PK', 'note': 'Rep full name'},
+            {'name': 'rep_code', 'type': 'string', 'note': 'Bullhorn rep code'},
+            {'name': 'role', 'type': 'string', 'note': 'BD role title'},
+            {'name': 'team', 'type': 'string', 'note': 'Team assignment'},
+            {'name': 'note_count', 'type': 'int', 'note': 'Total notes authored'},
+            {'name': 'active_contacts', 'type': 'int', 'note': 'Contacts managed'},
+        ],
+        'aliases': []
+    },
+    'Note': {
+        'pk': 'note_id', 'records': '50,710 vectors', 'category': 'BD Intelligence',
+        'desc': 'Individual CRM note entry from Bullhorn. Contains free-text intelligence about contacts, programs, and companies.',
+        'sources': ['Bullhorn CRM', 'Qdrant bullhorn_notes collection'],
+        'properties': [
+            {'name': 'note_id', 'type': 'string PK', 'note': 'Note unique ID'},
+            {'name': 'contact_name', 'type': 'string FK', 'note': 'Associated contact'},
+            {'name': 'author', 'type': 'string FK', 'note': 'Note author'},
+            {'name': 'date', 'type': 'datetime', 'note': 'Note date'},
+            {'name': 'body', 'type': 'text', 'note': 'Note content'},
+            {'name': 'action_type', 'type': 'enum', 'note': 'Call/Email/Meeting/Note'},
+            {'name': 'programs_mentioned', 'type': 'list[str]', 'note': 'Programs referenced'},
+            {'name': 'companies_mentioned', 'type': 'list[str]', 'note': 'Companies referenced'},
+        ],
+        'aliases': [{'from': 'note_body', 'to': 'body'}, {'from': 'note_date', 'to': 'date'}]
+    },
+    'Technology': {
+        'pk': 'name', 'records': '74 unique technologies', 'category': 'Reference',
+        'desc': 'Technology or skill detected in job postings and program descriptions. Used for capability mapping.',
+        'sources': ['job_postings', 'program_intelligence', 'tech_stack_summary.csv'],
+        'properties': [
+            {'name': 'name', 'type': 'string PK', 'note': 'Technology name'},
+            {'name': 'category', 'type': 'enum', 'note': 'AI/Cloud/Cyber/Network/Dev'},
+            {'name': 'demand_count', 'type': 'int', 'note': 'Job posting mentions'},
+            {'name': 'program_count', 'type': 'int', 'note': 'Programs using this tech'},
+        ],
+        'aliases': []
+    },
+    'Certification': {
+        'pk': 'name', 'records': '20+ certifications', 'category': 'Reference',
+        'desc': 'Professional certification required by job postings (CompTIA, CISSP, PMP, etc.).',
+        'sources': ['job_postings', 'program_requirements'],
+        'properties': [
+            {'name': 'name', 'type': 'string PK', 'note': 'Cert name'},
+            {'name': 'category', 'type': 'enum', 'note': 'Security/PM/Cloud/Network'},
+            {'name': 'demand_count', 'type': 'int', 'note': 'Job postings requiring this'},
+        ],
+        'aliases': []
+    },
+    'Scrape Run': {
+        'pk': 'run_id', 'records': 'daily runs', 'category': 'Meta/Ops',
+        'desc': 'Execution record of a job scraping pipeline run. Tracks source, volume, and sync status.',
+        'sources': ['data-scraper', 'n8n workflows'],
+        'properties': [
+            {'name': 'run_id', 'type': 'string PK', 'note': 'Run identifier'},
+            {'name': 'source', 'type': 'enum', 'note': 'apex-jobs/insight-global/teksystems'},
+            {'name': 'jobs_scraped', 'type': 'int', 'note': 'Total scraped'},
+            {'name': 'jobs_synced', 'type': 'int', 'note': 'Synced to hub'},
+            {'name': 'duration_seconds', 'type': 'float', 'note': 'Run duration'},
+            {'name': 'status', 'type': 'enum', 'note': 'Success/Failed'},
+            {'name': 'timestamp', 'type': 'datetime', 'note': 'Run timestamp'},
+        ],
+        'aliases': []
+    },
+    'Competitor': {
+        'pk': 'name', 'records': '10 tracked competitors', 'category': 'BD Intelligence',
+        'desc': 'Competitor staffing firm tracked for agency presence and contract activity. TEKsystems, Apex, KFORCE, etc.',
+        'sources': ['bd_competitor_analysis', 'db7_competitor_analysis'],
+        'properties': [
+            {'name': 'name', 'type': 'string PK', 'note': 'Competitor name'},
+            {'name': 'dod_presence', 'type': 'float', 'note': 'Total DoD contract value'},
+            {'name': 'agency_count', 'type': 'int', 'note': 'Agencies served'},
+            {'name': 'as_prime_count', 'type': 'int', 'note': 'Prime contracts'},
+            {'name': 'as_sub_count', 'type': 'int', 'note': 'Subcontracts'},
+            {'name': 'prime_contractors', 'type': 'list[str]', 'note': 'Primes they sub to'},
+        ],
+        'aliases': []
+    },
+    'OTA': {
+        'pk': 'ota_id', 'records': 'from Tango 09_ota_tables.sql', 'category': 'Federal Awards',
+        'desc': 'Other Transaction Agreement - non-FAR based award mechanism used for prototyping/R&D.',
+        'sources': ['Tango SDK', '09_ota_tables.sql'],
+        'properties': [
+            {'name': 'ota_id', 'type': 'string PK', 'note': 'OTA agreement ID'},
+            {'name': 'title', 'type': 'string', 'note': 'Agreement title'},
+            {'name': 'description', 'type': 'text', 'note': 'Agreement description'},
+            {'name': 'agency', 'type': 'string FK', 'note': 'Awarding agency'},
+            {'name': 'recipient_name', 'type': 'string FK', 'note': 'Recipient'},
+            {'name': 'award_amount', 'type': 'float', 'note': 'Award value'},
+            {'name': 'ota_type', 'type': 'enum', 'note': 'Prototype/Production/Follow-on'},
+            {'name': 'consortium', 'type': 'string', 'note': 'OTA consortium name'},
+            {'name': 'status', 'type': 'enum', 'note': 'Active/Completed/Terminated'},
+        ],
+        'aliases': []
+    },
+    'Federal Account': {
+        'pk': 'account_id', 'records': '~600 per contract', 'category': 'Federal Awards',
+        'desc': 'Federal account funding detail linking treasury accounts to contract obligations.',
+        'sources': ['USASpending'],
+        'properties': [
+            {'name': 'account_id', 'type': 'string PK', 'note': 'Account identifier'},
+            {'name': 'piid', 'type': 'string FK', 'note': 'Parent contract PIID'},
+            {'name': 'federal_account_name', 'type': 'string', 'note': 'Treasury account name'},
+            {'name': 'obligated_amount', 'type': 'float', 'note': 'Amount from this account'},
+            {'name': 'fiscal_year', 'type': 'int', 'note': 'Federal fiscal year'},
+            {'name': 'agency_name', 'type': 'string FK', 'note': 'Owning agency'},
+        ],
+        'aliases': []
+    },
+    'Grant': {
+        'pk': 'grant_id', 'records': 'from Tango API', 'category': 'Procurement',
+        'desc': 'Federal grant award. Tracked via Tango API for non-contract funding intelligence.',
+        'sources': ['Tango SDK'],
+        'properties': [
+            {'name': 'grant_id', 'type': 'string PK', 'note': 'Grant ID'},
+            {'name': 'title', 'type': 'string', 'note': 'Grant title'},
+            {'name': 'agency', 'type': 'string FK', 'note': 'Granting agency'},
+            {'name': 'recipient', 'type': 'string FK', 'note': 'Recipient org'},
+            {'name': 'amount', 'type': 'float', 'note': 'Grant amount'},
+            {'name': 'fiscal_year', 'type': 'int', 'note': 'Fiscal year'},
+        ],
+        'aliases': []
+    },
+    'Fiscal Phase': {
+        'pk': 'phase_name', 'records': '12 phases/year', 'category': 'Meta/Ops',
+        'desc': 'Federal budget cycle phase mapping months to BD activity patterns and hiring signals.',
+        'sources': ['budget_cycle_intelligence', 'BD playbooks'],
+        'properties': [
+            {'name': 'phase_name', 'type': 'string PK', 'note': 'Phase name'},
+            {'name': 'months', 'type': 'list[int]', 'note': 'Month numbers'},
+            {'name': 'description', 'type': 'string', 'note': 'Phase description'},
+            {'name': 'hiring_signal', 'type': 'string', 'note': 'Hiring activity pattern'},
+            {'name': 'bd_actions', 'type': 'list[str]', 'note': 'Recommended BD actions'},
+        ],
+        'aliases': []
+    },
+    'Capability': {
+        'pk': 'name', 'records': 'mapped from NAICS/PSC/Tech', 'category': 'Meta/Ops',
+        'desc': 'PTS capability domain mapping technologies, certifications, and clearances to program needs.',
+        'sources': ['contractor capabilities', 'BD playbooks'],
+        'properties': [
+            {'name': 'name', 'type': 'string PK', 'note': 'Capability name'},
+            {'name': 'category', 'type': 'string', 'note': 'Domain category'},
+            {'name': 'technologies', 'type': 'list[str]', 'note': 'Associated technologies'},
+            {'name': 'certifications', 'type': 'list[str]', 'note': 'Required certs'},
+            {'name': 'program_alignment', 'type': 'list[str]', 'note': 'Matching programs'},
+        ],
+        'aliases': []
+    },
+    'Recompete': {
+        'pk': 'recompete_id', 'records': 'from RECOMPETE_TRACKER.csv', 'category': 'Procurement',
+        'desc': 'Tracked recompete opportunity \u2014 existing contract approaching end of performance, representing BD opportunity.',
+        'sources': ['RECOMPETE_TRACKER.csv', 'CONTRACT_OPPORTUNITY_CALENDAR.md', 'bd_databases'],
+        'properties': [
+            {'name': 'recompete_id', 'type': 'string PK', 'note': 'Tracking ID'},
+            {'name': 'contract_piid', 'type': 'string FK', 'note': 'Source contract'},
+            {'name': 'program', 'type': 'string FK', 'note': 'Program name'},
+            {'name': 'incumbent', 'type': 'string FK', 'note': 'Current prime contractor'},
+            {'name': 'estimated_value', 'type': 'float', 'note': 'Estimated recompete value'},
+            {'name': 'current_end_date', 'type': 'date', 'note': 'Current contract end'},
+            {'name': 'expected_solicitation', 'type': 'date', 'note': 'Expected RFP date'},
+            {'name': 'expected_award', 'type': 'date', 'note': 'Expected award date'},
+            {'name': 'vehicle', 'type': 'string FK', 'note': 'Expected vehicle'},
+            {'name': 'naics_code', 'type': 'string FK', 'note': 'NAICS code'},
+            {'name': 'set_aside', 'type': 'string', 'note': 'Expected set-aside'},
+            {'name': 'bd_priority', 'type': 'enum', 'note': 'BD priority level'},
+            {'name': 'pts_strategy', 'type': 'text', 'note': 'PTS pursuit strategy'},
+            {'name': 'status', 'type': 'enum', 'note': 'Tracking/Pursuing/Won/Lost'},
+        ],
+        'aliases': []
+    },
+    'Notice': {
+        'pk': 'notice_id', 'records': 'from Tango reports', 'category': 'Procurement',
+        'desc': 'Federal business notice (FedBizOpps/SAM) including pre-solicitation, sources sought, and special notices.',
+        'sources': ['SAM.gov', 'Tango SDK tangoapi_notices.txt'],
+        'properties': [
+            {'name': 'notice_id', 'type': 'string PK', 'note': 'Notice ID'},
+            {'name': 'title', 'type': 'string', 'note': 'Notice title'},
+            {'name': 'type', 'type': 'enum', 'note': 'PreSol/SourcesSought/Special/Intent'},
+            {'name': 'agency', 'type': 'string FK', 'note': 'Agency'},
+            {'name': 'posted_date', 'type': 'date', 'note': 'Post date'},
+            {'name': 'response_date', 'type': 'date', 'note': 'Response deadline'},
+            {'name': 'naics_code', 'type': 'string FK', 'note': 'NAICS'},
+            {'name': 'set_aside', 'type': 'string', 'note': 'Set-aside type'},
+            {'name': 'related_opportunity', 'type': 'string FK', 'note': 'Related opportunity'},
+            {'name': 'description', 'type': 'text', 'note': 'Notice description'},
+        ],
+        'aliases': []
+    },
+}
+
+V2_ONLY_RELATIONSHIPS = [
+    {'from': 'Job', 'to': 'Technology', 'label': 'requires', 'type': 'many'},
+    {'from': 'Job', 'to': 'Certification', 'label': 'requires', 'type': 'many'},
+    {'from': 'Job', 'to': 'Scrape Run', 'label': 'scraped_in', 'type': 'FK'},
+    {'from': 'Job', 'to': 'BD Target', 'label': 'signals', 'type': 'derived'},
+    {'from': 'Contract', 'to': 'NAICS Code', 'label': 'classified_by', 'type': 'FK'},
+    {'from': 'Contract', 'to': 'PSC Code', 'label': 'classified_by', 'type': 'FK'},
+    {'from': 'Contract', 'to': 'Location', 'label': 'performed_at', 'type': 'FK'},
+    {'from': 'Contract', 'to': 'BD Target', 'label': 'scored_as', 'type': 'derived'},
+    {'from': 'Contract', 'to': 'IDV', 'label': 'ordered_under', 'type': 'FK'},
+    {'from': 'Contract', 'to': 'Task Order', 'label': 'has_task_orders', 'type': 'one-many'},
+    {'from': 'Contract', 'to': 'Transaction', 'label': 'has_transactions', 'type': 'one-many'},
+    {'from': 'Contract', 'to': 'Federal Account', 'label': 'funded_by', 'type': 'one-many'},
+    {'from': 'Contract', 'to': 'Recompete', 'label': 'tracked_as', 'type': 'one-one'},
+    {'from': 'Program', 'to': 'Technology', 'label': 'uses', 'type': 'many'},
+    {'from': 'Program', 'to': 'Past Performance', 'label': 'has_past_perf', 'type': 'one-many'},
+    {'from': 'Prime', 'to': 'Vendor', 'label': 'registered_as', 'type': 'one-one'},
+    {'from': 'Prime', 'to': 'Competitor', 'label': 'competes_with', 'type': 'many'},
+    {'from': 'Contact', 'to': 'Author', 'label': 'engaged_by', 'type': 'many'},
+    {'from': 'Contact', 'to': 'Note', 'label': 'mentioned_in', 'type': 'one-many'},
+    {'from': 'Contact', 'to': 'Placement', 'label': 'placed_as', 'type': 'one-many'},
+    {'from': 'Author', 'to': 'Activity', 'label': 'writes', 'type': 'one-many'},
+    {'from': 'Author', 'to': 'Note', 'label': 'authors', 'type': 'one-many'},
+    {'from': 'Subaward', 'to': 'NAICS Code', 'label': 'classified_by', 'type': 'FK'},
+    {'from': 'Opportunity', 'to': 'NAICS Code', 'label': 'classified_by', 'type': 'FK'},
+    {'from': 'Opportunity', 'to': 'PSC Code', 'label': 'categorized_by', 'type': 'FK'},
+    {'from': 'Opportunity', 'to': 'Location', 'label': 'located_at', 'type': 'FK'},
+    {'from': 'Opportunity', 'to': 'Notice', 'label': 'has_notices', 'type': 'one-many'},
+    {'from': 'Forecast', 'to': 'NAICS Code', 'label': 'classified_by', 'type': 'FK'},
+    {'from': 'Forecast', 'to': 'PSC Code', 'label': 'categorized_by', 'type': 'FK'},
+    {'from': 'OTA', 'to': 'Agency', 'label': 'awarded_by', 'type': 'FK'},
+    {'from': 'OTA', 'to': 'Prime', 'label': 'awarded_to', 'type': 'FK'},
+    {'from': 'OTA', 'to': 'Contract', 'label': 'related_to', 'type': 'FK'},
+    {'from': 'Grant', 'to': 'Agency', 'label': 'granted_by', 'type': 'FK'},
+    {'from': 'Grant', 'to': 'Vendor', 'label': 'awarded_to', 'type': 'FK'},
+    {'from': 'Recompete', 'to': 'Prime', 'label': 'incumbent_is', 'type': 'FK'},
+    {'from': 'Recompete', 'to': 'Program', 'label': 'for_program', 'type': 'FK'},
+    {'from': 'Recompete', 'to': 'Contract Vehicle', 'label': 'expected_vehicle', 'type': 'FK'},
+    {'from': 'BD Target', 'to': 'Competitor', 'label': 'has_competitors', 'type': 'many'},
+    {'from': 'BD Target', 'to': 'Recompete', 'label': 'recompete_as', 'type': 'one-one'},
+    {'from': 'IDV', 'to': 'Task Order', 'label': 'parent_of', 'type': 'one-many'},
+    {'from': 'IDV', 'to': 'Vendor', 'label': 'awarded_to', 'type': 'many'},
+    {'from': 'IDV', 'to': 'Contract Vehicle', 'label': 'managed_by', 'type': 'FK'},
+    {'from': 'IDV', 'to': 'Agency', 'label': 'managed_by', 'type': 'FK'},
+    {'from': 'Task Order', 'to': 'Prime', 'label': 'awarded_to', 'type': 'FK'},
+    {'from': 'Vendor', 'to': 'Agency', 'label': 'registered_with', 'type': 'FK'},
+    {'from': 'Placement', 'to': 'Job', 'label': 'fills', 'type': 'FK'},
+    {'from': 'Placement', 'to': 'Prime', 'label': 'at_company', 'type': 'FK'},
+    {'from': 'Placement', 'to': 'Program', 'label': 'on_program', 'type': 'FK'},
+    {'from': 'Past Performance', 'to': 'Prime', 'label': 'with_prime', 'type': 'FK'},
+    {'from': 'Note', 'to': 'Program', 'label': 'mentions', 'type': 'many'},
+    {'from': 'Note', 'to': 'Prime', 'label': 'mentions', 'type': 'many'},
+    {'from': 'Intelligence Report', 'to': 'Prime', 'label': 'analyzes', 'type': 'FK'},
+    {'from': 'Enrichment Run', 'to': 'Contract', 'label': 'enriches', 'type': 'one-many'},
+]
