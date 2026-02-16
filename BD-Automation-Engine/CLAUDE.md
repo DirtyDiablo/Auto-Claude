@@ -271,3 +271,73 @@ Dify-compatible endpoints at `/dify/*`:
 - ✅ Engine 8: AI Knowledge System (complete)
 - ✅ Dify Integration: Visual AI Orchestration (complete)
 - 🔜 Full Pipeline Integration (next)
+## Antigravity Awesome Skills (850+ installed)
+
+All skills from https://github.com/sickn33/antigravity-awesome-skills are installed in `.claude/skills/`.
+
+### PTS Context Files (auto-loaded)
+- `PTS_PLATFORM_CONTEXT.md` — Mission, architecture, priorities, tech stack
+- `PTS_BD_ENGINE_CONTEXT.md` — 8-engine pipeline, Bullhorn, Neo4j
+- `PTS_N8N_BUILDER_CONTEXT.md` — LangGraph workflows, federal APIs, N8N removal
+- `PTS_DATA_SCRAPER_CONTEXT.md` — Scraping, classification, program mapping
+
+### PTS Custom Skills
+- `@pts-bd-pipeline` — 8-engine pipeline orchestration and scoring
+- `@pts-federal-intel` — SAM.gov/FPDS/USASpending/Tango patterns
+- `@pts-contact-ops` — Bullhorn CRM, 6-tier hierarchy, HUMINT methodology
+- `@pts-arch-migration` — 3 to 2 repo consolidation, Supabase migration
+
+### Key Skills by Next-Gen Rebuild Task
+
+**Revenue Engine (Call Lists and Briefings)**
+@pts-bd-pipeline @crewai @langgraph @autonomous-agents @rag-engineer
+
+**Supabase Migration (SQLite to PostgreSQL + pgvector)**
+@pts-arch-migration @database-migration @postgres-best-practices @postgresql
+@supabase-automation @nextjs-supabase-auth @vector-database-engineer @vector-index-tuning
+
+**LangGraph Workflows (N8N Replacement)**
+@langgraph @langchain-architecture @workflow-automation @workflow-orchestration-patterns
+@autonomous-agent-patterns @agent-memory-mcp @agent-memory-systems @parallel-agents
+
+**Dashboard Rewrite (Next.js 16.1)**
+@nextjs-best-practices @nextjs-app-router-patterns @react-patterns @react-best-practices
+@react-flow-architect @react-flow-node-ts @react-state-management @zustand-store-ts
+@tailwind-design-system @tailwind-patterns @frontend-design @ui-ux-pro-max
+
+**API Consolidation (3 to 1 Server)**
+@fastapi-pro @fastapi-templates @fastapi-router-py @api-design-principles
+@api-documentation-generator @api-patterns @senior-architect @architecture
+
+**Python Backend**
+@python-pro @python-patterns @python-performance-optimization @async-python-patterns
+@pydantic-models-py @python-packaging @uv-package-manager
+
+**AI/Agent Pipeline**
+@ai-engineer @ai-agents-architect @crewai @rag-implementation @embedding-strategies
+@similarity-search-patterns @prompt-engineering @prompt-caching @llm-evaluation
+@context-manager @context-window-management @conversation-memory @hybrid-search-implementation
+
+**CI/CD and Infrastructure**
+@docker-expert @github-automation @github-actions-templates @deployment-engineer
+@deployment-procedures @terraform-specialist @observability-engineer @server-management
+
+**Security (Federal-Grade)**
+@api-security-best-practices @auth-implementation-patterns @security-auditor
+@secrets-management @vulnerability-scanner @cc-skill-security-review @gdpr-data-handling
+
+**Testing**
+@test-driven-development @tdd-workflow @python-testing-patterns @testing-patterns
+@webapp-testing @e2e-testing-patterns @systematic-debugging
+
+**Planning and Documentation**
+@brainstorming @doc-coauthoring @concise-planning @plan-writing @planning-with-files
+@executing-plans @writing-plans @docs-architect @wiki-architect
+
+**Code Quality and Review**
+@clean-code @code-review-checklist @code-review-excellence @production-code-audit
+@codebase-cleanup-tech-debt @legacy-modernizer @lint-and-validate
+
+**Workflow Integrations**
+@slack-automation @slack-bot-builder @notion-automation @github-automation
+@mcp-builder @n8n-code-python @n8n-mcp-tools-expert

@@ -42,3 +42,11 @@ nul
 # Qdrant lock files
 *.lock
 repomix-*.xml
+
+# Antigravity skills (pulled from external repo, reinstall via script)
+.claude/skills/*/
+!.claude/skills/PTS_*.md
+!.claude/skills/pts-bd-pipeline/
+!.claude/skills/pts-federal-intel/
+!.claude/skills/pts-contact-ops/
+!.claude/skills/pts-arch-migration/
