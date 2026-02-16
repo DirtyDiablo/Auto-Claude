@@ -41,3 +41,4 @@ nul
 
 # Qdrant lock files
 *.lock
+repomix-*.xml
