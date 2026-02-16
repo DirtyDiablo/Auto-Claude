@@ -1,0 +1,56 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+.venv
+venv
+*.egg-info
+
+# Testing
+tests/
+.pytest_cache
+.coverage
+htmlcov/
+
+# Development
+.pre-commit-config.yaml
+.secrets.baseline
+.mypy_cache
+.ruff_cache
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Data files (large)
+Engine7_BullhornETL/data/bullhorn.db
+Engine8_Knowledge/data/qdrant/
+
+# IDE
+.vscode/
+.idea/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Dashboard (separate build)
+dashboard/
+node_modules/
+
+# CI/CD
+.github/
+
+# Auto-Claude
+.auto-claude/
+.claude/
+
+# Outputs
+outputs/
+logs/

@@ -1,0 +1,170 @@
+[project]
+name = "bd-automation-engine"
+version = "1.0.0"
+description = "PTS BD Intelligence System for federal defense programs"
+requires-python = ">=3.12"
+readme = "README.md"
+license = {text = "Proprietary"}
+
+[project.optional-dependencies]
+dev = [
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "pytest-asyncio>=0.23.0",
+    "pre-commit>=3.6.0",
+]
+
+# ─── Ruff ─────────────────────────────────────────────────
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+exclude = [
+    ".auto-claude",
+    ".venv",
+    "node_modules",
+    "dashboard",
+    "data",
+    "outputs",
+    "__pycache__",
+    "*.egg-info",
+]
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "B",    # flake8-bugbear
+    "UP",   # pyupgrade
+    "S",    # flake8-bandit (security)
+    "ERA",  # eradicate (commented code)
+    "PL",   # pylint
+    "RUF",  # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "S101",   # assert in non-test code (used intentionally)
+    "S104",   # binding to all interfaces (intentional for Docker)
+    "S603",   # subprocess call (needed for orchestrator)
+    "S607",   # partial executable path (needed for orchestrator)
+    "PLR0913", # too many arguments (complex API handlers)
+    "PLR2004", # magic values (thresholds in scoring)
+    "ERA001",  # commented-out code (section headers, not dead code)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101",    # asserts are fine in tests
+    "PLR2004", # magic values are fine in tests
+    "S106",    # hardcoded passwords in test fixtures
+]
+"Engine8_Knowledge/api.py" = [
+    "PLR0915", # too many statements (large API file, will be split)
+]
+"orchestrator.py" = [
+    "PLR0915", # too many statements
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint.isort]
+known-first-party = [
+    "Engine1_Scraper",
+    "Engine2_ProgramMapping",
+    "Engine3_OrgChart",
+    "Engine4_Playbook",
+    "Engine5_Scoring",
+    "Engine6_QA",
+    "Engine7_BullhornETL",
+    "Engine8_Knowledge",
+    "api",
+    "config",
+    "services",
+    "utils",
+]
+
+# ─── Pytest ───────────────────────────────────────────────
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "-x",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests requiring external services",
+    "qdrant: marks tests requiring Qdrant",
+    "neo4j: marks tests requiring Neo4j",
+]
+filterwarnings = [
+    "ignore::DeprecationWarning:qdrant_client.*",
+    "ignore::DeprecationWarning:pydantic.*",
+]
+
+# ─── Mypy ─────────────────────────────────────────────────
+
+[tool.mypy]
+python_version = "3.12"
+warn_return_any = true
+warn_unused_configs = true
+warn_unused_ignores = true
+check_untyped_defs = true
+disallow_untyped_defs = false        # Gradual: enable later
+ignore_missing_imports = true         # Many deps lack stubs
+exclude = [
+    "tests/",
+    "data/",
+    "dashboard/",
+    ".auto-claude/",
+]
+
+[[tool.mypy.overrides]]
+module = "qdrant_client.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "crewai.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "langgraph.*"
+ignore_missing_imports = true
+
+# ─── Coverage ─────────────────────────────────────────────
+
+[tool.coverage.run]
+source = [
+    "Engine8_Knowledge",
+    "api",
+    "config",
+    "services",
+    "utils",
+]
+omit = [
+    "tests/*",
+    "data/*",
+    "dashboard/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+fail_under = 60
+show_missing = true
+skip_empty = true
+exclude_lines = [
+    "pragma: no cover",
+    "if __name__ == .__main__.",
+    "if TYPE_CHECKING:",
+    "pass",
+]

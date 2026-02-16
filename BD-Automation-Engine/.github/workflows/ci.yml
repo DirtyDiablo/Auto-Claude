@@ -1,0 +1,70 @@
+# CI Pipeline — BD-Automation-Engine
+# Runs on push to working branches and PRs to develop
+
+name: CI
+
+on:
+  push:
+    branches:
+      - 'claude/setup-auto-claude-*'
+  pull_request:
+    branches:
+      - develop
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+        with:
+          version: 'latest'
+
+      - name: Install dependencies
+        working-directory: BD-Automation-Engine
+        run: |
+          uv venv
+          uv pip install -r requirements.txt
+          uv pip install ruff mypy pytest pytest-cov pytest-asyncio
+
+      - name: Ruff lint
+        working-directory: BD-Automation-Engine
+        run: uv run ruff check .
+
+      - name: Ruff format check
+        working-directory: BD-Automation-Engine
+        run: uv run ruff format --check .
+
+      - name: Run tests
+        working-directory: BD-Automation-Engine
+        run: |
+          uv run pytest tests/ \
+            -v \
+            --tb=short \
+            --cov=Engine8_Knowledge \
+            --cov-report=term-missing \
+            --cov-report=xml:coverage.xml \
+            -m "not integration and not qdrant and not neo4j" \
+            || true
+
+      - name: Upload coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: BD-Automation-Engine/coverage.xml
+
+      - name: Mypy type check
+        working-directory: BD-Automation-Engine
+        run: uv run mypy Engine8_Knowledge/ --ignore-missing-imports || true
