@@ -20,6 +20,7 @@ from src.tenants.tenant_manager import TenantManager
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def setup():
     """Set up tenant, user, and session for middleware tests."""
@@ -42,6 +43,7 @@ def setup():
     # We need to patch singletons for middleware to find them
     import src.auth.auth_service as auth_mod
     import src.tenants.tenant_manager as tenant_mod
+
     old_auth = auth_mod._service
     old_tenant = tenant_mod._manager
     auth_mod._service = auth_svc
@@ -64,6 +66,7 @@ def setup():
 # TENANT CONTEXT
 # =========================================
 
+
 class TestTenantContext:
     def test_context_dataclass(self):
         ctx = TenantContext(tenant_id="t1", user_id="u1", role=Role.BD_MANAGER)
@@ -78,6 +81,7 @@ class TestTenantContext:
 # =========================================
 # MIDDLEWARE RESOLUTION
 # =========================================
+
 
 class TestMiddlewareResolution:
     def test_resolve_bearer_token(self, setup):
@@ -128,6 +132,7 @@ class TestMiddlewareResolution:
 # RATE LIMITER
 # =========================================
 
+
 class TestRateLimiter:
     def test_allows_under_limit(self):
         rl = TenantRateLimiter()
@@ -162,6 +167,7 @@ class TestRateLimiter:
 # PERMISSION HELPERS
 # =========================================
 
+
 class TestPermissionHelpers:
     def test_require_permission_granted(self, setup):
         ctx = TenantContext(
@@ -195,6 +201,7 @@ class TestPermissionHelpers:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_middleware(self):

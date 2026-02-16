@@ -29,26 +29,63 @@ WORKERS = [
     # Contacts workers
     {
         "name": "contacts-w1",
-        "args": ["--type", "contacts", "--start-id", "90001", "--end-id", "258000", "--worker", "1"],
-        "desc": "Contacts IDs 90,001-258,000 (~168K records)"
+        "args": [
+            "--type",
+            "contacts",
+            "--start-id",
+            "90001",
+            "--end-id",
+            "258000",
+            "--worker",
+            "1",
+        ],
+        "desc": "Contacts IDs 90,001-258,000 (~168K records)",
     },
     {
         "name": "contacts-w2",
-        "args": ["--type", "contacts", "--start-id", "258001", "--end-id", "426565", "--worker", "2"],
-        "desc": "Contacts IDs 258,001-426,565 (~168K records)"
+        "args": [
+            "--type",
+            "contacts",
+            "--start-id",
+            "258001",
+            "--end-id",
+            "426565",
+            "--worker",
+            "2",
+        ],
+        "desc": "Contacts IDs 258,001-426,565 (~168K records)",
     },
     # Activities workers
     {
         "name": "activities-w1",
-        "args": ["--type", "activities", "--start-id", "1", "--end-id", "202000", "--worker", "1"],
-        "desc": "Activities IDs 1-202,000 (~202K records)"
+        "args": [
+            "--type",
+            "activities",
+            "--start-id",
+            "1",
+            "--end-id",
+            "202000",
+            "--worker",
+            "1",
+        ],
+        "desc": "Activities IDs 1-202,000 (~202K records)",
     },
     {
         "name": "activities-w2",
-        "args": ["--type", "activities", "--start-id", "202001", "--end-id", "404715", "--worker", "2"],
-        "desc": "Activities IDs 202,001-404,715 (~202K records)"
+        "args": [
+            "--type",
+            "activities",
+            "--start-id",
+            "202001",
+            "--end-id",
+            "404715",
+            "--worker",
+            "2",
+        ],
+        "desc": "Activities IDs 202,001-404,715 (~202K records)",
     },
 ]
+
 
 def main():
     print("=" * 70)
@@ -65,23 +102,21 @@ def main():
         # Create log file for this worker
         log_file = f"worker_{w['name']}.log"
 
-        cmd = [PYTHON, SCRIPT] + w['args']
+        cmd = [PYTHON, SCRIPT] + w["args"]
         print(f"    Command: {' '.join(cmd)}")
         print(f"    Log: {log_file}")
 
         # Start process with output redirected to log file
-        with open(log_file, 'w') as f:
+        with open(log_file, "w") as f:
             proc = subprocess.Popen(
                 cmd,
                 stdout=f,
                 stderr=subprocess.STDOUT,
-                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if sys.platform == 'win32' else 0
+                creationflags=subprocess.CREATE_NEW_PROCESS_GROUP
+                if sys.platform == "win32"
+                else 0,
             )
-            processes.append({
-                "name": w['name'],
-                "proc": proc,
-                "log": log_file
-            })
+            processes.append({"name": w["name"], "proc": proc, "log": log_file})
             print(f"    PID: {proc.pid}")
 
     print("\n" + "=" * 70)

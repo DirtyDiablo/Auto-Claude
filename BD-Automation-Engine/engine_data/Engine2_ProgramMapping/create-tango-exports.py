@@ -13,10 +13,12 @@ logger = logging.getLogger(__name__)
 INPUT_FILE = Path("Federal Programs TANGO ENRICHED.csv")
 EXPORTS_DIR = Path("exports")
 
+
 def load_data():
     """Load enriched program data."""
-    with open(INPUT_FILE, 'r', encoding='utf-8') as f:
+    with open(INPUT_FILE, "r", encoding="utf-8") as f:
         return list(csv.DictReader(f))
+
 
 def export_location_intelligence(programs):
     """Export location analysis - programs by state and city."""
@@ -25,24 +27,26 @@ def export_location_intelligence(programs):
     # Aggregate by location
     location_data = []
     for p in programs:
-        if p.get('pop_city') or p.get('pop_state'):
-            location_data.append({
-                'Program Name': p.get('Program Name', ''),
-                'Acronym': p.get('Acronym', ''),
-                'Agency': p.get('Agency', ''),
-                'Prime Contractor': p.get('Prime Contractor', ''),
-                'City': p.get('pop_city', ''),
-                'State': p.get('pop_state', ''),
-                'ZIP Code': p.get('pop_zip', ''),
-                'Contract Number': p.get('Contract Number', ''),
-                'Contract Value': p.get('Contract Value', ''),
-                'Period Start': p.get('period_start', ''),
-                'Period End': p.get('period_end', ''),
-            })
+        if p.get("pop_city") or p.get("pop_state"):
+            location_data.append(
+                {
+                    "Program Name": p.get("Program Name", ""),
+                    "Acronym": p.get("Acronym", ""),
+                    "Agency": p.get("Agency", ""),
+                    "Prime Contractor": p.get("Prime Contractor", ""),
+                    "City": p.get("pop_city", ""),
+                    "State": p.get("pop_state", ""),
+                    "ZIP Code": p.get("pop_zip", ""),
+                    "Contract Number": p.get("Contract Number", ""),
+                    "Contract Value": p.get("Contract Value", ""),
+                    "Period Start": p.get("period_start", ""),
+                    "Period End": p.get("period_end", ""),
+                }
+            )
 
     # Write file
     if location_data:
-        with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=location_data[0].keys())
             writer.writeheader()
             writer.writerows(location_data)
@@ -52,7 +56,7 @@ def export_location_intelligence(programs):
     # Summary by state
     states = defaultdict(int)
     for p in location_data:
-        state = p.get('State', 'Unknown')
+        state = p.get("State", "Unknown")
         if state:
             states[state] += 1
 
@@ -60,40 +64,43 @@ def export_location_intelligence(programs):
     for state, count in sorted(states.items(), key=lambda x: -x[1])[:10]:
         print(f"    {state}: {count} programs")
 
+
 def export_subaward_intelligence(programs):
     """Export programs with subaward data."""
     output_file = EXPORTS_DIR / "subaward_intelligence.csv"
 
     subaward_data = []
     for p in programs:
-        if p.get('subawards_count'):
+        if p.get("subawards_count"):
             try:
-                count = int(p.get('subawards_count', 0))
+                count = int(p.get("subawards_count", 0))
             except (ValueError, TypeError) as e:
                 logger.debug("subaward_count_parse_failed: %s", e)
                 count = 0
 
-            subaward_data.append({
-                'Program Name': p.get('Program Name', ''),
-                'Acronym': p.get('Acronym', ''),
-                'Agency': p.get('Agency', ''),
-                'Prime Contractor': p.get('Prime Contractor', ''),
-                'Contract Number': p.get('Contract Number', ''),
-                'Contract Value': p.get('Contract Value', ''),
-                'Subaward Count': p.get('subawards_count', ''),
-                'Subaward Total': p.get('subawards_total', ''),
-                'Recipient UEI': p.get('recipient_uei', ''),
-                'Recipient Name': p.get('recipient_name', ''),
-                'City': p.get('pop_city', ''),
-                'State': p.get('pop_state', ''),
-            })
+            subaward_data.append(
+                {
+                    "Program Name": p.get("Program Name", ""),
+                    "Acronym": p.get("Acronym", ""),
+                    "Agency": p.get("Agency", ""),
+                    "Prime Contractor": p.get("Prime Contractor", ""),
+                    "Contract Number": p.get("Contract Number", ""),
+                    "Contract Value": p.get("Contract Value", ""),
+                    "Subaward Count": p.get("subawards_count", ""),
+                    "Subaward Total": p.get("subawards_total", ""),
+                    "Recipient UEI": p.get("recipient_uei", ""),
+                    "Recipient Name": p.get("recipient_name", ""),
+                    "City": p.get("pop_city", ""),
+                    "State": p.get("pop_state", ""),
+                }
+            )
 
     # Sort by subaward count
-    subaward_data.sort(key=lambda x: int(x.get('Subaward Count', 0) or 0), reverse=True)
+    subaward_data.sort(key=lambda x: int(x.get("Subaward Count", 0) or 0), reverse=True)
 
     # Write file
     if subaward_data:
-        with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=subaward_data[0].keys())
             writer.writeheader()
             writer.writerows(subaward_data)
@@ -103,8 +110,9 @@ def export_subaward_intelligence(programs):
     # Top 10 by subaward count
     print("  Top 10 by subaward count:")
     for p in subaward_data[:10]:
-        name = p['Program Name'][:40].encode('ascii', 'replace').decode('ascii')
+        name = p["Program Name"][:40].encode("ascii", "replace").decode("ascii")
         print(f"    {p['Subaward Count']:>5} subawards - {name}")
+
 
 def export_contract_timeline(programs):
     """Export contract timeline with period of performance."""
@@ -112,28 +120,30 @@ def export_contract_timeline(programs):
 
     timeline_data = []
     for p in programs:
-        if p.get('period_start') or p.get('period_end'):
-            timeline_data.append({
-                'Program Name': p.get('Program Name', ''),
-                'Acronym': p.get('Acronym', ''),
-                'Agency': p.get('Agency', ''),
-                'Prime Contractor': p.get('Prime Contractor', ''),
-                'Contract Number': p.get('Contract Number', ''),
-                'Period Start': p.get('period_start', ''),
-                'Period End': p.get('period_end', ''),
-                'Ultimate Completion': p.get('ultimate_completion', ''),
-                'Contract Value': p.get('Contract Value', ''),
-                'Awarding Office': p.get('awarding_office', ''),
-                'Awarding Agency': p.get('awarding_agency', ''),
-                'Parent PIID': p.get('parent_piid', ''),
-            })
+        if p.get("period_start") or p.get("period_end"):
+            timeline_data.append(
+                {
+                    "Program Name": p.get("Program Name", ""),
+                    "Acronym": p.get("Acronym", ""),
+                    "Agency": p.get("Agency", ""),
+                    "Prime Contractor": p.get("Prime Contractor", ""),
+                    "Contract Number": p.get("Contract Number", ""),
+                    "Period Start": p.get("period_start", ""),
+                    "Period End": p.get("period_end", ""),
+                    "Ultimate Completion": p.get("ultimate_completion", ""),
+                    "Contract Value": p.get("Contract Value", ""),
+                    "Awarding Office": p.get("awarding_office", ""),
+                    "Awarding Agency": p.get("awarding_agency", ""),
+                    "Parent PIID": p.get("parent_piid", ""),
+                }
+            )
 
     # Sort by end date
-    timeline_data.sort(key=lambda x: x.get('Period End', '9999'), reverse=False)
+    timeline_data.sort(key=lambda x: x.get("Period End", "9999"), reverse=False)
 
     # Write file
     if timeline_data:
-        with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=timeline_data[0].keys())
             writer.writeheader()
             writer.writerows(timeline_data)
@@ -141,8 +151,11 @@ def export_contract_timeline(programs):
     print(f"Contract timeline: {len(timeline_data)} programs -> {output_file}")
 
     # Count expiring soon (2025-2026)
-    expiring_soon = [p for p in timeline_data if p.get('Period End', '').startswith(('2025', '2026'))]
+    expiring_soon = [
+        p for p in timeline_data if p.get("Period End", "").startswith(("2025", "2026"))
+    ]
     print(f"  Contracts expiring 2025-2026: {len(expiring_soon)}")
+
 
 def export_vendor_uei_lookup(programs):
     """Export vendor UEI lookup table for SAM.gov queries."""
@@ -151,28 +164,30 @@ def export_vendor_uei_lookup(programs):
     # Deduplicate by UEI
     uei_map = {}
     for p in programs:
-        uei = p.get('recipient_uei', '')
+        uei = p.get("recipient_uei", "")
         if uei and uei not in uei_map:
             uei_map[uei] = {
-                'UEI': uei,
-                'Vendor Name': p.get('recipient_name', '') or p.get('Prime Contractor', ''),
-                'Contract Number': p.get('Contract Number', ''),
-                'Program Name': p.get('Program Name', ''),
-                'Agency': p.get('Agency', ''),
-                'City': p.get('pop_city', ''),
-                'State': p.get('pop_state', ''),
+                "UEI": uei,
+                "Vendor Name": p.get("recipient_name", "")
+                or p.get("Prime Contractor", ""),
+                "Contract Number": p.get("Contract Number", ""),
+                "Program Name": p.get("Program Name", ""),
+                "Agency": p.get("Agency", ""),
+                "City": p.get("pop_city", ""),
+                "State": p.get("pop_state", ""),
             }
 
     vendor_data = list(uei_map.values())
 
     # Write file
     if vendor_data:
-        with open(output_file, 'w', newline='', encoding='utf-8') as f:
+        with open(output_file, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=vendor_data[0].keys())
             writer.writeheader()
             writer.writerows(vendor_data)
 
     print(f"Vendor UEI lookup: {len(vendor_data)} unique vendors -> {output_file}")
+
 
 def export_naics_psc_analysis(programs):
     """Export NAICS and PSC code analysis."""
@@ -183,32 +198,43 @@ def export_naics_psc_analysis(programs):
     psc_counts = defaultdict(int)
 
     for p in programs:
-        naics = p.get('naics_code', '')
-        psc = p.get('psc_code', '')
+        naics = p.get("naics_code", "")
+        psc = p.get("psc_code", "")
         if naics:
             naics_counts[naics] += 1
         if psc:
             psc_counts[psc] += 1
 
     # Write NAICS analysis
-    naics_data = [{'NAICS Code': k, 'Program Count': v} for k, v in sorted(naics_counts.items(), key=lambda x: -x[1])]
-    with open(EXPORTS_DIR / "naics_summary.csv", 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=['NAICS Code', 'Program Count'])
+    naics_data = [
+        {"NAICS Code": k, "Program Count": v}
+        for k, v in sorted(naics_counts.items(), key=lambda x: -x[1])
+    ]
+    with open(
+        EXPORTS_DIR / "naics_summary.csv", "w", newline="", encoding="utf-8"
+    ) as f:
+        writer = csv.DictWriter(f, fieldnames=["NAICS Code", "Program Count"])
         writer.writeheader()
         writer.writerows(naics_data)
 
     # Write PSC analysis
-    psc_data = [{'PSC Code': k, 'Program Count': v} for k, v in sorted(psc_counts.items(), key=lambda x: -x[1])]
-    with open(EXPORTS_DIR / "psc_summary.csv", 'w', newline='', encoding='utf-8') as f:
-        writer = csv.DictWriter(f, fieldnames=['PSC Code', 'Program Count'])
+    psc_data = [
+        {"PSC Code": k, "Program Count": v}
+        for k, v in sorted(psc_counts.items(), key=lambda x: -x[1])
+    ]
+    with open(EXPORTS_DIR / "psc_summary.csv", "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=["PSC Code", "Program Count"])
         writer.writeheader()
         writer.writerows(psc_data)
 
-    print(f"NAICS analysis: {len(naics_data)} codes -> {EXPORTS_DIR / 'naics_summary.csv'}")
+    print(
+        f"NAICS analysis: {len(naics_data)} codes -> {EXPORTS_DIR / 'naics_summary.csv'}"
+    )
     print(f"PSC analysis: {len(psc_data)} codes -> {EXPORTS_DIR / 'psc_summary.csv'}")
     print("  Top 5 NAICS codes:")
     for item in naics_data[:5]:
         print(f"    {item['NAICS Code']}: {item['Program Count']} programs")
+
 
 def main():
     print("=" * 70)
@@ -247,6 +273,7 @@ def main():
     print("EXPORT COMPLETE")
     print("=" * 70)
     print(f"All exports saved to: {EXPORTS_DIR.absolute()}")
+
 
 if __name__ == "__main__":
     main()

@@ -31,16 +31,20 @@ router = APIRouter(prefix="/data-quality", tags=["data-quality"])
 # REQUEST MODELS
 # =========================================
 
+
 class RunAuditRequest(BaseModel):
     domains: Optional[List[str]] = None  # If None, audit all domains
+
 
 class HealRequest(BaseModel):
     domain: Optional[str] = None
     severity: Optional[str] = None
     auto_fixable_only: bool = True
 
+
 class ReloadRulesRequest(BaseModel):
     rules: Dict[str, List[Dict[str, Any]]]
+
 
 class BatchValidateRequest(BaseModel):
     domain: str
@@ -50,6 +54,7 @@ class BatchValidateRequest(BaseModel):
 # =========================================
 # HEALTH & OVERVIEW (3 endpoints)
 # =========================================
+
 
 @router.get("/health")
 async def get_health():
@@ -64,7 +69,10 @@ async def get_report():
     engine = get_quality_engine()
     history = engine.get_history()
     if not history:
-        return {"status": "no_audit_run", "message": "Run an audit first via POST /data-quality/audit/run"}
+        return {
+            "status": "no_audit_run",
+            "message": "Run an audit first via POST /data-quality/audit/run",
+        }
     latest = history[-1]
     return {
         "id": latest.id,
@@ -101,9 +109,13 @@ async def get_domain_report(domain: str):
         "auto_fixable": len([i for i in domain_issues if i.auto_fixable]),
         "issues": [
             {
-                "id": i.id, "dimension": i.dimension, "field": i.field_name,
-                "severity": i.severity, "description": i.description,
-                "auto_fixable": i.auto_fixable, "record_id": i.record_id,
+                "id": i.id,
+                "dimension": i.dimension,
+                "field": i.field_name,
+                "severity": i.severity,
+                "description": i.description,
+                "auto_fixable": i.auto_fixable,
+                "record_id": i.record_id,
             }
             for i in domain_issues[:50]  # Limit to 50 per response
         ],
@@ -113,6 +125,7 @@ async def get_domain_report(domain: str):
 # =========================================
 # RECORD SCORING (1 endpoint)
 # =========================================
+
 
 @router.get("/score/{record_type}/{record_id}")
 async def score_record(record_type: str, record_id: str):
@@ -125,7 +138,9 @@ async def score_record(record_type: str, record_id: str):
             record = r
             break
     if not record:
-        raise HTTPException(status_code=404, detail=f"Record {record_id} not found in {record_type}")
+        raise HTTPException(
+            status_code=404, detail=f"Record {record_id} not found in {record_type}"
+        )
     score = engine.score_single_record(record_type, record)
     return {
         "record_id": score.record_id,
@@ -133,8 +148,12 @@ async def score_record(record_type: str, record_id: str):
         "overall_score": score.overall_score,
         "dimension_scores": score.dimension_scores,
         "issues": [
-            {"dimension": i.dimension, "field": i.field_name,
-             "severity": i.severity, "description": i.description}
+            {
+                "dimension": i.dimension,
+                "field": i.field_name,
+                "severity": i.severity,
+                "description": i.description,
+            }
             for i in score.issues
         ],
         "checked_at": score.checked_at,
@@ -144,6 +163,7 @@ async def score_record(record_type: str, record_id: str):
 # =========================================
 # AUDIT TRIGGER (1 endpoint)
 # =========================================
+
 
 @router.post("/audit/run")
 async def run_audit(req: Optional[RunAuditRequest] = None):
@@ -167,6 +187,7 @@ async def run_audit(req: Optional[RunAuditRequest] = None):
 # ISSUES (2 endpoints)
 # =========================================
 
+
 @router.get("/issues")
 async def list_issues(
     domain: Optional[str] = None,
@@ -176,15 +197,22 @@ async def list_issues(
 ):
     """List all open issues."""
     engine = get_quality_engine()
-    issues = engine.get_issues(domain=domain, severity=severity, auto_fixable_only=auto_fixable)
+    issues = engine.get_issues(
+        domain=domain, severity=severity, auto_fixable_only=auto_fixable
+    )
     return {
         "issues": [
             {
-                "id": i.id, "domain": i.domain, "dimension": i.dimension,
-                "record_id": i.record_id, "field": i.field_name,
+                "id": i.id,
+                "domain": i.domain,
+                "dimension": i.dimension,
+                "record_id": i.record_id,
+                "field": i.field_name,
                 "current_value": str(i.current_value)[:100],
-                "severity": i.severity, "description": i.description,
-                "auto_fixable": i.auto_fixable, "impact_score": i.impact_score,
+                "severity": i.severity,
+                "description": i.description,
+                "auto_fixable": i.auto_fixable,
+                "impact_score": i.impact_score,
             }
             for i in issues[:limit]
         ],
@@ -225,13 +253,16 @@ async def get_issue(issue_id: str):
             "depth": lineage.depth if lineage else 0,
             "transformations": lineage.total_transformations if lineage else 0,
             "sources": len(lineage.sources) if lineage else 0,
-        } if lineage else None,
+        }
+        if lineage
+        else None,
     }
 
 
 # =========================================
 # SELF-HEALING (2 endpoints)
 # =========================================
+
 
 @router.post("/heal")
 async def trigger_healing(req: Optional[HealRequest] = None):
@@ -243,7 +274,9 @@ async def trigger_healing(req: Optional[HealRequest] = None):
     severity = req.severity if req else None
 
     issues = engine.get_issues(
-        domain=domain, severity=severity, auto_fixable_only=True,
+        domain=domain,
+        severity=severity,
+        auto_fixable_only=True,
     )
 
     if not issues:
@@ -265,9 +298,12 @@ async def trigger_healing(req: Optional[HealRequest] = None):
         "cascading_fixes": sum(len(r.cascading_fixes) for r in fixed),
         "fixes": [
             {
-                "record_id": r.issue.record_id, "field": r.issue.field_name,
-                "old_value": str(r.old_value)[:100], "new_value": str(r.new_value)[:100],
-                "confidence": r.confidence, "healer": r.healer_used,
+                "record_id": r.issue.record_id,
+                "field": r.issue.field_name,
+                "old_value": str(r.old_value)[:100],
+                "new_value": str(r.new_value)[:100],
+                "confidence": r.confidence,
+                "healer": r.healer_used,
             }
             for r in fixed[:20]
         ],
@@ -282,12 +318,15 @@ async def get_heal_log(limit: int = 100):
     return {
         "entries": [
             {
-                "status": r.status, "record_id": r.issue.record_id,
-                "field": r.issue.field_name, "healer": r.healer_used,
+                "status": r.status,
+                "record_id": r.issue.record_id,
+                "field": r.issue.field_name,
+                "healer": r.healer_used,
                 "confidence": r.confidence,
                 "old_value": str(r.old_value)[:100] if r.old_value else None,
                 "new_value": str(r.new_value)[:100] if r.new_value else None,
-                "reason": r.reason, "timestamp": r.timestamp,
+                "reason": r.reason,
+                "timestamp": r.timestamp,
             }
             for r in log[-limit:]
         ],
@@ -299,6 +338,7 @@ async def get_heal_log(limit: int = 100):
 # LINEAGE (2 endpoints)
 # =========================================
 
+
 @router.get("/lineage/{record_id}")
 async def get_lineage(record_id: str, depth: int = 10):
     """Full lineage trace for a record."""
@@ -308,14 +348,16 @@ async def get_lineage(record_id: str, depth: int = 10):
         raise HTTPException(status_code=404, detail="No lineage found for this record")
     return {
         "record_id": record_id,
-        "root": {"id": graph.root.id, "type": graph.root.node_type,
-                 "confidence": graph.root.confidence},
+        "root": {
+            "id": graph.root.id,
+            "type": graph.root.node_type,
+            "confidence": graph.root.confidence,
+        },
         "depth": graph.depth,
         "total_transformations": graph.total_transformations,
         "confidence_chain": graph.confidence_chain,
         "sources": [
-            {"id": s.id, "type": s.source_type, "url": s.url}
-            for s in graph.sources
+            {"id": s.id, "type": s.source_type, "url": s.url} for s in graph.sources
         ],
         "nodes": len(graph.nodes),
         "edges": len(graph.edges),
@@ -341,6 +383,7 @@ async def get_impact(record_id: str):
 # =========================================
 # FRESHNESS (1 endpoint)
 # =========================================
+
 
 @router.get("/freshness")
 async def get_freshness():
@@ -369,6 +412,7 @@ async def get_freshness():
 # RULES (2 endpoints)
 # =========================================
 
+
 @router.get("/rules")
 async def list_rules():
     """List all quality rules."""
@@ -377,9 +421,13 @@ async def list_rules():
     return {
         "rules": [
             {
-                "name": r.name, "dimension": r.dimension, "domain": r.domain,
-                "severity": r.severity, "description": r.description,
-                "impact_score": r.impact_score, "enabled": r.enabled,
+                "name": r.name,
+                "dimension": r.dimension,
+                "domain": r.domain,
+                "severity": r.severity,
+                "description": r.description,
+                "impact_score": r.impact_score,
+                "enabled": r.enabled,
             }
             for r in rules
         ],
@@ -408,6 +456,7 @@ async def reload_rules(req: ReloadRulesRequest):
 # TRENDS (1 endpoint)
 # =========================================
 
+
 @router.get("/trends")
 async def get_trends(periods: int = 10):
     """Quality score trends over time."""
@@ -418,6 +467,7 @@ async def get_trends(periods: int = 10):
 # =========================================
 # BATCH VALIDATION (1 endpoint)
 # =========================================
+
 
 @router.post("/validate/batch")
 async def validate_batch(req: BatchValidateRequest):
@@ -436,6 +486,7 @@ async def validate_batch(req: BatchValidateRequest):
 # =========================================
 # ROUTER INCLUSION
 # =========================================
+
 
 def include_data_quality_router(app: FastAPI) -> None:
     """Include data quality router in the app."""

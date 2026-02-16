@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class TransportType(str, Enum):
     SSE = "sse"
     STDIO = "stdio"
@@ -125,7 +126,14 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="Notion MCP",
         url="stdio://notion-mcp",
         transport="stdio",
-        capabilities=["database_query", "page_read", "page_write", "contacts", "programs", "jobs"],
+        capabilities=[
+            "database_query",
+            "page_read",
+            "page_write",
+            "contacts",
+            "programs",
+            "jobs",
+        ],
         priority=2,
         cost_tier="free",
         tags=["crm", "database", "productivity"],
@@ -135,7 +143,13 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="Google Maps MCP",
         url="https://maps-mcp.googleapis.com/v1",
         transport="http",
-        capabilities=["geocoding", "distance_matrix", "place_search", "directions", "geographic"],
+        capabilities=[
+            "geocoding",
+            "distance_matrix",
+            "place_search",
+            "directions",
+            "geographic",
+        ],
         priority=3,
         cost_tier="low",
         tags=["maps", "location", "geographic"],
@@ -145,7 +159,13 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="Slack MCP",
         url="https://slack-mcp.example.com/v1",
         transport="sse",
-        capabilities=["send_message", "channel_list", "user_lookup", "thread_reply", "team_coordination"],
+        capabilities=[
+            "send_message",
+            "channel_list",
+            "user_lookup",
+            "thread_reply",
+            "team_coordination",
+        ],
         priority=3,
         cost_tier="free",
         tags=["messaging", "team", "notifications"],
@@ -155,7 +175,13 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="GitHub MCP",
         url="stdio://github-mcp",
         transport="stdio",
-        capabilities=["repo_management", "issue_tracking", "pr_review", "ci_cd", "code_search"],
+        capabilities=[
+            "repo_management",
+            "issue_tracking",
+            "pr_review",
+            "ci_cd",
+            "code_search",
+        ],
         priority=4,
         cost_tier="free",
         tags=["code", "devops", "vcs"],
@@ -165,7 +191,13 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="Google Workspace MCP",
         url="https://workspace-mcp.googleapis.com/v1",
         transport="http",
-        capabilities=["email_send", "email_draft", "calendar_create", "calendar_list", "email_sequence"],
+        capabilities=[
+            "email_send",
+            "email_draft",
+            "calendar_create",
+            "calendar_list",
+            "email_sequence",
+        ],
         priority=2,
         cost_tier="low",
         tags=["email", "calendar", "productivity"],
@@ -185,7 +217,12 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="Memory MCP",
         url="stdio://memory-mcp",
         transport="stdio",
-        capabilities=["knowledge_store", "knowledge_recall", "entity_create", "relation_create"],
+        capabilities=[
+            "knowledge_store",
+            "knowledge_recall",
+            "entity_create",
+            "relation_create",
+        ],
         priority=4,
         cost_tier="free",
         tags=["memory", "knowledge_graph"],
@@ -195,7 +232,12 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="Day AI MCP",
         url="https://api.day.ai/mcp/v1",
         transport="http",
-        capabilities=["contact_enrich", "linkedin_activity", "company_intel", "contact_intelligence"],
+        capabilities=[
+            "contact_enrich",
+            "linkedin_activity",
+            "company_intel",
+            "contact_intelligence",
+        ],
         priority=3,
         cost_tier="medium",
         tags=["contacts", "enrichment", "intelligence"],
@@ -205,7 +247,12 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
         name="n8n Workflow MCP",
         url="http://localhost:5678/mcp",
         transport="http",
-        capabilities=["workflow_trigger", "workflow_list", "workflow_status", "automation"],
+        capabilities=[
+            "workflow_trigger",
+            "workflow_list",
+            "workflow_status",
+            "automation",
+        ],
         priority=4,
         cost_tier="free",
         tags=["automation", "workflow", "integration"],
@@ -215,66 +262,166 @@ _BUILTIN_SERVERS: List[MCPServerConfig] = [
 # Tool definitions for built-in servers
 _BUILTIN_TOOLS: Dict[str, List[MCPTool]] = {
     "mcp_notion": [
-        MCPTool(name="query_database", description="Query a Notion database with filters",
-                input_schema={"database_id": "string", "filter": "object"}, server_id="mcp_notion"),
-        MCPTool(name="read_page", description="Read a Notion page by ID",
-                input_schema={"page_id": "string"}, server_id="mcp_notion"),
-        MCPTool(name="create_page", description="Create a new Notion page",
-                input_schema={"parent_id": "string", "properties": "object"}, server_id="mcp_notion"),
+        MCPTool(
+            name="query_database",
+            description="Query a Notion database with filters",
+            input_schema={"database_id": "string", "filter": "object"},
+            server_id="mcp_notion",
+        ),
+        MCPTool(
+            name="read_page",
+            description="Read a Notion page by ID",
+            input_schema={"page_id": "string"},
+            server_id="mcp_notion",
+        ),
+        MCPTool(
+            name="create_page",
+            description="Create a new Notion page",
+            input_schema={"parent_id": "string", "properties": "object"},
+            server_id="mcp_notion",
+        ),
     ],
     "mcp_google_maps": [
-        MCPTool(name="geocode", description="Convert address to coordinates",
-                input_schema={"address": "string"}, server_id="mcp_google_maps", cost_per_call=0.005),
-        MCPTool(name="distance_matrix", description="Calculate distances between locations",
-                input_schema={"origins": "array", "destinations": "array"}, server_id="mcp_google_maps", cost_per_call=0.01),
-        MCPTool(name="place_search", description="Search for places near a location",
-                input_schema={"query": "string", "location": "string"}, server_id="mcp_google_maps", cost_per_call=0.02),
+        MCPTool(
+            name="geocode",
+            description="Convert address to coordinates",
+            input_schema={"address": "string"},
+            server_id="mcp_google_maps",
+            cost_per_call=0.005,
+        ),
+        MCPTool(
+            name="distance_matrix",
+            description="Calculate distances between locations",
+            input_schema={"origins": "array", "destinations": "array"},
+            server_id="mcp_google_maps",
+            cost_per_call=0.01,
+        ),
+        MCPTool(
+            name="place_search",
+            description="Search for places near a location",
+            input_schema={"query": "string", "location": "string"},
+            server_id="mcp_google_maps",
+            cost_per_call=0.02,
+        ),
     ],
     "mcp_slack": [
-        MCPTool(name="send_message", description="Send a message to a Slack channel",
-                input_schema={"channel": "string", "text": "string"}, server_id="mcp_slack"),
-        MCPTool(name="list_channels", description="List available Slack channels",
-                input_schema={}, server_id="mcp_slack"),
-        MCPTool(name="lookup_user", description="Look up a Slack user",
-                input_schema={"email": "string"}, server_id="mcp_slack"),
+        MCPTool(
+            name="send_message",
+            description="Send a message to a Slack channel",
+            input_schema={"channel": "string", "text": "string"},
+            server_id="mcp_slack",
+        ),
+        MCPTool(
+            name="list_channels",
+            description="List available Slack channels",
+            input_schema={},
+            server_id="mcp_slack",
+        ),
+        MCPTool(
+            name="lookup_user",
+            description="Look up a Slack user",
+            input_schema={"email": "string"},
+            server_id="mcp_slack",
+        ),
     ],
     "mcp_github": [
-        MCPTool(name="search_code", description="Search code across repositories",
-                input_schema={"query": "string", "repo": "string"}, server_id="mcp_github"),
-        MCPTool(name="create_issue", description="Create a GitHub issue",
-                input_schema={"repo": "string", "title": "string", "body": "string"}, server_id="mcp_github"),
+        MCPTool(
+            name="search_code",
+            description="Search code across repositories",
+            input_schema={"query": "string", "repo": "string"},
+            server_id="mcp_github",
+        ),
+        MCPTool(
+            name="create_issue",
+            description="Create a GitHub issue",
+            input_schema={"repo": "string", "title": "string", "body": "string"},
+            server_id="mcp_github",
+        ),
     ],
     "mcp_google_workspace": [
-        MCPTool(name="draft_email", description="Draft an email in Gmail",
-                input_schema={"to": "string", "subject": "string", "body": "string"}, server_id="mcp_google_workspace"),
-        MCPTool(name="send_email", description="Send an email via Gmail",
-                input_schema={"to": "string", "subject": "string", "body": "string"}, server_id="mcp_google_workspace", cost_per_call=0.001),
-        MCPTool(name="create_event", description="Create a Google Calendar event",
-                input_schema={"title": "string", "start": "string", "end": "string"}, server_id="mcp_google_workspace"),
-        MCPTool(name="list_events", description="List upcoming calendar events",
-                input_schema={"days": "integer"}, server_id="mcp_google_workspace"),
+        MCPTool(
+            name="draft_email",
+            description="Draft an email in Gmail",
+            input_schema={"to": "string", "subject": "string", "body": "string"},
+            server_id="mcp_google_workspace",
+        ),
+        MCPTool(
+            name="send_email",
+            description="Send an email via Gmail",
+            input_schema={"to": "string", "subject": "string", "body": "string"},
+            server_id="mcp_google_workspace",
+            cost_per_call=0.001,
+        ),
+        MCPTool(
+            name="create_event",
+            description="Create a Google Calendar event",
+            input_schema={"title": "string", "start": "string", "end": "string"},
+            server_id="mcp_google_workspace",
+        ),
+        MCPTool(
+            name="list_events",
+            description="List upcoming calendar events",
+            input_schema={"days": "integer"},
+            server_id="mcp_google_workspace",
+        ),
     ],
     "mcp_filesystem": [
-        MCPTool(name="read_file", description="Read a local file", input_schema={"path": "string"}, server_id="mcp_filesystem"),
-        MCPTool(name="write_file", description="Write a local file", input_schema={"path": "string", "content": "string"}, server_id="mcp_filesystem"),
+        MCPTool(
+            name="read_file",
+            description="Read a local file",
+            input_schema={"path": "string"},
+            server_id="mcp_filesystem",
+        ),
+        MCPTool(
+            name="write_file",
+            description="Write a local file",
+            input_schema={"path": "string", "content": "string"},
+            server_id="mcp_filesystem",
+        ),
     ],
     "mcp_memory": [
-        MCPTool(name="store_memory", description="Store a knowledge entity",
-                input_schema={"content": "string", "metadata": "object"}, server_id="mcp_memory"),
-        MCPTool(name="recall_memory", description="Recall stored knowledge",
-                input_schema={"query": "string"}, server_id="mcp_memory"),
+        MCPTool(
+            name="store_memory",
+            description="Store a knowledge entity",
+            input_schema={"content": "string", "metadata": "object"},
+            server_id="mcp_memory",
+        ),
+        MCPTool(
+            name="recall_memory",
+            description="Recall stored knowledge",
+            input_schema={"query": "string"},
+            server_id="mcp_memory",
+        ),
     ],
     "mcp_day_ai": [
-        MCPTool(name="enrich_contact", description="Enrich a contact with Day AI intelligence",
-                input_schema={"name": "string", "company": "string"}, server_id="mcp_day_ai", cost_per_call=0.05),
-        MCPTool(name="company_intel", description="Get company intelligence",
-                input_schema={"company": "string"}, server_id="mcp_day_ai", cost_per_call=0.03),
+        MCPTool(
+            name="enrich_contact",
+            description="Enrich a contact with Day AI intelligence",
+            input_schema={"name": "string", "company": "string"},
+            server_id="mcp_day_ai",
+            cost_per_call=0.05,
+        ),
+        MCPTool(
+            name="company_intel",
+            description="Get company intelligence",
+            input_schema={"company": "string"},
+            server_id="mcp_day_ai",
+            cost_per_call=0.03,
+        ),
     ],
     "mcp_n8n": [
-        MCPTool(name="trigger_workflow", description="Trigger an n8n workflow",
-                input_schema={"workflow_id": "string", "data": "object"}, server_id="mcp_n8n"),
-        MCPTool(name="list_workflows", description="List available n8n workflows",
-                input_schema={}, server_id="mcp_n8n"),
+        MCPTool(
+            name="trigger_workflow",
+            description="Trigger an n8n workflow",
+            input_schema={"workflow_id": "string", "data": "object"},
+            server_id="mcp_n8n",
+        ),
+        MCPTool(
+            name="list_workflows",
+            description="List available n8n workflows",
+            input_schema={},
+            server_id="mcp_n8n",
+        ),
     ],
 }
 
@@ -317,6 +464,7 @@ _INTENT_KEYWORDS: Dict[str, List[str]] = {
 # HEALTH MONITOR
 # =========================================
 
+
 class HealthMonitor:
     """Tracks health of MCP servers with periodic checks."""
 
@@ -324,13 +472,17 @@ class HealthMonitor:
         self.check_interval = check_interval
         self._history: Dict[str, List[Dict[str, Any]]] = {}
 
-    def record_check(self, server_id: str, healthy: bool, latency_ms: int = 0) -> HealthStatus:
+    def record_check(
+        self, server_id: str, healthy: bool, latency_ms: int = 0
+    ) -> HealthStatus:
         """Record a health check result and compute status."""
-        self._history.setdefault(server_id, []).append({
-            "healthy": healthy,
-            "latency_ms": latency_ms,
-            "timestamp": datetime.utcnow().isoformat(),
-        })
+        self._history.setdefault(server_id, []).append(
+            {
+                "healthy": healthy,
+                "latency_ms": latency_ms,
+                "timestamp": datetime.utcnow().isoformat(),
+            }
+        )
         # Keep last 10 checks
         self._history[server_id] = self._history[server_id][-10:]
 
@@ -352,6 +504,7 @@ class HealthMonitor:
 # =========================================
 # USAGE TRACKER
 # =========================================
+
 
 class UsageTracker:
     """Tracks usage patterns across MCP servers."""
@@ -375,13 +528,16 @@ class UsageTracker:
             "total_calls": total,
             "success_rate": round(successes / max(total, 1), 2),
             "avg_latency_ms": round(statistics.mean(latencies), 1) if latencies else 0,
-            "p95_latency_ms": round(sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0, 1),
+            "p95_latency_ms": round(
+                sorted(latencies)[int(len(latencies) * 0.95)] if latencies else 0, 1
+            ),
         }
 
 
 # =========================================
 # MCP TOOL REGISTRY
 # =========================================
+
 
 class MCPToolRegistry:
     """Central registry for all MCP server connections."""
@@ -461,7 +617,9 @@ class MCPToolRegistry:
     # ROUTING
     # --------------------------------------------------
 
-    def route_request(self, intent: str, context: Optional[Dict] = None) -> MCPRoutingResult:
+    def route_request(
+        self, intent: str, context: Optional[Dict] = None
+    ) -> MCPRoutingResult:
         """Intelligent routing: find the best MCP server for an intent."""
         context = context or {}
         intent_lower = intent.lower()
@@ -526,7 +684,9 @@ class MCPToolRegistry:
         selected_tool = ""
         for tool in best_entry.tools:
             for cap in best["matched_capabilities"]:
-                if cap in tool.name or any(kw in tool.description.lower() for kw in intent_lower.split()):
+                if cap in tool.name or any(
+                    kw in tool.description.lower() for kw in intent_lower.split()
+                ):
                     selected_tool = tool.name
                     break
             if selected_tool:
@@ -538,12 +698,15 @@ class MCPToolRegistry:
 
         return MCPRoutingResult(
             intent=intent,
-            matched_servers=[{
-                "server_id": c["server_id"],
-                "name": c["name"],
-                "score": round(c["score"], 1),
-                "matched_capabilities": c["matched_capabilities"],
-            } for c in ranked],
+            matched_servers=[
+                {
+                    "server_id": c["server_id"],
+                    "name": c["name"],
+                    "score": round(c["score"], 1),
+                    "matched_capabilities": c["matched_capabilities"],
+                }
+                for c in ranked
+            ],
             selected_server=best["server_id"],
             selected_tool=selected_tool,
             confidence=round(confidence, 2),
@@ -555,7 +718,9 @@ class MCPToolRegistry:
     # HEALTH
     # --------------------------------------------------
 
-    def health_check(self, server_id: str, healthy: bool = True, latency_ms: int = 50) -> str:
+    def health_check(
+        self, server_id: str, healthy: bool = True, latency_ms: int = 50
+    ) -> str:
         """Record a health check for a specific server."""
         entry = self.servers.get(server_id)
         if not entry:
@@ -572,7 +737,9 @@ class MCPToolRegistry:
         for server_id, entry in self.servers.items():
             # Simulate check — in production this pings each server
             status = self.health_monitor.record_check(
-                server_id, healthy=True, latency_ms=50,
+                server_id,
+                healthy=True,
+                latency_ms=50,
             )
             entry.health = status.value
             entry.last_health_check = datetime.utcnow().isoformat()
@@ -583,8 +750,13 @@ class MCPToolRegistry:
     # USAGE
     # --------------------------------------------------
 
-    def record_usage(self, server_id: str, tool_name: str,
-                     success: bool = True, latency_ms: int = 100) -> None:
+    def record_usage(
+        self,
+        server_id: str,
+        tool_name: str,
+        success: bool = True,
+        latency_ms: int = 100,
+    ) -> None:
         """Record a tool usage event."""
         entry = self.servers.get(server_id)
         if entry:
@@ -594,13 +766,15 @@ class MCPToolRegistry:
             entry.error_rate = round(entry.total_errors / max(entry.total_calls, 1), 2)
             entry.last_used = datetime.utcnow().isoformat()
 
-        self.usage_tracker.record(UsageRecord(
-            server_id=server_id,
-            tool_name=tool_name,
-            success=success,
-            latency_ms=latency_ms,
-            timestamp=datetime.utcnow().isoformat(),
-        ))
+        self.usage_tracker.record(
+            UsageRecord(
+                server_id=server_id,
+                tool_name=tool_name,
+                success=success,
+                latency_ms=latency_ms,
+                timestamp=datetime.utcnow().isoformat(),
+            )
+        )
 
     # --------------------------------------------------
     # QUERIES
@@ -609,7 +783,9 @@ class MCPToolRegistry:
     def get_server(self, server_id: str) -> Optional[MCPServerEntry]:
         return self.servers.get(server_id)
 
-    def list_servers(self, capability: str = "", healthy_only: bool = False) -> List[MCPServerEntry]:
+    def list_servers(
+        self, capability: str = "", healthy_only: bool = False
+    ) -> List[MCPServerEntry]:
         """List registered servers with optional filters."""
         results = list(self.servers.values())
         if capability:

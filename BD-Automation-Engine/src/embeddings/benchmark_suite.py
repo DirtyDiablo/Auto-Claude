@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class BenchmarkCategory(str, Enum):
     ACRONYM_RESOLUTION = "acronym_resolution"
     PROGRAM_MAPPING = "program_mapping"
@@ -82,130 +83,211 @@ class BenchmarkRun:
 
 _GOLDEN_QUERIES: List[GoldenQuery] = [
     # --- Acronym Resolution ---
-    GoldenQuery(category="acronym_resolution", query="What is DCGS?",
-                expected_document="Distributed Common Ground System",
-                expected_keywords=["Distributed", "Common", "Ground", "System"],
-                difficulty="easy", notes="Core acronym, should be trivial"),
-    GoldenQuery(category="acronym_resolution", query="What does JADC2 stand for?",
-                expected_document="Joint All-Domain Command and Control",
-                expected_keywords=["Joint", "All-Domain", "Command", "Control"],
-                difficulty="easy"),
-    GoldenQuery(category="acronym_resolution", query="Define PED in military context",
-                expected_document="Processing, Exploitation, and Dissemination",
-                expected_keywords=["Processing", "Exploitation", "Dissemination"],
-                difficulty="medium", notes="Common acronym but context-dependent"),
-    GoldenQuery(category="acronym_resolution", query="What is TS/SCI clearance?",
-                expected_document="Top Secret / Sensitive Compartmented Information",
-                expected_keywords=["Top Secret", "Sensitive", "Compartmented"],
-                difficulty="easy"),
-    GoldenQuery(category="acronym_resolution", query="What does ABMS refer to?",
-                expected_document="Advanced Battle Management System",
-                expected_keywords=["Advanced", "Battle", "Management"],
-                difficulty="medium"),
-    GoldenQuery(category="acronym_resolution", query="Define MASINT",
-                expected_document="Measurement and Signature Intelligence",
-                expected_keywords=["Measurement", "Signature", "Intelligence"],
-                difficulty="hard", notes="Less common acronym"),
-    GoldenQuery(category="acronym_resolution", query="What is DO-178C?",
-                expected_document="Software Considerations in Airborne Systems",
-                expected_keywords=["Software", "Airborne", "Certification"],
-                difficulty="hard"),
-
+    GoldenQuery(
+        category="acronym_resolution",
+        query="What is DCGS?",
+        expected_document="Distributed Common Ground System",
+        expected_keywords=["Distributed", "Common", "Ground", "System"],
+        difficulty="easy",
+        notes="Core acronym, should be trivial",
+    ),
+    GoldenQuery(
+        category="acronym_resolution",
+        query="What does JADC2 stand for?",
+        expected_document="Joint All-Domain Command and Control",
+        expected_keywords=["Joint", "All-Domain", "Command", "Control"],
+        difficulty="easy",
+    ),
+    GoldenQuery(
+        category="acronym_resolution",
+        query="Define PED in military context",
+        expected_document="Processing, Exploitation, and Dissemination",
+        expected_keywords=["Processing", "Exploitation", "Dissemination"],
+        difficulty="medium",
+        notes="Common acronym but context-dependent",
+    ),
+    GoldenQuery(
+        category="acronym_resolution",
+        query="What is TS/SCI clearance?",
+        expected_document="Top Secret / Sensitive Compartmented Information",
+        expected_keywords=["Top Secret", "Sensitive", "Compartmented"],
+        difficulty="easy",
+    ),
+    GoldenQuery(
+        category="acronym_resolution",
+        query="What does ABMS refer to?",
+        expected_document="Advanced Battle Management System",
+        expected_keywords=["Advanced", "Battle", "Management"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="acronym_resolution",
+        query="Define MASINT",
+        expected_document="Measurement and Signature Intelligence",
+        expected_keywords=["Measurement", "Signature", "Intelligence"],
+        difficulty="hard",
+        notes="Less common acronym",
+    ),
+    GoldenQuery(
+        category="acronym_resolution",
+        query="What is DO-178C?",
+        expected_document="Software Considerations in Airborne Systems",
+        expected_keywords=["Software", "Airborne", "Certification"],
+        difficulty="hard",
+    ),
     # --- Program Mapping ---
-    GoldenQuery(category="program_mapping", query="Which company primes DCGS-A?",
-                expected_document="Leidos primes DCGS-A",
-                expected_keywords=["Leidos", "DCGS-A"],
-                difficulty="easy"),
-    GoldenQuery(category="program_mapping", query="Army ISR ground processing program",
-                expected_document="DCGS-A Distributed Common Ground System Army",
-                expected_keywords=["DCGS-A", "Army", "ISR"],
-                difficulty="medium"),
-    GoldenQuery(category="program_mapping", query="Minuteman III replacement program",
-                expected_document="GBSD Ground Based Strategic Deterrent",
-                expected_keywords=["GBSD", "Minuteman", "ICBM"],
-                difficulty="hard", notes="Requires domain knowledge"),
-    GoldenQuery(category="program_mapping", query="Navy carrier-based unmanned refueling",
-                expected_document="MQ-25 Stingray",
-                expected_keywords=["MQ-25", "Stingray", "refueling"],
-                difficulty="medium"),
-    GoldenQuery(category="program_mapping", query="DOD connect sensors and shooters initiative",
-                expected_document="JADC2 Joint All-Domain Command and Control",
-                expected_keywords=["JADC2", "sensors", "shooters", "domain"],
-                difficulty="hard"),
-
+    GoldenQuery(
+        category="program_mapping",
+        query="Which company primes DCGS-A?",
+        expected_document="Leidos primes DCGS-A",
+        expected_keywords=["Leidos", "DCGS-A"],
+        difficulty="easy",
+    ),
+    GoldenQuery(
+        category="program_mapping",
+        query="Army ISR ground processing program",
+        expected_document="DCGS-A Distributed Common Ground System Army",
+        expected_keywords=["DCGS-A", "Army", "ISR"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="program_mapping",
+        query="Minuteman III replacement program",
+        expected_document="GBSD Ground Based Strategic Deterrent",
+        expected_keywords=["GBSD", "Minuteman", "ICBM"],
+        difficulty="hard",
+        notes="Requires domain knowledge",
+    ),
+    GoldenQuery(
+        category="program_mapping",
+        query="Navy carrier-based unmanned refueling",
+        expected_document="MQ-25 Stingray",
+        expected_keywords=["MQ-25", "Stingray", "refueling"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="program_mapping",
+        query="DOD connect sensors and shooters initiative",
+        expected_document="JADC2 Joint All-Domain Command and Control",
+        expected_keywords=["JADC2", "sensors", "shooters", "domain"],
+        difficulty="hard",
+    ),
     # --- Contact Queries ---
-    GoldenQuery(category="contact_query", query="Who manages DCGS-A at Leidos?",
-                expected_document="Craig Lindahl Program Manager Leidos DCGS-A",
-                expected_keywords=["Craig Lindahl", "Program Manager", "Leidos"],
-                difficulty="easy"),
-    GoldenQuery(category="contact_query", query="SETA lead advising Joint Staff on JADC2",
-                expected_document="Amanda Chen SETA Lead GDIT JADC2",
-                expected_keywords=["Amanda Chen", "SETA", "JADC2"],
-                difficulty="medium"),
-    GoldenQuery(category="contact_query", query="Contracting officer for DCGS-A at Aberdeen",
-                expected_document="Robert Hayes Contracting Officer US Army",
-                expected_keywords=["Robert Hayes", "Contracting", "Aberdeen"],
-                difficulty="hard"),
-    GoldenQuery(category="contact_query", query="Boeing chief engineer for unmanned systems",
-                expected_document="Diana Torres Chief Engineer Boeing MQ-25",
-                expected_keywords=["Diana Torres", "Boeing", "MQ-25"],
-                difficulty="medium"),
-
+    GoldenQuery(
+        category="contact_query",
+        query="Who manages DCGS-A at Leidos?",
+        expected_document="Craig Lindahl Program Manager Leidos DCGS-A",
+        expected_keywords=["Craig Lindahl", "Program Manager", "Leidos"],
+        difficulty="easy",
+    ),
+    GoldenQuery(
+        category="contact_query",
+        query="SETA lead advising Joint Staff on JADC2",
+        expected_document="Amanda Chen SETA Lead GDIT JADC2",
+        expected_keywords=["Amanda Chen", "SETA", "JADC2"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="contact_query",
+        query="Contracting officer for DCGS-A at Aberdeen",
+        expected_document="Robert Hayes Contracting Officer US Army",
+        expected_keywords=["Robert Hayes", "Contracting", "Aberdeen"],
+        difficulty="hard",
+    ),
+    GoldenQuery(
+        category="contact_query",
+        query="Boeing chief engineer for unmanned systems",
+        expected_document="Diana Torres Chief Engineer Boeing MQ-25",
+        expected_keywords=["Diana Torres", "Boeing", "MQ-25"],
+        difficulty="medium",
+    ),
     # --- Pain Points ---
-    GoldenQuery(category="pain_point", query="Programs struggling with cloud architect hiring",
-                expected_document="DCGS-A struggling to fill 5 senior cloud architect positions",
-                expected_keywords=["cloud architect", "Langley", "DCGS-A"],
-                difficulty="medium"),
-    GoldenQuery(category="pain_point", query="Legacy Java codebase migration challenges",
-                expected_document="DCGS-N legacy Java monolith needs microservices",
-                expected_keywords=["Java", "monolith", "microservices", "DCGS-N"],
-                difficulty="medium"),
-    GoldenQuery(category="pain_point", query="Cleared developer retention issues",
-                expected_document="Northrop struggling with retention losing people to commercial tech",
-                expected_keywords=["retention", "Northrop", "commercial"],
-                difficulty="hard"),
-    GoldenQuery(category="pain_point", query="SIGINT processing performance bottleneck",
-                expected_document="SIGINT processing pipeline has latency issues",
-                expected_keywords=["SIGINT", "latency", "pipeline"],
-                difficulty="hard"),
-
+    GoldenQuery(
+        category="pain_point",
+        query="Programs struggling with cloud architect hiring",
+        expected_document="DCGS-A struggling to fill 5 senior cloud architect positions",
+        expected_keywords=["cloud architect", "Langley", "DCGS-A"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="pain_point",
+        query="Legacy Java codebase migration challenges",
+        expected_document="DCGS-N legacy Java monolith needs microservices",
+        expected_keywords=["Java", "monolith", "microservices", "DCGS-N"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="pain_point",
+        query="Cleared developer retention issues",
+        expected_document="Northrop struggling with retention losing people to commercial tech",
+        expected_keywords=["retention", "Northrop", "commercial"],
+        difficulty="hard",
+    ),
+    GoldenQuery(
+        category="pain_point",
+        query="SIGINT processing performance bottleneck",
+        expected_document="SIGINT processing pipeline has latency issues",
+        expected_keywords=["SIGINT", "latency", "pipeline"],
+        difficulty="hard",
+    ),
     # --- Job Mapping ---
-    GoldenQuery(category="job_mapping", query="Kubernetes positions at DCGS-N",
-                expected_document="Kubernetes Platform Engineer DCGS-N St Inigoes",
-                expected_keywords=["Kubernetes", "DCGS-N", "St. Inigoes"],
-                difficulty="easy"),
-    GoldenQuery(category="job_mapping", query="TS/SCI cleared UAS autonomy engineer jobs",
-                expected_document="Autonomy Engineer MQ-25 Stingray Boeing",
-                expected_keywords=["Autonomy", "MQ-25", "UAS", "TS/SCI"],
-                difficulty="medium"),
-    GoldenQuery(category="job_mapping", query="Safety-critical real-time systems developer Hill AFB",
-                expected_document="Software Developer GBSD Hill AFB DO-178C",
-                expected_keywords=["GBSD", "Hill AFB", "DO-178C", "real-time"],
-                difficulty="hard"),
-    GoldenQuery(category="job_mapping", query="SIGINT analyst position at DGS-1",
-                expected_document="SIGINT Analyst DGS-1 DCGS-A Langley",
-                expected_keywords=["SIGINT", "DGS-1", "Langley", "DCGS-A"],
-                difficulty="medium"),
-
+    GoldenQuery(
+        category="job_mapping",
+        query="Kubernetes positions at DCGS-N",
+        expected_document="Kubernetes Platform Engineer DCGS-N St Inigoes",
+        expected_keywords=["Kubernetes", "DCGS-N", "St. Inigoes"],
+        difficulty="easy",
+    ),
+    GoldenQuery(
+        category="job_mapping",
+        query="TS/SCI cleared UAS autonomy engineer jobs",
+        expected_document="Autonomy Engineer MQ-25 Stingray Boeing",
+        expected_keywords=["Autonomy", "MQ-25", "UAS", "TS/SCI"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="job_mapping",
+        query="Safety-critical real-time systems developer Hill AFB",
+        expected_document="Software Developer GBSD Hill AFB DO-178C",
+        expected_keywords=["GBSD", "Hill AFB", "DO-178C", "real-time"],
+        difficulty="hard",
+    ),
+    GoldenQuery(
+        category="job_mapping",
+        query="SIGINT analyst position at DGS-1",
+        expected_document="SIGINT Analyst DGS-1 DCGS-A Langley",
+        expected_keywords=["SIGINT", "DGS-1", "Langley", "DCGS-A"],
+        difficulty="medium",
+    ),
     # --- Past Performance ---
-    GoldenQuery(category="past_performance", query="GDIT GovCloud migration experience",
-                expected_document="GDIT GovCloud approach preferred by Leidos for DCGS-A",
-                expected_keywords=["GDIT", "GovCloud", "DCGS-A"],
-                difficulty="medium"),
-    GoldenQuery(category="past_performance", query="PED throughput improvement results",
-                expected_document="PED throughput improved 30% after microservices migration",
-                expected_keywords=["PED", "30%", "microservices"],
-                difficulty="hard"),
-    GoldenQuery(category="past_performance", query="BAE proposal for DCGS-A cloud",
-                expected_document="BAE submitted unsolicited proposal rejected",
-                expected_keywords=["BAE", "unsolicited", "rejected"],
-                difficulty="hard"),
+    GoldenQuery(
+        category="past_performance",
+        query="GDIT GovCloud migration experience",
+        expected_document="GDIT GovCloud approach preferred by Leidos for DCGS-A",
+        expected_keywords=["GDIT", "GovCloud", "DCGS-A"],
+        difficulty="medium",
+    ),
+    GoldenQuery(
+        category="past_performance",
+        query="PED throughput improvement results",
+        expected_document="PED throughput improved 30% after microservices migration",
+        expected_keywords=["PED", "30%", "microservices"],
+        difficulty="hard",
+    ),
+    GoldenQuery(
+        category="past_performance",
+        query="BAE proposal for DCGS-A cloud",
+        expected_document="BAE submitted unsolicited proposal rejected",
+        expected_keywords=["BAE", "unsolicited", "rejected"],
+        difficulty="hard",
+    ),
 ]
 
 
 # =========================================
 # BENCHMARK SUITE
 # =========================================
+
 
 class EmbeddingBenchmarkSuite:
     """Golden query benchmark for evaluating embedding quality."""
@@ -238,14 +320,16 @@ class EmbeddingBenchmarkSuite:
     # BENCHMARK EXECUTION
     # --------------------------------------------------
 
-    def run_benchmark(self, model_id: str, model_name: str = "",
-                      is_fine_tuned: bool = False) -> BenchmarkRun:
+    def run_benchmark(
+        self, model_id: str, model_name: str = "", is_fine_tuned: bool = False
+    ) -> BenchmarkRun:
         """Run the full golden benchmark suite against a model.
 
         Simulates retrieval results. Fine-tuned models get higher scores,
         especially on hard/domain-specific queries.
         """
         import random
+
         rng = random.Random(hash(model_id) % 2**32)
 
         results: List[QueryResult] = []
@@ -286,8 +370,9 @@ class EmbeddingBenchmarkSuite:
         self._runs.append(run)
         return run
 
-    def _simulate_retrieval(self, gq: GoldenQuery, is_fine_tuned: bool,
-                            rng: random.Random) -> QueryResult:
+    def _simulate_retrieval(
+        self, gq: GoldenQuery, is_fine_tuned: bool, rng: random.Random
+    ) -> QueryResult:
         """Simulate retrieval of a golden query."""
         # Base hit probability depends on difficulty
         base_hit_prob = {"easy": 0.85, "medium": 0.65, "hard": 0.40}
@@ -325,12 +410,21 @@ class EmbeddingBenchmarkSuite:
     def _compute_category_metrics(self, results: List[QueryResult]) -> Dict[str, float]:
         """Compute aggregated metrics for a set of results."""
         if not results:
-            return {"recall_at_1": 0, "recall_at_5": 0, "recall_at_10": 0, "mrr": 0, "avg_relevance": 0, "keyword_recall": 0}
+            return {
+                "recall_at_1": 0,
+                "recall_at_5": 0,
+                "recall_at_10": 0,
+                "mrr": 0,
+                "avg_relevance": 0,
+                "keyword_recall": 0,
+            }
 
         n = len(results)
         hits_at_1 = sum(1 for r in results if r.hit and r.rank <= 1)
         hits_at_5 = sum(1 for r in results if r.hit and r.rank <= 5)
-        hits_at_10 = sum(1 for r in results if r.hit)  # all hits are in top 10 in our sim
+        hits_at_10 = sum(
+            1 for r in results if r.hit
+        )  # all hits are in top 10 in our sim
 
         # MRR
         rr_sum = sum(1.0 / r.rank for r in results if r.hit and r.rank > 0)
@@ -360,18 +454,33 @@ class EmbeddingBenchmarkSuite:
 
         deltas: Dict[str, float] = {}
         for key in run_a.overall_metrics:
-            if isinstance(run_a.overall_metrics[key], (int, float)) and isinstance(run_b.overall_metrics.get(key, 0), (int, float)):
-                deltas[key] = round(run_b.overall_metrics.get(key, 0) - run_a.overall_metrics.get(key, 0), 4)
+            if isinstance(run_a.overall_metrics[key], (int, float)) and isinstance(
+                run_b.overall_metrics.get(key, 0), (int, float)
+            ):
+                deltas[key] = round(
+                    run_b.overall_metrics.get(key, 0)
+                    - run_a.overall_metrics.get(key, 0),
+                    4,
+                )
 
         return {
-            "run_a": {"id": run_a.id, "model": run_a.model_name, "metrics": run_a.overall_metrics},
-            "run_b": {"id": run_b.id, "model": run_b.model_name, "metrics": run_b.overall_metrics},
+            "run_a": {
+                "id": run_a.id,
+                "model": run_a.model_name,
+                "metrics": run_a.overall_metrics,
+            },
+            "run_b": {
+                "id": run_b.id,
+                "model": run_b.model_name,
+                "metrics": run_b.overall_metrics,
+            },
             "deltas": deltas,
             "improved": deltas.get("recall_at_10", 0) > 0,
         }
 
-    def check_regression(self, current_run: BenchmarkRun,
-                         baseline_run: Optional[BenchmarkRun] = None) -> Dict[str, Any]:
+    def check_regression(
+        self, current_run: BenchmarkRun, baseline_run: Optional[BenchmarkRun] = None
+    ) -> Dict[str, Any]:
         """Check if current run regresses from baseline (overall metrics)."""
         if baseline_run is None:
             baseline_run = self._runs[0] if self._runs else None
@@ -411,7 +520,9 @@ class EmbeddingBenchmarkSuite:
         """Get all benchmark run summaries."""
         return [
             {
-                "id": r.id, "model_id": r.model_id, "model_name": r.model_name,
+                "id": r.id,
+                "model_id": r.model_id,
+                "model_name": r.model_name,
                 "total_queries": r.total_queries,
                 "overall_metrics": r.overall_metrics,
                 "passed_regression": r.passed_regression,

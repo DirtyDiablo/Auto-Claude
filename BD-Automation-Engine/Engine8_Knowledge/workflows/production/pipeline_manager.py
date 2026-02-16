@@ -15,7 +15,10 @@ from typing import Any, Dict
 import structlog
 
 from Engine8_Knowledge.workflows.graph_builder import (
-    EdgeSpec, NodeSpec, RetryConfig, WorkflowDefinition,
+    EdgeSpec,
+    NodeSpec,
+    RetryConfig,
+    WorkflowDefinition,
 )
 
 logger = structlog.get_logger(__name__)
@@ -46,6 +49,7 @@ PIPELINE_MANAGER_STATE = {
 # Node functions
 # ---------------------------------------------------------------------------
 
+
 async def scan_pipeline(state: Dict[str, Any]) -> Dict[str, Any]:
     """Query all active opportunities from data sources."""
     opportunities = []
@@ -53,23 +57,26 @@ async def scan_pipeline(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         # Query jobs collection for pipeline items
         hits = client.scroll(collection_name="jobs", limit=100)
         if hits and hits[0]:
             for point in hits[0]:
-                opportunities.append({
-                    "id": str(point.id),
-                    "title": point.payload.get("title", ""),
-                    "company": point.payload.get("company", ""),
-                    "program": point.payload.get("program", ""),
-                    "status": point.payload.get("status", "active"),
-                    "location": point.payload.get("location", ""),
-                    "clearance": point.payload.get("clearance", ""),
-                    "bd_priority": point.payload.get("bd_priority", "medium"),
-                    "last_activity": point.payload.get("scraped_at", ""),
-                })
+                opportunities.append(
+                    {
+                        "id": str(point.id),
+                        "title": point.payload.get("title", ""),
+                        "company": point.payload.get("company", ""),
+                        "program": point.payload.get("program", ""),
+                        "status": point.payload.get("status", "active"),
+                        "location": point.payload.get("location", ""),
+                        "clearance": point.payload.get("clearance", ""),
+                        "bd_priority": point.payload.get("bd_priority", "medium"),
+                        "last_activity": point.payload.get("scraped_at", ""),
+                    }
+                )
 
     except ImportError:
         pass
@@ -91,13 +98,20 @@ async def check_stale_items(state: Dict[str, Any]) -> Dict[str, Any]:
     for opp in opportunities:
         last_activity = opp.get("last_activity", "")
         if last_activity and last_activity < cutoff:
-            stale.append({
-                **opp,
-                "stale_days": (datetime.utcnow() - datetime.fromisoformat(
-                    last_activity.replace("Z", "+00:00").split("+")[0]
-                )).days if last_activity else 0,
-                "reason": "no_activity",
-            })
+            stale.append(
+                {
+                    **opp,
+                    "stale_days": (
+                        datetime.utcnow()
+                        - datetime.fromisoformat(
+                            last_activity.replace("Z", "+00:00").split("+")[0]
+                        )
+                    ).days
+                    if last_activity
+                    else 0,
+                    "reason": "no_activity",
+                }
+            )
 
     state["stale_items"] = stale
     logger.info("pipeline_manager.stale_check", stale=len(stale))
@@ -118,11 +132,13 @@ async def check_upcoming_deadlines(state: Dict[str, Any]) -> Dict[str, Any]:
         status = opp.get("status", "")
 
         if status in ("proposal_due", "rfp_response", "deadline"):
-            upcoming.append({
-                **opp,
-                "deadline_type": "proposal",
-                "urgency": "high",
-            })
+            upcoming.append(
+                {
+                    **opp,
+                    "deadline_type": "proposal",
+                    "urgency": "high",
+                }
+            )
 
     state["upcoming_deadlines"] = upcoming
     logger.info("pipeline_manager.deadline_check", upcoming=len(upcoming))
@@ -143,26 +159,35 @@ async def check_budget_cycles(state: Dict[str, Any]) -> Dict[str, Any]:
     # Q4 surge: July-September (DoD end-of-year spending)
     in_q4 = now.month in (7, 8, 9)
 
-    budget_items.append({
-        "type": "budget_cycle",
-        "fy_end_date": fy_end.strftime("%Y-%m-%d"),
-        "days_to_fy_end": days_to_fy_end,
-        "in_q4_surge": in_q4,
-        "recommendation": "Prioritize Q4 opportunities" if in_q4
-                          else f"FY end in {days_to_fy_end} days — plan accordingly",
-    })
+    budget_items.append(
+        {
+            "type": "budget_cycle",
+            "fy_end_date": fy_end.strftime("%Y-%m-%d"),
+            "days_to_fy_end": days_to_fy_end,
+            "in_q4_surge": in_q4,
+            "recommendation": "Prioritize Q4 opportunities"
+            if in_q4
+            else f"FY end in {days_to_fy_end} days — plan accordingly",
+        }
+    )
 
     # CR (Continuing Resolution) periods often run Oct-Dec
     if now.month in (10, 11, 12):
-        budget_items.append({
-            "type": "continuing_resolution",
-            "note": "Likely under CR — new starts may be delayed",
-            "recommendation": "Focus on existing contract vehicles, avoid new-start dependencies",
-        })
+        budget_items.append(
+            {
+                "type": "continuing_resolution",
+                "note": "Likely under CR — new starts may be delayed",
+                "recommendation": "Focus on existing contract vehicles, avoid new-start dependencies",
+            }
+        )
 
     state["budget_cycles"] = budget_items
-    logger.info("pipeline_manager.budget_check",
-                items=len(budget_items), q4=in_q4, days_to_fy=days_to_fy_end)
+    logger.info(
+        "pipeline_manager.budget_check",
+        items=len(budget_items),
+        q4=in_q4,
+        days_to_fy=days_to_fy_end,
+    )
     return state
 
 
@@ -188,9 +213,11 @@ async def merge_pipeline_state(state: Dict[str, Any]) -> Dict[str, Any]:
     pipeline_state["health_score"] = round(health, 2)
     state["pipeline_state"] = pipeline_state
 
-    logger.info("pipeline_manager.merged",
-                health=pipeline_state["health_score"],
-                total=pipeline_state["total_opportunities"])
+    logger.info(
+        "pipeline_manager.merged",
+        health=pipeline_state["health_score"],
+        total=pipeline_state["total_opportunities"],
+    )
     return state
 
 
@@ -203,29 +230,37 @@ async def analyze_risks(state: Dict[str, Any]) -> Dict[str, Any]:
     # Stale critical items
     for item in stale:
         if item.get("bd_priority") in ("critical", "high"):
-            risks.append({
-                "type": "stale_critical",
-                "opportunity": item.get("title", ""),
-                "company": item.get("company", ""),
-                "stale_days": item.get("stale_days", 0),
-                "severity": "critical" if item.get("bd_priority") == "critical" else "high",
-                "recommendation": f"Immediate follow-up required — {item.get('stale_days', 0)} days inactive",
-            })
+            risks.append(
+                {
+                    "type": "stale_critical",
+                    "opportunity": item.get("title", ""),
+                    "company": item.get("company", ""),
+                    "stale_days": item.get("stale_days", 0),
+                    "severity": "critical"
+                    if item.get("bd_priority") == "critical"
+                    else "high",
+                    "recommendation": f"Immediate follow-up required — {item.get('stale_days', 0)} days inactive",
+                }
+            )
 
     # Approaching deadlines without recent activity
     for item in deadlines:
-        risks.append({
-            "type": "deadline_approaching",
-            "opportunity": item.get("title", ""),
-            "deadline_type": item.get("deadline_type", ""),
-            "severity": "high",
-            "recommendation": "Verify submission readiness and team assignments",
-        })
+        risks.append(
+            {
+                "type": "deadline_approaching",
+                "opportunity": item.get("title", ""),
+                "deadline_type": item.get("deadline_type", ""),
+                "severity": "high",
+                "recommendation": "Verify submission readiness and team assignments",
+            }
+        )
 
     state["risks"] = risks
-    logger.info("pipeline_manager.risks_analyzed",
-                total=len(risks),
-                critical=sum(1 for r in risks if r.get("severity") == "critical"))
+    logger.info(
+        "pipeline_manager.risks_analyzed",
+        total=len(risks),
+        critical=sum(1 for r in risks if r.get("severity") == "critical"),
+    )
     return state
 
 
@@ -248,30 +283,37 @@ async def recommend_actions(state: Dict[str, Any]) -> Dict[str, Any]:
     # Additional recommendations for stale items
     for item in stale:
         if item.get("bd_priority") == "medium":
-            recommendations.append({
-                "opportunity": item.get("title", ""),
-                "action": f"Schedule follow-up — {item.get('stale_days', 0)} days since last activity",
-                "severity": "medium",
-                "requires_approval": False,
-                "auto_execute": True,
-            })
+            recommendations.append(
+                {
+                    "opportunity": item.get("title", ""),
+                    "action": f"Schedule follow-up — {item.get('stale_days', 0)} days since last activity",
+                    "severity": "medium",
+                    "requires_approval": False,
+                    "auto_execute": True,
+                }
+            )
 
     state["recommendations"] = recommendations
-    logger.info("pipeline_manager.recommendations",
-                total=len(recommendations),
-                needs_approval=sum(1 for r in recommendations if r.get("requires_approval")))
+    logger.info(
+        "pipeline_manager.recommendations",
+        total=len(recommendations),
+        needs_approval=sum(1 for r in recommendations if r.get("requires_approval")),
+    )
     return state
 
 
 async def review_recommendations(state: Dict[str, Any]) -> Dict[str, Any]:
     """Human approval gate for Critical deal actions.
     Interrupt node — workflow pauses for human review of critical actions."""
-    critical_recs = [r for r in state.get("recommendations", []) if r.get("requires_approval")]
+    critical_recs = [
+        r for r in state.get("recommendations", []) if r.get("requires_approval")
+    ]
     auto_recs = [r for r in state.get("recommendations", []) if r.get("auto_execute")]
 
     state["human_approved_actions"] = state.get("human_approved_actions", auto_recs)
-    logger.info("pipeline_manager.review",
-                critical=len(critical_recs), auto=len(auto_recs))
+    logger.info(
+        "pipeline_manager.review", critical=len(critical_recs), auto=len(auto_recs)
+    )
     return state
 
 
@@ -281,12 +323,14 @@ async def execute_approved_actions(state: Dict[str, Any]) -> Dict[str, Any]:
     results = []
 
     for action in approved:
-        results.append({
-            "opportunity": action.get("opportunity", ""),
-            "action": action.get("action", ""),
-            "status": "executed",
-            "executed_at": datetime.utcnow().isoformat(),
-        })
+        results.append(
+            {
+                "opportunity": action.get("opportunity", ""),
+                "action": action.get("action", ""),
+                "status": "executed",
+                "executed_at": datetime.utcnow().isoformat(),
+            }
+        )
 
     state["execution_results"] = results
     logger.info("pipeline_manager.executed", count=len(results))
@@ -325,15 +369,18 @@ async def generate_pipeline_report(state: Dict[str, Any]) -> Dict[str, Any]:
     }
 
     state["report"] = report
-    logger.info("pipeline_manager.report_generated",
-                health=report["pipeline_health"],
-                risks=report["risks_identified"])
+    logger.info(
+        "pipeline_manager.report_generated",
+        health=report["pipeline_health"],
+        risks=report["risks_identified"],
+    )
     return state
 
 
 # ---------------------------------------------------------------------------
 # Workflow Definition
 # ---------------------------------------------------------------------------
+
 
 def get_pipeline_manager_definition() -> WorkflowDefinition:
     """Return the production pipeline manager workflow definition."""
@@ -343,57 +390,69 @@ def get_pipeline_manager_definition() -> WorkflowDefinition:
         state_schema=PIPELINE_MANAGER_STATE,
         nodes={
             "scan_pipeline": NodeSpec(
-                name="scan_pipeline", function=scan_pipeline,
+                name="scan_pipeline",
+                function=scan_pipeline,
                 description="Scan all active pipeline opportunities",
                 timeout_seconds=120,
             ),
             "check_stale_items": NodeSpec(
-                name="check_stale_items", function=check_stale_items,
+                name="check_stale_items",
+                function=check_stale_items,
                 description="Identify stale items (>14 days inactive)",
                 timeout_seconds=60,
             ),
             "check_upcoming_deadlines": NodeSpec(
-                name="check_upcoming_deadlines", function=check_upcoming_deadlines,
+                name="check_upcoming_deadlines",
+                function=check_upcoming_deadlines,
                 description="Identify upcoming deadlines (30 days)",
                 timeout_seconds=60,
             ),
             "check_budget_cycles": NodeSpec(
-                name="check_budget_cycles", function=check_budget_cycles,
+                name="check_budget_cycles",
+                function=check_budget_cycles,
                 description="Analyze budget cycle timing",
                 timeout_seconds=30,
             ),
             "merge_pipeline_state": NodeSpec(
-                name="merge_pipeline_state", function=merge_pipeline_state,
+                name="merge_pipeline_state",
+                function=merge_pipeline_state,
                 description="Merge all analysis into unified state",
                 timeout_seconds=30,
             ),
             "analyze_risks": NodeSpec(
-                name="analyze_risks", function=analyze_risks,
+                name="analyze_risks",
+                function=analyze_risks,
                 description="Identify at-risk deals and stalled contacts",
                 timeout_seconds=120,
             ),
             "recommend_actions": NodeSpec(
-                name="recommend_actions", function=recommend_actions,
+                name="recommend_actions",
+                function=recommend_actions,
                 description="Generate prioritized action items",
                 timeout_seconds=60,
             ),
             "review_recommendations": NodeSpec(
-                name="review_recommendations", function=review_recommendations,
+                name="review_recommendations",
+                function=review_recommendations,
                 description="Human approval for critical deal actions",
-                timeout_seconds=3600, retry_on_error=False,
+                timeout_seconds=3600,
+                retry_on_error=False,
             ),
             "execute_approved_actions": NodeSpec(
-                name="execute_approved_actions", function=execute_approved_actions,
+                name="execute_approved_actions",
+                function=execute_approved_actions,
                 description="Execute approved actions",
                 timeout_seconds=300,
             ),
             "update_pipeline_db": NodeSpec(
-                name="update_pipeline_db", function=update_pipeline_db,
+                name="update_pipeline_db",
+                function=update_pipeline_db,
                 description="Sync updates to data sources",
                 timeout_seconds=120,
             ),
             "generate_pipeline_report": NodeSpec(
-                name="generate_pipeline_report", function=generate_pipeline_report,
+                name="generate_pipeline_report",
+                function=generate_pipeline_report,
                 description="Generate weekly pipeline report",
                 timeout_seconds=60,
             ),
@@ -406,7 +465,9 @@ def get_pipeline_manager_definition() -> WorkflowDefinition:
             EdgeSpec(source="merge_pipeline_state", target="analyze_risks"),
             EdgeSpec(source="analyze_risks", target="recommend_actions"),
             EdgeSpec(source="recommend_actions", target="review_recommendations"),
-            EdgeSpec(source="review_recommendations", target="execute_approved_actions"),
+            EdgeSpec(
+                source="review_recommendations", target="execute_approved_actions"
+            ),
             EdgeSpec(source="execute_approved_actions", target="update_pipeline_db"),
             EdgeSpec(source="update_pipeline_db", target="generate_pipeline_report"),
             EdgeSpec(source="generate_pipeline_report", target="__end__"),
@@ -418,7 +479,9 @@ def get_pipeline_manager_definition() -> WorkflowDefinition:
         ],
         retry_config={
             "scan_pipeline": RetryConfig(max_attempts=3, backoff_seconds=5.0),
-            "execute_approved_actions": RetryConfig(max_attempts=2, backoff_seconds=3.0),
+            "execute_approved_actions": RetryConfig(
+                max_attempts=2, backoff_seconds=3.0
+            ),
             "update_pipeline_db": RetryConfig(max_attempts=3, backoff_seconds=2.0),
         },
     )

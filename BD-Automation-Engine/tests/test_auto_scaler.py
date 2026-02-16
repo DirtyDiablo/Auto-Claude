@@ -18,6 +18,7 @@ def scaler():
 # PRE-REGISTERED POLICIES
 # =========================================
 
+
 def test_default_policies(scaler):
     policies = scaler.list_policies()
     assert len(policies) == 4
@@ -44,6 +45,7 @@ def test_agent_queue_policy(scaler):
 # EVALUATE - SCALE UP
 # =========================================
 
+
 def test_evaluate_scale_up(scaler):
     event = scaler.evaluate("api_cpu", 90.0)
     assert event.direction == ScalingDirection.SCALE_UP
@@ -61,6 +63,7 @@ def test_evaluate_scale_up_respects_max(scaler):
 # =========================================
 # EVALUATE - SCALE DOWN
 # =========================================
+
 
 def test_evaluate_scale_down(scaler):
     event = scaler.evaluate("api_cpu", 20.0)
@@ -80,6 +83,7 @@ def test_evaluate_scale_down_respects_min(scaler):
 # EVALUATE - NO CHANGE
 # =========================================
 
+
 def test_evaluate_no_change(scaler):
     event = scaler.evaluate("api_cpu", 50.0)
     assert event.direction == ScalingDirection.NO_CHANGE
@@ -94,6 +98,7 @@ def test_evaluate_not_found(scaler):
 # COOLDOWN
 # =========================================
 
+
 def test_cooldown_prevents_scaling(scaler):
     # First scale up succeeds
     event1 = scaler.evaluate("api_cpu", 90.0)
@@ -106,6 +111,7 @@ def test_cooldown_prevents_scaling(scaler):
 # =========================================
 # SCALING HISTORY
 # =========================================
+
 
 def test_scaling_history(scaler):
     scaler.evaluate("api_cpu", 90.0)
@@ -124,6 +130,7 @@ def test_scaling_history_filtered(scaler):
 # UPDATE POLICY
 # =========================================
 
+
 def test_update_policy(scaler):
     result = scaler.update_policy("api_cpu", scale_up_threshold=90)
     assert result is not None
@@ -140,6 +147,7 @@ def test_update_not_found(scaler):
 # RECOMMENDATIONS
 # =========================================
 
+
 def test_recommendations(scaler):
     recs = scaler.get_recommendations()
     assert isinstance(recs, list)
@@ -148,6 +156,7 @@ def test_recommendations(scaler):
 # =========================================
 # TO_DICT & STATS
 # =========================================
+
 
 def test_policy_to_dict(scaler):
     p = scaler.get_policy("api_cpu")
@@ -166,8 +175,10 @@ def test_stats(scaler):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.scaling.auto_scaler as mod
+
     mod._instance = None
     a1 = get_auto_scaler()
     a2 = get_auto_scaler()

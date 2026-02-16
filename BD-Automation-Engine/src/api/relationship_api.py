@@ -23,7 +23,10 @@ from typing import Any, Dict, Optional
 from fastapi import APIRouter, Query
 from pydantic import BaseModel, Field
 
-from src.graph.relationship_engine import RelationshipStrengthModel, get_relationship_model
+from src.graph.relationship_engine import (
+    RelationshipStrengthModel,
+    get_relationship_model,
+)
 from src.graph.influence_scorer import BDPageRank, get_influence_scorer
 from src.graph.path_router import OptimalPathRouter, get_path_router
 from src.graph.network_analysis import NetworkAnalyzer, get_network_analyzer
@@ -37,8 +40,11 @@ router = APIRouter(prefix="/relationships", tags=["relationship-intelligence"])
 # REQUEST MODELS
 # =========================================
 
+
 class RecomputeRequest(BaseModel):
-    scope: str = Field(default="all", description="Recompute scope: all, influence, strength, paths")
+    scope: str = Field(
+        default="all", description="Recompute scope: all, influence, strength, paths"
+    )
 
 
 # =========================================
@@ -83,6 +89,7 @@ def _get_network() -> NetworkAnalyzer:
 # RELATIONSHIP STRENGTH ENDPOINTS
 # =========================================
 
+
 @router.get("/score/{contact_a}/{contact_b}")
 async def get_relationship_score(contact_a: str, contact_b: str) -> Dict[str, Any]:
     """Score the relationship between two contacts."""
@@ -110,7 +117,8 @@ async def get_contact_relationships(contact_id: str) -> Dict[str, Any]:
     """Get all scored relationships for a contact."""
     model = _get_rel_model()
     all_scores = [
-        s for s in model._scores_cache.values()
+        s
+        for s in model._scores_cache.values()
         if s.contact_a == contact_id or s.contact_b == contact_id
     ]
     all_scores.sort(key=lambda s: s.total_score, reverse=True)
@@ -118,7 +126,9 @@ async def get_contact_relationships(contact_id: str) -> Dict[str, Any]:
         "contact_id": contact_id,
         "relationships": [
             {
-                "other_contact": s.contact_b if s.contact_a == contact_id else s.contact_a,
+                "other_contact": s.contact_b
+                if s.contact_a == contact_id
+                else s.contact_a,
                 "score": s.total_score,
                 "recency": s.recency_score,
                 "quality": s.quality_score,
@@ -157,6 +167,7 @@ async def get_decaying_relationships(
 # =========================================
 # INFLUENCE ENDPOINTS
 # =========================================
+
 
 @router.get("/influence/global")
 async def get_global_influence(
@@ -221,9 +232,11 @@ async def get_influence_trend(contact_id: str) -> Dict[str, Any]:
 # PATH ENDPOINTS
 # =========================================
 
+
 @router.get("/path/{from_id}/{to_id}")
 async def get_optimal_path(
-    from_id: str, to_id: str,
+    from_id: str,
+    to_id: str,
     max_hops: int = Query(default=5, ge=2, le=8),
 ) -> Dict[str, Any]:
     """Find optimal path between two contacts."""
@@ -291,6 +304,7 @@ async def get_missing_links(program: str) -> Dict[str, Any]:
 # =========================================
 # NETWORK ENDPOINTS
 # =========================================
+
 
 @router.get("/communities")
 async def get_communities() -> Dict[str, Any]:
@@ -376,6 +390,7 @@ async def get_network_growth(
 # RECOMPUTE ENDPOINT
 # =========================================
 
+
 @router.post("/recompute")
 async def recompute(request: RecomputeRequest) -> Dict[str, Any]:
     """Force recomputation of relationship intelligence."""
@@ -404,6 +419,7 @@ async def recompute(request: RecomputeRequest) -> Dict[str, Any]:
 # ROUTER INTEGRATION
 # =========================================
 
+
 def configure_relationships(
     graph_client: Any = None,
     rel_model: Optional[RelationshipStrengthModel] = None,
@@ -430,4 +446,6 @@ def include_relationship_router(app, **kwargs):
     """Include the Phase 34A relationship router in the main FastAPI app."""
     configure_relationships(**kwargs)
     app.include_router(router)
-    logger.info("Phase 34A relationship routes enabled: /relationships/* (14 endpoints)")
+    logger.info(
+        "Phase 34A relationship routes enabled: /relationships/* (14 endpoints)"
+    )

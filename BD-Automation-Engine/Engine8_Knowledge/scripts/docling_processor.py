@@ -14,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from docling.document_converter import DocumentConverter
+
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False
@@ -46,14 +47,17 @@ class DoclingProcessor:
             return {
                 "filename": os.path.basename(pdf_path),
                 "text": doc.export_to_markdown(),
-                "pages": len(doc.pages) if hasattr(doc, 'pages') else 0,
+                "pages": len(doc.pages) if hasattr(doc, "pages") else 0,
                 "tables": self._extract_tables(doc),
-                "metadata": self.extract_federal_metadata({"text": doc.export_to_markdown()})
+                "metadata": self.extract_federal_metadata(
+                    {"text": doc.export_to_markdown()}
+                ),
             }
         else:
             # Basic fallback using pypdf
             try:
                 from pypdf import PdfReader
+
                 reader = PdfReader(pdf_path)
                 text = "\n".join(page.extract_text() or "" for page in reader.pages)
                 return {
@@ -61,20 +65,26 @@ class DoclingProcessor:
                     "text": text,
                     "pages": len(reader.pages),
                     "tables": [],
-                    "metadata": self.extract_federal_metadata({"text": text})
+                    "metadata": self.extract_federal_metadata({"text": text}),
                 }
             except Exception as e:
                 logger.error(f"PDF processing error: {e}")
-                return {"filename": os.path.basename(pdf_path), "text": "", "error": str(e)}
+                return {
+                    "filename": os.path.basename(pdf_path),
+                    "text": "",
+                    "error": str(e),
+                }
 
     def _extract_tables(self, doc) -> List[Dict]:
         tables = []
-        if hasattr(doc, 'tables'):
+        if hasattr(doc, "tables"):
             for i, table in enumerate(doc.tables):
                 tables.append({"id": i, "data": str(table)})
         return tables
 
-    def process_directory(self, directory: str, extensions: List[str] = None) -> List[Dict]:
+    def process_directory(
+        self, directory: str, extensions: List[str] = None
+    ) -> List[Dict]:
         """Process all documents in directory."""
         extensions = extensions or [".pdf"]
         results = []
@@ -96,13 +106,13 @@ class DoclingProcessor:
 
         return {
             "contract_numbers": re.findall(
-                r'[A-Z]{1,2}\d{2}[A-Z]{3,4}-?\d{2}-[A-Z]-\d{4}', text
+                r"[A-Z]{1,2}\d{2}[A-Z]{3,4}-?\d{2}-[A-Z]-\d{4}", text
             ),
             "solicitation_numbers": re.findall(
-                r'[A-Z0-9]{2,4}-\d{2}-[A-Z]-\d{4,6}', text
+                r"[A-Z0-9]{2,4}-\d{2}-[A-Z]-\d{4,6}", text
             ),
-            "cage_codes": re.findall(r'\b[0-9A-Z]{5}\b', text)[:10],
-            "naics_codes": re.findall(r'\b\d{6}\b', text)[:5]
+            "cage_codes": re.findall(r"\b[0-9A-Z]{5}\b", text)[:10],
+            "naics_codes": re.findall(r"\b\d{6}\b", text)[:5],
         }
 
     def process_text(self, text: str, doc_id: str = "unknown") -> Dict:
@@ -112,11 +122,12 @@ class DoclingProcessor:
             "text": text,
             "pages": 0,
             "tables": [],
-            "metadata": self.extract_federal_metadata({"text": text})
+            "metadata": self.extract_federal_metadata({"text": text}),
         }
 
 
 _docling_instance = None
+
 
 def get_docling(output_dir: str = None) -> DoclingProcessor:
     global _docling_instance

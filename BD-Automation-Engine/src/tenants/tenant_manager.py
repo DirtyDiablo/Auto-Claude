@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class TenantStatus(str, Enum):
     ACTIVE = "active"
     PROVISIONING = "provisioning"
@@ -34,6 +35,7 @@ class TenantStatus(str, Enum):
 @dataclass
 class TenantBranding:
     """White-label branding configuration."""
+
     company_name: str = ""
     logo_url: str = ""
     primary_color: str = "#1a73e8"
@@ -45,6 +47,7 @@ class TenantBranding:
 @dataclass
 class FeatureFlags:
     """Which engines/features are enabled for the tenant."""
+
     engine_scraper: bool = True
     engine_program_mapping: bool = True
     engine_orgchart: bool = True
@@ -64,6 +67,7 @@ class FeatureFlags:
 @dataclass
 class DataRetention:
     """Data retention policies."""
+
     contacts_days: int = 365
     jobs_days: int = 180
     activities_days: int = 90
@@ -74,6 +78,7 @@ class DataRetention:
 @dataclass
 class TenantConfig:
     """Full tenant configuration."""
+
     branding: TenantBranding = field(default_factory=TenantBranding)
     features: FeatureFlags = field(default_factory=FeatureFlags)
     retention: DataRetention = field(default_factory=DataRetention)
@@ -86,6 +91,7 @@ class TenantConfig:
 @dataclass
 class TenantHealth:
     """Per-tenant resource usage and health."""
+
     tenant_id: str
     status: TenantStatus = TenantStatus.ACTIVE
     user_count: int = 0
@@ -100,22 +106,24 @@ class TenantHealth:
 @dataclass
 class Tenant:
     """Tenant entity."""
+
     id: str
     name: str
-    slug: str                       # URL-safe identifier
+    slug: str  # URL-safe identifier
     status: TenantStatus = TenantStatus.ACTIVE
     config: TenantConfig = field(default_factory=TenantConfig)
     owner_email: str = ""
     created_at: str = ""
     updated_at: str = ""
     deactivated_at: str = ""
-    plan: str = "professional"      # starter, professional, enterprise
-    api_key_prefix: str = ""        # For tenant-scoped API keys
+    plan: str = "professional"  # starter, professional, enterprise
+    api_key_prefix: str = ""  # For tenant-scoped API keys
 
 
 # =========================================
 # RESOURCE PREFIXES
 # =========================================
+
 
 def qdrant_collection_name(tenant_id: str, collection: str) -> str:
     """Get tenant-scoped Qdrant collection name."""
@@ -142,13 +150,18 @@ def sqlite_path(tenant_id: str) -> str:
 # =========================================
 
 TENANT_COLLECTIONS = [
-    "contacts", "jobs", "programs", "documents", "activities",
+    "contacts",
+    "jobs",
+    "programs",
+    "documents",
+    "activities",
 ]
 
 
 # =========================================
 # TENANT MANAGER
 # =========================================
+
 
 class TenantManager:
     """Manage tenant lifecycle and isolation."""
@@ -231,7 +244,9 @@ class TenantManager:
         tenant.updated_at = datetime.now(timezone.utc).isoformat()
         return tenant
 
-    def update_tenant_config(self, tenant_id: str, config: TenantConfig) -> Optional[Tenant]:
+    def update_tenant_config(
+        self, tenant_id: str, config: TenantConfig
+    ) -> Optional[Tenant]:
         """Update tenant configuration."""
         tenant = self._tenants.get(tenant_id)
         if not tenant:
@@ -272,9 +287,7 @@ class TenantManager:
         # 2. Set up Neo4j labels/constraints
         # 3. Create SQLite database
         # 4. Set up Redis key namespaces
-        collections = [
-            qdrant_collection_name(tenant.id, c) for c in TENANT_COLLECTIONS
-        ]
+        collections = [qdrant_collection_name(tenant.id, c) for c in TENANT_COLLECTIONS]
         logger.info(
             f"Provisioning tenant {tenant.id}: "
             f"{len(collections)} collections, Redis prefix={redis_prefix(tenant.id)}"

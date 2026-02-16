@@ -45,6 +45,7 @@ I appreciate your help. Looking forward to working together.
 # BRIEFING
 # =========================================
 
+
 def test_generate_briefing(client):
     resp = client.post("/api/voice/briefing/c001")
     assert resp.status_code == 200
@@ -79,9 +80,12 @@ def test_briefing_audio_not_found(client):
 
 
 def test_batch_briefings(client):
-    resp = client.post("/api/voice/briefing/batch", json={
-        "contact_ids": ["c001", "c002", "c003"],
-    })
+    resp = client.post(
+        "/api/voice/briefing/batch",
+        json={
+            "contact_ids": ["c001", "c002", "c003"],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] == 3
@@ -91,12 +95,16 @@ def test_batch_briefings(client):
 # TRANSCRIPT ANALYSIS
 # =========================================
 
+
 def test_analyze_transcript(client):
-    resp = client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-        "duration_sec": 300,
-    })
+    resp = client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+            "duration_sec": 300,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["contact_id"] == "c001"
@@ -105,36 +113,48 @@ def test_analyze_transcript(client):
 
 
 def test_analyze_empty_transcript(client):
-    resp = client.post("/api/voice/transcript/analyze", json={
-        "transcript": "",
-        "contact_id": "c001",
-    })
+    resp = client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": "",
+            "contact_id": "c001",
+        },
+    )
     assert resp.status_code == 400
 
 
 def test_analyze_extracts_pain_points(client):
-    resp = client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-    })
+    resp = client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+        },
+    )
     data = resp.json()
     assert len(data["pain_points"]) >= 1
 
 
 def test_analyze_extracts_competitors(client):
-    resp = client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-    })
+    resp = client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+        },
+    )
     data = resp.json()
     assert len(data["competitor_mentions"]) >= 1
 
 
 def test_analyze_extracts_action_items(client):
-    resp = client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-    })
+    resp = client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+        },
+    )
     data = resp.json()
     assert len(data["action_items"]) >= 1
 
@@ -143,13 +163,17 @@ def test_analyze_extracts_action_items(client):
 # VAPI WEBHOOK
 # =========================================
 
+
 def test_vapi_webhook(client):
-    resp = client.post("/api/voice/transcript/vapi-webhook", json={
-        "call_id": "vapi_test_001",
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-        "duration_seconds": 300,
-    })
+    resp = client.post(
+        "/api/voice/transcript/vapi-webhook",
+        json={
+            "call_id": "vapi_test_001",
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+            "duration_seconds": 300,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["call_id"] == "vapi_test_001"
@@ -159,13 +183,17 @@ def test_vapi_webhook(client):
 # TRANSCRIPT GET
 # =========================================
 
+
 def test_get_transcript(client):
     # Analyze first
-    resp = client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-        "call_id": "test_call_001",
-    })
+    resp = client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+            "call_id": "test_call_001",
+        },
+    )
     # Get by call_id
     resp = client.get("/api/voice/transcript/test_call_001")
     assert resp.status_code == 200
@@ -182,15 +210,22 @@ def test_get_transcript_not_found(client):
 # HISTORY
 # =========================================
 
+
 def test_call_history(client):
-    client.post("/api/voice/transcript/analyze", json={
-        "transcript": "First call about hiring.",
-        "contact_id": "c001",
-    })
-    client.post("/api/voice/transcript/analyze", json={
-        "transcript": "Second call about budget.",
-        "contact_id": "c001",
-    })
+    client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": "First call about hiring.",
+            "contact_id": "c001",
+        },
+    )
+    client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": "Second call about budget.",
+            "contact_id": "c001",
+        },
+    )
     resp = client.get("/api/voice/history/c001")
     assert resp.status_code == 200
     data = resp.json()
@@ -208,11 +243,15 @@ def test_call_history_empty(client):
 # INTEL QUERIES
 # =========================================
 
+
 def test_recent_intel(client):
-    client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-    })
+    client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+        },
+    )
     resp = client.get("/api/voice/intel/recent")
     assert resp.status_code == 200
     data = resp.json()
@@ -220,10 +259,13 @@ def test_recent_intel(client):
 
 
 def test_pain_points(client):
-    client.post("/api/voice/transcript/analyze", json={
-        "transcript": "We're struggling with staffing issues and latency problems.",
-        "contact_id": "c001",
-    })
+    client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": "We're struggling with staffing issues and latency problems.",
+            "contact_id": "c001",
+        },
+    )
     resp = client.get("/api/voice/intel/pain-points")
     assert resp.status_code == 200
     data = resp.json()
@@ -231,10 +273,13 @@ def test_pain_points(client):
 
 
 def test_action_items(client):
-    client.post("/api/voice/transcript/analyze", json={
-        "transcript": "I'll send the proposal by Friday. Schedule a meeting by next week.",
-        "contact_id": "c001",
-    })
+    client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": "I'll send the proposal by Friday. Schedule a meeting by next week.",
+            "contact_id": "c001",
+        },
+    )
     resp = client.get("/api/voice/intel/action-items")
     assert resp.status_code == 200
     data = resp.json()
@@ -245,19 +290,26 @@ def test_action_items(client):
 # COACHING
 # =========================================
 
+
 def test_coaching(client):
-    resp = client.post("/api/voice/coaching/suggestions", json={
-        "transcript": "We're also talking to Leidos about the contract recompete.",
-    })
+    resp = client.post(
+        "/api/voice/coaching/suggestions",
+        json={
+            "transcript": "We're also talking to Leidos about the contract recompete.",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] >= 1
 
 
 def test_coaching_no_triggers(client):
-    resp = client.post("/api/voice/coaching/suggestions", json={
-        "transcript": "The weather is nice today.",
-    })
+    resp = client.post(
+        "/api/voice/coaching/suggestions",
+        json={
+            "transcript": "The weather is nice today.",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] == 0
@@ -267,12 +319,16 @@ def test_coaching_no_triggers(client):
 # ANALYTICS
 # =========================================
 
+
 def test_analytics(client):
-    client.post("/api/voice/transcript/analyze", json={
-        "transcript": SAMPLE_TRANSCRIPT,
-        "contact_id": "c001",
-        "duration_sec": 300,
-    })
+    client.post(
+        "/api/voice/transcript/analyze",
+        json={
+            "transcript": SAMPLE_TRANSCRIPT,
+            "contact_id": "c001",
+            "duration_sec": 300,
+        },
+    )
     resp = client.get("/api/voice/analytics")
     assert resp.status_code == 200
     data = resp.json()

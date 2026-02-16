@@ -15,6 +15,7 @@ from src.data_quality.engine import DataQualityRule
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def dsl():
     return QualityRulesDSL()
@@ -24,17 +25,29 @@ def dsl():
 def sample_rules():
     return {
         "contacts": [
-            {"rule": "email_check", "dimension": "validity",
-             "severity": "high", "description": "Email must be valid",
-             "impact_score": 0.8},
-            {"rule": "name_check", "dimension": "completeness",
-             "severity": "critical", "description": "Name required",
-             "impact_score": 0.9},
+            {
+                "rule": "email_check",
+                "dimension": "validity",
+                "severity": "high",
+                "description": "Email must be valid",
+                "impact_score": 0.8,
+            },
+            {
+                "rule": "name_check",
+                "dimension": "completeness",
+                "severity": "critical",
+                "description": "Name required",
+                "impact_score": 0.9,
+            },
         ],
         "programs": [
-            {"rule": "contract_active", "dimension": "freshness",
-             "severity": "high", "description": "Contract not expired",
-             "impact_score": 0.85},
+            {
+                "rule": "contract_active",
+                "dimension": "freshness",
+                "severity": "high",
+                "description": "Contract not expired",
+                "impact_score": 0.85,
+            },
         ],
     }
 
@@ -42,6 +55,7 @@ def sample_rules():
 # =========================================
 # LOADING
 # =========================================
+
 
 class TestLoading:
     def test_load_from_dict(self, dsl, sample_rules):
@@ -61,15 +75,19 @@ class TestLoading:
         assert email.impact_score == 0.8
 
     def test_load_skips_unknown_domain(self, dsl):
-        rules = dsl.load_rules_from_dict({
-            "unknown_domain": [{"rule": "test", "dimension": "validity"}],
-        })
+        rules = dsl.load_rules_from_dict(
+            {
+                "unknown_domain": [{"rule": "test", "dimension": "validity"}],
+            }
+        )
         assert len(rules) == 0
 
     def test_load_skips_empty_name(self, dsl):
-        rules = dsl.load_rules_from_dict({
-            "contacts": [{"rule": "", "dimension": "validity"}],
-        })
+        rules = dsl.load_rules_from_dict(
+            {
+                "contacts": [{"rule": "", "dimension": "validity"}],
+            }
+        )
         assert len(rules) == 0
 
     def test_get_rules(self, dsl, sample_rules):
@@ -93,6 +111,7 @@ class TestLoading:
 # VALIDATION
 # =========================================
 
+
 class TestValidation:
     def test_valid_rules(self, dsl, sample_rules):
         rules = dsl.load_rules_from_dict(sample_rules)
@@ -103,7 +122,9 @@ class TestValidation:
 
     def test_invalid_dimension(self, dsl):
         rule = DataQualityRule(
-            name="bad", dimension="invalid_dim", domain="contacts",
+            name="bad",
+            dimension="invalid_dim",
+            domain="contacts",
             severity="high",
         )
         result = dsl.validate_rules([rule])
@@ -112,7 +133,9 @@ class TestValidation:
 
     def test_invalid_domain(self, dsl):
         rule = DataQualityRule(
-            name="bad", dimension="validity", domain="bad_domain",
+            name="bad",
+            dimension="validity",
+            domain="bad_domain",
             severity="high",
         )
         result = dsl.validate_rules([rule])
@@ -120,7 +143,9 @@ class TestValidation:
 
     def test_invalid_severity(self, dsl):
         rule = DataQualityRule(
-            name="bad", dimension="validity", domain="contacts",
+            name="bad",
+            dimension="validity",
+            domain="contacts",
             severity="extreme",
         )
         result = dsl.validate_rules([rule])
@@ -128,10 +153,12 @@ class TestValidation:
 
     def test_duplicate_names(self, dsl):
         rules = [
-            DataQualityRule(name="dup", dimension="validity",
-                          domain="contacts", severity="high"),
-            DataQualityRule(name="dup", dimension="accuracy",
-                          domain="contacts", severity="low"),
+            DataQualityRule(
+                name="dup", dimension="validity", domain="contacts", severity="high"
+            ),
+            DataQualityRule(
+                name="dup", dimension="accuracy", domain="contacts", severity="low"
+            ),
         ]
         result = dsl.validate_rules(rules)
         assert result.valid is False
@@ -139,8 +166,11 @@ class TestValidation:
 
     def test_impact_score_warning(self, dsl):
         rule = DataQualityRule(
-            name="ok", dimension="validity", domain="contacts",
-            severity="high", impact_score=1.5,
+            name="ok",
+            dimension="validity",
+            domain="contacts",
+            severity="high",
+            impact_score=1.5,
         )
         result = dsl.validate_rules([rule])
         assert len(result.warnings) > 0
@@ -149,6 +179,7 @@ class TestValidation:
 # =========================================
 # HOT RELOAD
 # =========================================
+
 
 class TestHotReload:
     def test_reload_adds_new(self, dsl, sample_rules):
@@ -180,14 +211,23 @@ class TestHotReload:
         dsl.load_rules_from_dict(sample_rules)
         new_rules = {
             "contacts": [
-                {"rule": "email_check", "dimension": "validity",
-                 "severity": "critical"},  # Changed from high to critical
-                {"rule": "name_check", "dimension": "completeness",
-                 "severity": "critical"},
+                {
+                    "rule": "email_check",
+                    "dimension": "validity",
+                    "severity": "critical",
+                },  # Changed from high to critical
+                {
+                    "rule": "name_check",
+                    "dimension": "completeness",
+                    "severity": "critical",
+                },
             ],
             "programs": [
-                {"rule": "contract_active", "dimension": "freshness",
-                 "severity": "high"},
+                {
+                    "rule": "contract_active",
+                    "dimension": "freshness",
+                    "severity": "high",
+                },
             ],
         }
         result = dsl.hot_reload(new_rules)
@@ -217,6 +257,7 @@ class TestHotReload:
 # EXPORT
 # =========================================
 
+
 class TestExport:
     def test_export_rules(self, dsl, sample_rules):
         dsl.load_rules_from_dict(sample_rules)
@@ -237,6 +278,7 @@ class TestExport:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_dsl(self):

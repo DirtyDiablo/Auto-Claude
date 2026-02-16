@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GraphResult:
     """A single graph retrieval result."""
+
     id: str
     name: str
     entity_type: str
@@ -37,6 +38,7 @@ class GraphRetriever:
         if self._mgr is None:
             try:
                 from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
                 self._mgr = get_neo4j_manager()
             except Exception:
                 raise RuntimeError("Neo4j manager not available")
@@ -66,31 +68,37 @@ class GraphRetriever:
             matches = self.entity_lookup(entity_name, entity_type)
             for match in matches[:3]:
                 context = self.expand_context(
-                    match["name"], match.get("type", ""), depth,
+                    match["name"],
+                    match.get("type", ""),
+                    depth,
                 )
                 context_text = self._format_context_text(match, context)
-                results.append(GraphResult(
-                    id=f"graph_{match.get('name', '')}",
-                    name=match.get("name", ""),
-                    entity_type=match.get("type", "Unknown"),
-                    context_text=context_text,
-                    relationships=context.get("relationships", []),
-                    properties=match,
-                    score=1.0 / (len(results) + 1),
-                ))
+                results.append(
+                    GraphResult(
+                        id=f"graph_{match.get('name', '')}",
+                        name=match.get("name", ""),
+                        entity_type=match.get("type", "Unknown"),
+                        context_text=context_text,
+                        relationships=context.get("relationships", []),
+                        properties=match,
+                        score=1.0 / (len(results) + 1),
+                    )
+                )
 
         # If no entity matches, try full-text search
         if not results:
             ft_results = self._fulltext_search(query, limit)
             for rank, ft in enumerate(ft_results):
-                results.append(GraphResult(
-                    id=f"graph_ft_{rank}",
-                    name=ft.get("name", ""),
-                    entity_type=ft.get("type", ""),
-                    context_text=ft.get("name", "") + " — " + ft.get("title", ""),
-                    properties=ft,
-                    score=ft.get("score", 0.0),
-                ))
+                results.append(
+                    GraphResult(
+                        id=f"graph_ft_{rank}",
+                        name=ft.get("name", ""),
+                        entity_type=ft.get("type", ""),
+                        context_text=ft.get("name", "") + " — " + ft.get("title", ""),
+                        properties=ft,
+                        score=ft.get("score", 0.0),
+                    )
+                )
 
         return results[:limit]
 
@@ -127,7 +135,9 @@ class GraphRetriever:
             logger.warning("entity_lookup_error", name=name, error=str(e)[:100])
             return []
 
-    def expand_context(self, entity_name: str, entity_type: str, depth: int = 2) -> dict:
+    def expand_context(
+        self, entity_name: str, entity_type: str, depth: int = 2
+    ) -> dict:
         """Get all connected entities within depth hops."""
         try:
             results = self.mgr.run_query(
@@ -146,19 +156,27 @@ class GraphRetriever:
             connected = []
             for r in results:
                 rel_chain = r.get("rel_types", [])
-                relationships.append({
-                    "target": r["connected_name"],
-                    "target_type": r["connected_type"],
-                    "relationship": " → ".join(rel_chain) if rel_chain else "CONNECTED",
-                })
-                connected.append({
-                    "name": r["connected_name"],
-                    "type": r["connected_type"],
-                    **r.get("props", {}),
-                })
+                relationships.append(
+                    {
+                        "target": r["connected_name"],
+                        "target_type": r["connected_type"],
+                        "relationship": " → ".join(rel_chain)
+                        if rel_chain
+                        else "CONNECTED",
+                    }
+                )
+                connected.append(
+                    {
+                        "name": r["connected_name"],
+                        "type": r["connected_type"],
+                        **r.get("props", {}),
+                    }
+                )
             return {"relationships": relationships, "connected": connected}
         except Exception as e:
-            logger.warning("expand_context_error", entity=entity_name, error=str(e)[:100])
+            logger.warning(
+                "expand_context_error", entity=entity_name, error=str(e)[:100]
+            )
             return {"relationships": [], "connected": []}
 
     def program_context(self, program_name: str) -> dict:
@@ -303,7 +321,9 @@ class GraphRetriever:
         if rels:
             rel_summary = []
             for r in rels[:10]:
-                rel_summary.append(f"{r['relationship']} → {r['target']} ({r['target_type']})")
+                rel_summary.append(
+                    f"{r['relationship']} → {r['target']} ({r['target_type']})"
+                )
             parts.append("Connections: " + "; ".join(rel_summary) + ".")
 
         return " ".join(parts)

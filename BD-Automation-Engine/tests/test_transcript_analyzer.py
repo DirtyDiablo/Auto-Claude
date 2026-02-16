@@ -58,6 +58,7 @@ Quick check-in call. Everything is going well. No major updates.
 # FULL TRANSCRIPT ANALYSIS
 # =========================================
 
+
 def test_analyze_full_transcript(analyzer):
     intel = analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001")
     assert isinstance(intel, TranscriptIntel)
@@ -76,7 +77,9 @@ def test_job_openings_extracted(analyzer):
     intel = analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001")
     assert len(intel.job_openings) >= 1
     contents = " ".join(j.content.lower() for j in intel.job_openings)
-    assert "hiring" in contents or "open position" in contents or "looking for" in contents
+    assert (
+        "hiring" in contents or "open position" in contents or "looking for" in contents
+    )
 
 
 def test_competitor_mentions_extracted(analyzer):
@@ -97,7 +100,9 @@ def test_contract_signals_extracted(analyzer):
     intel = analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001")
     assert len(intel.contract_signals) >= 1
     contents = " ".join(cs.content.lower() for cs in intel.contract_signals)
-    assert "recompete" in contents or "option year" in contents or "transition" in contents
+    assert (
+        "recompete" in contents or "option year" in contents or "transition" in contents
+    )
 
 
 def test_contact_mentions_extracted(analyzer):
@@ -110,7 +115,9 @@ def test_action_items_extracted(analyzer):
     intel = analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001")
     assert len(intel.action_items) >= 2
     descriptions = " ".join(ai.description.lower() for ai in intel.action_items)
-    assert "send" in descriptions or "schedule" in descriptions or "follow" in descriptions
+    assert (
+        "send" in descriptions or "schedule" in descriptions or "follow" in descriptions
+    )
 
 
 def test_action_item_owner(analyzer):
@@ -145,7 +152,10 @@ def test_sentiment_neutral(analyzer):
 def test_key_topics(analyzer):
     intel = analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001")
     assert len(intel.key_topics) >= 2
-    assert any(t in intel.key_topics for t in ["staffing", "budget", "contract", "cloud_migration"])
+    assert any(
+        t in intel.key_topics
+        for t in ["staffing", "budget", "contract", "cloud_migration"]
+    )
 
 
 def test_summary(analyzer):
@@ -167,6 +177,7 @@ def test_transcript_length(analyzer):
 # =========================================
 # VAPI WEBHOOK
 # =========================================
+
 
 def test_vapi_webhook(analyzer):
     webhook_data = {
@@ -210,14 +221,19 @@ def test_vapi_sets_source(analyzer):
 # COACHING
 # =========================================
 
+
 def test_coaching_competitor(analyzer):
-    suggestions = analyzer.get_coaching_suggestions("We're also talking to Leidos about this.")
+    suggestions = analyzer.get_coaching_suggestions(
+        "We're also talking to Leidos about this."
+    )
     assert len(suggestions) >= 1
     assert any("competitor" in s.get("trigger", "") for s in suggestions)
 
 
 def test_coaching_budget(analyzer):
-    suggestions = analyzer.get_coaching_suggestions("Our budget for this fiscal year is tight.")
+    suggestions = analyzer.get_coaching_suggestions(
+        "Our budget for this fiscal year is tight."
+    )
     assert len(suggestions) >= 1
 
 
@@ -235,6 +251,7 @@ def test_coaching_empty(analyzer):
 # QUERIES
 # =========================================
 
+
 def test_call_history(analyzer):
     analyzer.analyze_transcript("Call 1 about hiring needs.", contact_id="c001")
     analyzer.analyze_transcript("Call 2 about budget.", contact_id="c001")
@@ -249,13 +266,17 @@ def test_recent_intel(analyzer):
 
 
 def test_all_pain_points(analyzer):
-    analyzer.analyze_transcript("We're struggling with latency issues.", contact_id="c001")
+    analyzer.analyze_transcript(
+        "We're struggling with latency issues.", contact_id="c001"
+    )
     pps = analyzer.get_all_pain_points()
     assert len(pps) >= 1
 
 
 def test_all_action_items(analyzer):
-    analyzer.analyze_transcript("I'll send you the document by Friday.", contact_id="c001")
+    analyzer.analyze_transcript(
+        "I'll send you the document by Friday.", contact_id="c001"
+    )
     items = analyzer.get_all_action_items()
     assert len(items) >= 1
 
@@ -270,8 +291,11 @@ def test_all_action_items_by_status(analyzer):
 # ANALYTICS
 # =========================================
 
+
 def test_analytics(analyzer):
-    analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001", duration_sec=300)
+    analyzer.analyze_transcript(
+        SAMPLE_TRANSCRIPT_FULL, contact_id="c001", duration_sec=300
+    )
     analytics = analyzer.get_analytics()
     assert analytics["total_calls"] == 1
     assert analytics["total_duration_sec"] == 300
@@ -281,7 +305,14 @@ def test_analytics(analyzer):
 
 def test_analytics_sources(analyzer):
     analyzer.analyze_transcript("Call 1.", contact_id="c001")
-    analyzer.process_vapi_webhook({"call_id": "v1", "transcript": "Call 2.", "contact_id": "c002", "duration_seconds": 60})
+    analyzer.process_vapi_webhook(
+        {
+            "call_id": "v1",
+            "transcript": "Call 2.",
+            "contact_id": "c002",
+            "duration_seconds": 60,
+        }
+    )
     analytics = analyzer.get_analytics()
     assert "manual" in analytics["sources"]
     assert "vapi" in analytics["sources"]
@@ -290,6 +321,7 @@ def test_analytics_sources(analyzer):
 # =========================================
 # EXTRACTION CONFIDENCE
 # =========================================
+
 
 def test_extraction_confidence(analyzer):
     intel = analyzer.analyze_transcript(SAMPLE_TRANSCRIPT_FULL, contact_id="c001")
@@ -303,6 +335,7 @@ def test_extraction_confidence(analyzer):
 # STATS
 # =========================================
 
+
 def test_stats(analyzer):
     analyzer.analyze_transcript("Test.", contact_id="c001")
     stats = analyzer.get_stats()
@@ -313,6 +346,7 @@ def test_stats(analyzer):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     a1 = get_transcript_analyzer()

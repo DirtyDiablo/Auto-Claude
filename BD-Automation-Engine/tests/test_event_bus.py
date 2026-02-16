@@ -180,13 +180,21 @@ class TestEventBusInit:
         """All 15 named streams should be registered."""
         bus = EventBus()
         expected = [
-            "jobs:scraped", "jobs:enriched",
-            "contracts:awards", "contracts:opps",
+            "jobs:scraped",
+            "jobs:enriched",
+            "contracts:awards",
+            "contracts:opps",
             "documents:processed",
-            "contacts:discovered", "contacts:updated",
-            "intel:anomalies", "intel:alerts", "intel:predictions", "intel:signals",
-            "campaigns:events", "campaigns:responses",
-            "memory:updates", "system:health",
+            "contacts:discovered",
+            "contacts:updated",
+            "intel:anomalies",
+            "intel:alerts",
+            "intel:predictions",
+            "intel:signals",
+            "campaigns:events",
+            "campaigns:responses",
+            "memory:updates",
+            "system:health",
         ]
         for stream in expected:
             assert stream in bus.STREAM_DEFINITIONS, f"Missing stream: {stream}"
@@ -208,7 +216,9 @@ class TestEventBusPublish:
         bus.redis.xadd = AsyncMock(return_value=b"1234567890-0")
         bus._running = True
 
-        event = Event(event_type="job.scraped", source="test", payload={"title": "Analyst"})
+        event = Event(
+            event_type="job.scraped", source="test", payload={"title": "Analyst"}
+        )
         msg_id = await bus.publish("jobs:scraped", event)
         assert msg_id == "1234567890-0"
         bus.redis.xadd.assert_called_once()
@@ -253,7 +263,9 @@ class TestEventBusReplay:
         bus = EventBus()
         bus.redis = AsyncMock()
 
-        original = Event(event_type="job.scraped", source="test", payload={"title": "Eng"})
+        original = Event(
+            event_type="job.scraped", source="test", payload={"title": "Eng"}
+        )
         redis_data = {}
         for k, v in original.to_redis().items():
             redis_data[k.encode()] = v.encode()
@@ -291,15 +303,18 @@ class TestEventBusEventChain:
 
         corr_id = "chain-abc"
         e1 = Event(
-            event_type="job.scraped", source="test",
+            event_type="job.scraped",
+            source="test",
             metadata={"correlation_id": corr_id},
         )
         e2 = Event(
-            event_type="job.enriched", source="processor",
+            event_type="job.enriched",
+            source="processor",
             metadata={"correlation_id": corr_id},
         )
         e_unrelated = Event(
-            event_type="contact.updated", source="other",
+            event_type="contact.updated",
+            source="other",
             metadata={"correlation_id": "different"},
         )
 
@@ -307,11 +322,13 @@ class TestEventBusEventChain:
             return {k.encode(): v.encode() for k, v in ev.to_redis().items()}
 
         # Mock xrange for all streams
-        bus.redis.xrange = AsyncMock(return_value=[
-            (b"1-0", make_redis(e1)),
-            (b"2-0", make_redis(e2)),
-            (b"3-0", make_redis(e_unrelated)),
-        ])
+        bus.redis.xrange = AsyncMock(
+            return_value=[
+                (b"1-0", make_redis(e1)),
+                (b"2-0", make_redis(e2)),
+                (b"3-0", make_redis(e_unrelated)),
+            ]
+        )
 
         chain = await bus.get_event_chain(corr_id)
         assert len(chain) >= 2
@@ -351,6 +368,7 @@ class TestGetEventBusSingleton:
     def test_returns_event_bus(self):
         """get_event_bus should return an EventBus instance."""
         import src.streaming.event_bus as eb
+
         eb._event_bus = None  # Reset
         bus = get_event_bus()
         assert isinstance(bus, EventBus)
@@ -358,6 +376,7 @@ class TestGetEventBusSingleton:
     def test_returns_same_instance(self):
         """get_event_bus should return the same instance on repeated calls."""
         import src.streaming.event_bus as eb
+
         eb._event_bus = None
         bus1 = get_event_bus()
         bus2 = get_event_bus()

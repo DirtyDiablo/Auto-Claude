@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from mem0 import Memory
+
     MEM0_AVAILABLE = True
 except ImportError:
     MEM0_AVAILABLE = False
@@ -41,25 +42,28 @@ class FallbackMemory:
 
     def _load(self):
         if os.path.exists(self.memories_file):
-            with open(self.memories_file, 'r') as f:
+            with open(self.memories_file, "r") as f:
                 data = json.load(f)
                 self.memories = [MemoryEntry(**e) for e in data]
 
     def _save(self):
         os.makedirs(os.path.dirname(self.memories_file), exist_ok=True)
-        with open(self.memories_file, 'w') as f:
+        with open(self.memories_file, "w") as f:
             json.dump([asdict(m) for m in self.memories], f, indent=2)
 
     def add(self, content: str, memory_type: str, metadata: Dict) -> str:
         import uuid
+
         memory_id = str(uuid.uuid4())
-        self.memories.append(MemoryEntry(
-            id=memory_id,
-            content=content,
-            memory_type=memory_type,
-            timestamp=datetime.now().isoformat(),
-            metadata=metadata
-        ))
+        self.memories.append(
+            MemoryEntry(
+                id=memory_id,
+                content=content,
+                memory_type=memory_type,
+                timestamp=datetime.now().isoformat(),
+                metadata=metadata,
+            )
+        )
         self._save()
         return memory_id
 
@@ -85,8 +89,7 @@ class BDMemoryLayer:
 
     def __init__(self, storage_path: str = None):
         self.storage_path = storage_path or os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "data", "memory"
+            os.path.dirname(os.path.dirname(__file__)), "data", "memory"
         )
         os.makedirs(self.storage_path, exist_ok=True)
         self.user_id = "pts_bd_unified"
@@ -103,14 +106,14 @@ class BDMemoryLayer:
                 "config": {
                     "model": "gpt-4o-mini",
                     "api_key": os.getenv("OPENAI_API_KEY"),
-                }
+                },
             },
             "embedder": {
                 "provider": "openai",
                 "config": {
                     "model": "text-embedding-3-small",
                     "api_key": os.getenv("OPENAI_API_KEY"),
-                }
+                },
             },
             "vector_store": {
                 "provider": "qdrant",
@@ -119,7 +122,7 @@ class BDMemoryLayer:
                     "host": "localhost",
                     "port": 6333,
                     "embedding_model_dims": 1536,
-                }
+                },
             },
             "graph_store": {
                 "provider": "neo4j",
@@ -147,15 +150,20 @@ class BDMemoryLayer:
         self.memory = FallbackMemory(self.storage_path)
         self.backend = "fallback"
 
-    def add_interaction(self, interaction: str, metadata: Optional[Dict] = None) -> Dict:
+    def add_interaction(
+        self, interaction: str, metadata: Optional[Dict] = None
+    ) -> Dict:
         """Add query/response pair."""
         meta = metadata or {}
         meta["memory_type"] = "interaction"
         meta["timestamp"] = datetime.now().isoformat()
 
         if self.backend == "mem0":
-            return self.memory.add([{"role": "user", "content": interaction}],
-                                    user_id=self.user_id, metadata=meta)
+            return self.memory.add(
+                [{"role": "user", "content": interaction}],
+                user_id=self.user_id,
+                metadata=meta,
+            )
         return {"id": self.memory.add(interaction, "interaction", meta)}
 
     def add_entity_fact(self, entity_name: str, entity_type: str, fact: str) -> Dict:
@@ -165,15 +173,23 @@ class BDMemoryLayer:
             "memory_type": "entity_fact",
             "entity_name": entity_name,
             "entity_type": entity_type,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         if self.backend == "mem0":
-            return self.memory.add([{"role": "user", "content": structured}],
-                                    user_id=self.user_id, metadata=meta)
+            return self.memory.add(
+                [{"role": "user", "content": structured}],
+                user_id=self.user_id,
+                metadata=meta,
+            )
         return {"id": self.memory.add(structured, "entity_fact", meta)}
 
-    def add_bd_insight(self, insight_type: str, insight: str,
-                       source: str = "analysis", confidence: float = 0.8) -> Dict:
+    def add_bd_insight(
+        self,
+        insight_type: str,
+        insight: str,
+        source: str = "analysis",
+        confidence: float = 0.8,
+    ) -> Dict:
         """Add opportunity/risk/relationship insight."""
         structured = f"[BD INSIGHT - {insight_type.upper()}] {insight}"
         meta = {
@@ -181,11 +197,14 @@ class BDMemoryLayer:
             "insight_type": insight_type,
             "source": source,
             "confidence": confidence,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         if self.backend == "mem0":
-            return self.memory.add([{"role": "user", "content": structured}],
-                                    user_id=self.user_id, metadata=meta)
+            return self.memory.add(
+                [{"role": "user", "content": structured}],
+                user_id=self.user_id,
+                metadata=meta,
+            )
         return {"id": self.memory.add(structured, "bd_insight", meta)}
 
     def add_scrape_result(self, scrape_type: str, summary: str, count: int) -> Dict:
@@ -195,11 +214,14 @@ class BDMemoryLayer:
             "memory_type": "scrape_result",
             "scrape_type": scrape_type,
             "record_count": count,
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
         if self.backend == "mem0":
-            return self.memory.add([{"role": "user", "content": structured}],
-                                    user_id=self.user_id, metadata=meta)
+            return self.memory.add(
+                [{"role": "user", "content": structured}],
+                user_id=self.user_id,
+                metadata=meta,
+            )
         return {"id": self.memory.add(structured, "scrape_result", meta)}
 
     def get_context(self, query: str, limit: int = 10) -> List[Dict]:
@@ -212,7 +234,9 @@ class BDMemoryLayer:
     def get_entity_facts(self, entity_name: str, limit: int = 20) -> List[Dict]:
         return self.get_context(f"Facts about {entity_name}", limit)
 
-    def get_recent_insights(self, insight_type: str = None, limit: int = 10) -> List[Dict]:
+    def get_recent_insights(
+        self, insight_type: str = None, limit: int = 10
+    ) -> List[Dict]:
         query = f"BD insights {insight_type or 'all'}"
         return self.get_context(query, limit)
 
@@ -235,12 +259,13 @@ class BDMemoryLayer:
         return {
             "total_memories": len(memories),
             "by_type": type_counts,
-            "backend": self.backend
+            "backend": self.backend,
         }
 
 
 # Singleton
 _memory_instance = None
+
 
 def get_memory(storage_path: str = None) -> BDMemoryLayer:
     global _memory_instance

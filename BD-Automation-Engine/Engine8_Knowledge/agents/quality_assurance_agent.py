@@ -22,7 +22,10 @@ except ImportError:
 @dataclass
 class QualityIssue:
     """A data quality issue."""
-    issue_type: str  # "duplicate", "missing_field", "stale", "invalid", "low_confidence"
+
+    issue_type: (
+        str  # "duplicate", "missing_field", "stale", "invalid", "low_confidence"
+    )
     severity: str  # "critical", "high", "medium", "low"
     record_id: str
     collection: str
@@ -34,6 +37,7 @@ class QualityIssue:
 @dataclass
 class QualityReport:
     """Quality assessment report for a collection."""
+
     collection: str
     total_records: int
     issues: List[QualityIssue]
@@ -83,7 +87,7 @@ class QualityAssuranceAgent(BDAgent):
         super().__init__(
             name="Quality Assurance Agent",
             description="Ensure data accuracy, completeness, and freshness across all collections. "
-                       "Expert in data quality validation and duplicate detection."
+            "Expert in data quality validation and duplicate detection.",
         )
         self._content_hashes: Dict[str, Set[str]] = {}
 
@@ -107,15 +111,19 @@ class QualityAssuranceAgent(BDAgent):
             for field in required:
                 value = record.get(field)
                 if value is None or (isinstance(value, str) and not value.strip()):
-                    issues.append(QualityIssue(
-                        issue_type="missing_field",
-                        severity="high" if field in ["first_name", "last_name", "title"] else "medium",
-                        record_id=record_id,
-                        collection=collection_type,
-                        field=field,
-                        description=f"Missing required field: {field}",
-                        suggested_action=f"Add {field} to record",
-                    ))
+                    issues.append(
+                        QualityIssue(
+                            issue_type="missing_field",
+                            severity="high"
+                            if field in ["first_name", "last_name", "title"]
+                            else "medium",
+                            record_id=record_id,
+                            collection=collection_type,
+                            field=field,
+                            description=f"Missing required field: {field}",
+                            suggested_action=f"Add {field} to record",
+                        )
+                    )
 
         return issues
 
@@ -134,15 +142,17 @@ class QualityAssuranceAgent(BDAgent):
             content_hash = self._get_content_hash(record, dedup_fields)
 
             if content_hash in seen_hashes:
-                issues.append(QualityIssue(
-                    issue_type="duplicate",
-                    severity="medium",
-                    record_id=record_id,
-                    collection=collection_type,
-                    field=None,
-                    description=f"Duplicate of record {seen_hashes[content_hash]}",
-                    suggested_action="Merge or delete duplicate record",
-                ))
+                issues.append(
+                    QualityIssue(
+                        issue_type="duplicate",
+                        severity="medium",
+                        record_id=record_id,
+                        collection=collection_type,
+                        field=None,
+                        description=f"Duplicate of record {seen_hashes[content_hash]}",
+                        suggested_action="Merge or delete duplicate record",
+                    )
+                )
             else:
                 seen_hashes[content_hash] = record_id
 
@@ -166,20 +176,24 @@ class QualityAssuranceAgent(BDAgent):
                 try:
                     if isinstance(updated_at, str):
                         # Try parsing ISO format
-                        updated = datetime.fromisoformat(updated_at.replace("Z", "+00:00"))
+                        updated = datetime.fromisoformat(
+                            updated_at.replace("Z", "+00:00")
+                        )
                     else:
                         updated = updated_at
 
                     if updated.replace(tzinfo=None) < cutoff:
-                        issues.append(QualityIssue(
-                            issue_type="stale",
-                            severity="low",
-                            record_id=record_id,
-                            collection=collection_type,
-                            field="updated_at",
-                            description=f"Record not updated in {threshold_days}+ days",
-                            suggested_action="Review and refresh data",
-                        ))
+                        issues.append(
+                            QualityIssue(
+                                issue_type="stale",
+                                severity="low",
+                                record_id=record_id,
+                                collection=collection_type,
+                                field="updated_at",
+                                description=f"Record not updated in {threshold_days}+ days",
+                                suggested_action="Review and refresh data",
+                            )
+                        )
                 except (ValueError, TypeError):
                     pass
 
@@ -196,18 +210,22 @@ class QualityAssuranceAgent(BDAgent):
 
         for record in records:
             record_id = record.get("id", "unknown")
-            confidence = record.get("confidence_score") or record.get("match_confidence")
+            confidence = record.get("confidence_score") or record.get(
+                "match_confidence"
+            )
 
             if confidence is not None and confidence < threshold:
-                issues.append(QualityIssue(
-                    issue_type="low_confidence",
-                    severity="medium" if confidence < 0.3 else "low",
-                    record_id=record_id,
-                    collection=collection_type,
-                    field="confidence_score",
-                    description=f"Low confidence score: {confidence:.2f}",
-                    suggested_action="Manual review and validation required",
-                ))
+                issues.append(
+                    QualityIssue(
+                        issue_type="low_confidence",
+                        severity="medium" if confidence < 0.3 else "low",
+                        record_id=record_id,
+                        collection=collection_type,
+                        field="confidence_score",
+                        description=f"Low confidence score: {confidence:.2f}",
+                        suggested_action="Manual review and validation required",
+                    )
+                )
 
         return issues
 
@@ -242,16 +260,20 @@ class QualityAssuranceAgent(BDAgent):
         freshness = 1 - (len(stale_issues) / total)
 
         # Accuracy: % without duplicates or low confidence
-        accuracy_issues = [i for i in all_issues if i.issue_type in ["duplicate", "low_confidence"]]
+        accuracy_issues = [
+            i for i in all_issues if i.issue_type in ["duplicate", "low_confidence"]
+        ]
         accuracy = 1 - (len(accuracy_issues) / total)
 
         # Overall score
-        overall = (completeness * 0.4 + freshness * 0.3 + accuracy * 0.3)
+        overall = completeness * 0.4 + freshness * 0.3 + accuracy * 0.3
 
         # Generate recommendations
         recommendations = []
         if completeness < 0.9:
-            recommendations.append(f"Fill in missing fields for {len(set(i.record_id for i in missing_issues))} records")
+            recommendations.append(
+                f"Fill in missing fields for {len(set(i.record_id for i in missing_issues))} records"
+            )
         if freshness < 0.8:
             recommendations.append(f"Refresh {len(stale_issues)} stale records")
         if accuracy < 0.95:
@@ -270,7 +292,9 @@ class QualityAssuranceAgent(BDAgent):
             recommendations=recommendations,
         )
 
-    async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def process(
+        self, query: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """Process a quality assessment request."""
         if context and "records" in context:
             collection_type = context.get("collection_type", "contacts")
@@ -333,15 +357,31 @@ if __name__ == "__main__":
     # Test with sample records
     test_records = [
         {"id": "1", "first_name": "John", "last_name": "Smith", "company": "GDIT"},
-        {"id": "2", "first_name": "Jane", "last_name": "", "company": "Leidos"},  # Missing last_name
-        {"id": "3", "first_name": "John", "last_name": "Smith", "company": "GDIT"},  # Duplicate
-        {"id": "4", "first_name": "Bob", "last_name": "Jones", "company": "SAIC", "confidence_score": 0.3},
+        {
+            "id": "2",
+            "first_name": "Jane",
+            "last_name": "",
+            "company": "Leidos",
+        },  # Missing last_name
+        {
+            "id": "3",
+            "first_name": "John",
+            "last_name": "Smith",
+            "company": "GDIT",
+        },  # Duplicate
+        {
+            "id": "4",
+            "first_name": "Bob",
+            "last_name": "Jones",
+            "company": "SAIC",
+            "confidence_score": 0.3,
+        },
     ]
 
     async def test():
         result = await agent.process(
             "Check quality",
-            context={"records": test_records, "collection_type": "contacts"}
+            context={"records": test_records, "collection_type": "contacts"},
         )
         logger.info("quality_report_generated", content=result.content)
 

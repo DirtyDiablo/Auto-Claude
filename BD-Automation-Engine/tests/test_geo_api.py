@@ -36,6 +36,7 @@ def client(app):
 # GEOCODE
 # =========================================
 
+
 def test_geocode(client):
     resp = client.post("/api/geo/geocode", json={"location": "Pentagon"})
     assert resp.status_code == 200
@@ -61,6 +62,7 @@ def test_geocode_not_found(client):
 # =========================================
 # BATCH GEOCODE
 # =========================================
+
 
 def test_batch_geocode_all(client):
     resp = client.post("/api/geo/geocode/batch", json={"entity_type": "all"})
@@ -91,10 +93,16 @@ def test_batch_geocode_jobs(client):
 # RADIUS
 # =========================================
 
+
 def test_radius(client):
-    resp = client.post("/api/geo/radius", json={
-        "lat": 38.8719, "lng": -77.0563, "radius_miles": 15.0,
-    })
+    resp = client.post(
+        "/api/geo/radius",
+        json={
+            "lat": 38.8719,
+            "lng": -77.0563,
+            "radius_miles": 15.0,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] >= 3
@@ -102,10 +110,15 @@ def test_radius(client):
 
 
 def test_radius_with_entity_filter(client):
-    resp = client.post("/api/geo/radius", json={
-        "lat": 38.8719, "lng": -77.0563, "radius_miles": 30.0,
-        "entity_types": ["facility"],
-    })
+    resp = client.post(
+        "/api/geo/radius",
+        json={
+            "lat": 38.8719,
+            "lng": -77.0563,
+            "radius_miles": 30.0,
+            "entity_types": ["facility"],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert all(e["entity_type"] == "facility" for e in data["entities"])
@@ -114,6 +127,7 @@ def test_radius_with_entity_filter(client):
 # =========================================
 # CLUSTERS
 # =========================================
+
 
 def test_clusters_contacts(client):
     resp = client.get("/api/geo/clusters/contact")
@@ -139,10 +153,15 @@ def test_clusters_invalid_type(client):
 # OVERLAP
 # =========================================
 
+
 def test_overlap(client):
-    resp = client.post("/api/geo/overlap", json={
-        "program_a": "DCGS-A", "program_b": "JADC2",
-    })
+    resp = client.post(
+        "/api/geo/overlap",
+        json={
+            "program_a": "DCGS-A",
+            "program_b": "JADC2",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["program_a"] == "DCGS-A"
@@ -154,10 +173,16 @@ def test_overlap(client):
 # COMMUTE
 # =========================================
 
+
 def test_commute(client):
-    resp = client.post("/api/geo/commute", json={
-        "lat": 37.0833, "lng": -76.3605, "max_commute_miles": 15.0,
-    })
+    resp = client.post(
+        "/api/geo/commute",
+        json={
+            "lat": 37.0833,
+            "lng": -76.3605,
+            "max_commute_miles": 15.0,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] >= 1
@@ -166,6 +191,7 @@ def test_commute(client):
 # =========================================
 # COMPETITIVE DENSITY
 # =========================================
+
 
 def test_competitive_density(client):
     resp = client.get("/api/geo/competitive-density/NCR")
@@ -178,6 +204,7 @@ def test_competitive_density(client):
 # =========================================
 # HEATMAP
 # =========================================
+
 
 def test_heatmap_contacts(client):
     resp = client.get("/api/geo/heatmap/contact")
@@ -202,6 +229,7 @@ def test_heatmap_invalid_type(client):
 # =========================================
 # FACILITIES
 # =========================================
+
 
 def test_facilities_all(client):
     resp = client.get("/api/geo/facilities")
@@ -228,6 +256,7 @@ def test_facilities_filter_type(client):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(client):
     resp = client.get("/api/geo/stats")

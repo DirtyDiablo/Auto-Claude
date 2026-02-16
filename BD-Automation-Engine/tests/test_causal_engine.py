@@ -20,6 +20,7 @@ def causal():
 # GRAPH CONSTRUCTION
 # =========================================
 
+
 def test_build_graph(causal):
     graph = causal.build_causal_graph()
     assert isinstance(graph, CausalGraph)
@@ -93,6 +94,7 @@ def test_graph_to_dict(causal):
 # ATE ESTIMATION
 # =========================================
 
+
 def test_ate_outreach_to_contacts(causal):
     est = causal.estimate_effect("outreach_volume", "contacts_engaged")
     assert isinstance(est, CausalEstimate)
@@ -130,6 +132,7 @@ def test_ate_confounders_controlled(causal):
 # REFUTATION TESTS
 # =========================================
 
+
 def test_refutation_passed(causal):
     est = causal.estimate_effect("outreach_volume", "contacts_engaged")
     assert est.refutation_passed is True
@@ -157,6 +160,7 @@ def test_refutation_has_subset(causal):
 # CATE (via different treatment-outcome pairs)
 # =========================================
 
+
 def test_cate_team_size_vs_outreach(causal):
     """Team size effect on outreach vs on contracts."""
     e1 = causal.estimate_effect("team_size", "outreach_volume")
@@ -173,6 +177,7 @@ def test_cate_past_performance(causal):
 # =========================================
 # COUNTERFACTUAL
 # =========================================
+
 
 def test_counterfactual(causal):
     result = causal.counterfactual(
@@ -225,6 +230,7 @@ def test_get_counterfactual(causal):
 # PATH EFFECT COMPUTATION
 # =========================================
 
+
 def test_path_effect_direct(causal):
     causal.build_causal_graph()
     effect = causal._compute_path_effect("outreach_volume", "contacts_engaged")
@@ -247,6 +253,7 @@ def test_path_effect_no_path(causal):
 # ESTIMATE TO DICT
 # =========================================
 
+
 def test_estimate_to_dict(causal):
     est = causal.estimate_effect("outreach_volume", "contacts_engaged")
     d = est.to_dict()
@@ -260,6 +267,7 @@ def test_estimate_to_dict(causal):
 # STATS
 # =========================================
 
+
 def test_stats(causal):
     causal.build_causal_graph()
     causal.estimate_effect("outreach_volume", "contacts_engaged")
@@ -272,8 +280,10 @@ def test_stats(causal):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.simulation.causal_engine as mod
+
     mod._instance = None
     s1 = get_causal_engine()
     s2 = get_causal_engine()

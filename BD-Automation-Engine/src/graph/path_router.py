@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class PathOption:
     path: List[str]
@@ -89,7 +90,10 @@ class OptimalPathRouter:
                 self._adjacency.setdefault(tgt, {})[src] = strength
 
     async def find_optimal_path(
-        self, from_contact: str, to_contact: str, max_hops: int = 5,
+        self,
+        from_contact: str,
+        to_contact: str,
+        max_hops: int = 5,
     ) -> List[PathOption]:
         """Find top paths from source to target contact."""
         if not self._adjacency:
@@ -126,7 +130,9 @@ class OptimalPathRouter:
         return unique[:5]
 
     async def find_warm_intro_chain(
-        self, to_contact: str, our_contacts: Optional[List[str]] = None,
+        self,
+        to_contact: str,
+        our_contacts: Optional[List[str]] = None,
     ) -> List[WarmIntroChain]:
         """Find warm introduction chains to a target."""
         if not self._adjacency:
@@ -135,7 +141,8 @@ class OptimalPathRouter:
         # "Our contacts" = Tier 1-2 contacts or specified list
         if our_contacts is None:
             our_contacts = [
-                nid for nid, info in self._node_info.items()
+                nid
+                for nid, info in self._node_info.items()
                 if info.get("tier", 6) <= 2 and info.get("is_ours", False)
             ]
             if not our_contacts:
@@ -151,36 +158,53 @@ class OptimalPathRouter:
                     a, b = path[i], path[i + 1]
                     s = self._adjacency.get(a, {}).get(b, 0)
                     strengths.append(s)
-                    chain_items.append({
-                        "contact": a,
-                        "name": self._node_info.get(a, {}).get("name", a),
-                        "relationship_to_next": self._node_info.get(b, {}).get("name", b),
-                        "strength": s,
-                    })
+                    chain_items.append(
+                        {
+                            "contact": a,
+                            "name": self._node_info.get(a, {}).get("name", a),
+                            "relationship_to_next": self._node_info.get(b, {}).get(
+                                "name", b
+                            ),
+                            "strength": s,
+                        }
+                    )
                 # Add final target
-                chain_items.append({
-                    "contact": path[-1],
-                    "name": self._node_info.get(path[-1], {}).get("name", path[-1]),
-                    "relationship_to_next": "",
-                    "strength": 0,
-                })
+                chain_items.append(
+                    {
+                        "contact": path[-1],
+                        "name": self._node_info.get(path[-1], {}).get("name", path[-1]),
+                        "relationship_to_next": "",
+                        "strength": 0,
+                    }
+                )
 
                 avg_strength = sum(strengths) / len(strengths) if strengths else 0
-                feasibility = "strong" if avg_strength >= 70 else "moderate" if avg_strength >= 40 else "weak"
+                feasibility = (
+                    "strong"
+                    if avg_strength >= 70
+                    else "moderate"
+                    if avg_strength >= 40
+                    else "weak"
+                )
 
-                chains.append(WarmIntroChain(
-                    chain=chain_items,
-                    total_strength=round(avg_strength, 1),
-                    hops=len(path) - 1,
-                    feasibility=feasibility,
-                    suggested_approach=self._suggest_approach(chain_items, feasibility),
-                ))
+                chains.append(
+                    WarmIntroChain(
+                        chain=chain_items,
+                        total_strength=round(avg_strength, 1),
+                        hops=len(path) - 1,
+                        feasibility=feasibility,
+                        suggested_approach=self._suggest_approach(
+                            chain_items, feasibility
+                        ),
+                    )
+                )
 
         chains.sort(key=lambda c: c.total_strength, reverse=True)
         return chains[:5]
 
     async def identify_missing_links(
-        self, target_program: str,
+        self,
+        target_program: str,
     ) -> List[MissingLink]:
         """Identify missing connections for a target program."""
         if not self._node_info:
@@ -190,7 +214,8 @@ class OptimalPathRouter:
 
         # Find contacts on this program
         program_contacts = [
-            nid for nid, info in self._node_info.items()
+            nid
+            for nid, info in self._node_info.items()
             if program_lower in str(info.get("programs", [])).lower()
             or program_lower in str(info.get("program", "")).lower()
         ]
@@ -198,56 +223,64 @@ class OptimalPathRouter:
         links = []
 
         if not program_contacts:
-            links.append(MissingLink(
-                target_program=target_program,
-                gap_type="no_contact",
-                description=f"No contacts identified on {target_program}",
-                recommended_action="Research key personnel and start outreach via LinkedIn or conferences",
-                priority="critical",
-            ))
+            links.append(
+                MissingLink(
+                    target_program=target_program,
+                    gap_type="no_contact",
+                    description=f"No contacts identified on {target_program}",
+                    recommended_action="Research key personnel and start outreach via LinkedIn or conferences",
+                    priority="critical",
+                )
+            )
             return links
 
         # Check for decision makers
         decision_makers = [
-            c for c in program_contacts
-            if self._node_info[c].get("tier", 6) <= 2
+            c for c in program_contacts if self._node_info[c].get("tier", 6) <= 2
         ]
         if not decision_makers:
-            links.append(MissingLink(
-                target_program=target_program,
-                gap_type="weak_contact",
-                description=f"No Tier 1-2 decision makers on {target_program}",
-                recommended_action="Leverage existing contacts to get introductions to program leadership",
-                priority="high",
-            ))
+            links.append(
+                MissingLink(
+                    target_program=target_program,
+                    gap_type="weak_contact",
+                    description=f"No Tier 1-2 decision makers on {target_program}",
+                    recommended_action="Leverage existing contacts to get introductions to program leadership",
+                    priority="high",
+                )
+            )
 
         # Check for single-threaded risk
         if len(program_contacts) == 1:
-            links.append(MissingLink(
-                target_program=target_program,
-                gap_type="single_thread",
-                description=f"Only 1 contact on {target_program} — single-threaded risk",
-                recommended_action="Develop 2-3 additional relationships on this program for resilience",
-                priority="high",
-            ))
+            links.append(
+                MissingLink(
+                    target_program=target_program,
+                    gap_type="single_thread",
+                    description=f"Only 1 contact on {target_program} — single-threaded risk",
+                    recommended_action="Develop 2-3 additional relationships on this program for resilience",
+                    priority="high",
+                )
+            )
 
         # Check connection strength
         for cid in program_contacts:
             neighbors = self._adjacency.get(cid, {})
             our_strength = max(neighbors.values()) if neighbors else 0
             if our_strength < 30 and our_strength > 0:
-                links.append(MissingLink(
-                    target_program=target_program,
-                    gap_type="weak_contact",
-                    description=f"Weak relationship (score {our_strength:.0f}) with {self._node_info[cid].get('name', cid)}",
-                    recommended_action="Increase touchpoints: schedule a call, offer value, attend same events",
-                    priority="medium",
-                ))
+                links.append(
+                    MissingLink(
+                        target_program=target_program,
+                        gap_type="weak_contact",
+                        description=f"Weak relationship (score {our_strength:.0f}) with {self._node_info[cid].get('name', cid)}",
+                        recommended_action="Increase touchpoints: schedule a call, offer value, attend same events",
+                        priority="medium",
+                    )
+                )
 
         return links
 
     async def get_network_gaps(
-        self, programs: Optional[List[str]] = None,
+        self,
+        programs: Optional[List[str]] = None,
     ) -> List[NetworkGap]:
         """Find programs where we lack connections."""
         if not self._node_info:
@@ -268,7 +301,8 @@ class OptimalPathRouter:
         for program in programs:
             prog_lower = program.lower()
             contacts = [
-                nid for nid, info in self._node_info.items()
+                nid
+                for nid, info in self._node_info.items()
                 if prog_lower in str(info.get("programs", [])).lower()
             ]
 
@@ -279,10 +313,7 @@ class OptimalPathRouter:
                     strengths.append(strength)
             avg_str = sum(strengths) / len(strengths) if strengths else 0
 
-            has_dm = any(
-                self._node_info[c].get("tier", 6) <= 2
-                for c in contacts
-            )
+            has_dm = any(self._node_info[c].get("tier", 6) <= 2 for c in contacts)
 
             if not contacts:
                 severity = "critical"
@@ -299,22 +330,34 @@ class OptimalPathRouter:
             if severity == "critical":
                 recs.append(f"No contacts on {program} — prioritize initial outreach")
             if not has_dm:
-                recs.append("No decision maker access — seek introductions to Tier 1-2 contacts")
+                recs.append(
+                    "No decision maker access — seek introductions to Tier 1-2 contacts"
+                )
             if avg_str < 40:
-                recs.append("Weak relationships — increase interaction frequency and quality")
+                recs.append(
+                    "Weak relationships — increase interaction frequency and quality"
+                )
             if len(contacts) < 3:
-                recs.append("Limited coverage — develop additional contacts for resilience")
+                recs.append(
+                    "Limited coverage — develop additional contacts for resilience"
+                )
 
-            gaps.append(NetworkGap(
-                program=program,
-                contact_count=len(contacts),
-                avg_strength=round(avg_str, 1),
-                has_decision_maker=has_dm,
-                gap_severity=severity,
-                recommendations=recs,
-            ))
+            gaps.append(
+                NetworkGap(
+                    program=program,
+                    contact_count=len(contacts),
+                    avg_strength=round(avg_str, 1),
+                    has_decision_maker=has_dm,
+                    gap_severity=severity,
+                    recommendations=recs,
+                )
+            )
 
-        gaps.sort(key=lambda g: {"critical": 0, "significant": 1, "minor": 2}.get(g.gap_severity, 3))
+        gaps.sort(
+            key=lambda g: {"critical": 0, "significant": 1, "minor": 2}.get(
+                g.gap_severity, 3
+            )
+        )
         return gaps
 
     # =========================================
@@ -322,7 +365,10 @@ class OptimalPathRouter:
     # =========================================
 
     def _dijkstra_strongest(
-        self, start: str, end: str, max_hops: int,
+        self,
+        start: str,
+        end: str,
+        max_hops: int,
     ) -> Optional[List[str]]:
         """Modified Dijkstra: maximize minimum edge weight."""
         if start not in self._adjacency or end not in self._adjacency:
@@ -350,7 +396,10 @@ class OptimalPathRouter:
         return None
 
     def _bfs_shortest(
-        self, start: str, end: str, max_hops: int,
+        self,
+        start: str,
+        end: str,
+        max_hops: int,
     ) -> Optional[List[str]]:
         """BFS for shortest path."""
         if start not in self._adjacency or end not in self._adjacency:
@@ -377,7 +426,11 @@ class OptimalPathRouter:
         return None
 
     def _find_k_paths(
-        self, start: str, end: str, max_hops: int, k: int = 5,
+        self,
+        start: str,
+        end: str,
+        max_hops: int,
+        k: int = 5,
     ) -> List[List[str]]:
         """Find k paths using BFS without full visited filtering."""
         if start not in self._adjacency:
@@ -430,8 +483,12 @@ class OptimalPathRouter:
 
         weakest_seg = ""
         if strengths and len(path) > weakest_idx + 1:
-            a = self._node_info.get(path[weakest_idx], {}).get("name", path[weakest_idx])
-            b = self._node_info.get(path[weakest_idx + 1], {}).get("name", path[weakest_idx + 1])
+            a = self._node_info.get(path[weakest_idx], {}).get(
+                "name", path[weakest_idx]
+            )
+            b = self._node_info.get(path[weakest_idx + 1], {}).get(
+                "name", path[weakest_idx + 1]
+            )
             weakest_seg = f"{a} → {b}"
 
         return PathOption(

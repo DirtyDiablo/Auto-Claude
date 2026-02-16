@@ -22,6 +22,7 @@ from utils.llm_retry import anthropic_retry
 
 try:
     import anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     ANTHROPIC_AVAILABLE = False
@@ -75,11 +76,15 @@ Guidelines:
 5. Focus on DCGS, IC, DoD opportunities"""
 
     @abstractmethod
-    async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def process(
+        self, query: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         pass
 
     @anthropic_retry
-    async def _call_claude(self, prompt: str, context: str = "", max_tokens: int = 2000) -> str:
+    async def _call_claude(
+        self, prompt: str, context: str = "", max_tokens: int = 2000
+    ) -> str:
         if not self.client:
             return "Claude API not available. Please set ANTHROPIC_API_KEY."
 
@@ -88,7 +93,12 @@ Guidelines:
                 model="claude-sonnet-4-20250514",
                 max_tokens=max_tokens,
                 system=self.system_prompt,
-                messages=[{"role": "user", "content": f"{context}\n\n{prompt}" if context else prompt}]
+                messages=[
+                    {
+                        "role": "user",
+                        "content": f"{context}\n\n{prompt}" if context else prompt,
+                    }
+                ],
             )
             return response.content[0].text
         except Exception as e:
@@ -122,5 +132,5 @@ Guidelines:
     def _store_interaction(self, query: str, response: AgentResponse):
         self.memory.add_interaction(
             f"[{self.name}] Q: {query[:100]}\nA: {response.content[:300]}",
-            metadata={"agent": self.name, "success": response.success}
+            metadata={"agent": self.name, "success": response.success},
         )

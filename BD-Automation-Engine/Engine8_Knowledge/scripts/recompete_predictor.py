@@ -27,12 +27,31 @@ N8N_PROGRAMS_DB = Path("C:/Auto-Claud/N8N-Builder/data/federal_programs.db")
 
 # PTS past performance keywords (contracts PTS has delivered on)
 PTS_PAST_PERFORMANCE_KEYWORDS = [
-    "dcgs", "distributed common ground", "geoint", "sigint",
-    "isr", "intelligence surveillance", "c4isr", "elint",
-    "masint", "humint", "osint", "fusion", "targeting",
-    "air force", "usaf", "navy", "army",
-    "raytheon", "northrop grumman", "leidos", "gdit", "saic",
-    "bae systems", "l3harris", "peraton",
+    "dcgs",
+    "distributed common ground",
+    "geoint",
+    "sigint",
+    "isr",
+    "intelligence surveillance",
+    "c4isr",
+    "elint",
+    "masint",
+    "humint",
+    "osint",
+    "fusion",
+    "targeting",
+    "air force",
+    "usaf",
+    "navy",
+    "army",
+    "raytheon",
+    "northrop grumman",
+    "leidos",
+    "gdit",
+    "saic",
+    "bae systems",
+    "l3harris",
+    "peraton",
 ]
 
 
@@ -104,14 +123,20 @@ class RecompetePredictor:
 
         # Sort by priority
         priority_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
-        unique.sort(key=lambda x: (
-            priority_order.get(x["priority"], 9),
-            x.get("months_remaining", 999),
-        ))
+        unique.sort(
+            key=lambda x: (
+                priority_order.get(x["priority"], 9),
+                x.get("months_remaining", 999),
+            )
+        )
 
         unique = unique[:limit]
 
-        total_value = sum(r.get("value", 0) for r in unique if isinstance(r.get("value"), (int, float)))
+        total_value = sum(
+            r.get("value", 0)
+            for r in unique
+            if isinstance(r.get("value"), (int, float))
+        )
 
         return {
             "recompetes": unique,
@@ -131,7 +156,9 @@ class RecompetePredictor:
 
         Returns tasks formatted for the DailyActionEngine.
         """
-        predictions = self.get_recompete_predictions(months=months, limit=max_alerts * 2)
+        predictions = self.get_recompete_predictions(
+            months=months, limit=max_alerts * 2
+        )
         tasks = []
 
         for r in predictions["recompetes"][:max_alerts]:
@@ -150,31 +177,33 @@ class RecompetePredictor:
             else:
                 priority = "medium"
                 task_type = "research"
-                desc = f"Upcoming recompete in {months_left}mo — add to tracking pipeline"
+                desc = (
+                    f"Upcoming recompete in {months_left}mo — add to tracking pipeline"
+                )
 
-            tasks.append({
-                "id": f"recompete-{hash(program) % 100000}",
-                "type": task_type,
-                "priority": priority,
-                "priority_score": max(100 - months_left * 4, 20),
-                "title": f"Recompete: {program}",
-                "description": desc,
-                "program": program,
-                "months_remaining": months_left,
-                "incumbent": incumbent,
-                "value": r.get("value", 0),
-                "pts_past_performance": r.get("pts_past_performance", False),
-                "source_type": "recompete",
-                "completed": False,
-            })
+            tasks.append(
+                {
+                    "id": f"recompete-{hash(program) % 100000}",
+                    "type": task_type,
+                    "priority": priority,
+                    "priority_score": max(100 - months_left * 4, 20),
+                    "title": f"Recompete: {program}",
+                    "description": desc,
+                    "program": program,
+                    "months_remaining": months_left,
+                    "incumbent": incumbent,
+                    "value": r.get("value", 0),
+                    "pts_past_performance": r.get("pts_past_performance", False),
+                    "source_type": "recompete",
+                    "completed": False,
+                }
+            )
 
         return tasks
 
     # ── Data sources ──────────────────────────────────────────────────────
 
-    def _search_qdrant_programs(
-        self, today: datetime, horizon: datetime
-    ) -> List[Dict]:
+    def _search_qdrant_programs(self, today: datetime, horizon: datetime) -> List[Dict]:
         """Search Qdrant programs collection for expiring contracts."""
         results = []
         queries = [
@@ -192,19 +221,33 @@ class RecompetePredictor:
                     score_threshold=0.2,
                 )
                 for hit in hits:
-                    payload = hit.payload if hasattr(hit, "payload") else hit.get("payload", {})
+                    payload = (
+                        hit.payload
+                        if hasattr(hit, "payload")
+                        else hit.get("payload", {})
+                    )
                     expiry = self._parse_expiry(payload)
                     if expiry and today <= expiry <= horizon:
                         months_remaining = max(1, (expiry - today).days // 30)
-                        results.append({
-                            "program": payload.get("name", payload.get("program_name", "Unknown")),
-                            "expiry_date": expiry.strftime("%Y-%m-%d"),
-                            "months_remaining": months_remaining,
-                            "value": self._parse_value(payload.get("value", payload.get("contract_value", 0))),
-                            "incumbent": payload.get("prime_contractor", payload.get("incumbent", "")),
-                            "agency": payload.get("agency", ""),
-                            "source": "qdrant",
-                        })
+                        results.append(
+                            {
+                                "program": payload.get(
+                                    "name", payload.get("program_name", "Unknown")
+                                ),
+                                "expiry_date": expiry.strftime("%Y-%m-%d"),
+                                "months_remaining": months_remaining,
+                                "value": self._parse_value(
+                                    payload.get(
+                                        "value", payload.get("contract_value", 0)
+                                    )
+                                ),
+                                "incumbent": payload.get(
+                                    "prime_contractor", payload.get("incumbent", "")
+                                ),
+                                "agency": payload.get("agency", ""),
+                                "source": "qdrant",
+                            }
+                        )
             except Exception as e:
                 logger.warning(f"Qdrant recompete search failed for '{query}': {e}")
 
@@ -236,30 +279,66 @@ class RecompetePredictor:
                 ]
 
                 date_cols = [
-                    c for c in cols
-                    if any(kw in c.lower() for kw in [
-                        "end_date", "expir", "pop_end", "period_end",
-                        "completion", "ultimate_completion",
-                    ])
+                    c
+                    for c in cols
+                    if any(
+                        kw in c.lower()
+                        for kw in [
+                            "end_date",
+                            "expir",
+                            "pop_end",
+                            "period_end",
+                            "completion",
+                            "ultimate_completion",
+                        ]
+                    )
                 ]
 
                 if not date_cols:
                     continue
 
                 name_col = next(
-                    (c for c in cols if any(kw in c.lower() for kw in ["name", "program", "title", "description"])),
+                    (
+                        c
+                        for c in cols
+                        if any(
+                            kw in c.lower()
+                            for kw in ["name", "program", "title", "description"]
+                        )
+                    ),
                     None,
                 )
                 value_col = next(
-                    (c for c in cols if any(kw in c.lower() for kw in ["value", "amount", "dollars", "obligated"])),
+                    (
+                        c
+                        for c in cols
+                        if any(
+                            kw in c.lower()
+                            for kw in ["value", "amount", "dollars", "obligated"]
+                        )
+                    ),
                     None,
                 )
                 company_col = next(
-                    (c for c in cols if any(kw in c.lower() for kw in ["vendor", "contractor", "recipient", "company"])),
+                    (
+                        c
+                        for c in cols
+                        if any(
+                            kw in c.lower()
+                            for kw in ["vendor", "contractor", "recipient", "company"]
+                        )
+                    ),
                     None,
                 )
                 agency_col = next(
-                    (c for c in cols if any(kw in c.lower() for kw in ["agency", "department", "awarding"])),
+                    (
+                        c
+                        for c in cols
+                        if any(
+                            kw in c.lower()
+                            for kw in ["agency", "department", "awarding"]
+                        )
+                    ),
                     None,
                 )
 
@@ -275,17 +354,29 @@ class RecompetePredictor:
                             expiry = self._parse_date_string(str(d.get(date_col, "")))
                             if expiry and today <= expiry <= horizon:
                                 months_remaining = max(1, (expiry - today).days // 30)
-                                results.append({
-                                    "program": str(d.get(name_col, "")) if name_col else f"Contract in {table}",
-                                    "expiry_date": expiry.strftime("%Y-%m-%d"),
-                                    "months_remaining": months_remaining,
-                                    "value": self._parse_value(d.get(value_col, 0)) if value_col else 0,
-                                    "incumbent": str(d.get(company_col, "")) if company_col else "",
-                                    "agency": str(d.get(agency_col, "")) if agency_col else "",
-                                    "source": f"federal_programs/{table}",
-                                })
+                                results.append(
+                                    {
+                                        "program": str(d.get(name_col, ""))
+                                        if name_col
+                                        else f"Contract in {table}",
+                                        "expiry_date": expiry.strftime("%Y-%m-%d"),
+                                        "months_remaining": months_remaining,
+                                        "value": self._parse_value(d.get(value_col, 0))
+                                        if value_col
+                                        else 0,
+                                        "incumbent": str(d.get(company_col, ""))
+                                        if company_col
+                                        else "",
+                                        "agency": str(d.get(agency_col, ""))
+                                        if agency_col
+                                        else "",
+                                        "source": f"federal_programs/{table}",
+                                    }
+                                )
                     except Exception as e:
-                        logger.debug("Table %s col %s scan failed: %s", table, date_col, e)
+                        logger.debug(
+                            "Table %s col %s scan failed: %s", table, date_col, e
+                        )
 
             conn.close()
         except Exception as e:
@@ -318,15 +409,25 @@ class RecompetePredictor:
                 ]
 
                 date_cols = [
-                    c for c in cols
-                    if any(kw in c.lower() for kw in ["enddate", "end_date", "expirationdate"])
+                    c
+                    for c in cols
+                    if any(
+                        kw in c.lower()
+                        for kw in ["enddate", "end_date", "expirationdate"]
+                    )
                 ]
 
                 if not date_cols:
                     continue
 
                 name_col = next(
-                    (c for c in cols if any(kw in c.lower() for kw in ["name", "title", "description"])),
+                    (
+                        c
+                        for c in cols
+                        if any(
+                            kw in c.lower() for kw in ["name", "title", "description"]
+                        )
+                    ),
                     None,
                 )
 
@@ -342,15 +443,19 @@ class RecompetePredictor:
                             expiry = self._parse_date_string(str(d.get(date_col, "")))
                             if expiry and today <= expiry <= horizon:
                                 months_remaining = max(1, (expiry - today).days // 30)
-                                results.append({
-                                    "program": str(d.get(name_col, "")) if name_col else f"Bullhorn/{table}",
-                                    "expiry_date": expiry.strftime("%Y-%m-%d"),
-                                    "months_remaining": months_remaining,
-                                    "value": 0,
-                                    "incumbent": "",
-                                    "agency": "",
-                                    "source": f"bullhorn/{table}",
-                                })
+                                results.append(
+                                    {
+                                        "program": str(d.get(name_col, ""))
+                                        if name_col
+                                        else f"Bullhorn/{table}",
+                                        "expiry_date": expiry.strftime("%Y-%m-%d"),
+                                        "months_remaining": months_remaining,
+                                        "value": 0,
+                                        "incumbent": "",
+                                        "agency": "",
+                                        "source": f"bullhorn/{table}",
+                                    }
+                                )
                     except Exception:
                         pass
 
@@ -365,8 +470,13 @@ class RecompetePredictor:
     def _parse_expiry(self, payload: Dict) -> Optional[datetime]:
         """Extract expiry/end date from a Qdrant program payload."""
         for key in [
-            "end_date", "expiry_date", "pop_end", "period_of_performance_end",
-            "completion_date", "contract_end", "expiration",
+            "end_date",
+            "expiry_date",
+            "pop_end",
+            "period_of_performance_end",
+            "completion_date",
+            "contract_end",
+            "expiration",
         ]:
             val = payload.get(key)
             if val:
@@ -433,11 +543,13 @@ class RecompetePredictor:
     @staticmethod
     def _check_pts_past_performance(recompete: Dict) -> bool:
         """Check if PTS has past performance relevant to this program."""
-        searchable = " ".join([
-            str(recompete.get("program", "")),
-            str(recompete.get("incumbent", "")),
-            str(recompete.get("agency", "")),
-        ]).lower()
+        searchable = " ".join(
+            [
+                str(recompete.get("program", "")),
+                str(recompete.get("incumbent", "")),
+                str(recompete.get("agency", "")),
+            ]
+        ).lower()
 
         return any(kw in searchable for kw in PTS_PAST_PERFORMANCE_KEYWORDS)
 
@@ -492,20 +604,39 @@ class RecompetePredictor:
                 # Determine channel
                 if any(kw in action or kw in content for kw in ["email", "e-mail"]):
                     ch = "email"
-                elif any(kw in action or kw in content for kw in ["call", "phone", "voicemail"]):
+                elif any(
+                    kw in action or kw in content
+                    for kw in ["call", "phone", "voicemail"]
+                ):
                     ch = "phone"
-                elif any(kw in action or kw in content for kw in ["linkedin", "inmail"]):
+                elif any(
+                    kw in action or kw in content for kw in ["linkedin", "inmail"]
+                ):
                     ch = "linkedin"
                 else:
                     ch = "email"
 
                 if ch not in channel_stats:
-                    channel_stats[ch] = {"total": 0, "success": 0, "response_days_sum": 0}
+                    channel_stats[ch] = {
+                        "total": 0,
+                        "success": 0,
+                        "response_days_sum": 0,
+                    }
 
                 channel_stats[ch]["total"] += 1
 
                 # Check for success signals
-                if any(kw in content for kw in ["replied", "responded", "meeting", "scheduled", "booked", "interested"]):
+                if any(
+                    kw in content
+                    for kw in [
+                        "replied",
+                        "responded",
+                        "meeting",
+                        "scheduled",
+                        "booked",
+                        "interested",
+                    ]
+                ):
                     channel_stats[ch]["success"] += 1
 
         except Exception as e:
@@ -516,12 +647,16 @@ class RecompetePredictor:
         for ch, stats in channel_stats.items():
             total = stats["total"]
             success = stats["success"]
-            channels.append({
-                "channel": ch,
-                "total": total,
-                "success_rate": round(success / max(total, 1), 3),
-                "avg_response_days": round(stats["response_days_sum"] / max(success, 1), 1),
-            })
+            channels.append(
+                {
+                    "channel": ch,
+                    "total": total,
+                    "success_rate": round(success / max(total, 1), 3),
+                    "avg_response_days": round(
+                        stats["response_days_sum"] / max(success, 1), 1
+                    ),
+                }
+            )
 
         channels.sort(key=lambda x: -x["success_rate"])
 

@@ -14,18 +14,36 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.production.pipeline_manager import (
     PIPELINE_MANAGER_STATE,
-    scan_pipeline, check_stale_items, check_upcoming_deadlines,
-    check_budget_cycles, merge_pipeline_state, analyze_risks,
-    recommend_actions, review_recommendations, execute_approved_actions,
-    generate_pipeline_report, get_pipeline_manager_definition,
+    scan_pipeline,
+    check_stale_items,
+    check_upcoming_deadlines,
+    check_budget_cycles,
+    merge_pipeline_state,
+    analyze_risks,
+    recommend_actions,
+    review_recommendations,
+    execute_approved_actions,
+    generate_pipeline_report,
+    get_pipeline_manager_definition,
 )
 
 
 def test_state_schema_keys():
-    expected = {"scan_date", "active_opportunities", "stale_items",
-                "upcoming_deadlines", "budget_cycles", "pipeline_state",
-                "risks", "recommendations", "human_approved_actions",
-                "execution_results", "report", "errors", "step_timings"}
+    expected = {
+        "scan_date",
+        "active_opportunities",
+        "stale_items",
+        "upcoming_deadlines",
+        "budget_cycles",
+        "pipeline_state",
+        "risks",
+        "recommendations",
+        "human_approved_actions",
+        "execution_results",
+        "report",
+        "errors",
+        "step_timings",
+    }
     assert set(PIPELINE_MANAGER_STATE.keys()) == expected
 
 
@@ -40,9 +58,11 @@ async def test_scan_pipeline():
 @pytest.mark.asyncio
 async def test_check_stale_items_none():
     now = datetime.utcnow().isoformat()
-    state = {"active_opportunities": [
-        {"title": "Fresh", "last_activity": now, "bd_priority": "medium"},
-    ]}
+    state = {
+        "active_opportunities": [
+            {"title": "Fresh", "last_activity": now, "bd_priority": "medium"},
+        ]
+    }
     result = await check_stale_items(state)
     assert len(result["stale_items"]) == 0
 
@@ -50,18 +70,22 @@ async def test_check_stale_items_none():
 @pytest.mark.asyncio
 async def test_check_stale_items_found():
     old = (datetime.utcnow() - timedelta(days=30)).isoformat()
-    state = {"active_opportunities": [
-        {"title": "Stale Job", "last_activity": old, "bd_priority": "high"},
-    ]}
+    state = {
+        "active_opportunities": [
+            {"title": "Stale Job", "last_activity": old, "bd_priority": "high"},
+        ]
+    }
     result = await check_stale_items(state)
     assert len(result["stale_items"]) >= 1
 
 
 @pytest.mark.asyncio
 async def test_check_upcoming_deadlines():
-    state = {"active_opportunities": [
-        {"title": "RFP Response", "program": "DCGS", "status": "proposal_due"},
-    ]}
+    state = {
+        "active_opportunities": [
+            {"title": "RFP Response", "program": "DCGS", "status": "proposal_due"},
+        ]
+    }
     result = await check_upcoming_deadlines(state)
     assert len(result["upcoming_deadlines"]) >= 1
 
@@ -90,8 +114,14 @@ async def test_merge_pipeline_state():
 @pytest.mark.asyncio
 async def test_analyze_risks_critical():
     state = {
-        "stale_items": [{"title": "Critical Deal", "bd_priority": "critical",
-                          "company": "GDIT", "stale_days": 21}],
+        "stale_items": [
+            {
+                "title": "Critical Deal",
+                "bd_priority": "critical",
+                "company": "GDIT",
+                "stale_days": 21,
+            }
+        ],
         "upcoming_deadlines": [],
     }
     result = await analyze_risks(state)
@@ -102,8 +132,13 @@ async def test_analyze_risks_critical():
 @pytest.mark.asyncio
 async def test_recommend_actions():
     state = {
-        "risks": [{"opportunity": "Deal A", "recommendation": "Follow up",
-                    "severity": "critical"}],
+        "risks": [
+            {
+                "opportunity": "Deal A",
+                "recommendation": "Follow up",
+                "severity": "critical",
+            }
+        ],
         "stale_items": [{"title": "Deal B", "bd_priority": "medium", "stale_days": 20}],
     }
     result = await recommend_actions(state)
@@ -120,9 +155,11 @@ async def test_review_recommendations():
 
 @pytest.mark.asyncio
 async def test_execute_approved_actions():
-    state = {"human_approved_actions": [
-        {"opportunity": "Deal A", "action": "Send follow-up"},
-    ]}
+    state = {
+        "human_approved_actions": [
+            {"opportunity": "Deal A", "action": "Send follow-up"},
+        ]
+    }
     result = await execute_approved_actions(state)
     assert len(result["execution_results"]) == 1
 
@@ -131,8 +168,12 @@ async def test_execute_approved_actions():
 async def test_generate_pipeline_report():
     state = {
         "scan_date": "2024-01-15",
-        "pipeline_state": {"health_score": 0.75, "total_opportunities": 10,
-                           "stale_count": 2, "upcoming_deadlines_count": 1},
+        "pipeline_state": {
+            "health_score": 0.75,
+            "total_opportunities": 10,
+            "stale_count": 2,
+            "upcoming_deadlines_count": 1,
+        },
         "risks": [{"severity": "critical"}],
         "recommendations": [{"action": "test"}],
         "execution_results": [{"status": "executed"}],

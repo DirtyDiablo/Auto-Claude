@@ -22,18 +22,23 @@ from Engine8_Knowledge.search.hybrid_engine import SearchResponse, SearchResult
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_hybrid():
     h = MagicMock()
     h.search.return_value = SearchResponse(
-        results=[SearchResult(id="1", content="test result", score=0.9, source="bd_contacts")],
+        results=[
+            SearchResult(id="1", content="test result", score=0.9, source="bd_contacts")
+        ],
         mode_used="hybrid",
         search_latency_ms=100,
         total_candidates=50,
         channels_used=["dense", "sparse"],
     )
     h.search_with_graph.return_value = SearchResponse(
-        results=[SearchResult(id="g1", content="graph result", score=0.85, source="graph")],
+        results=[
+            SearchResult(id="g1", content="graph result", score=0.85, source="graph")
+        ],
         mode_used="graphrag",
         search_latency_ms=200,
         total_candidates=75,
@@ -58,6 +63,7 @@ def us(mock_hybrid, mock_graph):
 # TestQueryClassification
 # ---------------------------------------------------------------------------
 
+
 class TestQueryClassification:
     """Test query classification logic."""
 
@@ -78,18 +84,25 @@ class TestQueryClassification:
         assert result in ("hybrid", "keyword")
 
     def test_capitalized_names(self, us):
-        assert us._classify_query("Tell me about John Smith at Northrop Grumman") == "graphrag"
+        assert (
+            us._classify_query("Tell me about John Smith at Northrop Grumman")
+            == "graphrag"
+        )
 
     def test_default_hybrid(self, us):
         assert us._classify_query("general search about defense industry") == "hybrid"
 
     def test_semantic_query(self, us):
-        assert us._classify_query("modernization challenges for legacy systems") == "hybrid"
+        assert (
+            us._classify_query("modernization challenges for legacy systems")
+            == "hybrid"
+        )
 
 
 # ---------------------------------------------------------------------------
 # TestSearch
 # ---------------------------------------------------------------------------
+
 
 class TestSearch:
     """Test search routing."""
@@ -142,6 +155,7 @@ class TestSearch:
 # TestMultiSearch
 # ---------------------------------------------------------------------------
 
+
 class TestMultiSearch:
     """Test batch search."""
 
@@ -157,6 +171,7 @@ class TestMultiSearch:
 # ---------------------------------------------------------------------------
 # TestModes
 # ---------------------------------------------------------------------------
+
 
 class TestModes:
     """Test mode descriptions."""
@@ -179,13 +194,21 @@ class TestModes:
 # TestGraphSearch
 # ---------------------------------------------------------------------------
 
+
 class TestGraphSearch:
     """Test graph-first search."""
 
     def test_graph_search_with_results(self, us, mock_graph):
         from Engine8_Knowledge.search.graph_retriever import GraphResult
+
         mock_graph.retrieve.return_value = [
-            GraphResult(id="g1", name="Alice", entity_type="Person", context_text="Alice is a PM", score=0.9),
+            GraphResult(
+                id="g1",
+                name="Alice",
+                entity_type="Person",
+                context_text="Alice is a PM",
+                score=0.9,
+            ),
         ]
         resp = us._graph_search("Who is Alice?", top_k=5, filters=None)
         assert len(resp.results) == 1
@@ -202,11 +225,13 @@ class TestGraphSearch:
 # TestSingleton
 # ---------------------------------------------------------------------------
 
+
 class TestSingleton:
     """Test singleton factory."""
 
     def test_get_instance(self):
         import Engine8_Knowledge.search.unified_search as mod
+
         mod._instance = None
         us = mod.get_unified_search()
         assert us is not None

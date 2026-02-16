@@ -16,6 +16,7 @@ import os
 # Try to import anthropic, but make it optional for template
 try:
     import anthropic
+
     HAS_ANTHROPIC = True
 except ImportError:
     HAS_ANTHROPIC = False
@@ -23,9 +24,11 @@ except ImportError:
 # Import retry utilities
 try:
     from utils.llm_retry import anthropic_retry
+
     HAS_RETRY = True
 except ImportError:
     HAS_RETRY = False
+
     # Fallback no-op decorator
     def anthropic_retry(func):
         return func
@@ -37,55 +40,63 @@ except ImportError:
 
 # Required Fields (6) - Must be extracted from job posting
 REQUIRED_FIELDS = [
-    'Job Title/Position',       # Title Case, cleaned
-    'Date Posted',              # YYYY-MM-DD format
-    'Location',                 # "City, State" format
-    'Position Overview',        # 100-200 word summary
-    'Key Responsibilities',     # Array of 5-15 bullet points
-    'Required Qualifications'   # Array of 5-20 bullet points
+    "Job Title/Position",  # Title Case, cleaned
+    "Date Posted",  # YYYY-MM-DD format
+    "Location",  # "City, State" format
+    "Position Overview",  # 100-200 word summary
+    "Key Responsibilities",  # Array of 5-15 bullet points
+    "Required Qualifications",  # Array of 5-20 bullet points
 ]
 
 # Intelligence Fields (8) - Extracted for BD intelligence
 INTELLIGENCE_FIELDS = [
-    'Security Clearance',       # Standardized (TS/SCI w/ Poly, TS/SCI, Top Secret, Secret)
-    'Program Hints',            # Extracted program names/acronyms from description
-    'Client Hints',             # Agency, department, command mentions
-    'Contract Vehicle Hints',   # GWAC, IDIQ, BPA mentions
-    'Prime Contractor',         # Identified prime contractor
-    'Recruiter Contact',        # Name, email, phone if available
-    'Technologies',             # Array of tech stack mentions
-    'Certifications Required'   # Array of cert requirements
+    "Security Clearance",  # Standardized (TS/SCI w/ Poly, TS/SCI, Top Secret, Secret)
+    "Program Hints",  # Extracted program names/acronyms from description
+    "Client Hints",  # Agency, department, command mentions
+    "Contract Vehicle Hints",  # GWAC, IDIQ, BPA mentions
+    "Prime Contractor",  # Identified prime contractor
+    "Recruiter Contact",  # Name, email, phone if available
+    "Technologies",  # Array of tech stack mentions
+    "Certifications Required",  # Array of cert requirements
 ]
 
 # Optional Fields (3) - Additional info if available
 OPTIONAL_FIELDS = [
-    'Project Duration',         # Contract length or "Permanent"
-    'Rate/Pay Rate',            # "$X/hour" or "$XXK-XXXK/year"
-    'Position Details',         # 150-300 word detailed context
-    'Additional Information'    # Benefits, travel, misc details
+    "Project Duration",  # Contract length or "Permanent"
+    "Rate/Pay Rate",  # "$X/hour" or "$XXK-XXXK/year"
+    "Position Details",  # 150-300 word detailed context
+    "Additional Information",  # Benefits, travel, misc details
 ]
 
 # Enrichment Fields (6) - Added during pipeline processing
 ENRICHMENT_FIELDS = [
-    'Matched Program',          # Best-matched federal program name
-    'Match Confidence',         # 0.0-1.0 confidence score
-    'Match Type',               # direct/fuzzy/inferred
-    'BD Priority Score',        # 0-100 numeric score
-    'Priority Tier',            # Hot/Warm/Cold
-    'Match Signals'             # Array of signals that contributed to match
+    "Matched Program",  # Best-matched federal program name
+    "Match Confidence",  # 0.0-1.0 confidence score
+    "Match Type",  # direct/fuzzy/inferred
+    "BD Priority Score",  # 0-100 numeric score
+    "Priority Tier",  # Hot/Warm/Cold
+    "Match Signals",  # Array of signals that contributed to match
 ]
 
 # Metadata Fields (4) - From raw scraper data
 METADATA_FIELDS = [
-    'Source',                   # Scraper source (clearancejobs, linkedin, indeed)
-    'Source URL',               # Original job posting URL
-    'Scraped At',               # ISO timestamp of scrape
-    'Processed At'              # ISO timestamp of processing
+    "Source",  # Scraper source (clearancejobs, linkedin, indeed)
+    "Source URL",  # Original job posting URL
+    "Scraped At",  # ISO timestamp of scrape
+    "Processed At",  # ISO timestamp of processing
 ]
 
 # Combined field lists for different use cases
-EXTRACTION_FIELDS = REQUIRED_FIELDS + INTELLIGENCE_FIELDS + OPTIONAL_FIELDS  # 18 fields for LLM extraction
-ALL_FIELDS = REQUIRED_FIELDS + INTELLIGENCE_FIELDS + OPTIONAL_FIELDS + ENRICHMENT_FIELDS + METADATA_FIELDS  # 24 total fields
+EXTRACTION_FIELDS = (
+    REQUIRED_FIELDS + INTELLIGENCE_FIELDS + OPTIONAL_FIELDS
+)  # 18 fields for LLM extraction
+ALL_FIELDS = (
+    REQUIRED_FIELDS
+    + INTELLIGENCE_FIELDS
+    + OPTIONAL_FIELDS
+    + ENRICHMENT_FIELDS
+    + METADATA_FIELDS
+)  # 24 total fields
 
 
 # ============================================
@@ -243,6 +254,7 @@ Example structure:
 # PREPROCESSING
 # ============================================
 
+
 def preprocess_job_data(raw_job: Dict) -> Dict:
     """
     Clean and normalize raw job data before LLM processing.
@@ -260,9 +272,9 @@ def preprocess_job_data(raw_job: Dict) -> Dict:
         if isinstance(cleaned[key], str):
             cleaned[key] = html.unescape(cleaned[key])
             # Clean excessive whitespace
-            cleaned[key] = re.sub(r'\s+', ' ', cleaned[key]).strip()
+            cleaned[key] = re.sub(r"\s+", " ", cleaned[key]).strip()
             # Remove common HTML artifacts
-            cleaned[key] = re.sub(r'<[^>]+>', '', cleaned[key])
+            cleaned[key] = re.sub(r"<[^>]+>", "", cleaned[key])
 
     return cleaned
 
@@ -281,13 +293,13 @@ def normalize_location(location: str) -> str:
 
     # Common standardizations
     replacements = {
-        r'100%\s*Remote': 'Remote',
-        r'Ft\.?\s*Meade': 'Fort George G. Meade, MD',
-        r'Ft\.?\s*Belvoir': 'Fort Belvoir, VA',
-        r'Ft\.?\s*Detrick': 'Fort Detrick, MD',
-        r'Washington\s*,?\s*DC\s*Metro': 'Washington, DC',
-        r'DC\s*Metro': 'Washington, DC',
-        r'Hampton\s*Roads': 'Hampton, VA',
+        r"100%\s*Remote": "Remote",
+        r"Ft\.?\s*Meade": "Fort George G. Meade, MD",
+        r"Ft\.?\s*Belvoir": "Fort Belvoir, VA",
+        r"Ft\.?\s*Detrick": "Fort Detrick, MD",
+        r"Washington\s*,?\s*DC\s*Metro": "Washington, DC",
+        r"DC\s*Metro": "Washington, DC",
+        r"Hampton\s*Roads": "Hampton, VA",
     }
 
     for pattern, replacement in replacements.items():
@@ -309,25 +321,25 @@ def normalize_clearance(clearance: str) -> str:
     clearance_lower = clearance.lower()
 
     # Check for polygraph variants
-    if 'poly' in clearance_lower:
-        if 'full' in clearance_lower or 'scope' in clearance_lower:
-            return 'TS/SCI w/ Full Scope Poly'
-        elif 'ci' in clearance_lower:
-            return 'TS/SCI w/ CI Poly'
+    if "poly" in clearance_lower:
+        if "full" in clearance_lower or "scope" in clearance_lower:
+            return "TS/SCI w/ Full Scope Poly"
+        elif "ci" in clearance_lower:
+            return "TS/SCI w/ CI Poly"
         else:
-            return 'TS/SCI w/ Poly'
+            return "TS/SCI w/ Poly"
 
     # Check for SCI
-    if 'sci' in clearance_lower:
-        return 'TS/SCI'
+    if "sci" in clearance_lower:
+        return "TS/SCI"
 
     # Check for TS
-    if 'ts' in clearance_lower or 'top secret' in clearance_lower:
-        return 'Top Secret'
+    if "ts" in clearance_lower or "top secret" in clearance_lower:
+        return "Top Secret"
 
     # Check for Secret
-    if 'secret' in clearance_lower:
-        return 'Secret'
+    if "secret" in clearance_lower:
+        return "Secret"
 
     return clearance
 
@@ -336,10 +348,10 @@ def normalize_clearance(clearance: str) -> str:
 # LLM EXTRACTION
 # ============================================
 
+
 @anthropic_retry
 def standardize_job_with_llm(
-    preprocessed_job: Dict,
-    api_key: Optional[str] = None
+    preprocessed_job: Dict, api_key: Optional[str] = None
 ) -> Dict:
     """
     Use Claude to extract standardized fields from job posting.
@@ -355,7 +367,7 @@ def standardize_job_with_llm(
     if not HAS_ANTHROPIC:
         raise ImportError("anthropic package not installed. Run: pip install anthropic")
 
-    api_key = api_key or os.environ.get('ANTHROPIC_API_KEY')
+    api_key = api_key or os.environ.get("ANTHROPIC_API_KEY")
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY not set")
 
@@ -365,9 +377,7 @@ def standardize_job_with_llm(
         model="claude-sonnet-4-20250514",
         max_tokens=2000,
         system=SYSTEM_PROMPT,
-        messages=[
-            {"role": "user", "content": json.dumps(preprocessed_job, indent=2)}
-        ]
+        messages=[{"role": "user", "content": json.dumps(preprocessed_job, indent=2)}],
     )
 
     # Parse response
@@ -376,7 +386,7 @@ def standardize_job_with_llm(
     except json.JSONDecodeError:
         # Try to extract JSON from response
         text = response.content[0].text
-        json_match = re.search(r'\{.*\}', text, re.DOTALL)
+        json_match = re.search(r"\{.*\}", text, re.DOTALL)
         if json_match:
             result = json.loads(json_match.group())
         else:
@@ -391,62 +401,64 @@ def standardize_job_with_llm(
 
 # Valid standardized clearance levels
 VALID_CLEARANCES = [
-    'TS/SCI w/ Full Scope Poly',
-    'TS/SCI w/ CI Poly',
-    'TS/SCI w/ Poly',
-    'TS/SCI',
-    'Top Secret',
-    'Secret',
-    'Public Trust',
-    'None',
+    "TS/SCI w/ Full Scope Poly",
+    "TS/SCI w/ CI Poly",
+    "TS/SCI w/ Poly",
+    "TS/SCI",
+    "Top Secret",
+    "Secret",
+    "Public Trust",
+    "None",
 ]
 
 # Valid match types for enrichment
-VALID_MATCH_TYPES = ['direct', 'fuzzy', 'inferred']
+VALID_MATCH_TYPES = ["direct", "fuzzy", "inferred"]
 
 # Valid priority tiers
-VALID_TIERS = ['Hot', 'Warm', 'Cold']
+VALID_TIERS = ["Hot", "Warm", "Cold"]
 
 
 def _validate_required_fields(job: Dict, errors: List[str]) -> None:
     """Validate the 6 required fields."""
     # Job Title/Position - must be non-empty string
-    title = job.get('Job Title/Position')
+    title = job.get("Job Title/Position")
     if not title or not isinstance(title, str):
         errors.append("Missing required field: Job Title/Position")
     elif len(title.strip()) < 3:
         errors.append("Job Title/Position is too short (minimum 3 characters)")
 
     # Date Posted - must be YYYY-MM-DD format
-    date_posted = job.get('Date Posted')
+    date_posted = job.get("Date Posted")
     if not date_posted:
         errors.append("Missing required field: Date Posted")
     elif isinstance(date_posted, str):
         try:
-            datetime.strptime(date_posted, '%Y-%m-%d')
+            datetime.strptime(date_posted, "%Y-%m-%d")
         except ValueError:
             errors.append("Date Posted must be YYYY-MM-DD format")
 
     # Location - must be non-empty string (City, State or special values)
-    location = job.get('Location')
+    location = job.get("Location")
     if not location or not isinstance(location, str):
         errors.append("Missing required field: Location")
     elif len(location.strip()) < 2:
         errors.append("Location is too short")
 
     # Position Overview - 100-200 words (warn if outside range)
-    overview = job.get('Position Overview', '')
+    overview = job.get("Position Overview", "")
     if not overview or not isinstance(overview, str):
         errors.append("Missing required field: Position Overview")
     else:
         word_count = len(overview.split())
         if word_count < 50:
-            errors.append(f"Position Overview too short ({word_count} words, need 100+)")
+            errors.append(
+                f"Position Overview too short ({word_count} words, need 100+)"
+            )
         elif word_count > 300:
             errors.append(f"Position Overview too long ({word_count} words, max 200)")
 
     # Key Responsibilities - array of 5-15 bullet points
-    responsibilities = job.get('Key Responsibilities')
+    responsibilities = job.get("Key Responsibilities")
     if not isinstance(responsibilities, list):
         errors.append("Key Responsibilities must be an array")
     elif len(responsibilities) < 3:
@@ -461,7 +473,7 @@ def _validate_required_fields(job: Dict, errors: List[str]) -> None:
                 break
 
     # Required Qualifications - array of 5-20 bullet points
-    qualifications = job.get('Required Qualifications')
+    qualifications = job.get("Required Qualifications")
     if not isinstance(qualifications, list):
         errors.append("Required Qualifications must be an array")
     elif len(qualifications) < 3:
@@ -472,14 +484,16 @@ def _validate_required_fields(job: Dict, errors: List[str]) -> None:
         # Validate each item is a non-empty string
         for i, item in enumerate(qualifications):
             if not isinstance(item, str) or not item.strip():
-                errors.append(f"Required Qualifications[{i}] must be a non-empty string")
+                errors.append(
+                    f"Required Qualifications[{i}] must be a non-empty string"
+                )
                 break
 
 
 def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
     """Validate the 8 intelligence fields."""
     # Security Clearance - standardized string or null
-    clearance = job.get('Security Clearance')
+    clearance = job.get("Security Clearance")
     if clearance is not None:
         if not isinstance(clearance, str):
             errors.append("Security Clearance must be a string or null")
@@ -487,12 +501,17 @@ def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
             # Allow variations but log as warning (not error)
             # Check if it's at least a reasonable clearance string
             clearance_lower = clearance.lower()
-            has_valid_keyword = any(kw in clearance_lower for kw in ['secret', 'ts', 'sci', 'poly', 'trust', 'none'])
+            has_valid_keyword = any(
+                kw in clearance_lower
+                for kw in ["secret", "ts", "sci", "poly", "trust", "none"]
+            )
             if not has_valid_keyword:
-                errors.append(f"Security Clearance '{clearance}' is not a recognized format")
+                errors.append(
+                    f"Security Clearance '{clearance}' is not a recognized format"
+                )
 
     # Program Hints - array of strings or null
-    program_hints = job.get('Program Hints')
+    program_hints = job.get("Program Hints")
     if program_hints is not None:
         if not isinstance(program_hints, list):
             errors.append("Program Hints must be an array or null")
@@ -503,7 +522,7 @@ def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
                     break
 
     # Client Hints - array of strings or null
-    client_hints = job.get('Client Hints')
+    client_hints = job.get("Client Hints")
     if client_hints is not None:
         if not isinstance(client_hints, list):
             errors.append("Client Hints must be an array or null")
@@ -514,7 +533,7 @@ def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
                     break
 
     # Contract Vehicle Hints - array of strings or null
-    contract_hints = job.get('Contract Vehicle Hints')
+    contract_hints = job.get("Contract Vehicle Hints")
     if contract_hints is not None:
         if not isinstance(contract_hints, list):
             errors.append("Contract Vehicle Hints must be an array or null")
@@ -525,24 +544,24 @@ def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
                     break
 
     # Prime Contractor - string or null
-    prime = job.get('Prime Contractor')
+    prime = job.get("Prime Contractor")
     if prime is not None and not isinstance(prime, str):
         errors.append("Prime Contractor must be a string or null")
 
     # Recruiter Contact - object with name/email/phone or null
-    recruiter = job.get('Recruiter Contact')
+    recruiter = job.get("Recruiter Contact")
     if recruiter is not None:
         if not isinstance(recruiter, dict):
             errors.append("Recruiter Contact must be an object or null")
         else:
             # Validate email format if present
-            email = recruiter.get('email')
+            email = recruiter.get("email")
             if email and isinstance(email, str):
-                if '@' not in email or '.' not in email:
+                if "@" not in email or "." not in email:
                     errors.append("Recruiter Contact email is not valid format")
 
     # Technologies - array of strings (can be empty but should exist)
-    technologies = job.get('Technologies')
+    technologies = job.get("Technologies")
     if technologies is not None:
         if not isinstance(technologies, list):
             errors.append("Technologies must be an array or null")
@@ -553,7 +572,7 @@ def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
                     break
 
     # Certifications Required - array of strings or null
-    certifications = job.get('Certifications Required')
+    certifications = job.get("Certifications Required")
     if certifications is not None:
         if not isinstance(certifications, list):
             errors.append("Certifications Required must be an array or null")
@@ -567,22 +586,22 @@ def _validate_intelligence_fields(job: Dict, errors: List[str]) -> None:
 def _validate_optional_fields(job: Dict, errors: List[str]) -> None:
     """Validate the 4 optional fields."""
     # Project Duration - string or null
-    duration = job.get('Project Duration')
+    duration = job.get("Project Duration")
     if duration is not None and not isinstance(duration, str):
         errors.append("Project Duration must be a string or null")
 
     # Rate/Pay Rate - string or null
-    rate = job.get('Rate/Pay Rate')
+    rate = job.get("Rate/Pay Rate")
     if rate is not None and not isinstance(rate, str):
         errors.append("Rate/Pay Rate must be a string or null")
 
     # Position Details - string or null
-    details = job.get('Position Details')
+    details = job.get("Position Details")
     if details is not None and not isinstance(details, str):
         errors.append("Position Details must be a string or null")
 
     # Additional Information - string or null
-    additional = job.get('Additional Information')
+    additional = job.get("Additional Information")
     if additional is not None and not isinstance(additional, str):
         errors.append("Additional Information must be a string or null")
 
@@ -590,12 +609,12 @@ def _validate_optional_fields(job: Dict, errors: List[str]) -> None:
 def _validate_enrichment_fields(job: Dict, errors: List[str]) -> None:
     """Validate the 6 enrichment fields (if present)."""
     # Matched Program - string or null
-    matched = job.get('Matched Program')
+    matched = job.get("Matched Program")
     if matched is not None and not isinstance(matched, str):
         errors.append("Matched Program must be a string or null")
 
     # Match Confidence - float 0.0-1.0 or null
-    confidence = job.get('Match Confidence')
+    confidence = job.get("Match Confidence")
     if confidence is not None:
         if not isinstance(confidence, (int, float)):
             errors.append("Match Confidence must be a number or null")
@@ -603,15 +622,17 @@ def _validate_enrichment_fields(job: Dict, errors: List[str]) -> None:
             errors.append(f"Match Confidence must be 0.0-1.0, got {confidence}")
 
     # Match Type - direct/fuzzy/inferred or null
-    match_type = job.get('Match Type')
+    match_type = job.get("Match Type")
     if match_type is not None:
         if not isinstance(match_type, str):
             errors.append("Match Type must be a string or null")
         elif match_type not in VALID_MATCH_TYPES:
-            errors.append(f"Match Type must be one of {VALID_MATCH_TYPES}, got '{match_type}'")
+            errors.append(
+                f"Match Type must be one of {VALID_MATCH_TYPES}, got '{match_type}'"
+            )
 
     # BD Priority Score - int 0-100 or null
-    bd_score = job.get('BD Priority Score')
+    bd_score = job.get("BD Priority Score")
     if bd_score is not None:
         if not isinstance(bd_score, (int, float)):
             errors.append("BD Priority Score must be a number or null")
@@ -619,7 +640,7 @@ def _validate_enrichment_fields(job: Dict, errors: List[str]) -> None:
             errors.append(f"BD Priority Score must be 0-100, got {bd_score}")
 
     # Priority Tier - Hot/Warm/Cold or null
-    tier = job.get('Priority Tier')
+    tier = job.get("Priority Tier")
     if tier is not None:
         if not isinstance(tier, str):
             errors.append("Priority Tier must be a string or null")
@@ -627,10 +648,12 @@ def _validate_enrichment_fields(job: Dict, errors: List[str]) -> None:
             # Handle tier with emoji prefix (e.g., "🔥 Hot")
             tier_clean = tier.split()[-1] if tier else tier
             if tier_clean not in VALID_TIERS:
-                errors.append(f"Priority Tier must be one of {VALID_TIERS}, got '{tier}'")
+                errors.append(
+                    f"Priority Tier must be one of {VALID_TIERS}, got '{tier}'"
+                )
 
     # Match Signals - array of strings or null
-    signals = job.get('Match Signals')
+    signals = job.get("Match Signals")
     if signals is not None:
         if not isinstance(signals, list):
             errors.append("Match Signals must be an array or null")
@@ -644,7 +667,7 @@ def _validate_enrichment_fields(job: Dict, errors: List[str]) -> None:
 def _validate_metadata_fields(job: Dict, errors: List[str]) -> None:
     """Validate the 4 metadata fields (if present)."""
     # Source - non-empty string
-    source = job.get('Source')
+    source = job.get("Source")
     if source is not None:
         if not isinstance(source, str):
             errors.append("Source must be a string")
@@ -652,33 +675,33 @@ def _validate_metadata_fields(job: Dict, errors: List[str]) -> None:
             errors.append("Source cannot be empty")
 
     # Source URL - valid URL string
-    url = job.get('Source URL')
+    url = job.get("Source URL")
     if url is not None:
         if not isinstance(url, str):
             errors.append("Source URL must be a string")
-        elif url and not (url.startswith('http://') or url.startswith('https://')):
+        elif url and not (url.startswith("http://") or url.startswith("https://")):
             errors.append("Source URL must be a valid HTTP/HTTPS URL")
 
     # Scraped At - ISO timestamp string
-    scraped_at = job.get('Scraped At')
+    scraped_at = job.get("Scraped At")
     if scraped_at is not None:
         if not isinstance(scraped_at, str):
             errors.append("Scraped At must be a string")
         else:
             # Try to parse ISO format
             try:
-                datetime.fromisoformat(scraped_at.replace('Z', '+00:00'))
+                datetime.fromisoformat(scraped_at.replace("Z", "+00:00"))
             except ValueError:
                 errors.append("Scraped At must be ISO timestamp format")
 
     # Processed At - ISO timestamp string
-    processed_at = job.get('Processed At')
+    processed_at = job.get("Processed At")
     if processed_at is not None:
         if not isinstance(processed_at, str):
             errors.append("Processed At must be a string")
         else:
             try:
-                datetime.fromisoformat(processed_at.replace('Z', '+00:00'))
+                datetime.fromisoformat(processed_at.replace("Z", "+00:00"))
             except ValueError:
                 errors.append("Processed At must be ISO timestamp format")
 
@@ -687,7 +710,7 @@ def validate_standardized_job(
     job: Dict,
     validate_enrichment: bool = False,
     validate_metadata: bool = False,
-    _strict: bool = False
+    _strict: bool = False,
 ) -> Tuple[bool, List[str]]:
     """
     Validate that standardized job has all required fields and proper formats.
@@ -733,9 +756,7 @@ def validate_standardized_job(
 
 
 def validate_job_batch(
-    jobs: List[Dict],
-    validate_enrichment: bool = False,
-    validate_metadata: bool = False
+    jobs: List[Dict], validate_enrichment: bool = False, validate_metadata: bool = False
 ) -> Tuple[int, int, List[Dict]]:
     """
     Validate a batch of standardized jobs.
@@ -756,7 +777,7 @@ def validate_job_batch(
         is_valid, errors = validate_standardized_job(
             job,
             validate_enrichment=validate_enrichment,
-            validate_metadata=validate_metadata
+            validate_metadata=validate_metadata,
         )
 
         if is_valid:
@@ -764,12 +785,14 @@ def validate_job_batch(
         else:
             invalid_count += 1
 
-        results.append({
-            'index': i,
-            'is_valid': is_valid,
-            'errors': errors,
-            'job_title': job.get('Job Title/Position', 'Unknown')
-        })
+        results.append(
+            {
+                "index": i,
+                "is_valid": is_valid,
+                "errors": errors,
+                "job_title": job.get("Job Title/Position", "Unknown"),
+            }
+        )
 
     return valid_count, invalid_count, results
 
@@ -778,10 +801,11 @@ def validate_job_batch(
 # BATCH PROCESSING
 # ============================================
 
+
 def process_job_batch(
     jobs: List[Dict],
     api_key: Optional[str] = None,
-    on_progress: Optional[callable] = None
+    on_progress: Optional[callable] = None,
 ) -> List[Dict]:
     """
     Process a batch of jobs through the standardization pipeline.
@@ -806,29 +830,31 @@ def process_job_batch(
             standardized = standardize_job_with_llm(cleaned, api_key)
 
             # Post-process normalizations
-            if standardized.get('Location'):
-                standardized['Location'] = normalize_location(standardized['Location'])
-            if standardized.get('Security Clearance'):
-                standardized['Security Clearance'] = normalize_clearance(standardized['Security Clearance'])
+            if standardized.get("Location"):
+                standardized["Location"] = normalize_location(standardized["Location"])
+            if standardized.get("Security Clearance"):
+                standardized["Security Clearance"] = normalize_clearance(
+                    standardized["Security Clearance"]
+                )
 
             # Validate
             is_valid, errors = validate_standardized_job(standardized)
 
             result = {
-                'original': raw_job,
-                'standardized': standardized,
-                'is_valid': is_valid,
-                'validation_errors': errors,
-                'status': 'success'
+                "original": raw_job,
+                "standardized": standardized,
+                "is_valid": is_valid,
+                "validation_errors": errors,
+                "status": "success",
             }
 
         except Exception as e:
             result = {
-                'original': raw_job,
-                'standardized': None,
-                'is_valid': False,
-                'validation_errors': [str(e)],
-                'status': 'error'
+                "original": raw_job,
+                "standardized": None,
+                "is_valid": False,
+                "validation_errors": [str(e)],
+                "status": "error",
             }
 
         results.append(result)
@@ -843,18 +869,20 @@ def process_job_batch(
 # CLI INTERFACE
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Standardize job postings')
-    parser.add_argument('--input', '-i', required=True, help='Input JSON file with jobs')
-    parser.add_argument('--output', '-o', required=True, help='Output JSON file')
-    parser.add_argument('--test', action='store_true', help='Process only first 3 jobs')
+    parser = argparse.ArgumentParser(description="Standardize job postings")
+    parser.add_argument(
+        "--input", "-i", required=True, help="Input JSON file with jobs"
+    )
+    parser.add_argument("--output", "-o", required=True, help="Output JSON file")
+    parser.add_argument("--test", action="store_true", help="Process only first 3 jobs")
 
     args = parser.parse_args()
 
     # Load jobs
-    with open(args.input, 'r') as f:
+    with open(args.input, "r") as f:
         jobs = json.load(f)
 
     if args.test:
@@ -863,16 +891,16 @@ if __name__ == '__main__':
 
     # Process with progress
     def show_progress(current, total, result):
-        status = 'OK' if result['is_valid'] else 'ERRORS'
-        title = result['original'].get('title', 'Unknown')[:50]
+        status = "OK" if result["is_valid"] else "ERRORS"
+        title = result["original"].get("title", "Unknown")[:50]
         print(f"[{current}/{total}] {status}: {title}")
 
     results = process_job_batch(jobs, on_progress=show_progress)
 
     # Save results
-    with open(args.output, 'w') as f:
+    with open(args.output, "w") as f:
         json.dump(results, f, indent=2)
 
     # Summary
-    valid_count = sum(1 for r in results if r['is_valid'])
+    valid_count = sum(1 for r in results if r["is_valid"])
     print(f"\nComplete: {valid_count}/{len(results)} jobs standardized successfully")

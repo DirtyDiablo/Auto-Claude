@@ -16,6 +16,7 @@ router = APIRouter()
 # REQUEST MODELS
 # =========================================
 
+
 class RecordMetricRequest(BaseModel):
     metric_name: str
     value: float
@@ -46,10 +47,12 @@ class RecordSLOBatchRequest(BaseModel):
 # TRACING ENDPOINTS
 # =========================================
 
+
 @router.get("/api/observability/traces")
 def list_traces(limit: int = Query(50)):
     """List recent traces."""
     from src.observability.distributed_tracer import get_tracer
+
     tracer = get_tracer()
     traces = tracer.list_traces(limit=limit)
     return {"traces": [t.to_dict() for t in traces], "total": len(traces)}
@@ -59,6 +62,7 @@ def list_traces(limit: int = Query(50)):
 def get_trace(trace_id: str):
     """Get a trace with all spans."""
     from src.observability.distributed_tracer import get_tracer
+
     tracer = get_tracer()
     trace = tracer.get_trace(trace_id)
     if not trace:
@@ -78,6 +82,7 @@ def search_spans(
 ):
     """Search spans by criteria."""
     from src.observability.distributed_tracer import get_tracer
+
     tracer = get_tracer()
     spans = tracer.search_spans(
         operation_name=operation,
@@ -91,10 +96,12 @@ def search_spans(
 # METRICS ENDPOINTS
 # =========================================
 
+
 @router.get("/api/observability/metrics")
 def list_metrics(metric_type: Optional[str] = Query(None)):
     """List all metrics."""
     from src.observability.metrics_pipeline import get_metrics, MetricType
+
     pipeline = get_metrics()
     mt = MetricType(metric_type) if metric_type else None
     metrics = pipeline.list_metrics(metric_type=mt)
@@ -105,6 +112,7 @@ def list_metrics(metric_type: Optional[str] = Query(None)):
 def record_metric(req: RecordMetricRequest):
     """Record a metric value."""
     from src.observability.metrics_pipeline import get_metrics
+
     pipeline = get_metrics()
     pipeline.record(req.metric_name, req.value, req.labels or None)
     return {"recorded": True, "metric": req.metric_name, "value": req.value}
@@ -114,9 +122,11 @@ def record_metric(req: RecordMetricRequest):
 def export_metrics(fmt: str = Query("json")):
     """Export metrics in Prometheus or JSON format."""
     from src.observability.metrics_pipeline import get_metrics
+
     pipeline = get_metrics()
     if fmt == "prometheus":
         from fastapi.responses import PlainTextResponse
+
         return PlainTextResponse(pipeline.export_prometheus(), media_type="text/plain")
     return pipeline.export_json()
 
@@ -125,10 +135,12 @@ def export_metrics(fmt: str = Query("json")):
 # ALERTS ENDPOINTS
 # =========================================
 
+
 @router.post("/api/observability/alerts/rules")
 def create_alert_rule(req: AlertRuleRequest):
     """Create an alert rule."""
     from src.observability.metrics_pipeline import get_metrics
+
     pipeline = get_metrics()
     rule = pipeline.add_alert_rule(
         metric_name=req.metric_name,
@@ -143,6 +155,7 @@ def create_alert_rule(req: AlertRuleRequest):
 def list_alerts(resolved: Optional[bool] = Query(None)):
     """List triggered alerts."""
     from src.observability.metrics_pipeline import get_metrics
+
     pipeline = get_metrics()
     alerts = pipeline.get_alerts(resolved=resolved)
     return {"alerts": [a.to_dict() for a in alerts], "total": len(alerts)}
@@ -152,10 +165,12 @@ def list_alerts(resolved: Optional[bool] = Query(None)):
 # SLO ENDPOINTS
 # =========================================
 
+
 @router.get("/api/observability/slos")
 def list_slos():
     """List all SLO definitions and current status."""
     from src.observability.slo_engine import get_slo_engine
+
     engine = get_slo_engine()
     return engine.get_dashboard()
 
@@ -164,6 +179,7 @@ def list_slos():
 def get_slo_report(slo_id: str):
     """Get detailed SLO report with error budget."""
     from src.observability.slo_engine import get_slo_engine
+
     engine = get_slo_engine()
     report = engine.get_report(slo_id)
     if not report:
@@ -175,6 +191,7 @@ def get_slo_report(slo_id: str):
 def record_slo_event(req: RecordSLOEventRequest):
     """Record a good/bad event for an SLO."""
     from src.observability.slo_engine import get_slo_engine
+
     engine = get_slo_engine()
     slo = engine.get_slo(req.slo_id)
     if not slo:
@@ -186,6 +203,7 @@ def record_slo_event(req: RecordSLOEventRequest):
 # =========================================
 # HEALTH
 # =========================================
+
 
 @router.get("/api/observability/health")
 def observability_health():
@@ -205,6 +223,7 @@ def observability_health():
 # =========================================
 # ROUTER REGISTRATION
 # =========================================
+
 
 def include_observability_router(app: FastAPI) -> None:
     app.include_router(router)

@@ -17,7 +17,6 @@ from datetime import datetime
 
 BD_SCORE_CONFIG = {
     "base_score": 50,
-
     "clearance_boosts": {
         "TS/SCI w/ Poly": 35,
         "TS/SCI w/ Full Scope Poly": 35,
@@ -26,45 +25,39 @@ BD_SCORE_CONFIG = {
         "Top Secret": 15,
         "Secret": 5,
     },
-
     "program_boosts": {
-        "AF DCGS - PACAF": 15,   # Critical priority
+        "AF DCGS - PACAF": 15,  # Critical priority
         "AF DCGS - Langley": 10,
         "AF DCGS - Wright-Patt": 10,
         "Navy DCGS-N": 8,
         "Army DCGS-A": 8,
     },
-
     "location_boosts": {
         "San Diego": 10,  # Critical understaffed site
         "Hampton": 5,
         "Dayton": 5,
     },
-
     "tier_multipliers": {
         1: 1.3,  # Executive
-        2: 1.25, # Director
+        2: 1.25,  # Director
         3: 1.2,  # Program Leadership
         4: 1.1,  # Management
         5: 1.0,  # Senior IC
         6: 0.9,  # IC
     },
-
     "match_confidence_weight": 20,  # Max points from confidence
-
     "pain_point_boost": 5,  # Per validated pain point
-
     "recency_boosts": {
         "last_7_days": 10,
         "last_30_days": 5,
         "last_90_days": 2,
-    }
+    },
 }
 
 TIER_THRESHOLDS = {
-    "hot": {"min": 80, "emoji": "\U0001F525", "color": "red"},     # Fire emoji
-    "warm": {"min": 50, "emoji": "\U0001F7E1", "color": "yellow"}, # Yellow circle
-    "cold": {"min": 0, "emoji": "\u2744\uFE0F", "color": "blue"},  # Snowflake
+    "hot": {"min": 80, "emoji": "\U0001f525", "color": "red"},  # Fire emoji
+    "warm": {"min": 50, "emoji": "\U0001f7e1", "color": "yellow"},  # Yellow circle
+    "cold": {"min": 0, "emoji": "\u2744\ufe0f", "color": "blue"},  # Snowflake
 }
 
 
@@ -72,9 +65,11 @@ TIER_THRESHOLDS = {
 # DATA CLASSES
 # ============================================
 
+
 @dataclass
 class ScoringResult:
     """Result of BD scoring calculation."""
+
     bd_score: int
     tier: str
     tier_emoji: str
@@ -85,6 +80,7 @@ class ScoringResult:
 # ============================================
 # SCORING FUNCTIONS
 # ============================================
+
 
 def calculate_clearance_boost(clearance: str) -> int:
     """Calculate score boost from clearance level."""
@@ -137,7 +133,7 @@ def calculate_recency_boost(date_str: str) -> int:
         return 0
 
     try:
-        posted_date = datetime.strptime(date_str, '%Y-%m-%d')
+        posted_date = datetime.strptime(date_str, "%Y-%m-%d")
         days_ago = (datetime.now() - posted_date).days
 
         if days_ago <= 7:
@@ -179,7 +175,9 @@ def generate_recommendations(score: int, breakdown: Dict) -> List[str]:
         recommendations.append("High-value cleared position - prioritize")
 
     if breakdown.get("program_boost", 0) >= 10:
-        recommendations.append("DCGS program alignment - leverage existing relationships")
+        recommendations.append(
+            "DCGS program alignment - leverage existing relationships"
+        )
 
     if breakdown.get("location_boost", 0) >= 10:
         recommendations.append("San Diego/PACAF - critical understaffed site")
@@ -211,25 +209,25 @@ def calculate_bd_score(item: Dict) -> ScoringResult:
     breakdown["base_score"] = BD_SCORE_CONFIG["base_score"]
 
     # Clearance boost
-    clearance = item.get('clearance') or item.get('Security Clearance', '')
+    clearance = item.get("clearance") or item.get("Security Clearance", "")
     clearance_boost = calculate_clearance_boost(clearance)
     score += clearance_boost
     breakdown["clearance_boost"] = clearance_boost
 
     # Program boost
-    program = item.get('program') or item.get('Program', '')
+    program = item.get("program") or item.get("Program", "")
     program_boost = calculate_program_boost(program)
     score += program_boost
     breakdown["program_boost"] = program_boost
 
     # Location boost
-    location = item.get('location') or item.get('Location', '')
+    location = item.get("location") or item.get("Location", "")
     location_boost = calculate_location_boost(location)
     score += location_boost
     breakdown["location_boost"] = location_boost
 
     # Confidence boost (from mapping)
-    confidence = item.get('match_confidence', 0.5)
+    confidence = item.get("match_confidence", 0.5)
     if isinstance(confidence, str):
         confidence = float(confidence)
     confidence_boost = calculate_confidence_boost(confidence)
@@ -237,22 +235,22 @@ def calculate_bd_score(item: Dict) -> ScoringResult:
     breakdown["confidence_boost"] = confidence_boost
 
     # Recency boost
-    date_posted = item.get('date_posted') or item.get('Date Posted', '')
+    date_posted = item.get("date_posted") or item.get("Date Posted", "")
     recency_boost = calculate_recency_boost(date_posted)
     score += recency_boost
     breakdown["recency_boost"] = recency_boost
 
     # Pain points boost
-    pain_points = item.get('pain_points_count', 0)
+    pain_points = item.get("pain_points_count", 0)
     pain_boost = pain_points * BD_SCORE_CONFIG["pain_point_boost"]
     score += pain_boost
     breakdown["pain_point_boost"] = pain_boost
 
     # Apply tier multiplier if contact-based scoring
-    tier = item.get('tier', 5)
+    tier = item.get("tier", 5)
     if isinstance(tier, str):
         # Extract number from "Tier X - Name"
-        tier = int(tier.split()[1]) if 'Tier' in tier else 5
+        tier = int(tier.split()[1]) if "Tier" in tier else 5
     multiplier = calculate_tier_multiplier(tier)
     score = int(score * multiplier)
     breakdown["tier_multiplier"] = multiplier
@@ -272,7 +270,7 @@ def calculate_bd_score(item: Dict) -> ScoringResult:
         tier=tier_name,
         tier_emoji=tier_emoji,
         score_breakdown=breakdown,
-        recommendations=recommendations
+        recommendations=recommendations,
     )
 
 
@@ -292,11 +290,11 @@ def score_batch(items: List[Dict]) -> List[Dict]:
         scoring = calculate_bd_score(item)
 
         enriched = item.copy()
-        enriched['_scoring'] = {
-            'BD Priority Score': scoring.bd_score,
-            'Priority Tier': f"{scoring.tier_emoji} {scoring.tier}",
-            'Score Breakdown': scoring.score_breakdown,
-            'Recommendations': scoring.recommendations,
+        enriched["_scoring"] = {
+            "BD Priority Score": scoring.bd_score,
+            "Priority Tier": f"{scoring.tier_emoji} {scoring.tier}",
+            "Score Breakdown": scoring.score_breakdown,
+            "Recommendations": scoring.recommendations,
         }
 
         results.append(enriched)
@@ -307,6 +305,7 @@ def score_batch(items: List[Dict]) -> List[Dict]:
 # ============================================
 # REPORTING
 # ============================================
+
 
 def generate_scoring_report(scored_items: List[Dict]) -> Dict:
     """
@@ -323,15 +322,15 @@ def generate_scoring_report(scored_items: List[Dict]) -> Dict:
         "by_tier": {"Hot": 0, "Warm": 0, "Cold": 0},
         "average_score": 0,
         "top_opportunities": [],
-        "score_distribution": {"80-100": 0, "50-79": 0, "0-49": 0}
+        "score_distribution": {"80-100": 0, "50-79": 0, "0-49": 0},
     }
 
     total_score = 0
 
     for item in scored_items:
-        scoring = item.get('_scoring', {})
-        score = scoring.get('BD Priority Score', 0)
-        tier = scoring.get('Priority Tier', 'Cold').split()[-1]
+        scoring = item.get("_scoring", {})
+        score = scoring.get("BD Priority Score", 0)
+        tier = scoring.get("Priority Tier", "Cold").split()[-1]
 
         total_score += score
 
@@ -354,8 +353,8 @@ def generate_scoring_report(scored_items: List[Dict]) -> Dict:
     # Top opportunities
     sorted_items = sorted(
         scored_items,
-        key=lambda x: x.get('_scoring', {}).get('BD Priority Score', 0),
-        reverse=True
+        key=lambda x: x.get("_scoring", {}).get("BD Priority Score", 0),
+        reverse=True,
     )
     report["top_opportunities"] = sorted_items[:10]
 
@@ -365,6 +364,7 @@ def generate_scoring_report(scored_items: List[Dict]) -> Dict:
 # ============================================
 # SCORING FEEDBACK LOOP
 # ============================================
+
 
 def recalibrate(
     conversion_data: List[Dict],
@@ -547,31 +547,31 @@ def recalibrate(
 # CLI INTERFACE
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Calculate BD Priority Scores')
-    parser.add_argument('--input', '-i', required=True, help='Input JSON file')
-    parser.add_argument('--output', '-o', required=True, help='Output JSON file')
-    parser.add_argument('--report', '-r', help='Optional report file')
+    parser = argparse.ArgumentParser(description="Calculate BD Priority Scores")
+    parser.add_argument("--input", "-i", required=True, help="Input JSON file")
+    parser.add_argument("--output", "-o", required=True, help="Output JSON file")
+    parser.add_argument("--report", "-r", help="Optional report file")
 
     args = parser.parse_args()
 
     # Load items
-    with open(args.input, 'r') as f:
+    with open(args.input, "r") as f:
         items = json.load(f)
 
     # Score
     scored = score_batch(items)
 
     # Save results
-    with open(args.output, 'w') as f:
+    with open(args.output, "w") as f:
         json.dump(scored, f, indent=2)
 
     # Generate and save report if requested
     if args.report:
         report = generate_scoring_report(scored)
-        with open(args.report, 'w') as f:
+        with open(args.report, "w") as f:
             json.dump(report, f, indent=2)
         print(f"Report saved to {args.report}")
 
@@ -579,4 +579,6 @@ if __name__ == '__main__':
     report = generate_scoring_report(scored)
     print(f"\nScored {report['total_items']} items:")
     print(f"  Average Score: {report['average_score']}")
-    print(f"  By Tier: Hot={report['by_tier']['Hot']}, Warm={report['by_tier']['Warm']}, Cold={report['by_tier']['Cold']}")
+    print(
+        f"  By Tier: Hot={report['by_tier']['Hot']}, Warm={report['by_tier']['Warm']}, Cold={report['by_tier']['Cold']}"
+    )

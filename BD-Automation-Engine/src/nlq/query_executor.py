@@ -107,7 +107,10 @@ class QueryExecutor:
         if self.search and hasattr(self.search, "search"):
             try:
                 results = await self._call_search(
-                    query_text, collection, filters, params.get("limit", 20),
+                    query_text,
+                    collection,
+                    filters,
+                    params.get("limit", 20),
                 )
                 return QueryResult(
                     data=results,
@@ -122,16 +125,26 @@ class QueryExecutor:
         return self._synthetic_search_results(intent, params)
 
     async def _call_search(
-        self, query: str, collection: str, filters: dict, limit: int,
+        self,
+        query: str,
+        collection: str,
+        filters: dict,
+        limit: int,
     ) -> List[dict]:
         """Call the actual search client."""
         if hasattr(self.search, "search_async"):
             return await self.search.search_async(
-                query=query, collection=collection, filters=filters, limit=limit,
+                query=query,
+                collection=collection,
+                filters=filters,
+                limit=limit,
             )
         elif hasattr(self.search, "search"):
             result = self.search.search(
-                query=query, collection=collection, filters=filters, limit=limit,
+                query=query,
+                collection=collection,
+                filters=filters,
+                limit=limit,
             )
             return result if isinstance(result, list) else []
         return []
@@ -190,8 +203,15 @@ class QueryExecutor:
             data={
                 "win_probability": 0.72,
                 "confidence": "high",
-                "top_factors": ["Strong relationship (Tier 2)", "Incumbent advantage", "Clearance match"],
-                "recommended_actions": ["Schedule follow-up call", "Submit candidate profile"],
+                "top_factors": [
+                    "Strong relationship (Tier 2)",
+                    "Incumbent advantage",
+                    "Clearance match",
+                ],
+                "recommended_actions": [
+                    "Schedule follow-up call",
+                    "Submit candidate profile",
+                ],
             },
             summary="Win probability is 72% (high confidence) — strong relationship and incumbent advantage",
             count=1,
@@ -251,8 +271,13 @@ class QueryExecutor:
 
         return QueryResult(
             data=[
-                {"from": "Your Contact", "relationship": "works_with", "to": "Target PM",
-                 "strength": 0.8, "path_length": 2},
+                {
+                    "from": "Your Contact",
+                    "relationship": "works_with",
+                    "to": "Target PM",
+                    "strength": 0.8,
+                    "path_length": 2,
+                },
             ],
             summary="Found 1 relationship path to the target contact (2 degrees of separation)",
             count=1,
@@ -266,9 +291,13 @@ class QueryExecutor:
     async def execute_generation(self, intent: str, params: dict) -> QueryResult:
         """Generate outreach messages, meeting prep, briefings."""
         gen_type = "email"
-        if any(w in params.get("search_query", "") for w in ["call", "script", "phone"]):
+        if any(
+            w in params.get("search_query", "") for w in ["call", "script", "phone"]
+        ):
             gen_type = "call_script"
-        elif any(w in params.get("search_query", "") for w in ["meeting", "prep", "brief"]):
+        elif any(
+            w in params.get("search_query", "") for w in ["meeting", "prep", "brief"]
+        ):
             gen_type = "meeting_prep"
 
         target = ""
@@ -301,8 +330,18 @@ class QueryExecutor:
 
         return QueryResult(
             data={
-                "entity_a": {"name": entity_a, "jobs": 45, "contacts": 120, "programs": 8},
-                "entity_b": {"name": entity_b, "jobs": 38, "contacts": 95, "programs": 6},
+                "entity_a": {
+                    "name": entity_a,
+                    "jobs": 45,
+                    "contacts": 120,
+                    "programs": 8,
+                },
+                "entity_b": {
+                    "name": entity_b,
+                    "jobs": 38,
+                    "contacts": 95,
+                    "programs": 6,
+                },
                 "comparison": {
                     "jobs_difference": 7,
                     "contacts_difference": 25,
@@ -355,15 +394,39 @@ class QueryExecutor:
         return QueryResult(
             data={
                 "explanation": "Score is based on 6 weighted dimensions: win probability (30%), "
-                              "revenue potential (20%), strategic fit (15%), relationship strength (15%), "
-                              "timing urgency (10%), and competitive position (10%).",
+                "revenue potential (20%), strategic fit (15%), relationship strength (15%), "
+                "timing urgency (10%), and competitive position (10%).",
                 "dimensions": [
-                    {"name": "Win Probability", "weight": 0.30, "description": "ML model prediction based on 22 features"},
-                    {"name": "Revenue Potential", "weight": 0.20, "description": "Log-scale contract value assessment"},
-                    {"name": "Strategic Fit", "weight": 0.15, "description": "Alignment with PTS growth priorities"},
-                    {"name": "Relationship Strength", "weight": 0.15, "description": "Contact tier and interaction depth"},
-                    {"name": "Timing Urgency", "weight": 0.10, "description": "Fiscal cycle and job age"},
-                    {"name": "Competitive Position", "weight": 0.10, "description": "Incumbent advantage and competitor density"},
+                    {
+                        "name": "Win Probability",
+                        "weight": 0.30,
+                        "description": "ML model prediction based on 22 features",
+                    },
+                    {
+                        "name": "Revenue Potential",
+                        "weight": 0.20,
+                        "description": "Log-scale contract value assessment",
+                    },
+                    {
+                        "name": "Strategic Fit",
+                        "weight": 0.15,
+                        "description": "Alignment with PTS growth priorities",
+                    },
+                    {
+                        "name": "Relationship Strength",
+                        "weight": 0.15,
+                        "description": "Contact tier and interaction depth",
+                    },
+                    {
+                        "name": "Timing Urgency",
+                        "weight": 0.10,
+                        "description": "Fiscal cycle and job age",
+                    },
+                    {
+                        "name": "Competitive Position",
+                        "weight": 0.10,
+                        "description": "Incumbent advantage and competitor density",
+                    },
                 ],
             },
             summary="Composite score uses 6 weighted dimensions with ML-driven win probability as the primary factor (30%)",
@@ -453,11 +516,17 @@ class QueryExecutor:
             data=merged_data,
             summary=" | ".join(summaries),
             count=total_count,
-            sources=list(set(primary.sources + [
-                s for sr in sub_results
-                if isinstance(sr, QueryResult)
-                for s in sr.sources
-            ])),
+            sources=list(
+                set(
+                    primary.sources
+                    + [
+                        s
+                        for sr in sub_results
+                        if isinstance(sr, QueryResult)
+                        for s in sr.sources
+                    ]
+                )
+            ),
         )
 
     # =========================================
@@ -475,26 +544,63 @@ class QueryExecutor:
 
         sample_data = {
             "contacts": [
-                {"name": "John Smith", "company": "Leidos", "title": "Program Manager",
-                 "tier": 2, "location": "San Diego", "score": 85},
-                {"name": "Jane Doe", "company": "GDIT", "title": "Site Lead",
-                 "tier": 1, "location": "Langley", "score": 92},
+                {
+                    "name": "John Smith",
+                    "company": "Leidos",
+                    "title": "Program Manager",
+                    "tier": 2,
+                    "location": "San Diego",
+                    "score": 85,
+                },
+                {
+                    "name": "Jane Doe",
+                    "company": "GDIT",
+                    "title": "Site Lead",
+                    "tier": 1,
+                    "location": "Langley",
+                    "score": 92,
+                },
             ],
             "jobs": [
-                {"title": "Sr Intelligence Analyst", "company": "Leidos",
-                 "location": "Hickam AFB", "clearance": "TS/SCI", "days_open": 5},
-                {"title": "Cyber Security Engineer", "company": "GDIT",
-                 "location": "San Diego", "clearance": "Secret", "days_open": 12},
+                {
+                    "title": "Sr Intelligence Analyst",
+                    "company": "Leidos",
+                    "location": "Hickam AFB",
+                    "clearance": "TS/SCI",
+                    "days_open": 5,
+                },
+                {
+                    "title": "Cyber Security Engineer",
+                    "company": "GDIT",
+                    "location": "San Diego",
+                    "clearance": "Secret",
+                    "days_open": 12,
+                },
             ],
             "programs": [
-                {"name": "AF DCGS", "prime": "Leidos", "value": "$950M",
-                 "status": "Active", "jobs_count": 23},
-                {"name": "NGEN", "prime": "GDIT", "value": "$3.5B",
-                 "status": "Active", "jobs_count": 45},
+                {
+                    "name": "AF DCGS",
+                    "prime": "Leidos",
+                    "value": "$950M",
+                    "status": "Active",
+                    "jobs_count": 23,
+                },
+                {
+                    "name": "NGEN",
+                    "prime": "GDIT",
+                    "value": "$3.5B",
+                    "status": "Active",
+                    "jobs_count": 45,
+                },
             ],
             "contracts": [
-                {"name": "DCGS Sustainment", "agency": "USAF", "prime": "Leidos",
-                 "pop_end": "2027-03-31", "value": "$120M"},
+                {
+                    "name": "DCGS Sustainment",
+                    "agency": "USAF",
+                    "prime": "Leidos",
+                    "pop_end": "2027-03-31",
+                    "value": "$120M",
+                },
             ],
         }
 
@@ -555,8 +661,11 @@ class QueryExecutor:
             ],
         }
 
-        return suggestions_map.get(intent, [
-            "Tell me more",
-            "Show a different view",
-            "What else can I ask?",
-        ])
+        return suggestions_map.get(
+            intent,
+            [
+                "Tell me more",
+                "Show a different view",
+                "What else can I ask?",
+            ],
+        )

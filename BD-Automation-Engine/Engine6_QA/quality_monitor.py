@@ -6,6 +6,7 @@ Provides:
 - Data quality scoring (payload completeness, freshness)
 - Aggregated quality report for dashboard consumption
 """
+
 import logging
 from dataclasses import dataclass, asdict
 from datetime import datetime
@@ -58,15 +59,24 @@ class QualityReport:
 
 
 KNOWN_COLLECTIONS = [
-    "contacts", "programs", "documents", "activities", "jobs",
-    "bullhorn_notes", "federal_contracts", "intelligence_reports", "opportunities",
+    "contacts",
+    "programs",
+    "documents",
+    "activities",
+    "jobs",
+    "bullhorn_notes",
+    "federal_contracts",
+    "intelligence_reports",
+    "opportunities",
 ]
 
 
 class QualityMonitor:
     """Live quality monitoring for all Qdrant collections."""
 
-    def __init__(self, qdrant_url: str = "http://localhost:6333", client: QdrantClient = None):
+    def __init__(
+        self, qdrant_url: str = "http://localhost:6333", client: QdrantClient = None
+    ):
         self.client = client or QdrantClient(url=qdrant_url, timeout=15)
 
     def check_collection_health(self, name: str) -> CollectionHealth:
@@ -76,8 +86,12 @@ class QualityMonitor:
             vector_count = info.points_count or 0
             segments = info.segments_count or 0
             optimizer = info.optimizer_status
-            opt_status = "ok" if optimizer and getattr(optimizer, 'ok', str(optimizer) == "ok") else "optimizing"
-            indexed_count = getattr(info, 'indexed_vectors_count', vector_count) or 0
+            opt_status = (
+                "ok"
+                if optimizer and getattr(optimizer, "ok", str(optimizer) == "ok")
+                else "optimizing"
+            )
+            indexed_count = getattr(info, "indexed_vectors_count", vector_count) or 0
             indexed = indexed_count >= vector_count if vector_count > 0 else True
 
             if vector_count == 0:
@@ -97,8 +111,12 @@ class QualityMonitor:
             )
         except UnexpectedResponse:
             return CollectionHealth(
-                name=name, vector_count=0, segment_count=0,
-                status="red", indexed=False, optimizer_status="not_found",
+                name=name,
+                vector_count=0,
+                segment_count=0,
+                status="red",
+                indexed=False,
+                optimizer_status="not_found",
             )
 
     def check_all_collections(self) -> List[CollectionHealth]:
@@ -108,7 +126,9 @@ class QualityMonitor:
             results.append(self.check_collection_health(name))
         return results
 
-    def compute_quality_score(self, name: str, sample_size: int = 100) -> DataQualityScore:
+    def compute_quality_score(
+        self, name: str, sample_size: int = 100
+    ) -> DataQualityScore:
         """Sample points from a collection and score payload completeness."""
         required = REQUIRED_PAYLOAD_FIELDS.get(name, ["title"])
         missing_counts: Dict[str, int] = {f: 0 for f in required}
@@ -124,8 +144,10 @@ class QualityMonitor:
             actual_sample = len(points)
             if actual_sample == 0:
                 return DataQualityScore(
-                    collection=name, completeness=0.0,
-                    sample_size=0, missing_fields=missing_counts,
+                    collection=name,
+                    completeness=0.0,
+                    sample_size=0,
+                    missing_fields=missing_counts,
                 )
 
             for point in points:
@@ -140,14 +162,18 @@ class QualityMonitor:
 
             completeness = complete_count / actual_sample
             return DataQualityScore(
-                collection=name, completeness=round(completeness, 3),
-                sample_size=actual_sample, missing_fields=missing_counts,
+                collection=name,
+                completeness=round(completeness, 3),
+                sample_size=actual_sample,
+                missing_fields=missing_counts,
             )
         except Exception as e:
             logger.error(f"Quality score failed for {name}: {e}")
             return DataQualityScore(
-                collection=name, completeness=0.0,
-                sample_size=0, missing_fields=missing_counts,
+                collection=name,
+                completeness=0.0,
+                sample_size=0,
+                missing_fields=missing_counts,
             )
 
     def generate_report(self) -> QualityReport:
@@ -162,6 +188,7 @@ class QualityMonitor:
         alerts = []
         try:
             from Engine6_QA.scripts.alerts import AlertEngine
+
             engine = AlertEngine()
             alerts = engine.get_recent_alerts(10)
         except Exception as e:
@@ -174,7 +201,8 @@ class QualityMonitor:
         red = sum(1 for h in health_list if h.status == "red")
         avg_completeness = (
             sum(q.completeness for q in quality_list) / len(quality_list)
-            if quality_list else 0.0
+            if quality_list
+            else 0.0
         )
 
         return QualityReport(

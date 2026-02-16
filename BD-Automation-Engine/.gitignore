@@ -24,6 +24,7 @@ dist/
 
 # Windows artifacts
 nul
+~$*
 
 # Large binary databases (use Git LFS if needed later)
 *.db

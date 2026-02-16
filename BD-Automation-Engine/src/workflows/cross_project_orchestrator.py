@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class TaskQueueName(str, Enum):
     HUB = "hub_tasks"
     SCRAPER = "scraper_tasks"
@@ -48,6 +49,7 @@ class TaskPriority(int, Enum):
 @dataclass
 class OrchestratorTask:
     """A single routable task in the orchestrator."""
+
     task_id: str
     name: str
     queue: TaskQueueName
@@ -91,6 +93,7 @@ class OrchestratorTask:
 @dataclass
 class TaskQueue:
     """Named task queue with health tracking."""
+
     name: TaskQueueName
     tasks: List[OrchestratorTask] = field(default_factory=list)
     total_dispatched: int = 0
@@ -102,8 +105,12 @@ class TaskQueue:
     def to_dict(self) -> Dict[str, Any]:
         return {
             "name": self.name.value,
-            "pending": sum(1 for t in self.tasks if t.status == OrchestratorTaskStatus.QUEUED),
-            "running": sum(1 for t in self.tasks if t.status == OrchestratorTaskStatus.RUNNING),
+            "pending": sum(
+                1 for t in self.tasks if t.status == OrchestratorTaskStatus.QUEUED
+            ),
+            "running": sum(
+                1 for t in self.tasks if t.status == OrchestratorTaskStatus.RUNNING
+            ),
             "completed": self.total_completed,
             "failed": self.total_failed,
             "total_dispatched": self.total_dispatched,
@@ -115,6 +122,7 @@ class TaskQueue:
 @dataclass
 class FanOutResult:
     """Result of a fan-out / fan-in operation."""
+
     group_id: str
     task_ids: List[str]
     total: int
@@ -176,6 +184,7 @@ _QUEUE_ROUTING: Dict[str, TaskQueueName] = {
 # CROSS-PROJECT ORCHESTRATOR
 # =========================================
 
+
 class CrossProjectOrchestrator:
     """Routes tasks across BD-Automation-Engine sub-projects via typed queues.
 
@@ -231,7 +240,8 @@ class CrossProjectOrchestrator:
         # Check dependencies
         if task.depends_on:
             all_done = all(
-                self._tasks.get(dep_id) and self._tasks[dep_id].status == OrchestratorTaskStatus.COMPLETED
+                self._tasks.get(dep_id)
+                and self._tasks[dep_id].status == OrchestratorTaskStatus.COMPLETED
                 for dep_id in task.depends_on
             )
             if not all_done:
@@ -239,7 +249,12 @@ class CrossProjectOrchestrator:
 
         self._tasks[task_id] = task
         self._queues[target_queue].tasks.append(task)
-        logger.info("Task %s submitted to %s (priority=%s)", task_id, target_queue.value, priority.name)
+        logger.info(
+            "Task %s submitted to %s (priority=%s)",
+            task_id,
+            target_queue.value,
+            priority.name,
+        )
         return task
 
     # ----- dispatch / execute -----
@@ -250,10 +265,7 @@ class CrossProjectOrchestrator:
         if not q:
             return None
 
-        candidates = [
-            t for t in q.tasks
-            if t.status == OrchestratorTaskStatus.QUEUED
-        ]
+        candidates = [t for t in q.tasks if t.status == OrchestratorTaskStatus.QUEUED]
         if not candidates:
             return None
 
@@ -405,7 +417,8 @@ class CrossProjectOrchestrator:
             if task.status != OrchestratorTaskStatus.WAITING:
                 continue
             all_done = all(
-                self._tasks.get(dep_id) and self._tasks[dep_id].status == OrchestratorTaskStatus.COMPLETED
+                self._tasks.get(dep_id)
+                and self._tasks[dep_id].status == OrchestratorTaskStatus.COMPLETED
                 for dep_id in task.depends_on
             )
             if all_done:

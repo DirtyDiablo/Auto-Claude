@@ -22,6 +22,7 @@ def orch():
 # QUEUE ROUTING
 # =========================================
 
+
 def test_route_hub_task(orch):
     assert orch.route_task("map_programs") == TaskQueueName.HUB
 
@@ -41,6 +42,7 @@ def test_route_unknown_defaults_hub(orch):
 # =========================================
 # TASK SUBMISSION
 # =========================================
+
 
 def test_submit_task(orch):
     task = orch.submit_task("map_programs", payload={"job_id": "j001"})
@@ -84,6 +86,7 @@ def test_task_id_unique(orch):
 # DISPATCH AND EXECUTE
 # =========================================
 
+
 def test_dispatch_next(orch):
     orch.submit_task("map_programs")
     task = orch.dispatch_next(TaskQueueName.HUB)
@@ -125,6 +128,7 @@ def test_fail_task(orch):
 # DEPENDENCY RESOLUTION
 # =========================================
 
+
 def test_dependency_unblocks_waiting(orch):
     t1 = orch.submit_task("scrape_jobs")
     t2 = orch.submit_task("map_programs", depends_on=[t1.task_id])
@@ -139,6 +143,7 @@ def test_dependency_unblocks_waiting(orch):
 # =========================================
 # FAN-OUT / FAN-IN
 # =========================================
+
 
 def test_fan_out(orch):
     result = orch.fan_out(["scrape_jobs", "map_programs", "score_opportunities"])
@@ -172,6 +177,7 @@ def test_fan_in_unknown_group(orch):
 # =========================================
 # TASK MANAGEMENT
 # =========================================
+
 
 def test_list_tasks(orch):
     orch.submit_task("scrape_jobs")
@@ -212,6 +218,7 @@ def test_cancel_completed_task_fails(orch):
 # QUEUE HEALTH
 # =========================================
 
+
 def test_queue_status(orch):
     orch.submit_task("scrape_jobs")
     status = orch.get_queue_status(TaskQueueName.SCRAPER)
@@ -238,6 +245,7 @@ def test_get_all_queues(orch):
 # TO DICT
 # =========================================
 
+
 def test_task_to_dict(orch):
     t = orch.submit_task("scrape_jobs", payload={"key": "val"})
     d = t.to_dict()
@@ -249,6 +257,7 @@ def test_task_to_dict(orch):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(orch):
     t = orch.submit_task("scrape_jobs")
@@ -262,8 +271,10 @@ def test_stats(orch):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.workflows.cross_project_orchestrator as mod
+
     mod._instance = None
     s1 = get_orchestrator()
     s2 = get_orchestrator()

@@ -55,8 +55,13 @@ class WeeklyReportResponse(BaseModel):
 # ─── Mock Report Data ─────────────────────────────────────────────────────────
 
 _PROGRAMS = [
-    "AF DCGS Block 5", "Army DCGS-A", "Navy DCGS-N", "SOCOM DCGS-SOF",
-    "GBSD", "JSTARS Recap", "PACAF ISR Modernization",
+    "AF DCGS Block 5",
+    "Army DCGS-A",
+    "Navy DCGS-N",
+    "SOCOM DCGS-SOF",
+    "GBSD",
+    "JSTARS Recap",
+    "PACAF ISR Modernization",
 ]
 
 _COMPANIES = ["GDIT", "Leidos", "SAIC", "CACI", "Peraton", "BAE Systems"]
@@ -73,7 +78,6 @@ def _generate_report(weeks_back: int) -> dict:
             "end": now.strftime("%Y-%m-%d"),
         },
         "generated_at": now.isoformat() + "Z",
-
         "pipeline_summary": {
             "total_pipeline_value": 4_850_000,
             "deals_by_stage": {
@@ -88,7 +92,6 @@ def _generate_report(weeks_back: int) -> dict:
             "moved_forward": 4,
             "stalled": 2,
         },
-
         "outreach_activity": {
             "sequences_created": 6,
             "steps_sent": 14,
@@ -100,7 +103,6 @@ def _generate_report(weeks_back: int) -> dict:
             "bounced": 1,
             "top_performing_template": "Day 1 Intro Email (35% response rate)",
         },
-
         "meetings": {
             "scheduled": 3,
             "held": 2,
@@ -123,7 +125,6 @@ def _generate_report(weeks_back: int) -> dict:
                 },
             ],
         },
-
         "competitive_changes": {
             "new_awards": [
                 {
@@ -141,7 +142,6 @@ def _generate_report(weeks_back: int) -> dict:
                 "signal": "Possible DCGS-A ramp-up",
             },
         },
-
         "top_opportunities": [
             {
                 "program": "AF DCGS Block 5",
@@ -184,7 +184,6 @@ def _generate_report(weeks_back: int) -> dict:
                 "priority": "medium",
             },
         ],
-
         "action_items": [
             {
                 "action": "Follow up with J. Miller (GDIT) on AF DCGS Block 5 tech evaluation results",
@@ -217,7 +216,6 @@ def _generate_report(weeks_back: int) -> dict:
                 "related_program": "PACAF ISR Modernization",
             },
         ],
-
         "executive_summary": (
             f"This week ({start.strftime('%b %d')} - {now.strftime('%b %d')}), the BD pipeline "
             f"holds $4.85M across 23 active deals. 4 opportunities advanced stages and 3 new "

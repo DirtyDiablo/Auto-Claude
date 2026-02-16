@@ -36,8 +36,10 @@ router = APIRouter(prefix="/predict", tags=["predictive-intelligence"])
 # REQUEST/RESPONSE MODELS
 # =========================================
 
+
 class OpportunityInput(BaseModel):
     """Input for win probability prediction."""
+
     id: str = Field(default="opp-1", description="Opportunity ID")
     title: str = Field(default="Unknown", description="Job/opportunity title")
     company: str = Field(default="Unknown", description="Company name")
@@ -75,11 +77,15 @@ class BatchInput(BaseModel):
 
 class WhatIfInput(BaseModel):
     opportunity: OpportunityInput
-    changes: Dict[str, Any] = Field(default_factory=dict, description="Hypothetical changes to apply")
+    changes: Dict[str, Any] = Field(
+        default_factory=dict, description="Hypothetical changes to apply"
+    )
 
 
 class RetrainInput(BaseModel):
-    n_synthetic: int = Field(default=500, ge=50, le=10000, description="Synthetic training samples")
+    n_synthetic: int = Field(
+        default=500, ge=50, le=10000, description="Synthetic training samples"
+    )
 
 
 # =========================================
@@ -142,6 +148,7 @@ def configure_predictive(
 # WIN PROBABILITY ENDPOINTS
 # =========================================
 
+
 @router.post("/win-probability")
 async def predict_win_probability(opp: OpportunityInput) -> Dict[str, Any]:
     """Predict win probability for a single opportunity."""
@@ -161,21 +168,26 @@ async def predict_win_probability(opp: OpportunityInput) -> Dict[str, Any]:
 async def predict_win_probability_batch(batch: BatchInput) -> Dict[str, Any]:
     """Score multiple opportunities."""
     model = _get_win_model()
-    predictions = await model.predict_batch([o.model_dump() for o in batch.opportunities])
+    predictions = await model.predict_batch(
+        [o.model_dump() for o in batch.opportunities]
+    )
     results = []
     for opp, pred in zip(batch.opportunities, predictions):
-        results.append({
-            "opportunity_id": opp.id,
-            "win_probability": pred.win_probability,
-            "confidence": pred.confidence,
-            "optimal_timing": pred.optimal_timing,
-        })
+        results.append(
+            {
+                "opportunity_id": opp.id,
+                "win_probability": pred.win_probability,
+                "confidence": pred.confidence,
+                "optimal_timing": pred.optimal_timing,
+            }
+        )
     return {"predictions": results, "total": len(results)}
 
 
 # =========================================
 # PIPELINE ENDPOINTS
 # =========================================
+
 
 @router.get("/pipeline/ranked")
 async def get_pipeline_ranked(
@@ -245,6 +257,7 @@ async def what_if_analysis(request: WhatIfInput) -> Dict[str, Any]:
 # FORECAST ENDPOINTS
 # =========================================
 
+
 @router.get("/forecast/program/{name}")
 async def forecast_program(
     name: str,
@@ -263,8 +276,12 @@ async def forecast_program(
         "seasonal_pattern": forecast.seasonal_pattern,
         "confidence": forecast.confidence,
         "forecast_points": [
-            {"date": p.date, "predicted": p.predicted,
-             "lower": p.lower_bound, "upper": p.upper_bound}
+            {
+                "date": p.date,
+                "predicted": p.predicted,
+                "lower": p.lower_bound,
+                "upper": p.upper_bound,
+            }
             for p in forecast.forecast_points
         ],
     }
@@ -345,6 +362,7 @@ async def get_timing(program: str) -> Dict[str, Any]:
 # BUDGET ENDPOINTS
 # =========================================
 
+
 @router.get("/budget-calendar")
 async def get_budget_calendar(
     months: int = Query(default=12, ge=1, le=24),
@@ -396,6 +414,7 @@ async def get_recompete(contract: str) -> Dict[str, Any]:
 # MODEL MANAGEMENT ENDPOINTS
 # =========================================
 
+
 @router.get("/model-performance")
 async def get_model_performance() -> Dict[str, Any]:
     """Model accuracy and performance metrics."""
@@ -435,29 +454,57 @@ async def retrain_model(request: RetrainInput) -> Dict[str, Any]:
 # HELPERS
 # =========================================
 
+
 def _generate_sample_pipeline() -> List[dict]:
     """Generate sample pipeline data when no real data is available."""
     return [
         {
-            "id": "opp-1", "title": "Sr Intelligence Analyst", "company": "Leidos",
-            "program": "AF DCGS - PACAF", "contact_tier": 2, "relationship_depth": 8,
-            "days_since_last_contact": 5, "clearance_match": 1, "pts_involvement": 3,
-            "estimated_value": 500000, "days_job_open": 10, "fiscal_quarter": 3,
-            "location": "Hickam AFB", "competitor_density": 2,
+            "id": "opp-1",
+            "title": "Sr Intelligence Analyst",
+            "company": "Leidos",
+            "program": "AF DCGS - PACAF",
+            "contact_tier": 2,
+            "relationship_depth": 8,
+            "days_since_last_contact": 5,
+            "clearance_match": 1,
+            "pts_involvement": 3,
+            "estimated_value": 500000,
+            "days_job_open": 10,
+            "fiscal_quarter": 3,
+            "location": "Hickam AFB",
+            "competitor_density": 2,
         },
         {
-            "id": "opp-2", "title": "Cyber Security Engineer", "company": "GDIT",
-            "program": "NGEN", "contact_tier": 3, "relationship_depth": 3,
-            "days_since_last_contact": 20, "clearance_match": 1, "pts_involvement": 1,
-            "estimated_value": 350000, "days_job_open": 25, "fiscal_quarter": 3,
-            "location": "San Diego", "competitor_density": 5,
+            "id": "opp-2",
+            "title": "Cyber Security Engineer",
+            "company": "GDIT",
+            "program": "NGEN",
+            "contact_tier": 3,
+            "relationship_depth": 3,
+            "days_since_last_contact": 20,
+            "clearance_match": 1,
+            "pts_involvement": 1,
+            "estimated_value": 350000,
+            "days_job_open": 25,
+            "fiscal_quarter": 3,
+            "location": "San Diego",
+            "competitor_density": 5,
         },
         {
-            "id": "opp-3", "title": "Systems Engineer", "company": "Northrop Grumman",
-            "program": "GBSD", "contact_tier": 4, "relationship_depth": 1,
-            "days_since_last_contact": 45, "clearance_match": 0, "pts_involvement": 0,
-            "estimated_value": 200000, "days_job_open": 40, "fiscal_quarter": 1,
-            "location": "Colorado Springs", "competitor_density": 8,
+            "id": "opp-3",
+            "title": "Systems Engineer",
+            "company": "Northrop Grumman",
+            "program": "GBSD",
+            "contact_tier": 4,
+            "relationship_depth": 1,
+            "days_since_last_contact": 45,
+            "clearance_match": 0,
+            "pts_involvement": 0,
+            "estimated_value": 200000,
+            "days_job_open": 40,
+            "fiscal_quarter": 1,
+            "location": "Colorado Springs",
+            "competitor_density": 8,
         },
     ]
 
@@ -465,6 +512,7 @@ def _generate_sample_pipeline() -> List[dict]:
 # =========================================
 # ROUTER INTEGRATION
 # =========================================
+
 
 def include_predictive_router(app, **kwargs):
     """Include the Phase 32A predictive router in the main FastAPI app."""

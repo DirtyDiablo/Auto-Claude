@@ -1,4 +1,5 @@
 """Test PageIndex implementation."""
+
 import sys
 from pathlib import Path
 
@@ -24,16 +25,25 @@ def test_page_index():
 
     # Index a test document
     test_pages = [
-        {"page_number": 1, "content": "AF DCGS is a distributed common ground system operated by the Air Force."},
-        {"page_number": 2, "content": "GDIT is the prime contractor for Army DCGS-A program worth $300M."},
-        {"page_number": 3, "content": "Key locations include Langley AFB, Wright-Patterson, and San Diego."},
+        {
+            "page_number": 1,
+            "content": "AF DCGS is a distributed common ground system operated by the Air Force.",
+        },
+        {
+            "page_number": 2,
+            "content": "GDIT is the prime contractor for Army DCGS-A program worth $300M.",
+        },
+        {
+            "page_number": 3,
+            "content": "Key locations include Langley AFB, Wright-Patterson, and San Diego.",
+        },
     ]
 
     num_indexed = index.index_document(
         document_id="test_doc_001",
         document_name="DCGS_Overview.pdf",
         pages=test_pages,
-        metadata={"type": "test"}
+        metadata={"type": "test"},
     )
     print(f"[OK] Indexed {num_indexed} pages")
 
@@ -67,7 +77,7 @@ def test_page_index():
 
     # Verify deletion
     stats = index.stats()
-    assert stats['total_pages'] == 0, "Delete failed"
+    assert stats["total_pages"] == 0, "Delete failed"
     print("[OK] Deletion verified")
 
     # Close connection before cleanup
@@ -82,6 +92,7 @@ def test_page_index():
 
     # Test routes import
     from routes import router
+
     print(f"[OK] Router created with prefix: {router.prefix}")
 
     print("\n[SUCCESS] All PageIndex tests passed!")

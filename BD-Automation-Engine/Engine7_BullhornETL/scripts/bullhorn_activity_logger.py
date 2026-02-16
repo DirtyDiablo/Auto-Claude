@@ -21,7 +21,6 @@ Usage:
 """
 
 import os
-import json
 import logging
 import sqlite3
 from pathlib import Path
@@ -217,7 +216,9 @@ class BullhornActivityLogger:
         cursor.execute("SELECT COUNT(*) FROM outreach_log WHERE bullhorn_synced = 1")
         synced = cursor.fetchone()[0]
 
-        cursor.execute("SELECT activity_type, COUNT(*) FROM outreach_log GROUP BY activity_type")
+        cursor.execute(
+            "SELECT activity_type, COUNT(*) FROM outreach_log GROUP BY activity_type"
+        )
         by_type = dict(cursor.fetchall())
 
         cursor.execute(
@@ -257,7 +258,9 @@ class BullhornActivityLogger:
             parts.append(f"Outcome: {outcome}")
         if notes:
             parts.append(f"\n{notes}")
-        parts.append(f"\n[Auto-logged by BD Intelligence System — {datetime.now().strftime('%Y-%m-%d %H:%M')}]")
+        parts.append(
+            f"\n[Auto-logged by BD Intelligence System — {datetime.now().strftime('%Y-%m-%d %H:%M')}]"
+        )
         return "\n".join(parts)
 
     def _save_local(self, **kwargs) -> int:

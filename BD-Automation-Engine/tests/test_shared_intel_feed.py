@@ -21,6 +21,7 @@ def feed():
 # SEED DATA
 # =========================================
 
+
 def test_seed_data_loaded(feed):
     items = feed.get_feed()
     assert len(items) == 5
@@ -37,6 +38,7 @@ def test_seed_has_all_types(feed):
 # =========================================
 # POST INTEL
 # =========================================
+
 
 def test_post_intel(feed):
     item = feed.post_intel(
@@ -68,14 +70,19 @@ def test_post_with_mentions(feed):
 
 
 def test_post_unique_id(feed):
-    i1 = feed.post_intel(IntelType.WIN_INTEL, IntelPriority.NORMAL, "A", "B", "r1", "Alice")
-    i2 = feed.post_intel(IntelType.WIN_INTEL, IntelPriority.NORMAL, "C", "D", "r1", "Alice")
+    i1 = feed.post_intel(
+        IntelType.WIN_INTEL, IntelPriority.NORMAL, "A", "B", "r1", "Alice"
+    )
+    i2 = feed.post_intel(
+        IntelType.WIN_INTEL, IntelPriority.NORMAL, "C", "D", "r1", "Alice"
+    )
     assert i1.item_id != i2.item_id
 
 
 # =========================================
 # GET AND DELETE
 # =========================================
+
 
 def test_get_item(feed):
     items = feed.get_feed()
@@ -97,6 +104,7 @@ def test_delete_item(feed):
 # =========================================
 # PIN / UNPIN
 # =========================================
+
 
 def test_pin_item(feed):
     items = feed.get_feed()
@@ -124,9 +132,13 @@ def test_unpin_item(feed):
 # REACTIONS
 # =========================================
 
+
 def test_add_reaction(feed):
     items = feed.get_feed()
-    assert feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "thumbsup") is True
+    assert (
+        feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "thumbsup")
+        is True
+    )
     item = feed.get_item(items[0].item_id)
     assert len(item.reactions) == 1
 
@@ -134,13 +146,18 @@ def test_add_reaction(feed):
 def test_no_duplicate_reaction(feed):
     items = feed.get_feed()
     feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "thumbsup")
-    assert feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "thumbsup") is False
+    assert (
+        feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "thumbsup")
+        is False
+    )
 
 
 def test_different_emoji_allowed(feed):
     items = feed.get_feed()
     feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "thumbsup")
-    assert feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "fire") is True
+    assert (
+        feed.add_reaction(items[0].item_id, "rep_01", "Sarah Mitchell", "fire") is True
+    )
     item = feed.get_item(items[0].item_id)
     assert len(item.reactions) == 2
 
@@ -148,6 +165,7 @@ def test_different_emoji_allowed(feed):
 # =========================================
 # COMMENTS
 # =========================================
+
 
 def test_add_comment(feed):
     items = feed.get_feed()
@@ -171,6 +189,7 @@ def test_multiple_comments(feed):
 # =========================================
 # FEED QUERIES
 # =========================================
+
 
 def test_feed_filter_type(feed):
     items = feed.get_feed(intel_type=IntelType.COMPETITOR_MOVE)
@@ -197,8 +216,12 @@ def test_feed_limit(feed):
 
 def test_get_mentions(feed):
     feed.post_intel(
-        IntelType.TEAM_UPDATE, IntelPriority.NORMAL,
-        "Heads up", "Meeting moved", "rep_01", "Sarah",
+        IntelType.TEAM_UPDATE,
+        IntelPriority.NORMAL,
+        "Heads up",
+        "Meeting moved",
+        "rep_01",
+        "Sarah",
         mentions=["rep_02"],
     )
     mentioned = feed.get_mentions("rep_02")
@@ -219,6 +242,7 @@ def test_search_feed_body(feed):
 # TO DICT
 # =========================================
 
+
 def test_item_to_dict(feed):
     items = feed.get_feed()
     d = items[0].to_dict()
@@ -232,6 +256,7 @@ def test_item_to_dict(feed):
 # STATS
 # =========================================
 
+
 def test_stats(feed):
     stats = feed.get_stats()
     assert stats["total_items"] == 5
@@ -243,8 +268,10 @@ def test_stats(feed):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.collaboration.shared_intel_feed as mod
+
     mod._instance = None
     s1 = get_intel_feed()
     s2 = get_intel_feed()

@@ -12,6 +12,7 @@ from src.api.predictive_api import router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     """Create test app with predictive router."""
@@ -64,6 +65,7 @@ def sample_opportunity():
 # WIN PROBABILITY ENDPOINTS
 # =========================================
 
+
 class TestWinProbabilityEndpoints:
     def test_predict_single(self, client, sample_opportunity):
         resp = client.post("/predict/win-probability", json=sample_opportunity)
@@ -103,6 +105,7 @@ class TestWinProbabilityEndpoints:
 # PIPELINE ENDPOINTS
 # =========================================
 
+
 class TestPipelineEndpoints:
     def test_pipeline_ranked(self, client):
         resp = client.get("/predict/pipeline/ranked")
@@ -127,10 +130,13 @@ class TestPipelineEndpoints:
         assert "focus_areas" in data
 
     def test_what_if(self, client, sample_opportunity):
-        resp = client.post("/predict/what-if", json={
-            "opportunity": sample_opportunity,
-            "changes": {"contact_tier": 1, "relationship_depth": 10},
-        })
+        resp = client.post(
+            "/predict/what-if",
+            json={
+                "opportunity": sample_opportunity,
+                "changes": {"contact_tier": 1, "relationship_depth": 10},
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "original_score" in data
@@ -141,6 +147,7 @@ class TestPipelineEndpoints:
 # =========================================
 # FORECAST ENDPOINTS
 # =========================================
+
 
 class TestForecastEndpoints:
     def test_forecast_program(self, client):
@@ -184,6 +191,7 @@ class TestForecastEndpoints:
 # BUDGET ENDPOINTS
 # =========================================
 
+
 class TestBudgetEndpoints:
     def test_budget_calendar(self, client):
         resp = client.get("/predict/budget-calendar")
@@ -210,6 +218,7 @@ class TestBudgetEndpoints:
 # MODEL MANAGEMENT ENDPOINTS
 # =========================================
 
+
 class TestModelManagementEndpoints:
     def test_model_performance(self, client):
         resp = client.get("/predict/model-performance")
@@ -231,10 +240,12 @@ class TestModelManagementEndpoints:
 # ENDPOINT COUNT
 # =========================================
 
+
 class TestEndpointCount:
     def test_fourteen_endpoints(self, app):
         predict_routes = [
-            r for r in app.routes
+            r
+            for r in app.routes
             if hasattr(r, "path") and r.path.startswith("/predict")
         ]
         assert len(predict_routes) == 14

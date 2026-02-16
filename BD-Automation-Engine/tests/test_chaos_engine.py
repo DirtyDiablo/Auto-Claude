@@ -21,6 +21,7 @@ def engine():
 # CREATE EXPERIMENTS
 # =========================================
 
+
 def test_create_experiment(engine):
     exp = engine.create_experiment(
         name="test_latency",
@@ -56,9 +57,11 @@ def test_create_with_duration(engine):
 # RUN EXPERIMENTS
 # =========================================
 
+
 def test_run_experiment(engine):
     exp = engine.create_experiment(
-        name="latency_test", fault_type=FaultType.LATENCY,
+        name="latency_test",
+        fault_type=FaultType.LATENCY,
         target_service="qdrant_search",
     )
     result = engine.run_experiment(exp.experiment_id)
@@ -69,7 +72,8 @@ def test_run_experiment(engine):
 
 def test_run_error_experiment(engine):
     exp = engine.create_experiment(
-        name="error_test", fault_type=FaultType.ERROR,
+        name="error_test",
+        fault_type=FaultType.ERROR,
         target_service="api_gateway",
     )
     result = engine.run_experiment(exp.experiment_id)
@@ -78,7 +82,8 @@ def test_run_error_experiment(engine):
 
 def test_run_timeout_experiment(engine):
     exp = engine.create_experiment(
-        name="timeout_test", fault_type=FaultType.TIMEOUT,
+        name="timeout_test",
+        fault_type=FaultType.TIMEOUT,
         target_service="n8n_workflow",
     )
     result = engine.run_experiment(exp.experiment_id)
@@ -87,7 +92,8 @@ def test_run_timeout_experiment(engine):
 
 def test_run_resource_exhaustion(engine):
     exp = engine.create_experiment(
-        name="resource_test", fault_type=FaultType.RESOURCE_EXHAUSTION,
+        name="resource_test",
+        fault_type=FaultType.RESOURCE_EXHAUSTION,
         target_service="agent_executor",
     )
     result = engine.run_experiment(exp.experiment_id)
@@ -96,7 +102,8 @@ def test_run_resource_exhaustion(engine):
 
 def test_run_network_partition(engine):
     exp = engine.create_experiment(
-        name="partition_test", fault_type=FaultType.NETWORK_PARTITION,
+        name="partition_test",
+        fault_type=FaultType.NETWORK_PARTITION,
         target_service="bullhorn_etl",
     )
     result = engine.run_experiment(exp.experiment_id)
@@ -111,9 +118,11 @@ def test_run_not_found(engine):
 # ABORT
 # =========================================
 
+
 def test_abort_experiment(engine):
     exp = engine.create_experiment(
-        name="abort_test", fault_type=FaultType.LATENCY,
+        name="abort_test",
+        fault_type=FaultType.LATENCY,
         target_service="qdrant_search",
     )
     result = engine.abort_experiment(exp.experiment_id)
@@ -128,9 +137,11 @@ def test_abort_not_found(engine):
 # QUERIES
 # =========================================
 
+
 def test_get_experiment(engine):
     exp = engine.create_experiment(
-        name="q_test", fault_type=FaultType.LATENCY,
+        name="q_test",
+        fault_type=FaultType.LATENCY,
         target_service="qdrant_search",
     )
     fetched = engine.get_experiment(exp.experiment_id)
@@ -157,6 +168,7 @@ def test_list_by_status(engine):
 # TEMPLATES
 # =========================================
 
+
 def test_list_templates(engine):
     templates = engine.list_templates()
     assert len(templates) == 5
@@ -165,6 +177,7 @@ def test_list_templates(engine):
 # =========================================
 # STEADY STATE
 # =========================================
+
 
 def test_verify_steady_state(engine):
     hyp = SteadyStateHypothesis(
@@ -180,6 +193,7 @@ def test_verify_steady_state(engine):
 # =========================================
 # TO_DICT & STATS
 # =========================================
+
 
 def test_experiment_to_dict(engine):
     exp = engine.create_experiment("t", FaultType.LATENCY, "qdrant_search")
@@ -199,8 +213,10 @@ def test_stats(engine):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.resilience.chaos_engine as mod
+
     mod._instance = None
     e1 = get_chaos_engine()
     e2 = get_chaos_engine()

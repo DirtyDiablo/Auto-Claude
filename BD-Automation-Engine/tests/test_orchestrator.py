@@ -20,6 +20,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 # FIXTURES
 # ============================================
 
+
 @pytest.fixture
 def sample_jobs():
     """Sample job data for testing."""
@@ -73,7 +74,7 @@ def sample_jobs():
 def sample_jobs_file(sample_jobs, tmp_path):
     """Create a temporary JSON file with sample jobs."""
     file_path = tmp_path / "sample_jobs.json"
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         json.dump(sample_jobs, f)
     return str(file_path)
 
@@ -84,18 +85,22 @@ def enriched_jobs(sample_jobs):
     enriched = []
     for job in sample_jobs:
         enriched_job = job.copy()
-        enriched_job['_mapping'] = {
-            'program_name': 'AF DCGS - PACAF' if 'DCGS' in str(job) else 'Corporate HQ',
-            'match_confidence': 0.85,
-            'match_type': 'direct',
-            'signals': ['Location match: San Diego'],
-            'secondary_candidates': [],
+        enriched_job["_mapping"] = {
+            "program_name": "AF DCGS - PACAF" if "DCGS" in str(job) else "Corporate HQ",
+            "match_confidence": 0.85,
+            "match_type": "direct",
+            "signals": ["Location match: San Diego"],
+            "secondary_candidates": [],
         }
-        enriched_job['_scoring'] = {
-            'BD Priority Score': 85 if 'TS/SCI' in str(job.get('clearance', '')) else 60,
-            'Priority Tier': 'Hot' if 'TS/SCI' in str(job.get('clearance', '')) else 'Warm',
-            'Score Breakdown': {'base': 50, 'clearance': 25, 'confidence': 10},
-            'Recommendations': ['Immediate outreach recommended'],
+        enriched_job["_scoring"] = {
+            "BD Priority Score": 85
+            if "TS/SCI" in str(job.get("clearance", ""))
+            else 60,
+            "Priority Tier": "Hot"
+            if "TS/SCI" in str(job.get("clearance", ""))
+            else "Warm",
+            "Score Breakdown": {"base": 50, "clearance": 25, "confidence": 10},
+            "Recommendations": ["Immediate outreach recommended"],
         }
         enriched.append(enriched_job)
     return enriched
@@ -104,6 +109,7 @@ def enriched_jobs(sample_jobs):
 # ============================================
 # ORCHESTRATOR TESTS
 # ============================================
+
 
 class TestOrchestratorConfig:
     """Test OrchestratorConfig dataclass."""
@@ -155,9 +161,9 @@ class TestBDOrchestrator:
         engines = import_engines()
 
         # Check that mapping engine is available (core engine)
-        if 'mapping' in engines:
-            assert 'process_jobs_batch' in engines['mapping']
-            assert 'export_batch' in engines['mapping']
+        if "mapping" in engines:
+            assert "process_jobs_batch" in engines["mapping"]
+            assert "export_batch" in engines["mapping"]
 
 
 class TestPipelineResult:
@@ -176,7 +182,7 @@ class TestPipelineResult:
             briefings_generated=3,
             qa_approved=8,
             qa_needs_review=2,
-            export_files={'notion': '/path/to/csv'},
+            export_files={"notion": "/path/to/csv"},
             errors=[],
             duration_seconds=45.5,
         )
@@ -190,6 +196,7 @@ class TestPipelineResult:
 # EMAIL NOTIFIER TESTS
 # ============================================
 
+
 class TestEmailNotifier:
     """Test EmailNotifier class."""
 
@@ -198,8 +205,8 @@ class TestEmailNotifier:
         from orchestrator import EmailNotifier, OrchestratorConfig
 
         config = OrchestratorConfig(
-            smtp_user='',
-            smtp_password='',
+            smtp_user="",
+            smtp_password="",
         )
         notifier = EmailNotifier(config)
 
@@ -212,17 +219,22 @@ class TestEmailNotifier:
         config = OrchestratorConfig()
         notifier = EmailNotifier(config)
 
-        hot_leads = [j for j in enriched_jobs if 'Hot' in str(j.get('_scoring', {}).get('Priority Tier', ''))]
+        hot_leads = [
+            j
+            for j in enriched_jobs
+            if "Hot" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+        ]
 
         text = notifier._build_hot_lead_text(hot_leads)
 
-        assert 'HOT LEAD ALERT' in text
-        assert 'Senior Systems Engineer' in text or len(hot_leads) == 0
+        assert "HOT LEAD ALERT" in text
+        assert "Senior Systems Engineer" in text or len(hot_leads) == 0
 
 
 # ============================================
 # WEBHOOK DELIVERY TESTS
 # ============================================
+
 
 class TestWebhookDelivery:
     """Test WebhookDelivery class."""
@@ -231,21 +243,21 @@ class TestWebhookDelivery:
         """Test that webhook delivery handles missing URL gracefully."""
         from orchestrator import WebhookDelivery, OrchestratorConfig
 
-        config = OrchestratorConfig(n8n_webhook_url='')
+        config = OrchestratorConfig(n8n_webhook_url="")
         delivery = WebhookDelivery(config)
 
-        result = delivery.deliver_jobs([{'test': 'job'}])
+        result = delivery.deliver_jobs([{"test": "job"}])
 
         assert result == False  # Should fail gracefully
 
-    @patch('requests.post')
+    @patch("requests.post")
     def test_webhook_delivery_success(self, mock_post, enriched_jobs):
         """Test successful webhook delivery."""
         from orchestrator import WebhookDelivery, OrchestratorConfig
 
         mock_post.return_value.status_code = 200
 
-        config = OrchestratorConfig(n8n_webhook_url='https://test.webhook.com')
+        config = OrchestratorConfig(n8n_webhook_url="https://test.webhook.com")
         delivery = WebhookDelivery(config)
 
         delivery.deliver_jobs(enriched_jobs)
@@ -256,6 +268,7 @@ class TestWebhookDelivery:
 # ============================================
 # ENGINE INTEGRATION TESTS
 # ============================================
+
 
 class TestProgramMapperIntegration:
     """Test program_mapper.py integration."""
@@ -269,9 +282,9 @@ class TestProgramMapperIntegration:
             result = map_job_to_program(job)
 
             assert result is not None
-            assert hasattr(result, 'program_name')
-            assert hasattr(result, 'match_confidence')
-            assert hasattr(result, 'match_type')
+            assert hasattr(result, "program_name")
+            assert hasattr(result, "match_confidence")
+            assert hasattr(result, "match_type")
             assert 0.0 <= result.match_confidence <= 1.0
         except ImportError:
             pytest.skip("program_mapper not available")
@@ -285,7 +298,7 @@ class TestProgramMapperIntegration:
 
             assert len(results) == len(sample_jobs)
             for result in results:
-                assert '_mapping' in result
+                assert "_mapping" in result
         except ImportError:
             pytest.skip("program_mapper not available")
 
@@ -302,10 +315,10 @@ class TestBDScoringIntegration:
             result = calculate_bd_score(job)
 
             assert result is not None
-            assert hasattr(result, 'bd_score')
-            assert hasattr(result, 'tier')
+            assert hasattr(result, "bd_score")
+            assert hasattr(result, "tier")
             assert 0 <= result.bd_score <= 100
-            assert result.tier in ['Hot', 'Warm', 'Cold']
+            assert result.tier in ["Hot", "Warm", "Cold"]
         except ImportError:
             pytest.skip("bd_scoring not available")
 
@@ -318,7 +331,7 @@ class TestBDScoringIntegration:
 
             assert len(results) == len(sample_jobs)
             for result in results:
-                assert '_scoring' in result
+                assert "_scoring" in result
         except ImportError:
             pytest.skip("bd_scoring not available")
 
@@ -331,11 +344,11 @@ class TestContactLookupIntegration:
         try:
             from Engine3_OrgChart.scripts.contact_lookup import lookup_contacts
 
-            result = lookup_contacts(program_name='DCGS')
+            result = lookup_contacts(program_name="DCGS")
 
             assert result is not None
-            assert hasattr(result, 'contacts')
-            assert hasattr(result, 'contact_count')
+            assert hasattr(result, "contacts")
+            assert hasattr(result, "contact_count")
         except ImportError:
             pytest.skip("contact_lookup not available")
 
@@ -352,8 +365,8 @@ class TestBriefingGeneratorIntegration:
             result = generate_briefing(job, include_contacts=False)
 
             assert result is not None
-            assert 'markdown' in result
-            assert 'BD Briefing' in result['markdown']
+            assert "markdown" in result
+            assert "BD Briefing" in result["markdown"]
         except ImportError:
             pytest.skip("briefing_generator not available")
 
@@ -369,9 +382,9 @@ class TestQAFeedbackIntegration:
             report = evaluate_batch(enriched_jobs)
 
             assert report is not None
-            assert hasattr(report, 'total_items')
-            assert hasattr(report, 'auto_approved')
-            assert hasattr(report, 'needs_review')
+            assert hasattr(report, "total_items")
+            assert hasattr(report, "auto_approved")
+            assert hasattr(report, "needs_review")
         except ImportError:
             pytest.skip("qa_feedback not available")
 
@@ -379,6 +392,7 @@ class TestQAFeedbackIntegration:
 # ============================================
 # SERVICES TESTS
 # ============================================
+
 
 class TestDatabaseService:
     """Test database.py service."""
@@ -390,11 +404,11 @@ class TestDatabaseService:
         storage = FileBasedStorage(data_dir=str(tmp_path))
 
         # Save jobs
-        filepath = storage.save_jobs(enriched_jobs, 'test_batch')
+        filepath = storage.save_jobs(enriched_jobs, "test_batch")
         assert Path(filepath).exists()
 
         # Load jobs
-        loaded = storage.load_jobs('test_batch')
+        loaded = storage.load_jobs("test_batch")
         assert len(loaded) == len(enriched_jobs)
 
 
@@ -418,11 +432,11 @@ class TestSchedulerService:
         from services.scheduler import ScheduledRun
 
         run = ScheduledRun(
-            run_id='TEST_001',
+            run_id="TEST_001",
             scheduled_time=datetime.now(),
         )
 
-        assert run.status == 'pending'
+        assert run.status == "pending"
         assert run.retry_count == 0
 
 
@@ -445,11 +459,11 @@ class TestNotionSyncService:
 
         sync = NotionSyncService()
 
-        result = sync._format_rich_text('Test text')
+        result = sync._format_rich_text("Test text")
 
         assert len(result) == 1
-        assert result[0]['type'] == 'text'
-        assert result[0]['text']['content'] == 'Test text'
+        assert result[0]["type"] == "text"
+        assert result[0]["text"]["content"] == "Test text"
 
 
 class TestBullhornIntegration:
@@ -462,7 +476,7 @@ class TestBullhornIntegration:
         config = BullhornConfig()
 
         assert isinstance(config.api_url, str)
-        assert 'bullhorn' in config.api_url.lower()
+        assert "bullhorn" in config.api_url.lower()
 
     def test_mock_client(self):
         """Test mock Bullhorn client."""
@@ -473,15 +487,16 @@ class TestBullhornIntegration:
         # Test mock operations
         assert client.authenticate() == True
 
-        contact = {'name': 'Test User', 'email': 'test@example.com'}
+        contact = {"name": "Test User", "email": "test@example.com"}
         enriched = client.enrich_contact_from_bullhorn(contact)
 
-        assert enriched['name'] == 'Test User'
+        assert enriched["name"] == "Test User"
 
 
 # ============================================
 # EXPORTER TESTS
 # ============================================
+
 
 class TestExporters:
     """Test exporters.py module."""
@@ -513,10 +528,10 @@ class TestExporters:
             assert Path(result.file_path).exists()
 
             # Verify JSON structure
-            with open(result.file_path, 'r') as f:
+            with open(result.file_path, "r") as f:
                 data = json.load(f)
-            assert 'jobs' in data
-            assert 'metadata' in data
+            assert "jobs" in data
+            assert "metadata" in data
         except ImportError:
             pytest.skip("exporters not available")
 
@@ -524,6 +539,7 @@ class TestExporters:
 # ============================================
 # END-TO-END TESTS
 # ============================================
+
 
 class TestEndToEnd:
     """End-to-end integration tests."""
@@ -556,7 +572,7 @@ class TestEndToEnd:
         )
 
         orchestrator = BDOrchestrator(config)
-        result = orchestrator.run_full_pipeline(str(tmp_path / 'nonexistent.json'))
+        result = orchestrator.run_full_pipeline(str(tmp_path / "nonexistent.json"))
 
         assert result.success == False
         assert len(result.errors) > 0
@@ -566,5 +582,5 @@ class TestEndToEnd:
 # MAIN
 # ============================================
 
-if __name__ == '__main__':
-    pytest.main([__file__, '-v', '--tb=short'])
+if __name__ == "__main__":
+    pytest.main([__file__, "-v", "--tb=short"])

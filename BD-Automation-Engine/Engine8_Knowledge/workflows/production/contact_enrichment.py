@@ -16,7 +16,10 @@ from typing import Any, Dict
 import structlog
 
 from Engine8_Knowledge.workflows.graph_builder import (
-    EdgeSpec, NodeSpec, RetryConfig, WorkflowDefinition,
+    EdgeSpec,
+    NodeSpec,
+    RetryConfig,
+    WorkflowDefinition,
 )
 
 logger = structlog.get_logger(__name__)
@@ -47,14 +50,14 @@ CONTACT_ENRICHMENT_STATE = {
 # Node functions
 # ---------------------------------------------------------------------------
 
+
 async def validate_input(state: Dict[str, Any]) -> Dict[str, Any]:
     """Validate that contact IDs are provided and non-empty."""
     contact_ids = state.get("contact_ids", [])
     if not contact_ids:
-        state["errors"] = state.get("errors", []) + [{
-            "node": "validate_input",
-            "error": "No contact_ids provided"
-        }]
+        state["errors"] = state.get("errors", []) + [
+            {"node": "validate_input", "error": "No contact_ids provided"}
+        ]
         return state
 
     logger.info("contact_enrichment.validate_input", count=len(contact_ids))
@@ -68,6 +71,7 @@ async def gather_contacts_qdrant(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         for cid in contact_ids[:100]:  # Limit batch size
@@ -79,11 +83,13 @@ async def gather_contacts_qdrant(state: Dict[str, Any]) -> Dict[str, Any]:
                 )
                 if hits and hits[0]:
                     for point in hits[0]:
-                        results.append({
-                            "id": cid,
-                            "source": "qdrant",
-                            **point.payload,
-                        })
+                        results.append(
+                            {
+                                "id": cid,
+                                "source": "qdrant",
+                                **point.payload,
+                            }
+                        )
             except Exception:
                 pass
 
@@ -104,6 +110,7 @@ async def gather_contacts_neo4j(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
         mgr = get_neo4j_manager()
 
         for cid in contact_ids[:100]:
@@ -120,14 +127,16 @@ async def gather_contacts_neo4j(state: Dict[str, Any]) -> Dict[str, Any]:
                 records = await mgr.execute_query(query, {"id": cid})
                 for rec in records:
                     node = rec["p"]
-                    results.append({
-                        "id": cid,
-                        "source": "neo4j",
-                        "name": node.get("name", ""),
-                        "title": node.get("title", ""),
-                        "companies": rec.get("companies", []),
-                        "programs": rec.get("programs", []),
-                    })
+                    results.append(
+                        {
+                            "id": cid,
+                            "source": "neo4j",
+                            "name": node.get("name", ""),
+                            "title": node.get("title", ""),
+                            "companies": rec.get("companies", []),
+                            "programs": rec.get("programs", []),
+                        }
+                    )
             except Exception:
                 pass
 
@@ -158,7 +167,9 @@ async def gather_contacts_notion(state: Dict[str, Any]) -> Dict[str, Any]:
                 "Content-Type": "application/json",
             }
             # Query the contacts database
-            db_id = os.getenv("NOTION_CONTACTS_DB", "2ccdef65-baa5-8087-a53b-000ba596128e")
+            db_id = os.getenv(
+                "NOTION_CONTACTS_DB", "2ccdef65-baa5-8087-a53b-000ba596128e"
+            )
 
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
@@ -170,11 +181,16 @@ async def gather_contacts_notion(state: Dict[str, Any]) -> Dict[str, Any]:
                 if resp.status_code == 200:
                     data = resp.json()
                     for page in data.get("results", []):
-                        results.append({
-                            "id": page["id"],
-                            "source": "notion",
-                            "properties": {k: str(v) for k, v in page.get("properties", {}).items()},
-                        })
+                        results.append(
+                            {
+                                "id": page["id"],
+                                "source": "notion",
+                                "properties": {
+                                    k: str(v)
+                                    for k, v in page.get("properties", {}).items()
+                                },
+                            }
+                        )
 
     except ImportError:
         logger.warning("contact_enrichment.httpx_unavailable")
@@ -203,9 +219,9 @@ async def merge_contact_data(state: Dict[str, Any]) -> Dict[str, Any]:
     for c in neo4j:
         cid = c.get("id", "")
         if cid in merged_by_id:
-            merged_by_id[cid].update({
-                k: v for k, v in c.items() if v and k != "source"
-            })
+            merged_by_id[cid].update(
+                {k: v for k, v in c.items() if v and k != "source"}
+            )
             merged_by_id[cid]["sources"].append("neo4j")
         else:
             merged_by_id[cid] = {**c, "sources": ["neo4j"]}
@@ -220,8 +236,13 @@ async def merge_contact_data(state: Dict[str, Any]) -> Dict[str, Any]:
 
     merged = list(merged_by_id.values())
     state["contacts_merged"] = merged
-    logger.info("contact_enrichment.merged", total=len(merged),
-                qdrant=len(qdrant), neo4j=len(neo4j), notion=len(notion))
+    logger.info(
+        "contact_enrichment.merged",
+        total=len(merged),
+        qdrant=len(qdrant),
+        neo4j=len(neo4j),
+        notion=len(notion),
+    )
     return state
 
 
@@ -235,7 +256,18 @@ async def classify_contacts(state: Dict[str, Any]) -> Dict[str, Any]:
         title = (contact.get("title") or "").lower()
         tier = 6  # Default: Individual Contributor
 
-        if any(kw in title for kw in ["vp", "vice president", "cto", "ceo", "cio", "president", "chief"]):
+        if any(
+            kw in title
+            for kw in [
+                "vp",
+                "vice president",
+                "cto",
+                "ceo",
+                "cio",
+                "president",
+                "chief",
+            ]
+        ):
             tier = 1  # Executive
         elif any(kw in title for kw in ["senior director", "sr director", "svp"]):
             tier = 2  # Senior Leadership
@@ -256,19 +288,25 @@ async def classify_contacts(state: Dict[str, Any]) -> Dict[str, Any]:
         elif tier == 4 or len(programs) >= 2:
             bd_priority = "medium"
 
-        classifications.append({
-            "id": contact.get("id", ""),
-            "name": contact.get("name", ""),
-            "title": contact.get("title", ""),
-            "tier": tier,
-            "bd_priority": bd_priority,
-            "programs": programs,
-            "requires_review": tier <= 3,  # Human review for Tier 1-3
-        })
+        classifications.append(
+            {
+                "id": contact.get("id", ""),
+                "name": contact.get("name", ""),
+                "title": contact.get("title", ""),
+                "tier": tier,
+                "bd_priority": bd_priority,
+                "programs": programs,
+                "requires_review": tier <= 3,  # Human review for Tier 1-3
+            }
+        )
 
     state["classifications"] = classifications
     needs_review = sum(1 for c in classifications if c.get("requires_review"))
-    logger.info("contact_enrichment.classified", total=len(classifications), needs_review=needs_review)
+    logger.info(
+        "contact_enrichment.classified",
+        total=len(classifications),
+        needs_review=needs_review,
+    )
     return state
 
 
@@ -277,8 +315,9 @@ async def review_classifications(state: Dict[str, Any]) -> Dict[str, Any]:
     This node is set as interrupt_before — workflow pauses here for human review."""
     # When resumed, human_approved should be set
     state["human_approved"] = state.get("human_approved", False)
-    logger.info("contact_enrichment.review_classifications",
-                approved=state["human_approved"])
+    logger.info(
+        "contact_enrichment.review_classifications", approved=state["human_approved"]
+    )
     return state
 
 
@@ -314,6 +353,7 @@ async def enrich_from_zoominfo(state: Dict[str, Any]) -> Dict[str, Any]:
     # ZoomInfo enrichment is optional — graceful degradation
     try:
         import os
+
         zoominfo_key = os.getenv("ZOOMINFO_API_KEY")
         if not zoominfo_key:
             logger.info("contact_enrichment.zoominfo_skipped", reason="no_api_key")
@@ -344,8 +384,11 @@ async def update_databases(state: Dict[str, Any]) -> Dict[str, Any]:
         results["neo4j"] += 1
 
     state["update_results"] = results
-    logger.info("contact_enrichment.databases_updated",
-                qdrant=results["qdrant"], neo4j=results["neo4j"])
+    logger.info(
+        "contact_enrichment.databases_updated",
+        qdrant=results["qdrant"],
+        neo4j=results["neo4j"],
+    )
     return state
 
 
@@ -373,17 +416,21 @@ async def generate_report(state: Dict[str, Any]) -> Dict[str, Any]:
         tier = str(c.get("tier", "unknown"))
         report["tier_distribution"][tier] = report["tier_distribution"].get(tier, 0) + 1
         priority = c.get("bd_priority", "standard")
-        report["priority_distribution"][priority] = report["priority_distribution"].get(priority, 0) + 1
+        report["priority_distribution"][priority] = (
+            report["priority_distribution"].get(priority, 0) + 1
+        )
 
     state["report"] = report
-    logger.info("contact_enrichment.report_generated",
-                processed=report["contacts_processed"])
+    logger.info(
+        "contact_enrichment.report_generated", processed=report["contacts_processed"]
+    )
     return state
 
 
 # ---------------------------------------------------------------------------
 # Workflow Definition
 # ---------------------------------------------------------------------------
+
 
 def get_contact_enrichment_definition() -> WorkflowDefinition:
     """Return the production contact enrichment workflow definition."""
@@ -393,57 +440,70 @@ def get_contact_enrichment_definition() -> WorkflowDefinition:
         state_schema=CONTACT_ENRICHMENT_STATE,
         nodes={
             "validate_input": NodeSpec(
-                name="validate_input", function=validate_input,
+                name="validate_input",
+                function=validate_input,
                 description="Validate contact IDs are provided",
-                timeout_seconds=30, retry_on_error=False,
+                timeout_seconds=30,
+                retry_on_error=False,
             ),
             "gather_contacts_qdrant": NodeSpec(
-                name="gather_contacts_qdrant", function=gather_contacts_qdrant,
+                name="gather_contacts_qdrant",
+                function=gather_contacts_qdrant,
                 description="Gather contact data from Qdrant",
                 timeout_seconds=120,
             ),
             "gather_contacts_neo4j": NodeSpec(
-                name="gather_contacts_neo4j", function=gather_contacts_neo4j,
+                name="gather_contacts_neo4j",
+                function=gather_contacts_neo4j,
                 description="Gather contact data from Neo4j",
                 timeout_seconds=120,
             ),
             "gather_contacts_notion": NodeSpec(
-                name="gather_contacts_notion", function=gather_contacts_notion,
+                name="gather_contacts_notion",
+                function=gather_contacts_notion,
                 description="Gather contact data from Notion",
                 timeout_seconds=120,
             ),
             "merge_contact_data": NodeSpec(
-                name="merge_contact_data", function=merge_contact_data,
+                name="merge_contact_data",
+                function=merge_contact_data,
                 description="Merge data from all 3 sources",
                 timeout_seconds=60,
             ),
             "classify_contacts": NodeSpec(
-                name="classify_contacts", function=classify_contacts,
+                name="classify_contacts",
+                function=classify_contacts,
                 description="Apply tier/priority classification",
                 timeout_seconds=60,
             ),
             "review_classifications": NodeSpec(
-                name="review_classifications", function=review_classifications,
+                name="review_classifications",
+                function=review_classifications,
                 description="Human approval for Tier 1-3 classifications",
-                timeout_seconds=3600, retry_on_error=False,
+                timeout_seconds=3600,
+                retry_on_error=False,
             ),
             "enrich_from_linkedin": NodeSpec(
-                name="enrich_from_linkedin", function=enrich_from_linkedin,
+                name="enrich_from_linkedin",
+                function=enrich_from_linkedin,
                 description="Enrich with LinkedIn data",
                 timeout_seconds=300,
             ),
             "enrich_from_zoominfo": NodeSpec(
-                name="enrich_from_zoominfo", function=enrich_from_zoominfo,
+                name="enrich_from_zoominfo",
+                function=enrich_from_zoominfo,
                 description="Enrich with ZoomInfo data",
                 timeout_seconds=300,
             ),
             "update_databases": NodeSpec(
-                name="update_databases", function=update_databases,
+                name="update_databases",
+                function=update_databases,
                 description="Update Notion, Neo4j, and Qdrant",
                 timeout_seconds=300,
             ),
             "generate_report": NodeSpec(
-                name="generate_report", function=generate_report,
+                name="generate_report",
+                function=generate_report,
                 description="Generate enrichment report",
                 timeout_seconds=60,
             ),
@@ -464,7 +524,11 @@ def get_contact_enrichment_definition() -> WorkflowDefinition:
         entry_point="validate_input",
         interrupt_nodes=["review_classifications"],
         parallel_groups=[
-            ["gather_contacts_qdrant", "gather_contacts_neo4j", "gather_contacts_notion"],
+            [
+                "gather_contacts_qdrant",
+                "gather_contacts_neo4j",
+                "gather_contacts_notion",
+            ],
         ],
         retry_config={
             "enrich_from_linkedin": RetryConfig(max_attempts=3, backoff_seconds=5.0),

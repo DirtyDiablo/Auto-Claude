@@ -15,25 +15,57 @@ COLLECTION = "programs"
 
 # Fields that indicate enrichment quality (more = better)
 ENRICHMENT_FIELDS = [
-    "Program Name", "Acronym", "Agency Owner", "Agency",
-    "Program Type", "Priority Level", "Contract Number",
-    "Contract Value", "Contract Value (Consolidated)",
-    "total_contract_value", "obligated",
-    "Prime Contractor", "Prime Contractor 1", "Prime Contractor (Consolidated)",
-    "recipient_name", "recipient_uei",
-    "Key Subcontractors", "Known Subcontractors",
-    "period_start", "period_end", "ultimate_completion",
-    "PoP Start (Consolidated)", "PoP End (Consolidated)",
-    "Performance Location (TANGO)", "pop_city", "pop_state",
-    "naics_code", "psc_code", "set_aside",
-    "subawards_count", "subawards_total",
-    "awarding_office", "awarding_agency", "funding_office",
-    "Clearance Requirements", "Security Requirements",
-    "Technical Stack", "Keywords/Signals",
-    "tango_piid", "tango_description", "parent_piid", "parent_description",
-    "Contract Description", "Match Confidence", "Match Score",
-    "NAICS Code (Consolidated)", "PSC Code (Consolidated)",
-    "Recompete Date", "Budget", "Pain Points", "Notes",
+    "Program Name",
+    "Acronym",
+    "Agency Owner",
+    "Agency",
+    "Program Type",
+    "Priority Level",
+    "Contract Number",
+    "Contract Value",
+    "Contract Value (Consolidated)",
+    "total_contract_value",
+    "obligated",
+    "Prime Contractor",
+    "Prime Contractor 1",
+    "Prime Contractor (Consolidated)",
+    "recipient_name",
+    "recipient_uei",
+    "Key Subcontractors",
+    "Known Subcontractors",
+    "period_start",
+    "period_end",
+    "ultimate_completion",
+    "PoP Start (Consolidated)",
+    "PoP End (Consolidated)",
+    "Performance Location (TANGO)",
+    "pop_city",
+    "pop_state",
+    "naics_code",
+    "psc_code",
+    "set_aside",
+    "subawards_count",
+    "subawards_total",
+    "awarding_office",
+    "awarding_agency",
+    "funding_office",
+    "Clearance Requirements",
+    "Security Requirements",
+    "Technical Stack",
+    "Keywords/Signals",
+    "tango_piid",
+    "tango_description",
+    "parent_piid",
+    "parent_description",
+    "Contract Description",
+    "Match Confidence",
+    "Match Score",
+    "NAICS Code (Consolidated)",
+    "PSC Code (Consolidated)",
+    "Recompete Date",
+    "Budget",
+    "Pain Points",
+    "Notes",
 ]
 
 
@@ -42,36 +74,41 @@ def compute_richness(payload: dict) -> int:
     score = 0
     for field in ENRICHMENT_FIELDS:
         val = payload.get(field)
-        if val and str(val).strip() and str(val).strip() not in ('""', "''", "N/A", "None"):
+        if (
+            val
+            and str(val).strip()
+            and str(val).strip() not in ('""', "''", "N/A", "None")
+        ):
             score += 1
     # Bonus: count total non-empty keys as tiebreaker
     total_keys = sum(
-        1 for k, v in payload.items()
-        if v and str(v).strip() and not k.startswith("_")
+        1 for k, v in payload.items() if v and str(v).strip() and not k.startswith("_")
     )
-    return score * 1000 + total_keys  # Primary: enrichment fields, secondary: total keys
+    return (
+        score * 1000 + total_keys
+    )  # Primary: enrichment fields, secondary: total keys
 
 
 def get_program_key(payload: dict) -> str:
     """Generate a grouping key for program identity."""
     name = (
-        payload.get("Program Name")
-        or payload.get("name")
-        or payload.get("title")
-        or ""
-    ).strip().lower()
+        (
+            payload.get("Program Name")
+            or payload.get("name")
+            or payload.get("title")
+            or ""
+        )
+        .strip()
+        .lower()
+    )
 
-    acronym = (
-        payload.get("Acronym")
-        or payload.get("acronym")
-        or ""
-    ).strip().lower()
+    acronym = (payload.get("Acronym") or payload.get("acronym") or "").strip().lower()
 
     contract = (
-        payload.get("Contract Number")
-        or payload.get("contract_number")
-        or ""
-    ).strip().lower()
+        (payload.get("Contract Number") or payload.get("contract_number") or "")
+        .strip()
+        .lower()
+    )
 
     # Primary key: name + acronym
     # If no name, fall back to contract number
@@ -122,7 +159,9 @@ def main():
     duplicate_ids = []
     kept_records = []
 
-    print(f"\nFound {unique_count:,} unique programs across {len(all_points):,} records")
+    print(
+        f"\nFound {unique_count:,} unique programs across {len(all_points):,} records"
+    )
     print(f"Duplicate groups: {sum(1 for g in groups.values() if len(g) > 1)}")
     print()
 
@@ -132,7 +171,9 @@ def main():
 
     print("Top duplicate groups:")
     for key, points in dup_groups[:15]:
-        sources = [p.payload.get("_source", p.payload.get("source", "?")) for p in points]
+        sources = [
+            p.payload.get("_source", p.payload.get("source", "?")) for p in points
+        ]
         print(f"  [{len(points)} copies] {key}")
         for src in sources:
             print(f"    - {src}")
@@ -193,9 +234,9 @@ def main():
     info_after = client.get_collection(COLLECTION)
     final_count = info_after.points_count
 
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"DEDUPLICATION COMPLETE")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
     print(f"Before:           {total_points:,} points")
     print(f"Duplicates found: {len(duplicate_ids):,}")
     print(f"After:            {final_count:,} points")

@@ -18,6 +18,7 @@ from src.rag.reranker import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def reranker():
     return AdvancedReranker()
@@ -37,7 +38,9 @@ def sample_channel_results():
             ScoredDoc(doc_id="v3", text="SAIC provides ISR solutions.", score=0.7),
         ],
         "bm25": [
-            ScoredDoc(doc_id="b1", text="DCGS-A program is managed by GDIT.", score=0.85),
+            ScoredDoc(
+                doc_id="b1", text="DCGS-A program is managed by GDIT.", score=0.85
+            ),
             ScoredDoc(doc_id="v1", text="GDIT works on DCGS-A at Langley.", score=0.8),
             ScoredDoc(doc_id="b2", text="Hiring 5 analysts for DCGS.", score=0.75),
         ],
@@ -47,6 +50,7 @@ def sample_channel_results():
 # =========================================
 # SIMILARITY HELPERS
 # =========================================
+
 
 def test_cosine_similarity_identical():
     vec = [1.0, 0.0, 0.5]
@@ -74,6 +78,7 @@ def test_text_embedding():
     assert len(emb) == 32
     # Should be normalized (unit vector)
     import math
+
     norm = math.sqrt(sum(v * v for v in emb))
     assert norm == pytest.approx(1.0, abs=0.01)
 
@@ -91,6 +96,7 @@ def test_token_overlap_score_no_match():
 # =========================================
 # RRF FUSION
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_fuse_rankings(reranker, sample_channel_results):
@@ -119,6 +125,7 @@ async def test_fuse_rankings_single_channel(reranker):
 # CROSS-ENCODER
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_cross_encode(reranker):
     scores = await reranker.cross_encode(
@@ -139,6 +146,7 @@ async def test_cross_encode_empty(reranker):
 # COLBERT
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_colbert_rerank(reranker):
     scores = await reranker.colbert_rerank(
@@ -158,6 +166,7 @@ async def test_colbert_rerank_empty(reranker):
 # =========================================
 # MMR DIVERSITY
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_diversify(reranker):
@@ -182,9 +191,12 @@ async def test_diversify_empty(reranker):
 # FULL PIPELINE
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_full_rerank(reranker, sample_channel_results):
-    result = await reranker.full_rerank("DCGS program at GDIT", sample_channel_results, top_k=3)
+    result = await reranker.full_rerank(
+        "DCGS program at GDIT", sample_channel_results, top_k=3
+    )
     assert isinstance(result, RerankResult)
     assert len(result.docs) <= 3
     assert "rrf_fusion" in result.stages_applied
@@ -208,6 +220,7 @@ async def test_full_rerank_empty(reranker):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_reranker_singleton():
     r1 = get_reranker()

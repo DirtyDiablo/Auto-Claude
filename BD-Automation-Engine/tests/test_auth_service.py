@@ -20,6 +20,7 @@ from src.auth.rbac import Role
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def svc():
     return AuthService()
@@ -51,6 +52,7 @@ def session(svc, user):
 # PASSWORD HASHING
 # =========================================
 
+
 class TestPasswordHashing:
     def test_hash_contains_salt(self, svc):
         h = svc._hash_password("test")
@@ -71,6 +73,7 @@ class TestPasswordHashing:
 # =========================================
 # USER MANAGEMENT
 # =========================================
+
 
 class TestUserManagement:
     def test_create_user(self, svc):
@@ -120,7 +123,9 @@ class TestUserManagement:
     def test_change_password(self, svc, user):
         assert svc.change_password(user.id, "SecurePass123!", "NewPass456!")
         # Old password no longer works
-        assert not svc._verify_password("SecurePass123!", svc.get_user(user.id).password_hash)
+        assert not svc._verify_password(
+            "SecurePass123!", svc.get_user(user.id).password_hash
+        )
         # New password works
         assert svc._verify_password("NewPass456!", svc.get_user(user.id).password_hash)
 
@@ -132,9 +137,12 @@ class TestUserManagement:
 # LOGIN
 # =========================================
 
+
 class TestLogin:
     def test_login_success(self, svc, user):
-        sess = svc.login(email="alice@acme.com", password="SecurePass123!", tenant_id="t1")
+        sess = svc.login(
+            email="alice@acme.com", password="SecurePass123!", tenant_id="t1"
+        )
         assert sess is not None
         assert sess.user_id == user.id
         assert sess.access_token.startswith("bd_at_")
@@ -149,7 +157,9 @@ class TestLogin:
 
     def test_login_deactivated(self, svc, user):
         svc.deactivate_user(user.id)
-        sess = svc.login(email="alice@acme.com", password="SecurePass123!", tenant_id="t1")
+        sess = svc.login(
+            email="alice@acme.com", password="SecurePass123!", tenant_id="t1"
+        )
         assert sess is None
 
     def test_login_sets_last_login(self, svc, user):
@@ -160,13 +170,16 @@ class TestLogin:
         for _ in range(MAX_LOGIN_ATTEMPTS):
             svc.login(email="alice@acme.com", password="wrong", tenant_id="t1")
         # Next attempt should fail even with correct password (locked)
-        sess = svc.login(email="alice@acme.com", password="SecurePass123!", tenant_id="t1")
+        sess = svc.login(
+            email="alice@acme.com", password="SecurePass123!", tenant_id="t1"
+        )
         assert sess is None
 
 
 # =========================================
 # TOKEN / SESSION
 # =========================================
+
 
 class TestSession:
     def test_validate_token(self, svc, session):
@@ -205,7 +218,9 @@ class TestSession:
     def test_concurrent_session_limit(self, svc, user):
         sessions = []
         for _ in range(MAX_CONCURRENT_SESSIONS + 1):
-            s = svc.login(email="alice@acme.com", password="SecurePass123!", tenant_id="t1")
+            s = svc.login(
+                email="alice@acme.com", password="SecurePass123!", tenant_id="t1"
+            )
             if s:
                 sessions.append(s)
         # Should have at most MAX active
@@ -216,6 +231,7 @@ class TestSession:
 # =========================================
 # MFA
 # =========================================
+
 
 class TestMFA:
     def test_enable_mfa(self, svc, user):
@@ -247,6 +263,7 @@ class TestMFA:
 # SSO
 # =========================================
 
+
 class TestSSO:
     def test_configure_sso(self, svc):
         config = SSOConfig(
@@ -271,11 +288,13 @@ class TestSSO:
         assert svc.get_sso_config("t1") is None
 
     def test_sso_login(self, svc):
-        svc.configure_sso(SSOConfig(
-            tenant_id="t1",
-            provider=AuthProvider.SAML,
-            enabled=True,
-        ))
+        svc.configure_sso(
+            SSOConfig(
+                tenant_id="t1",
+                provider=AuthProvider.SAML,
+                enabled=True,
+            )
+        )
         sess = svc.login_sso(
             tenant_id="t1",
             sso_subject_id="ext-123",
@@ -290,7 +309,9 @@ class TestSSO:
         assert sess is None
 
     def test_sso_auto_provisions_user(self, svc):
-        svc.configure_sso(SSOConfig(tenant_id="t1", provider=AuthProvider.OIDC, enabled=True))
+        svc.configure_sso(
+            SSOConfig(tenant_id="t1", provider=AuthProvider.OIDC, enabled=True)
+        )
         svc.login_sso(tenant_id="t1", sso_subject_id="new-user", email="new@acme.com")
         users = svc.list_users("t1")
         assert len(users) == 1
@@ -300,6 +321,7 @@ class TestSSO:
 # =========================================
 # AUDIT LOG
 # =========================================
+
 
 class TestAuditLog:
     def test_login_creates_audit(self, svc, user):
@@ -329,6 +351,7 @@ class TestAuditLog:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_service(self):

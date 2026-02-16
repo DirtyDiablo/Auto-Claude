@@ -27,6 +27,7 @@ def empty_renderer():
 # SEEDED TEMPLATES
 # =========================================
 
+
 def test_seeded_templates(renderer):
     templates = renderer.list_templates()
     assert len(templates) >= 6
@@ -50,6 +51,7 @@ def test_get_template(renderer):
 # TEMPLATE REGISTRATION
 # =========================================
 
+
 def test_register_template(empty_renderer):
     t = empty_renderer.register_template(
         template_id="custom",
@@ -72,6 +74,7 @@ def test_register_overwrites(renderer):
 # RENDERING
 # =========================================
 
+
 def test_render_contact_card(renderer):
     resp = MCPAppResponse(
         template_id="contact_card",
@@ -87,7 +90,12 @@ def test_render_contact_card(renderer):
 def test_render_program_overview(renderer):
     resp = MCPAppResponse(
         template_id="program_overview",
-        data={"program_name": "DCGS-A", "prime": "Leidos", "value": "950", "metrics": "[0.9,0.8]"},
+        data={
+            "program_name": "DCGS-A",
+            "prime": "Leidos",
+            "value": "950",
+            "metrics": "[0.9,0.8]",
+        },
     )
     rendered = renderer.render_app(resp)
     assert rendered.status == RenderStatus.RENDERED.value
@@ -118,6 +126,7 @@ def test_render_logs_event(renderer):
 # SANDBOX CONFIG
 # =========================================
 
+
 def test_sandbox_basic(renderer):
     resp = MCPAppResponse(template_id="call_briefing", data={})
     rendered = renderer.render_app(resp)
@@ -142,8 +151,11 @@ def test_sandbox_with_chart(renderer):
 # ACTIONS
 # =========================================
 
+
 def test_render_with_actions(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="send_email", requires_approval=True)
+    action = MCPAppAction(
+        action_id="a1", tool_call="send_email", requires_approval=True
+    )
     resp = MCPAppResponse(
         template_id="contact_card",
         data={"name": "Test"},
@@ -155,22 +167,34 @@ def test_render_with_actions(renderer):
 
 
 def test_approve_action(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="send_email", requires_approval=True)
-    resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"}, actions=[action])
+    action = MCPAppAction(
+        action_id="a1", tool_call="send_email", requires_approval=True
+    )
+    resp = MCPAppResponse(
+        template_id="contact_card", data={"name": "Test"}, actions=[action]
+    )
     rendered = renderer.render_app(resp)
     assert renderer.approve_action(rendered.id, "a1") is True
 
 
 def test_deny_action(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="send_email", requires_approval=True)
-    resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"}, actions=[action])
+    action = MCPAppAction(
+        action_id="a1", tool_call="send_email", requires_approval=True
+    )
+    resp = MCPAppResponse(
+        template_id="contact_card", data={"name": "Test"}, actions=[action]
+    )
     rendered = renderer.render_app(resp)
     assert renderer.deny_action(rendered.id, "a1") is True
 
 
 def test_execute_approved_action(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="send_email", requires_approval=True)
-    resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"}, actions=[action])
+    action = MCPAppAction(
+        action_id="a1", tool_call="send_email", requires_approval=True
+    )
+    resp = MCPAppResponse(
+        template_id="contact_card", data={"name": "Test"}, actions=[action]
+    )
     rendered = renderer.render_app(resp)
     renderer.approve_action(rendered.id, "a1")
     result = renderer.execute_action(rendered.id, "a1")
@@ -179,16 +203,24 @@ def test_execute_approved_action(renderer):
 
 
 def test_execute_unapproved_action(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="send_email", requires_approval=True)
-    resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"}, actions=[action])
+    action = MCPAppAction(
+        action_id="a1", tool_call="send_email", requires_approval=True
+    )
+    resp = MCPAppResponse(
+        template_id="contact_card", data={"name": "Test"}, actions=[action]
+    )
     rendered = renderer.render_app(resp)
     result = renderer.execute_action(rendered.id, "a1")
     assert result is None
 
 
 def test_execute_auto_approved(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="read_only", requires_approval=False)
-    resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"}, actions=[action])
+    action = MCPAppAction(
+        action_id="a1", tool_call="read_only", requires_approval=False
+    )
+    resp = MCPAppResponse(
+        template_id="contact_card", data={"name": "Test"}, actions=[action]
+    )
     rendered = renderer.render_app(resp)
     result = renderer.execute_action(rendered.id, "a1")
     assert result is not None
@@ -204,9 +236,14 @@ def test_action_nonexistent_app(renderer):
 # EVENTS
 # =========================================
 
+
 def test_events_audit_trail(renderer):
-    action = MCPAppAction(action_id="a1", tool_call="send_email", requires_approval=True)
-    resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"}, actions=[action])
+    action = MCPAppAction(
+        action_id="a1", tool_call="send_email", requires_approval=True
+    )
+    resp = MCPAppResponse(
+        template_id="contact_card", data={"name": "Test"}, actions=[action]
+    )
     rendered = renderer.render_app(resp)
     renderer.approve_action(rendered.id, "a1")
     renderer.execute_action(rendered.id, "a1")
@@ -228,6 +265,7 @@ def test_event_auto_id():
 # STATS
 # =========================================
 
+
 def test_stats(renderer):
     resp = MCPAppResponse(template_id="contact_card", data={"name": "Test"})
     renderer.render_app(resp)
@@ -240,6 +278,7 @@ def test_stats(renderer):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     r1 = get_apps_renderer()

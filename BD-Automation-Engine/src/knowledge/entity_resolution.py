@@ -18,20 +18,23 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class MatchOutcome(str, Enum):
-    DEFINITE_MATCH = "definite_match"    # > 0.95
-    PROBABLE_MATCH = "probable_match"    # 0.80-0.95
-    POSSIBLE_MATCH = "possible_match"    # 0.60-0.80
-    NO_MATCH = "no_match"               # < 0.60
+    DEFINITE_MATCH = "definite_match"  # > 0.95
+    PROBABLE_MATCH = "probable_match"  # 0.80-0.95
+    POSSIBLE_MATCH = "possible_match"  # 0.60-0.80
+    NO_MATCH = "no_match"  # < 0.60
 
 
 # =========================================
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class ResolutionResult:
     """Result of comparing two entity mentions."""
+
     entity_a_id: str
     entity_b_id: str
     outcome: str
@@ -43,6 +46,7 @@ class ResolutionResult:
 @dataclass
 class ResolutionCandidate:
     """A potential match for an entity."""
+
     entity_id: str
     entity_name: str
     confidence: float
@@ -52,6 +56,7 @@ class ResolutionCandidate:
 @dataclass
 class MergeResult:
     """Result of merging two entities."""
+
     primary_id: str
     merged_id: str
     success: bool
@@ -63,6 +68,7 @@ class MergeResult:
 @dataclass
 class GlobalResolutionReport:
     """Result of running global entity resolution."""
+
     total_entities_scanned: int = 0
     pairs_compared: int = 0
     definite_matches: int = 0
@@ -77,6 +83,7 @@ class GlobalResolutionReport:
 # =========================================
 # STRING SIMILARITY
 # =========================================
+
 
 def levenshtein_distance(s1: str, s2: str) -> int:
     """Compute Levenshtein edit distance between two strings."""
@@ -151,8 +158,9 @@ def jaro_similarity(s1: str, s2: str) -> float:
             transpositions += 1
         k += 1
 
-    jaro = (matches / len1 + matches / len2 +
-            (matches - transpositions / 2) / matches) / 3
+    jaro = (
+        matches / len1 + matches / len2 + (matches - transpositions / 2) / matches
+    ) / 3
     return jaro
 
 
@@ -322,6 +330,7 @@ def program_name_similarity(name_a: str, name_b: str) -> float:
 # RESOLVERS
 # =========================================
 
+
 class PersonResolver:
     """Multi-signal person resolution."""
 
@@ -349,14 +358,18 @@ class PersonResolver:
         title_b = entity_b.get("title", "").lower()
         if company_a and company_b:
             comp_sim = org_name_similarity(company_a, company_b)
-            title_sim = jaro_winkler_similarity(title_a, title_b) if title_a and title_b else 0.0
+            title_sim = (
+                jaro_winkler_similarity(title_a, title_b)
+                if title_a and title_b
+                else 0.0
+            )
             signals["company_title"] = (comp_sim + title_sim) / 2
         else:
             signals["company_title"] = 0.0
 
         # 4. Phone match
-        phone_a = re.sub(r'\D', '', entity_a.get("phone", ""))
-        phone_b = re.sub(r'\D', '', entity_b.get("phone", ""))
+        phone_a = re.sub(r"\D", "", entity_a.get("phone", ""))
+        phone_b = re.sub(r"\D", "", entity_b.get("phone", ""))
         if phone_a and phone_b and len(phone_a) >= 7 and len(phone_b) >= 7:
             signals["phone"] = 1.0 if phone_a[-10:] == phone_b[-10:] else 0.0
         else:
@@ -374,7 +387,9 @@ class PersonResolver:
         loc_a = entity_a.get("location", "").lower()
         loc_b = entity_b.get("location", "").lower()
         if loc_a and loc_b:
-            signals["location"] = 1.0 if loc_a == loc_b else jaro_winkler_similarity(loc_a, loc_b)
+            signals["location"] = (
+                1.0 if loc_a == loc_b else jaro_winkler_similarity(loc_a, loc_b)
+            )
         else:
             signals["location"] = 0.0
 
@@ -392,7 +407,10 @@ class PersonResolver:
         )
 
     def find_candidates(
-        self, entity: Dict, all_entities: List[Dict], limit: int = 10,
+        self,
+        entity: Dict,
+        all_entities: List[Dict],
+        limit: int = 10,
     ) -> List[ResolutionCandidate]:
         """Find potential matches for an entity from a list."""
         candidates = []
@@ -401,12 +419,14 @@ class PersonResolver:
                 continue
             result = self.resolve(entity, other)
             if result.confidence >= 0.50:
-                candidates.append(ResolutionCandidate(
-                    entity_id=other.get("id", ""),
-                    entity_name=other.get("name", ""),
-                    confidence=result.confidence,
-                    signals=result.signals,
-                ))
+                candidates.append(
+                    ResolutionCandidate(
+                        entity_id=other.get("id", ""),
+                        entity_name=other.get("name", ""),
+                        confidence=result.confidence,
+                        signals=result.signals,
+                    )
+                )
         candidates.sort(key=lambda c: c.confidence, reverse=True)
         return candidates[:limit]
 
@@ -452,14 +472,24 @@ class OrganizationResolver:
 
     def resolve(self, name_a: str, name_b: str) -> ResolutionResult:
         sim = org_name_similarity(name_a, name_b)
-        outcome = MatchOutcome.DEFINITE_MATCH.value if sim >= 0.95 else (
-            MatchOutcome.PROBABLE_MATCH.value if sim >= 0.80 else (
-                MatchOutcome.POSSIBLE_MATCH.value if sim >= 0.60 else
-                MatchOutcome.NO_MATCH.value
-            ))
+        outcome = (
+            MatchOutcome.DEFINITE_MATCH.value
+            if sim >= 0.95
+            else (
+                MatchOutcome.PROBABLE_MATCH.value
+                if sim >= 0.80
+                else (
+                    MatchOutcome.POSSIBLE_MATCH.value
+                    if sim >= 0.60
+                    else MatchOutcome.NO_MATCH.value
+                )
+            )
+        )
         return ResolutionResult(
-            entity_a_id=name_a, entity_b_id=name_b,
-            outcome=outcome, confidence=round(sim, 4),
+            entity_a_id=name_a,
+            entity_b_id=name_b,
+            outcome=outcome,
+            confidence=round(sim, 4),
             signals={"name_similarity": sim},
         )
 
@@ -469,14 +499,24 @@ class ProgramResolver:
 
     def resolve(self, name_a: str, name_b: str) -> ResolutionResult:
         sim = program_name_similarity(name_a, name_b)
-        outcome = MatchOutcome.DEFINITE_MATCH.value if sim >= 0.95 else (
-            MatchOutcome.PROBABLE_MATCH.value if sim >= 0.80 else (
-                MatchOutcome.POSSIBLE_MATCH.value if sim >= 0.60 else
-                MatchOutcome.NO_MATCH.value
-            ))
+        outcome = (
+            MatchOutcome.DEFINITE_MATCH.value
+            if sim >= 0.95
+            else (
+                MatchOutcome.PROBABLE_MATCH.value
+                if sim >= 0.80
+                else (
+                    MatchOutcome.POSSIBLE_MATCH.value
+                    if sim >= 0.60
+                    else MatchOutcome.NO_MATCH.value
+                )
+            )
+        )
         return ResolutionResult(
-            entity_a_id=name_a, entity_b_id=name_b,
-            outcome=outcome, confidence=round(sim, 4),
+            entity_a_id=name_a,
+            entity_b_id=name_b,
+            outcome=outcome,
+            confidence=round(sim, 4),
             signals={"name_similarity": sim},
         )
 
@@ -484,6 +524,7 @@ class ProgramResolver:
 # =========================================
 # ENTITY RESOLUTION ENGINE
 # =========================================
+
 
 class EntityResolutionEngine:
     """Resolves whether two entity mentions refer to the same real-world entity."""
@@ -501,11 +542,13 @@ class EntityResolutionEngine:
             return self.person_resolver.resolve(entity_a, entity_b)
         elif type_a == "organization":
             return self.org_resolver.resolve(
-                entity_a.get("name", ""), entity_b.get("name", ""),
+                entity_a.get("name", ""),
+                entity_b.get("name", ""),
             )
         elif type_a == "program":
             return self.program_resolver.resolve(
-                entity_a.get("name", ""), entity_b.get("name", ""),
+                entity_a.get("name", ""),
+                entity_b.get("name", ""),
             )
         # Default: name similarity
         sim = name_similarity(entity_a.get("name", ""), entity_b.get("name", ""))
@@ -518,13 +561,18 @@ class EntityResolutionEngine:
         )
 
     def find_candidates(
-        self, entity: Dict, all_entities: List[Dict], limit: int = 10,
+        self,
+        entity: Dict,
+        all_entities: List[Dict],
+        limit: int = 10,
     ) -> List[ResolutionCandidate]:
         """Find resolution candidates for an entity."""
         return self.person_resolver.find_candidates(entity, all_entities, limit)
 
     def merge_entities(
-        self, primary: Dict, duplicate: Dict,
+        self,
+        primary: Dict,
+        duplicate: Dict,
     ) -> MergeResult:
         """Merge duplicate entity into primary, keeping the most complete data."""
         fields_merged = []
@@ -560,10 +608,13 @@ class EntityResolutionEngine:
         return result
 
     def run_global_resolution(
-        self, entities: List[Dict], entity_type: str = "person",
+        self,
+        entities: List[Dict],
+        entity_type: str = "person",
     ) -> GlobalResolutionReport:
         """Scan all entities for duplicates using blocking + pairwise comparison."""
         import time
+
         start = time.time()
 
         # Block by first letter of last name for efficiency

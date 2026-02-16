@@ -46,6 +46,7 @@ LLM_COSTS_LOG = DATA_DIR / "llm_costs.json"
 # HELPERS
 # =========================================
 
+
 def _ensure_data_dir():
     DATA_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -101,7 +102,16 @@ def _create_notification(
         conn.execute(
             """INSERT INTO notifications (id, type, title, message, entity_type, entity_id, created_at, priority)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (notif_id, notif_type, title, message, entity_type, entity_id, now, priority),
+            (
+                notif_id,
+                notif_type,
+                title,
+                message,
+                entity_type,
+                entity_id,
+                now,
+                priority,
+            ),
         )
         conn.commit()
         return {
@@ -121,7 +131,10 @@ def _create_notification(
 
 def _update_freshness(collection: str, count: int = 0, source: str = "api"):
     """Update the freshness log for a given collection/source."""
-    log = _read_json(FRESHNESS_LOG, {"collections": {}, "scraper_last_run": None, "tango_last_sync": None})
+    log = _read_json(
+        FRESHNESS_LOG,
+        {"collections": {}, "scraper_last_run": None, "tango_last_sync": None},
+    )
     now = datetime.utcnow().isoformat()
     if collection in ("scraper_last_run", "tango_last_sync"):
         log[collection] = now
@@ -138,11 +151,17 @@ def _update_freshness(collection: str, count: int = 0, source: str = "api"):
 # PYDANTIC MODELS
 # =========================================
 
+
 class NotificationCreate(BaseModel):
-    type: str = Field(..., description="Notification type: new_jobs, contract_alert, stale_data, meeting_reminder, outreach_response")
+    type: str = Field(
+        ...,
+        description="Notification type: new_jobs, contract_alert, stale_data, meeting_reminder, outreach_response",
+    )
     title: str = Field(..., description="Short title")
     message: str = Field(..., description="Notification body")
-    entity_type: Optional[str] = Field(None, description="Related entity type (contact, program, job)")
+    entity_type: Optional[str] = Field(
+        None, description="Related entity type (contact, program, job)"
+    )
     entity_id: Optional[str] = Field(None, description="Related entity ID")
     priority: str = Field("info", description="Priority: info, warning, critical")
 
@@ -193,19 +212,24 @@ class LLMCostEntry(BaseModel):
 # TASK 1: DATA FRESHNESS
 # =========================================
 
+
 @router.get("/data/freshness")
 async def get_data_freshness():
     """Return freshness indicators for each data source and collection."""
     # Try to get live Qdrant stats
     try:
         from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
+
         qdrant_url = os.getenv("QDRANT_URL")
         store = BDKnowledgeStore(url=qdrant_url)
         collection_stats = store.get_collection_stats()
     except Exception:
         collection_stats = {}
 
-    log = _read_json(FRESHNESS_LOG, {"collections": {}, "scraper_last_run": None, "tango_last_sync": None})
+    log = _read_json(
+        FRESHNESS_LOG,
+        {"collections": {}, "scraper_last_run": None, "tango_last_sync": None},
+    )
     now = datetime.utcnow()
 
     collections_out = {}
@@ -218,7 +242,9 @@ async def get_data_freshness():
         last_indexed = log_entry.get("last_indexed")
         if last_indexed:
             try:
-                indexed_dt = datetime.fromisoformat(last_indexed.replace("Z", "+00:00").replace("+00:00", ""))
+                indexed_dt = datetime.fromisoformat(
+                    last_indexed.replace("Z", "+00:00").replace("+00:00", "")
+                )
             except (ValueError, TypeError):
                 indexed_dt = None
         else:
@@ -237,11 +263,23 @@ async def get_data_freshness():
     for cname, cinfo in collections_out.items():
         sd = cinfo.get("staleness_days")
         if sd is None or sd < 0:
-            alerts.append({"level": "info", "message": f"{cname} has no freshness data recorded"})
+            alerts.append(
+                {"level": "info", "message": f"{cname} has no freshness data recorded"}
+            )
         elif sd > 14:
-            alerts.append({"level": "critical", "message": f"{cname} collection is {sd} days stale"})
+            alerts.append(
+                {
+                    "level": "critical",
+                    "message": f"{cname} collection is {sd} days stale",
+                }
+            )
         elif sd > 7:
-            alerts.append({"level": "warning", "message": f"{cname} collection is {sd} days stale"})
+            alerts.append(
+                {
+                    "level": "warning",
+                    "message": f"{cname} collection is {sd} days stale",
+                }
+            )
         elif sd == 0:
             alerts.append({"level": "info", "message": f"{cname} refreshed today"})
 
@@ -257,6 +295,7 @@ async def get_data_freshness():
 # =========================================
 # TASK 2: NOTIFICATIONS
 # =========================================
+
 
 @router.post("/notifications")
 async def create_notification(body: NotificationCreate):
@@ -320,6 +359,7 @@ async def mark_notification_read(notif_id: str):
 # TASK 3: WEBHOOK RECEIVERS
 # =========================================
 
+
 @router.post("/webhooks/jobs-scraped")
 async def webhook_jobs_scraped(body: WebhookJobsScraped):
     """Receive webhook when new jobs are scraped."""
@@ -356,7 +396,8 @@ async def webhook_contacts_enriched(body: WebhookContactsEnriched):
     notif = _create_notification(
         notif_type="contact_enriched",
         title=f"{body.count} contacts enriched",
-        message=f"Source: {body.source}" + (f", Program: {body.program}" if body.program else ""),
+        message=f"Source: {body.source}"
+        + (f", Program: {body.program}" if body.program else ""),
         entity_type="program" if body.program else None,
         entity_id=body.program if body.program else None,
         priority="info",
@@ -382,11 +423,13 @@ async def webhook_alert(body: WebhookAlert):
 # TASK 4: CROSS-SESSION MEMORY
 # =========================================
 
+
 @router.post("/ai/memories")
 async def store_memory(body: MemoryCreate):
     """Store an AI memory for an entity."""
     try:
         from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
+
         qdrant_url = os.getenv("QDRANT_URL")
         store = BDKnowledgeStore(url=qdrant_url)
 
@@ -395,6 +438,7 @@ async def store_memory(body: MemoryCreate):
             store.client.get_collection("memories")
         except Exception:
             from qdrant_client.models import VectorParams, Distance
+
             store.client.create_collection(
                 collection_name="memories",
                 vectors_config=VectorParams(size=384, distance=Distance.COSINE),
@@ -407,18 +451,20 @@ async def store_memory(body: MemoryCreate):
 
         store.client.upsert(
             collection_name="memories",
-            points=[{
-                "id": memory_id,
-                "vector": embedding,
-                "payload": {
-                    "entity_type": body.entity_type,
-                    "entity_name": body.entity_name,
-                    "summary": body.summary,
-                    "confidence": body.confidence,
-                    "last_updated": datetime.utcnow().isoformat(),
-                    "source_interaction": "dashboard",
-                },
-            }],
+            points=[
+                {
+                    "id": memory_id,
+                    "vector": embedding,
+                    "payload": {
+                        "entity_type": body.entity_type,
+                        "entity_name": body.entity_name,
+                        "summary": body.summary,
+                        "confidence": body.confidence,
+                        "last_updated": datetime.utcnow().isoformat(),
+                        "source_interaction": "dashboard",
+                    },
+                }
+            ],
         )
         return {
             "success": True,
@@ -431,11 +477,14 @@ async def store_memory(body: MemoryCreate):
 
 
 @router.get("/ai/memories/{entity_type}/{entity_name}")
-async def get_entity_memories(entity_type: str, entity_name: str, limit: int = Query(20, ge=1, le=100)):
+async def get_entity_memories(
+    entity_type: str, entity_name: str, limit: int = Query(20, ge=1, le=100)
+):
     """Retrieve AI memories for a specific entity."""
     try:
         from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
         from qdrant_client.models import Filter, FieldCondition, MatchValue
+
         qdrant_url = os.getenv("QDRANT_URL")
         store = BDKnowledgeStore(url=qdrant_url)
 
@@ -449,8 +498,12 @@ async def get_entity_memories(entity_type: str, entity_name: str, limit: int = Q
             collection_name="memories",
             scroll_filter=Filter(
                 must=[
-                    FieldCondition(key="entity_type", match=MatchValue(value=entity_type)),
-                    FieldCondition(key="entity_name", match=MatchValue(value=entity_name)),
+                    FieldCondition(
+                        key="entity_type", match=MatchValue(value=entity_type)
+                    ),
+                    FieldCondition(
+                        key="entity_name", match=MatchValue(value=entity_name)
+                    ),
                 ]
             ),
             limit=limit,
@@ -461,15 +514,17 @@ async def get_entity_memories(entity_type: str, entity_name: str, limit: int = Q
         memories = []
         for point in results:
             payload = point.payload or {}
-            memories.append({
-                "id": str(point.id),
-                "entity_type": payload.get("entity_type", ""),
-                "entity_name": payload.get("entity_name", ""),
-                "summary": payload.get("summary", ""),
-                "confidence": payload.get("confidence", 0),
-                "last_updated": payload.get("last_updated", ""),
-                "source_interaction": payload.get("source_interaction", ""),
-            })
+            memories.append(
+                {
+                    "id": str(point.id),
+                    "entity_type": payload.get("entity_type", ""),
+                    "entity_name": payload.get("entity_name", ""),
+                    "summary": payload.get("summary", ""),
+                    "confidence": payload.get("confidence", 0),
+                    "last_updated": payload.get("last_updated", ""),
+                    "source_interaction": payload.get("source_interaction", ""),
+                }
+            )
 
         return {
             "memories": memories,
@@ -486,6 +541,7 @@ async def delete_memory(memory_id: str):
     """Delete a specific AI memory."""
     try:
         from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
+
         qdrant_url = os.getenv("QDRANT_URL")
         store = BDKnowledgeStore(url=qdrant_url)
         store.client.delete(
@@ -501,6 +557,7 @@ async def delete_memory(memory_id: str):
 # =========================================
 # TASK 5: LLM COST TRACKING
 # =========================================
+
 
 @router.get("/ai/costs")
 async def get_llm_costs(days: int = Query(30, ge=1, le=365)):
@@ -526,7 +583,9 @@ async def get_llm_costs(days: int = Query(30, ge=1, le=365)):
         out = e.get("output_tokens", 0)
         ep = e.get("endpoint", "unknown")
 
-        daily.setdefault(day, {"input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0, "queries": 0})
+        daily.setdefault(
+            day, {"input_tokens": 0, "output_tokens": 0, "cost_usd": 0.0, "queries": 0}
+        )
         daily[day]["input_tokens"] += inp
         daily[day]["output_tokens"] += out
         daily[day]["cost_usd"] += cost
@@ -546,7 +605,10 @@ async def get_llm_costs(days: int = Query(30, ge=1, le=365)):
 
     return {
         "daily": daily_list,
-        "by_endpoint": [{"endpoint": k, "cost_usd": round(v, 4)} for k, v in sorted(by_endpoint.items(), key=lambda x: -x[1])],
+        "by_endpoint": [
+            {"endpoint": k, "cost_usd": round(v, 4)}
+            for k, v in sorted(by_endpoint.items(), key=lambda x: -x[1])
+        ],
         "recent_queries": filtered[-50:] if len(filtered) > 50 else filtered,
         "summary": {
             "total_cost_usd": round(total_cost, 4),
@@ -560,19 +622,23 @@ async def get_llm_costs(days: int = Query(30, ge=1, le=365)):
     }
 
 
-def log_llm_cost(endpoint: str, model: str, input_tokens: int, output_tokens: int, cost_usd: float):
+def log_llm_cost(
+    endpoint: str, model: str, input_tokens: int, output_tokens: int, cost_usd: float
+):
     """Utility to log an LLM cost entry (called from middleware)."""
     entries: list = _read_json(LLM_COSTS_LOG, [])
     if not isinstance(entries, list):
         entries = []
-    entries.append({
-        "timestamp": datetime.utcnow().isoformat(),
-        "endpoint": endpoint,
-        "model": model,
-        "input_tokens": input_tokens,
-        "output_tokens": output_tokens,
-        "cost_usd": round(cost_usd, 6),
-    })
+    entries.append(
+        {
+            "timestamp": datetime.utcnow().isoformat(),
+            "endpoint": endpoint,
+            "model": model,
+            "input_tokens": input_tokens,
+            "output_tokens": output_tokens,
+            "cost_usd": round(cost_usd, 6),
+        }
+    )
     # Keep last 10000 entries
     if len(entries) > 10000:
         entries = entries[-10000:]

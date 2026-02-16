@@ -27,15 +27,15 @@ load_dotenv()
 
 # Configure logging with ASCII-safe output for Windows
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
-logger = logging.getLogger('BD-CorrelationEngine')
+logger = logging.getLogger("BD-CorrelationEngine")
 
 
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
+
 
 @dataclass
 class NotionConfig:
@@ -43,15 +43,22 @@ class NotionConfig:
 
     Updated for Notion API 2025-09-03 with multi-source database support.
     """
-    token: str = field(default_factory=lambda: os.getenv('NOTION_TOKEN', ''))
+
+    token: str = field(default_factory=lambda: os.getenv("NOTION_TOKEN", ""))
 
     # Database IDs (discovered from schema analysis)
-    db_jobs: str = "0a0d7e46-3d88-40b6-853a-3c9680347644"  # Program Mapping Intelligence Hub
+    db_jobs: str = (
+        "0a0d7e46-3d88-40b6-853a-3c9680347644"  # Program Mapping Intelligence Hub
+    )
     db_programs: str = "9db40fce-0781-42b9-902c-d4b0263b1e23"  # Federal Programs
     db_contractors: str = "ca67175b-df3d-442d-a2e7-cc24e9a1bf78"  # Contractors Database
-    db_contract_vehicles: str = "e1166305-1b1f-4812-b665-bcfa6a87a2ab"  # Contract Vehicles
+    db_contract_vehicles: str = (
+        "e1166305-1b1f-4812-b665-bcfa6a87a2ab"  # Contract Vehicles
+    )
     db_dcgs_contacts: str = "2ccdef65-baa5-80d0-9b66-c67d66e7a54d"  # DCGS Contacts
-    db_gdit_contacts: str = "c1b1d358-9d82-4f03-b77c-db43d9795c6f"  # GDIT Other Contacts
+    db_gdit_contacts: str = (
+        "c1b1d358-9d82-4f03-b77c-db43d9795c6f"  # GDIT Other Contacts
+    )
 
     api_base: str = "https://api.notion.com/v1"
     api_version: str = "2025-09-03"  # Updated for data source support
@@ -60,36 +67,43 @@ class NotionConfig:
 @dataclass
 class CorrelationConfig:
     """Configuration for correlation parameters."""
+
     # Matching thresholds
     location_match_threshold: float = 0.8
     company_match_threshold: float = 0.9
 
     # BD Score weights
-    score_weights: Dict[str, float] = field(default_factory=lambda: {
-        'job_count': 0.20,         # More jobs = higher priority
-        'contact_quality': 0.25,   # Better contacts = higher priority
-        'recency': 0.15,           # Recent activity = higher priority
-        'contract_value': 0.20,    # Higher value = higher priority
-        'clearance_match': 0.10,   # Clearance alignment
-        'pain_points': 0.10        # Known pain points
-    })
+    score_weights: Dict[str, float] = field(
+        default_factory=lambda: {
+            "job_count": 0.20,  # More jobs = higher priority
+            "contact_quality": 0.25,  # Better contacts = higher priority
+            "recency": 0.15,  # Recent activity = higher priority
+            "contract_value": 0.20,  # Higher value = higher priority
+            "clearance_match": 0.10,  # Clearance alignment
+            "pain_points": 0.10,  # Known pain points
+        }
+    )
 
     # Priority thresholds
-    priority_thresholds: Dict[str, int] = field(default_factory=lambda: {
-        'critical': 80,   # Red - immediate action
-        'high': 60,       # Orange - this week
-        'medium': 40,     # Yellow - this month
-        'low': 0          # Gray - monitor
-    })
+    priority_thresholds: Dict[str, int] = field(
+        default_factory=lambda: {
+            "critical": 80,  # Red - immediate action
+            "high": 60,  # Orange - this week
+            "medium": 40,  # Yellow - this month
+            "low": 0,  # Gray - monitor
+        }
+    )
 
 
 # =============================================================================
 # DATA MODELS
 # =============================================================================
 
+
 @dataclass
 class Job:
     """Represents a job/opportunity from the Jobs database."""
+
     id: str
     title: str
     company: str = ""
@@ -112,6 +126,7 @@ class Job:
 @dataclass
 class Program:
     """Represents a federal program from Programs database."""
+
     id: str
     name: str
     prime_contractor: str = ""
@@ -133,6 +148,7 @@ class Program:
 @dataclass
 class Contact:
     """Represents a contact from Contacts databases."""
+
     id: str
     name: str
     first_name: str = ""
@@ -158,6 +174,7 @@ class Contact:
 @dataclass
 class Contractor:
     """Represents a contractor company from Contractors database."""
+
     id: str
     name: str
     relationship_status: str = ""
@@ -175,9 +192,11 @@ class Contractor:
 # NEW MIND MAP ENTITY MODELS
 # =============================================================================
 
+
 @dataclass
 class Location:
     """Represents a physical location entity for the mind map."""
+
     id: str
     name: str
     location_hub: str = ""  # Hampton Roads, San Diego Metro, DC Metro, etc.
@@ -198,6 +217,7 @@ class Location:
 @dataclass
 class TaskOrder:
     """Represents a task order under a program (inferred from clusters)."""
+
     id: str
     name: str
     program_id: str = ""
@@ -218,6 +238,7 @@ class TaskOrder:
 @dataclass
 class Team:
     """Represents a team within a task order (inferred from contact clusters)."""
+
     id: str
     name: str
     task_order_id: str = ""
@@ -233,6 +254,7 @@ class Team:
 @dataclass
 class Customer:
     """Represents a government customer/agency entity."""
+
     id: str
     name: str
     mission_area: str = ""
@@ -247,6 +269,7 @@ class Customer:
 # =============================================================================
 # NOTION DATA LOADER
 # =============================================================================
+
 
 class NotionDataLoader:
     """Loads data from all BD-related Notion databases.
@@ -266,7 +289,7 @@ class NotionDataLoader:
         """Validate configuration."""
         if not self.config.token:
             # Try to get from environment
-            token = os.getenv('NOTION_TOKEN')
+            token = os.getenv("NOTION_TOKEN")
             if not token:
                 raise ValueError(
                     "NOTION_TOKEN not configured. Set NOTION_TOKEN environment variable."
@@ -278,7 +301,7 @@ class NotionDataLoader:
         return {
             "Authorization": f"Bearer {self.config.token}",
             "Notion-Version": self.config.api_version,
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     # ============================================
@@ -298,7 +321,7 @@ class NotionDataLoader:
             response = requests.get(
                 f"{self.config.api_base}/databases/{database_id}",
                 headers=self._get_headers(),
-                timeout=30
+                timeout=30,
             )
 
             if response.status_code != 200:
@@ -306,15 +329,17 @@ class NotionDataLoader:
                 return None
 
             db_info = response.json()
-            data_sources = db_info.get('data_sources', [])
+            data_sources = db_info.get("data_sources", [])
 
             if not data_sources:
                 logger.warning(f"No data sources found for database {database_id}")
                 return None
 
-            data_source_id = data_sources[0]['id']
+            data_source_id = data_sources[0]["id"]
             self._data_source_cache[database_id] = data_source_id
-            logger.debug(f"Cached data_source_id {data_source_id} for database {database_id}")
+            logger.debug(
+                f"Cached data_source_id {data_source_id} for database {database_id}"
+            )
 
             return data_source_id
 
@@ -322,7 +347,9 @@ class NotionDataLoader:
             logger.error(f"Error getting data source ID: {e}")
             return None
 
-    def _query_data_source(self, data_source_id: str, page_size: int = 100) -> List[Dict]:
+    def _query_data_source(
+        self, data_source_id: str, page_size: int = 100
+    ) -> List[Dict]:
         """Query a data source directly (API 2025-09-03)."""
         all_results = []
         has_more = True
@@ -337,7 +364,7 @@ class NotionDataLoader:
                 f"{self.config.api_base}/data_sources/{data_source_id}/query",
                 headers=self._get_headers(),
                 json=payload,
-                timeout=30
+                timeout=30,
             )
 
             if response.status_code != 200:
@@ -345,10 +372,10 @@ class NotionDataLoader:
                 break
 
             data = response.json()
-            all_results.extend(data.get('results', []))
+            all_results.extend(data.get("results", []))
 
-            has_more = data.get('has_more', False)
-            start_cursor = data.get('next_cursor')
+            has_more = data.get("has_more", False)
+            start_cursor = data.get("next_cursor")
 
         return all_results
 
@@ -366,50 +393,52 @@ class NotionDataLoader:
 
         return self._query_data_source(data_source_id, page_size)
 
-    def _extract_property(self, props: Dict, key: str, prop_type: str = 'text') -> Any:
+    def _extract_property(self, props: Dict, key: str, prop_type: str = "text") -> Any:
         """Extract a property value from Notion page properties."""
         prop = props.get(key, {})
 
-        if prop_type == 'title':
-            title_list = prop.get('title', [])
-            return title_list[0].get('text', {}).get('content', '') if title_list else ''
+        if prop_type == "title":
+            title_list = prop.get("title", [])
+            return (
+                title_list[0].get("text", {}).get("content", "") if title_list else ""
+            )
 
-        elif prop_type == 'text' or prop_type == 'rich_text':
-            text_list = prop.get('rich_text', [])
-            return text_list[0].get('text', {}).get('content', '') if text_list else ''
+        elif prop_type == "text" or prop_type == "rich_text":
+            text_list = prop.get("rich_text", [])
+            return text_list[0].get("text", {}).get("content", "") if text_list else ""
 
-        elif prop_type == 'select':
-            select = prop.get('select')
-            return select.get('name', '') if select else ''
+        elif prop_type == "select":
+            select = prop.get("select")
+            return select.get("name", "") if select else ""
 
-        elif prop_type == 'multi_select':
-            return [item.get('name', '') for item in prop.get('multi_select', [])]
+        elif prop_type == "multi_select":
+            return [item.get("name", "") for item in prop.get("multi_select", [])]
 
-        elif prop_type == 'number':
-            return prop.get('number')
+        elif prop_type == "number":
+            return prop.get("number")
 
-        elif prop_type == 'url':
-            return prop.get('url', '')
+        elif prop_type == "url":
+            return prop.get("url", "")
 
-        elif prop_type == 'email':
-            return prop.get('email', '')
+        elif prop_type == "email":
+            return prop.get("email", "")
 
-        elif prop_type == 'phone':
-            return prop.get('phone_number', '')
+        elif prop_type == "phone":
+            return prop.get("phone_number", "")
 
-        elif prop_type == 'date':
-            date_obj = prop.get('date')
-            return date_obj.get('start', '') if date_obj else ''
+        elif prop_type == "date":
+            date_obj = prop.get("date")
+            return date_obj.get("start", "") if date_obj else ""
 
-        elif prop_type == 'relation':
-            return [rel.get('id', '') for rel in prop.get('relation', [])]
+        elif prop_type == "relation":
+            return [rel.get("id", "") for rel in prop.get("relation", [])]
 
-        elif prop_type == 'formula':
-            formula = prop.get('formula', {})
-            f_type = formula.get('type', '')
-            return formula.get(f_type, '')
+        elif prop_type == "formula":
+            formula = prop.get("formula", {})
+            f_type = formula.get("type", "")
+            return formula.get(f_type, "")
 
-        return ''
+        return ""
 
     def load_jobs(self) -> List[Job]:
         """Load all jobs from the Program Mapping Intelligence Hub."""
@@ -419,24 +448,32 @@ class NotionDataLoader:
         jobs = []
 
         for page in results:
-            props = page.get('properties', {})
+            props = page.get("properties", {})
 
             job = Job(
-                id=page['id'],
-                title=self._extract_property(props, 'Job Title', 'title'),  # Actual property name
-                company=self._extract_property(props, 'Company', 'text'),
-                location=self._extract_property(props, 'Location', 'text'),
-                clearance=self._extract_property(props, 'Clearance Level', 'select'),  # Actual property name
-                status=self._extract_property(props, 'Status', 'select'),
-                source=self._extract_property(props, 'Source Program', 'select'),  # Actual property name
-                source_url=self._extract_property(props, 'Source URL', 'url'),
-                program_name=self._extract_property(props, 'Program Name', 'text'),
-                contract_naics=self._extract_property(props, 'Contract NAICS', 'text'),
-                bd_priority=self._extract_property(props, 'BD Priority Index', 'formula'),  # Use formula for score
+                id=page["id"],
+                title=self._extract_property(
+                    props, "Job Title", "title"
+                ),  # Actual property name
+                company=self._extract_property(props, "Company", "text"),
+                location=self._extract_property(props, "Location", "text"),
+                clearance=self._extract_property(
+                    props, "Clearance Level", "select"
+                ),  # Actual property name
+                status=self._extract_property(props, "Status", "select"),
+                source=self._extract_property(
+                    props, "Source Program", "select"
+                ),  # Actual property name
+                source_url=self._extract_property(props, "Source URL", "url"),
+                program_name=self._extract_property(props, "Program Name", "text"),
+                contract_naics=self._extract_property(props, "Contract NAICS", "text"),
+                bd_priority=self._extract_property(
+                    props, "BD Priority Index", "formula"
+                ),  # Use formula for score
             )
 
             # Try to extract BD score from formula
-            bd_score = self._extract_property(props, 'BD Priority Index', 'formula')
+            bd_score = self._extract_property(props, "BD Priority Index", "formula")
             if bd_score and isinstance(bd_score, (int, float)):
                 job.bd_score = float(bd_score)
 
@@ -453,21 +490,33 @@ class NotionDataLoader:
         programs = []
 
         for page in results:
-            props = page.get('properties', {})
+            props = page.get("properties", {})
 
             program = Program(
-                id=page['id'],
-                name=self._extract_property(props, 'Program Name', 'title'),
-                prime_contractor=self._extract_property(props, 'Prime Contractor 1', 'text'),  # Text version
-                contract_value=self._extract_property(props, 'Contract Value', 'text'),
-                contract_vehicle=self._extract_property(props, 'Contract Vehicle/Type', 'text'),
-                period_of_performance=self._extract_property(props, 'Period of Performance', 'date'),
-                status=self._extract_property(props, 'Priority Level', 'select'),  # Actual property name
-                location=self._extract_property(props, 'Key Locations', 'text'),  # Actual property name
-                bd_priority=self._extract_property(props, 'BD Priority', 'select'),
-                mission_area=self._extract_property(props, 'Mission Area', 'text'),
-                hiring_velocity=self._extract_property(props, 'Hiring Velocity', 'select'),
-                notes=self._extract_property(props, 'Notes', 'text'),
+                id=page["id"],
+                name=self._extract_property(props, "Program Name", "title"),
+                prime_contractor=self._extract_property(
+                    props, "Prime Contractor 1", "text"
+                ),  # Text version
+                contract_value=self._extract_property(props, "Contract Value", "text"),
+                contract_vehicle=self._extract_property(
+                    props, "Contract Vehicle/Type", "text"
+                ),
+                period_of_performance=self._extract_property(
+                    props, "Period of Performance", "date"
+                ),
+                status=self._extract_property(
+                    props, "Priority Level", "select"
+                ),  # Actual property name
+                location=self._extract_property(
+                    props, "Key Locations", "text"
+                ),  # Actual property name
+                bd_priority=self._extract_property(props, "BD Priority", "select"),
+                mission_area=self._extract_property(props, "Mission Area", "text"),
+                hiring_velocity=self._extract_property(
+                    props, "Hiring Velocity", "select"
+                ),
+                notes=self._extract_property(props, "Notes", "text"),
             )
 
             programs.append(program)
@@ -475,41 +524,61 @@ class NotionDataLoader:
         logger.info(f"Loaded {len(programs)} programs")
         return programs
 
-    def load_contacts(self, source: str = 'all') -> List[Contact]:
+    def load_contacts(self, source: str = "all") -> List[Contact]:
         """Load contacts from contact databases."""
         contacts = []
 
-        if source in ('all', 'dcgs'):
+        if source in ("all", "dcgs"):
             logger.info("Loading DCGS contacts...")
             dcgs_results = self._query_database(self.config.db_dcgs_contacts)
 
             for page in dcgs_results:
-                props = page.get('properties', {})
+                props = page.get("properties", {})
 
                 contact = Contact(
-                    id=page['id'],
-                    name=self._extract_property(props, 'Name', 'title'),
-                    first_name=self._extract_property(props, 'First Name', 'text'),
-                    last_name='',  # DCGS may not have this field
-                    title=self._extract_property(props, 'Job Title', 'text'),  # Actual property name
-                    company=self._extract_property(props, 'Company', 'text'),  # May not exist in DCGS
-                    email=self._extract_property(props, 'Email Address', 'email'),  # Actual property name
-                    phone=self._extract_property(props, 'Phone Number', 'phone'),
-                    linkedin=self._extract_property(props, 'LinkedIn Contact Profile URL', 'url'),  # Actual property name
-                    program=self._extract_property(props, 'Program', 'select'),  # It's a select
-                    bd_priority=self._extract_property(props, 'BD Priority', 'select'),
-                    relationship_status=self._extract_property(props, 'Relationship Strength', 'select'),  # Actual property name
-                    last_contact_date=self._extract_property(props, 'Last Contact Date', 'date'),
-                    next_outreach_date=self._extract_property(props, 'Next Outreach Date', 'date'),
-                    notes=self._extract_property(props, 'Outreach History', 'text'),  # Actual property name
-                    source_db='dcgs'
+                    id=page["id"],
+                    name=self._extract_property(props, "Name", "title"),
+                    first_name=self._extract_property(props, "First Name", "text"),
+                    last_name="",  # DCGS may not have this field
+                    title=self._extract_property(
+                        props, "Job Title", "text"
+                    ),  # Actual property name
+                    company=self._extract_property(
+                        props, "Company", "text"
+                    ),  # May not exist in DCGS
+                    email=self._extract_property(
+                        props, "Email Address", "email"
+                    ),  # Actual property name
+                    phone=self._extract_property(props, "Phone Number", "phone"),
+                    linkedin=self._extract_property(
+                        props, "LinkedIn Contact Profile URL", "url"
+                    ),  # Actual property name
+                    program=self._extract_property(
+                        props, "Program", "select"
+                    ),  # It's a select
+                    bd_priority=self._extract_property(props, "BD Priority", "select"),
+                    relationship_status=self._extract_property(
+                        props, "Relationship Strength", "select"
+                    ),  # Actual property name
+                    last_contact_date=self._extract_property(
+                        props, "Last Contact Date", "date"
+                    ),
+                    next_outreach_date=self._extract_property(
+                        props, "Next Outreach Date", "date"
+                    ),
+                    notes=self._extract_property(
+                        props, "Outreach History", "text"
+                    ),  # Actual property name
+                    source_db="dcgs",
                 )
 
                 # Try to extract tier from Hierarchy Tier select
-                tier = self._extract_property(props, 'Hierarchy Tier', 'select')  # Actual property name
+                tier = self._extract_property(
+                    props, "Hierarchy Tier", "select"
+                )  # Actual property name
                 if tier:
                     # Parse tier number from string like "Tier 3 - Program Leadership"
-                    match = re.search(r'Tier\s*(\d+)', str(tier))
+                    match = re.search(r"Tier\s*(\d+)", str(tier))
                     if match:
                         contact.tier = int(match.group(1))
 
@@ -517,36 +586,54 @@ class NotionDataLoader:
 
             logger.info(f"Loaded {len(dcgs_results)} DCGS contacts")
 
-        if source in ('all', 'gdit'):
+        if source in ("all", "gdit"):
             logger.info("Loading GDIT contacts...")
             gdit_results = self._query_database(self.config.db_gdit_contacts)
 
             for page in gdit_results:
-                props = page.get('properties', {})
+                props = page.get("properties", {})
 
                 contact = Contact(
-                    id=page['id'],
-                    name=self._extract_property(props, 'Name', 'title'),
-                    first_name=self._extract_property(props, 'First Name', 'text'),
-                    last_name='',  # May not exist
-                    title=self._extract_property(props, 'Job Title', 'text'),  # Actual property name
-                    company='GDIT',  # Default for this database
-                    email=self._extract_property(props, 'Email Address', 'email'),  # Actual property name
-                    phone=self._extract_property(props, 'Phone Number', 'phone'),
-                    linkedin=self._extract_property(props, 'LinkedIn Contact Profile URL', 'url'),  # Actual property name
-                    program=self._extract_property(props, 'Program', 'select'),  # It's a select
-                    bd_priority=self._extract_property(props, 'BD Priority', 'select'),
-                    relationship_status=self._extract_property(props, 'Relationship Strength', 'select'),  # Actual property name
-                    last_contact_date=self._extract_property(props, 'Last Contact Date', 'date'),
-                    next_outreach_date=self._extract_property(props, 'Next Outreach Date', 'date'),
-                    notes=self._extract_property(props, 'Outreach History', 'text'),  # Actual property name
-                    source_db='gdit'
+                    id=page["id"],
+                    name=self._extract_property(props, "Name", "title"),
+                    first_name=self._extract_property(props, "First Name", "text"),
+                    last_name="",  # May not exist
+                    title=self._extract_property(
+                        props, "Job Title", "text"
+                    ),  # Actual property name
+                    company="GDIT",  # Default for this database
+                    email=self._extract_property(
+                        props, "Email Address", "email"
+                    ),  # Actual property name
+                    phone=self._extract_property(props, "Phone Number", "phone"),
+                    linkedin=self._extract_property(
+                        props, "LinkedIn Contact Profile URL", "url"
+                    ),  # Actual property name
+                    program=self._extract_property(
+                        props, "Program", "select"
+                    ),  # It's a select
+                    bd_priority=self._extract_property(props, "BD Priority", "select"),
+                    relationship_status=self._extract_property(
+                        props, "Relationship Strength", "select"
+                    ),  # Actual property name
+                    last_contact_date=self._extract_property(
+                        props, "Last Contact Date", "date"
+                    ),
+                    next_outreach_date=self._extract_property(
+                        props, "Next Outreach Date", "date"
+                    ),
+                    notes=self._extract_property(
+                        props, "Outreach History", "text"
+                    ),  # Actual property name
+                    source_db="gdit",
                 )
 
                 # Try to extract tier from Hierarchy Tier select
-                tier = self._extract_property(props, 'Hierarchy Tier', 'select')  # Actual property name
+                tier = self._extract_property(
+                    props, "Hierarchy Tier", "select"
+                )  # Actual property name
                 if tier:
-                    match = re.search(r'Tier\s*(\d+)', str(tier))
+                    match = re.search(r"Tier\s*(\d+)", str(tier))
                     if match:
                         contact.tier = int(match.group(1))
 
@@ -565,16 +652,28 @@ class NotionDataLoader:
         contractors = []
 
         for page in results:
-            props = page.get('properties', {})
+            props = page.get("properties", {})
 
             contractor = Contractor(
-                id=page['id'],
-                name=self._extract_property(props, 'Name', 'title'),
-                relationship_status=self._extract_property(props, 'Relationship Status', 'select'),
-                placements_made=self._extract_property(props, 'PTS Placements Made', 'number') or 0,
-                active_placements=self._extract_property(props, 'Active Placements', 'number') or 0,
-                portfolio_value=self._extract_property(props, 'Portfolio Value', 'text'),
-                last_engagement=self._extract_property(props, 'Last Engagement Date', 'date'),
+                id=page["id"],
+                name=self._extract_property(props, "Name", "title"),
+                relationship_status=self._extract_property(
+                    props, "Relationship Status", "select"
+                ),
+                placements_made=self._extract_property(
+                    props, "PTS Placements Made", "number"
+                )
+                or 0,
+                active_placements=self._extract_property(
+                    props, "Active Placements", "number"
+                )
+                or 0,
+                portfolio_value=self._extract_property(
+                    props, "Portfolio Value", "text"
+                ),
+                last_engagement=self._extract_property(
+                    props, "Last Engagement Date", "date"
+                ),
             )
 
             contractors.append(contractor)
@@ -587,6 +686,7 @@ class NotionDataLoader:
 # DATA CORRELATOR
 # =============================================================================
 
+
 class DataCorrelator:
     """Correlates data across different databases."""
 
@@ -597,7 +697,7 @@ class DataCorrelator:
         """Normalize text for matching."""
         if not text:
             return ""
-        return re.sub(r'[^a-z0-9\s]', '', text.lower()).strip()
+        return re.sub(r"[^a-z0-9\s]", "", text.lower()).strip()
 
     def _location_similarity(self, loc1: str, loc2: str) -> float:
         """Calculate similarity between two locations."""
@@ -633,10 +733,10 @@ class DataCorrelator:
 
         # Check for common abbreviations
         abbreviations = {
-            'gdit': 'general dynamics',
-            'bae': 'bae systems',
-            'leidos': 'leidos',
-            'booz': 'booz allen',
+            "gdit": "general dynamics",
+            "bae": "bae systems",
+            "leidos": "leidos",
+            "booz": "booz allen",
         }
 
         for abbr, full in abbreviations.items():
@@ -656,9 +756,7 @@ class DataCorrelator:
         return 0.0
 
     def correlate_jobs_to_programs(
-        self,
-        jobs: List[Job],
-        programs: List[Program]
+        self, jobs: List[Job], programs: List[Program]
     ) -> Tuple[List[Job], List[Program]]:
         """Match jobs to programs based on location, company, and keywords."""
         logger.info("Correlating jobs to programs...")
@@ -694,19 +792,27 @@ class DataCorrelator:
             for loc_key, progs in program_lookup.items():
                 for prog in progs:
                     loc_score = self._location_similarity(job.location, prog.location)
-                    comp_score = self._company_similarity(job.company, prog.prime_contractor)
+                    comp_score = self._company_similarity(
+                        job.company, prog.prime_contractor
+                    )
 
                     # Combined score
                     score = (loc_score * 0.6) + (comp_score * 0.4)
 
-                    if score > best_score and score >= self.config.location_match_threshold:
+                    if (
+                        score > best_score
+                        and score >= self.config.location_match_threshold
+                    ):
                         best_score = score
                         best_match = prog
 
             if best_match:
                 job.matched_program_id = best_match.id
                 program_job_counts[best_match.id] += 1
-                if job.title and job.title not in program_active_positions[best_match.id]:
+                if (
+                    job.title
+                    and job.title not in program_active_positions[best_match.id]
+                ):
                     program_active_positions[best_match.id].append(job.title)
 
         # Update program statistics
@@ -720,9 +826,7 @@ class DataCorrelator:
         return jobs, programs
 
     def correlate_contacts_to_programs(
-        self,
-        contacts: List[Contact],
-        programs: List[Program]
+        self, contacts: List[Contact], programs: List[Program]
     ) -> Tuple[List[Contact], List[Program]]:
         """Match contacts to programs based on program field and company."""
         logger.info("Correlating contacts to programs...")
@@ -749,8 +853,7 @@ class DataCorrelator:
                 # Partial match
                 for prog_name, prog in program_by_name.items():
                     if contact_program and (
-                        contact_program in prog_name or
-                        prog_name in contact_program
+                        contact_program in prog_name or prog_name in contact_program
                     ):
                         best_match = prog
                         break
@@ -759,7 +862,12 @@ class DataCorrelator:
             if not best_match:
                 self._normalize_text(contact.company)
                 for program in programs:
-                    if self._company_similarity(contact.company, program.prime_contractor) >= 0.8:
+                    if (
+                        self._company_similarity(
+                            contact.company, program.prime_contractor
+                        )
+                        >= 0.8
+                    ):
                         best_match = program
                         break
 
@@ -777,9 +885,7 @@ class DataCorrelator:
         return contacts, programs
 
     def correlate_jobs_to_contacts(
-        self,
-        jobs: List[Job],
-        contacts: List[Contact]
+        self, jobs: List[Job], contacts: List[Contact]
     ) -> Tuple[List[Job], List[Contact]]:
         """Match jobs to relevant contacts for outreach."""
         logger.info("Correlating jobs to contacts...")
@@ -809,9 +915,7 @@ class DataCorrelator:
         return jobs, contacts
 
     def correlate_contractors_to_jobs(
-        self,
-        contractors: List[Contractor],
-        jobs: List[Job]
+        self, contractors: List[Contractor], jobs: List[Job]
     ) -> List[Contractor]:
         """Count jobs per contractor company."""
         logger.info("Correlating contractors to jobs...")
@@ -838,44 +942,45 @@ class DataCorrelator:
 # LOCATION ENTITY EXTRACTOR
 # =============================================================================
 
+
 class LocationExtractor:
     """Extracts and normalizes Location entities from various data sources."""
 
     # Location hub mapping for known areas
     LOCATION_HUBS = {
-        'hampton roads': 'Hampton Roads',
-        'norfolk': 'Hampton Roads',
-        'virginia beach': 'Hampton Roads',
-        'portsmouth': 'Hampton Roads',
-        'chesapeake': 'Hampton Roads',
-        'langley': 'Hampton Roads',
-        'san diego': 'San Diego Metro',
-        'coronado': 'San Diego Metro',
-        'point loma': 'San Diego Metro',
-        'dc': 'DC Metro',
-        'washington': 'DC Metro',
-        'arlington': 'DC Metro',
-        'alexandria': 'DC Metro',
-        'fairfax': 'DC Metro',
-        'mclean': 'DC Metro',
-        'reston': 'DC Metro',
-        'tysons': 'DC Metro',
-        'fort belvoir': 'DC Metro',
-        'fort meade': 'DC Metro',
-        'aberdeen': 'DC Metro',
-        'dayton': 'Dayton/Wright-Patt',
-        'wright-patterson': 'Dayton/Wright-Patt',
-        'wright patterson': 'Dayton/Wright-Patt',
-        'wpafb': 'Dayton/Wright-Patt',
+        "hampton roads": "Hampton Roads",
+        "norfolk": "Hampton Roads",
+        "virginia beach": "Hampton Roads",
+        "portsmouth": "Hampton Roads",
+        "chesapeake": "Hampton Roads",
+        "langley": "Hampton Roads",
+        "san diego": "San Diego Metro",
+        "coronado": "San Diego Metro",
+        "point loma": "San Diego Metro",
+        "dc": "DC Metro",
+        "washington": "DC Metro",
+        "arlington": "DC Metro",
+        "alexandria": "DC Metro",
+        "fairfax": "DC Metro",
+        "mclean": "DC Metro",
+        "reston": "DC Metro",
+        "tysons": "DC Metro",
+        "fort belvoir": "DC Metro",
+        "fort meade": "DC Metro",
+        "aberdeen": "DC Metro",
+        "dayton": "Dayton/Wright-Patt",
+        "wright-patterson": "Dayton/Wright-Patt",
+        "wright patterson": "Dayton/Wright-Patt",
+        "wpafb": "Dayton/Wright-Patt",
     }
 
     # Facility type detection patterns
     FACILITY_PATTERNS = {
-        'AFB': ['afb', 'air force base', 'air base'],
-        'Navy Base': ['navy', 'naval', 'nas ', 'navsta'],
-        'Army Post': ['army', 'fort ', 'camp '],
-        'Data Center': ['data center', 'datacenter'],
-        'Corporate Office': ['office', 'hq', 'headquarters'],
+        "AFB": ["afb", "air force base", "air base"],
+        "Navy Base": ["navy", "naval", "nas ", "navsta"],
+        "Army Post": ["army", "fort ", "camp "],
+        "Data Center": ["data center", "datacenter"],
+        "Corporate Office": ["office", "hq", "headquarters"],
     }
 
     def __init__(self):
@@ -887,7 +992,7 @@ class LocationExtractor:
         if not loc_str:
             return ""
         # Normalize: lowercase, remove special chars, collapse whitespace
-        return re.sub(r'[^a-z0-9\s]', '', loc_str.lower()).strip()
+        return re.sub(r"[^a-z0-9\s]", "", loc_str.lower()).strip()
 
     def _parse_location_string(self, loc_str: str) -> Tuple[str, str, str]:
         """Parse location string to extract city, state, and name."""
@@ -895,7 +1000,7 @@ class LocationExtractor:
             return "", "", ""
 
         # Common patterns: "City, ST", "City, State", "Base Name, City, ST"
-        parts = [p.strip() for p in loc_str.split(',')]
+        parts = [p.strip() for p in loc_str.split(",")]
 
         city = ""
         state = ""
@@ -904,11 +1009,25 @@ class LocationExtractor:
         if len(parts) >= 2:
             # Check if last part is a state abbreviation or state name
             last_part = parts[-1].strip().upper()
-            state_abbrevs = ['VA', 'MD', 'CA', 'TX', 'FL', 'NC', 'OH', 'CO', 'AZ', 'GA', 'PA', 'NY', 'DC']
+            state_abbrevs = [
+                "VA",
+                "MD",
+                "CA",
+                "TX",
+                "FL",
+                "NC",
+                "OH",
+                "CO",
+                "AZ",
+                "GA",
+                "PA",
+                "NY",
+                "DC",
+            ]
             if last_part in state_abbrevs or len(last_part) == 2:
                 state = last_part
                 city = parts[-2].strip() if len(parts) >= 2 else ""
-                name = ', '.join(parts[:-1]) if len(parts) > 2 else city
+                name = ", ".join(parts[:-1]) if len(parts) > 2 else city
 
         return city, state, name
 
@@ -934,6 +1053,7 @@ class LocationExtractor:
         self._location_counter += 1
         # Create a hash-based ID for consistency
         import hashlib
+
         hash_part = hashlib.md5(key.encode()).hexdigest()[:8]
         return f"loc-{hash_part}"
 
@@ -961,7 +1081,7 @@ class LocationExtractor:
             location_hub=location_hub,
             city=city,
             state=state,
-            facility_type=facility_type
+            facility_type=facility_type,
         )
 
         self.locations[key] = location
@@ -989,7 +1109,7 @@ class LocationExtractor:
         for program in programs:
             if program.location:
                 # Programs may have multiple locations (comma-separated)
-                loc_parts = [l.strip() for l in program.location.split(';')]
+                loc_parts = [l.strip() for l in program.location.split(";")]
                 for loc_str in loc_parts:
                     if loc_str:
                         location = self.extract_location(loc_str)
@@ -998,27 +1118,34 @@ class LocationExtractor:
                                 location.programs_at_location.append(program.id)
                             location.program_count = len(location.programs_at_location)
                             # Track prime presence
-                            if program.prime_contractor and program.prime_contractor not in location.primes_with_presence:
-                                location.primes_with_presence.append(program.prime_contractor)
+                            if (
+                                program.prime_contractor
+                                and program.prime_contractor
+                                not in location.primes_with_presence
+                            ):
+                                location.primes_with_presence.append(
+                                    program.prime_contractor
+                                )
         return self.locations
 
     def link_contacts_to_locations(
-        self,
-        contacts: List[Contact],
-        programs: List[Program]
+        self, contacts: List[Contact], programs: List[Program]
     ) -> Dict[str, Location]:
         """Link contacts to locations via their matched programs."""
         # Build program->location map
         program_locations = {}
         for program in programs:
             if program.location:
-                key = self._normalize_location_key(program.location.split(';')[0])
+                key = self._normalize_location_key(program.location.split(";")[0])
                 if key in self.locations:
                     program_locations[program.id] = self.locations[key]
 
         # Link contacts via program
         for contact in contacts:
-            if contact.matched_program_id and contact.matched_program_id in program_locations:
+            if (
+                contact.matched_program_id
+                and contact.matched_program_id in program_locations
+            ):
                 location = program_locations[contact.matched_program_id]
                 if contact.id not in location.contacts_at_location:
                     location.contacts_at_location.append(contact.id)
@@ -1035,6 +1162,7 @@ class LocationExtractor:
 # TASK ORDER INFERENCER
 # =============================================================================
 
+
 class TaskOrderInferencer:
     """Infers Task Order entities from program/location clusters."""
 
@@ -1045,6 +1173,7 @@ class TaskOrderInferencer:
     def _generate_task_order_id(self, program_id: str, location_id: str) -> str:
         """Generate a unique task order ID."""
         import hashlib
+
         key = f"{program_id}:{location_id}"
         hash_part = hashlib.md5(key.encode()).hexdigest()[:8]
         return f"to-{hash_part}"
@@ -1060,7 +1189,7 @@ class TaskOrderInferencer:
         programs: List[Program],
         locations: List[Location],
         jobs: List[Job],
-        contacts: List[Contact]
+        contacts: List[Contact],
     ) -> List[TaskOrder]:
         """Infer task orders from program/location combinations."""
         logger.info("Inferring task orders from program/location clusters...")
@@ -1074,7 +1203,9 @@ class TaskOrderInferencer:
         for job in jobs:
             if job.matched_program_id:
                 # Find location for this job
-                loc_key = self._normalize_location_key(job.location) if job.location else ""
+                loc_key = (
+                    self._normalize_location_key(job.location) if job.location else ""
+                )
                 job_clusters[(job.matched_program_id, loc_key)].append(job)
 
         # Group contacts by (program, location)
@@ -1100,7 +1231,9 @@ class TaskOrderInferencer:
                         break
 
                 # Create task order
-                to_id = self._generate_task_order_id(program_id, location_id or "no-loc")
+                to_id = self._generate_task_order_id(
+                    program_id, location_id or "no-loc"
+                )
 
                 if to_id not in self.task_orders:
                     task_order = TaskOrder(
@@ -1110,7 +1243,7 @@ class TaskOrderInferencer:
                         program_name=program.name,
                         location_id=location_id,
                         location_name=location_name,
-                        prime_id=program.prime_contractor
+                        prime_id=program.prime_contractor,
                     )
 
                     # Add jobs
@@ -1136,12 +1269,13 @@ class TaskOrderInferencer:
         """Normalize location string for matching."""
         if not loc_str:
             return ""
-        return re.sub(r'[^a-z0-9\s]', '', loc_str.lower()).strip()
+        return re.sub(r"[^a-z0-9\s]", "", loc_str.lower()).strip()
 
 
 # =============================================================================
 # TEAM BUILDER
 # =============================================================================
+
 
 class TeamBuilder:
     """Creates Team entities from contact clusters."""
@@ -1152,6 +1286,7 @@ class TeamBuilder:
     def _generate_team_id(self, program_id: str, location_id: str) -> str:
         """Generate a unique team ID."""
         import hashlib
+
         key = f"team:{program_id}:{location_id}"
         hash_part = hashlib.md5(key.encode()).hexdigest()[:8]
         return f"team-{hash_part}"
@@ -1167,7 +1302,7 @@ class TeamBuilder:
         contacts: List[Contact],
         task_orders: List[TaskOrder],
         programs: List[Program],
-        locations: List[Location]
+        locations: List[Location],
     ) -> List[Team]:
         """Build teams from contact clusters sharing same program + location."""
         logger.info("Building teams from contact clusters...")
@@ -1201,7 +1336,7 @@ class TeamBuilder:
                         name=self._create_team_name(program.name, location_name),
                         task_order_id=task_order.id if task_order else "",
                         program_id=program_id,
-                        location_id=location_id
+                        location_id=location_id,
                     )
 
                     # Sort contacts by tier to find team lead
@@ -1224,25 +1359,66 @@ class TeamBuilder:
 # CUSTOMER/AGENCY EXTRACTOR
 # =============================================================================
 
+
 class CustomerExtractor:
     """Extracts Customer/Agency entities from program data."""
 
     # Known customer/agency patterns
     KNOWN_CUSTOMERS = {
-        'air force': {'name': 'U.S. Air Force', 'abbrev': 'USAF', 'mission': 'Air & Space Operations'},
-        'usaf': {'name': 'U.S. Air Force', 'abbrev': 'USAF', 'mission': 'Air & Space Operations'},
-        'army': {'name': 'U.S. Army', 'abbrev': 'USA', 'mission': 'Land Operations'},
-        'navy': {'name': 'U.S. Navy', 'abbrev': 'USN', 'mission': 'Naval Operations'},
-        'marine': {'name': 'U.S. Marine Corps', 'abbrev': 'USMC', 'mission': 'Expeditionary Operations'},
-        'dod': {'name': 'Department of Defense', 'abbrev': 'DoD', 'mission': 'Defense'},
-        'inscom': {'name': 'INSCOM', 'abbrev': 'INSCOM', 'mission': 'Army Intelligence'},
-        'peo iews': {'name': 'PEO IEW&S', 'abbrev': 'PEO IEW&S', 'mission': 'Intelligence Systems'},
-        'nasic': {'name': 'NASIC', 'abbrev': 'NASIC', 'mission': 'Air & Space Intelligence'},
-        'dia': {'name': 'Defense Intelligence Agency', 'abbrev': 'DIA', 'mission': 'Defense Intelligence'},
-        'nsa': {'name': 'National Security Agency', 'abbrev': 'NSA', 'mission': 'Signals Intelligence'},
-        'nga': {'name': 'National Geospatial-Intelligence Agency', 'abbrev': 'NGA', 'mission': 'Geospatial Intel'},
-        'nro': {'name': 'National Reconnaissance Office', 'abbrev': 'NRO', 'mission': 'Reconnaissance'},
-        'dcgs': {'name': 'DCGS Program Office', 'abbrev': 'DCGS', 'mission': 'C4ISR'},
+        "air force": {
+            "name": "U.S. Air Force",
+            "abbrev": "USAF",
+            "mission": "Air & Space Operations",
+        },
+        "usaf": {
+            "name": "U.S. Air Force",
+            "abbrev": "USAF",
+            "mission": "Air & Space Operations",
+        },
+        "army": {"name": "U.S. Army", "abbrev": "USA", "mission": "Land Operations"},
+        "navy": {"name": "U.S. Navy", "abbrev": "USN", "mission": "Naval Operations"},
+        "marine": {
+            "name": "U.S. Marine Corps",
+            "abbrev": "USMC",
+            "mission": "Expeditionary Operations",
+        },
+        "dod": {"name": "Department of Defense", "abbrev": "DoD", "mission": "Defense"},
+        "inscom": {
+            "name": "INSCOM",
+            "abbrev": "INSCOM",
+            "mission": "Army Intelligence",
+        },
+        "peo iews": {
+            "name": "PEO IEW&S",
+            "abbrev": "PEO IEW&S",
+            "mission": "Intelligence Systems",
+        },
+        "nasic": {
+            "name": "NASIC",
+            "abbrev": "NASIC",
+            "mission": "Air & Space Intelligence",
+        },
+        "dia": {
+            "name": "Defense Intelligence Agency",
+            "abbrev": "DIA",
+            "mission": "Defense Intelligence",
+        },
+        "nsa": {
+            "name": "National Security Agency",
+            "abbrev": "NSA",
+            "mission": "Signals Intelligence",
+        },
+        "nga": {
+            "name": "National Geospatial-Intelligence Agency",
+            "abbrev": "NGA",
+            "mission": "Geospatial Intel",
+        },
+        "nro": {
+            "name": "National Reconnaissance Office",
+            "abbrev": "NRO",
+            "mission": "Reconnaissance",
+        },
+        "dcgs": {"name": "DCGS Program Office", "abbrev": "DCGS", "mission": "C4ISR"},
     }
 
     def __init__(self):
@@ -1251,6 +1427,7 @@ class CustomerExtractor:
     def _generate_customer_id(self, key: str) -> str:
         """Generate a unique customer ID."""
         import hashlib
+
         hash_part = hashlib.md5(key.encode()).hexdigest()[:8]
         return f"cust-{hash_part}"
 
@@ -1283,13 +1460,13 @@ class CustomerExtractor:
                 customer_info = self._detect_customer(program.notes)
 
             if customer_info:
-                key = customer_info['abbrev'].lower()
+                key = customer_info["abbrev"].lower()
                 if key not in self.customers:
                     self.customers[key] = Customer(
                         id=self._generate_customer_id(key),
-                        name=customer_info['name'],
-                        abbreviation=customer_info['abbrev'],
-                        mission_area=customer_info['mission']
+                        name=customer_info["name"],
+                        abbreviation=customer_info["abbrev"],
+                        mission_area=customer_info["mission"],
                     )
 
                 # Link program to customer
@@ -1306,9 +1483,11 @@ class CustomerExtractor:
 # RELATIONSHIP INFERENCE ENGINE
 # =============================================================================
 
+
 @dataclass
 class Edge:
     """Represents a relationship edge between two nodes."""
+
     id: str
     source_id: str
     source_type: str
@@ -1339,7 +1518,7 @@ class RelationshipInferenceEngine:
         target_type: str,
         relationship: str,
         weight: float = 1.0,
-        metadata: Dict[str, Any] = None
+        metadata: Dict[str, Any] = None,
     ):
         """Add an edge to the graph."""
         edge = Edge(
@@ -1350,7 +1529,7 @@ class RelationshipInferenceEngine:
             target_type=target_type,
             relationship=relationship,
             weight=weight,
-            metadata=metadata or {}
+            metadata=metadata or {},
         )
         self.edges.append(edge)
 
@@ -1364,7 +1543,7 @@ class RelationshipInferenceEngine:
                     target_id=job.matched_program_id,
                     target_type="PROGRAM",
                     relationship="mapped_to",
-                    weight=0.9
+                    weight=0.9,
                 )
 
     def infer_job_contact_edges(self, jobs: List[Job]) -> None:
@@ -1380,13 +1559,11 @@ class RelationshipInferenceEngine:
                     target_id=contact_id,
                     target_type="CONTACT",
                     relationship=rel,
-                    weight=weight
+                    weight=weight,
                 )
 
     def infer_job_location_edges(
-        self,
-        jobs: List[Job],
-        locations: List[Location]
+        self, jobs: List[Job], locations: List[Location]
     ) -> None:
         """Create Job→Location edges."""
         # Build location lookup
@@ -1405,13 +1582,11 @@ class RelationshipInferenceEngine:
                         target_id=location_lookup[key].id,
                         target_type="LOCATION",
                         relationship="located_at",
-                        weight=1.0
+                        weight=1.0,
                     )
 
     def infer_contact_team_edges(
-        self,
-        contacts: List[Contact],
-        teams: List[Team]
+        self, contacts: List[Contact], teams: List[Team]
     ) -> None:
         """Create Contact→Team edges."""
         # Build contact->team mapping
@@ -1431,7 +1606,7 @@ class RelationshipInferenceEngine:
                     target_id=team.id,
                     target_type="TEAM",
                     relationship=rel,
-                    weight=weight
+                    weight=weight,
                 )
 
     def infer_contact_program_edges(self, contacts: List[Contact]) -> None:
@@ -1444,7 +1619,7 @@ class RelationshipInferenceEngine:
                     target_id=contact.matched_program_id,
                     target_type="PROGRAM",
                     relationship="works_on",
-                    weight=0.9
+                    weight=0.9,
                 )
 
     def infer_program_prime_edges(self, programs: List[Program]) -> None:
@@ -1457,13 +1632,11 @@ class RelationshipInferenceEngine:
                     target_id=program.prime_contractor,
                     target_type="PRIME",
                     relationship="run_by",
-                    weight=1.0
+                    weight=1.0,
                 )
 
     def infer_program_location_edges(
-        self,
-        programs: List[Program],
-        locations: List[Location]
+        self, programs: List[Program], locations: List[Location]
     ) -> None:
         """Create Program→Location edges."""
         location_lookup = {}
@@ -1474,7 +1647,7 @@ class RelationshipInferenceEngine:
         for program in programs:
             if program.location:
                 # Handle multiple locations
-                loc_parts = [l.strip() for l in program.location.split(';')]
+                loc_parts = [l.strip() for l in program.location.split(";")]
                 for loc_str in loc_parts:
                     key = self._normalize_key(loc_str)
                     if key in location_lookup:
@@ -1484,13 +1657,11 @@ class RelationshipInferenceEngine:
                             target_id=location_lookup[key].id,
                             target_type="LOCATION",
                             relationship="operates_at",
-                            weight=1.0
+                            weight=1.0,
                         )
 
     def infer_program_customer_edges(
-        self,
-        programs: List[Program],
-        customers: List[Customer]
+        self, programs: List[Program], customers: List[Customer]
     ) -> None:
         """Create Program→Customer edges."""
         # Build customer lookup by program
@@ -1508,7 +1679,7 @@ class RelationshipInferenceEngine:
                     target_id=customer.id,
                     target_type="CUSTOMER",
                     relationship="owned_by",
-                    weight=1.0
+                    weight=1.0,
                 )
 
     def infer_task_order_edges(self, task_orders: List[TaskOrder]) -> None:
@@ -1522,7 +1693,7 @@ class RelationshipInferenceEngine:
                     target_id=to.program_id,
                     target_type="PROGRAM",
                     relationship="under",
-                    weight=1.0
+                    weight=1.0,
                 )
 
             # Task Order → Location
@@ -1533,7 +1704,7 @@ class RelationshipInferenceEngine:
                     target_id=to.location_id,
                     target_type="LOCATION",
                     relationship="executes_at",
-                    weight=1.0
+                    weight=1.0,
                 )
 
     def infer_team_task_order_edges(self, teams: List[Team]) -> None:
@@ -1546,7 +1717,7 @@ class RelationshipInferenceEngine:
                     target_id=team.task_order_id,
                     target_type="TASK_ORDER",
                     relationship="part_of",
-                    weight=1.0
+                    weight=1.0,
                 )
 
     def infer_location_aggregation_edges(self, locations: List[Location]) -> None:
@@ -1560,7 +1731,7 @@ class RelationshipInferenceEngine:
                     target_id=program_id,
                     target_type="PROGRAM",
                     relationship="hosts",
-                    weight=0.8
+                    weight=0.8,
                 )
 
             # Location → Contacts
@@ -1571,7 +1742,7 @@ class RelationshipInferenceEngine:
                     target_id=contact_id,
                     target_type="CONTACT",
                     relationship="has_contact",
-                    weight=0.7
+                    weight=0.7,
                 )
 
             # Location → Jobs
@@ -1582,7 +1753,7 @@ class RelationshipInferenceEngine:
                     target_id=job_id,
                     target_type="JOB",
                     relationship="has_job",
-                    weight=0.7
+                    weight=0.7,
                 )
 
     def build_all_relationships(
@@ -1593,7 +1764,7 @@ class RelationshipInferenceEngine:
         locations: List[Location],
         task_orders: List[TaskOrder],
         teams: List[Team],
-        customers: List[Customer]
+        customers: List[Customer],
     ) -> List[Edge]:
         """Build all relationship edges."""
         logger.info("Building relationship edges...")
@@ -1628,12 +1799,13 @@ class RelationshipInferenceEngine:
         """Normalize text for lookup keys."""
         if not text:
             return ""
-        return re.sub(r'[^a-z0-9\s]', '', text.lower()).strip()
+        return re.sub(r"[^a-z0-9\s]", "", text.lower()).strip()
 
 
 # =============================================================================
 # BD SCORE CALCULATOR
 # =============================================================================
+
 
 class BDScoreCalculator:
     """Calculates BD priority scores for jobs, programs, and contacts."""
@@ -1647,19 +1819,19 @@ class BDScoreCalculator:
             return 0.0
 
         # Remove currency symbols and spaces
-        cleaned = re.sub(r'[$,\s]', '', value_str.upper())
+        cleaned = re.sub(r"[$,\s]", "", value_str.upper())
 
         # Handle millions/billions
         multiplier = 1.0
-        if 'B' in cleaned:
+        if "B" in cleaned:
             multiplier = 1000.0
-            cleaned = cleaned.replace('B', '')
-        elif 'M' in cleaned:
+            cleaned = cleaned.replace("B", "")
+        elif "M" in cleaned:
             multiplier = 1.0
-            cleaned = cleaned.replace('M', '')
-        elif 'K' in cleaned:
+            cleaned = cleaned.replace("M", "")
+        elif "K" in cleaned:
             multiplier = 0.001
-            cleaned = cleaned.replace('K', '')
+            cleaned = cleaned.replace("K", "")
 
         try:
             return float(cleaned) * multiplier
@@ -1673,26 +1845,21 @@ class BDScoreCalculator:
 
         # Job count score (0-100)
         job_score = min(program.job_count * 5, 100)  # 20 jobs = 100
-        score += job_score * weights['job_count']
+        score += job_score * weights["job_count"]
 
         # Contact quality score (0-100)
         contact_score = min(program.contact_count * 3, 100)  # ~33 contacts = 100
-        score += contact_score * weights['contact_quality']
+        score += contact_score * weights["contact_quality"]
 
         # Contract value score (0-100)
         value_millions = self._parse_contract_value(program.contract_value)
         value_score = min(value_millions / 5, 100)  # $500M = 100
-        score += value_score * weights['contract_value']
+        score += value_score * weights["contract_value"]
 
         # Hiring velocity score (0-100)
-        velocity_scores = {
-            'High': 100,
-            'Medium': 60,
-            'Low': 30,
-            '': 0
-        }
+        velocity_scores = {"High": 100, "Medium": 60, "Low": 30, "": 0}
         velocity_score = velocity_scores.get(program.hiring_velocity, 0)
-        score += velocity_score * weights['recency']
+        score += velocity_score * weights["recency"]
 
         return min(score, 100)
 
@@ -1703,28 +1870,24 @@ class BDScoreCalculator:
         # Tier score (inverted - lower tier = higher score)
         tier_scores = {
             1: 100,  # Executive
-            2: 90,   # Senior Management
-            3: 75,   # Program Manager
-            4: 60,   # Technical Lead
-            5: 40,   # Team Member
-            6: 20    # General Contact
+            2: 90,  # Senior Management
+            3: 75,  # Program Manager
+            4: 60,  # Technical Lead
+            5: 40,  # Team Member
+            6: 20,  # General Contact
         }
         score += tier_scores.get(contact.tier, 20) * 0.4
 
         # Relationship status score
-        status_scores = {
-            'Active': 100,
-            'Warm': 80,
-            'Cold': 40,
-            'New': 60,
-            '': 30
-        }
+        status_scores = {"Active": 100, "Warm": 80, "Cold": 40, "New": 60, "": 30}
         score += status_scores.get(contact.relationship_status, 30) * 0.3
 
         # Recency score (based on last contact)
         if contact.last_contact_date:
             try:
-                last_date = datetime.fromisoformat(contact.last_contact_date.replace('Z', '+00:00'))
+                last_date = datetime.fromisoformat(
+                    contact.last_contact_date.replace("Z", "+00:00")
+                )
                 days_since = (datetime.now(last_date.tzinfo) - last_date).days
                 if days_since <= 7:
                     recency_score = 100
@@ -1759,19 +1922,19 @@ class BDScoreCalculator:
 
         # Clearance level
         clearance_scores = {
-            'TS/SCI': 100,
-            'TS/SCI w/ Poly': 100,
-            'Top Secret': 80,
-            'TS': 80,
-            'Secret': 50,
-            'Public Trust': 30,
-            '': 10
+            "TS/SCI": 100,
+            "TS/SCI w/ Poly": 100,
+            "Top Secret": 80,
+            "TS": 80,
+            "Secret": 50,
+            "Public Trust": 30,
+            "": 10,
         }
         score += clearance_scores.get(job.clearance, 10) * 0.2
 
         # Has BD Priority already set
         # Handle bd_priority which can be a number (from formula) or string
-        bd_priority_str = str(job.bd_priority) if job.bd_priority else ''
+        bd_priority_str = str(job.bd_priority) if job.bd_priority else ""
 
         # If it's a numeric score, use it directly
         if isinstance(job.bd_priority, (int, float)) and job.bd_priority > 0:
@@ -1779,10 +1942,10 @@ class BDScoreCalculator:
         else:
             # Extract priority level from emoji string
             priority_scores = {
-                'Critical': 100,
-                'High': 80,
-                'Medium': 50,
-                'Low': 20,
+                "Critical": 100,
+                "High": 80,
+                "Medium": 50,
+                "Low": 20,
             }
             for key in priority_scores:
                 if key.lower() in bd_priority_str.lower():
@@ -1797,11 +1960,11 @@ class BDScoreCalculator:
         """Get priority label from score."""
         thresholds = self.config.priority_thresholds
 
-        if score >= thresholds['critical']:
+        if score >= thresholds["critical"]:
             return "Critical"
-        elif score >= thresholds['high']:
+        elif score >= thresholds["high"]:
             return "High"
-        elif score >= thresholds['medium']:
+        elif score >= thresholds["medium"]:
             return "Medium"
         else:
             return "Low"
@@ -1811,18 +1974,19 @@ class BDScoreCalculator:
 # EXPORT GENERATOR
 # =============================================================================
 
+
 class ExportGenerator:
     """Generates JSON exports for the BD Dashboard."""
 
     def __init__(self, output_dir: str = None):
         self.output_dir = output_dir or os.path.join(
-            os.path.dirname(__file__), '..', '..', 'outputs', 'bd_dashboard'
+            os.path.dirname(__file__), "..", "..", "outputs", "bd_dashboard"
         )
         Path(self.output_dir).mkdir(parents=True, exist_ok=True)
 
     def _serialize_dataclass(self, obj: Any) -> Dict:
         """Convert dataclass to dict, handling nested objects."""
-        if hasattr(obj, '__dataclass_fields__'):
+        if hasattr(obj, "__dataclass_fields__"):
             return asdict(obj)
         return obj
 
@@ -1833,32 +1997,36 @@ class ExportGenerator:
         data = {
             "generated_at": datetime.now().isoformat(),
             "total_count": len(jobs),
-            "jobs": [self._serialize_dataclass(j) for j in jobs]
+            "jobs": [self._serialize_dataclass(j) for j in jobs],
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported {len(jobs)} jobs to {output_path}")
         return output_path
 
-    def export_programs(self, programs: List[Program], filename: str = "programs_enriched.json"):
+    def export_programs(
+        self, programs: List[Program], filename: str = "programs_enriched.json"
+    ):
         """Export enriched programs data."""
         output_path = os.path.join(self.output_dir, filename)
 
         data = {
             "generated_at": datetime.now().isoformat(),
             "total_count": len(programs),
-            "programs": [self._serialize_dataclass(p) for p in programs]
+            "programs": [self._serialize_dataclass(p) for p in programs],
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported {len(programs)} programs to {output_path}")
         return output_path
 
-    def export_contacts(self, contacts: List[Contact], filename: str = "contacts_classified.json"):
+    def export_contacts(
+        self, contacts: List[Contact], filename: str = "contacts_classified.json"
+    ):
         """Export classified contacts data."""
         output_path = os.path.join(self.output_dir, filename)
 
@@ -1871,26 +2039,28 @@ class ExportGenerator:
             "generated_at": datetime.now().isoformat(),
             "total_count": len(contacts),
             "by_tier": dict(by_tier),
-            "contacts": [self._serialize_dataclass(c) for c in contacts]
+            "contacts": [self._serialize_dataclass(c) for c in contacts],
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported {len(contacts)} contacts to {output_path}")
         return output_path
 
-    def export_contractors(self, contractors: List[Contractor], filename: str = "contractors_enriched.json"):
+    def export_contractors(
+        self, contractors: List[Contractor], filename: str = "contractors_enriched.json"
+    ):
         """Export enriched contractors data."""
         output_path = os.path.join(self.output_dir, filename)
 
         data = {
             "generated_at": datetime.now().isoformat(),
             "total_count": len(contractors),
-            "contractors": [self._serialize_dataclass(c) for c in contractors]
+            "contractors": [self._serialize_dataclass(c) for c in contractors],
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported {len(contractors)} contractors to {output_path}")
@@ -1902,7 +2072,7 @@ class ExportGenerator:
         programs: List[Program],
         contacts: List[Contact],
         contractors: List[Contractor],
-        filename: str = "correlation_summary.json"
+        filename: str = "correlation_summary.json",
     ):
         """Export summary of all correlations."""
         output_path = os.path.join(self.output_dir, filename)
@@ -1923,23 +2093,23 @@ class ExportGenerator:
             if isinstance(job.bd_priority, (int, float)):
                 score = job.bd_priority
                 if score >= 80:
-                    priority_dist['critical'] += 1
+                    priority_dist["critical"] += 1
                 elif score >= 60:
-                    priority_dist['high'] += 1
+                    priority_dist["high"] += 1
                 elif score >= 40:
-                    priority_dist['medium'] += 1
+                    priority_dist["medium"] += 1
                 else:
-                    priority_dist['low'] += 1
+                    priority_dist["low"] += 1
             else:
-                bd_str = str(job.bd_priority) if job.bd_priority else ''
-                if 'Critical' in bd_str:
-                    priority_dist['critical'] += 1
-                elif 'High' in bd_str:
-                    priority_dist['high'] += 1
-                elif 'Medium' in bd_str:
-                    priority_dist['medium'] += 1
+                bd_str = str(job.bd_priority) if job.bd_priority else ""
+                if "Critical" in bd_str:
+                    priority_dist["critical"] += 1
+                elif "High" in bd_str:
+                    priority_dist["high"] += 1
+                elif "Medium" in bd_str:
+                    priority_dist["medium"] += 1
                 else:
-                    priority_dist['low'] += 1
+                    priority_dist["low"] += 1
 
         data = {
             "generated_at": datetime.now().isoformat(),
@@ -1953,23 +2123,34 @@ class ExportGenerator:
                 "contacts_matched_to_programs": contacts_with_programs,
                 "contacts_with_relevant_jobs": contacts_with_jobs,
                 "match_rates": {
-                    "jobs_to_programs": round(jobs_with_programs / len(jobs) * 100, 1) if jobs else 0,
-                    "jobs_to_contacts": round(jobs_with_contacts / len(jobs) * 100, 1) if jobs else 0,
-                    "contacts_to_programs": round(contacts_with_programs / len(contacts) * 100, 1) if contacts else 0
-                }
+                    "jobs_to_programs": round(jobs_with_programs / len(jobs) * 100, 1)
+                    if jobs
+                    else 0,
+                    "jobs_to_contacts": round(jobs_with_contacts / len(jobs) * 100, 1)
+                    if jobs
+                    else 0,
+                    "contacts_to_programs": round(
+                        contacts_with_programs / len(contacts) * 100, 1
+                    )
+                    if contacts
+                    else 0,
+                },
             },
             "priority_distribution": dict(priority_dist),
             "top_programs_by_jobs": [
-                {"name": p.name, "job_count": p.job_count, "contact_count": p.contact_count}
+                {
+                    "name": p.name,
+                    "job_count": p.job_count,
+                    "contact_count": p.contact_count,
+                }
                 for p in top_programs
             ],
             "contacts_by_tier": {
-                tier: sum(1 for c in contacts if c.tier == tier)
-                for tier in range(1, 7)
-            }
+                tier: sum(1 for c in contacts if c.tier == tier) for tier in range(1, 7)
+            },
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported correlation summary to {output_path}")
@@ -1979,6 +2160,7 @@ class ExportGenerator:
 # =============================================================================
 # MIND MAP EXPORTER
 # =============================================================================
+
 
 class MindMapExporter:
     """Exports entity nodes and relationship edges for the mind map visualization."""
@@ -2009,13 +2191,13 @@ class MindMapExporter:
 
     def __init__(self, output_dir: str = None):
         self.output_dir = output_dir or os.path.join(
-            os.path.dirname(__file__), '..', '..', 'outputs', 'bd_dashboard'
+            os.path.dirname(__file__), "..", "..", "outputs", "bd_dashboard"
         )
         Path(self.output_dir).mkdir(parents=True, exist_ok=True)
 
     def _serialize_dataclass(self, obj: Any) -> Dict:
         """Convert dataclass to dict."""
-        if hasattr(obj, '__dataclass_fields__'):
+        if hasattr(obj, "__dataclass_fields__"):
             return asdict(obj)
         return obj
 
@@ -2024,7 +2206,7 @@ class MindMapExporter:
         entity: Any,
         node_type: str,
         label_field: str = "name",
-        subtitle_field: str = None
+        subtitle_field: str = None,
     ) -> Dict:
         """Create a standardized node from an entity."""
         data = self._serialize_dataclass(entity)
@@ -2046,7 +2228,7 @@ class MindMapExporter:
             "subtitle": subtitle,
             "icon": self.NODE_ICONS.get(node_type, "circle"),
             "color": self.NODE_COLORS.get(node_type, "#718096"),
-            "data": data
+            "data": data,
         }
 
     def export_nodes(
@@ -2059,7 +2241,7 @@ class MindMapExporter:
         teams: List[Team],
         customers: List[Customer],
         contractors: List[Contractor] = None,
-        filename: str = "mindmap_nodes.json"
+        filename: str = "mindmap_nodes.json",
     ) -> str:
         """Export all entity nodes to JSON."""
         output_path = os.path.join(self.output_dir, filename)
@@ -2131,8 +2313,8 @@ class MindMapExporter:
                     "color": self.NODE_COLORS.get("PRIME", "#38a169"),
                     "data": {
                         "id": program.prime_contractor,
-                        "name": program.prime_contractor
-                    }
+                        "name": program.prime_contractor,
+                    },
                 }
                 nodes.append(prime_node)
                 primes_seen.add(program.prime_contractor)
@@ -2146,19 +2328,17 @@ class MindMapExporter:
             "generated_at": datetime.now().isoformat(),
             "total_count": len(nodes),
             "counts_by_type": dict(node_counts),
-            "nodes": nodes
+            "nodes": nodes,
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported {len(nodes)} mind map nodes to {output_path}")
         return output_path
 
     def export_edges(
-        self,
-        edges: List[Edge],
-        filename: str = "mindmap_edges.json"
+        self, edges: List[Edge], filename: str = "mindmap_edges.json"
     ) -> str:
         """Export all relationship edges to JSON."""
         output_path = os.path.join(self.output_dir, filename)
@@ -2185,10 +2365,10 @@ class MindMapExporter:
             "total_count": len(edges),
             "counts_by_relationship": dict(edge_counts),
             "counts_by_type_pair": dict(type_pairs),
-            "edges": edge_list
+            "edges": edge_list,
         }
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
 
         logger.info(f"Exported {len(edges)} mind map edges to {output_path}")
@@ -2198,6 +2378,7 @@ class MindMapExporter:
 # =============================================================================
 # MAIN ORCHESTRATION
 # =============================================================================
+
 
 def run_full_correlation(output_dir: str = None) -> Dict[str, str]:
     """
@@ -2245,7 +2426,9 @@ def run_full_correlation(output_dir: str = None) -> Dict[str, str]:
 
     for contact in contacts:
         # Store calculated score (could be used to update Notion)
-        contact.bd_priority = scorer.get_priority_label(scorer.calculate_contact_score(contact))
+        contact.bd_priority = scorer.get_priority_label(
+            scorer.calculate_contact_score(contact)
+        )
 
     # Extract new entity types
     logger.info("\n[PHASE 4] Extracting entity types for mind map...")
@@ -2262,7 +2445,9 @@ def run_full_correlation(output_dir: str = None) -> Dict[str, str]:
     logger.info(f"Extracted {len(customers)} customer/agency entities")
 
     # Infer task orders from program/location clusters
-    task_orders = task_order_inferencer.infer_task_orders(programs, locations, jobs, contacts)
+    task_orders = task_order_inferencer.infer_task_orders(
+        programs, locations, jobs, contacts
+    )
     logger.info(f"Inferred {len(task_orders)} task orders")
 
     # Build teams from contact clusters
@@ -2278,22 +2463,24 @@ def run_full_correlation(output_dir: str = None) -> Dict[str, str]:
         locations=locations,
         task_orders=task_orders,
         teams=teams,
-        customers=customers
+        customers=customers,
     )
     logger.info(f"Built {len(edges)} relationship edges")
 
     # Generate exports
     logger.info("\n[PHASE 6] Generating exports...")
     exports = {}
-    exports['jobs'] = exporter.export_jobs(jobs)
-    exports['programs'] = exporter.export_programs(programs)
-    exports['contacts'] = exporter.export_contacts(contacts)
-    exports['contractors'] = exporter.export_contractors(contractors)
-    exports['summary'] = exporter.export_correlation_summary(jobs, programs, contacts, contractors)
+    exports["jobs"] = exporter.export_jobs(jobs)
+    exports["programs"] = exporter.export_programs(programs)
+    exports["contacts"] = exporter.export_contacts(contacts)
+    exports["contractors"] = exporter.export_contractors(contractors)
+    exports["summary"] = exporter.export_correlation_summary(
+        jobs, programs, contacts, contractors
+    )
 
     # Export mind map data
     logger.info("\n[PHASE 7] Exporting mind map data...")
-    exports['mindmap_nodes'] = mindmap_exporter.export_nodes(
+    exports["mindmap_nodes"] = mindmap_exporter.export_nodes(
         jobs=jobs,
         programs=programs,
         contacts=contacts,
@@ -2301,9 +2488,9 @@ def run_full_correlation(output_dir: str = None) -> Dict[str, str]:
         task_orders=task_orders,
         teams=teams,
         customers=customers,
-        contractors=contractors
+        contractors=contractors,
     )
-    exports['mindmap_edges'] = mindmap_exporter.export_edges(edges)
+    exports["mindmap_edges"] = mindmap_exporter.export_edges(edges)
 
     logger.info("\n" + "=" * 60)
     logger.info("Correlation Complete!")
@@ -2327,17 +2514,26 @@ def run_full_correlation(output_dir: str = None) -> Dict[str, str]:
 # CLI INTERFACE
 # =============================================================================
 
+
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD Data Correlation Engine')
-    parser.add_argument('--run-all', action='store_true', help='Run full correlation pipeline')
-    parser.add_argument('--export-jobs', action='store_true', help='Export jobs only')
-    parser.add_argument('--export-contacts', action='store_true', help='Export contacts only')
-    parser.add_argument('--export-programs', action='store_true', help='Export programs only')
-    parser.add_argument('--export-mindmap', action='store_true', help='Export mind map nodes and edges')
-    parser.add_argument('--output-dir', type=str, help='Output directory for exports')
-    parser.add_argument('--test', action='store_true', help='Test Notion connection')
+    parser = argparse.ArgumentParser(description="BD Data Correlation Engine")
+    parser.add_argument(
+        "--run-all", action="store_true", help="Run full correlation pipeline"
+    )
+    parser.add_argument("--export-jobs", action="store_true", help="Export jobs only")
+    parser.add_argument(
+        "--export-contacts", action="store_true", help="Export contacts only"
+    )
+    parser.add_argument(
+        "--export-programs", action="store_true", help="Export programs only"
+    )
+    parser.add_argument(
+        "--export-mindmap", action="store_true", help="Export mind map nodes and edges"
+    )
+    parser.add_argument("--output-dir", type=str, help="Output directory for exports")
+    parser.add_argument("--test", action="store_true", help="Test Notion connection")
 
     args = parser.parse_args()
 
@@ -2385,9 +2581,18 @@ def main():
         print(f"  - mindmap_nodes: {exports.get('mindmap_nodes')}")
         print(f"  - mindmap_edges: {exports.get('mindmap_edges')}")
 
-    if not any([args.run_all, args.export_jobs, args.export_contacts, args.export_programs, args.export_mindmap, args.test]):
+    if not any(
+        [
+            args.run_all,
+            args.export_jobs,
+            args.export_contacts,
+            args.export_programs,
+            args.export_mindmap,
+            args.test,
+        ]
+    ):
         parser.print_help()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

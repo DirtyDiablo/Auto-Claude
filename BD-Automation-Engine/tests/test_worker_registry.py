@@ -16,6 +16,7 @@ from src.agents.swarm.workers import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def registry():
     return WorkerRegistry()
@@ -24,6 +25,7 @@ def registry():
 # =========================================
 # WORKER TYPES
 # =========================================
+
 
 def test_worker_types_enum():
     assert WorkerType.RESEARCH.value == "research"
@@ -53,6 +55,7 @@ def test_each_capability_has_fields():
 # =========================================
 # REGISTRY
 # =========================================
+
 
 def test_list_worker_types(registry):
     types = registry.list_worker_types()
@@ -91,6 +94,7 @@ def test_get_worker_nonexistent(registry):
 # BEST WORKER SELECTION
 # =========================================
 
+
 def test_get_best_worker_explicit(registry):
     task = SubTask(worker_type="analytics")
     assert registry.get_best_worker(task) == "analytics"
@@ -118,6 +122,7 @@ def test_get_best_worker_default(registry):
 # WORKER EXECUTION
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_default_execute_research(registry):
     worker = registry.get_worker("research")
@@ -131,7 +136,9 @@ async def test_default_execute_research(registry):
 @pytest.mark.asyncio
 async def test_default_execute_contact_discovery(registry):
     worker = registry.get_worker("contact_discovery")
-    task = SubTask(id="t2", description="Find contacts", worker_type="contact_discovery")
+    task = SubTask(
+        id="t2", description="Find contacts", worker_type="contact_discovery"
+    )
     result = await worker.execute(task)
     assert result["contacts_found"] == 0
     assert "contacts" in result
@@ -140,7 +147,9 @@ async def test_default_execute_contact_discovery(registry):
 @pytest.mark.asyncio
 async def test_default_execute_document_generator(registry):
     worker = registry.get_worker("document_generator")
-    task = SubTask(id="t3", description="Generate report", worker_type="document_generator")
+    task = SubTask(
+        id="t3", description="Generate report", worker_type="document_generator"
+    )
     result = await worker.execute(task)
     assert "documents" in result
 
@@ -161,6 +170,7 @@ async def test_custom_executor(registry):
 # =========================================
 # STATS RECORDING
 # =========================================
+
 
 def test_record_execution(registry):
     registry.record_execution("research", True, 5.0, 1500, 0.9)
@@ -198,6 +208,7 @@ def test_get_stats_nonexistent(registry):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     r1 = get_worker_registry()

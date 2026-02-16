@@ -2,6 +2,7 @@
 FastAPI routes for LightRAG graph-based reasoning.
 Import this into main api.py during integration step.
 """
+
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from typing import List, Optional, Dict
@@ -54,12 +55,14 @@ async def get_graph_rag() -> BDGraphRAG:
         _graph_rag = BDGraphRAG(
             working_dir=working_dir,
             use_qdrant=False,  # Use NanoVectorDB for simplicity
-            llm_provider="openai"
+            llm_provider="openai",
         )
         logger.info("lightrag_created", working_dir=working_dir)
 
     # Ensure storages are initialized
-    logger.debug("storage_init_check", storage_initialized=_graph_rag._storage_initialized)
+    logger.debug(
+        "storage_init_check", storage_initialized=_graph_rag._storage_initialized
+    )
     if not _graph_rag._storage_initialized:
         logger.debug("calling_initialize")
         await _graph_rag.initialize()
@@ -80,6 +83,7 @@ def get_entity_extractor() -> BDEntityExtractor:
 async def test_write():
     """Test endpoint to verify file writing works."""
     import os
+
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     debug_file = os.path.join(base_dir, "data", "test_write.log")
     with open(debug_file, "a") as f:
@@ -96,6 +100,7 @@ async def insert_documents(request: InsertRequest):
     for graph-based reasoning.
     """
     import os
+
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     debug_file = os.path.join(base_dir, "data", "debug_route.log")
 
@@ -106,7 +111,9 @@ async def insert_documents(request: InsertRequest):
         rag = await get_graph_rag()
 
         with open(debug_file, "a") as f:
-            f.write(f"[{__import__('datetime').datetime.now()}] Got rag, _storage_initialized: {rag._storage_initialized}\n")
+            f.write(
+                f"[{__import__('datetime').datetime.now()}] Got rag, _storage_initialized: {rag._storage_initialized}\n"
+            )
 
         extractor = get_entity_extractor()
 
@@ -116,7 +123,9 @@ async def insert_documents(request: InsertRequest):
             documents = [extractor.enrich_document(doc) for doc in documents]
 
         with open(debug_file, "a") as f:
-            f.write(f"[{__import__('datetime').datetime.now()}] Calling insert_documents with {len(documents)} docs\n")
+            f.write(
+                f"[{__import__('datetime').datetime.now()}] Calling insert_documents with {len(documents)} docs\n"
+            )
 
         result = await rag.insert_documents(documents, request.metadata)
 
@@ -128,6 +137,7 @@ async def insert_documents(request: InsertRequest):
         with open(debug_file, "a") as f:
             f.write(f"[{__import__('datetime').datetime.now()}] ERROR: {e}\n")
             import traceback
+
             f.write(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -160,7 +170,7 @@ async def query_graph(request: QueryRequest):
             "answer": result.answer,
             "entities_found": result.entities_found,
             "relationships": result.relationships,
-            "sources": result.sources
+            "sources": result.sources,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -194,7 +204,7 @@ async def get_entity(entity_name: str):
         return {
             "entity_name": entity_name,
             "known_entity": entity_info,
-            "graph_data": graph_data
+            "graph_data": graph_data,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -212,10 +222,7 @@ async def get_relationships(contractor: Optional[str] = None):
         rag = await get_graph_rag()
         relationships = rag.get_contractor_relationships(contractor)
 
-        return {
-            "contractor": contractor,
-            "relationships": relationships
-        }
+        return {"contractor": contractor, "relationships": relationships}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -272,7 +279,7 @@ async def extract_entities(request: EntityRequest):
                     "name": e.name,
                     "type": e.type.value,
                     "confidence": e.confidence,
-                    "context": e.context
+                    "context": e.context,
                 }
                 for e in entities
             ],
@@ -282,11 +289,11 @@ async def extract_entities(request: EntityRequest):
                     "target": r.target,
                     "type": r.relationship_type,
                     "confidence": r.confidence,
-                    "evidence": r.evidence
+                    "evidence": r.evidence,
                 }
                 for r in relationships
             ],
-            "suggested_tags": tags
+            "suggested_tags": tags,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -323,10 +330,7 @@ async def lightrag_status():
             "status": "ready" if stats.get("initialized") else "initializing",
             "working_dir": stats.get("working_dir"),
             "llm_provider": stats.get("llm_provider"),
-            "graph_stats": stats.get("graph", {})
+            "graph_stats": stats.get("graph", {}),
         }
     except Exception as e:
-        return {
-            "status": "error",
-            "error": str(e)
-        }
+        return {"status": "error", "error": str(e)}

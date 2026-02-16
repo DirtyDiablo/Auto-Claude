@@ -7,6 +7,7 @@ Enhanced with Superpowers Systematic Debugging pattern:
 - Severity levels (low, medium, high, critical)
 - Recommended fixes and auto-fixable detection
 """
+
 import json
 from datetime import datetime
 from pathlib import Path
@@ -14,11 +15,13 @@ from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from enum import Enum
 
+
 class QAStatus(Enum):
     PENDING = "pending"
     APPROVED = "approved"
     NEEDS_REVIEW = "needs_review"
     REJECTED = "rejected"
+
 
 @dataclass
 class QAConfig:
@@ -26,15 +29,20 @@ class QAConfig:
     review_threshold: float = 0.50
     batch_size: int = 10
 
+
 @dataclass
 class RootCause:
     """Root cause analysis for QA issues - Systematic Debugging pattern."""
-    issue_type: str  # 'low_confidence', 'missing_data', 'invalid_mapping', 'data_quality'
-    severity: str    # 'low', 'medium', 'high', 'critical'
+
+    issue_type: (
+        str  # 'low_confidence', 'missing_data', 'invalid_mapping', 'data_quality'
+    )
+    severity: str  # 'low', 'medium', 'high', 'critical'
     description: str
     affected_fields: List[str]
     recommended_fix: str
     auto_fixable: bool = False
+
 
 @dataclass
 class QAResult:
@@ -44,6 +52,7 @@ class QAResult:
     review_reasons: List[str] = field(default_factory=list)
     original_program: str = ""
     root_cause: Optional[RootCause] = None
+
 
 @dataclass
 class BatchQAReport:
@@ -73,55 +82,55 @@ def analyze_root_cause(job: Dict[str, Any]) -> Optional[RootCause]:
     program = mapping.get("program_name", "")
 
     # Issue 1: Invalid program mapping (CRITICAL severity) - Check first!
-    if program in ['Unmatched', 'Unknown', '', None]:
+    if program in ["Unmatched", "Unknown", "", None]:
         return RootCause(
-            issue_type='invalid_mapping',
-            severity='critical',
-            description='No valid program match found',
-            affected_fields=['_mapping.program_name'],
-            recommended_fix='Re-run program mapper with expanded search criteria',
-            auto_fixable=True
+            issue_type="invalid_mapping",
+            severity="critical",
+            description="No valid program match found",
+            affected_fields=["_mapping.program_name"],
+            recommended_fix="Re-run program mapper with expanded search criteria",
+            auto_fixable=True,
         )
 
     # Issue 2: Low confidence mapping (HIGH severity)
     if confidence < 0.50:
         return RootCause(
-            issue_type='low_confidence',
-            severity='high',
-            description=f'Mapping confidence {confidence:.1%} below threshold (50%)',
-            affected_fields=['_mapping.match_confidence', '_mapping.program_name'],
-            recommended_fix='Manual review required - verify program match signals',
-            auto_fixable=False
+            issue_type="low_confidence",
+            severity="high",
+            description=f"Mapping confidence {confidence:.1%} below threshold (50%)",
+            affected_fields=["_mapping.match_confidence", "_mapping.program_name"],
+            recommended_fix="Manual review required - verify program match signals",
+            auto_fixable=False,
         )
 
     # Issue 3: Missing critical data (MEDIUM severity)
     missing_fields = []
-    if not job.get('Security Clearance'):
-        missing_fields.append('Security Clearance')
-    if not job.get('Location'):
-        missing_fields.append('Location')
-    if not job.get('Prime Contractor'):
-        missing_fields.append('Prime Contractor')
+    if not job.get("Security Clearance"):
+        missing_fields.append("Security Clearance")
+    if not job.get("Location"):
+        missing_fields.append("Location")
+    if not job.get("Prime Contractor"):
+        missing_fields.append("Prime Contractor")
 
     if missing_fields:
         return RootCause(
-            issue_type='missing_data',
-            severity='medium',
-            description=f'Missing required fields: {", ".join(missing_fields)}',
+            issue_type="missing_data",
+            severity="medium",
+            description=f"Missing required fields: {', '.join(missing_fields)}",
             affected_fields=missing_fields,
-            recommended_fix='Data enrichment - fetch from source or request manual input',
-            auto_fixable=True  # Can be auto-fixed via re-scraping
+            recommended_fix="Data enrichment - fetch from source or request manual input",
+            auto_fixable=True,  # Can be auto-fixed via re-scraping
         )
 
     # Issue 4: Data quality - moderate confidence (LOW severity)
     if 0.50 <= confidence < 0.70:
         return RootCause(
-            issue_type='data_quality',
-            severity='low',
-            description=f'Moderate confidence {confidence:.1%} - verification recommended',
-            affected_fields=['_mapping'],
-            recommended_fix='Quick review - validate program match makes sense',
-            auto_fixable=False
+            issue_type="data_quality",
+            severity="low",
+            description=f"Moderate confidence {confidence:.1%} - verification recommended",
+            affected_fields=["_mapping"],
+            recommended_fix="Quick review - validate program match makes sense",
+            auto_fixable=False,
         )
 
     return None  # No root cause identified (should auto-approve)
@@ -134,47 +143,51 @@ def debug_qa_failure(job: Dict[str, Any]) -> Dict[str, Any]:
     Returns structured debug information following Systematic Debugging pattern.
     """
     debug_report = {
-        'job_id': (job.get('Source URL', '') or job.get('Job Title/Position', 'unknown'))[:100],
-        'failure_reason': '',
-        'data_quality_check': {},
-        'suggested_actions': [],
-        'root_cause': None
+        "job_id": (
+            job.get("Source URL", "") or job.get("Job Title/Position", "unknown")
+        )[:100],
+        "failure_reason": "",
+        "data_quality_check": {},
+        "suggested_actions": [],
+        "root_cause": None,
     }
 
     # Step 1: Identify root cause
     root_cause = analyze_root_cause(job)
     if root_cause:
-        debug_report['root_cause'] = {
-            'type': root_cause.issue_type,
-            'severity': root_cause.severity,
-            'description': root_cause.description,
-            'affected_fields': root_cause.affected_fields,
-            'auto_fixable': root_cause.auto_fixable
+        debug_report["root_cause"] = {
+            "type": root_cause.issue_type,
+            "severity": root_cause.severity,
+            "description": root_cause.description,
+            "affected_fields": root_cause.affected_fields,
+            "auto_fixable": root_cause.auto_fixable,
         }
-        debug_report['failure_reason'] = root_cause.description
+        debug_report["failure_reason"] = root_cause.description
 
     # Step 2: Data quality checks
-    mapping = job.get('_mapping', {})
-    debug_report['data_quality_check'] = {
-        'has_mapping': bool(mapping),
-        'confidence': mapping.get('match_confidence', 0.0),
-        'program_identified': bool(mapping.get('program_name')),
-        'required_fields_present': {
-            'clearance': bool(job.get('Security Clearance')),
-            'location': bool(job.get('Location')),
-            'prime_contractor': bool(job.get('Prime Contractor')),
-            'job_title': bool(job.get('Job Title/Position'))
-        }
+    mapping = job.get("_mapping", {})
+    debug_report["data_quality_check"] = {
+        "has_mapping": bool(mapping),
+        "confidence": mapping.get("match_confidence", 0.0),
+        "program_identified": bool(mapping.get("program_name")),
+        "required_fields_present": {
+            "clearance": bool(job.get("Security Clearance")),
+            "location": bool(job.get("Location")),
+            "prime_contractor": bool(job.get("Prime Contractor")),
+            "job_title": bool(job.get("Job Title/Position")),
+        },
     }
 
     # Step 3: Suggested actions
     if root_cause:
-        debug_report['suggested_actions'].append(root_cause.recommended_fix)
+        debug_report["suggested_actions"].append(root_cause.recommended_fix)
 
         if root_cause.auto_fixable:
-            debug_report['suggested_actions'].append('AUTO-FIX: Can be resolved programmatically')
+            debug_report["suggested_actions"].append(
+                "AUTO-FIX: Can be resolved programmatically"
+            )
         else:
-            debug_report['suggested_actions'].append('MANUAL: Requires human review')
+            debug_report["suggested_actions"].append("MANUAL: Requires human review")
 
     return debug_report
 
@@ -212,9 +225,15 @@ def evaluate_item(job, config=None):
         if not root_cause:  # Only analyze if not already done
             root_cause = analyze_root_cause(job)
 
-    return QAResult(job_id=job_id[:100], status=status, confidence=confidence,
-                   review_reasons=review_reasons, original_program=program,
-                   root_cause=root_cause)
+    return QAResult(
+        job_id=job_id[:100],
+        status=status,
+        confidence=confidence,
+        review_reasons=review_reasons,
+        original_program=program,
+        root_cause=root_cause,
+    )
+
 
 def evaluate_batch(jobs, config=None, batch_id=None):
     if config is None:
@@ -231,9 +250,17 @@ def evaluate_batch(jobs, config=None, batch_id=None):
     needs_review = sum(1 for r in results if r.status == QAStatus.NEEDS_REVIEW)
     rejected = sum(1 for r in results if r.status == QAStatus.REJECTED)
     avg_conf = total_conf / len(results) if results else 0.0
-    return BatchQAReport(batch_id=batch_id, total_items=len(results), auto_approved=auto_approved,
-                        needs_review=needs_review, rejected=rejected, avg_confidence=avg_conf,
-                        timestamp=datetime.now().isoformat(), items=results)
+    return BatchQAReport(
+        batch_id=batch_id,
+        total_items=len(results),
+        auto_approved=auto_approved,
+        needs_review=needs_review,
+        rejected=rejected,
+        avg_confidence=avg_conf,
+        timestamp=datetime.now().isoformat(),
+        items=results,
+    )
+
 
 class ReviewQueue:
     def __init__(self, queue_file=None):
@@ -267,8 +294,10 @@ class ReviewQueue:
                 "severity": qa_result.root_cause.severity,
                 "description": qa_result.root_cause.description,
                 "recommended_fix": qa_result.root_cause.recommended_fix,
-                "auto_fixable": qa_result.root_cause.auto_fixable
-            } if qa_result.root_cause else None
+                "auto_fixable": qa_result.root_cause.auto_fixable,
+            }
+            if qa_result.root_cause
+            else None,
         }
         self.items.append(item)
         self._save()
@@ -280,6 +309,7 @@ class ReviewQueue:
         total = len(self.items)
         pending = len(self.get_pending())
         return {"total": total, "pending": pending, "reviewed": total - pending}
+
 
 def run_qa_workflow(jobs, config=None, auto_queue=True):
     if config is None:
@@ -305,14 +335,14 @@ def generate_qa_summary_report(report: BatchQAReport, output_dir: str = None) ->
     Follows Verification-Before-Completion pattern - creates evidence of QA results.
     """
     if output_dir is None:
-        output_dir = Path(__file__).parent.parent / 'outputs'
+        output_dir = Path(__file__).parent.parent / "outputs"
 
     output_dir = Path(output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
     # Aggregate root causes
     root_causes_by_type = {}
-    root_causes_by_severity = {'low': 0, 'medium': 0, 'high': 0, 'critical': 0}
+    root_causes_by_severity = {"low": 0, "medium": 0, "high": 0, "critical": 0}
     auto_fixable_count = 0
 
     for item in report.items:
@@ -337,8 +367,12 @@ def generate_qa_summary_report(report: BatchQAReport, output_dir: str = None) ->
         "",
         "## Overall Statistics",
         f"- **Total Items:** {report.total_items}",
-        f"- **Auto-Approved:** {report.auto_approved} ({report.auto_approved/report.total_items*100:.1f}%)" if report.total_items > 0 else "- **Auto-Approved:** 0",
-        f"- **Needs Review:** {report.needs_review} ({report.needs_review/report.total_items*100:.1f}%)" if report.total_items > 0 else "- **Needs Review:** 0",
+        f"- **Auto-Approved:** {report.auto_approved} ({report.auto_approved / report.total_items * 100:.1f}%)"
+        if report.total_items > 0
+        else "- **Auto-Approved:** 0",
+        f"- **Needs Review:** {report.needs_review} ({report.needs_review / report.total_items * 100:.1f}%)"
+        if report.total_items > 0
+        else "- **Needs Review:** 0",
         f"- **Average Confidence:** {report.avg_confidence:.1%}",
         "",
         "## Root Cause Analysis",
@@ -348,72 +382,96 @@ def generate_qa_summary_report(report: BatchQAReport, output_dir: str = None) ->
         "### Issues by Type",
     ]
 
-    for issue_type, count in sorted(root_causes_by_type.items(), key=lambda x: x[1], reverse=True):
+    for issue_type, count in sorted(
+        root_causes_by_type.items(), key=lambda x: x[1], reverse=True
+    ):
         report_lines.append(f"- **{issue_type}:** {count} items")
 
     if not root_causes_by_type:
         report_lines.append("- No root causes identified (all items approved)")
 
-    report_lines.extend([
-        "",
-        "### Issues by Severity",
-    ])
-    for sev in ['critical', 'high', 'medium', 'low']:
+    report_lines.extend(
+        [
+            "",
+            "### Issues by Severity",
+        ]
+    )
+    for sev in ["critical", "high", "medium", "low"]:
         count = root_causes_by_severity.get(sev, 0)
         if count > 0:
             report_lines.append(f"- **{sev.upper()}:** {count} items")
 
     # Detailed items requiring review
-    review_items = [item for item in report.items if item.status == QAStatus.NEEDS_REVIEW and item.root_cause]
+    review_items = [
+        item
+        for item in report.items
+        if item.status == QAStatus.NEEDS_REVIEW and item.root_cause
+    ]
     if review_items:
-        report_lines.extend([
-            "",
-            "## Items Requiring Review",
-            "",
-            "| Job ID | Issue Type | Severity | Recommended Fix |",
-            "|--------|-----------|----------|-----------------|"
-        ])
+        report_lines.extend(
+            [
+                "",
+                "## Items Requiring Review",
+                "",
+                "| Job ID | Issue Type | Severity | Recommended Fix |",
+                "|--------|-----------|----------|-----------------|",
+            ]
+        )
 
         # Sort by severity (critical first)
-        severity_order = {'critical': 0, 'high': 1, 'medium': 2, 'low': 3}
-        review_items.sort(key=lambda x: severity_order.get(x.root_cause.severity, 4) if x.root_cause else 4)
+        severity_order = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+        review_items.sort(
+            key=lambda x: (
+                severity_order.get(x.root_cause.severity, 4) if x.root_cause else 4
+            )
+        )
 
         for item in review_items[:50]:  # Limit to 50 items
             rc = item.root_cause
-            job_id_short = item.job_id[:40] + '...' if len(item.job_id) > 40 else item.job_id
-            fix_short = rc.recommended_fix[:60] + '...' if len(rc.recommended_fix) > 60 else rc.recommended_fix
+            job_id_short = (
+                item.job_id[:40] + "..." if len(item.job_id) > 40 else item.job_id
+            )
+            fix_short = (
+                rc.recommended_fix[:60] + "..."
+                if len(rc.recommended_fix) > 60
+                else rc.recommended_fix
+            )
             report_lines.append(
                 f"| {job_id_short} | {rc.issue_type} | {rc.severity} | {fix_short} |"
             )
 
     # Summary recommendations
-    report_lines.extend([
-        "",
-        "## Recommended Actions",
-        ""
-    ])
+    report_lines.extend(["", "## Recommended Actions", ""])
 
-    if root_causes_by_severity.get('critical', 0) > 0:
-        report_lines.append(f"1. **CRITICAL:** Address {root_causes_by_severity['critical']} critical issues immediately (invalid program mappings)")
+    if root_causes_by_severity.get("critical", 0) > 0:
+        report_lines.append(
+            f"1. **CRITICAL:** Address {root_causes_by_severity['critical']} critical issues immediately (invalid program mappings)"
+        )
 
     if auto_fixable_count > 0:
-        report_lines.append(f"2. **AUTO-FIX:** {auto_fixable_count} issues can be resolved by re-running the pipeline with expanded criteria")
+        report_lines.append(
+            f"2. **AUTO-FIX:** {auto_fixable_count} issues can be resolved by re-running the pipeline with expanded criteria"
+        )
 
     manual_count = report.needs_review - auto_fixable_count
     if manual_count > 0:
-        report_lines.append(f"3. **MANUAL REVIEW:** {manual_count} items require human verification")
+        report_lines.append(
+            f"3. **MANUAL REVIEW:** {manual_count} items require human verification"
+        )
 
-    report_lines.extend([
-        "",
-        "---",
-        f"*Report generated by BD-Automation-Engine QA Module (Superpowers Systematic Debugging Pattern)*"
-    ])
+    report_lines.extend(
+        [
+            "",
+            "---",
+            f"*Report generated by BD-Automation-Engine QA Module (Superpowers Systematic Debugging Pattern)*",
+        ]
+    )
 
     # Save report
     report_path = output_dir / f"qa_report_{report.batch_id}.md"
     report_content = "\n".join(report_lines)
 
-    with open(report_path, 'w', encoding='utf-8') as f:
+    with open(report_path, "w", encoding="utf-8") as f:
         f.write(report_content)
 
     print(f"\nQA Report saved: {report_path}")

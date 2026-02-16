@@ -22,6 +22,7 @@ def generator():
 # BRIEFING GENERATION
 # =========================================
 
+
 def test_generate_briefing(generator):
     briefing = generator.generate_briefing("c001")
     assert isinstance(briefing, CallBriefing)
@@ -42,7 +43,9 @@ def test_briefing_pain_points(generator):
     briefing = generator.generate_briefing("c001")
     assert len(briefing.pain_points) >= 2
     assert all(isinstance(pp, PainPoint) for pp in briefing.pain_points)
-    assert any("cloud architect" in pp.description.lower() for pp in briefing.pain_points)
+    assert any(
+        "cloud architect" in pp.description.lower() for pp in briefing.pain_points
+    )
 
 
 def test_briefing_recent_interactions(generator):
@@ -72,7 +75,9 @@ def test_briefing_talking_points(generator):
     assert all(isinstance(tp, TalkingPoint) for tp in briefing.talking_points)
     # Should have relationship continuity point since c001 has interactions
     topics = [tp.topic for tp in briefing.talking_points]
-    assert any("Relationship" in t or "Pain Point" in t or "Staffing" in t for t in topics)
+    assert any(
+        "Relationship" in t or "Pain Point" in t or "Staffing" in t for t in topics
+    )
 
 
 def test_briefing_relationship_map(generator):
@@ -125,6 +130,7 @@ def test_briefing_stored(generator):
 # BATCH BRIEFINGS
 # =========================================
 
+
 def test_batch_briefings(generator):
     results = generator.generate_batch(["c001", "c002", "c003"])
     assert len(results) == 3
@@ -139,6 +145,7 @@ def test_batch_with_invalid(generator):
 # =========================================
 # AUDIO BRIEFING
 # =========================================
+
 
 def test_audio_briefing(generator):
     briefing = generator.generate_briefing("c001")
@@ -190,6 +197,7 @@ def test_audio_stored(generator):
 # DIFFERENT CONTACTS
 # =========================================
 
+
 def test_contact_c003(generator):
     briefing = generator.generate_briefing("c003")
     assert briefing.contact.name == "James Patel"
@@ -207,6 +215,7 @@ def test_contact_c002(generator):
 # STATS
 # =========================================
 
+
 def test_stats(generator):
     generator.generate_briefing("c001")
     generator.generate_briefing("c002")
@@ -218,6 +227,7 @@ def test_stats(generator):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     g1 = get_briefing_generator()

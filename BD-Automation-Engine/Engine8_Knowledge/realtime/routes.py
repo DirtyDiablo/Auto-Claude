@@ -20,6 +20,7 @@ router.include_router(sse_router)
 
 # ─── WebSocket endpoint ──────────────────────────────────
 
+
 @router.websocket("/ws/dashboard")
 async def websocket_dashboard(websocket: WebSocket):
     """
@@ -42,6 +43,7 @@ async def websocket_dashboard(websocket: WebSocket):
 
 # ─── Status endpoint ─────────────────────────────────────
 
+
 @router.get("/realtime/status")
 async def realtime_status():
     """Get real-time server connection stats and event throughput."""
@@ -53,6 +55,7 @@ async def realtime_status():
     events_per_min = 0
     if events:
         from datetime import datetime
+
         try:
             newest = datetime.fromisoformat(events[0].get("timestamp", ""))
             oldest = datetime.fromisoformat(events[-1].get("timestamp", ""))

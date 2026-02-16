@@ -36,6 +36,7 @@ router = APIRouter(prefix="/revenue", tags=["revenue"])
 # REQUEST MODELS
 # =========================================
 
+
 class PlacementRequest(BaseModel):
     id: str
     contractor_name: str
@@ -95,6 +96,7 @@ def _get_exec() -> ExecutiveAnalytics:
 # REVENUE ENDPOINTS (1-7)
 # =========================================
 
+
 @router.get("/summary")
 async def revenue_summary(period: Optional[str] = None):
     """Revenue overview with period comparison."""
@@ -137,10 +139,7 @@ async def revenue_by_rep():
     tracker = _get_tracker()
     by_rep = tracker.get_revenue_by_rep()
     return {
-        "reps": [
-            {"rep": rep, "revenue": round(rev, 2)}
-            for rep, rev in by_rep.items()
-        ],
+        "reps": [{"rep": rep, "revenue": round(rev, 2)} for rep, rev in by_rep.items()],
         "total": len(by_rep),
     }
 
@@ -204,6 +203,7 @@ async def concentration_risk():
 # DEAL LIFECYCLE ENDPOINTS (8-10)
 # =========================================
 
+
 @router.get("/deals/lifecycle")
 async def deal_lifecycle():
     """Deal stage analytics."""
@@ -255,6 +255,7 @@ async def stale_deals():
 # =========================================
 # ROI ENDPOINTS (11-14)
 # =========================================
+
 
 @router.get("/roi/campaigns")
 async def campaign_roi():
@@ -346,8 +347,11 @@ async def channel_roi():
 # EXECUTIVE SUMMARY (15)
 # =========================================
 
+
 @router.get("/executive-summary")
-async def executive_summary(period: Optional[str] = None, prior_period: Optional[str] = None):
+async def executive_summary(
+    period: Optional[str] = None, prior_period: Optional[str] = None
+):
     """Auto-generated executive summary."""
     exec_analytics = _get_exec()
     summary = exec_analytics.generate_executive_summary(
@@ -367,7 +371,9 @@ async def executive_summary(period: Optional[str] = None, prior_period: Optional
         "diversification": {
             "score": summary.diversification.score,
             "assessment": summary.diversification.assessment,
-        } if summary.diversification else None,
+        }
+        if summary.diversification
+        else None,
         "narrative": summary.narrative,
         "generated_at": summary.generated_at,
     }
@@ -376,6 +382,7 @@ async def executive_summary(period: Optional[str] = None, prior_period: Optional
 # =========================================
 # PLACEMENT RECORDING (16)
 # =========================================
+
 
 @router.post("/placements")
 async def record_placement(req: PlacementRequest):
@@ -410,6 +417,7 @@ async def record_placement(req: PlacementRequest):
 # =========================================
 # INTEGRATION
 # =========================================
+
 
 def configure_revenue(app_instance: FastAPI) -> None:
     """Configure revenue routes on an existing FastAPI app."""

@@ -88,13 +88,22 @@ class TestDiscovery:
     @pytest.mark.asyncio
     async def test_discover_sam_gov(self, pipeline, mock_crawler):
         """Discover documents from SAM.gov via mocked crawler."""
-        mock_crawler.crawl_url = AsyncMock(return_value=CrawlResult(
-            url="https://sam.gov/search/?keywords=DCGS",
-            extracted_data=[
-                {"title": "DCGS Support RFP", "agency": "Air Force", "url": "https://sam.gov/doc1.pdf"},
-            ],
-            links=["https://sam.gov/attachments/solicitation.pdf", "https://sam.gov/page2"],
-        ))
+        mock_crawler.crawl_url = AsyncMock(
+            return_value=CrawlResult(
+                url="https://sam.gov/search/?keywords=DCGS",
+                extracted_data=[
+                    {
+                        "title": "DCGS Support RFP",
+                        "agency": "Air Force",
+                        "url": "https://sam.gov/doc1.pdf",
+                    },
+                ],
+                links=[
+                    "https://sam.gov/attachments/solicitation.pdf",
+                    "https://sam.gov/page2",
+                ],
+            )
+        )
 
         docs = await pipeline.discover_documents("sam_gov", {"keywords": ["DCGS"]})
 
@@ -107,12 +116,14 @@ class TestDiscovery:
     @pytest.mark.asyncio
     async def test_discover_fpds(self, pipeline, mock_crawler):
         """Discover documents from FPDS."""
-        mock_crawler.crawl_url = AsyncMock(return_value=CrawlResult(
-            url="https://www.fpds.gov/ezsearch/search.do?q=ISR",
-            extracted_data=[
-                {"title": "ISR Contract Award", "url": "https://fpds.gov/doc/123"},
-            ],
-        ))
+        mock_crawler.crawl_url = AsyncMock(
+            return_value=CrawlResult(
+                url="https://www.fpds.gov/ezsearch/search.do?q=ISR",
+                extracted_data=[
+                    {"title": "ISR Contract Award", "url": "https://fpds.gov/doc/123"},
+                ],
+            )
+        )
 
         docs = await pipeline.discover_documents("fpds", {"keywords": ["ISR"]})
 
@@ -124,14 +135,20 @@ class TestDiscovery:
         """Discover documents from an agency website."""
         page_result = CrawlResult(
             url="https://agency.mil/docs",
-            links=["https://agency.mil/docs/sow.pdf", "https://agency.mil/docs/brief.docx"],
+            links=[
+                "https://agency.mil/docs/sow.pdf",
+                "https://agency.mil/docs/brief.docx",
+            ],
         )
         mock_crawler.crawl_site = AsyncMock(return_value=[page_result])
 
-        docs = await pipeline.discover_documents("agency_sites", {
-            "url": "https://agency.mil/docs",
-            "max_pages": 5,
-        })
+        docs = await pipeline.discover_documents(
+            "agency_sites",
+            {
+                "url": "https://agency.mil/docs",
+                "max_pages": 5,
+            },
+        )
 
         assert len(docs) == 2
         assert all(d.source == "agency_site" for d in docs)
@@ -243,7 +260,9 @@ class TestProcessing:
         """Batch process downloads and processes multiple docs."""
         # Create temp files
         file1 = tmp_path / "doc1.txt"
-        file1.write_text("Statement of work for ISR platform. SOW deliverables include...")
+        file1.write_text(
+            "Statement of work for ISR platform. SOW deliverables include..."
+        )
         file2 = tmp_path / "doc2.txt"
         file2.write_text("Contract modification amendment to existing task order.")
 
@@ -254,6 +273,7 @@ class TestProcessing:
 
         # Mock download to return our temp files
         call_count = [0]
+
         async def mock_download(ref, output_dir=None):
             path = str(file1) if call_count[0] == 0 else str(file2)
             call_count[0] += 1
@@ -295,13 +315,19 @@ class TestMonitor:
     @pytest.mark.asyncio
     async def test_monitor_new_documents(self, pipeline, mock_crawler):
         """Monitor finds documents matching watch criteria."""
-        mock_crawler.crawl_url = AsyncMock(return_value=CrawlResult(
-            url="https://sam.gov/search",
-            extracted_data=[
-                {"title": "DCGS Support RFP", "agency": "Department of Defense", "url": "https://sam.gov/rfp1"},
-            ],
-            links=[],
-        ))
+        mock_crawler.crawl_url = AsyncMock(
+            return_value=CrawlResult(
+                url="https://sam.gov/search",
+                extracted_data=[
+                    {
+                        "title": "DCGS Support RFP",
+                        "agency": "Department of Defense",
+                        "url": "https://sam.gov/rfp1",
+                    },
+                ],
+                links=[],
+            )
+        )
 
         watch_configs = [
             {

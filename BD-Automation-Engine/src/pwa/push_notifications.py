@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class NotificationPriority(Enum):
     LOW = "low"
     NORMAL = "normal"
@@ -48,6 +49,7 @@ class NotificationTopic(Enum):
 @dataclass
 class PushSubscription:
     """A browser push subscription endpoint."""
+
     subscription_id: str
     user_id: str
     endpoint: str = ""
@@ -71,6 +73,7 @@ class PushSubscription:
 @dataclass
 class Notification:
     """A push notification with delivery tracking."""
+
     notification_id: str
     title: str
     body: str = ""
@@ -141,6 +144,7 @@ _NOTIFICATION_TEMPLATES: Dict[str, Dict[str, Any]] = {
 # PUSH NOTIFICATION SERVICE
 # =========================================
 
+
 class PushNotificationService:
     """Manages push notification subscriptions, delivery,
     and template-based notifications.
@@ -150,12 +154,19 @@ class PushNotificationService:
         self._subscriptions: Dict[str, PushSubscription] = {}
         self._notifications: List[Notification] = []
         self._templates = dict(_NOTIFICATION_TEMPLATES)
-        logger.info("PushNotificationService initialized with %d templates", len(self._templates))
+        logger.info(
+            "PushNotificationService initialized with %d templates",
+            len(self._templates),
+        )
 
     # ----- subscriptions -----
 
-    def subscribe(self, user_id: str, endpoint: str = "", topics: Optional[List[str]] = None) -> PushSubscription:
-        sub_id = f"sub_{hashlib.md5(f'{user_id}:{time.time()}'.encode()).hexdigest()[:12]}"
+    def subscribe(
+        self, user_id: str, endpoint: str = "", topics: Optional[List[str]] = None
+    ) -> PushSubscription:
+        sub_id = (
+            f"sub_{hashlib.md5(f'{user_id}:{time.time()}'.encode()).hexdigest()[:12]}"
+        )
         sub = PushSubscription(
             subscription_id=sub_id,
             user_id=user_id,
@@ -175,7 +186,9 @@ class PushNotificationService:
     def get_subscription(self, subscription_id: str) -> Optional[PushSubscription]:
         return self._subscriptions.get(subscription_id)
 
-    def list_subscriptions(self, user_id: Optional[str] = None) -> List[PushSubscription]:
+    def list_subscriptions(
+        self, user_id: Optional[str] = None
+    ) -> List[PushSubscription]:
         subs = list(self._subscriptions.values())
         if user_id:
             subs = [s for s in subs if s.user_id == user_id]
@@ -183,9 +196,15 @@ class PushNotificationService:
 
     # ----- send notifications -----
 
-    def send(self, title: str, body: str = "", topic: NotificationTopic = NotificationTopic.SYSTEM_ALERT,
-             priority: NotificationPriority = NotificationPriority.NORMAL,
-             target_user_id: Optional[str] = None, data: Optional[Dict[str, Any]] = None) -> Notification:
+    def send(
+        self,
+        title: str,
+        body: str = "",
+        topic: NotificationTopic = NotificationTopic.SYSTEM_ALERT,
+        priority: NotificationPriority = NotificationPriority.NORMAL,
+        target_user_id: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> Notification:
         """Send a push notification."""
         notif = Notification(
             notification_id=f"notif_{uuid.uuid4().hex[:12]}",
@@ -206,11 +225,19 @@ class PushNotificationService:
             notif.status = NotificationStatus.FAILED
 
         self._notifications.append(notif)
-        logger.info("Sent notification %s to %d subscribers", notif.notification_id, len(matching_subs))
+        logger.info(
+            "Sent notification %s to %d subscribers",
+            notif.notification_id,
+            len(matching_subs),
+        )
         return notif
 
-    def send_from_template(self, template_key: str, target_user_id: Optional[str] = None,
-                            data: Optional[Dict[str, Any]] = None) -> Optional[Notification]:
+    def send_from_template(
+        self,
+        template_key: str,
+        target_user_id: Optional[str] = None,
+        data: Optional[Dict[str, Any]] = None,
+    ) -> Optional[Notification]:
         """Send a notification from a pre-built template."""
         tpl = self._templates.get(template_key)
         if not tpl:
@@ -224,7 +251,9 @@ class PushNotificationService:
             data=data,
         )
 
-    def _get_matching_subscriptions(self, topic: NotificationTopic, target_user_id: Optional[str]) -> List[PushSubscription]:
+    def _get_matching_subscriptions(
+        self, topic: NotificationTopic, target_user_id: Optional[str]
+    ) -> List[PushSubscription]:
         subs = []
         for sub in self._subscriptions.values():
             if not sub.enabled:
@@ -243,7 +272,9 @@ class PushNotificationService:
                 return n
         return None
 
-    def list_notifications(self, user_id: Optional[str] = None, limit: int = 50) -> List[Notification]:
+    def list_notifications(
+        self, user_id: Optional[str] = None, limit: int = 50
+    ) -> List[Notification]:
         notifs = self._notifications
         if user_id:
             notifs = [n for n in notifs if n.target_user_id == user_id]
@@ -263,8 +294,12 @@ class PushNotificationService:
     # ----- stats -----
 
     def get_stats(self) -> Dict[str, Any]:
-        delivered = sum(1 for n in self._notifications if n.status == NotificationStatus.DELIVERED)
-        failed = sum(1 for n in self._notifications if n.status == NotificationStatus.FAILED)
+        delivered = sum(
+            1 for n in self._notifications if n.status == NotificationStatus.DELIVERED
+        )
+        failed = sum(
+            1 for n in self._notifications if n.status == NotificationStatus.FAILED
+        )
         return {
             "total_subscriptions": len(self._subscriptions),
             "total_notifications": len(self._notifications),

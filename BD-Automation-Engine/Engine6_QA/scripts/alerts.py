@@ -9,6 +9,7 @@ Alert rules:
 
 Delivery channels: Slack webhook, n8n webhook, log file.
 """
+
 import json
 import logging
 import os
@@ -37,6 +38,7 @@ logger = logging.getLogger("BD-Alerts")
 # DATA STRUCTURES
 # ============================================
 
+
 class AlertSeverity(Enum):
     INFO = "info"
     WARNING = "warning"
@@ -57,6 +59,7 @@ class Alert:
 # ============================================
 # ALERT ENGINE
 # ============================================
+
 
 class AlertEngine:
     """Runs alert rules and delivers notifications."""
@@ -136,9 +139,9 @@ class AlertEngine:
             # Count Tier 1 contacts
             result = client.count(
                 collection_name="contacts",
-                count_filter=Filter(must=[
-                    FieldCondition(key="tier", match=MatchValue(value="1"))
-                ]),
+                count_filter=Filter(
+                    must=[FieldCondition(key="tier", match=MatchValue(value="1"))]
+                ),
                 exact=False,
             )
             tier1_count = result.count
@@ -157,7 +160,11 @@ class AlertEngine:
                     severity=AlertSeverity.WARNING,
                     title=f"{new_count} new Tier 1 contacts detected",
                     message=f"Total Tier 1 contacts: {tier1_count} (was {baseline}). Review new high-priority contacts.",
-                    data={"tier1_total": tier1_count, "new": new_count, "baseline": baseline},
+                    data={
+                        "tier1_total": tier1_count,
+                        "new": new_count,
+                        "baseline": baseline,
+                    },
                 )
         except Exception as e:
             logger.debug(f"Tier 1 check skipped: {e}")
@@ -185,7 +192,11 @@ class AlertEngine:
                         severity=AlertSeverity.WARNING,
                         title=f"Job count {direction} {deviation:.0%}",
                         message=f"Jobs collection: {current} vectors (baseline: {baseline}). Deviation: {deviation:.1%}.",
-                        data={"current": current, "baseline": baseline, "deviation": round(deviation, 3)},
+                        data={
+                            "current": current,
+                            "baseline": baseline,
+                            "deviation": round(deviation, 3),
+                        },
                     )
         except Exception as e:
             logger.debug(f"Job count check skipped: {e}")
@@ -207,7 +218,10 @@ class AlertEngine:
                     severity=AlertSeverity.CRITICAL,
                     title=f"Pipeline failed with {len(errors)} error(s)",
                     message=f"Last run errors: {'; '.join(errors[:3])}",
-                    data={"errors": errors, "run_id": last_run.get("run_id", "unknown")},
+                    data={
+                        "errors": errors,
+                        "run_id": last_run.get("run_id", "unknown"),
+                    },
                 )
         except (json.JSONDecodeError, OSError) as e:
             logger.debug(f"Pipeline state check skipped: {e}")
@@ -241,7 +255,11 @@ class AlertEngine:
                     severity=AlertSeverity.WARNING,
                     title="Search quality below threshold",
                     message=f"Benchmark query scored {top_score:.3f} (threshold: 0.60). Embeddings may need refresh.",
-                    data={"query": query, "score": round(top_score, 4), "threshold": 0.60},
+                    data={
+                        "query": query,
+                        "score": round(top_score, 4),
+                        "threshold": 0.60,
+                    },
                 )
         except Exception as e:
             logger.debug(f"Search quality check skipped: {e}")
@@ -252,8 +270,14 @@ class AlertEngine:
     def deliver_alert(self, alert: Alert):
         """Deliver alert to all configured channels."""
         # Always log
-        level = logging.CRITICAL if alert.severity == AlertSeverity.CRITICAL else logging.WARNING
-        logger.log(level, f"[{alert.severity.value.upper()}] {alert.title}: {alert.message}")
+        level = (
+            logging.CRITICAL
+            if alert.severity == AlertSeverity.CRITICAL
+            else logging.WARNING
+        )
+        logger.log(
+            level, f"[{alert.severity.value.upper()}] {alert.title}: {alert.message}"
+        )
 
         # Record in history
         self._state.setdefault("history", []).append(asdict(alert))
@@ -272,16 +296,22 @@ class AlertEngine:
     def _send_slack(self, alert: Alert):
         colors = {"info": "#36a64f", "warning": "#ff9900", "critical": "#ff0000"}
         payload = {
-            "attachments": [{
-                "color": colors.get(alert.severity.value, "#cccccc"),
-                "title": f"BD Alert: {alert.title}",
-                "text": alert.message,
-                "fields": [
-                    {"title": "Severity", "value": alert.severity.value.upper(), "short": True},
-                    {"title": "Rule", "value": alert.rule_id, "short": True},
-                ],
-                "ts": int(datetime.now().timestamp()),
-            }]
+            "attachments": [
+                {
+                    "color": colors.get(alert.severity.value, "#cccccc"),
+                    "title": f"BD Alert: {alert.title}",
+                    "text": alert.message,
+                    "fields": [
+                        {
+                            "title": "Severity",
+                            "value": alert.severity.value.upper(),
+                            "short": True,
+                        },
+                        {"title": "Rule", "value": alert.rule_id, "short": True},
+                    ],
+                    "ts": int(datetime.now().timestamp()),
+                }
+            ]
         }
         try:
             resp = requests.post(self.slack_url, json=payload, timeout=10)
@@ -318,7 +348,9 @@ class AlertEngine:
 # ============================================
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s"
+    )
 
     engine = AlertEngine()
     alerts = engine.check_all_rules()

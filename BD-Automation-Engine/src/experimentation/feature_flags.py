@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class FlagType(Enum):
     BOOLEAN = "boolean"
     PERCENTAGE = "percentage"
@@ -37,6 +38,7 @@ class FlagStatus(Enum):
 @dataclass
 class RolloutStage:
     """A single stage in a gradual rollout."""
+
     stage_id: str
     percentage: float  # 0-100
     duration_hours: float
@@ -56,6 +58,7 @@ class RolloutStage:
 @dataclass
 class FeatureFlag:
     """A feature flag with multiple evaluation strategies."""
+
     flag_id: str
     name: str
     description: str = ""
@@ -97,6 +100,7 @@ class FeatureFlag:
 # FEATURE FLAG ENGINE
 # =========================================
 
+
 class FeatureFlagEngine:
     """Manages feature flags with boolean, percentage, user-list, and
     gradual-rollout evaluation strategies.
@@ -114,7 +118,9 @@ class FeatureFlagEngine:
         self._flags: Dict[str, FeatureFlag] = {}
         self._flag_counter = 0
         self._create_default_flags()
-        logger.info("FeatureFlagEngine initialized with %d default flags", len(self._flags))
+        logger.info(
+            "FeatureFlagEngine initialized with %d default flags", len(self._flags)
+        )
 
     # ----- flag CRUD -----
 
@@ -243,12 +249,16 @@ class FeatureFlagEngine:
 
         rollout_stages: List[RolloutStage] = []
         for idx, stage_def in enumerate(stages):
-            stage_id = f"rs_{hashlib.md5(f'{flag_id}:stage:{idx}'.encode()).hexdigest()[:8]}"
-            rollout_stages.append(RolloutStage(
-                stage_id=stage_id,
-                percentage=stage_def.get("percentage", 0.0),
-                duration_hours=stage_def.get("duration_hours", 24.0),
-            ))
+            stage_id = (
+                f"rs_{hashlib.md5(f'{flag_id}:stage:{idx}'.encode()).hexdigest()[:8]}"
+            )
+            rollout_stages.append(
+                RolloutStage(
+                    stage_id=stage_id,
+                    percentage=stage_def.get("percentage", 0.0),
+                    duration_hours=stage_def.get("duration_hours", 24.0),
+                )
+            )
 
         flag.rollout_stages = rollout_stages
         flag.flag_type = FlagType.GRADUAL_ROLLOUT
@@ -276,14 +286,22 @@ class FeatureFlagEngine:
                 stage.completed = True
                 if not stage.started_at:
                     stage.started_at = now
-                logger.info("Completed rollout stage %s at %s%% for flag %s",
-                            stage.stage_id, stage.percentage, flag_id)
+                logger.info(
+                    "Completed rollout stage %s at %s%% for flag %s",
+                    stage.stage_id,
+                    stage.percentage,
+                    flag_id,
+                )
                 # Start the next incomplete stage
-                for next_stage in flag.rollout_stages[idx + 1:]:
+                for next_stage in flag.rollout_stages[idx + 1 :]:
                     if not next_stage.completed:
                         next_stage.started_at = now
-                        logger.info("Advanced to stage %s at %s%% for flag %s",
-                                    next_stage.stage_id, next_stage.percentage, flag_id)
+                        logger.info(
+                            "Advanced to stage %s at %s%% for flag %s",
+                            next_stage.stage_id,
+                            next_stage.percentage,
+                            flag_id,
+                        )
                         break
                 break
 
@@ -382,8 +400,7 @@ class FeatureFlagEngine:
             "inactive_flags": sum(1 for f in flags if f.status == FlagStatus.INACTIVE),
             "archived_flags": sum(1 for f in flags if f.status == FlagStatus.ARCHIVED),
             "by_type": {
-                ft.value: sum(1 for f in flags if f.flag_type == ft)
-                for ft in FlagType
+                ft.value: sum(1 for f in flags if f.flag_type == ft) for ft in FlagType
             },
         }
 

@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class AgentInvocationResult:
     """Result from invoking a BD agent."""
+
     success: bool
     agent_name: str
     content: str
@@ -55,20 +56,20 @@ class DifyCrewAIBridge:
 
     # Map agent names to API endpoints
     AGENT_ENDPOINTS = {
-        'bd_strategy': '/agent/strategy',
-        'company_research': '/agent/company',
-        'contact_finder': '/agent/contact',
-        'program_intel': '/agent/program',
+        "bd_strategy": "/agent/strategy",
+        "company_research": "/agent/company",
+        "contact_finder": "/agent/contact",
+        "program_intel": "/agent/program",
     }
 
     # Workflow endpoints
     WORKFLOW_ENDPOINTS = {
-        'capture_strategy': '/workflow/capture',
-        'competitor_analysis': '/workflow/competitor',
-        'quick_intel': '/workflow/quick',
-        'analyze_program': '/agents/analyze-program',
-        'prepare_outreach': '/agents/prepare-outreach',
-        'weekly_intel': '/agents/weekly-intel',
+        "capture_strategy": "/workflow/capture",
+        "competitor_analysis": "/workflow/competitor",
+        "quick_intel": "/workflow/quick",
+        "analyze_program": "/agents/analyze-program",
+        "prepare_outreach": "/agents/prepare-outreach",
+        "weekly_intel": "/agents/weekly-intel",
     }
 
     def __init__(self, knowledge_api_url: str = None):
@@ -79,17 +80,14 @@ class DifyCrewAIBridge:
             knowledge_api_url: URL of your BD Knowledge API (default: http://127.0.0.1:8100)
         """
         self.knowledge_api_url = knowledge_api_url or os.getenv(
-            'KNOWLEDGE_API_URL', 'http://127.0.0.1:8100'
+            "KNOWLEDGE_API_URL", "http://127.0.0.1:8100"
         )
         self.client = httpx.AsyncClient(timeout=120.0)  # Longer timeout for agents
 
         logger.info(f"DifyCrewAIBridge initialized: API={self.knowledge_api_url}")
 
     async def invoke_agent(
-        self,
-        agent_name: str,
-        query: str,
-        context: Dict[str, Any] = None
+        self, agent_name: str, query: str, context: Dict[str, Any] = None
     ) -> AgentInvocationResult:
         """
         Invoke a BD agent from Dify.
@@ -112,24 +110,23 @@ class DifyCrewAIBridge:
                 content=f"Unknown agent: {agent_name}. Available: {list(self.AGENT_ENDPOINTS.keys())}",
                 confidence=0.0,
                 sources=[],
-                metadata={'error': 'unknown_agent'}
+                metadata={"error": "unknown_agent"},
             )
 
         try:
             response = await self.client.get(
-                f"{self.knowledge_api_url}{endpoint}",
-                params={"q": query}
+                f"{self.knowledge_api_url}{endpoint}", params={"q": query}
             )
             response.raise_for_status()
             data = response.json()
 
             return AgentInvocationResult(
                 success=True,
-                agent_name=data.get('agent', agent_name),
-                content=data.get('response', ''),
-                confidence=data.get('confidence', 0.0),
-                sources=data.get('sources', []),
-                metadata={'query': query, 'context': context}
+                agent_name=data.get("agent", agent_name),
+                content=data.get("response", ""),
+                confidence=data.get("confidence", 0.0),
+                sources=data.get("sources", []),
+                metadata={"query": query, "context": context},
             )
 
         except Exception as e:
@@ -140,7 +137,7 @@ class DifyCrewAIBridge:
                 content=f"Error invoking agent: {e}",
                 confidence=0.0,
                 sources=[],
-                metadata={'error': str(e)}
+                metadata={"error": str(e)},
             )
 
     async def bd_strategy(self, query: str) -> AgentInvocationResult:
@@ -154,7 +151,7 @@ class DifyCrewAIBridge:
         - "Assess win probability for AF DCGS"
         - "Develop teaming strategy for GBSD"
         """
-        return await self.invoke_agent('bd_strategy', query)
+        return await self.invoke_agent("bd_strategy", query)
 
     async def company_research(self, company_name: str) -> AgentInvocationResult:
         """
@@ -167,7 +164,7 @@ class DifyCrewAIBridge:
         - "What programs does GDIT prime on?"
         - "Leidos competitive positioning"
         """
-        return await self.invoke_agent('company_research', company_name)
+        return await self.invoke_agent("company_research", company_name)
 
     async def contact_finder(self, query: str) -> AgentInvocationResult:
         """
@@ -180,7 +177,7 @@ class DifyCrewAIBridge:
         - "Who are the decision makers for GBSD?"
         - "ISR program managers at Northrop"
         """
-        return await self.invoke_agent('contact_finder', query)
+        return await self.invoke_agent("contact_finder", query)
 
     async def program_intel(self, program_name: str) -> AgentInvocationResult:
         """
@@ -193,14 +190,11 @@ class DifyCrewAIBridge:
         - "DCGS-A contract details"
         - "GBSD opportunity assessment"
         """
-        return await self.invoke_agent('program_intel', program_name)
+        return await self.invoke_agent("program_intel", program_name)
 
     # Multi-Agent Workflows
 
-    async def run_capture_strategy_workflow(
-        self,
-        opportunity: str
-    ) -> Dict[str, Any]:
+    async def run_capture_strategy_workflow(self, opportunity: str) -> Dict[str, Any]:
         """
         Run the full capture strategy workflow.
 
@@ -219,18 +213,15 @@ class DifyCrewAIBridge:
         try:
             response = await self.client.get(
                 f"{self.knowledge_api_url}/workflow/capture",
-                params={"opportunity": opportunity}
+                params={"opportunity": opportunity},
             )
             response.raise_for_status()
             return response.json()
         except Exception as e:
             logger.error(f"Capture workflow error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
-    async def run_competitor_analysis_workflow(
-        self,
-        company: str
-    ) -> Dict[str, Any]:
+    async def run_competitor_analysis_workflow(self, company: str) -> Dict[str, Any]:
         """
         Run competitor analysis workflow.
 
@@ -243,18 +234,15 @@ class DifyCrewAIBridge:
         try:
             response = await self.client.get(
                 f"{self.knowledge_api_url}/workflow/competitor",
-                params={"company": company}
+                params={"company": company},
             )
             response.raise_for_status()
             return response.json()
         except Exception as e:
             logger.error(f"Competitor workflow error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
-    async def run_program_analysis(
-        self,
-        program_name: str
-    ) -> Dict[str, Any]:
+    async def run_program_analysis(self, program_name: str) -> Dict[str, Any]:
         """
         Run full program analysis with CrewAI agents.
 
@@ -269,18 +257,15 @@ class DifyCrewAIBridge:
         try:
             response = await self.client.post(
                 f"{self.knowledge_api_url}/agents/analyze-program",
-                params={"program_name": program_name}
+                params={"program_name": program_name},
             )
             response.raise_for_status()
             return response.json()
         except Exception as e:
             logger.error(f"Program analysis error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
-    async def run_outreach_prep(
-        self,
-        contact_name: str
-    ) -> Dict[str, Any]:
+    async def run_outreach_prep(self, contact_name: str) -> Dict[str, Any]:
         """
         Prepare outreach materials for a contact.
 
@@ -295,13 +280,13 @@ class DifyCrewAIBridge:
         try:
             response = await self.client.post(
                 f"{self.knowledge_api_url}/agents/prepare-outreach",
-                params={"contact_name": contact_name}
+                params={"contact_name": contact_name},
             )
             response.raise_for_status()
             return response.json()
         except Exception as e:
             logger.error(f"Outreach prep error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def run_weekly_intel(self) -> Dict[str, Any]:
         """
@@ -321,19 +306,17 @@ class DifyCrewAIBridge:
             return response.json()
         except Exception as e:
             logger.error(f"Weekly intel error: {e}")
-            return {'success': False, 'error': str(e)}
+            return {"success": False, "error": str(e)}
 
     async def get_agent_status(self) -> Dict[str, Any]:
         """Check status of CrewAI agents."""
         try:
-            response = await self.client.get(
-                f"{self.knowledge_api_url}/agents/status"
-            )
+            response = await self.client.get(f"{self.knowledge_api_url}/agents/status")
             response.raise_for_status()
             return response.json()
         except Exception as e:
             logger.error(f"Agent status error: {e}")
-            return {'available': False, 'error': str(e)}
+            return {"available": False, "error": str(e)}
 
     def get_available_agents(self) -> List[Dict[str, Any]]:
         """
@@ -349,14 +332,14 @@ class DifyCrewAIBridge:
                     "query": {
                         "type": "string",
                         "required": True,
-                        "description": "Strategy request (e.g., 'Develop capture plan for DCGS-A')"
+                        "description": "Strategy request (e.g., 'Develop capture plan for DCGS-A')",
                     }
                 },
                 "examples": [
                     "Develop capture plan for AF DCGS recompete",
                     "Assess win probability for GBSD",
-                    "Teaming strategy for ISR modernization"
-                ]
+                    "Teaming strategy for ISR modernization",
+                ],
             },
             {
                 "name": "company_research_agent",
@@ -365,14 +348,14 @@ class DifyCrewAIBridge:
                     "company_name": {
                         "type": "string",
                         "required": True,
-                        "description": "Company to research"
+                        "description": "Company to research",
                     }
                 },
                 "examples": [
                     "Research Northrop Grumman's ISR capabilities",
                     "What programs does GDIT prime on?",
-                    "Leidos competitive positioning in DCGS"
-                ]
+                    "Leidos competitive positioning in DCGS",
+                ],
             },
             {
                 "name": "contact_finder_agent",
@@ -381,14 +364,14 @@ class DifyCrewAIBridge:
                     "query": {
                         "type": "string",
                         "required": True,
-                        "description": "Contact search criteria"
+                        "description": "Contact search criteria",
                     }
                 },
                 "examples": [
                     "Find Tier 1 contacts at Leidos for DCGS",
                     "Who are the decision makers for GBSD?",
-                    "ISR program managers at Northrop"
-                ]
+                    "ISR program managers at Northrop",
+                ],
             },
             {
                 "name": "program_intel_agent",
@@ -397,15 +380,15 @@ class DifyCrewAIBridge:
                     "program_name": {
                         "type": "string",
                         "required": True,
-                        "description": "Program to analyze"
+                        "description": "Program to analyze",
                     }
                 },
                 "examples": [
                     "AF DCGS program analysis",
                     "DCGS-A contract vehicle details",
-                    "GBSD opportunity timeline"
-                ]
-            }
+                    "GBSD opportunity timeline",
+                ],
+            },
         ]
 
     async def close(self):
@@ -435,7 +418,7 @@ def create_dify_agents_router():
     @router.get("/agents/invoke")
     async def invoke_agent(
         agent: str = Query(..., description="Agent name"),
-        query: str = Query(..., description="Query for agent")
+        query: str = Query(..., description="Query for agent"),
     ):
         """Invoke an agent from Dify."""
         result = await bridge.invoke_agent(agent, query)

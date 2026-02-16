@@ -33,37 +33,42 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT))
 os.chdir(str(PROJECT_ROOT))
 
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
-    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 
 from dotenv import load_dotenv
+
 load_dotenv(PROJECT_ROOT / "BD-Automation-Engine.env")
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 import openai
 from qdrant_client import QdrantClient
 from qdrant_client.models import (
-    Distance, VectorParams, PointStruct,
-    Filter, FieldCondition, MatchValue
+    Distance,
+    VectorParams,
+    PointStruct,
+    Filter,
+    FieldCondition,
+    MatchValue,
 )
 
 from utils.llm_retry import openai_retry
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
-logger = logging.getLogger('EnrichReindex')
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+logger = logging.getLogger("EnrichReindex")
 
 # Suppress noisy HTTP logging from httpx/httpcore
-logging.getLogger('httpx').setLevel(logging.WARNING)
-logging.getLogger('httpcore').setLevel(logging.WARNING)
-logging.getLogger('openai').setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("httpcore").setLevel(logging.WARNING)
+logging.getLogger("openai").setLevel(logging.WARNING)
 
 # ── Constants ────────────────────────────────────────────────────────────
 QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
-NAMESPACE = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')
+NAMESPACE = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
 
 EMBED_BATCH_SIZE = 200
 UPSERT_BATCH_SIZE = 500
@@ -71,18 +76,28 @@ BATCH_SLEEP = 3
 
 DS_DIR = PROJECT_ROOT / "data" / "from_data_scraper"
 N8N_OUTPUTS_DIR = PROJECT_ROOT / "data" / "from_n8n_builder" / "analytical_outputs"
-REGISTRY_PATH = PROJECT_ROOT / "Engine8_Knowledge" / "data" / "bd_file_metadata_registry.json"
+REGISTRY_PATH = (
+    PROJECT_ROOT / "Engine8_Knowledge" / "data" / "bd_file_metadata_registry.json"
+)
 
 COLLECTIONS = ["contacts", "programs", "jobs", "documents", "activities"]
 
 oai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
-stats = defaultdict(lambda: {"indexed": 0, "skipped": 0, "errors": 0,
-                              "metadata_added": 0, "zeros_fixed": 0})
+stats = defaultdict(
+    lambda: {
+        "indexed": 0,
+        "skipped": 0,
+        "errors": 0,
+        "metadata_added": 0,
+        "zeros_fixed": 0,
+    }
+)
 
 
 # ══════════════════════════════════════════════════════════════════════════
 # CORE EMBEDDING FUNCTIONS (proven from index_staged_data.py)
 # ══════════════════════════════════════════════════════════════════════════
+
 
 def make_id(collection: str, *parts) -> str:
     content = f"{collection}:" + "|".join(str(p).strip().lower() for p in parts if p)
@@ -97,10 +112,14 @@ def _embed_one_batch(batch_texts: list[str]) -> list:
             resp = oai_client.embeddings.create(model=EMBEDDING_MODEL, input=truncated)
             return [d.embedding for d in resp.data]
         except openai.BadRequestError as e:
-            if 'max_tokens_per_request' in str(e) and len(truncated) > 10:
+            if "max_tokens_per_request" in str(e) and len(truncated) > 10:
                 mid = len(truncated) // 2
-                logger.info("Splitting batch %d -> %d + %d (token limit)",
-                            len(truncated), mid, len(truncated) - mid)
+                logger.info(
+                    "Splitting batch %d -> %d + %d (token limit)",
+                    len(truncated),
+                    mid,
+                    len(truncated) - mid,
+                )
                 left = _embed_one_batch(batch_texts[:mid])
                 time.sleep(1)
                 right = _embed_one_batch(batch_texts[mid:])
@@ -109,7 +128,9 @@ def _embed_one_batch(batch_texts: list[str]) -> list:
             return [None] * len(truncated)
         except openai.RateLimitError:
             wait = min(30, 5 * (attempt + 1))
-            logger.info("Rate limited, waiting %ds (attempt %d/5)...", wait, attempt + 1)
+            logger.info(
+                "Rate limited, waiting %ds (attempt %d/5)...", wait, attempt + 1
+            )
             time.sleep(wait)
         except Exception as e:
             if attempt < 4:
@@ -128,13 +149,18 @@ def batch_embed(texts: list[str], batch_size: int = EMBED_BATCH_SIZE) -> list:
     all_embeddings = []
     total_batches = (len(texts) + batch_size - 1) // batch_size
     for batch_num, i in enumerate(range(0, len(texts), batch_size)):
-        batch = texts[i:i + batch_size]
+        batch = texts[i : i + batch_size]
         result = _embed_one_batch(batch)
         all_embeddings.extend(result)
         done = min(i + batch_size, len(texts))
         if done % 1000 < batch_size or done == len(texts):
-            logger.info("  Embedded %d/%d texts (batch %d/%d)",
-                        done, len(texts), batch_num + 1, total_batches)
+            logger.info(
+                "  Embedded %d/%d texts (batch %d/%d)",
+                done,
+                len(texts),
+                batch_num + 1,
+                total_batches,
+            )
         if batch_num < total_batches - 1:
             time.sleep(BATCH_SLEEP)
     return all_embeddings
@@ -143,15 +169,15 @@ def batch_embed(texts: list[str], batch_size: int = EMBED_BATCH_SIZE) -> list:
 def read_csv_rows(filepath: Path) -> list[dict]:
     rows = []
     try:
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 cleaned = {}
                 for k, v in row.items():
                     if k is None:
                         continue
-                    clean_k = k.lstrip('\ufeff').strip('"').strip()
-                    cleaned[clean_k] = (v or '').strip()
+                    clean_k = k.lstrip("\ufeff").strip('"').strip()
+                    cleaned[clean_k] = (v or "").strip()
                 rows.append(cleaned)
     except Exception as e:
         logger.error("Failed to read %s: %s", filepath.name, e)
@@ -162,8 +188,11 @@ def make_text_from_row(row: dict, key_fields: list[str] = None) -> str:
     if key_fields:
         parts = [f"{k}: {row.get(k, '')}" for k in key_fields if row.get(k)]
     else:
-        parts = [f"{k}: {v}" for k, v in row.items()
-                 if v and not k.startswith('_') and len(str(v)) < 2000]
+        parts = [
+            f"{k}: {v}"
+            for k, v in row.items()
+            if v and not k.startswith("_") and len(str(v)) < 2000
+        ]
     return " | ".join(parts)[:8000]
 
 
@@ -172,7 +201,7 @@ def ensure_collection(client: QdrantClient, name: str):
     if name not in existing:
         client.create_collection(
             collection_name=name,
-            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
         logger.info("Created collection: %s", name)
 
@@ -181,11 +210,12 @@ def ensure_collection(client: QdrantClient, name: str):
 # METADATA REGISTRY
 # ══════════════════════════════════════════════════════════════════════════
 
+
 def load_registry() -> dict:
     if not REGISTRY_PATH.exists():
         logger.warning("Registry not found at %s", REGISTRY_PATH)
         return {}
-    with open(REGISTRY_PATH, 'r', encoding='utf-8') as f:
+    with open(REGISTRY_PATH, "r", encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -207,12 +237,17 @@ def build_metadata_index(registry: dict) -> tuple[dict, list]:
     for d in registry.get("directories", []):
         path = d.get("path", "").replace("\\", "/").rstrip("/")
         if path:
-            dir_index.append((path.lower(), {
-                "intel_category": d.get("intelligence_category", []),
-                "search_tags": d.get("search_tags", []),
-                "priority": d.get("priority", "MEDIUM"),
-                "qdrant_collection": d.get("qdrant_collection", "documents"),
-            }))
+            dir_index.append(
+                (
+                    path.lower(),
+                    {
+                        "intel_category": d.get("intelligence_category", []),
+                        "search_tags": d.get("search_tags", []),
+                        "priority": d.get("priority", "MEDIUM"),
+                        "qdrant_collection": d.get("qdrant_collection", "documents"),
+                    },
+                )
+            )
     # Sort longest prefix first for greedy matching
     dir_index.sort(key=lambda x: -len(x[0]))
 
@@ -226,28 +261,72 @@ FILENAME_RULES = [
     (r"_dossier\.md$", ["COMPETITIVE_INTEL", "CONTACT_INTEL"], "HIGH", "data-scraper"),
     (r"_past_performance\.md$", ["PAST_PERFORMANCE"], "HIGH", "data-scraper"),
     (r"HUMINT|humint", ["HUMINT", "BD_STRATEGY"], "CRITICAL", None),
-    (r"colton.?scurry|account.?takeover", ["HUMINT", "BD_STRATEGY", "CONTACT_INTEL"], "CRITICAL", None),
+    (
+        r"colton.?scurry|account.?takeover",
+        ["HUMINT", "BD_STRATEGY", "CONTACT_INTEL"],
+        "CRITICAL",
+        None,
+    ),
     (r"playbook|PLAYBOOK", ["BD_STRATEGY"], "HIGH", None),
-    (r"call.?list|call.?sheet|CALL_LIST|CALL_SHEET", ["BD_STRATEGY", "CONTACT_INTEL"], "HIGH", None),
-    (r"bd_target|BD_TARGET|bd_scored|bd_priority|bd_master|MASTER_TARGET", ["BD_STRATEGY", "CONTRACT_INTEL"], "HIGH", None),
+    (
+        r"call.?list|call.?sheet|CALL_LIST|CALL_SHEET",
+        ["BD_STRATEGY", "CONTACT_INTEL"],
+        "HIGH",
+        None,
+    ),
+    (
+        r"bd_target|BD_TARGET|bd_scored|bd_priority|bd_master|MASTER_TARGET",
+        ["BD_STRATEGY", "CONTRACT_INTEL"],
+        "HIGH",
+        None,
+    ),
     (r"competitor|COMPETITOR|scorecard|SCORECARD", ["COMPETITIVE_INTEL"], "HIGH", None),
     (r"past.?performance|PAST_PERFORMANCE", ["PAST_PERFORMANCE"], "HIGH", None),
-    (r"FPDS|fpds|subaward|SUBAWARD|solicitation|SOLICITATION|opportunity|OPPORTUNITY", ["CONTRACT_INTEL", "FINANCIAL_INTEL"], "HIGH", None),
-    (r"PIID|piid|contract.*value|CONTRACT.*VALUE", ["CONTRACT_INTEL", "FINANCIAL_INTEL"], "HIGH", None),
+    (
+        r"FPDS|fpds|subaward|SUBAWARD|solicitation|SOLICITATION|opportunity|OPPORTUNITY",
+        ["CONTRACT_INTEL", "FINANCIAL_INTEL"],
+        "HIGH",
+        None,
+    ),
+    (
+        r"PIID|piid|contract.*value|CONTRACT.*VALUE",
+        ["CONTRACT_INTEL", "FINANCIAL_INTEL"],
+        "HIGH",
+        None,
+    ),
     (r"PHASE\d|phase\d", ["CONTRACT_INTEL", "BD_STRATEGY"], "MEDIUM", None),
-    (r"contact|CONTACT|org.?chart|ORG.?CHART|hierarchy|HIERARCHY", ["CONTACT_INTEL"], "HIGH", None),
-    (r"program|PROGRAM|federal.*program|Federal.*Program", ["PROGRAM_INTEL"], "HIGH", None),
+    (
+        r"contact|CONTACT|org.?chart|ORG.?CHART|hierarchy|HIERARCHY",
+        ["CONTACT_INTEL"],
+        "HIGH",
+        None,
+    ),
+    (
+        r"program|PROGRAM|federal.*program|Federal.*Program",
+        ["PROGRAM_INTEL"],
+        "HIGH",
+        None,
+    ),
     (r"job|JOB|hiring|HIRING|requisition", ["JOB_INTEL"], "MEDIUM", None),
     (r"intelligence|INTELLIGENCE|enriched|ENRICHED", ["BD_STRATEGY"], "HIGH", None),
-    (r"briefing|BRIEFING|report|REPORT|dashboard|DASHBOARD", ["BD_STRATEGY"], "MEDIUM", None),
+    (
+        r"briefing|BRIEFING|report|REPORT|dashboard|DASHBOARD",
+        ["BD_STRATEGY"],
+        "MEDIUM",
+        None,
+    ),
     (r"prime|PRIME|contractor|CONTRACTOR", ["COMPETITIVE_INTEL"], "HIGH", None),
     (r"workflow|WORKFLOW|pipeline|automation", ["ARCHITECTURE"], "LOW", None),
     (r"notes|NOTES|activity|ACTIVITY", ["HUMINT"], "MEDIUM", None),
 ]
 
 
-def resolve_metadata(source_filename: str, source_type: str = None,
-                     file_index: dict = None, dir_index: list = None) -> dict:
+def resolve_metadata(
+    source_filename: str,
+    source_type: str = None,
+    file_index: dict = None,
+    dir_index: list = None,
+) -> dict:
     """Resolve metadata tags for a given source filename."""
     fname_lower = (source_filename or "").lower()
 
@@ -283,12 +362,15 @@ def resolve_metadata(source_filename: str, source_type: str = None,
 
     # Generate search tags from filename
     tags = []
-    clean_name = re.sub(r'[_\-.]', ' ', Path(source_filename or "unknown").stem)
+    clean_name = re.sub(r"[_\-.]", " ", Path(source_filename or "unknown").stem)
     tags = [t.strip().lower() for t in clean_name.split() if len(t.strip()) > 2]
 
     # Detect source project from path hints
     if source_type:
-        if "data_scraper" in source_type or "scraper" in (source_filename or "").lower():
+        if (
+            "data_scraper" in source_type
+            or "scraper" in (source_filename or "").lower()
+        ):
             source_project = "data-scraper"
         elif "n8n" in source_type:
             source_project = "n8n-builder"
@@ -305,39 +387,99 @@ def resolve_metadata(source_filename: str, source_type: str = None,
 # PHASE A: ENRICH EXISTING VECTORS + FIX ZEROS
 # ══════════════════════════════════════════════════════════════════════════
 
+
 def create_text_for_reembed(payload: dict, collection: str) -> str:
     """Construct embedding text from payload for zero-vector re-embedding."""
-    if collection == 'contacts':
-        fields = ['name', 'Name', 'first_name', 'First Name', 'last_name', 'Last Name',
-                  'title', 'Title', 'company', 'Company', 'program', 'Programs',
-                  'tier', 'clearance', 'Clearances', 'email', 'Email',
-                  'linkedin', 'LinkedIn', 'Primes', 'content']
-    elif collection == 'programs':
-        fields = ['Program Name', 'name', 'Acronym', 'Agency Owner', 'agency',
-                  'Prime Contractor', 'prime_contractor', 'Contract Value',
-                  'description', 'content', 'Keywords/Signals', 'Clearance Requirements']
-    elif collection == 'jobs':
-        fields = ['title', 'company', 'location', 'clearance', 'description',
-                  'requirements', 'program', 'employment_type', 'content']
-    elif collection == 'documents':
-        fields = ['title', 'content', 'text', 'summary', 'description',
-                  '_source_type', 'prime_name', 'recipient', 'company']
-    elif collection == 'activities':
-        fields = ['content', 'comments', 'note_text', 'subject', 'action',
-                  'activity_type', 'actor', 'Name', 'Type', 'Candidate', 'Job Title']
+    if collection == "contacts":
+        fields = [
+            "name",
+            "Name",
+            "first_name",
+            "First Name",
+            "last_name",
+            "Last Name",
+            "title",
+            "Title",
+            "company",
+            "Company",
+            "program",
+            "Programs",
+            "tier",
+            "clearance",
+            "Clearances",
+            "email",
+            "Email",
+            "linkedin",
+            "LinkedIn",
+            "Primes",
+            "content",
+        ]
+    elif collection == "programs":
+        fields = [
+            "Program Name",
+            "name",
+            "Acronym",
+            "Agency Owner",
+            "agency",
+            "Prime Contractor",
+            "prime_contractor",
+            "Contract Value",
+            "description",
+            "content",
+            "Keywords/Signals",
+            "Clearance Requirements",
+        ]
+    elif collection == "jobs":
+        fields = [
+            "title",
+            "company",
+            "location",
+            "clearance",
+            "description",
+            "requirements",
+            "program",
+            "employment_type",
+            "content",
+        ]
+    elif collection == "documents":
+        fields = [
+            "title",
+            "content",
+            "text",
+            "summary",
+            "description",
+            "_source_type",
+            "prime_name",
+            "recipient",
+            "company",
+        ]
+    elif collection == "activities":
+        fields = [
+            "content",
+            "comments",
+            "note_text",
+            "subject",
+            "action",
+            "activity_type",
+            "actor",
+            "Name",
+            "Type",
+            "Candidate",
+            "Job Title",
+        ]
     else:
-        fields = ['name', 'title', 'content', 'text', 'description']
+        fields = ["name", "title", "content", "text", "description"]
 
     parts = []
     for f in fields:
-        val = payload.get(f, '')
+        val = payload.get(f, "")
         if val and str(val).strip():
             parts.append(f"{f}: {str(val)[:1000]}")
 
     if not parts:
         # Fallback: use all non-underscore fields
         for k, v in payload.items():
-            if v and not k.startswith('_') and len(str(v)) < 2000:
+            if v and not k.startswith("_") and len(str(v)) < 2000:
                 parts.append(f"{k}: {v}")
 
     return " | ".join(parts)[:8000]
@@ -347,8 +489,9 @@ def is_zero_vector(vector: list[float]) -> bool:
     return all(abs(v) < 1e-10 for v in vector)
 
 
-def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
-            dry_run: bool = False):
+def phase_a(
+    client: QdrantClient, file_index: dict, dir_index: list, dry_run: bool = False
+):
     """Enrich ALL existing vectors with metadata tags. Fix any zero vectors."""
     print("\n" + "=" * 70)
     print("PHASE A: ENRICH EXISTING VECTORS + FIX ZEROS")
@@ -374,8 +517,11 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
 
         while scanned < min(total, 20000):
             result = client.scroll(
-                collection_name=coll, limit=1000, offset=offset,
-                with_vectors=False, with_payload=True
+                collection_name=coll,
+                limit=1000,
+                offset=offset,
+                with_vectors=False,
+                with_payload=True,
             )
             points, next_offset = result
             if not points:
@@ -383,8 +529,8 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
 
             new_in_batch = 0
             for p in points:
-                src = p.payload.get('_source', '')
-                src_type = p.payload.get('_source_type', '')
+                src = p.payload.get("_source", "")
+                src_type = p.payload.get("_source_type", "")
                 if src and src not in sources_seen:
                     sources_seen.add(src)
                     meta = resolve_metadata(src, src_type, file_index, dir_index)
@@ -405,7 +551,9 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
             if offset is None:
                 break
 
-        print(f"    Found {len(source_metadata)} unique sources across {scanned:,} vectors")
+        print(
+            f"    Found {len(source_metadata)} unique sources across {scanned:,} vectors"
+        )
 
         # Step 2: Apply metadata via filter-based set_payload (very efficient)
         enriched = 0
@@ -427,11 +575,10 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
                     collection_name=coll,
                     payload=payload_update,
                     points=Filter(
-                        must=[FieldCondition(
-                            key="_source",
-                            match=MatchValue(value=src)
-                        )]
-                    )
+                        must=[
+                            FieldCondition(key="_source", match=MatchValue(value=src))
+                        ]
+                    ),
                 )
                 enriched += 1
             except Exception as e:
@@ -443,8 +590,7 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
 
         # Step 3: Check for zero vectors (sample first, full scan if found)
         sample_result = client.scroll(
-            collection_name=coll, limit=100,
-            with_vectors=True, with_payload=False
+            collection_name=coll, limit=100, with_vectors=True, with_payload=False
         )
         sample_zeros = sum(1 for p in sample_result[0] if is_zero_vector(p.vector))
 
@@ -461,8 +607,11 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
 
         while True:
             result = client.scroll(
-                collection_name=coll, limit=100, offset=offset,
-                with_vectors=True, with_payload=True
+                collection_name=coll,
+                limit=100,
+                offset=offset,
+                with_vectors=True,
+                with_payload=True,
             )
             points, next_offset = result
             if not points:
@@ -508,77 +657,109 @@ def phase_a(client: QdrantClient, file_index: dict, dir_index: list,
 # Files already handled by index_staged_data.py (9 phases)
 ALREADY_INDEXED_DS = {
     # Phase 1: Contracts
-    "FULL_OPPORTUNITIES.csv", "FULL_PROGRAM_CONTRACTS.csv",
-    "MASTER_CONTRACTS_COMBINED.csv", "PHASE2_PROGRAM_PIIDS_FULL.csv",
-    "PHASE5_RECENT_ACTIVE_CONTRACTS.csv", "db1_dod_prime_contracts_100m.csv",
-    "db2_subawards_tango.csv", "db3_dod_it_opportunities.csv",
-    "db3_dod_opportunities_all.csv", "db3_dod_solicitations.csv",
-    "phase3_opportunities_tango.csv", "phase3_solicitations_only.csv",
-    "L3Harris_GBS_PROGRAM_CONTRACTS.csv", "L3Harris_SATCOM_RF_CONTRACTS.csv",
-    "navy_subaward_N00019.csv", "sam_data_elements.csv",
-    "size_billion_1b_5b.csv", "size_giant_5b_10b.csv",
-    "size_large_500m_1b.csv", "size_mega_10b_plus.csv",
+    "FULL_OPPORTUNITIES.csv",
+    "FULL_PROGRAM_CONTRACTS.csv",
+    "MASTER_CONTRACTS_COMBINED.csv",
+    "PHASE2_PROGRAM_PIIDS_FULL.csv",
+    "PHASE5_RECENT_ACTIVE_CONTRACTS.csv",
+    "db1_dod_prime_contracts_100m.csv",
+    "db2_subawards_tango.csv",
+    "db3_dod_it_opportunities.csv",
+    "db3_dod_opportunities_all.csv",
+    "db3_dod_solicitations.csv",
+    "phase3_opportunities_tango.csv",
+    "phase3_solicitations_only.csv",
+    "L3Harris_GBS_PROGRAM_CONTRACTS.csv",
+    "L3Harris_SATCOM_RF_CONTRACTS.csv",
+    "navy_subaward_N00019.csv",
+    "sam_data_elements.csv",
+    "size_billion_1b_5b.csv",
+    "size_giant_5b_10b.csv",
+    "size_large_500m_1b.csv",
+    "size_mega_10b_plus.csv",
     "agency_Department_of_Defense.csv",
     # Phase 2: BD Targets
-    "master_bd_targets.csv", "master_bd_targets_contract_enriched.csv",
-    "master_bd_targets_fpds_enriched.csv", "db6_bd_targets_all.csv",
-    "db6_bd_targets_priority.csv", "tier1_high_priority_targets.csv",
-    "tier2_medium_priority_targets.csv", "tier3_standard_targets.csv",
+    "master_bd_targets.csv",
+    "master_bd_targets_contract_enriched.csv",
+    "master_bd_targets_fpds_enriched.csv",
+    "db6_bd_targets_all.csv",
+    "db6_bd_targets_priority.csv",
+    "tier1_high_priority_targets.csv",
+    "tier2_medium_priority_targets.csv",
+    "tier3_standard_targets.csv",
     "it_services_all_targets.csv",
     # Phase 3: Primes
-    "MASTER_PRIMES_ENRICHED.csv", "PRIMES_FROM_NOTES.csv",
-    "PRIME_INTELLIGENCE_DETAILED.csv", "FULL_PRIME_ENRICHMENT.csv",
-    "primes_usaspending_enriched.csv", "high_subcontract_activity.csv",
+    "MASTER_PRIMES_ENRICHED.csv",
+    "PRIMES_FROM_NOTES.csv",
+    "PRIME_INTELLIGENCE_DETAILED.csv",
+    "FULL_PRIME_ENRICHMENT.csv",
+    "primes_usaspending_enriched.csv",
+    "high_subcontract_activity.csv",
     # Phase 4: Contacts
-    "CONTACTS_INTELLIGENCE.csv", "CONTACT_INTELLIGENCE_DETAILED.csv",
-    "bullhorn_contacts_master.csv", "PHASE1_FAIR_GAME_CONTACTS.csv",
-    "PHASE1_CLAIMED_CONTACTS.csv", "ORG_CHART_DATA.csv",
-    "colton_scurry_contacts.csv", "colton_scurry_contact_handoff.csv",
+    "CONTACTS_INTELLIGENCE.csv",
+    "CONTACT_INTELLIGENCE_DETAILED.csv",
+    "bullhorn_contacts_master.csv",
+    "PHASE1_FAIR_GAME_CONTACTS.csv",
+    "PHASE1_CLAIMED_CONTACTS.csv",
+    "ORG_CHART_DATA.csv",
+    "colton_scurry_contacts.csv",
+    "colton_scurry_contact_handoff.csv",
     "ZOOMINFO_L3HARRIS.csv",
     # Phase 6: Jobs
-    "JOBS_ENRICHED.csv", "JOBS_INTELLIGENCE_MAPPED.csv",
-    "bd_top_program_jobs_detail.csv", "colton_scurry_jobs.csv",
-    "hub_jobs_2026-01-26.json", "standardized_jobs_2026-01-26.json",
+    "JOBS_ENRICHED.csv",
+    "JOBS_INTELLIGENCE_MAPPED.csv",
+    "bd_top_program_jobs_detail.csv",
+    "colton_scurry_jobs.csv",
+    "hub_jobs_2026-01-26.json",
+    "standardized_jobs_2026-01-26.json",
     # Phase 7: Programs
-    "MASTER_PROGRAMS_ENRICHED.csv", "PROGRAMS_CLEAN.csv",
-    "PROGRAMS_FROM_NOTES.csv", "GAP_PROGRAMS.csv",
+    "MASTER_PROGRAMS_ENRICHED.csv",
+    "PROGRAMS_CLEAN.csv",
+    "PROGRAMS_FROM_NOTES.csv",
+    "GAP_PROGRAMS.csv",
     "PROGRAM_INTELLIGENCE_DETAILED.csv",
     # Skip files
-    "bullhorn_programs_master.csv", "bullhorn_primes_master.csv",
+    "bullhorn_programs_master.csv",
+    "bullhorn_primes_master.csv",
 }
 
 SKIP_DS_FILES = {
-    "bullhorn_past_performance.db", "data_inventory.json",
+    "bullhorn_past_performance.db",
+    "data_inventory.json",
     "BD_Job_Openings_2026-01-26.xlsx",
     "ALL_NOTES_COMBINED.csv",  # 292K rows, duplicates existing activities
 }
 
 # N8N files to skip
 N8N_SKIP_PREFIXES = [
-    "CSIS", "Lookup_", "VendorNames_", "CSISbudget", "CSISvariable",
+    "CSIS",
+    "Lookup_",
+    "VendorNames_",
+    "CSISbudget",
+    "CSISvariable",
 ]
 
 N8N_SKIP_PATTERNS = [
-    r"^Agency_",          # Reference lookup tables
+    r"^Agency_",  # Reference lookup tables
     r"^Budget_",
     r"^Contract_Pricing",
     r"^ProductOrService",
-    r"^action_",          # action_obligation, action_type_code
-    r"^agency_",          # agency_Department_of_*
+    r"^action_",  # action_obligation, action_type_code
+    r"^agency_",  # agency_Department_of_*
     r"^assistance_type",
     r"^awarding_",
     r"^business_type",
-    r"^contract_",        # Lowercase reference tables
+    r"^contract_",  # Lowercase reference tables
     r"^extent_competed",
     r"^fair_opportunity",
     r"^funding_",
     r"^legal_entity",
-    r"^naics_",           # Reference NAICS tables
+    r"^naics_",  # Reference NAICS tables
     r"^number_of_",
     r"^object_class",
     r"^period_of_",
     r"^place_of_",
-    r"^pop_",             # Period of performance ref
+    r"^pop_",  # Period of performance ref
     r"^price_evaluation",
     r"^product_or_service",
     r"^program_activity",
@@ -594,21 +775,21 @@ N8N_SKIP_PATTERNS = [
     r"^ultimate_parent",
     r"^vendor_",
     r"^2\d{3}[-_]\d{2}",  # Historical date-prefixed files (2012-08-*, 2025_07_*)
-    r"^A\d{3}",          # BEA reference tables (A191RD3A086NBEA etc.)
-    r"^Vehicle\.csv$",    # Reference table
-    r"^VendorSize",       # Reference table
-    r"^World_Factbook",   # Reference data
-    r"^watcher_state",    # System file
-    r"^graph_hints",      # System file
-    r"^project_index",    # System file
+    r"^A\d{3}",  # BEA reference tables (A191RD3A086NBEA etc.)
+    r"^Vehicle\.csv$",  # Reference table
+    r"^VendorSize",  # Reference table
+    r"^World_Factbook",  # Reference data
+    r"^watcher_state",  # System file
+    r"^graph_hints",  # System file
+    r"^project_index",  # System file
     r"^file_categories",  # System file
     r"^settings\.local",  # System config
-    r"^commodity_",       # commodity_translations_merge (36K rows)
-    r"^Contract_Large",   # Contract_LargeVendorLabeledAsSmallBusiness (312K rows)
-    r"^Contract_N\d",     # Contract_N0001920C0032 sub-awards
-    r"^Defense_Major",    # Defense_Major_Command_Codes (19K rows)
-    r"^ProdServ",         # ProdServPlatformNAICS (695K rows)
-    r"^Footing_",         # Budget footing reference data
+    r"^commodity_",  # commodity_translations_merge (36K rows)
+    r"^Contract_Large",  # Contract_LargeVendorLabeledAsSmallBusiness (312K rows)
+    r"^Contract_N\d",  # Contract_N0001920C0032 sub-awards
+    r"^Defense_Major",  # Defense_Major_Command_Codes (19K rows)
+    r"^ProdServ",  # ProdServPlatformNAICS (695K rows)
+    r"^Footing_",  # Budget footing reference data
 ]
 
 # Max rows to index per CSV file (skip massive reference tables)
@@ -630,14 +811,18 @@ def classify_file_to_collection(filename: str) -> str:
     fn = filename.lower()
 
     # Programs
-    if re.match(r'federal.?program', fn):
+    if re.match(r"federal.?program", fn):
         return "programs"
     if fn.startswith("discovered_programs") or fn.startswith("programs_kb"):
         return "programs"
     if fn.startswith("dod-staffing-programs") or fn.startswith("dod-programs"):
         return "programs"
-    if fn in ("programs_final.csv", "program_intelligence.csv",
-              "program_hierarchy.csv", "programs_with_contracts.csv"):
+    if fn in (
+        "programs_final.csv",
+        "program_intelligence.csv",
+        "program_hierarchy.csv",
+        "programs_with_contracts.csv",
+    ):
         return "programs"
     if fn.startswith("01_program_directory"):
         return "programs"
@@ -666,16 +851,25 @@ def classify_file_to_collection(filename: str) -> str:
     return "documents"
 
 
-def index_csv_file(client: QdrantClient, filepath: Path, collection: str,
-                   metadata: dict, source_project: str = "data-scraper"):
+def index_csv_file(
+    client: QdrantClient,
+    filepath: Path,
+    collection: str,
+    metadata: dict,
+    source_project: str = "data-scraper",
+):
     """Index a CSV file into Qdrant with metadata tags."""
     rows = read_csv_rows(filepath)
     if not rows:
         return 0
 
     if len(rows) > MAX_CSV_ROWS:
-        logger.warning("SKIPPING %s: %d rows exceeds MAX_CSV_ROWS (%d)",
-                        filepath.name, len(rows), MAX_CSV_ROWS)
+        logger.warning(
+            "SKIPPING %s: %d rows exceeds MAX_CSV_ROWS (%d)",
+            filepath.name,
+            len(rows),
+            MAX_CSV_ROWS,
+        )
         return 0
 
     logger.info("Indexing CSV %s -> %s (%d rows)", filepath.name, collection, len(rows))
@@ -684,10 +878,22 @@ def index_csv_file(client: QdrantClient, filepath: Path, collection: str,
     for row in rows:
         # Build ID from all key fields
         id_parts = []
-        for f in ["piid", "notice_id", "contract_id", "award_id", "title",
-                   "name", "Name", "Full Name", "contact_name", "company",
-                   "Program Name", "program_name", "Acronym"]:
-            val = row.get(f, '')
+        for f in [
+            "piid",
+            "notice_id",
+            "contract_id",
+            "award_id",
+            "title",
+            "name",
+            "Name",
+            "Full Name",
+            "contact_name",
+            "company",
+            "Program Name",
+            "program_name",
+            "Acronym",
+        ]:
+            val = row.get(f, "")
             if val:
                 id_parts.append(val)
         if not id_parts:
@@ -737,11 +943,16 @@ def index_csv_file(client: QdrantClient, filepath: Path, collection: str,
     return count
 
 
-def index_md_file(client: QdrantClient, filepath: Path, collection: str,
-                  metadata: dict, source_project: str = "data-scraper"):
+def index_md_file(
+    client: QdrantClient,
+    filepath: Path,
+    collection: str,
+    metadata: dict,
+    source_project: str = "data-scraper",
+):
     """Index a Markdown file, chunking if > 8000 chars."""
     try:
-        content = filepath.read_text(encoding='utf-8', errors='replace')
+        content = filepath.read_text(encoding="utf-8", errors="replace")
     except Exception as e:
         logger.error("Failed to read %s: %s", filepath.name, e)
         return 0
@@ -750,10 +961,10 @@ def index_md_file(client: QdrantClient, filepath: Path, collection: str,
         return 0
 
     # Extract title from first heading or filename
-    title = filepath.stem.replace('_', ' ')
-    first_line = content.split('\n')[0].strip()
-    if first_line.startswith('#'):
-        title = first_line.lstrip('#').strip()
+    title = filepath.stem.replace("_", " ")
+    first_line = content.split("\n")[0].strip()
+    if first_line.startswith("#"):
+        title = first_line.lstrip("#").strip()
 
     # Chunk if large
     chunks = []
@@ -761,7 +972,7 @@ def index_md_file(client: QdrantClient, filepath: Path, collection: str,
         chunks = [(content, 0)]
     else:
         # Split by headings (## or ###)
-        sections = re.split(r'\n(?=##\s)', content)
+        sections = re.split(r"\n(?=##\s)", content)
         current_chunk = ""
         for section in sections:
             if len(current_chunk) + len(section) > 7000 and current_chunk:
@@ -821,11 +1032,16 @@ def index_md_file(client: QdrantClient, filepath: Path, collection: str,
     return count
 
 
-def index_json_file(client: QdrantClient, filepath: Path, collection: str,
-                    metadata: dict, source_project: str = "data-scraper"):
+def index_json_file(
+    client: QdrantClient,
+    filepath: Path,
+    collection: str,
+    metadata: dict,
+    source_project: str = "data-scraper",
+):
     """Index a JSON file (array or dict of records)."""
     try:
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             data = json.load(f)
     except Exception as e:
         logger.error("Failed to read JSON %s: %s", filepath.name, e)
@@ -851,7 +1067,9 @@ def index_json_file(client: QdrantClient, filepath: Path, collection: str,
     if not isinstance(data, list) or not data:
         return 0
 
-    logger.info("Indexing JSON %s -> %s (%d records)", filepath.name, collection, len(data))
+    logger.info(
+        "Indexing JSON %s -> %s (%d records)", filepath.name, collection, len(data)
+    )
 
     texts, ids, payloads = [], [], []
     for record in data:
@@ -860,18 +1078,19 @@ def index_json_file(client: QdrantClient, filepath: Path, collection: str,
 
         id_parts = [filepath.name]
         for f in ["title", "name", "id", "_doc_key"]:
-            val = record.get(f, '')
+            val = record.get(f, "")
             if val:
                 id_parts.append(str(val)[:100])
                 break
 
-        point_id = make_id(collection, *id_parts,
-                           json.dumps(record, sort_keys=True)[:100])
+        point_id = make_id(
+            collection, *id_parts, json.dumps(record, sort_keys=True)[:100]
+        )
 
         # Build text
         text_parts = []
         for k, v in record.items():
-            if v and not k.startswith('_') and isinstance(v, (str, int, float)):
+            if v and not k.startswith("_") and isinstance(v, (str, int, float)):
                 text_parts.append(f"{k}: {str(v)[:500]}")
         text = " | ".join(text_parts)[:8000]
         if not text.strip():
@@ -919,8 +1138,9 @@ def index_json_file(client: QdrantClient, filepath: Path, collection: str,
     return count
 
 
-def phase_b(client: QdrantClient, file_index: dict, dir_index: list,
-            dry_run: bool = False):
+def phase_b(
+    client: QdrantClient, file_index: dict, dir_index: list, dry_run: bool = False
+):
     """Index new staged analytical files."""
     print("\n" + "=" * 70)
     print("PHASE B: INDEX NEW STAGED FILES")
@@ -942,7 +1162,7 @@ def phase_b(client: QdrantClient, file_index: dict, dir_index: list,
                 continue
             if fp.name in SKIP_DS_FILES:
                 continue
-            if fp.suffix.lower() not in ('.csv', '.md', '.json'):
+            if fp.suffix.lower() not in (".csv", ".md", ".json"):
                 continue
             ds_files.append(fp)
 
@@ -959,11 +1179,11 @@ def phase_b(client: QdrantClient, file_index: dict, dir_index: list,
             ds_indexed += 1
             continue
 
-        if fp.suffix.lower() == '.csv':
+        if fp.suffix.lower() == ".csv":
             count = index_csv_file(client, fp, collection, metadata, "data-scraper")
-        elif fp.suffix.lower() == '.md':
+        elif fp.suffix.lower() == ".md":
             count = index_md_file(client, fp, collection, metadata, "data-scraper")
-        elif fp.suffix.lower() == '.json':
+        elif fp.suffix.lower() == ".json":
             count = index_json_file(client, fp, collection, metadata, "data-scraper")
         else:
             count = 0
@@ -984,7 +1204,7 @@ def phase_b(client: QdrantClient, file_index: dict, dir_index: list,
         for fp in sorted(N8N_OUTPUTS_DIR.rglob("*")):
             if not fp.is_file():
                 continue
-            if fp.suffix.lower() not in ('.csv', '.md', '.json'):
+            if fp.suffix.lower() not in (".csv", ".md", ".json"):
                 continue
             if should_skip_n8n(fp.name):
                 continue
@@ -1003,11 +1223,11 @@ def phase_b(client: QdrantClient, file_index: dict, dir_index: list,
             n8n_indexed += 1
             continue
 
-        if fp.suffix.lower() == '.csv':
+        if fp.suffix.lower() == ".csv":
             count = index_csv_file(client, fp, collection, metadata, "n8n-builder")
-        elif fp.suffix.lower() == '.md':
+        elif fp.suffix.lower() == ".md":
             count = index_md_file(client, fp, collection, metadata, "n8n-builder")
-        elif fp.suffix.lower() == '.json':
+        elif fp.suffix.lower() == ".json":
             count = index_json_file(client, fp, collection, metadata, "n8n-builder")
         else:
             count = 0
@@ -1038,8 +1258,10 @@ def phase_c(client: QdrantClient):
     print("PHASE C: SEARCH QUALITY BENCHMARK")
     print("=" * 70)
 
-    print(f"\n{'#':<3} {'Query':<40} {'Collection':<12} {'Top Score':<10} "
-          f"{'Target':<8} {'Status':<6} {'Top Result Source':<40}")
+    print(
+        f"\n{'#':<3} {'Query':<40} {'Collection':<12} {'Top Score':<10} "
+        f"{'Target':<8} {'Status':<6} {'Top Result Source':<40}"
+    )
     print("-" * 160)
 
     passed = 0
@@ -1051,32 +1273,36 @@ def phase_c(client: QdrantClient):
 
             # Search
             results = client.query_points(
-                collection_name=collection,
-                query=query_vec,
-                limit=3
+                collection_name=collection, query=query_vec, limit=3
             )
 
             if results.points:
                 top = results.points[0]
                 score = top.score
-                source = (top.payload or {}).get('_source', '?')[:40]
-                (top.payload or {}).get('intel_category', [])
+                source = (top.payload or {}).get("_source", "?")[:40]
+                (top.payload or {}).get("intel_category", [])
                 status = "PASS" if score >= target else "MISS"
                 if status == "PASS":
                     passed += 1
 
-                print(f"{i:<3} {query:<40} {collection:<12} {score:<10.4f} "
-                      f"{target:<8.2f} {status:<6} {source}")
+                print(
+                    f"{i:<3} {query:<40} {collection:<12} {score:<10.4f} "
+                    f"{target:<8.2f} {status:<6} {source}"
+                )
 
                 # Show top 3 results
                 for j, pt in enumerate(results.points[:3]):
-                    pt_src = (pt.payload or {}).get('_source', '?')[:50]
-                    pt_cat = (pt.payload or {}).get('intel_category', [])
-                    print(f"    #{j+1}: score={pt.score:.4f} src={pt_src} "
-                          f"intel={pt_cat}")
+                    pt_src = (pt.payload or {}).get("_source", "?")[:50]
+                    pt_cat = (pt.payload or {}).get("intel_category", [])
+                    print(
+                        f"    #{j + 1}: score={pt.score:.4f} src={pt_src} "
+                        f"intel={pt_cat}"
+                    )
             else:
-                print(f"{i:<3} {query:<40} {collection:<12} {'N/A':<10} "
-                      f"{target:<8.2f} {'FAIL':<6} No results")
+                print(
+                    f"{i:<3} {query:<40} {collection:<12} {'N/A':<10} "
+                    f"{target:<8.2f} {'FAIL':<6} No results"
+                )
         except Exception as e:
             print(f"{i:<3} {query:<40} {collection:<12} ERROR: {e}")
 
@@ -1086,6 +1312,7 @@ def phase_c(client: QdrantClient):
 # ══════════════════════════════════════════════════════════════════════════
 # MAIN
 # ══════════════════════════════════════════════════════════════════════════
+
 
 def main():
     parser = argparse.ArgumentParser(description="Enrich + Reindex + New Files")
@@ -1141,8 +1368,10 @@ def main():
     print("FINAL REPORT")
     print("=" * 70)
 
-    print(f"\n{'Collection':<15} {'Before':>10} {'After':>10} {'Net':>10} "
-          f"{'Enriched':>10} {'Zeros':>8} {'Errors':>8}")
+    print(
+        f"\n{'Collection':<15} {'Before':>10} {'After':>10} {'Net':>10} "
+        f"{'Enriched':>10} {'Zeros':>8} {'Errors':>8}"
+    )
     print("-" * 75)
 
     for coll in COLLECTIONS:
@@ -1156,11 +1385,14 @@ def main():
         enriched = stats[coll]["metadata_added"]
         zeros = stats[coll]["zeros_fixed"]
         errs = stats[coll]["errors"]
-        print(f"{coll:<15} {before:>10,} {after:>10,} {'+' if net >= 0 else ''}{net:>9,} "
-              f"{enriched:>10} {zeros:>8} {errs:>8}")
+        print(
+            f"{coll:<15} {before:>10,} {after:>10,} {'+' if net >= 0 else ''}{net:>9,} "
+            f"{enriched:>10} {zeros:>8} {errs:>8}"
+        )
 
     total_after = sum(
-        client.get_collection(c).points_count for c in COLLECTIONS
+        client.get_collection(c).points_count
+        for c in COLLECTIONS
         if c in [col.name for col in client.get_collections().collections]
     )
     total_indexed = sum(s["indexed"] for s in stats.values())
@@ -1169,7 +1401,9 @@ def main():
     total_errors = sum(s["errors"] for s in stats.values())
 
     print(f"\nTotals:")
-    print(f"  Vectors: {total_baseline:,} -> {total_after:,} (+{total_after - total_baseline:,})")
+    print(
+        f"  Vectors: {total_baseline:,} -> {total_after:,} (+{total_after - total_baseline:,})"
+    )
     print(f"  New indexed: {total_indexed:,}")
     print(f"  Metadata enriched: {total_enriched:,} source groups")
     print(f"  Zeros fixed: {total_zeros:,}")
@@ -1180,4 +1414,4 @@ if __name__ == "__main__":
     start = time.time()
     main()
     elapsed = time.time() - start
-    print(f"\nTotal time: {elapsed/60:.1f} minutes")
+    print(f"\nTotal time: {elapsed / 60:.1f} minutes")

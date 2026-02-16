@@ -18,9 +18,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 def print_header(title: str):
     """Print a section header."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {title}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
 
 def print_result(name: str, success: bool, details: str = ""):
@@ -54,6 +54,7 @@ async def verify_agents():
             BDCrewOrchestrator,
             get_orchestrator,
         )
+
         print_result("All agent imports", True)
         results.append(True)
     except ImportError as e:
@@ -72,8 +73,11 @@ async def verify_agents():
             city="Langley",
             state="VA",
         )
-        print_result("ContactClassifierAgent", True,
-                    f"Tier: {result.tier_label}, Priority: {result.bd_priority}")
+        print_result(
+            "ContactClassifierAgent",
+            True,
+            f"Tier: {result.tier_label}, Priority: {result.bd_priority}",
+        )
         results.append(True)
     except Exception as e:
         print_result("ContactClassifierAgent", False, str(e))
@@ -83,13 +87,18 @@ async def verify_agents():
     try:
         agent = ScraperMonitorAgent()
         test_jobs = [
-            {"title": "DCGS Engineer", "company": "GDIT",
-             "detected_clearance": "TS/SCI", "bd_score": 85,
-             "description": "Support ISR fusion operations"}
+            {
+                "title": "DCGS Engineer",
+                "company": "GDIT",
+                "detected_clearance": "TS/SCI",
+                "bd_score": 85,
+                "description": "Support ISR fusion operations",
+            }
         ]
         analysis = agent.analyze_scrape_batch(test_jobs, "test")
-        print_result("ScraperMonitorAgent", True,
-                    f"High-value jobs: {analysis.high_value_jobs}")
+        print_result(
+            "ScraperMonitorAgent", True, f"High-value jobs: {analysis.high_value_jobs}"
+        )
         results.append(True)
     except Exception as e:
         print_result("ScraperMonitorAgent", False, str(e))
@@ -103,8 +112,11 @@ async def verify_agents():
             {"id": "2", "first_name": "Jane", "last_name": "", "company": "Leidos"},
         ]
         report = agent.assess_quality(test_records, "contacts")
-        print_result("QualityAssuranceAgent", True,
-                    f"Issues found: {len(report.issues)}, Score: {report.overall_score:.0%}")
+        print_result(
+            "QualityAssuranceAgent",
+            True,
+            f"Issues found: {len(report.issues)}, Score: {report.overall_score:.0%}",
+        )
         results.append(True)
     except Exception as e:
         print_result("QualityAssuranceAgent", False, str(e))
@@ -114,12 +126,20 @@ async def verify_agents():
     try:
         agent = AnalyticsAgent()
         test_jobs = [
-            {"title": "Engineer", "company": "GDIT", "detected_clearance": "TS/SCI",
-             "bd_score": 85, "mapped_program": "AF DCGS"},
+            {
+                "title": "Engineer",
+                "company": "GDIT",
+                "detected_clearance": "TS/SCI",
+                "bd_score": 85,
+                "mapped_program": "AF DCGS",
+            },
         ]
         report = agent.generate_report(jobs=test_jobs, period="weekly")
-        print_result("AnalyticsAgent", True,
-                    f"Insights: {len(report.insights)}, Recommendations: {len(report.recommendations)}")
+        print_result(
+            "AnalyticsAgent",
+            True,
+            f"Insights: {len(report.insights)}, Recommendations: {len(report.recommendations)}",
+        )
         results.append(True)
     except Exception as e:
         print_result("AnalyticsAgent", False, str(e))
@@ -128,8 +148,7 @@ async def verify_agents():
     # Test orchestrator
     try:
         orchestrator = get_orchestrator()
-        print_result("BDCrewOrchestrator", True,
-                    f"Backend: {orchestrator.backend}")
+        print_result("BDCrewOrchestrator", True, f"Backend: {orchestrator.backend}")
         results.append(True)
     except Exception as e:
         print_result("BDCrewOrchestrator", False, str(e))
@@ -146,6 +165,7 @@ async def verify_orchestrator_workflows():
 
     try:
         from Engine8_Knowledge.agents import get_orchestrator
+
         orchestrator = get_orchestrator()
     except ImportError as e:
         print_result("Orchestrator import", False, str(e))
@@ -154,12 +174,19 @@ async def verify_orchestrator_workflows():
     # Test classify_contacts_workflow
     try:
         contacts = [
-            {"first_name": "John", "last_name": "Smith",
-             "job_title": "VP Programs", "company": "GDIT"}
+            {
+                "first_name": "John",
+                "last_name": "Smith",
+                "job_title": "VP Programs",
+                "company": "GDIT",
+            }
         ]
         result = await orchestrator.classify_contacts_workflow(contacts)
-        print_result("classify_contacts_workflow", result.success,
-                    f"Agents: {', '.join(result.agents_used)}")
+        print_result(
+            "classify_contacts_workflow",
+            result.success,
+            f"Agents: {', '.join(result.agents_used)}",
+        )
         results.append(result.success)
     except Exception as e:
         print_result("classify_contacts_workflow", False, str(e))
@@ -168,12 +195,19 @@ async def verify_orchestrator_workflows():
     # Test analyze_scrape_workflow
     try:
         jobs = [
-            {"title": "DCGS Engineer", "company": "GDIT",
-             "detected_clearance": "TS/SCI", "bd_score": 85}
+            {
+                "title": "DCGS Engineer",
+                "company": "GDIT",
+                "detected_clearance": "TS/SCI",
+                "bd_score": 85,
+            }
         ]
         result = await orchestrator.analyze_scrape_workflow(jobs, "test")
-        print_result("analyze_scrape_workflow", result.success,
-                    f"Agents: {', '.join(result.agents_used)}")
+        print_result(
+            "analyze_scrape_workflow",
+            result.success,
+            f"Agents: {', '.join(result.agents_used)}",
+        )
         results.append(result.success)
     except Exception as e:
         print_result("analyze_scrape_workflow", False, str(e))
@@ -185,8 +219,11 @@ async def verify_orchestrator_workflows():
             {"id": "1", "first_name": "John", "last_name": "Smith", "company": "GDIT"}
         ]
         result = await orchestrator.quality_check_workflow(records, "contacts")
-        print_result("quality_check_workflow", result.success,
-                    f"Agents: {', '.join(result.agents_used)}")
+        print_result(
+            "quality_check_workflow",
+            result.success,
+            f"Agents: {', '.join(result.agents_used)}",
+        )
         results.append(result.success)
     except Exception as e:
         print_result("quality_check_workflow", False, str(e))
@@ -196,10 +233,13 @@ async def verify_orchestrator_workflows():
     try:
         result = await orchestrator.generate_analytics_workflow(
             jobs=[{"title": "Engineer", "company": "GDIT", "bd_score": 80}],
-            period="weekly"
+            period="weekly",
         )
-        print_result("generate_analytics_workflow", result.success,
-                    f"Agents: {', '.join(result.agents_used)}")
+        print_result(
+            "generate_analytics_workflow",
+            result.success,
+            f"Agents: {', '.join(result.agents_used)}",
+        )
         results.append(result.success)
     except Exception as e:
         print_result("generate_analytics_workflow", False, str(e))
@@ -217,6 +257,7 @@ def verify_models():
     # Test Contact model
     try:
         from models.contacts import Contact, HierarchyTier, BDPriority
+
         contact = Contact(
             first_name="John",
             last_name="Smith",
@@ -233,6 +274,7 @@ def verify_models():
     # Test Job model
     try:
         from models.jobs import Job, JobStatus, ClearanceLevel
+
         job = Job(
             title="Systems Engineer",
             company="GDIT",
@@ -248,6 +290,7 @@ def verify_models():
     # Test Program model
     try:
         from models.programs import Program
+
         program = Program(
             program_name="AF DCGS",
             acronym="DCGS",
@@ -261,6 +304,7 @@ def verify_models():
     # Test Activity model
     try:
         from models.activities import Activity, ActivityType
+
         activity = Activity(
             activity_type=ActivityType.MEETING,
             summary="BD meeting",
@@ -282,6 +326,7 @@ def verify_settings():
 
     try:
         from config.settings import get_settings
+
         settings = get_settings()
         print_result("Settings load", True, f"Log level: {settings.log_level}")
         results.append(True)
@@ -324,9 +369,9 @@ def verify_api_imports():
 
 async def main():
     """Run all verifications."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  BD INTELLIGENCE SYSTEM - PIPELINE VERIFICATION")
-    print("="*60)
+    print("=" * 60)
 
     all_results = []
 
@@ -368,7 +413,7 @@ async def main():
     else:
         print("\n  [ERROR] Multiple verifications failed, check errors above.")
 
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     return success_rate == 100
 

@@ -39,6 +39,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class WorkflowTriggerResult:
     """Result from triggering an n8n workflow."""
+
     success: bool
     workflow_name: str
     execution_id: Optional[str]
@@ -64,44 +65,36 @@ class DifyN8NBridge:
     # Update these paths to match your actual n8n webhook configuration
     WORKFLOW_WEBHOOKS = {
         # Job Processing Pipeline
-        'job_scraper': '/webhook/job-scraper-trigger',
-        'job_enrichment': '/webhook/ai-enrichment',
-        'job_scoring': '/webhook/score-job',
-
+        "job_scraper": "/webhook/job-scraper-trigger",
+        "job_enrichment": "/webhook/ai-enrichment",
+        "job_scoring": "/webhook/score-job",
         # BD Opportunity Pipeline
-        'hub_to_opportunities': '/webhook/hub-to-bd',
-        'contact_classification': '/webhook/contact-classify',
-
+        "hub_to_opportunities": "/webhook/hub-to-bd",
+        "contact_classification": "/webhook/contact-classify",
         # Alerts & Notifications
-        'hot_lead_alert': '/webhook/hot-lead',
-        'weekly_report': '/webhook/weekly-report',
-
+        "hot_lead_alert": "/webhook/hot-lead",
+        "weekly_report": "/webhook/weekly-report",
         # RAG & Search
-        'clearance_rag': '/webhook/clearance-rag',
-        'firecrawl_search': '/webhook/firecrawl-search',
-
+        "clearance_rag": "/webhook/clearance-rag",
+        "firecrawl_search": "/webhook/firecrawl-search",
         # Master Orchestration
-        'master_pipeline': '/webhook/master-pipeline',
+        "master_pipeline": "/webhook/master-pipeline",
     }
 
     # Map to workflow file names (for reference)
     WORKFLOW_FILES = {
-        'job_scraper': 'PTS_BD_WF1_Apify_Job_Scraper_Intake.json',
-        'job_enrichment': 'PTS_BD_WF2_AI_Enrichment_Processor.json',
-        'hub_to_opportunities': 'PTS_BD_WF3_Hub_to_BD_Opportunities.json',
-        'contact_classification': 'PTS_BD_WF4_Contact_Classification.json',
-        'hot_lead_alert': 'PTS_BD_WF5_Hot_Lead_Alerts.json',
-        'weekly_report': 'PTS_BD_WF6_Weekly_Summary_Report.json',
-        'clearance_rag': 'Clearance_Job_RAG_Agent.json',
-        'firecrawl_search': 'Firecrawl_Search_Agent.json',
-        'master_pipeline': 'BD_Master_Orchestration_Workflow.json',
+        "job_scraper": "PTS_BD_WF1_Apify_Job_Scraper_Intake.json",
+        "job_enrichment": "PTS_BD_WF2_AI_Enrichment_Processor.json",
+        "hub_to_opportunities": "PTS_BD_WF3_Hub_to_BD_Opportunities.json",
+        "contact_classification": "PTS_BD_WF4_Contact_Classification.json",
+        "hot_lead_alert": "PTS_BD_WF5_Hot_Lead_Alerts.json",
+        "weekly_report": "PTS_BD_WF6_Weekly_Summary_Report.json",
+        "clearance_rag": "Clearance_Job_RAG_Agent.json",
+        "firecrawl_search": "Firecrawl_Search_Agent.json",
+        "master_pipeline": "BD_Master_Orchestration_Workflow.json",
     }
 
-    def __init__(
-        self,
-        n8n_url: str = None,
-        n8n_api_key: str = None
-    ):
+    def __init__(self, n8n_url: str = None, n8n_api_key: str = None):
         """
         Initialize the Dify-n8n bridge.
 
@@ -109,21 +102,21 @@ class DifyN8NBridge:
             n8n_url: Base URL of your n8n instance
             n8n_api_key: API key for n8n API operations
         """
-        self.n8n_url = n8n_url or os.getenv('N8N_API_URL', 'https://primetech.app.n8n.cloud')
-        self.n8n_api_key = n8n_api_key or os.getenv('N8N_API_KEY', '')
+        self.n8n_url = n8n_url or os.getenv(
+            "N8N_API_URL", "https://primetech.app.n8n.cloud"
+        )
+        self.n8n_api_key = n8n_api_key or os.getenv("N8N_API_KEY", "")
 
-        headers = {'Content-Type': 'application/json'}
+        headers = {"Content-Type": "application/json"}
         if self.n8n_api_key:
-            headers['X-N8N-API-KEY'] = self.n8n_api_key
+            headers["X-N8N-API-KEY"] = self.n8n_api_key
 
         self.client = httpx.AsyncClient(timeout=120.0, headers=headers)
 
         logger.info(f"DifyN8NBridge initialized: n8n={self.n8n_url}")
 
     async def trigger_workflow(
-        self,
-        workflow_key: str,
-        payload: Dict[str, Any] = None
+        self, workflow_key: str, payload: Dict[str, Any] = None
     ) -> WorkflowTriggerResult:
         """
         Trigger an n8n workflow by key.
@@ -143,15 +136,16 @@ class DifyN8NBridge:
                 success=False,
                 workflow_name=workflow_key,
                 execution_id=None,
-                status='error',
-                data={'error': f"Unknown workflow: {workflow_key}. Available: {list(self.WORKFLOW_WEBHOOKS.keys())}"},
-                triggered_at=datetime.now().isoformat()
+                status="error",
+                data={
+                    "error": f"Unknown workflow: {workflow_key}. Available: {list(self.WORKFLOW_WEBHOOKS.keys())}"
+                },
+                triggered_at=datetime.now().isoformat(),
             )
 
         try:
             response = await self.client.post(
-                f"{self.n8n_url}{webhook_path}",
-                json=payload or {}
+                f"{self.n8n_url}{webhook_path}", json=payload or {}
             )
 
             # n8n webhooks may return various status codes
@@ -159,15 +153,15 @@ class DifyN8NBridge:
             try:
                 data = response.json()
             except Exception:
-                data = {'raw_response': response.text}
+                data = {"raw_response": response.text}
 
             return WorkflowTriggerResult(
                 success=response.status_code < 400,
                 workflow_name=workflow_key,
-                execution_id=data.get('executionId'),
-                status='triggered' if response.status_code < 400 else 'error',
+                execution_id=data.get("executionId"),
+                status="triggered" if response.status_code < 400 else "error",
                 data=data,
-                triggered_at=datetime.now().isoformat()
+                triggered_at=datetime.now().isoformat(),
             )
 
         except Exception as e:
@@ -176,9 +170,9 @@ class DifyN8NBridge:
                 success=False,
                 workflow_name=workflow_key,
                 execution_id=None,
-                status='error',
-                data={'error': str(e)},
-                triggered_at=datetime.now().isoformat()
+                status="error",
+                data={"error": str(e)},
+                triggered_at=datetime.now().isoformat(),
             )
 
     # Convenience methods for common workflows
@@ -187,7 +181,7 @@ class DifyN8NBridge:
         self,
         keywords: List[str] = None,
         sources: List[str] = None,
-        max_results: int = 100
+        max_results: int = 100,
     ) -> WorkflowTriggerResult:
         """
         Trigger job scraping via n8n.
@@ -204,16 +198,15 @@ class DifyN8NBridge:
         """
         payload = {
             "keywords": keywords or ["DCGS", "ISR", "TS/SCI", "intelligence analyst"],
-            "sources": sources or ["insight_global", "teksystems", "apex", "clearancejobs"],
+            "sources": sources
+            or ["insight_global", "teksystems", "apex", "clearancejobs"],
             "max_results": max_results,
-            "triggered_by": "dify"
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('job_scraper', payload)
+        return await self.trigger_workflow("job_scraper", payload)
 
     async def trigger_job_enrichment(
-        self,
-        job_ids: List[str] = None,
-        enrich_all_pending: bool = False
+        self, job_ids: List[str] = None, enrich_all_pending: bool = False
     ) -> WorkflowTriggerResult:
         """
         Trigger AI enrichment for jobs.
@@ -230,14 +223,12 @@ class DifyN8NBridge:
         payload = {
             "job_ids": job_ids,
             "enrich_all_pending": enrich_all_pending,
-            "triggered_by": "dify"
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('job_enrichment', payload)
+        return await self.trigger_workflow("job_enrichment", payload)
 
     async def trigger_contact_classification(
-        self,
-        contact_ids: List[str] = None,
-        company_filter: str = None
+        self, contact_ids: List[str] = None, company_filter: str = None
     ) -> WorkflowTriggerResult:
         """
         Trigger contact classification (OrgChart tier assignment).
@@ -254,13 +245,12 @@ class DifyN8NBridge:
         payload = {
             "contact_ids": contact_ids,
             "company_filter": company_filter,
-            "triggered_by": "dify"
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('contact_classification', payload)
+        return await self.trigger_workflow("contact_classification", payload)
 
     async def trigger_hot_lead_alert(
-        self,
-        lead_data: Dict[str, Any]
+        self, lead_data: Dict[str, Any]
     ) -> WorkflowTriggerResult:
         """
         Send hot lead alert notification.
@@ -281,14 +271,12 @@ class DifyN8NBridge:
         payload = {
             **lead_data,
             "triggered_by": "dify",
-            "triggered_at": datetime.now().isoformat()
+            "triggered_at": datetime.now().isoformat(),
         }
-        return await self.trigger_workflow('hot_lead_alert', payload)
+        return await self.trigger_workflow("hot_lead_alert", payload)
 
     async def trigger_weekly_report(
-        self,
-        recipients: List[str] = None,
-        include_sections: List[str] = None
+        self, recipients: List[str] = None, include_sections: List[str] = None
     ) -> WorkflowTriggerResult:
         """
         Generate and send weekly BD intelligence report.
@@ -304,15 +292,14 @@ class DifyN8NBridge:
         """
         payload = {
             "recipients": recipients,
-            "include_sections": include_sections or ["hot_leads", "new_jobs", "opportunities", "actions"],
-            "triggered_by": "dify"
+            "include_sections": include_sections
+            or ["hot_leads", "new_jobs", "opportunities", "actions"],
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('weekly_report', payload)
+        return await self.trigger_workflow("weekly_report", payload)
 
     async def trigger_clearance_rag(
-        self,
-        query: str,
-        clearance_level: str = None
+        self, query: str, clearance_level: str = None
     ) -> WorkflowTriggerResult:
         """
         Query clearance jobs via RAG agent.
@@ -329,14 +316,12 @@ class DifyN8NBridge:
         payload = {
             "query": query,
             "clearance_level": clearance_level,
-            "triggered_by": "dify"
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('clearance_rag', payload)
+        return await self.trigger_workflow("clearance_rag", payload)
 
     async def trigger_firecrawl_search(
-        self,
-        search_query: str,
-        target_sites: List[str] = None
+        self, search_query: str, target_sites: List[str] = None
     ) -> WorkflowTriggerResult:
         """
         Run Firecrawl web search agent.
@@ -353,14 +338,12 @@ class DifyN8NBridge:
         payload = {
             "query": search_query,
             "target_sites": target_sites,
-            "triggered_by": "dify"
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('firecrawl_search', payload)
+        return await self.trigger_workflow("firecrawl_search", payload)
 
     async def trigger_master_pipeline(
-        self,
-        pipeline_stage: str = "full",
-        options: Dict[str, Any] = None
+        self, pipeline_stage: str = "full", options: Dict[str, Any] = None
     ) -> WorkflowTriggerResult:
         """
         Trigger master BD orchestration pipeline.
@@ -377,9 +360,9 @@ class DifyN8NBridge:
         payload = {
             "stage": pipeline_stage,
             "options": options or {},
-            "triggered_by": "dify"
+            "triggered_by": "dify",
         }
-        return await self.trigger_workflow('master_pipeline', payload)
+        return await self.trigger_workflow("master_pipeline", payload)
 
     def get_available_workflows(self) -> List[Dict[str, Any]]:
         """
@@ -393,10 +376,18 @@ class DifyN8NBridge:
                 "description": "Scrape jobs from ClearanceJobs, LinkedIn, and competitor sites using Apify",
                 "file": self.WORKFLOW_FILES.get("job_scraper"),
                 "parameters": {
-                    "keywords": {"type": "array", "items": {"type": "string"}, "description": "Search keywords"},
-                    "sources": {"type": "array", "items": {"type": "string"}, "description": "Job sources to scrape"},
-                    "max_results": {"type": "integer", "default": 100}
-                }
+                    "keywords": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Search keywords",
+                    },
+                    "sources": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                        "description": "Job sources to scrape",
+                    },
+                    "max_results": {"type": "integer", "default": 100},
+                },
             },
             {
                 "name": "job_enrichment",
@@ -404,8 +395,8 @@ class DifyN8NBridge:
                 "file": self.WORKFLOW_FILES.get("job_enrichment"),
                 "parameters": {
                     "job_ids": {"type": "array", "items": {"type": "string"}},
-                    "enrich_all_pending": {"type": "boolean", "default": False}
-                }
+                    "enrich_all_pending": {"type": "boolean", "default": False},
+                },
             },
             {
                 "name": "contact_classification",
@@ -413,8 +404,8 @@ class DifyN8NBridge:
                 "file": self.WORKFLOW_FILES.get("contact_classification"),
                 "parameters": {
                     "contact_ids": {"type": "array", "items": {"type": "string"}},
-                    "company_filter": {"type": "string"}
-                }
+                    "company_filter": {"type": "string"},
+                },
             },
             {
                 "name": "hot_lead_alert",
@@ -425,8 +416,8 @@ class DifyN8NBridge:
                     "company": {"type": "string"},
                     "program": {"type": "string"},
                     "score": {"type": "integer"},
-                    "reason": {"type": "string"}
-                }
+                    "reason": {"type": "string"},
+                },
             },
             {
                 "name": "weekly_report",
@@ -434,8 +425,8 @@ class DifyN8NBridge:
                 "file": self.WORKFLOW_FILES.get("weekly_report"),
                 "parameters": {
                     "recipients": {"type": "array", "items": {"type": "string"}},
-                    "include_sections": {"type": "array", "items": {"type": "string"}}
-                }
+                    "include_sections": {"type": "array", "items": {"type": "string"}},
+                },
             },
             {
                 "name": "clearance_rag",
@@ -443,8 +434,8 @@ class DifyN8NBridge:
                 "file": self.WORKFLOW_FILES.get("clearance_rag"),
                 "parameters": {
                     "query": {"type": "string", "required": True},
-                    "clearance_level": {"type": "string"}
-                }
+                    "clearance_level": {"type": "string"},
+                },
             },
             {
                 "name": "firecrawl_search",
@@ -452,18 +443,21 @@ class DifyN8NBridge:
                 "file": self.WORKFLOW_FILES.get("firecrawl_search"),
                 "parameters": {
                     "query": {"type": "string", "required": True},
-                    "target_sites": {"type": "array", "items": {"type": "string"}}
-                }
+                    "target_sites": {"type": "array", "items": {"type": "string"}},
+                },
             },
             {
                 "name": "master_pipeline",
                 "description": "Master BD orchestration - runs full scrape->enrich->score->notify pipeline",
                 "file": self.WORKFLOW_FILES.get("master_pipeline"),
                 "parameters": {
-                    "stage": {"type": "string", "enum": ["scrape", "enrich", "score", "full"]},
-                    "options": {"type": "object"}
-                }
-            }
+                    "stage": {
+                        "type": "string",
+                        "enum": ["scrape", "enrich", "score", "full"],
+                    },
+                    "options": {"type": "object"},
+                },
+            },
         ]
 
     async def close(self):
@@ -492,21 +486,19 @@ def create_dify_n8n_router():
         return bridge.get_available_workflows()
 
     @router.post("/n8n/trigger/{workflow_key}")
-    async def trigger_workflow(
-        workflow_key: str,
-        payload: Dict[str, Any] = None
-    ):
+    async def trigger_workflow(workflow_key: str, payload: Dict[str, Any] = None):
         """Trigger an n8n workflow from Dify."""
         result = await bridge.trigger_workflow(workflow_key, payload or {})
         return asdict(result)
 
     @router.post("/n8n/scrape-jobs")
     async def scrape_jobs(
-        keywords: List[str] = Query(None),
-        max_results: int = Query(100)
+        keywords: List[str] = Query(None), max_results: int = Query(100)
     ):
         """Trigger job scraping from Dify."""
-        result = await bridge.trigger_job_scraper(keywords=keywords, max_results=max_results)
+        result = await bridge.trigger_job_scraper(
+            keywords=keywords, max_results=max_results
+        )
         return asdict(result)
 
     @router.post("/n8n/hot-lead")

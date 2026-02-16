@@ -26,9 +26,9 @@ DEFAULT_LIMIT = 10
 def _search_qdrant(query: str, collection: str, limit: int = DEFAULT_LIMIT) -> str:
     """Embed query and search a Qdrant collection, returning formatted results."""
     try:
-        embedding = _oai.embeddings.create(
-            input=query, model=EMBEDDING_MODEL
-        ).data[0].embedding
+        embedding = (
+            _oai.embeddings.create(input=query, model=EMBEDDING_MODEL).data[0].embedding
+        )
 
         results = _qdrant.query_points(
             collection_name=collection,
@@ -48,7 +48,15 @@ def _search_qdrant(query: str, collection: str, limit: int = DEFAULT_LIMIT) -> s
             text = payload.get("text", "")[:300]
             # Build a summary from key payload fields
             meta_parts = []
-            for key in ["name", "title", "company", "program", "agency", "location", "source_file"]:
+            for key in [
+                "name",
+                "title",
+                "company",
+                "program",
+                "agency",
+                "location",
+                "source_file",
+            ]:
                 if key in payload and payload[key]:
                     meta_parts.append(f"{key}={payload[key]}")
             meta_str = ", ".join(meta_parts[:5])
@@ -63,6 +71,7 @@ def _search_qdrant(query: str, collection: str, limit: int = DEFAULT_LIMIT) -> s
 # =========================================
 # 6 Qdrant Search Tools
 # =========================================
+
 
 @tool("Search BD Contacts")
 def qdrant_contacts_tool(query: str) -> str:
@@ -104,19 +113,29 @@ def qdrant_contracts_tool(query: str) -> str:
 # Custom Tools
 # =========================================
 
+
 @tool("Search Contact Memory")
 def mem0_search_tool(query: str) -> str:
     """Search Mem0 for contact interaction history, HUMINT notes, and pain points."""
     try:
         from Engine8_Knowledge.scripts.memory_layer import get_memory
+
         mem = get_memory()
         if mem.backend == "mem0":
             results = mem.memory.search(query, user_id="bd_team", limit=10)
-            memories = results.get("results", []) if isinstance(results, dict) else results
-            return "\n".join([r.get("memory", str(r)) for r in memories]) or "No memories found."
+            memories = (
+                results.get("results", []) if isinstance(results, dict) else results
+            )
+            return (
+                "\n".join([r.get("memory", str(r)) for r in memories])
+                or "No memories found."
+            )
         else:
             results = mem.get_context(query, limit=10)
-            return "\n".join([r.get("memory", str(r)) for r in results]) or "No memories found."
+            return (
+                "\n".join([r.get("memory", str(r)) for r in results])
+                or "No memories found."
+            )
     except Exception as e:
         logger.error("mem0_search_tool error: %s", e)
         return f"Memory search error: {e}"
@@ -128,17 +147,24 @@ def graphiti_search_tool(query: str) -> str:
     try:
         import asyncio
         from services.graphiti_service import search_graph
+
         try:
             loop = asyncio.get_running_loop()
         except RuntimeError:
             loop = None
         if loop and loop.is_running():
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
-                results = pool.submit(asyncio.run, search_graph(query, limit=10)).result()
+                results = pool.submit(
+                    asyncio.run, search_graph(query, limit=10)
+                ).result()
         else:
             results = asyncio.run(search_graph(query, limit=10))
-        return "\n".join([r.get("fact", str(r)) for r in results]) or "No graph results found."
+        return (
+            "\n".join([r.get("fact", str(r)) for r in results])
+            or "No graph results found."
+        )
     except Exception as e:
         logger.error("graphiti_search_tool error: %s", e)
         return f"Graph search error: {e}"

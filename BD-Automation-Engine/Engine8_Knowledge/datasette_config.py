@@ -41,23 +41,21 @@ METADATA = {
             "tables": {
                 "jobs": {"description": "Job postings from Bullhorn CRM"},
                 "candidates": {"description": "Contacts and candidates"},
-                "placements": {"description": "Staffing placements (job-candidate matches)"},
+                "placements": {
+                    "description": "Staffing placements (job-candidate matches)"
+                },
                 "activities": {"description": "Call notes and interaction activities"},
                 "prime_contractors": {"description": "Defense prime contractors"},
                 "programs": {"description": "Federal programs and contracts"},
                 "past_performance": {"description": "Aggregated performance metrics"},
-            }
+            },
         },
-        "bd_graph": {
-            "description": "BD Knowledge Graph (entities and relationships)"
-        },
+        "bd_graph": {"description": "BD Knowledge Graph (entities and relationships)"},
         "memories": {
             "description": "Memory system (long-term memories, interactions, insights)"
         },
-        "page_index": {
-            "description": "BM25 page-level document index"
-        }
-    }
+        "page_index": {"description": "BM25 page-level document index"},
+    },
 }
 
 
@@ -66,7 +64,9 @@ def get_available_databases() -> list:
     return [str(db) for db in DATABASES if db.exists()]
 
 
-def start_datasette(port: int = None, background: bool = True) -> subprocess.Popen | None:
+def start_datasette(
+    port: int = None, background: bool = True
+) -> subprocess.Popen | None:
     """
     Start Datasette server for SQLite database exploration.
 
@@ -91,12 +91,20 @@ def start_datasette(port: int = None, background: bool = True) -> subprocess.Pop
         return None
 
     cmd = [
-        sys.executable, "-m", "datasette", "serve",
+        sys.executable,
+        "-m",
+        "datasette",
+        "serve",
         *dbs,
-        "--port", str(port),
+        "--port",
+        str(port),
         "--cors",
-        "--setting", "sql_time_limit_ms", "10000",
-        "--setting", "max_returned_rows", "1000",
+        "--setting",
+        "sql_time_limit_ms",
+        "10000",
+        "--setting",
+        "max_returned_rows",
+        "1000",
     ]
 
     logger.info("datasette_starting", port=port, databases=len(dbs))
@@ -107,7 +115,9 @@ def start_datasette(port: int = None, background: bool = True) -> subprocess.Pop
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        logger.info("datasette_started", pid=process.pid, url=f"http://localhost:{port}")
+        logger.info(
+            "datasette_started", pid=process.pid, url=f"http://localhost:{port}"
+        )
         return process
     else:
         subprocess.run(cmd)

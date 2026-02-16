@@ -28,6 +28,7 @@ def _api_available() -> bool:
     """Check if the Hub API is reachable."""
     try:
         import httpx
+
         r = httpx.get(f"{API_BASE}/health", timeout=3)
         return r.status_code == 200
     except Exception:
@@ -35,14 +36,14 @@ def _api_available() -> bool:
 
 
 skip_if_no_api = pytest.mark.skipif(
-    not _api_available(),
-    reason="Hub API not running — set BD_API_URL or start api.py"
+    not _api_available(), reason="Hub API not running — set BD_API_URL or start api.py"
 )
 
 
 # =========================================================================
 # TEST SUITE 1: Job-to-Outreach Pipeline
 # =========================================================================
+
 
 class TestJobToOutreachPipeline:
     """End-to-end: scrape → program match → contact classify → outreach."""
@@ -68,6 +69,7 @@ class TestJobToOutreachPipeline:
         """Verify ML model detects hiring surge from job volume."""
         try:
             from Engine8_Knowledge.ml.hiring_signals import get_hiring_signal_detector
+
             detector = get_hiring_signal_detector()
             # Simulate job history: sudden spike in DCGS jobs
             test_jobs = [
@@ -107,12 +109,12 @@ class TestJobToOutreachPipeline:
     def test_outreach_message_bd_formula(self):
         """Verify outreach messages contain all 6 BD Formula elements."""
         bd_formula_elements = [
-            "specific_reference",      # Reference to specific program/contract
-            "value_proposition",       # What PTS brings
-            "social_proof",            # Past performance evidence
-            "personalization",         # Contact-specific detail
-            "clear_ask",              # Specific next step
-            "urgency",                # Time-sensitive element
+            "specific_reference",  # Reference to specific program/contract
+            "value_proposition",  # What PTS brings
+            "social_proof",  # Past performance evidence
+            "personalization",  # Contact-specific detail
+            "clear_ask",  # Specific next step
+            "urgency",  # Time-sensitive element
         ]
         # Verify template structure expects all elements
         assert len(bd_formula_elements) == 6
@@ -123,7 +125,12 @@ class TestJobToOutreachPipeline:
         """Verify cadence steps are correctly structured."""
         cadence = [
             {"step": 1, "channel": "email", "delay_days": 0, "template": "intro"},
-            {"step": 2, "channel": "linkedin", "delay_days": 3, "template": "connection"},
+            {
+                "step": 2,
+                "channel": "linkedin",
+                "delay_days": 3,
+                "template": "connection",
+            },
             {"step": 3, "channel": "email", "delay_days": 7, "template": "follow_up"},
             {"step": 4, "channel": "phone", "delay_days": 10, "template": "call"},
             {"step": 5, "channel": "email", "delay_days": 14, "template": "value_add"},
@@ -138,7 +145,13 @@ class TestJobToOutreachPipeline:
 
     def test_response_outcome_tracking(self):
         """Verify response tracking records outcomes correctly."""
-        outcomes = ["positive_reply", "meeting_scheduled", "not_interested", "no_response", "bounced"]
+        outcomes = [
+            "positive_reply",
+            "meeting_scheduled",
+            "not_interested",
+            "no_response",
+            "bounced",
+        ]
         for outcome in outcomes:
             record = {
                 "contact_id": "test-001",
@@ -153,6 +166,7 @@ class TestJobToOutreachPipeline:
         """Verify feedback loop can connect outcomes to predictor."""
         try:
             from Engine8_Knowledge.ml.response_predictor import get_response_predictor
+
             predictor = get_response_predictor()
             info = predictor.get_model_info()
             assert isinstance(info, dict)
@@ -164,6 +178,7 @@ class TestJobToOutreachPipeline:
 # =========================================================================
 # TEST SUITE 2: Competitive Intelligence Flow
 # =========================================================================
+
 
 class TestCompetitiveIntelligenceFlow:
     """Verify competitive intelligence pipeline end-to-end."""
@@ -216,9 +231,9 @@ class TestCompetitiveIntelligenceFlow:
         """Verify escalation triggers for high-impact events."""
         thresholds = {
             "critical": 100_000_000,  # >$100M → critical
-            "high": 25_000_000,       # >$25M → high
-            "medium": 5_000_000,      # >$5M → medium
-            "low": 0,                 # everything else
+            "high": 25_000_000,  # >$25M → high
+            "medium": 5_000_000,  # >$5M → medium
+            "low": 0,  # everything else
         }
         test_value = 45_000_000
         severity = "low"
@@ -233,6 +248,7 @@ class TestCompetitiveIntelligenceFlow:
 # TEST SUITE 3: Knowledge Graph Consistency
 # =========================================================================
 
+
 class TestKnowledgeGraphConsistency:
     """Verify knowledge graph operations maintain consistency."""
 
@@ -240,12 +256,11 @@ class TestKnowledgeGraphConsistency:
         """Verify adding a contact creates a graph node."""
         try:
             from Engine8_Knowledge.graph.bd_knowledge_graph import BDKnowledgeGraph
+
             # Use in-memory database for testing
             graph = BDKnowledgeGraph(db_path=":memory:")
             entity_id = graph.add_entity(
-                "Contact",
-                "Test Engineer",
-                {"title": "Sr. Engineer", "company": "GDIT"}
+                "Contact", "Test Engineer", {"title": "Sr. Engineer", "company": "GDIT"}
             )
             assert entity_id is not None
             # Verify node exists
@@ -258,6 +273,7 @@ class TestKnowledgeGraphConsistency:
         """Verify updating a contact's program updates graph relationships."""
         try:
             from Engine8_Knowledge.graph.bd_knowledge_graph import BDKnowledgeGraph
+
             graph = BDKnowledgeGraph(db_path=":memory:")
             contact_id = graph.add_entity("Contact", "Jane Doe", {"title": "Director"})
             program_id = graph.add_entity("Program", "DCGS-A", {"agency": "Army"})
@@ -270,6 +286,7 @@ class TestKnowledgeGraphConsistency:
         """Verify influence scoring runs without errors."""
         try:
             from Engine8_Knowledge.graph.influence_scoring import get_influence_scorer
+
             scorer = get_influence_scorer()
             leaderboard = scorer.get_leaderboard(limit=5)
             assert isinstance(leaderboard, list)
@@ -279,7 +296,10 @@ class TestKnowledgeGraphConsistency:
     def test_community_detection_runs(self):
         """Verify community detection produces results."""
         try:
-            from Engine8_Knowledge.graph.community_detection import get_community_detector
+            from Engine8_Knowledge.graph.community_detection import (
+                get_community_detector,
+            )
+
             detector = get_community_detector()
             summary = detector.get_community_summary()
             assert isinstance(summary, dict)
@@ -290,6 +310,7 @@ class TestKnowledgeGraphConsistency:
         """Verify Graph RAG returns structured results."""
         try:
             from Engine8_Knowledge.graph.graph_rag import get_graph_rag
+
             rag = get_graph_rag()
             # Just verify the engine initializes
             assert rag is not None
@@ -301,26 +322,38 @@ class TestKnowledgeGraphConsistency:
 # TEST SUITE 4: Autonomous Agents
 # =========================================================================
 
+
 class TestAutonomousAgents:
     """Verify autonomous agent scheduling and execution."""
 
     def test_scheduler_has_all_tasks(self):
         """Verify all 10 scheduled tasks are registered."""
         from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
         scheduler = get_task_scheduler()
         schedule = scheduler.get_schedule()
         expected_tasks = {
-            "daily_scrape", "morning_brief", "contact_enrichment",
-            "competitive_scan", "pipeline_health", "model_drift_check",
-            "weekly_report", "monthly_retrain", "event_cleanup", "backup",
+            "daily_scrape",
+            "morning_brief",
+            "contact_enrichment",
+            "competitive_scan",
+            "pipeline_health",
+            "model_drift_check",
+            "weekly_report",
+            "monthly_retrain",
+            "event_cleanup",
+            "backup",
         }
         actual_tasks = {t["name"] for t in schedule}
-        assert expected_tasks == actual_tasks, f"Missing: {expected_tasks - actual_tasks}"
+        assert expected_tasks == actual_tasks, (
+            f"Missing: {expected_tasks - actual_tasks}"
+        )
 
     @pytest.mark.asyncio
     async def test_run_now_pipeline_health(self):
         """Verify pipeline_health task can execute."""
         from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
         scheduler = get_task_scheduler()
         result = await scheduler.run_now("pipeline_health")
         assert "status" in result
@@ -330,6 +363,7 @@ class TestAutonomousAgents:
     async def test_run_now_event_cleanup(self):
         """Verify event_cleanup task executes without error."""
         from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
         scheduler = get_task_scheduler()
         result = await scheduler.run_now("event_cleanup")
         assert result["status"] in ("success", "failed")
@@ -338,6 +372,7 @@ class TestAutonomousAgents:
     async def test_run_now_backup(self):
         """Verify backup task executes."""
         from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
         scheduler = get_task_scheduler()
         result = await scheduler.run_now("backup")
         assert result["task"] == "backup"
@@ -345,8 +380,14 @@ class TestAutonomousAgents:
     def test_workflow_definitions_complete(self):
         """Verify all 4 workflows are registered."""
         from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
         coordinator = get_agent_coordinator()
-        expected = {"new_program_discovery", "recompete_response", "hot_lead_pipeline", "weekly_optimization"}
+        expected = {
+            "new_program_discovery",
+            "recompete_response",
+            "hot_lead_pipeline",
+            "weekly_optimization",
+        }
         actual = set(coordinator.workflows.keys())
         assert expected == actual
 
@@ -354,10 +395,10 @@ class TestAutonomousAgents:
     async def test_hot_lead_workflow_runs(self):
         """Verify hot_lead_pipeline workflow completes end-to-end."""
         from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
         coordinator = get_agent_coordinator()
         result = await coordinator.run_workflow(
-            "hot_lead_pipeline",
-            {"contact_name": "John Doe", "company": "GDIT"}
+            "hot_lead_pipeline", {"contact_name": "John Doe", "company": "GDIT"}
         )
         assert result["status"] in ("completed", "failed")
         assert result["workflow_name"] == "hot_lead_pipeline"
@@ -366,6 +407,7 @@ class TestAutonomousAgents:
     async def test_workflow_with_human_gate_pauses(self):
         """Verify workflows pause at human gates."""
         from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
         coordinator = get_agent_coordinator()
         result = await coordinator.run_workflow("new_program_discovery", {})
         # new_program_discovery has a human gate after classify step
@@ -376,6 +418,7 @@ class TestAutonomousAgents:
 # =========================================================================
 # TEST SUITE 5: Auth and Scoping
 # =========================================================================
+
 
 class TestAuthAndScoping:
     """Verify role-based access control and data scoping."""
@@ -419,7 +462,12 @@ class TestAuthAndScoping:
         token_payload = {
             "sub": "user-123",
             "role": "bd_manager",
-            "permissions": ["contacts:read", "contacts:write", "outreach:read", "outreach:write"],
+            "permissions": [
+                "contacts:read",
+                "contacts:write",
+                "outreach:read",
+                "outreach:write",
+            ],
             "exp": 1738000000,
             "iat": 1737900000,
         }
@@ -447,12 +495,14 @@ class TestAuthAndScoping:
 # API-Level Integration Tests (require running server)
 # =========================================================================
 
+
 @skip_if_no_api
 class TestAPIIntegration:
     """Tests that require the Hub API to be running."""
 
     def test_health_endpoint(self):
         import httpx
+
         r = httpx.get(f"{API_BASE}/health", timeout=5)
         assert r.status_code == 200
         data = r.json()
@@ -460,6 +510,7 @@ class TestAPIIntegration:
 
     def test_contacts_endpoint(self):
         import httpx
+
         r = httpx.get(f"{API_BASE}/api/v2/contacts", params={"limit": 5}, timeout=10)
         assert r.status_code == 200
         data = r.json()
@@ -468,6 +519,7 @@ class TestAPIIntegration:
 
     def test_programs_endpoint(self):
         import httpx
+
         r = httpx.get(f"{API_BASE}/api/v2/programs", params={"limit": 5}, timeout=10)
         assert r.status_code == 200
         data = r.json()
@@ -475,6 +527,7 @@ class TestAPIIntegration:
 
     def test_automation_schedule(self):
         import httpx
+
         r = httpx.get(f"{API_BASE}/automation/schedule", timeout=10)
         assert r.status_code == 200
         data = r.json()
@@ -483,6 +536,7 @@ class TestAPIIntegration:
 
     def test_automation_workflows(self):
         import httpx
+
         r = httpx.get(f"{API_BASE}/automation/workflows/definitions", timeout=10)
         assert r.status_code == 200
         data = r.json()
@@ -491,6 +545,7 @@ class TestAPIIntegration:
 
     def test_claude_queue(self):
         import httpx
+
         r = httpx.get(f"{API_BASE}/automation/claude/queue", timeout=10)
         assert r.status_code == 200
         data = r.json()

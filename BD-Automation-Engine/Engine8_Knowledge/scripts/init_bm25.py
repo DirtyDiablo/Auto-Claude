@@ -22,8 +22,7 @@ def get_qdrant_data(collection: str, qdrant_path: str = None) -> List[Dict]:
 
         if qdrant_path is None:
             qdrant_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "data", "qdrant"
+                os.path.dirname(os.path.dirname(__file__)), "data", "qdrant"
             )
 
         client = QdrantClient(path=qdrant_path)
@@ -33,10 +32,7 @@ def get_qdrant_data(collection: str, qdrant_path: str = None) -> List[Dict]:
 
         while True:
             results, offset = client.scroll(
-                collection_name=collection,
-                limit=100,
-                offset=offset,
-                with_payload=True
+                collection_name=collection, limit=100, offset=offset, with_payload=True
             )
 
             for r in results:
@@ -45,17 +41,20 @@ def get_qdrant_data(collection: str, qdrant_path: str = None) -> List[Dict]:
                 text_parts = []
 
                 # Common text fields
-                for field in ['text', 'content', 'description', 'title', 'notes', 'name']:
+                for field in [
+                    "text",
+                    "content",
+                    "description",
+                    "title",
+                    "notes",
+                    "name",
+                ]:
                     if field in payload and payload[field]:
                         text_parts.append(str(payload[field]))
 
                 text = " ".join(text_parts) if text_parts else str(payload)
 
-                docs.append({
-                    "id": str(r.id),
-                    "text": text,
-                    **payload
-                })
+                docs.append({"id": str(r.id), "text": text, **payload})
 
             if offset is None:
                 break
@@ -101,28 +100,22 @@ def initialize_bm25_index(collections: List[str] = None):
         stats[collection] = count
         logger.info(f"Indexed {count} documents from {collection}")
 
-    return {
-        "total_indexed": total_indexed,
-        "by_collection": stats,
-        "status": "success"
-    }
+    return {"total_indexed": total_indexed, "by_collection": stats, "status": "success"}
 
 
 def main():
     """Run BM25 initialization."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Initialize BM25 Index')
+    parser = argparse.ArgumentParser(description="Initialize BM25 Index")
     parser.add_argument(
-        '--collections',
-        nargs='+',
-        default=['jobs', 'contacts', 'programs', 'documents'],
-        help='Collections to index'
+        "--collections",
+        nargs="+",
+        default=["jobs", "contacts", "programs", "documents"],
+        help="Collections to index",
     )
     parser.add_argument(
-        '--qdrant-path',
-        default=None,
-        help='Path to Qdrant data directory'
+        "--qdrant-path", default=None, help="Path to Qdrant data directory"
     )
 
     args = parser.parse_args()
@@ -138,7 +131,7 @@ def main():
     print("-" * 40)
     print(f"Total Documents Indexed: {result['total_indexed']}")
     print("\nBy Collection:")
-    for coll, count in result['by_collection'].items():
+    for coll, count in result["by_collection"].items():
         print(f"  - {coll}: {count} documents")
     print(f"\nStatus: {result['status']}")
     print("=" * 60 + "\n")

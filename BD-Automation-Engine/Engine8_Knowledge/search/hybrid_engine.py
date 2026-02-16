@@ -24,27 +24,37 @@ logger = logging.getLogger(__name__)
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
-        Filter, FieldCondition, MatchValue, MatchText,
-        Prefetch, FusionQuery, Fusion, SparseVector,
+        Filter,
+        FieldCondition,
+        MatchValue,
+        MatchText,
+        Prefetch,
+        FusionQuery,
+        Fusion,
+        SparseVector,
     )
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
 
 try:
     import openai
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
 
 try:
     from fastembed import SparseTextEmbedding
+
     FASTEMBED_AVAILABLE = True
 except ImportError:
     FASTEMBED_AVAILABLE = False
 
 try:
     from sentence_transformers import CrossEncoder
+
     CROSSENCODER_AVAILABLE = True
 except ImportError:
     CROSSENCODER_AVAILABLE = False
@@ -60,9 +70,11 @@ RRF_K = 60  # RRF constant
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class SearchResult:
     """A single search result from hybrid search."""
+
     id: str
     content: str
     score: float
@@ -74,6 +86,7 @@ class SearchResult:
 @dataclass
 class SearchResponse:
     """Complete search response with metadata."""
+
     results: list[SearchResult]
     mode_used: str
     search_latency_ms: float
@@ -85,6 +98,7 @@ class SearchResponse:
 # ---------------------------------------------------------------------------
 # HybridSearchEngine
 # ---------------------------------------------------------------------------
+
 
 class HybridSearchEngine:
     """Qdrant-native hybrid search with dense + BM25 sparse + RRF + reranking."""
@@ -172,7 +186,9 @@ class HybridSearchEngine:
         for coll in target_collections:
             try:
                 coll_results = self._hybrid_search_collection(
-                    query, coll, top_k=top_k * 3,
+                    query,
+                    coll,
+                    top_k=top_k * 3,
                     dense_weight=dense_weight,
                     sparse_weight=sparse_weight,
                     qdrant_filter=qdrant_filter,
@@ -181,7 +197,9 @@ class HybridSearchEngine:
                 if coll_results:
                     channels_used.append(coll)
             except Exception as e:
-                logger.warning("collection_search_error", collection=coll, error=str(e)[:100])
+                logger.warning(
+                    "collection_search_error", collection=coll, error=str(e)[:100]
+                )
 
         if not channels_used:
             channels_used = ["dense"]
@@ -212,8 +230,10 @@ class HybridSearchEngine:
         elapsed = (time.time() - start) * 1000
         logger.info(
             "hybrid_search_complete",
-            query=query[:50], results=len(all_results),
-            latency_ms=round(elapsed), candidates=total_candidates,
+            query=query[:50],
+            results=len(all_results),
+            latency_ms=round(elapsed),
+            candidates=total_candidates,
         )
 
         return SearchResponse(
@@ -246,7 +266,9 @@ class HybridSearchEngine:
 
         # Get hybrid results first
         hybrid_resp = self.search(
-            query, collections, top_k=top_k * 2,
+            query,
+            collections,
+            top_k=top_k * 2,
             use_rerank=False,
             filters=filters,
         )
@@ -256,14 +278,16 @@ class HybridSearchEngine:
         if graph_results:
             for rank, gr in enumerate(graph_results):
                 graph_rrf_score = graph_weight * (1.0 / (RRF_K + rank + 1))
-                merged.append(SearchResult(
-                    id=gr.get("id", f"graph_{rank}"),
-                    content=gr.get("context_text", gr.get("name", "")),
-                    score=graph_rrf_score,
-                    source="graph",
-                    channel_scores={"graph": graph_rrf_score},
-                    metadata=gr,
-                ))
+                merged.append(
+                    SearchResult(
+                        id=gr.get("id", f"graph_{rank}"),
+                        content=gr.get("context_text", gr.get("name", "")),
+                        score=graph_rrf_score,
+                        source="graph",
+                        channel_scores={"graph": graph_rrf_score},
+                        metadata=gr,
+                    )
+                )
 
         # Deduplicate — prefer higher score
         seen: dict[str, SearchResult] = {}
@@ -297,7 +321,8 @@ class HybridSearchEngine:
     @lru_cache(maxsize=1000)
     def _cached_dense_embedding(self, text: str) -> tuple:
         resp = self.openai_client.embeddings.create(
-            model=self._embedding_model, input=text,
+            model=self._embedding_model,
+            input=text,
         )
         vec = resp.data[0].embedding
         return tuple(vec)
@@ -357,14 +382,22 @@ class HybridSearchEngine:
                     limit=top_k,
                 ).points
             except Exception as e:
-                logger.warning("prefetch_search_failed", collection=collection, error=str(e)[:100])
-                results = self._dense_only_search(collection, dense_vec, top_k, qdrant_filter)
+                logger.warning(
+                    "prefetch_search_failed", collection=collection, error=str(e)[:100]
+                )
+                results = self._dense_only_search(
+                    collection, dense_vec, top_k, qdrant_filter
+                )
         else:
-            results = self._dense_only_search(collection, dense_vec, top_k, qdrant_filter)
+            results = self._dense_only_search(
+                collection, dense_vec, top_k, qdrant_filter
+            )
 
         return self._format_qdrant_results(results, collection)
 
-    def _dense_only_search(self, collection: str, dense_vec: list, top_k: int, qdrant_filter: Any) -> list:
+    def _dense_only_search(
+        self, collection: str, dense_vec: list, top_k: int, qdrant_filter: Any
+    ) -> list:
         """Fallback dense-only search for non-upgraded collections."""
         try:
             return self.qdrant.query_points(
@@ -384,7 +417,9 @@ class HybridSearchEngine:
                 )
                 return results
             except Exception as e2:
-                logger.warning("dense_search_failed", collection=collection, error=str(e2)[:100])
+                logger.warning(
+                    "dense_search_failed", collection=collection, error=str(e2)[:100]
+                )
                 return []
 
     def _collection_has_sparse(self, collection: str) -> bool:
@@ -408,19 +443,25 @@ class HybridSearchEngine:
                 or payload.get("title", "")
                 or str(payload)[:200]
             )
-            results.append(SearchResult(
-                id=str(getattr(pt, "id", "")),
-                content=content[:500],
-                score=getattr(pt, "score", 0.0) or 0.0,
-                source=source,
-                channel_scores={"dense": getattr(pt, "score", 0.0) or 0.0},
-                metadata={k: v for k, v in payload.items() if k not in ("text", "content")},
-            ))
+            results.append(
+                SearchResult(
+                    id=str(getattr(pt, "id", "")),
+                    content=content[:500],
+                    score=getattr(pt, "score", 0.0) or 0.0,
+                    source=source,
+                    channel_scores={"dense": getattr(pt, "score", 0.0) or 0.0},
+                    metadata={
+                        k: v for k, v in payload.items() if k not in ("text", "content")
+                    },
+                )
+            )
         return results
 
     # -- Reranking --
 
-    def _rerank_results(self, query: str, results: list[SearchResult], top_k: int = 10) -> list[SearchResult]:
+    def _rerank_results(
+        self, query: str, results: list[SearchResult], top_k: int = 10
+    ) -> list[SearchResult]:
         """Cross-encoder reranking with BAAI/bge-reranker-v2-m3."""
         if not results:
             return []
@@ -437,7 +478,13 @@ class HybridSearchEngine:
     def _resolve_collections(self, collections: list[str] | str) -> list[str]:
         """Resolve 'all' to the list of known collections."""
         if collections == "all":
-            return ["bd_contacts", "bd_documents", "bd_activities", "bd_programs", "bd_jobs"]
+            return [
+                "bd_contacts",
+                "bd_documents",
+                "bd_activities",
+                "bd_programs",
+                "bd_jobs",
+            ]
         if isinstance(collections, str):
             return [collections]
         return collections
@@ -450,7 +497,9 @@ class HybridSearchEngine:
         for key, val in filters.items():
             if isinstance(val, list):
                 for v in val:
-                    conditions.append(FieldCondition(key=key, match=MatchValue(value=v)))
+                    conditions.append(
+                        FieldCondition(key=key, match=MatchValue(value=v))
+                    )
             elif isinstance(val, str):
                 conditions.append(FieldCondition(key=key, match=MatchText(text=val)))
             else:

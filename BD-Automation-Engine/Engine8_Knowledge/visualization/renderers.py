@@ -30,6 +30,7 @@ TIER_COLORS = {
 @dataclass
 class RenderOptions:
     """Configuration for rendering."""
+
     width: int = 1200
     height: int = 800
     show_photos: bool = False
@@ -58,16 +59,18 @@ class TreeRenderer:
         nodes_data = []
         for person in org_chart.nodes:
             color = TIER_COLORS.get(person.tier, "#6b7280")
-            nodes_data.append({
-                "id": person.name,
-                "name": person.name,
-                "title": person.title,
-                "tier": person.tier,
-                "company": person.company,
-                "email": person.email if opts.show_emails else "",
-                "color": color,
-                "parent": person.reports_to or "",
-            })
+            nodes_data.append(
+                {
+                    "id": person.name,
+                    "name": person.name,
+                    "title": person.title,
+                    "tier": person.tier,
+                    "company": person.company,
+                    "email": person.email if opts.show_emails else "",
+                    "color": color,
+                    "parent": person.reports_to or "",
+                }
+            )
 
         html = f"""<!DOCTYPE html>
 <html><head>
@@ -243,8 +246,12 @@ class MatrixRenderer:
         items = data or []
 
         # Extract unique values for each dimension
-        dim1_values = sorted(set(item.get(dimension1, "") for item in items if item.get(dimension1)))
-        dim2_values = sorted(set(item.get(dimension2, "") for item in items if item.get(dimension2)))
+        dim1_values = sorted(
+            set(item.get(dimension1, "") for item in items if item.get(dimension1))
+        )
+        dim2_values = sorted(
+            set(item.get(dimension2, "") for item in items if item.get(dimension2))
+        )
 
         # Build matrix
         matrix: Dict[str, Dict[str, int]] = {}
@@ -261,7 +268,11 @@ class MatrixRenderer:
             cells = ""
             for d2 in dim2_values[:30]:
                 val = matrix.get(d1, {}).get(d2, 0)
-                bg = f"rgba(37, 99, 235, {min(val / 5, 1) * 0.8})" if val > 0 else "#f8fafc"
+                bg = (
+                    f"rgba(37, 99, 235, {min(val / 5, 1) * 0.8})"
+                    if val > 0
+                    else "#f8fafc"
+                )
                 color = "white" if val >= 3 else "#334155"
                 cells += f'<td style="background:{bg};color:{color};text-align:center;padding:6px">{val if val else ""}</td>'
             rows_html += f'<tr><td style="font-weight:bold;padding:6px;white-space:nowrap">{d1}</td>{cells}</tr>'

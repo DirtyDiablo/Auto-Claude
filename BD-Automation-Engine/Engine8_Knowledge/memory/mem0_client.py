@@ -23,6 +23,7 @@ def _get_memory_layer():
     global _memory_layer
     if _memory_layer is None:
         from Engine8_Knowledge.scripts.memory_layer import get_memory
+
         _memory_layer = get_memory()
     return _memory_layer
 
@@ -101,9 +102,13 @@ class BDMemoryClient:
             etype = meta.get("entity_type", "unknown")
             return self._layer.add_entity_fact(entity or content[:50], etype, content)
         elif memory_type == "contact_insight":
-            return self._layer.add_bd_insight("contact", content, source=meta.get("source", "user"))
+            return self._layer.add_bd_insight(
+                "contact", content, source=meta.get("source", "user")
+            )
         elif memory_type == "action_item":
-            return self._layer.add_bd_insight("action", content, source=meta.get("source", "user"))
+            return self._layer.add_bd_insight(
+                "action", content, source=meta.get("source", "user")
+            )
         else:
             # conversation_summary or generic
             return self._layer.add_interaction(content, meta)

@@ -24,6 +24,7 @@ def client(app):
 # LEARN
 # =========================================
 
+
 def test_learn(client):
     resp = client.post("/api/intelligence/learn")
     assert resp.status_code == 200
@@ -35,6 +36,7 @@ def test_learn(client):
 # =========================================
 # INSIGHTS
 # =========================================
+
 
 def test_get_insights(client):
     client.post("/api/intelligence/learn")
@@ -70,6 +72,7 @@ def test_get_insights_invalid_type(client):
 # PATTERNS
 # =========================================
 
+
 def test_scan_patterns(client):
     resp = client.post("/api/intelligence/patterns/scan")
     assert resp.status_code == 200
@@ -98,6 +101,7 @@ def test_active_patterns_by_type(client):
 # OPPORTUNITIES
 # =========================================
 
+
 def test_opportunities(client):
     client.post("/api/intelligence/patterns/scan")
     resp = client.get("/api/intelligence/opportunities")
@@ -118,6 +122,7 @@ def test_opportunities_with_min_score(client):
 # TRANSFER
 # =========================================
 
+
 def test_transfer_learning(client):
     client.post("/api/intelligence/learn")
     resp = client.post("/api/intelligence/transfer/DCGS-A/DCGS-N")
@@ -131,6 +136,7 @@ def test_transfer_learning(client):
 # =========================================
 # BRIEFS
 # =========================================
+
 
 def test_weekly_brief(client):
     client.post("/api/intelligence/learn")
@@ -170,13 +176,16 @@ def test_flash_report(client):
 
 
 def test_flash_report_not_found(client):
-    resp = client.post("/api/intelligence/brief/flash", json={"pattern_id": "nonexistent"})
+    resp = client.post(
+        "/api/intelligence/brief/flash", json={"pattern_id": "nonexistent"}
+    )
     assert resp.status_code == 404
 
 
 # =========================================
 # EFFECTIVENESS
 # =========================================
+
 
 def test_outreach_effectiveness(client):
     resp = client.get("/api/intelligence/effectiveness/outreach")
@@ -197,6 +206,7 @@ def test_campaign_effectiveness(client):
 # =========================================
 # TRENDS
 # =========================================
+
 
 def test_competitive_trends(client):
     resp = client.get("/api/intelligence/trends/competitive")

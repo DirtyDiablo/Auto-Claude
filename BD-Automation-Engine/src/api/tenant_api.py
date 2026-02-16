@@ -34,15 +34,18 @@ auth_router = APIRouter(prefix="/auth", tags=["auth"])
 # REQUEST MODELS
 # =========================================
 
+
 class CreateTenantRequest(BaseModel):
     name: str
     owner_email: str
     plan: str = "professional"
 
+
 class UpdateTenantRequest(BaseModel):
     name: Optional[str] = None
     plan: Optional[str] = None
     owner_email: Optional[str] = None
+
 
 class CreateUserRequest(BaseModel):
     email: str
@@ -51,24 +54,29 @@ class CreateUserRequest(BaseModel):
     role: str = "viewer"
     display_name: str = ""
 
+
 class LoginRequest(BaseModel):
     email: str
     password: str
     tenant_id: str
+
 
 class ChangePasswordRequest(BaseModel):
     user_id: str
     old_password: str
     new_password: str
 
+
 class RefreshTokenRequest(BaseModel):
     refresh_token: str
+
 
 class SSOLoginRequest(BaseModel):
     tenant_id: str
     sso_subject_id: str
     email: str
     display_name: str = ""
+
 
 class SSOConfigRequest(BaseModel):
     tenant_id: str
@@ -82,15 +90,18 @@ class SSOConfigRequest(BaseModel):
     userinfo_url: str = ""
     redirect_uri: str = ""
 
+
 class AssignRoleRequest(BaseModel):
     tenant_id: str
     user_id: str
     role: str
 
+
 class CreateApiKeyRequest(BaseModel):
     tenant_id: str
     name: str
     role: str = "api_service"
+
 
 class PermissionCheckRequest(BaseModel):
     role: str
@@ -101,6 +112,7 @@ class PermissionCheckRequest(BaseModel):
 # =========================================
 # TENANT ENDPOINTS (7)
 # =========================================
+
 
 @router.post("/")
 async def create_tenant(req: CreateTenantRequest):
@@ -185,6 +197,7 @@ async def get_tenant_usage(tenant_id: str):
 # =========================================
 # AUTH ENDPOINTS (8)
 # =========================================
+
 
 @auth_router.post("/login")
 async def login(req: LoginRequest):
@@ -284,8 +297,13 @@ async def list_users(tenant_id: str):
     users = svc.list_users(tenant_id)
     return {
         "users": [
-            {"id": u.id, "email": u.email, "role": u.role.value,
-             "display_name": u.display_name, "active": u.active}
+            {
+                "id": u.id,
+                "email": u.email,
+                "role": u.role.value,
+                "display_name": u.display_name,
+                "active": u.active,
+            }
             for u in users
         ],
         "total": len(users),
@@ -315,6 +333,7 @@ async def enable_mfa(user_id: str):
 # =========================================
 # RBAC ENDPOINTS (4)
 # =========================================
+
 
 @auth_router.post("/roles/assign")
 async def assign_role(req: AssignRoleRequest):
@@ -351,7 +370,12 @@ async def check_permission(req: PermissionCheckRequest):
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     allowed = rbac.check_permission(role, resource, action)
-    return {"allowed": allowed, "role": req.role, "resource": req.resource, "action": req.action}
+    return {
+        "allowed": allowed,
+        "role": req.role,
+        "resource": req.resource,
+        "action": req.action,
+    }
 
 
 @auth_router.post("/api-keys")
@@ -380,8 +404,11 @@ async def create_api_key(req: CreateApiKeyRequest):
 # AUDIT ENDPOINTS (2)
 # =========================================
 
+
 @auth_router.get("/audit/{tenant_id}")
-async def get_audit_log(tenant_id: str, user_id: Optional[str] = None, limit: int = 100):
+async def get_audit_log(
+    tenant_id: str, user_id: Optional[str] = None, limit: int = 100
+):
     """Get audit log for a tenant."""
     svc = get_auth_service()
     entries = svc.get_audit_log(tenant_id, user_id=user_id, limit=limit)
@@ -413,6 +440,7 @@ async def get_audit_stats(tenant_id: str):
 # HELPERS
 # =========================================
 
+
 def _tenant_to_dict(t: Tenant) -> Dict[str, Any]:
     return {
         "id": t.id,
@@ -434,6 +462,7 @@ def _tenant_to_dict(t: Tenant) -> Dict[str, Any]:
 # =========================================
 # ROUTER INCLUSION
 # =========================================
+
 
 def include_tenant_router(app: FastAPI) -> None:
     """Include tenant and auth routers in the app."""

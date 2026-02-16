@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class AuditAction(str, Enum):
     CREATE = "create"
     READ = "read"
@@ -42,6 +43,7 @@ class AuditAction(str, Enum):
 @dataclass
 class AuditActor:
     """Who performed the action."""
+
     user_id: str
     role: str = ""
     ip_address: str = ""
@@ -59,6 +61,7 @@ class AuditActor:
 @dataclass
 class AuditResource:
     """What was acted upon."""
+
     resource_type: str
     resource_id: str = ""
     program: str = ""
@@ -76,6 +79,7 @@ class AuditResource:
 @dataclass
 class AuditEvent:
     """A single audit trail record."""
+
     event_id: str
     timestamp: str
     actor: AuditActor
@@ -113,6 +117,7 @@ class AuditEvent:
 @dataclass
 class AuditFilters:
     """Filters for querying the audit trail."""
+
     actor_id: Optional[str] = None
     action: Optional[AuditAction] = None
     resource_type: Optional[str] = None
@@ -125,6 +130,7 @@ class AuditFilters:
 @dataclass
 class ChainVerification:
     """Result of verifying audit trail hash chain integrity."""
+
     verified: bool
     records_checked: int
     first_event_id: str = ""
@@ -146,6 +152,7 @@ class ChainVerification:
 @dataclass
 class ComplianceReport:
     """SOC 2 / FedRAMP compliance report generated from audit data."""
+
     report_id: str
     report_type: str  # soc2 | fedramp
     period_start: str
@@ -181,6 +188,7 @@ class ComplianceReport:
 # =========================================
 # IMMUTABLE AUDIT TRAIL
 # =========================================
+
 
 class ImmutableAuditTrail:
     """Append-only audit log with SHA-256 chain hashing for tamper detection.
@@ -255,9 +263,15 @@ class ImmutableAuditTrail:
             if filters.action:
                 events = [e for e in events if e.action == filters.action]
             if filters.resource_type:
-                events = [e for e in events if e.resource.resource_type == filters.resource_type]
+                events = [
+                    e
+                    for e in events
+                    if e.resource.resource_type == filters.resource_type
+                ]
             if filters.resource_id:
-                events = [e for e in events if e.resource.resource_id == filters.resource_id]
+                events = [
+                    e for e in events if e.resource.resource_id == filters.resource_id
+                ]
             if filters.program:
                 events = [e for e in events if e.resource.program == filters.program]
             if filters.start_time:
@@ -267,7 +281,7 @@ class ImmutableAuditTrail:
 
         # Reverse chronological
         events = list(reversed(events))
-        return events[offset:offset + limit]
+        return events[offset : offset + limit]
 
     def query_resource_trail(
         self,
@@ -277,7 +291,8 @@ class ImmutableAuditTrail:
     ) -> List[AuditEvent]:
         """Get all events for a specific resource."""
         events = [
-            e for e in self._events
+            e
+            for e in self._events
             if e.resource.resource_type == resource_type
             and e.resource.resource_id == resource_id
         ]
@@ -298,7 +313,11 @@ class ImmutableAuditTrail:
         if start_idx >= len(self._events) or start_idx >= end:
             return ChainVerification(verified=True, records_checked=0)
 
-        prev_hash = self._events[start_idx].prev_hash if start_idx == 0 else self._events[start_idx - 1].chain_hash
+        prev_hash = (
+            self._events[start_idx].prev_hash
+            if start_idx == 0
+            else self._events[start_idx - 1].chain_hash
+        )
 
         for i in range(start_idx, min(end, len(self._events))):
             event = self._events[i]
@@ -334,10 +353,7 @@ class ImmutableAuditTrail:
         start = (now - timedelta(days=period_days)).isoformat()
         end = now.isoformat()
 
-        events = [
-            e for e in self._events
-            if e.timestamp >= start
-        ]
+        events = [e for e in self._events if e.timestamp >= start]
 
         unique_users = set(e.actor.user_id for e in events)
         denials = sum(1 for e in events if e.policy_decision == "deny")
@@ -347,9 +363,18 @@ class ImmutableAuditTrail:
         covered_actions = set(e.action for e in events)
         action_coverage = len(covered_actions) / max(len(action_types), 1)
 
-        resource_types = {"contact", "program", "job", "humint_note", "simulation", "report"}
+        resource_types = {
+            "contact",
+            "program",
+            "job",
+            "humint_note",
+            "simulation",
+            "report",
+        }
         covered_resources = set(e.resource.resource_type for e in events)
-        resource_coverage = len(covered_resources & resource_types) / max(len(resource_types), 1)
+        resource_coverage = len(covered_resources & resource_types) / max(
+            len(resource_types), 1
+        )
 
         # Chain integrity
         chain = self.verify_chain()
@@ -357,23 +382,29 @@ class ImmutableAuditTrail:
         # Findings
         findings = []
         if not chain.verified:
-            findings.append({
-                "severity": "critical",
-                "finding": "Audit chain integrity compromised",
-                "recommendation": "Investigate chain break and restore from backup",
-            })
+            findings.append(
+                {
+                    "severity": "critical",
+                    "finding": "Audit chain integrity compromised",
+                    "recommendation": "Investigate chain break and restore from backup",
+                }
+            )
         if action_coverage < 0.8:
-            findings.append({
-                "severity": "medium",
-                "finding": f"Audit coverage at {action_coverage:.0%} — some action types not logged",
-                "recommendation": "Ensure all action types are instrumented",
-            })
+            findings.append(
+                {
+                    "severity": "medium",
+                    "finding": f"Audit coverage at {action_coverage:.0%} — some action types not logged",
+                    "recommendation": "Ensure all action types are instrumented",
+                }
+            )
         if denials == 0 and len(events) > 100:
-            findings.append({
-                "severity": "low",
-                "finding": "Zero access denials in audit period — verify ABAC enforcement",
-                "recommendation": "Review ABAC policy configuration",
-            })
+            findings.append(
+                {
+                    "severity": "low",
+                    "finding": "Zero access denials in audit period — verify ABAC enforcement",
+                    "recommendation": "Review ABAC policy configuration",
+                }
+            )
 
         score = 85.0
         if chain.verified:
@@ -409,16 +440,37 @@ class ImmutableAuditTrail:
         has_policy = any(e.action == AuditAction.POLICY_EVAL for e in self._events)
 
         checks = [
-            {"control": "CC6.1 - Logical Access", "status": "pass" if has_policy else "warn",
-             "detail": "ABAC policy evaluation audited" if has_policy else "No policy evaluations logged"},
-            {"control": "CC6.2 - Authentication", "status": "pass" if has_login else "warn",
-             "detail": "Login events audited" if has_login else "No login events logged"},
-            {"control": "CC7.2 - Monitoring", "status": "pass" if total > 0 else "fail",
-             "detail": f"{total} events logged"},
-            {"control": "CC7.3 - Tamper Detection", "status": "pass" if chain.verified else "fail",
-             "detail": "SHA-256 chain intact" if chain.verified else "Chain integrity compromised"},
-            {"control": "CC8.1 - Change Management", "status": "pass",
-             "detail": "All changes logged with before/after state"},
+            {
+                "control": "CC6.1 - Logical Access",
+                "status": "pass" if has_policy else "warn",
+                "detail": "ABAC policy evaluation audited"
+                if has_policy
+                else "No policy evaluations logged",
+            },
+            {
+                "control": "CC6.2 - Authentication",
+                "status": "pass" if has_login else "warn",
+                "detail": "Login events audited"
+                if has_login
+                else "No login events logged",
+            },
+            {
+                "control": "CC7.2 - Monitoring",
+                "status": "pass" if total > 0 else "fail",
+                "detail": f"{total} events logged",
+            },
+            {
+                "control": "CC7.3 - Tamper Detection",
+                "status": "pass" if chain.verified else "fail",
+                "detail": "SHA-256 chain intact"
+                if chain.verified
+                else "Chain integrity compromised",
+            },
+            {
+                "control": "CC8.1 - Change Management",
+                "status": "pass",
+                "detail": "All changes logged with before/after state",
+            },
         ]
         passed = sum(1 for c in checks if c["status"] == "pass")
         return {
@@ -433,21 +485,44 @@ class ImmutableAuditTrail:
         """FedRAMP Moderate readiness checklist."""
         total = len(self._events)
         chain = self.verify_chain()
-        has_encrypt = any(e.action in (AuditAction.ENCRYPT, AuditAction.KEY_ROTATION) for e in self._events)
+        has_encrypt = any(
+            e.action in (AuditAction.ENCRYPT, AuditAction.KEY_ROTATION)
+            for e in self._events
+        )
 
         checks = [
-            {"control": "AC-2 Account Management", "status": "pass" if total > 0 else "warn",
-             "detail": f"{total} audit events recorded"},
-            {"control": "AU-2 Auditable Events", "status": "pass" if total >= 5 else "warn",
-             "detail": "Comprehensive event logging"},
-            {"control": "AU-10 Non-Repudiation", "status": "pass" if chain.verified else "fail",
-             "detail": "SHA-256 chain hashing" if chain.verified else "Chain broken"},
-            {"control": "SC-28 Encryption at Rest", "status": "pass" if has_encrypt else "warn",
-             "detail": "Encryption events logged" if has_encrypt else "No encryption events yet"},
-            {"control": "SI-4 Information System Monitoring", "status": "pass",
-             "detail": "Real-time audit trail with policy decisions"},
-            {"control": "IA-2 Multi-Factor Auth", "status": "warn",
-             "detail": "MFA configuration recommended"},
+            {
+                "control": "AC-2 Account Management",
+                "status": "pass" if total > 0 else "warn",
+                "detail": f"{total} audit events recorded",
+            },
+            {
+                "control": "AU-2 Auditable Events",
+                "status": "pass" if total >= 5 else "warn",
+                "detail": "Comprehensive event logging",
+            },
+            {
+                "control": "AU-10 Non-Repudiation",
+                "status": "pass" if chain.verified else "fail",
+                "detail": "SHA-256 chain hashing" if chain.verified else "Chain broken",
+            },
+            {
+                "control": "SC-28 Encryption at Rest",
+                "status": "pass" if has_encrypt else "warn",
+                "detail": "Encryption events logged"
+                if has_encrypt
+                else "No encryption events yet",
+            },
+            {
+                "control": "SI-4 Information System Monitoring",
+                "status": "pass",
+                "detail": "Real-time audit trail with policy decisions",
+            },
+            {
+                "control": "IA-2 Multi-Factor Auth",
+                "status": "warn",
+                "detail": "MFA configuration recommended",
+            },
         ]
         passed = sum(1 for c in checks if c["status"] == "pass")
         return {

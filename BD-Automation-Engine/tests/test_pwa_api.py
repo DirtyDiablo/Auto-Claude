@@ -38,6 +38,7 @@ def client(app):
 # PWA ENDPOINTS
 # =========================================
 
+
 def test_manifest(client):
     resp = client.get("/api/pwa/manifest")
     assert resp.status_code == 200
@@ -51,10 +52,13 @@ def test_list_resources(client):
 
 
 def test_queue_sync(client):
-    resp = client.post("/api/pwa/sync", json={
-        "action": "create_contact",
-        "payload": {"name": "Test"},
-    })
+    resp = client.post(
+        "/api/pwa/sync",
+        json={
+            "action": "create_contact",
+            "payload": {"name": "Test"},
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["action"] == "create_contact"
 
@@ -71,10 +75,14 @@ def test_process_sync(client):
 # NOTIFICATION ENDPOINTS
 # =========================================
 
+
 def test_subscribe(client):
-    resp = client.post("/api/pwa/notifications/subscribe", json={
-        "user_id": "user1",
-    })
+    resp = client.post(
+        "/api/pwa/notifications/subscribe",
+        json={
+            "user_id": "user1",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["user_id"] == "user1"
 
@@ -82,11 +90,14 @@ def test_subscribe(client):
 def test_send_notification(client):
     # Subscribe first
     client.post("/api/pwa/notifications/subscribe", json={"user_id": "user1"})
-    resp = client.post("/api/pwa/notifications/send", json={
-        "title": "Test Notification",
-        "body": "Test body",
-        "target_user_id": "user1",
-    })
+    resp = client.post(
+        "/api/pwa/notifications/send",
+        json={
+            "title": "Test Notification",
+            "body": "Test body",
+            "target_user_id": "user1",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["status"] == "delivered"
 
@@ -101,11 +112,15 @@ def test_list_templates(client):
 # RESPONSIVE API ENDPOINTS
 # =========================================
 
+
 def test_detect_client(client):
-    resp = client.post("/api/pwa/detect-client", json={
-        "user_agent": "Mobile Safari",
-        "screen_width": 375,
-    })
+    resp = client.post(
+        "/api/pwa/detect-client",
+        json={
+            "user_agent": "Mobile Safari",
+            "screen_width": 375,
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["device_type"] == "mobile"
 
@@ -113,6 +128,7 @@ def test_detect_client(client):
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_health(client):
     resp = client.get("/api/pwa/health")

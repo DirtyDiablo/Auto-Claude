@@ -21,14 +21,15 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class Role(str, Enum):
-    SUPER_ADMIN = "super_admin"         # Cross-tenant admin (platform operator)
-    TENANT_ADMIN = "tenant_admin"       # Full tenant access
-    BD_DIRECTOR = "bd_director"         # All BD features, reporting
-    BD_MANAGER = "bd_manager"           # Contact/campaign management
-    BD_ANALYST = "bd_analyst"           # Read-only intelligence
-    VIEWER = "viewer"                   # Dashboard-only
-    API_SERVICE = "api_service"         # Machine-to-machine
+    SUPER_ADMIN = "super_admin"  # Cross-tenant admin (platform operator)
+    TENANT_ADMIN = "tenant_admin"  # Full tenant access
+    BD_DIRECTOR = "bd_director"  # All BD features, reporting
+    BD_MANAGER = "bd_manager"  # Contact/campaign management
+    BD_ANALYST = "bd_analyst"  # Read-only intelligence
+    VIEWER = "viewer"  # Dashboard-only
+    API_SERVICE = "api_service"  # Machine-to-machine
 
 
 class Resource(str, Enum):
@@ -57,18 +58,20 @@ class Action(str, Enum):
 
 
 class Scope(str, Enum):
-    OWN = "own"                     # Only own records
-    TEAM = "team"                   # Team records
-    TENANT = "tenant"               # All tenant records
+    OWN = "own"  # Only own records
+    TEAM = "team"  # Team records
+    TENANT = "tenant"  # All tenant records
 
 
 # =========================================
 # PERMISSION
 # =========================================
 
+
 @dataclass(frozen=True)
 class Permission:
     """A single permission grant."""
+
     resource: Resource
     action: Action
     scope: Scope = Scope.TENANT
@@ -81,54 +84,77 @@ class Permission:
 # Define permissions per role
 _ALL_RESOURCES = list(Resource)
 _BD_RESOURCES = [
-    Resource.CONTACTS, Resource.JOBS, Resource.PROGRAMS,
-    Resource.CAMPAIGNS, Resource.PROPOSALS, Resource.RELATIONSHIPS,
+    Resource.CONTACTS,
+    Resource.JOBS,
+    Resource.PROGRAMS,
+    Resource.CAMPAIGNS,
+    Resource.PROPOSALS,
+    Resource.RELATIONSHIPS,
     Resource.ANALYTICS,
 ]
 _READ_ACTIONS = [Action.READ]
 _CRUD_ACTIONS = [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]
-_FULL_ACTIONS = [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE, Action.EXPORT, Action.ADMIN]
+_FULL_ACTIONS = [
+    Action.CREATE,
+    Action.READ,
+    Action.UPDATE,
+    Action.DELETE,
+    Action.EXPORT,
+    Action.ADMIN,
+]
 
 
-def _build_permissions(resources: List[Resource], actions: List[Action], scope: Scope) -> FrozenSet[Permission]:
+def _build_permissions(
+    resources: List[Resource], actions: List[Action], scope: Scope
+) -> FrozenSet[Permission]:
     return frozenset(
         Permission(resource=r, action=a, scope=scope)
-        for r in resources for a in actions
+        for r in resources
+        for a in actions
     )
 
 
 ROLE_PERMISSIONS: Dict[Role, FrozenSet[Permission]] = {
     Role.SUPER_ADMIN: _build_permissions(_ALL_RESOURCES, _FULL_ACTIONS, Scope.TENANT),
-
     Role.TENANT_ADMIN: _build_permissions(_ALL_RESOURCES, _FULL_ACTIONS, Scope.TENANT),
-
     Role.BD_DIRECTOR: (
         _build_permissions(_BD_RESOURCES, _FULL_ACTIONS, Scope.TENANT)
-        | _build_permissions([Resource.REVENUE], [Action.READ, Action.EXPORT], Scope.TENANT)
+        | _build_permissions(
+            [Resource.REVENUE], [Action.READ, Action.EXPORT], Scope.TENANT
+        )
         | _build_permissions([Resource.USERS], _READ_ACTIONS, Scope.TENANT)
     ),
-
     Role.BD_MANAGER: (
         _build_permissions(
             [Resource.CONTACTS, Resource.CAMPAIGNS, Resource.PROPOSALS],
-            _CRUD_ACTIONS, Scope.TENANT,
+            _CRUD_ACTIONS,
+            Scope.TENANT,
         )
         | _build_permissions(
-            [Resource.JOBS, Resource.PROGRAMS, Resource.RELATIONSHIPS, Resource.ANALYTICS],
-            _READ_ACTIONS + [Action.EXPORT], Scope.TENANT,
+            [
+                Resource.JOBS,
+                Resource.PROGRAMS,
+                Resource.RELATIONSHIPS,
+                Resource.ANALYTICS,
+            ],
+            _READ_ACTIONS + [Action.EXPORT],
+            Scope.TENANT,
         )
     ),
-
     Role.BD_ANALYST: _build_permissions(
-        _BD_RESOURCES, [Action.READ], Scope.TENANT,
+        _BD_RESOURCES,
+        [Action.READ],
+        Scope.TENANT,
     ),
-
     Role.VIEWER: _build_permissions(
-        [Resource.ANALYTICS, Resource.PROGRAMS], [Action.READ], Scope.TENANT,
+        [Resource.ANALYTICS, Resource.PROGRAMS],
+        [Action.READ],
+        Scope.TENANT,
     ),
-
     Role.API_SERVICE: _build_permissions(
-        _BD_RESOURCES + [Resource.REVENUE], [Action.READ, Action.CREATE], Scope.TENANT,
+        _BD_RESOURCES + [Resource.REVENUE],
+        [Action.READ, Action.CREATE],
+        Scope.TENANT,
     ),
 }
 
@@ -147,14 +173,16 @@ ROLE_HIERARCHY = [
 # API KEY
 # =========================================
 
+
 @dataclass
 class APIKey:
     """API key for service or user authentication."""
+
     id: str
     tenant_id: str
     name: str
-    key_hash: str               # Hashed version of the key
-    key_prefix: str             # First 8 chars for identification
+    key_hash: str  # Hashed version of the key
+    key_prefix: str  # First 8 chars for identification
     role: Role = Role.API_SERVICE
     created_by: str = ""
     created_at: str = ""
@@ -166,19 +194,26 @@ class APIKey:
 # RBAC MANAGER
 # =========================================
 
+
 class RBACManager:
     """Manage roles, permissions, and API keys."""
 
     def __init__(self):
         self._api_keys: Dict[str, APIKey] = {}
-        self._user_roles: Dict[str, Dict[str, Role]] = {}  # tenant_id -> {user_id -> role}
+        self._user_roles: Dict[
+            str, Dict[str, Role]
+        ] = {}  # tenant_id -> {user_id -> role}
 
     # -----------------------------------------
     # Permission checking
     # -----------------------------------------
 
     def check_permission(
-        self, role: Role, resource: Resource, action: Action, scope: Scope = Scope.TENANT,
+        self,
+        role: Role,
+        resource: Resource,
+        action: Action,
+        scope: Scope = Scope.TENANT,
     ) -> bool:
         """Check if a role has a specific permission."""
         required = Permission(resource=resource, action=action, scope=scope)
@@ -191,11 +226,15 @@ class RBACManager:
         # Check if role has broader scope
         if scope == Scope.OWN:
             team_perm = Permission(resource=resource, action=action, scope=Scope.TEAM)
-            tenant_perm = Permission(resource=resource, action=action, scope=Scope.TENANT)
+            tenant_perm = Permission(
+                resource=resource, action=action, scope=Scope.TENANT
+            )
             if team_perm in role_perms or tenant_perm in role_perms:
                 return True
         elif scope == Scope.TEAM:
-            tenant_perm = Permission(resource=resource, action=action, scope=Scope.TENANT)
+            tenant_perm = Permission(
+                resource=resource, action=action, scope=Scope.TENANT
+            )
             if tenant_perm in role_perms:
                 return True
 
@@ -205,7 +244,11 @@ class RBACManager:
         """Get all permissions for a role."""
         perms = ROLE_PERMISSIONS.get(role, frozenset())
         return [
-            {"resource": p.resource.value, "action": p.action.value, "scope": p.scope.value}
+            {
+                "resource": p.resource.value,
+                "action": p.action.value,
+                "scope": p.scope.value,
+            }
             for p in sorted(perms, key=lambda p: (p.resource.value, p.action.value))
         ]
 
@@ -242,25 +285,29 @@ class RBACManager:
     def list_tenant_users(self, tenant_id: str) -> List[Dict[str, str]]:
         """List all user-role assignments for a tenant."""
         users = self._user_roles.get(tenant_id, {})
-        return [
-            {"user_id": uid, "role": role.value}
-            for uid, role in users.items()
-        ]
+        return [{"user_id": uid, "role": role.value} for uid, role in users.items()]
 
     # -----------------------------------------
     # API key management
     # -----------------------------------------
 
     def create_api_key(
-        self, tenant_id: str, name: str, role: Role = Role.API_SERVICE, created_by: str = "",
+        self,
+        tenant_id: str,
+        name: str,
+        role: Role = Role.API_SERVICE,
+        created_by: str = "",
     ) -> tuple:
         """Create a new API key. Returns (APIKey, raw_key)."""
         raw_key = f"bdapi_{secrets.token_hex(24)}"
         key_prefix = raw_key[:12]
-        key_id = uuid.uuid4().hex[:12] if hasattr(uuid, 'uuid4') else secrets.token_hex(6)
+        key_id = (
+            uuid.uuid4().hex[:12] if hasattr(uuid, "uuid4") else secrets.token_hex(6)
+        )
 
         # In production, hash the key with bcrypt
         import hashlib
+
         key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
 
         api_key = APIKey(
@@ -280,6 +327,7 @@ class RBACManager:
     def validate_api_key(self, raw_key: str) -> Optional[APIKey]:
         """Validate an API key and return the key record."""
         import hashlib
+
         key_hash = hashlib.sha256(raw_key.encode()).hexdigest()
         for api_key in self._api_keys.values():
             if api_key.key_hash == key_hash and api_key.active:

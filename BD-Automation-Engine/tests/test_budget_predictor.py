@@ -19,6 +19,7 @@ from src.ml.budget_predictor import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def predictor():
     return BudgetCyclePredictor()
@@ -49,6 +50,7 @@ def predictor_with_contracts():
 # FISCAL CALENDAR
 # =========================================
 
+
 class TestFiscalCalendar:
     def test_q1_oct(self, predictor):
         dt = datetime(2025, 10, 15, tzinfo=timezone.utc)
@@ -78,6 +80,7 @@ class TestFiscalCalendar:
 # =========================================
 # SPENDING WINDOW
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestSpendingWindow:
@@ -111,6 +114,7 @@ class TestSpendingWindow:
 # =========================================
 # RECOMPETE PREDICTION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestRecompetePrediction:
@@ -154,6 +158,7 @@ class TestRecompetePrediction:
 # BD CALENDAR
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestBDCalendar:
     async def test_returns_calendar(self, predictor):
@@ -193,10 +198,16 @@ class TestBDCalendar:
 # AGENCY PATTERNS
 # =========================================
 
+
 class TestAgencyPatterns:
     def test_all_agencies_have_required_keys(self):
-        required = {"peak_months", "surge_months", "slow_months",
-                     "budget_cycle_offset_days", "typical_procurement_lead_time_months"}
+        required = {
+            "peak_months",
+            "surge_months",
+            "slow_months",
+            "budget_cycle_offset_days",
+            "typical_procurement_lead_time_months",
+        }
         for agency, pattern in AGENCY_PATTERNS.items():
             assert required.issubset(pattern.keys()), f"{agency} missing keys"
 
@@ -215,6 +226,7 @@ class TestAgencyPatterns:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_predictor_returns_instance(self):

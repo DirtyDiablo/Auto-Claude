@@ -19,6 +19,7 @@ logger = logging.getLogger("BD-Graphiti")
 try:
     from graphiti_core import Graphiti
     from graphiti_core.nodes import EpisodeType
+
     GRAPHITI_AVAILABLE = True
 except ImportError:
     GRAPHITI_AVAILABLE = False

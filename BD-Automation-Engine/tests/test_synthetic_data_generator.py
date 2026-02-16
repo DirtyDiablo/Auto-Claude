@@ -18,6 +18,7 @@ def gen():
 # FULL GENERATION
 # =========================================
 
+
 def test_generate_all_strategies(gen):
     job = gen.generate()
     assert isinstance(job, GenerationJob)
@@ -58,12 +59,15 @@ def test_generate_multiple_strategies(gen):
 
 def test_generate_max_per_strategy(gen):
     job = gen.generate(strategies=["entity_centric"], max_per_strategy=3)
-    assert job.triplets_by_strategy.get("entity_centric", 0) <= 10  # 2 triplets per program * up to 3
+    assert (
+        job.triplets_by_strategy.get("entity_centric", 0) <= 10
+    )  # 2 triplets per program * up to 3
 
 
 # =========================================
 # ENTITY-CENTRIC
 # =========================================
+
 
 def test_entity_centric_programs(gen):
     job = gen.generate(strategies=["entity_centric"])
@@ -87,6 +91,7 @@ def test_entity_centric_positive_negative(gen):
 # ROLE-CENTRIC
 # =========================================
 
+
 def test_role_centric_contacts(gen):
     job = gen.generate(strategies=["role_centric"])
     triplets = gen.get_triplets(strategy="role_centric")
@@ -99,17 +104,21 @@ def test_role_centric_contacts(gen):
 # PAIN POINT
 # =========================================
 
+
 def test_pain_point_queries(gen):
     job = gen.generate(strategies=["pain_point"])
     triplets = gen.get_triplets(strategy="pain_point")
     assert len(triplets) >= 1
-    assert any("struggling" in t.positive.lower() or "challenge" in t.positive.lower()
-               for t in triplets)
+    assert any(
+        "struggling" in t.positive.lower() or "challenge" in t.positive.lower()
+        for t in triplets
+    )
 
 
 # =========================================
 # RELATIONSHIP
 # =========================================
+
 
 def test_relationship_queries(gen):
     job = gen.generate(strategies=["relationship"])
@@ -123,17 +132,21 @@ def test_relationship_queries(gen):
 # JOB MAPPING
 # =========================================
 
+
 def test_job_mapping_queries(gen):
     job = gen.generate(strategies=["job_mapping"])
     triplets = gen.get_triplets(strategy="job_mapping")
     assert len(triplets) >= 2
-    assert any("Kubernetes" in t.query or "Cloud" in t.query or "Autonomy" in t.query
-               for t in triplets)
+    assert any(
+        "Kubernetes" in t.query or "Cloud" in t.query or "Autonomy" in t.query
+        for t in triplets
+    )
 
 
 # =========================================
 # ACRONYM
 # =========================================
+
 
 def test_acronym_queries(gen):
     job = gen.generate(strategies=["acronym"])
@@ -157,17 +170,23 @@ def test_acronym_positive_contains_expansion(gen):
 # TEMPORAL
 # =========================================
 
+
 def test_temporal_queries(gen):
     job = gen.generate(strategies=["temporal"])
     triplets = gen.get_triplets(strategy="temporal")
     assert len(triplets) >= 1
-    assert any("recompete" in t.positive.lower() or "fy26" in t.positive.lower()
-               or "2026" in t.positive for t in triplets)
+    assert any(
+        "recompete" in t.positive.lower()
+        or "fy26" in t.positive.lower()
+        or "2026" in t.positive
+        for t in triplets
+    )
 
 
 # =========================================
 # COLLECTION-SPECIFIC
 # =========================================
+
 
 def test_from_notes(gen):
     triplets = gen.generate_from_notes()
@@ -203,6 +222,7 @@ def test_from_contacts(gen):
 # HARD NEGATIVE MINING
 # =========================================
 
+
 def test_hard_negative_mining(gen):
     base_triplets = gen.generate_from_programs(max_count=5)
     upgraded = gen.mine_hard_negatives(base_triplets)
@@ -214,6 +234,7 @@ def test_hard_negative_mining(gen):
 # =========================================
 # FILTERING & STATS
 # =========================================
+
 
 def test_filter_by_strategy(gen):
     gen.generate()
@@ -256,6 +277,7 @@ def test_generation_history(gen):
 # TRIPLET STRUCTURE
 # =========================================
 
+
 def test_triplet_has_id(gen):
     gen.generate(strategies=["acronym"])
     triplets = gen.get_triplets()
@@ -273,6 +295,7 @@ def test_triplet_query_positive_different(gen):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     g1 = get_synthetic_generator()

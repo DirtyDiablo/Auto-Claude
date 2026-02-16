@@ -32,10 +32,18 @@ router = APIRouter(prefix="/nlq", tags=["natural-language-query"])
 # REQUEST/RESPONSE MODELS
 # =========================================
 
+
 class AskRequest(BaseModel):
-    query: str = Field(..., min_length=1, max_length=2000, description="Natural language query")
-    user_id: str = Field(default="default", description="User identifier for conversation context")
-    format: str = Field(default="natural", description="Response format: natural, table, chart, brief, detailed")
+    query: str = Field(
+        ..., min_length=1, max_length=2000, description="Natural language query"
+    )
+    user_id: str = Field(
+        default="default", description="User identifier for conversation context"
+    )
+    format: str = Field(
+        default="natural",
+        description="Response format: natural, table, chart, brief, detailed",
+    )
 
 
 class ClarifyRequest(BaseModel):
@@ -96,6 +104,7 @@ def _get_autocomplete() -> SmartAutocomplete:
 # ENDPOINTS
 # =========================================
 
+
 @router.post("/ask")
 async def nlq_ask(request: AskRequest) -> Dict[str, Any]:
     """Natural language query — the main endpoint."""
@@ -105,6 +114,7 @@ async def nlq_ask(request: AskRequest) -> Dict[str, Any]:
     # Reformat if requested
     if request.format != "natural" and response.data:
         from src.nlq.query_router import QueryResult
+
         result = QueryResult(
             data=response.data,
             summary=response.answer,
@@ -197,17 +207,29 @@ async def nlq_intents() -> Dict[str, Any]:
     intents = [
         {"name": intent.value, "description": desc}
         for intent, desc in [
-            (QueryIntent.SEARCH_CONTACTS, "Search for contacts by company, role, tier, location"),
-            (QueryIntent.SEARCH_JOBS, "Find job openings by clearance, location, program"),
+            (
+                QueryIntent.SEARCH_CONTACTS,
+                "Search for contacts by company, role, tier, location",
+            ),
+            (
+                QueryIntent.SEARCH_JOBS,
+                "Find job openings by clearance, location, program",
+            ),
             (QueryIntent.SEARCH_PROGRAMS, "Look up federal programs and contracts"),
-            (QueryIntent.SEARCH_CONTRACTS, "Search contract awards, recompetes, task orders"),
+            (
+                QueryIntent.SEARCH_CONTRACTS,
+                "Search contract awards, recompetes, task orders",
+            ),
             (QueryIntent.GRAPH_QUERY, "Explore relationship networks and connections"),
             (QueryIntent.ANALYTICS, "Pipeline metrics, conversion rates, KPIs"),
             (QueryIntent.PREDICTION, "Win probability and opportunity scoring"),
             (QueryIntent.FORECAST, "Hiring trends, demand forecasting, ramp signals"),
             (QueryIntent.CAMPAIGN, "Create and manage outreach campaigns"),
             (QueryIntent.GENERATE, "Generate emails, call scripts, meeting prep"),
-            (QueryIntent.COMPARE, "Compare companies, programs, locations side-by-side"),
+            (
+                QueryIntent.COMPARE,
+                "Compare companies, programs, locations side-by-side",
+            ),
             (QueryIntent.EXPLAIN, "Explain scores, predictions, and rankings"),
             (QueryIntent.STATUS, "Daily digest and recent activity summary"),
             (QueryIntent.MEMORY, "Recall previous interactions and stored knowledge"),
@@ -254,6 +276,7 @@ async def nlq_feedback(request: FeedbackRequest) -> Dict[str, Any]:
 # =========================================
 # ROUTER INTEGRATION
 # =========================================
+
 
 def configure_nlq(
     search_client: Any = None,

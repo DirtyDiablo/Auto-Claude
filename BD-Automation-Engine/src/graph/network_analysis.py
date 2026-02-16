@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Community:
     id: int
@@ -158,16 +159,20 @@ class NetworkAnalyzer:
             prog_list = list(programs)
             label_str = prog_list[0] if prog_list else f"Cluster {i + 1}"
 
-            communities.append(Community(
-                id=i,
-                label=label_str,
-                members=members,
-                member_names=[self._nodes.get(m, {}).get("name", m) for m in members],
-                size=len(members),
-                avg_strength=round(avg_str, 1),
-                programs=prog_list,
-                key_member=self._nodes.get(key, {}).get("name", key),
-            ))
+            communities.append(
+                Community(
+                    id=i,
+                    label=label_str,
+                    members=members,
+                    member_names=[
+                        self._nodes.get(m, {}).get("name", m) for m in members
+                    ],
+                    size=len(members),
+                    avg_strength=round(avg_str, 1),
+                    programs=prog_list,
+                    key_member=self._nodes.get(key, {}).get("name", key),
+                )
+            )
 
         return communities
 
@@ -207,36 +212,45 @@ class NetworkAnalyzer:
                 all_comms = comms
 
             connections_across = sum(
-                1 for neighbor in self._adjacency.get(nid, {})
+                1
+                for neighbor in self._adjacency.get(nid, {})
                 if any(c not in comms for c in node_communities.get(neighbor, []))
             )
 
             score = min(100, len(all_comms) * 25 + connections_across * 10)
 
-            bridges.append(BridgeContact(
-                contact_id=nid,
-                name=self._nodes.get(nid, {}).get("name", nid),
-                communities=all_comms,
-                community_labels=[community_labels.get(c, f"C{c}") for c in all_comms],
-                bridge_score=round(score, 1),
-                connections_across=connections_across,
-            ))
+            bridges.append(
+                BridgeContact(
+                    contact_id=nid,
+                    name=self._nodes.get(nid, {}).get("name", nid),
+                    communities=all_comms,
+                    community_labels=[
+                        community_labels.get(c, f"C{c}") for c in all_comms
+                    ],
+                    bridge_score=round(score, 1),
+                    connections_across=connections_across,
+                )
+            )
 
         bridges.sort(key=lambda b: b.bridge_score, reverse=True)
         return bridges
 
     async def get_network_density(
-        self, program: Optional[str] = None,
+        self,
+        program: Optional[str] = None,
     ) -> DensityReport:
         """Calculate network density metrics."""
         if program:
             prog_lower = program.lower()
             nodes = {
-                nid: info for nid, info in self._nodes.items()
+                nid: info
+                for nid, info in self._nodes.items()
                 if prog_lower in str(info.get("programs", [])).lower()
             }
             adjacency = {
-                nid: {k: v for k, v in self._adjacency.get(nid, {}).items() if k in nodes}
+                nid: {
+                    k: v for k, v in self._adjacency.get(nid, {}).items() if k in nodes
+                }
                 for nid in nodes
             }
             scope = program
@@ -248,9 +262,14 @@ class NetworkAnalyzer:
         n = len(nodes)
         if n < 2:
             return DensityReport(
-                scope=scope, total_nodes=n, total_edges=0,
-                density=0, avg_degree=0, avg_strength=0,
-                clustering_coefficient=0, assessment="sparse",
+                scope=scope,
+                total_nodes=n,
+                total_edges=0,
+                density=0,
+                avg_degree=0,
+                avg_strength=0,
+                clustering_coefficient=0,
+                assessment="sparse",
             )
 
         # Count edges (undirected — avoid double-counting)
@@ -353,7 +372,11 @@ class NetworkAnalyzer:
                             if dt.tzinfo is None:
                                 dt = dt.replace(tzinfo=timezone.utc)
                         elif isinstance(created, datetime):
-                            dt = created if created.tzinfo else created.replace(tzinfo=timezone.utc)
+                            dt = (
+                                created
+                                if created.tzinfo
+                                else created.replace(tzinfo=timezone.utc)
+                            )
                         else:
                             continue
                         if dt >= cutoff:

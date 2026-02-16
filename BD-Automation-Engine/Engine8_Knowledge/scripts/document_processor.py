@@ -18,11 +18,12 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDDocumentProcessor')
+logger = logging.getLogger("BDDocumentProcessor")
 
 # Check for optional dependencies
 try:
     from docling.document_converter import DocumentConverter
+
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False
@@ -32,7 +33,9 @@ try:
     MAGIC_AVAILABLE = True
 except ImportError:
     MAGIC_AVAILABLE = False
-    logger.warning("python-magic not installed. Install with: pip install python-magic-bin")
+    logger.warning(
+        "python-magic not installed. Install with: pip install python-magic-bin"
+    )
 
 # =========================================
 # CONFIGURATION
@@ -48,15 +51,15 @@ OUTPUTS_DIR = PROJECT_ROOT / "outputs"
 
 # Supported file types
 SUPPORTED_EXTENSIONS = {
-    '.pdf': 'document',
-    '.docx': 'document',
-    '.doc': 'document',
-    '.xlsx': 'spreadsheet',
-    '.xls': 'spreadsheet',
-    '.csv': 'data',
-    '.txt': 'text',
-    '.md': 'markdown',
-    '.json': 'data',
+    ".pdf": "document",
+    ".docx": "document",
+    ".doc": "document",
+    ".xlsx": "spreadsheet",
+    ".xls": "spreadsheet",
+    ".csv": "data",
+    ".txt": "text",
+    ".md": "markdown",
+    ".json": "data",
 }
 
 # Maximum chunk size for text splitting
@@ -67,6 +70,7 @@ DEFAULT_CHUNK_OVERLAP = 50
 @dataclass
 class ProcessedDocument:
     """Represents a processed document with extracted content."""
+
     id: str
     title: str
     content: str
@@ -88,26 +92,27 @@ class ProcessedDocument:
 
     def to_dict(self) -> Dict:
         return {
-            'id': self.id,
-            'title': self.title,
-            'content': self.content,
-            'summary': self.summary,
-            'doc_type': self.doc_type,
-            'source_file': self.source_file,
-            'file_size': self.file_size,
-            'page_count': self.page_count,
-            'tables': self.tables,
-            'metadata': self.metadata,
-            'chunks': self.chunks,
-            'tags': self.tags,
-            'created_date': self.created_date,
-            'processed_at': self.processed_at
+            "id": self.id,
+            "title": self.title,
+            "content": self.content,
+            "summary": self.summary,
+            "doc_type": self.doc_type,
+            "source_file": self.source_file,
+            "file_size": self.file_size,
+            "page_count": self.page_count,
+            "tables": self.tables,
+            "metadata": self.metadata,
+            "chunks": self.chunks,
+            "tags": self.tags,
+            "created_date": self.created_date,
+            "processed_at": self.processed_at,
         }
 
 
 @dataclass
 class ProcessingResult:
     """Result of document processing operation."""
+
     total_files: int
     processed: int
     errors: int
@@ -120,13 +125,14 @@ class ProcessingResult:
 # TEXT CHUNKING
 # =========================================
 
+
 class TextChunker:
     """Split text into semantic chunks for embedding."""
 
     def __init__(
         self,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
-        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP
+        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
     ):
         self.chunk_size = chunk_size
         self.chunk_overlap = chunk_overlap
@@ -154,7 +160,7 @@ class TextChunker:
                 current_length += sentence_length
             else:
                 if current_chunk:
-                    chunks.append(' '.join(current_chunk))
+                    chunks.append(" ".join(current_chunk))
 
                 # Start new chunk with overlap
                 overlap_text = self._get_overlap(current_chunk)
@@ -166,7 +172,7 @@ class TextChunker:
                     current_length = sentence_length
 
         if current_chunk:
-            chunks.append(' '.join(current_chunk))
+            chunks.append(" ".join(current_chunk))
 
         return chunks
 
@@ -175,7 +181,7 @@ class TextChunker:
         import re
 
         # Simple sentence splitting (handles common cases)
-        sentence_endings = re.compile(r'(?<=[.!?])\s+(?=[A-Z])')
+        sentence_endings = re.compile(r"(?<=[.!?])\s+(?=[A-Z])")
         sentences = sentence_endings.split(text)
 
         # Handle very long sentences by splitting on other punctuation
@@ -183,7 +189,7 @@ class TextChunker:
         for sentence in sentences:
             if len(sentence) > self.chunk_size:
                 # Split on semicolons, colons
-                sub_parts = re.split(r'[;:]\s+', sentence)
+                sub_parts = re.split(r"[;:]\s+", sentence)
                 result.extend(sub_parts)
             else:
                 result.append(sentence)
@@ -195,17 +201,18 @@ class TextChunker:
         if not chunks:
             return ""
 
-        overlap = ' '.join(chunks)
+        overlap = " ".join(chunks)
         if len(overlap) <= self.chunk_overlap:
             return overlap
 
         # Get last N characters
-        return overlap[-self.chunk_overlap:]
+        return overlap[-self.chunk_overlap :]
 
 
 # =========================================
 # DOCUMENT PROCESSOR CLASS
 # =========================================
+
 
 class BDDocumentProcessor:
     """
@@ -218,7 +225,7 @@ class BDDocumentProcessor:
     def __init__(
         self,
         chunk_size: int = DEFAULT_CHUNK_SIZE,
-        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP
+        chunk_overlap: int = DEFAULT_CHUNK_OVERLAP,
     ):
         self.chunker = TextChunker(chunk_size, chunk_overlap)
 
@@ -262,18 +269,18 @@ class BDDocumentProcessor:
             created_date = datetime.fromtimestamp(stat.st_mtime).isoformat()
 
             # Extract content based on file type
-            if ext in ['.pdf', '.docx', '.doc'] and self.converter:
+            if ext in [".pdf", ".docx", ".doc"] and self.converter:
                 content, tables, page_count = self._process_with_docling(path)
-            elif ext in ['.xlsx', '.xls']:
+            elif ext in [".xlsx", ".xls"]:
                 content, tables = self._process_spreadsheet(path)
                 page_count = len(tables)
-            elif ext == '.csv':
+            elif ext == ".csv":
                 content, tables = self._process_csv(path)
                 page_count = 1
-            elif ext == '.json':
+            elif ext == ".json":
                 content, tables = self._process_json(path)
                 page_count = 1
-            elif ext in ['.txt', '.md']:
+            elif ext in [".txt", ".md"]:
                 content = self._process_text(path)
                 tables = []
                 page_count = 1
@@ -303,7 +310,7 @@ class BDDocumentProcessor:
                 tables=tables,
                 chunks=chunks,
                 tags=tags,
-                created_date=created_date
+                created_date=created_date,
             )
 
         except Exception as e:
@@ -325,12 +332,16 @@ class BDDocumentProcessor:
         # Extract tables
         tables = []
         for table in result.document.tables:
-            tables.append({
-                'content': table.export_to_text(),
-                'rows': len(table.grid) if hasattr(table, 'grid') else 0
-            })
+            tables.append(
+                {
+                    "content": table.export_to_text(),
+                    "rows": len(table.grid) if hasattr(table, "grid") else 0,
+                }
+            )
 
-        page_count = result.document.num_pages if hasattr(result.document, 'num_pages') else 1
+        page_count = (
+            result.document.num_pages if hasattr(result.document, "num_pages") else 1
+        )
 
         return content, tables, page_count
 
@@ -353,14 +364,16 @@ class BDDocumentProcessor:
                 content_parts.append(text)
 
                 # Store as table
-                tables.append({
-                    'sheet': sheet_name,
-                    'rows': len(df),
-                    'columns': list(df.columns),
-                    'content': text
-                })
+                tables.append(
+                    {
+                        "sheet": sheet_name,
+                        "rows": len(df),
+                        "columns": list(df.columns),
+                        "content": text,
+                    }
+                )
 
-            return '\n\n'.join(content_parts), tables
+            return "\n\n".join(content_parts), tables
 
         except Exception as e:
             logger.warning(f"Pandas not available or error: {e}")
@@ -371,7 +384,7 @@ class BDDocumentProcessor:
         content_parts = []
         tables = []
 
-        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
             reader = csv.reader(f)
             rows = list(reader)
 
@@ -383,16 +396,13 @@ class BDDocumentProcessor:
                     row_dict = dict(zip(headers, row))
                     content_parts.append(str(row_dict))
 
-                tables.append({
-                    'rows': len(rows) - 1,
-                    'columns': headers
-                })
+                tables.append({"rows": len(rows) - 1, "columns": headers})
 
-        return '\n'.join(content_parts), tables
+        return "\n".join(content_parts), tables
 
     def _process_json(self, path: Path) -> Tuple[str, List[Dict]]:
         """Process JSON file."""
-        with open(path, 'r', encoding='utf-8') as f:
+        with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
 
         content = json.dumps(data, indent=2, default=str)
@@ -400,22 +410,23 @@ class BDDocumentProcessor:
         # Try to extract structured data
         tables = []
         if isinstance(data, list) and data:
-            tables.append({
-                'type': 'array',
-                'length': len(data),
-                'sample_keys': list(data[0].keys()) if isinstance(data[0], dict) else []
-            })
+            tables.append(
+                {
+                    "type": "array",
+                    "length": len(data),
+                    "sample_keys": list(data[0].keys())
+                    if isinstance(data[0], dict)
+                    else [],
+                }
+            )
         elif isinstance(data, dict):
-            tables.append({
-                'type': 'object',
-                'keys': list(data.keys())
-            })
+            tables.append({"type": "object", "keys": list(data.keys())})
 
         return content, tables
 
     def _process_text(self, path: Path) -> str:
         """Process plain text file."""
-        with open(path, 'r', encoding='utf-8', errors='ignore') as f:
+        with open(path, "r", encoding="utf-8", errors="ignore") as f:
             return f.read()
 
     def _extract_tags(self, path: Path) -> List[str]:
@@ -423,18 +434,27 @@ class BDDocumentProcessor:
         tags = []
 
         # Add extension-based tag
-        ext = path.suffix.lower().replace('.', '')
+        ext = path.suffix.lower().replace(".", "")
         if ext:
             tags.append(ext)
 
         # Add parent directory name
         parent = path.parent.name.lower()
-        if parent and parent not in ['.', '..', 'data', 'exports']:
-            tags.append(parent.replace(' ', '_'))
+        if parent and parent not in [".", "..", "data", "exports"]:
+            tags.append(parent.replace(" ", "_"))
 
         # Extract common keywords from filename
         filename = path.stem.lower()
-        keywords = ['bullhorn', 'contact', 'job', 'placement', 'activity', 'note', 'report', 'summary']
+        keywords = [
+            "bullhorn",
+            "contact",
+            "job",
+            "placement",
+            "activity",
+            "note",
+            "report",
+            "summary",
+        ]
         for keyword in keywords:
             if keyword in filename:
                 tags.append(keyword)
@@ -449,7 +469,7 @@ class BDDocumentProcessor:
         self,
         directory: Path,
         recursive: bool = True,
-        extensions: Optional[List[str]] = None
+        extensions: Optional[List[str]] = None,
     ) -> ProcessingResult:
         """
         Process all documents in a directory.
@@ -470,7 +490,7 @@ class BDDocumentProcessor:
             return ProcessingResult(0, 0, 0, [], [], 0.0)
 
         # Find files
-        pattern = '**/*' if recursive else '*'
+        pattern = "**/*" if recursive else "*"
         files = []
         for f in directory.glob(pattern):
             if f.is_file():
@@ -499,19 +519,21 @@ class BDDocumentProcessor:
             errors=len(error_files),
             documents=documents,
             error_files=error_files,
-            duration_seconds=duration
+            duration_seconds=duration,
         )
 
     def process_bullhorn_exports(self) -> ProcessingResult:
         """Process all Bullhorn export files."""
         if not BULLHORN_EXPORTS_DIR.exists():
-            logger.warning(f"Bullhorn exports directory not found: {BULLHORN_EXPORTS_DIR}")
+            logger.warning(
+                f"Bullhorn exports directory not found: {BULLHORN_EXPORTS_DIR}"
+            )
             return ProcessingResult(0, 0, 0, [], [], 0.0)
 
         return self.process_directory(
             BULLHORN_EXPORTS_DIR,
             recursive=True,
-            extensions=['.xls', '.xlsx', '.csv', '.txt']
+            extensions=[".xls", ".xlsx", ".csv", ".txt"],
         )
 
     def process_prime_contacts(self) -> ProcessingResult:
@@ -521,9 +543,7 @@ class BDDocumentProcessor:
             return ProcessingResult(0, 0, 0, [], [], 0.0)
 
         return self.process_directory(
-            PRIME_CONTACTS_DIR,
-            recursive=True,
-            extensions=['.csv', '.json']
+            PRIME_CONTACTS_DIR, recursive=True, extensions=[".csv", ".json"]
         )
 
     def process_outputs(self) -> ProcessingResult:
@@ -533,9 +553,7 @@ class BDDocumentProcessor:
             return ProcessingResult(0, 0, 0, [], [], 0.0)
 
         return self.process_directory(
-            OUTPUTS_DIR,
-            recursive=True,
-            extensions=['.md', '.txt', '.json']
+            OUTPUTS_DIR, recursive=True, extensions=[".md", ".txt", ".json"]
         )
 
 
@@ -543,19 +561,26 @@ class BDDocumentProcessor:
 # CLI INTERFACE
 # =========================================
 
+
 def main():
     """CLI for the BD Document Processor."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD Document Processor')
-    parser.add_argument('--file', type=str, help='Process single file')
-    parser.add_argument('--dir', type=str, help='Process directory')
-    parser.add_argument('--bullhorn', action='store_true', help='Process Bullhorn exports')
-    parser.add_argument('--contacts', action='store_true', help='Process prime contacts')
-    parser.add_argument('--outputs', action='store_true', help='Process output files')
-    parser.add_argument('--all', action='store_true', help='Process all sources')
-    parser.add_argument('--output', type=str, help='Output JSON file')
-    parser.add_argument('--recursive', action='store_true', default=True, help='Process subdirectories')
+    parser = argparse.ArgumentParser(description="BD Document Processor")
+    parser.add_argument("--file", type=str, help="Process single file")
+    parser.add_argument("--dir", type=str, help="Process directory")
+    parser.add_argument(
+        "--bullhorn", action="store_true", help="Process Bullhorn exports"
+    )
+    parser.add_argument(
+        "--contacts", action="store_true", help="Process prime contacts"
+    )
+    parser.add_argument("--outputs", action="store_true", help="Process output files")
+    parser.add_argument("--all", action="store_true", help="Process all sources")
+    parser.add_argument("--output", type=str, help="Output JSON file")
+    parser.add_argument(
+        "--recursive", action="store_true", default=True, help="Process subdirectories"
+    )
 
     args = parser.parse_args()
 
@@ -574,7 +599,9 @@ def main():
 
     if args.dir:
         result = processor.process_directory(Path(args.dir), recursive=args.recursive)
-        print(f"\nProcessed {result.processed}/{result.total_files} files ({result.errors} errors)")
+        print(
+            f"\nProcessed {result.processed}/{result.total_files} files ({result.errors} errors)"
+        )
         print(f"Duration: {result.duration_seconds:.1f}s")
         all_results.extend(result.documents)
 
@@ -601,11 +628,11 @@ def main():
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        with open(output_path, 'w', encoding='utf-8') as f:
+        with open(output_path, "w", encoding="utf-8") as f:
             json.dump([d.to_dict() for d in all_results], f, indent=2)
 
         print(f"\nSaved {len(all_results)} documents to {output_path}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

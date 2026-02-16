@@ -22,15 +22,15 @@ logger = logging.getLogger(__name__)
 # ─── Feature Definitions ────────────────────────────────────────────────────
 
 FEATURE_NAMES = [
-    "contact_tier",           # 1-6 (1=executive, 6=individual)
-    "interaction_count",      # total past interactions
-    "days_since_last",        # days since last interaction
-    "channel_email",          # 1 if email channel
-    "channel_linkedin",       # 1 if linkedin channel
-    "channel_phone",          # 1 if phone channel
-    "program_value_log",      # log10(contract value) to normalize
-    "hiring_velocity",        # job postings per month for related program
-    "day_of_week",            # 0=Monday .. 6=Sunday
+    "contact_tier",  # 1-6 (1=executive, 6=individual)
+    "interaction_count",  # total past interactions
+    "days_since_last",  # days since last interaction
+    "channel_email",  # 1 if email channel
+    "channel_linkedin",  # 1 if linkedin channel
+    "channel_phone",  # 1 if phone channel
+    "program_value_log",  # log10(contract value) to normalize
+    "hiring_velocity",  # job postings per month for related program
+    "day_of_week",  # 0=Monday .. 6=Sunday
 ]
 
 CHANNEL_MAP = {"email": 0, "linkedin": 1, "phone": 2}
@@ -53,7 +53,14 @@ def _safe_log_value(value) -> float:
     if not value:
         return 0.0
     try:
-        v = str(value).replace("$", "").replace(",", "").replace("B", "e9").replace("M", "e6").replace("K", "e3")
+        v = (
+            str(value)
+            .replace("$", "")
+            .replace(",", "")
+            .replace("B", "e9")
+            .replace("M", "e6")
+            .replace("K", "e3")
+        )
         num = float(v)
         return np.log10(max(num, 1.0))
     except (ValueError, TypeError):
@@ -61,6 +68,7 @@ def _safe_log_value(value) -> float:
 
 
 # ─── Synthetic Data Generator ───────────────────────────────────────────────
+
 
 class SyntheticDataGenerator:
     """
@@ -85,7 +93,9 @@ class SyntheticDataGenerator:
 
         for i in range(n_samples):
             # Contact tier (weighted: more lower-tier contacts exist)
-            tier = self.rng.choice([1, 2, 3, 4, 5, 6], p=[0.05, 0.10, 0.15, 0.25, 0.25, 0.20])
+            tier = self.rng.choice(
+                [1, 2, 3, 4, 5, 6], p=[0.05, 0.10, 0.15, 0.25, 0.25, 0.20]
+            )
 
             # Interaction count (higher for lower tiers = more active relationships)
             base_interactions = max(0, int(self.rng.normal(15 - tier * 2, 5)))
@@ -96,9 +106,13 @@ class SyntheticDataGenerator:
 
             # Channel selection (execs prefer email, juniors more varied)
             if tier <= 2:
-                channel = self.rng.choice(["email", "linkedin", "phone"], p=[0.6, 0.25, 0.15])
+                channel = self.rng.choice(
+                    ["email", "linkedin", "phone"], p=[0.6, 0.25, 0.15]
+                )
             else:
-                channel = self.rng.choice(["email", "linkedin", "phone"], p=[0.35, 0.40, 0.25])
+                channel = self.rng.choice(
+                    ["email", "linkedin", "phone"], p=[0.35, 0.40, 0.25]
+                )
 
             ch_email, ch_linkedin, ch_phone = _encode_channel(channel)
 
@@ -137,7 +151,14 @@ class SyntheticDataGenerator:
             channel_bonus += 0.03 if channel == "linkedin" and tier >= 3 else 0.0
             velocity_bonus = min(hiring_velocity * 0.01, 0.1)
 
-            prob = base_prob + interaction_bonus - recency_penalty + day_bonus + channel_bonus + velocity_bonus
+            prob = (
+                base_prob
+                + interaction_bonus
+                - recency_penalty
+                + day_bonus
+                + channel_bonus
+                + velocity_bonus
+            )
             prob = np.clip(prob, 0.05, 0.95)
 
             # Add noise
@@ -150,6 +171,7 @@ class SyntheticDataGenerator:
 
 
 # ─── Response Predictor Model ───────────────────────────────────────────────
+
 
 class ResponsePredictor:
     """
@@ -243,7 +265,9 @@ class ResponsePredictor:
             self.trained_at = data["trained_at"]
             self.accuracy = data["accuracy"]
             self.auc = data["auc"]
-            logger.info(f"Model loaded from {self.model_path} (trained: {self.trained_at})")
+            logger.info(
+                f"Model loaded from {self.model_path} (trained: {self.trained_at})"
+            )
             return True
         except Exception as e:
             logger.error(f"Failed to load model: {e}")
@@ -299,9 +323,7 @@ class ResponsePredictor:
             return {}
 
         importances = self.model.feature_importances_
-        return {
-            name: float(imp) for name, imp in zip(FEATURE_NAMES, importances)
-        }
+        return {name: float(imp) for name, imp in zip(FEATURE_NAMES, importances)}
 
     def get_status(self) -> Dict[str, Any]:
         """Get model status info."""
@@ -312,7 +334,9 @@ class ResponsePredictor:
             "auc": self.auc,
             "model_path": str(self.model_path),
             "feature_names": FEATURE_NAMES,
-            "feature_importance": self.get_feature_importance() if self.is_loaded else {},
+            "feature_importance": self.get_feature_importance()
+            if self.is_loaded
+            else {},
         }
 
     def _features_to_array(self, features: Dict[str, Any]) -> np.ndarray:
@@ -320,17 +344,20 @@ class ResponsePredictor:
         channel = features.get("channel", "email")
         ch_email, ch_linkedin, ch_phone = _encode_channel(channel)
 
-        return np.array([
-            float(features.get("contact_tier", 3)),
-            float(features.get("interaction_count", 0)),
-            float(features.get("days_since_last", 30)),
-            ch_email,
-            ch_linkedin,
-            ch_phone,
-            _safe_log_value(features.get("program_value", 0)),
-            float(features.get("hiring_velocity", 0)),
-            float(features.get("day_of_week", datetime.now().weekday())),
-        ], dtype=np.float32)
+        return np.array(
+            [
+                float(features.get("contact_tier", 3)),
+                float(features.get("interaction_count", 0)),
+                float(features.get("days_since_last", 30)),
+                ch_email,
+                ch_linkedin,
+                ch_phone,
+                _safe_log_value(features.get("program_value", 0)),
+                float(features.get("hiring_velocity", 0)),
+                float(features.get("day_of_week", datetime.now().weekday())),
+            ],
+            dtype=np.float32,
+        )
 
 
 # ─── Singleton ──────────────────────────────────────────────────────────────

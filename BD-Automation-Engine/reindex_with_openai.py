@@ -20,13 +20,13 @@ import argparse
 from datetime import datetime
 from dotenv import load_dotenv
 
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
 load_dotenv()
 
 import openai
 from qdrant_client import QdrantClient
-from qdrant_client.models import Distance, VectorParams, PointStruct, ScrollRequest
+from qdrant_client.models import Distance, VectorParams, PointStruct
 
 # Configuration
 QDRANT_URL = "http://localhost:6333"
@@ -38,7 +38,7 @@ EMBED_BATCH_SIZE = 2000
 client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # UUID namespace
-NAMESPACE = uuid.UUID('abcdef12-3456-7890-abcd-ef1234567890')
+NAMESPACE = uuid.UUID("abcdef12-3456-7890-abcd-ef1234567890")
 
 
 def get_embeddings(texts: list[str]) -> list[list[float]]:
@@ -46,14 +46,11 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
     all_embeddings = []
 
     for i in range(0, len(texts), EMBED_BATCH_SIZE):
-        batch = texts[i:i + EMBED_BATCH_SIZE]
+        batch = texts[i : i + EMBED_BATCH_SIZE]
         batch = [t if t.strip() else "empty" for t in batch]
 
         try:
-            response = client_openai.embeddings.create(
-                model=OPENAI_MODEL,
-                input=batch
-            )
+            response = client_openai.embeddings.create(model=OPENAI_MODEL, input=batch)
             embeddings = [item.embedding for item in response.data]
             all_embeddings.extend(embeddings)
         except Exception as e:
@@ -65,44 +62,44 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
 
 def create_text_for_embedding(payload: dict, collection: str) -> str:
     """Create searchable text from payload based on collection type."""
-    if collection == 'programs':
+    if collection == "programs":
         parts = [
-            payload.get('name', ''),
-            payload.get('description', ''),
-            payload.get('agency', ''),
-            payload.get('prime_contractor', ''),
-            payload.get('content', ''),
-            payload.get('text', ''),
+            payload.get("name", ""),
+            payload.get("description", ""),
+            payload.get("agency", ""),
+            payload.get("prime_contractor", ""),
+            payload.get("content", ""),
+            payload.get("text", ""),
         ]
-    elif collection == 'documents':
+    elif collection == "documents":
         parts = [
-            payload.get('title', ''),
-            payload.get('content', ''),
-            payload.get('text', ''),
-            payload.get('summary', ''),
-            payload.get('description', ''),
+            payload.get("title", ""),
+            payload.get("content", ""),
+            payload.get("text", ""),
+            payload.get("summary", ""),
+            payload.get("description", ""),
         ]
-    elif collection == 'jobs':
+    elif collection == "jobs":
         parts = [
-            payload.get('title', ''),
-            payload.get('company', ''),
-            payload.get('description', ''),
-            payload.get('requirements', ''),
-            payload.get('location', ''),
-            payload.get('content', ''),
-            payload.get('text', ''),
+            payload.get("title", ""),
+            payload.get("company", ""),
+            payload.get("description", ""),
+            payload.get("requirements", ""),
+            payload.get("location", ""),
+            payload.get("content", ""),
+            payload.get("text", ""),
         ]
     else:
         # Generic - try common fields
         parts = [
-            payload.get('name', ''),
-            payload.get('title', ''),
-            payload.get('content', ''),
-            payload.get('text', ''),
-            payload.get('description', ''),
+            payload.get("name", ""),
+            payload.get("title", ""),
+            payload.get("content", ""),
+            payload.get("text", ""),
+            payload.get("description", ""),
         ]
 
-    return ' '.join(str(p) for p in parts if p)
+    return " ".join(str(p) for p in parts if p)
 
 
 def reindex_collection(collection: str):
@@ -141,7 +138,7 @@ def reindex_collection(collection: str):
 
     qdrant.create_collection(
         collection_name=temp_collection,
-        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
     )
 
     # Scroll through all points
@@ -163,7 +160,7 @@ def reindex_collection(collection: str):
             limit=BATCH_SIZE,
             offset=offset,
             with_payload=True,
-            with_vectors=False  # Don't need old vectors
+            with_vectors=False,  # Don't need old vectors
         )
 
         points, next_offset = result
@@ -176,9 +173,9 @@ def reindex_collection(collection: str):
             text = create_text_for_embedding(payload, collection)
 
             # Add OpenAI metadata
-            payload['_indexed_at'] = datetime.now().isoformat()
-            payload['_embedding_model'] = OPENAI_MODEL
-            payload['_reindexed'] = True
+            payload["_indexed_at"] = datetime.now().isoformat()
+            payload["_embedding_model"] = OPENAI_MODEL
+            payload["_reindexed"] = True
 
             batch_payloads.append(payload)
             batch_ids.append(point.id)
@@ -238,7 +235,7 @@ def reindex_collection(collection: str):
     print(f"  Creating new: {collection} ({EMBEDDING_DIM} dims)")
     qdrant.create_collection(
         collection_name=collection,
-        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
     )
 
     # Copy from temp to new collection
@@ -252,7 +249,7 @@ def reindex_collection(collection: str):
             limit=BATCH_SIZE,
             offset=offset,
             with_payload=True,
-            with_vectors=True
+            with_vectors=True,
         )
 
         points, next_offset = result
@@ -260,8 +257,7 @@ def reindex_collection(collection: str):
             break
 
         points_to_upsert = [
-            PointStruct(id=p.id, vector=p.vector, payload=p.payload)
-            for p in points
+            PointStruct(id=p.id, vector=p.vector, payload=p.payload) for p in points
         ]
         qdrant.upsert(collection_name=collection, points=points_to_upsert)
         copied += len(points_to_upsert)
@@ -283,20 +279,23 @@ def reindex_collection(collection: str):
     print("=" * 70)
     print(f"  Total indexed: {final_count:,}")
     print(f"  Errors: {errors:,}")
-    print(f"  Time: {elapsed/60:.1f} minutes")
+    print(f"  Time: {elapsed / 60:.1f} minutes")
     print(f"  New dimensions: {EMBEDDING_DIM}")
     print("=" * 70)
 
 
 def main():
-    parser = argparse.ArgumentParser(description='Re-index collection with OpenAI')
-    parser.add_argument('--collection', required=True,
-                        choices=['programs', 'documents', 'jobs', 'all'],
-                        help='Collection to re-index')
+    parser = argparse.ArgumentParser(description="Re-index collection with OpenAI")
+    parser.add_argument(
+        "--collection",
+        required=True,
+        choices=["programs", "documents", "jobs", "all"],
+        help="Collection to re-index",
+    )
     args = parser.parse_args()
 
-    if args.collection == 'all':
-        for coll in ['programs', 'documents', 'jobs']:
+    if args.collection == "all":
+        for coll in ["programs", "documents", "jobs"]:
             reindex_collection(coll)
             print("\n")
     else:

@@ -25,6 +25,7 @@ E7_ANALYSIS = BASE_DIR / "Engine7_BullhornETL" / "colton_scurry_analysis"
 @dataclass
 class ExpandedQuery:
     """Result of query expansion."""
+
     original: str
     expanded: str
     acronyms_resolved: List[str] = field(default_factory=list)
@@ -52,7 +53,6 @@ DEFENSE_SYNONYMS: Dict[str, List[str]] = {
     "NRO": ["National Reconnaissance Office"],
     "DIA": ["Defense Intelligence Agency"],
     "NSA": ["National Security Agency"],
-
     # Clearances
     "TS/SCI": ["Top Secret Sensitive Compartmented Information", "TS SCI"],
     "TS": ["Top Secret"],
@@ -62,7 +62,6 @@ DEFENSE_SYNONYMS: Dict[str, List[str]] = {
     "FSP": ["Full Scope Polygraph"],
     "SCI": ["Sensitive Compartmented Information"],
     "SAP": ["Special Access Program"],
-
     # Roles / Titles
     "PM": ["Program Manager"],
     "DPM": ["Deputy Program Manager"],
@@ -77,10 +76,11 @@ DEFENSE_SYNONYMS: Dict[str, List[str]] = {
     "PTL": ["Program Technical Lead"],
     "TL": ["Technical Lead", "Team Lead"],
     "SA": ["System Administrator", "Systems Analyst"],
-
     # Technologies / Domains
     "ISR": ["Intelligence Surveillance Reconnaissance"],
-    "C4ISR": ["Command Control Communications Computers Intelligence Surveillance Reconnaissance"],
+    "C4ISR": [
+        "Command Control Communications Computers Intelligence Surveillance Reconnaissance"
+    ],
     "SIGINT": ["Signals Intelligence"],
     "GEOINT": ["Geospatial Intelligence"],
     "HUMINT": ["Human Intelligence"],
@@ -95,7 +95,6 @@ DEFENSE_SYNONYMS: Dict[str, List[str]] = {
     "ATO": ["Authority to Operate"],
     "IATO": ["Interim Authority to Operate"],
     "PKI": ["Public Key Infrastructure"],
-
     # Contractors
     "GDIT": ["General Dynamics IT", "General Dynamics Information Technology"],
     "L3Harris": ["L3 Harris Technologies"],
@@ -107,7 +106,6 @@ DEFENSE_SYNONYMS: Dict[str, List[str]] = {
     "NGC": ["Northrop Grumman"],
     "LM": ["Lockheed Martin"],
     "RTX": ["Raytheon Technologies", "Raytheon"],
-
     # Contract Vehicles
     "IDIQ": ["Indefinite Delivery Indefinite Quantity"],
     "BPA": ["Blanket Purchase Agreement"],
@@ -204,7 +202,7 @@ class QueryExpander:
 
         for term in terms_sorted:
             # Check if term appears as a word boundary in the query
-            pattern = r'\b' + re.escape(term) + r'\b'
+            pattern = r"\b" + re.escape(term) + r"\b"
             if re.search(pattern, query_upper):
                 expansions = self._synonym_map[term]
                 for exp in expansions:

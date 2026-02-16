@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from docling.document_converter import DocumentConverter
+
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 @dataclass
 class ExtractedTable:
     """A table extracted from a document."""
+
     page: int
     headers: List[str] = field(default_factory=list)
     rows: List[List[str]] = field(default_factory=list)
@@ -62,6 +64,7 @@ class ExtractedTable:
 @dataclass
 class ExtractionResult:
     """Result from document extraction."""
+
     file_path: str
     file_type: str
     title: Optional[str] = None
@@ -93,14 +96,16 @@ class ExtractionResult:
         while start < len(text):
             end = min(start + chunk_size, len(text))
             chunk_text = text[start:end]
-            chunks.append({
-                "text": chunk_text,
-                "chunk_index": chunk_idx,
-                "total_chunks": -1,  # Will be set after all chunks created
-                "source_file": self.file_path,
-                "file_type": self.file_type,
-                "title": self.title,
-            })
+            chunks.append(
+                {
+                    "text": chunk_text,
+                    "chunk_index": chunk_idx,
+                    "total_chunks": -1,  # Will be set after all chunks created
+                    "source_file": self.file_path,
+                    "file_type": self.file_type,
+                    "title": self.title,
+                }
+            )
             chunk_idx += 1
             start = end - overlap if end < len(text) else end
 
@@ -136,7 +141,7 @@ class DoclingExtractor:
             return ExtractionResult(
                 file_path=str(path),
                 file_type=path.suffix,
-                errors=[f"File not found: {path}"]
+                errors=[f"File not found: {path}"],
             )
 
         result = ExtractionResult(
@@ -190,11 +195,11 @@ class DoclingExtractor:
             try:
                 results.append(self.extract(path))
             except Exception as e:
-                results.append(ExtractionResult(
-                    file_path=path,
-                    file_type=Path(path).suffix,
-                    errors=[str(e)]
-                ))
+                results.append(
+                    ExtractionResult(
+                        file_path=path, file_type=Path(path).suffix, errors=[str(e)]
+                    )
+                )
         return results
 
     def extract_to_chunks(
@@ -207,6 +212,7 @@ class DoclingExtractor:
 
 if __name__ == "__main__":
     import sys
+
     logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) < 2:

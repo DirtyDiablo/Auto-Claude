@@ -32,6 +32,7 @@ router = APIRouter(prefix="/knowledge", tags=["knowledge"])
 # REQUEST MODELS
 # =========================================
 
+
 class IngestEpisodeRequest(BaseModel):
     content: str = Field(..., min_length=1, description="Text content of the episode")
     episode_type: str = Field(
@@ -78,7 +79,8 @@ class CompileBatchRequest(BaseModel):
 
 class CompileNotesRequest(BaseModel):
     notes: List[Dict[str, Any]] = Field(
-        ..., min_length=1,
+        ...,
+        min_length=1,
         description="Structured notes (contact_name, company, subject, notes/content)",
     )
 
@@ -101,6 +103,7 @@ class HybridSearchRequest(BaseModel):
 # SERIALIZATION HELPERS
 # =========================================
 
+
 def _serialize_dataclass(obj: Any) -> Any:
     """Convert dataclass to dict, handling nested dataclasses."""
     if hasattr(obj, "__dataclass_fields__"):
@@ -118,6 +121,7 @@ def _serialize_list(items: list) -> list:
 # =========================================
 # ENDPOINTS — Temporal Knowledge Graph
 # =========================================
+
 
 @router.post("/ingest")
 async def ingest_episode(request: IngestEpisodeRequest):
@@ -163,7 +167,11 @@ async def query_temporal(request: TemporalQueryRequest):
         entity_id=request.entity_id,
         predicate=request.predicate,
     )
-    return {"timestamp": request.timestamp, "facts": _serialize_list(facts), "count": len(facts)}
+    return {
+        "timestamp": request.timestamp,
+        "facts": _serialize_list(facts),
+        "count": len(facts),
+    }
 
 
 @router.get("/contradictions")
@@ -171,12 +179,16 @@ async def get_contradictions():
     """List all detected contradictions in the knowledge graph."""
     kg = get_temporal_kg()
     contradictions = kg.find_contradictions()
-    return {"contradictions": _serialize_list(contradictions), "count": len(contradictions)}
+    return {
+        "contradictions": _serialize_list(contradictions),
+        "count": len(contradictions),
+    }
 
 
 # =========================================
 # ENDPOINTS — Entity Resolution
 # =========================================
+
 
 @router.post("/resolve/entity")
 async def resolve_entity(request: ResolveEntityRequest):
@@ -236,6 +248,7 @@ async def run_global_resolution(request: GlobalResolutionRequest):
 # ENDPOINTS — Knowledge Compiler
 # =========================================
 
+
 @router.post("/compile")
 async def compile_text(request: CompileTextRequest):
     """Compile unstructured text into structured facts."""
@@ -270,6 +283,7 @@ async def compile_notes(request: CompileNotesRequest):
 # ENDPOINTS — Stats & Search
 # =========================================
 
+
 @router.get("/stats")
 async def get_knowledge_stats():
     """Get comprehensive knowledge graph statistics."""
@@ -278,7 +292,9 @@ async def get_knowledge_stats():
 
 
 @router.get("/search/semantic")
-async def search_semantic(query: str, entity_type: Optional[str] = None, limit: int = 20):
+async def search_semantic(
+    query: str, entity_type: Optional[str] = None, limit: int = 20
+):
     """Search entities across the knowledge graph by name/alias."""
     kg = get_temporal_kg()
     entities = kg.search_entities(query, entity_type, limit)
@@ -337,6 +353,7 @@ async def search_hybrid(
 # =========================================
 # INTEGRATION
 # =========================================
+
 
 def include_knowledge_router(app: FastAPI) -> None:
     """Register the knowledge router with the FastAPI app."""

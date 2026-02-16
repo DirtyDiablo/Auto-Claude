@@ -12,8 +12,12 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.collection_upgrade import (
-    upgrade_collection, upgrade_all, verify_upgrade,
-    rollback_upgrade, _extract_text, KNOWN_COLLECTIONS,
+    upgrade_collection,
+    upgrade_all,
+    verify_upgrade,
+    rollback_upgrade,
+    _extract_text,
+    KNOWN_COLLECTIONS,
 )
 
 
@@ -21,11 +25,14 @@ from Engine8_Knowledge.search.collection_upgrade import (
 # TestUpgradeCollection
 # ---------------------------------------------------------------------------
 
+
 class TestUpgradeCollection:
     """Test single collection upgrade."""
 
     def test_already_upgraded(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+        ) as MockClient:
             client = MockClient.return_value
             info = MagicMock()
             info.config.params.sparse_vectors = {"bm25": MagicMock()}
@@ -35,7 +42,9 @@ class TestUpgradeCollection:
         assert result["status"] == "already_upgraded"
 
     def test_dry_run(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+        ) as MockClient:
             client = MockClient.return_value
             info = MagicMock()
             info.config.params.sparse_vectors = None
@@ -48,10 +57,16 @@ class TestUpgradeCollection:
         assert result["estimated_batches"] == 10
 
     def test_upgrade_success(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient, \
-             patch("Engine8_Knowledge.search.collection_upgrade.SparseTextEmbedding") as MockSparse, \
-             patch("Engine8_Knowledge.search.collection_upgrade._save_progress"), \
-             patch("Engine8_Knowledge.search.collection_upgrade._clear_progress"):
+        with (
+            patch(
+                "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+            ) as MockClient,
+            patch(
+                "Engine8_Knowledge.search.collection_upgrade.SparseTextEmbedding"
+            ) as MockSparse,
+            patch("Engine8_Knowledge.search.collection_upgrade._save_progress"),
+            patch("Engine8_Knowledge.search.collection_upgrade._clear_progress"),
+        ):
             client = MockClient.return_value
             # Original collection info
             info = MagicMock()
@@ -89,12 +104,16 @@ class TestUpgradeCollection:
         assert result["migrated"] == 2
 
     def test_upgrade_qdrant_not_available(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QDRANT_AVAILABLE", False):
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QDRANT_AVAILABLE", False
+        ):
             result = upgrade_collection("test")
         assert result["status"] == "error"
 
     def test_upgrade_collection_not_found(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+        ) as MockClient:
             client = MockClient.return_value
             client.get_collection.side_effect = Exception("not found")
             result = upgrade_collection("nonexistent")
@@ -105,11 +124,14 @@ class TestUpgradeCollection:
 # TestUpgradeAll
 # ---------------------------------------------------------------------------
 
+
 class TestUpgradeAll:
     """Test bulk upgrade."""
 
     def test_upgrade_all_dry_run(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.upgrade_collection") as mock_up:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.upgrade_collection"
+        ) as mock_up:
             mock_up.return_value = {"status": "dry_run", "vectors_count": 100}
             results = upgrade_all(dry_run=True)
         assert len(results) == len(KNOWN_COLLECTIONS)
@@ -125,11 +147,14 @@ class TestUpgradeAll:
 # TestVerify
 # ---------------------------------------------------------------------------
 
+
 class TestVerify:
     """Test upgrade verification."""
 
     def test_verify_upgraded(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+        ) as MockClient:
             client = MockClient.return_value
             info = MagicMock()
             info.config.params.sparse_vectors = {"bm25": MagicMock()}
@@ -140,7 +165,9 @@ class TestVerify:
         assert result["has_bm25"] is True
 
     def test_verify_not_upgraded(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+        ) as MockClient:
             client = MockClient.return_value
             info = MagicMock()
             info.config.params.sparse_vectors = None
@@ -155,19 +182,26 @@ class TestVerify:
 # TestRollback
 # ---------------------------------------------------------------------------
 
+
 class TestRollback:
     """Test rollback of failed upgrade."""
 
     def test_rollback_deletes_temp(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient, \
-             patch("Engine8_Knowledge.search.collection_upgrade._clear_progress"):
+        with (
+            patch(
+                "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+            ) as MockClient,
+            patch("Engine8_Knowledge.search.collection_upgrade._clear_progress"),
+        ):
             client = MockClient.return_value
             result = rollback_upgrade("bd_contacts")
         assert result["status"] == "rolled_back"
         client.delete_collection.assert_called_once_with("bd_contacts_hybrid_temp")
 
     def test_rollback_error(self):
-        with patch("Engine8_Knowledge.search.collection_upgrade.QdrantClient") as MockClient:
+        with patch(
+            "Engine8_Knowledge.search.collection_upgrade.QdrantClient"
+        ) as MockClient:
             client = MockClient.return_value
             client.delete_collection.side_effect = Exception("not found")
             result = rollback_upgrade("bd_contacts")
@@ -177,6 +211,7 @@ class TestRollback:
 # ---------------------------------------------------------------------------
 # TestHelpers
 # ---------------------------------------------------------------------------
+
 
 class TestHelpers:
     """Test helper functions."""
@@ -191,6 +226,8 @@ class TestHelpers:
         assert _extract_text({}) == "empty"
 
     def test_extract_text_multiple_fields(self):
-        text = _extract_text({"name": "Alice", "title": "PM", "description": "Program manager"})
+        text = _extract_text(
+            {"name": "Alice", "title": "PM", "description": "Program manager"}
+        )
         assert "Alice" in text
         assert "PM" in text

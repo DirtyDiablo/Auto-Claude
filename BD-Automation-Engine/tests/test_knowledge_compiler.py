@@ -16,6 +16,7 @@ from src.knowledge.compiler import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def compiler():
     return KnowledgeCompiler()
@@ -35,6 +36,7 @@ SIMPLE_TEXT = "John Smith works at Leidos on the DCGS program."
 # =========================================
 # BASIC COMPILATION
 # =========================================
+
 
 def test_compile_empty(compiler):
     facts = compiler.compile("")
@@ -69,6 +71,7 @@ def test_compile_fact_has_type(compiler):
 # RELATIONSHIP EXTRACTION
 # =========================================
 
+
 def test_compile_extracts_relationships(compiler):
     facts = compiler.compile(SIMPLE_TEXT)
     rels = [f for f in facts if f.fact_type == FactType.RELATIONSHIP.value]
@@ -85,6 +88,7 @@ def test_compile_relationship_has_subject(compiler):
 # =========================================
 # NUMERICAL EXTRACTION
 # =========================================
+
 
 def test_compile_extracts_currency(compiler):
     facts = compiler.compile("The contract is worth $2.5M.")
@@ -109,6 +113,7 @@ def test_compile_extracts_team_size(compiler):
 # SENTIMENT / PAIN POINT EXTRACTION
 # =========================================
 
+
 def test_compile_extracts_pain_points(compiler):
     facts = compiler.compile("The team is stretched thin and overwhelmed.")
     sentiments = [f for f in facts if f.fact_type == FactType.SENTIMENT.value]
@@ -131,8 +136,11 @@ def test_compile_pain_point_budget(compiler):
 # ACTION ITEM EXTRACTION
 # =========================================
 
+
 def test_compile_extracts_actions(compiler):
-    facts = compiler.compile("Need to follow up with John next week about the proposal.")
+    facts = compiler.compile(
+        "Need to follow up with John next week about the proposal."
+    )
     actions = [f for f in facts if f.fact_type == FactType.ACTION_ITEM.value]
     assert len(actions) >= 1
 
@@ -149,15 +157,17 @@ def test_compile_action_with_source(compiler):
 
 
 def test_compile_actions_limited_to_5(compiler):
-    text = ". ".join([
-        "Follow up on item one",
-        "Schedule meeting for item two",
-        "Send report for item three",
-        "Call back about item four",
-        "Set up demo for item five",
-        "Arrange visit for item six",
-        "Provide update for item seven",
-    ])
+    text = ". ".join(
+        [
+            "Follow up on item one",
+            "Schedule meeting for item two",
+            "Send report for item three",
+            "Call back about item four",
+            "Set up demo for item five",
+            "Arrange visit for item six",
+            "Provide update for item seven",
+        ]
+    )
     facts = compiler.compile(text)
     actions = [f for f in facts if f.fact_type == FactType.ACTION_ITEM.value]
     assert len(actions) <= 5
@@ -166,6 +176,7 @@ def test_compile_actions_limited_to_5(compiler):
 # =========================================
 # HIRING EXTRACTION
 # =========================================
+
 
 def test_compile_extracts_hiring(compiler):
     facts = compiler.compile("GDIT is hiring 3 new positions for the program.")
@@ -183,6 +194,7 @@ def test_compile_hiring_vacancy(compiler):
 # DEPARTURE EXTRACTION
 # =========================================
 
+
 def test_compile_extracts_departures(compiler):
     facts = compiler.compile("Mike Brown left the company last month.")
     events = [f for f in facts if f.predicate == "DEPARTED"]
@@ -198,6 +210,7 @@ def test_compile_departure_resigned(compiler):
 # =========================================
 # TEMPORAL MARKERS
 # =========================================
+
 
 def test_compile_temporal_quarter(compiler):
     facts = compiler.compile("The Q2 hiring push will add 5 analysts.")
@@ -215,6 +228,7 @@ def test_compile_temporal_relative(compiler):
 # =========================================
 # BATCH COMPILATION
 # =========================================
+
 
 def test_compile_batch(compiler):
     texts = [SIMPLE_TEXT, SAMPLE_TEXT]
@@ -247,10 +261,20 @@ def test_compile_batch_duration(compiler):
 # NOTES COMPILATION
 # =========================================
 
+
 def test_compile_from_notes(compiler):
     notes = [
-        {"contact_name": "John Smith", "company": "GDIT", "notes": "Discussed hiring needs."},
-        {"contact_name": "Jane Doe", "company": "Leidos", "subject": "DCGS", "content": "Budget review."},
+        {
+            "contact_name": "John Smith",
+            "company": "GDIT",
+            "notes": "Discussed hiring needs.",
+        },
+        {
+            "contact_name": "Jane Doe",
+            "company": "Leidos",
+            "subject": "DCGS",
+            "content": "Budget review.",
+        },
     ]
     report = compiler.compile_from_notes(notes)
     assert isinstance(report, CompilationReport)
@@ -267,6 +291,7 @@ def test_compile_from_notes_empty_fields(compiler):
 # HISTORY
 # =========================================
 
+
 def test_compilation_history(compiler):
     compiler.compile_batch([SIMPLE_TEXT])
     compiler.compile_batch([SAMPLE_TEXT])
@@ -277,6 +302,7 @@ def test_compilation_history(compiler):
 # =========================================
 # COMPREHENSIVE SAMPLE
 # =========================================
+
 
 def test_compile_comprehensive(compiler):
     """Test that a rich text produces multiple fact types."""
@@ -289,6 +315,7 @@ def test_compile_comprehensive(compiler):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_knowledge_compiler_singleton():
     c1 = get_knowledge_compiler()

@@ -12,7 +12,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, DictMetaStore
 from Engine8_Knowledge.workflows.human_loop import (
-    HumanInTheLoopManager, ApprovalRequest, ApprovalDecision,
+    HumanInTheLoopManager,
+    ApprovalRequest,
+    ApprovalDecision,
 )
 
 
@@ -30,11 +32,13 @@ def manager(tmp_path):
 async def seeded_manager(manager):
     """Manager with a pre-created approval request."""
     await manager.create_approval_request(
-        thread_id="t1", workflow_name="contact_enrichment",
+        thread_id="t1",
+        workflow_name="contact_enrichment",
         node_name="review_classifications",
         state_snapshot={"classifications": [{"tier": 1}]},
         description="Review Tier 1 contact classifications",
-        urgency="high", expires_in_hours=24,
+        urgency="high",
+        expires_in_hours=24,
     )
     return manager
 
@@ -47,8 +51,10 @@ def test_init(manager):
 @pytest.mark.asyncio
 async def test_create_approval_request(manager):
     req = await manager.create_approval_request(
-        thread_id="t1", workflow_name="test",
-        node_name="review", state_snapshot={"data": "test"},
+        thread_id="t1",
+        workflow_name="test",
+        node_name="review",
+        state_snapshot={"data": "test"},
         description="Please approve",
     )
     assert isinstance(req, ApprovalRequest)
@@ -65,7 +71,9 @@ async def test_list_pending_approvals_empty(manager):
 
 @pytest.mark.asyncio
 async def test_list_pending_approvals_filtered(seeded_manager):
-    approvals = await seeded_manager.list_pending_approvals(workflow_name="contact_enrichment")
+    approvals = await seeded_manager.list_pending_approvals(
+        workflow_name="contact_enrichment"
+    )
     assert len(approvals) >= 1
     assert approvals[0].workflow_name == "contact_enrichment"
 
@@ -79,8 +87,10 @@ async def test_submit_decision_approve(seeded_manager):
     req_id = approvals[0].request_id
 
     decision = await seeded_manager.submit_decision(
-        request_id=req_id, decision="approve",
-        notes="Looks good", decided_by="tester",
+        request_id=req_id,
+        decision="approve",
+        notes="Looks good",
+        decided_by="tester",
     )
     assert isinstance(decision, ApprovalDecision)
     assert decision.decision == "approve"
@@ -93,7 +103,8 @@ async def test_submit_decision_reject(seeded_manager):
     req_id = approvals[0].request_id
 
     decision = await seeded_manager.submit_decision(
-        request_id=req_id, decision="reject",
+        request_id=req_id,
+        decision="reject",
         notes="Tier assignment incorrect",
     )
     assert decision.decision == "reject"
@@ -126,7 +137,9 @@ async def test_resume_workflow(seeded_manager):
     await seeded_manager.submit_decision(req_id, decision="approve")
 
     # Create the thread in checkpoint store so resume works
-    await seeded_manager.checkpoint_store.create_thread("contact_enrichment", thread_id="t1")
+    await seeded_manager.checkpoint_store.create_thread(
+        "contact_enrichment", thread_id="t1"
+    )
     tid = await seeded_manager.resume_workflow(req_id)
     assert tid == "t1"
 
@@ -135,9 +148,12 @@ async def test_resume_workflow(seeded_manager):
 async def test_auto_approve_expired(manager):
     # Create request that expires immediately
     await manager.create_approval_request(
-        thread_id="t_expired", workflow_name="test",
-        node_name="review", state_snapshot={},
-        description="Expire test", expires_in_hours=0,
+        thread_id="t_expired",
+        workflow_name="test",
+        node_name="review",
+        state_snapshot={},
+        description="Expire test",
+        expires_in_hours=0,
     )
     auto_approved = await manager.auto_approve_expired()
     assert len(auto_approved) >= 1

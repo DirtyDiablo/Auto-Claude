@@ -86,9 +86,15 @@ class TestPlacementPredictorInit:
     def test_features_constant_expected_names(self):
         """FEATURES should include all expected feature names."""
         expected = {
-            "contact_tier", "days_since_last_contact", "interaction_count",
-            "response_rate", "sentiment_score", "program_pain_score",
-            "pts_past_perf_match", "clearance_match", "location_match",
+            "contact_tier",
+            "days_since_last_contact",
+            "interaction_count",
+            "response_rate",
+            "sentiment_score",
+            "program_pain_score",
+            "pts_past_perf_match",
+            "clearance_match",
+            "location_match",
         }
         assert set(FEATURES) == expected
 
@@ -135,23 +141,31 @@ class TestHeuristicPrediction:
         result = predictor.predict(high_value_features)
         assert isinstance(result, PlacementPrediction)
 
-    def test_predict_probability_between_zero_and_one(self, predictor, high_value_features):
+    def test_predict_probability_between_zero_and_one(
+        self, predictor, high_value_features
+    ):
         """Predicted probability should always be in [0.0, 1.0]."""
         result = predictor.predict(high_value_features)
         assert 0.0 <= result.probability <= 1.0
 
-    def test_predict_high_value_has_higher_probability(self, predictor, high_value_features, low_value_features):
+    def test_predict_high_value_has_higher_probability(
+        self, predictor, high_value_features, low_value_features
+    ):
         """High-value contacts should get higher probability than low-value ones."""
         high_result = predictor.predict(high_value_features)
         low_result = predictor.predict(low_value_features)
         assert high_result.probability > low_result.probability
 
-    def test_predict_confidence_high_for_strong_contact(self, predictor, high_value_features):
+    def test_predict_confidence_high_for_strong_contact(
+        self, predictor, high_value_features
+    ):
         """A strong contact should receive 'high' confidence."""
         result = predictor.predict(high_value_features)
         assert result.confidence in ("high", "medium")
 
-    def test_predict_confidence_low_for_weak_contact(self, predictor, low_value_features):
+    def test_predict_confidence_low_for_weak_contact(
+        self, predictor, low_value_features
+    ):
         """A weak contact should receive 'low' confidence."""
         result = predictor.predict(low_value_features)
         assert result.confidence in ("low", "medium")
@@ -291,6 +305,7 @@ class TestSingleton:
     def test_get_placement_predictor_returns_instance(self):
         """get_placement_predictor() should return a PlacementPredictor instance."""
         import Engine8_Knowledge.ml.placement_predictor as mod
+
         mod._predictor = None
         instance = get_placement_predictor()
         assert isinstance(instance, PlacementPredictor)
@@ -298,6 +313,7 @@ class TestSingleton:
     def test_get_placement_predictor_is_singleton(self):
         """Calling get_placement_predictor() twice should return the same instance."""
         import Engine8_Knowledge.ml.placement_predictor as mod
+
         mod._predictor = None
         a = get_placement_predictor()
         b = get_placement_predictor()

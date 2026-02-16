@@ -1,20 +1,25 @@
 """Phase 30A — Monitoring API Router (8 endpoints)"""
+
 import time
 import platform
 import structlog
 from fastapi import APIRouter
+
 logger = structlog.get_logger(__name__)
 
 router = APIRouter(tags=["monitoring"])
 
 _start_time = time.time()
 
+
 def _get_metrics():
     try:
         from Engine8_Knowledge.monitoring.metrics import get_platform_metrics
+
         return get_platform_metrics()
     except Exception:
         return None
+
 
 @router.get("/monitoring/health")
 async def health_check():
@@ -23,6 +28,7 @@ async def health_check():
     # Check Qdrant
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=5) as client:
             resp = await client.get("http://localhost:6333/healthz")
             subsystems["qdrant"] = "healthy" if resp.status_code == 200 else "unhealthy"
@@ -32,31 +38,43 @@ async def health_check():
     # Check Neo4j
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=5) as client:
             resp = await client.get("http://localhost:7474")
             subsystems["neo4j"] = "healthy" if resp.status_code == 200 else "unhealthy"
     except Exception:
         subsystems["neo4j"] = "unavailable"
 
-    overall = "healthy" if all(v == "healthy" for v in subsystems.values()) else "degraded"
-    return {"status": overall, "subsystems": subsystems, "uptime_seconds": int(time.time() - _start_time)}
+    overall = (
+        "healthy" if all(v == "healthy" for v in subsystems.values()) else "degraded"
+    )
+    return {
+        "status": overall,
+        "subsystems": subsystems,
+        "uptime_seconds": int(time.time() - _start_time),
+    }
+
 
 @router.get("/monitoring/ready")
 async def readiness_probe():
     """K8s readiness probe."""
     return {"ready": True, "timestamp": time.time()}
 
+
 @router.get("/monitoring/live")
 async def liveness_probe():
     """K8s liveness probe."""
     return {"alive": True, "uptime_seconds": int(time.time() - _start_time)}
 
+
 @router.get("/monitoring/resource-usage")
 async def resource_usage():
     """Current resource usage."""
     import os
+
     try:
         import psutil
+
         process = psutil.Process(os.getpid())
         mem = process.memory_info()
         return {
@@ -75,6 +93,7 @@ async def resource_usage():
             "note": "psutil not installed for detailed metrics",
         }
 
+
 @router.get("/monitoring/dashboard-urls")
 async def dashboard_urls():
     """Grafana dashboard URLs."""
@@ -89,10 +108,12 @@ async def dashboard_urls():
         }
     }
 
+
 @router.get("/monitoring/alerts")
 async def active_alerts():
     """Active monitoring alerts."""
     return {"alerts": [], "total": 0, "status": "all_clear"}
+
 
 @router.get("/monitoring/status")
 async def platform_status():

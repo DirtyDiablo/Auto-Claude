@@ -12,6 +12,7 @@ from src.api.memory_api import include_memory_router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     app = FastAPI()
@@ -28,12 +29,16 @@ def client(app):
 # STORE
 # =========================================
 
+
 def test_store_memory(client):
-    resp = client.post("/memory/store", json={
-        "content": "Called John Smith about DCGS program opportunity",
-        "memory_type": "episodic",
-        "source": "call_log",
-    })
+    resp = client.post(
+        "/memory/store",
+        json={
+            "content": "Called John Smith about DCGS program opportunity",
+            "memory_type": "episodic",
+            "source": "call_log",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["memory_id"] != ""
@@ -42,12 +47,15 @@ def test_store_memory(client):
 
 
 def test_store_semantic(client):
-    resp = client.post("/memory/store", json={
-        "content": "DCGS-A is a $450M intelligence program",
-        "memory_type": "semantic",
-        "confidence": 0.9,
-        "programs": ["DCGS"],
-    })
+    resp = client.post(
+        "/memory/store",
+        json={
+            "content": "DCGS-A is a $450M intelligence program",
+            "memory_type": "semantic",
+            "confidence": 0.9,
+            "programs": ["DCGS"],
+        },
+    )
     assert resp.status_code == 200
 
 
@@ -55,16 +63,23 @@ def test_store_semantic(client):
 # RECALL
 # =========================================
 
+
 def test_recall(client):
     # Store first
-    client.post("/memory/store", json={
-        "content": "Met with Leidos team about DCGS contract renewal",
-        "memory_type": "episodic",
-    })
-    resp = client.post("/memory/recall", json={
-        "query": "DCGS contract",
-        "limit": 5,
-    })
+    client.post(
+        "/memory/store",
+        json={
+            "content": "Met with Leidos team about DCGS contract renewal",
+            "memory_type": "episodic",
+        },
+    )
+    resp = client.post(
+        "/memory/recall",
+        json={
+            "query": "DCGS contract",
+            "limit": 5,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["count"] >= 0
@@ -72,14 +87,20 @@ def test_recall(client):
 
 
 def test_recall_by_type(client):
-    client.post("/memory/store", json={
-        "content": "DCGS program fact",
-        "memory_type": "semantic",
-    })
-    resp = client.post("/memory/recall", json={
-        "query": "DCGS",
-        "memory_types": ["semantic"],
-    })
+    client.post(
+        "/memory/store",
+        json={
+            "content": "DCGS program fact",
+            "memory_type": "semantic",
+        },
+    )
+    resp = client.post(
+        "/memory/recall",
+        json={
+            "query": "DCGS",
+            "memory_types": ["semantic"],
+        },
+    )
     assert resp.status_code == 200
 
 
@@ -87,12 +108,16 @@ def test_recall_by_type(client):
 # CONTEXT RECALL
 # =========================================
 
+
 def test_recall_context(client):
-    resp = client.post("/memory/recall/context", json={
-        "task_description": "Build outreach campaign for DCGS",
-        "programs": ["DCGS"],
-        "agent_type": "outreach",
-    })
+    resp = client.post(
+        "/memory/recall/context",
+        json={
+            "task_description": "Build outreach campaign for DCGS",
+            "programs": ["DCGS"],
+            "agent_type": "outreach",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "episodic" in data
@@ -104,6 +129,7 @@ def test_recall_context(client):
 # =========================================
 # CONSOLIDATE & REFLECT & FORGET
 # =========================================
+
 
 def test_consolidate(client):
     resp = client.post("/memory/consolidate", json={"age_threshold_days": 7})
@@ -131,6 +157,7 @@ def test_forget(client):
 # =========================================
 # GET ENDPOINTS
 # =========================================
+
 
 def test_stats(client):
     resp = client.get("/memory/stats")
@@ -162,10 +189,13 @@ def test_procedural_insights(client):
 
 
 def test_search(client):
-    client.post("/memory/store", json={
-        "content": "DCGS program discussion notes",
-        "memory_type": "episodic",
-    })
+    client.post(
+        "/memory/store",
+        json={
+            "content": "DCGS program discussion notes",
+            "memory_type": "episodic",
+        },
+    )
     resp = client.get("/memory/search?q=DCGS")
     assert resp.status_code == 200
     data = resp.json()
@@ -173,11 +203,14 @@ def test_search(client):
 
 
 def test_entity_memories(client):
-    client.post("/memory/store", json={
-        "content": "DCGS program details and contacts",
-        "memory_type": "semantic",
-        "programs": ["DCGS"],
-    })
+    client.post(
+        "/memory/store",
+        json={
+            "content": "DCGS program details and contacts",
+            "memory_type": "semantic",
+            "programs": ["DCGS"],
+        },
+    )
     resp = client.get("/memory/entity/DCGS/memories")
     assert resp.status_code == 200
     data = resp.json()

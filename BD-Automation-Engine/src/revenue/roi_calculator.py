@@ -21,14 +21,16 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class CampaignROI:
     """ROI for a BD campaign."""
+
     campaign_id: str
     campaign_name: str
-    total_investment: float = 0.0   # Time + money invested
+    total_investment: float = 0.0  # Time + money invested
     total_revenue: float = 0.0
-    roi_pct: float = 0.0           # (revenue - investment) / investment * 100
+    roi_pct: float = 0.0  # (revenue - investment) / investment * 100
     placements: int = 0
     revenue_per_dollar: float = 0.0
     time_to_first_revenue_days: int = 0
@@ -37,6 +39,7 @@ class CampaignROI:
 @dataclass
 class ContactROI:
     """ROI for a client contact."""
+
     contact_id: str
     contact_name: str
     total_touchpoints: int = 0
@@ -53,6 +56,7 @@ class ContactROI:
 @dataclass
 class ProgramROI:
     """ROI for a program."""
+
     program: str
     total_investment: float = 0.0
     total_revenue: float = 0.0
@@ -66,6 +70,7 @@ class ProgramROI:
 @dataclass
 class ChannelROI:
     """ROI for an outreach channel."""
+
     channel: str
     deals_sourced: int = 0
     deals_won: int = 0
@@ -79,6 +84,7 @@ class ChannelROI:
 @dataclass
 class ToolROI:
     """ROI for a tool/platform."""
+
     tool_name: str
     monthly_cost: float = 0.0
     annual_cost: float = 0.0
@@ -90,6 +96,7 @@ class ToolROI:
 # =========================================
 # ROI CALCULATOR
 # =========================================
+
 
 class ROICalculator:
     """Calculate ROI across multiple dimensions."""
@@ -133,16 +140,18 @@ class ROICalculator:
             roi = ((revenue - investment) / investment * 100) if investment > 0 else 0
             rpd = revenue / investment if investment > 0 else 0
 
-            results.append(CampaignROI(
-                campaign_id=c.get("id", ""),
-                campaign_name=c.get("name", ""),
-                total_investment=investment,
-                total_revenue=revenue,
-                roi_pct=round(roi, 2),
-                placements=c.get("placements", 0),
-                revenue_per_dollar=round(rpd, 2),
-                time_to_first_revenue_days=c.get("time_to_revenue_days", 0),
-            ))
+            results.append(
+                CampaignROI(
+                    campaign_id=c.get("id", ""),
+                    campaign_name=c.get("name", ""),
+                    total_investment=investment,
+                    total_revenue=revenue,
+                    roi_pct=round(roi, 2),
+                    placements=c.get("placements", 0),
+                    revenue_per_dollar=round(rpd, 2),
+                    time_to_first_revenue_days=c.get("time_to_revenue_days", 0),
+                )
+            )
 
         results.sort(key=lambda r: r.roi_pct, reverse=True)
         return results
@@ -156,10 +165,14 @@ class ROICalculator:
         results = []
         for c in self._contacts:
             touchpoints = c.get("touchpoints", 0)
-            effort_hours = c.get("effort_hours", touchpoints * 0.5)  # ~30 min per touchpoint
+            effort_hours = c.get(
+                "effort_hours", touchpoints * 0.5
+            )  # ~30 min per touchpoint
             effort_cost = effort_hours * hourly_cost
             revenue = c.get("revenue", 0)
-            roi = ((revenue - effort_cost) / effort_cost * 100) if effort_cost > 0 else 0
+            roi = (
+                ((revenue - effort_cost) / effort_cost * 100) if effort_cost > 0 else 0
+            )
 
             # Time to revenue
             first_contact = c.get("first_contact_date", "")
@@ -177,19 +190,21 @@ class ROICalculator:
                 except (ValueError, TypeError):
                     pass
 
-            results.append(ContactROI(
-                contact_id=c.get("id", ""),
-                contact_name=c.get("name", ""),
-                total_touchpoints=touchpoints,
-                estimated_effort_hours=round(effort_hours, 1),
-                estimated_effort_cost=round(effort_cost, 2),
-                total_revenue=revenue,
-                roi_pct=round(roi, 2),
-                placements=c.get("placements", 0),
-                first_contact_date=first_contact,
-                first_revenue_date=first_revenue,
-                time_to_revenue_days=days,
-            ))
+            results.append(
+                ContactROI(
+                    contact_id=c.get("id", ""),
+                    contact_name=c.get("name", ""),
+                    total_touchpoints=touchpoints,
+                    estimated_effort_hours=round(effort_hours, 1),
+                    estimated_effort_cost=round(effort_cost, 2),
+                    total_revenue=revenue,
+                    roi_pct=round(roi, 2),
+                    placements=c.get("placements", 0),
+                    first_contact_date=first_contact,
+                    first_revenue_date=first_revenue,
+                    time_to_revenue_days=days,
+                )
+            )
 
         results.sort(key=lambda r: r.roi_pct, reverse=True)
         return results
@@ -206,16 +221,18 @@ class ROICalculator:
             revenue = p.get("revenue", 0)
             roi = ((revenue - investment) / investment * 100) if investment > 0 else 0
 
-            results.append(ProgramROI(
-                program=p.get("program", ""),
-                total_investment=investment,
-                total_revenue=revenue,
-                roi_pct=round(roi, 2),
-                placements=p.get("placements", 0),
-                active_placements=p.get("active_placements", 0),
-                avg_margin_pct=p.get("avg_margin_pct", 0),
-                time_to_first_revenue_days=p.get("time_to_revenue_days", 0),
-            ))
+            results.append(
+                ProgramROI(
+                    program=p.get("program", ""),
+                    total_investment=investment,
+                    total_revenue=revenue,
+                    roi_pct=round(roi, 2),
+                    placements=p.get("placements", 0),
+                    active_placements=p.get("active_placements", 0),
+                    avg_margin_pct=p.get("avg_margin_pct", 0),
+                    time_to_first_revenue_days=p.get("time_to_revenue_days", 0),
+                )
+            )
 
         results.sort(key=lambda r: r.roi_pct, reverse=True)
         return results
@@ -236,16 +253,18 @@ class ROICalculator:
             conv = (won / sourced * 100) if sourced > 0 else 0
             avg_val = revenue / won if won > 0 else 0
 
-            results.append(ChannelROI(
-                channel=ch.get("channel", ""),
-                deals_sourced=sourced,
-                deals_won=won,
-                total_revenue=revenue,
-                total_cost=cost,
-                roi_pct=round(roi, 2),
-                conversion_rate=round(conv, 1),
-                avg_deal_value=round(avg_val, 2),
-            ))
+            results.append(
+                ChannelROI(
+                    channel=ch.get("channel", ""),
+                    deals_sourced=sourced,
+                    deals_won=won,
+                    total_revenue=revenue,
+                    total_cost=cost,
+                    roi_pct=round(roi, 2),
+                    conversion_rate=round(conv, 1),
+                    avg_deal_value=round(avg_val, 2),
+                )
+            )
 
         results.sort(key=lambda r: r.roi_pct, reverse=True)
         return results
@@ -263,14 +282,16 @@ class ROICalculator:
             revenue = t.get("attributed_revenue", 0)
             roi = ((revenue - annual) / annual * 100) if annual > 0 else 0
 
-            results.append(ToolROI(
-                tool_name=t.get("name", ""),
-                monthly_cost=monthly,
-                annual_cost=annual,
-                attributed_revenue=revenue,
-                roi_pct=round(roi, 2),
-                placements_attributed=t.get("placements", 0),
-            ))
+            results.append(
+                ToolROI(
+                    tool_name=t.get("name", ""),
+                    monthly_cost=monthly,
+                    annual_cost=annual,
+                    attributed_revenue=revenue,
+                    roi_pct=round(roi, 2),
+                    placements_attributed=t.get("placements", 0),
+                )
+            )
 
         results.sort(key=lambda r: r.roi_pct, reverse=True)
         return results
@@ -285,9 +306,17 @@ class ROICalculator:
         programs = self.calculate_program_roi()
         channels = self.calculate_channel_roi()
 
-        total_investment = sum(c.total_investment for c in campaigns) + sum(p.total_investment for p in programs)
-        total_revenue = sum(c.total_revenue for c in campaigns) + sum(p.total_revenue for p in programs)
-        overall_roi = ((total_revenue - total_investment) / total_investment * 100) if total_investment > 0 else 0
+        total_investment = sum(c.total_investment for c in campaigns) + sum(
+            p.total_investment for p in programs
+        )
+        total_revenue = sum(c.total_revenue for c in campaigns) + sum(
+            p.total_revenue for p in programs
+        )
+        overall_roi = (
+            ((total_revenue - total_investment) / total_investment * 100)
+            if total_investment > 0
+            else 0
+        )
 
         best_channel = channels[0].channel if channels else "N/A"
 

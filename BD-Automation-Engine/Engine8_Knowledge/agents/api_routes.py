@@ -24,6 +24,7 @@ _executor = ThreadPoolExecutor(max_workers=2)
 
 # ── Request / Response models ──
 
+
 class ResearchRequest(BaseModel):
     program_name: str
     agency: str = ""
@@ -58,6 +59,7 @@ class TaskStatus(BaseModel):
 
 # ── Background runner ──
 
+
 def run_crew_background(task_id: str, crew, crew_type: str, inputs: dict):
     """Run a crew in background thread, store results, persist to Mem0."""
     _tasks[task_id]["status"] = "running"
@@ -85,9 +87,18 @@ def run_crew_background(task_id: str, crew, crew_type: str, inputs: dict):
         # Persist to Mem0
         try:
             from Engine8_Knowledge.scripts.memory_layer import get_memory
+
             mem = get_memory()
-            summary = f"[{crew_type}] {inputs}  →  {str(result.raw)[:500]}" if hasattr(result, "raw") else str(result)[:500]
-            mem.add(summary, user_id="bd_agents", metadata={"crew_type": crew_type, "task_id": task_id})
+            summary = (
+                f"[{crew_type}] {inputs}  →  {str(result.raw)[:500]}"
+                if hasattr(result, "raw")
+                else str(result)[:500]
+            )
+            mem.add(
+                summary,
+                user_id="bd_agents",
+                metadata={"crew_type": crew_type, "task_id": task_id},
+            )
             logger.info("Saved crew result to Mem0: %s", task_id)
         except Exception as e:
             logger.warning("Mem0 persistence failed: %s", e)
@@ -100,6 +111,7 @@ def run_crew_background(task_id: str, crew, crew_type: str, inputs: dict):
 
 
 # ── Endpoints ──
+
 
 @router.post("/research", response_model=TaskResponse)
 async def run_bd_research(req: ResearchRequest):
@@ -124,11 +136,18 @@ async def run_bd_research(req: ResearchRequest):
     }
 
     _executor.submit(
-        run_crew_background, task_id, crew, "bd_research",
+        run_crew_background,
+        task_id,
+        crew,
+        "bd_research",
         {"program_name": req.program_name, "agency": req.agency, "prime": req.prime},
     )
 
-    return TaskResponse(task_id=task_id, status="queued", message=f"BD research crew launched for '{req.program_name}'")
+    return TaskResponse(
+        task_id=task_id,
+        status="queued",
+        message=f"BD research crew launched for '{req.program_name}'",
+    )
 
 
 @router.post("/outreach", response_model=TaskResponse)
@@ -154,11 +173,22 @@ async def run_contact_outreach(req: OutreachRequest):
     }
 
     _executor.submit(
-        run_crew_background, task_id, crew, "contact_outreach",
-        {"contact_name": req.contact_name, "company": req.company, "program": req.program},
+        run_crew_background,
+        task_id,
+        crew,
+        "contact_outreach",
+        {
+            "contact_name": req.contact_name,
+            "company": req.company,
+            "program": req.program,
+        },
     )
 
-    return TaskResponse(task_id=task_id, status="queued", message=f"Outreach crew launched for '{req.contact_name}'")
+    return TaskResponse(
+        task_id=task_id,
+        status="queued",
+        message=f"Outreach crew launched for '{req.contact_name}'",
+    )
 
 
 @router.post("/weekly-intel", response_model=TaskResponse)
@@ -184,11 +214,16 @@ async def run_weekly_intel(req: WeeklyIntelRequest):
     }
 
     _executor.submit(
-        run_crew_background, task_id, crew, "weekly_intel",
+        run_crew_background,
+        task_id,
+        crew,
+        "weekly_intel",
         {"focus_programs": req.focus_programs},
     )
 
-    return TaskResponse(task_id=task_id, status="queued", message="Weekly intel crew launched")
+    return TaskResponse(
+        task_id=task_id, status="queued", message="Weekly intel crew launched"
+    )
 
 
 @router.get("/status/{task_id}", response_model=TaskStatus)
@@ -222,6 +257,8 @@ async def list_tasks():
                 "created_at": t["created_at"],
                 "completed_at": t.get("completed_at"),
             }
-            for tid, t in sorted(_tasks.items(), key=lambda x: x[1]["created_at"], reverse=True)
+            for tid, t in sorted(
+                _tasks.items(), key=lambda x: x[1]["created_at"], reverse=True
+            )
         ],
     }

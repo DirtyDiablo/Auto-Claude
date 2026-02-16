@@ -57,7 +57,13 @@ class GraphQueries:
             {"pattern_a": f"(?i).*{person_a}.*", "pattern_b": f"(?i).*{person_b}.*"},
         )
         if not result:
-            return {"from": person_a, "to": person_b, "path": [], "hops": 0, "found": False}
+            return {
+                "from": person_a,
+                "to": person_b,
+                "path": [],
+                "hops": 0,
+                "found": False,
+            }
         return {
             "from": person_a,
             "to": person_b,
@@ -292,16 +298,34 @@ class GraphQueries:
 
     def get_graph_stats(self) -> dict:
         """Node counts, relationship counts, density metrics."""
-        node_labels = ["Person", "Company", "Program", "Job", "Contract", "Location", "Interaction"]
+        node_labels = [
+            "Person",
+            "Company",
+            "Program",
+            "Job",
+            "Contract",
+            "Location",
+            "Interaction",
+        ]
         node_counts = {}
         for label in node_labels:
             node_counts[label] = self._mgr.get_node_count(label)
 
         rel_counts = {}
         rel_types = [
-            "WORKS_AT", "MANAGES", "PRIMES_ON", "SUBS_TO", "POSTED_BY",
-            "MAPPED_TO", "BETWEEN", "ABOUT", "BY_USER", "LOCATED_IN",
-            "LOCATED_AT", "JOB_AT", "AWARDED_TO",
+            "WORKS_AT",
+            "MANAGES",
+            "PRIMES_ON",
+            "SUBS_TO",
+            "POSTED_BY",
+            "MAPPED_TO",
+            "BETWEEN",
+            "ABOUT",
+            "BY_USER",
+            "LOCATED_IN",
+            "LOCATED_AT",
+            "JOB_AT",
+            "AWARDED_TO",
         ]
         for rt in rel_types:
             count = self._mgr.get_relationship_count(rt)
@@ -332,5 +356,6 @@ def get_graph_queries() -> GraphQueries:
     global _instance
     if _instance is None:
         from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
         _instance = GraphQueries(get_neo4j_manager())
     return _instance

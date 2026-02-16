@@ -39,24 +39,24 @@ from .ingestion_pipeline import (
 
 __all__ = [
     # Parser
-    'NormalizedJob',
-    'parse_job_file',
-    'deduplicate_jobs',
-    'normalize_clearance',
-    'normalize_employment_type',
-    'normalize_date',
-    'extract_company_from_url',
+    "NormalizedJob",
+    "parse_job_file",
+    "deduplicate_jobs",
+    "normalize_clearance",
+    "normalize_employment_type",
+    "normalize_date",
+    "extract_company_from_url",
     # AI Enrichment
-    'AIEnrichmentEngine',
-    'FallbackEnrichmentEngine',
-    'EnrichmentResult',
+    "AIEnrichmentEngine",
+    "FallbackEnrichmentEngine",
+    "EnrichmentResult",
     # Relational Enrichment
-    'RelationalEnrichmentEngine',
-    'ProgramDatabase',
-    'ProgramMatcher',
-    'FederalProgram',
-    'ProgramMatch',
+    "RelationalEnrichmentEngine",
+    "ProgramDatabase",
+    "ProgramMatcher",
+    "FederalProgram",
+    "ProgramMatch",
     # Pipeline
-    'JobIngestionPipeline',
-    'NotionJobUploader',
+    "JobIngestionPipeline",
+    "NotionJobUploader",
 ]

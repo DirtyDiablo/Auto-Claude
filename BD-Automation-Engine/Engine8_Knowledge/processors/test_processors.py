@@ -1,4 +1,5 @@
 """Test Document Processing Pipeline."""
+
 import sys
 from pathlib import Path
 
@@ -35,6 +36,7 @@ def test_document_pipeline():
 
     # Test routes import
     from routes import router
+
     print(f"\n[OK] Router created with prefix: {router.prefix}")
 
     print("\n[SUCCESS] Document Pipeline tests passed!")

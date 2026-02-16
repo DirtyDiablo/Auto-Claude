@@ -17,6 +17,7 @@ router = APIRouter()
 # REQUEST MODELS
 # =========================================
 
+
 class ResizePoolRequest(BaseModel):
     new_max: int = 50
 
@@ -51,10 +52,12 @@ class UpdatePolicyRequest(BaseModel):
 # CONNECTION POOL ENDPOINTS
 # =========================================
 
+
 @router.get("/api/scaling/pools")
 def list_pools():
     """List all connection pools."""
     from src.scaling.connection_pool import get_pool_manager
+
     mgr = get_pool_manager()
     pools = mgr.list_pools()
     return {"pools": [p.to_dict() for p in pools], "total": len(pools)}
@@ -64,6 +67,7 @@ def list_pools():
 def get_pool(name: str):
     """Get a specific connection pool."""
     from src.scaling.connection_pool import get_pool_manager
+
     mgr = get_pool_manager()
     pool = mgr.get_pool(name)
     if not pool:
@@ -75,6 +79,7 @@ def get_pool(name: str):
 def get_pool_health(name: str):
     """Get health status for a connection pool."""
     from src.scaling.connection_pool import get_pool_manager
+
     mgr = get_pool_manager()
     pool = mgr.get_pool(name)
     if not pool:
@@ -86,10 +91,12 @@ def get_pool_health(name: str):
 # READ REPLICA ENDPOINTS
 # =========================================
 
+
 @router.get("/api/scaling/replicas")
 def list_replicas(status: Optional[str] = Query(None)):
     """List read replicas."""
     from src.scaling.read_replicas import get_replica_manager, ReplicaStatus
+
     mgr = get_replica_manager()
     st = ReplicaStatus(status) if status else None
     replicas = mgr.list_replicas(status_filter=st)
@@ -100,6 +107,7 @@ def list_replicas(status: Optional[str] = Query(None)):
 def get_lag_report():
     """Get replication lag report."""
     from src.scaling.read_replicas import get_replica_manager
+
     mgr = get_replica_manager()
     return mgr.get_lag_report()
 
@@ -108,6 +116,7 @@ def get_lag_report():
 def promote_replica(replica_id: str):
     """Promote a replica to active status."""
     from src.scaling.read_replicas import get_replica_manager
+
     mgr = get_replica_manager()
     replica = mgr.get_replica(replica_id)
     if not replica:
@@ -120,10 +129,12 @@ def promote_replica(replica_id: str):
 # CACHE LAYER ENDPOINTS
 # =========================================
 
+
 @router.get("/api/scaling/cache")
 def list_cache_layers():
     """List all cache layers."""
     from src.scaling.cache_layer import get_cache_manager
+
     mgr = get_cache_manager()
     layers = mgr.list_layers()
     return {"layers": [l.to_dict() for l in layers], "total": len(layers)}
@@ -133,6 +144,7 @@ def list_cache_layers():
 def get_hit_rates():
     """Get hit rates for all cache layers."""
     from src.scaling.cache_layer import get_cache_manager
+
     mgr = get_cache_manager()
     return mgr.get_hit_rates()
 
@@ -141,6 +153,7 @@ def get_hit_rates():
 def warm_cache(req: CacheWarmRequest):
     """Warm cache with specified keys."""
     from src.scaling.cache_layer import get_cache_manager
+
     mgr = get_cache_manager()
     count = mgr.warm_cache(req.keys)
     return {"warmed": count, "keys_requested": len(req.keys)}
@@ -150,10 +163,12 @@ def warm_cache(req: CacheWarmRequest):
 # AUTO-SCALING ENDPOINTS
 # =========================================
 
+
 @router.get("/api/scaling/policies")
 def list_policies():
     """List auto-scaling policies."""
     from src.scaling.auto_scaler import get_auto_scaler
+
     scaler = get_auto_scaler()
     policies = scaler.list_policies()
     return {"policies": [p.to_dict() for p in policies], "total": len(policies)}
@@ -163,6 +178,7 @@ def list_policies():
 def evaluate_policy(policy_id: str, req: EvaluateScalingRequest):
     """Evaluate a scaling policy against a metric value."""
     from src.scaling.auto_scaler import get_auto_scaler
+
     scaler = get_auto_scaler()
     policy = scaler.get_policy(policy_id)
     if not policy:
@@ -175,6 +191,7 @@ def evaluate_policy(policy_id: str, req: EvaluateScalingRequest):
 def get_recommendations():
     """Get auto-scaling recommendations."""
     from src.scaling.auto_scaler import get_auto_scaler
+
     scaler = get_auto_scaler()
     return {"recommendations": scaler.get_recommendations()}
 
@@ -182,6 +199,7 @@ def get_recommendations():
 # =========================================
 # HEALTH
 # =========================================
+
 
 @router.get("/api/scaling/health")
 def scaling_health():
@@ -203,6 +221,7 @@ def scaling_health():
 # =========================================
 # ROUTER REGISTRATION
 # =========================================
+
 
 def include_scaling_router(app: FastAPI) -> None:
     app.include_router(router)

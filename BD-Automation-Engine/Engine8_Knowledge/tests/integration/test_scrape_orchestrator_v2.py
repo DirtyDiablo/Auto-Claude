@@ -38,14 +38,18 @@ def tmp_storage(tmp_path):
 @pytest.fixture
 def mock_crawl_engine():
     engine = AsyncMock()
-    engine.crawl_url = AsyncMock(return_value=CrawlResult(
-        url="https://example.com",
-        extracted_data=[{"title": "Job 1"}, {"title": "Job 2"}],
-    ))
-    engine.crawl_competitor_careers = AsyncMock(return_value=[
-        {"title": "Job A"},
-        {"title": "Job B"},
-    ])
+    engine.crawl_url = AsyncMock(
+        return_value=CrawlResult(
+            url="https://example.com",
+            extracted_data=[{"title": "Job 1"}, {"title": "Job 2"}],
+        )
+    )
+    engine.crawl_competitor_careers = AsyncMock(
+        return_value=[
+            {"title": "Job A"},
+            {"title": "Job B"},
+        ]
+    )
     return engine
 
 
@@ -161,7 +165,9 @@ class TestSourceHealth:
 
 class TestTriggerAndControl:
     @pytest.mark.asyncio
-    async def test_trigger_source(self, orchestrator, sample_career_source, mock_crawl_engine):
+    async def test_trigger_source(
+        self, orchestrator, sample_career_source, mock_crawl_engine
+    ):
         """Trigger a career page scrape."""
         source_id = await orchestrator.schedule_source(sample_career_source)
         run_id = await orchestrator.trigger_source(source_id)
@@ -205,14 +211,19 @@ class TestTriggerAndControl:
 
 class TestFullCycle:
     @pytest.mark.asyncio
-    async def test_run_full_cycle(self, orchestrator, sample_career_source, mock_crawl_engine, mock_sam_sync):
+    async def test_run_full_cycle(
+        self, orchestrator, sample_career_source, mock_crawl_engine, mock_sam_sync
+    ):
         """Full cycle scrapes career pages, monitors SAM, processes docs."""
         await orchestrator.schedule_source(sample_career_source)
 
         # SAM sync returns 2 alerts
-        mock_sam_sync.monitor_awards = AsyncMock(return_value=[
-            MagicMock(), MagicMock(),
-        ])
+        mock_sam_sync.monitor_awards = AsyncMock(
+            return_value=[
+                MagicMock(),
+                MagicMock(),
+            ]
+        )
 
         report = await orchestrator.run_full_cycle()
 
@@ -311,6 +322,7 @@ class TestRunSource:
 class TestSingleton:
     def test_singleton(self, tmp_storage):
         import Engine8_Knowledge.scrapers.scrape_orchestrator_v2 as mod
+
         mod._orchestrator = None  # Reset
         o1 = get_scrape_orchestrator(storage_path=tmp_storage)
         o2 = get_scrape_orchestrator()

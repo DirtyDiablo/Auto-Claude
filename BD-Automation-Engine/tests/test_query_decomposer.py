@@ -17,6 +17,7 @@ from src.rag.query_decomposer import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def decomposer():
     return QueryDecomposer()
@@ -25,6 +26,7 @@ def decomposer():
 # =========================================
 # HELPER FUNCTIONS
 # =========================================
+
 
 def test_extract_entities():
     entities = _extract_entities("Find contacts at Leidos working on DCGS")
@@ -70,6 +72,7 @@ def test_compute_complexity_high():
 # DECOMPOSITION
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_decompose_simple(decomposer):
     plan = await decomposer.decompose("What is Jeff's email?")
@@ -80,9 +83,7 @@ async def test_decompose_simple(decomposer):
 
 @pytest.mark.asyncio
 async def test_decompose_comparison(decomposer):
-    plan = await decomposer.decompose(
-        "Compare hiring at Langley vs PACAF"
-    )
+    plan = await decomposer.decompose("Compare hiring at Langley vs PACAF")
     assert isinstance(plan, DecompositionPlan)
     assert plan.is_decomposed is True
     assert len(plan.sub_queries) >= 2
@@ -106,7 +107,9 @@ async def test_decompose_has_ids(decomposer):
 
 @pytest.mark.asyncio
 async def test_decompose_assigns_intents(decomposer):
-    plan = await decomposer.decompose("Who manages DCGS and what are their pain points?")
+    plan = await decomposer.decompose(
+        "Who manages DCGS and what are their pain points?"
+    )
     for sq in plan.sub_queries:
         assert sq.intent != ""
 
@@ -114,6 +117,7 @@ async def test_decompose_assigns_intents(decomposer):
 # =========================================
 # DEPENDENCY GRAPH
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_classify_dependency_single(decomposer):
@@ -124,10 +128,12 @@ async def test_classify_dependency_single(decomposer):
 
 @pytest.mark.asyncio
 async def test_classify_dependency_parallel(decomposer):
-    graph = await decomposer.classify_dependency([
-        "What positions are open at Langley?",
-        "What positions are open at PACAF?",
-    ])
+    graph = await decomposer.classify_dependency(
+        [
+            "What positions are open at Langley?",
+            "What positions are open at PACAF?",
+        ]
+    )
     assert len(graph.nodes) == 2
     # These should be parallel (no dependencies between them)
     assert len(graph.execution_order) >= 1
@@ -143,6 +149,7 @@ async def test_classify_dependency_empty(decomposer):
 # =========================================
 # SYNTHESIS
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_synthesize(decomposer):
@@ -176,6 +183,7 @@ async def test_synthesize_empty(decomposer):
 # HISTORY
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_decompose_history(decomposer):
     await decomposer.decompose("query 1")
@@ -187,6 +195,7 @@ async def test_decompose_history(decomposer):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_query_decomposer_singleton():
     d1 = get_query_decomposer()

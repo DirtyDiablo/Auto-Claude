@@ -66,14 +66,18 @@ class WatchConfig:
     companies: List[str] = field(default_factory=list)
     agencies: List[str] = field(default_factory=list)
     min_value: Optional[float] = None
-    alert_on: List[str] = field(default_factory=lambda: ["new_award", "new_opportunity"])
+    alert_on: List[str] = field(
+        default_factory=lambda: ["new_award", "new_opportunity"]
+    )
     enabled: bool = True
     created_at: Optional[str] = None
 
 
 @dataclass
 class ContractAlert:
-    alert_type: str = ""  # new_award, modification, new_opportunity, deadline_approaching
+    alert_type: str = (
+        ""  # new_award, modification, new_opportunity, deadline_approaching
+    )
     contract: Optional[Union[ContractAward, ContractOpportunity]] = None
     matched_watch: str = ""
     relevance_score: float = 0.0
@@ -166,6 +170,7 @@ class SAMGovSync:
 
     def _save_watches(self):
         from dataclasses import asdict
+
         data = [asdict(w) for w in self._watches]
         self._watches_path.write_text(json.dumps(data, indent=2, default=str))
 
@@ -194,13 +199,16 @@ class SAMGovSync:
     # API interactions
     # ------------------------------------------------------------------
 
-    async def _tango_request(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _tango_request(
+        self, endpoint: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Make request to Tango/MakeGov API."""
         if not self.tango_key:
             logger.warning("tango_api_key_missing")
             return {"results": [], "total": 0}
         try:
             import httpx
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.get(
                     f"{self.TANGO_API_BASE}/{endpoint}",
@@ -213,13 +221,16 @@ class SAMGovSync:
             logger.error("tango_request_error", endpoint=endpoint, error=str(exc))
             return {"results": [], "total": 0}
 
-    async def _sam_request(self, endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
+    async def _sam_request(
+        self, endpoint: str, params: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Make request to SAM.gov API (free fallback)."""
         if not self.sam_key:
             logger.warning("sam_api_key_missing")
             return {"opportunitiesData": [], "totalRecords": 0}
         try:
             import httpx
+
             params["api_key"] = self.sam_key
             async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.get(
@@ -258,23 +269,27 @@ class SAMGovSync:
         data = await self._tango_request("awards", params)
         awards = []
         for item in data.get("results", []):
-            awards.append(ContractAward(
-                award_id=item.get("id", ""),
-                title=item.get("title", ""),
-                awardee=item.get("awardee", {}).get("name", ""),
-                value=float(item.get("value", 0)),
-                naics=item.get("naics", ""),
-                set_aside=item.get("set_aside"),
-                agency=item.get("agency", ""),
-                sub_agency=item.get("sub_agency"),
-                description=item.get("description", ""),
-                place_of_performance=item.get("place_of_performance"),
-                contract_type=item.get("contract_type", ""),
-            ))
+            awards.append(
+                ContractAward(
+                    award_id=item.get("id", ""),
+                    title=item.get("title", ""),
+                    awardee=item.get("awardee", {}).get("name", ""),
+                    value=float(item.get("value", 0)),
+                    naics=item.get("naics", ""),
+                    set_aside=item.get("set_aside"),
+                    agency=item.get("agency", ""),
+                    sub_agency=item.get("sub_agency"),
+                    description=item.get("description", ""),
+                    place_of_performance=item.get("place_of_performance"),
+                    contract_type=item.get("contract_type", ""),
+                )
+            )
         logger.info("search_awards", keywords=query.keywords, results=len(awards))
         return awards
 
-    async def search_opportunities(self, query: OpportunityQuery) -> List[ContractOpportunity]:
+    async def search_opportunities(
+        self, query: OpportunityQuery
+    ) -> List[ContractOpportunity]:
         """Search active solicitations (RFIs, RFPs, Sources Sought)."""
         params: Dict[str, Any] = {"limit": query.limit, "status": "active"}
         if query.keywords:
@@ -291,28 +306,39 @@ class SAMGovSync:
         # Try Tango first, fall back to SAM.gov
         data = await self._tango_request("opportunities", params)
         if not data.get("results"):
-            sam_data = await self._sam_request("search", {
-                "keyword": " ".join(query.keywords) if query.keywords else "",
-                "limit": query.limit,
-            })
+            sam_data = await self._sam_request(
+                "search",
+                {
+                    "keyword": " ".join(query.keywords) if query.keywords else "",
+                    "limit": query.limit,
+                },
+            )
             data["results"] = sam_data.get("opportunitiesData", [])
 
         opportunities = []
         for item in data.get("results", []):
-            opportunities.append(ContractOpportunity(
-                notice_id=item.get("noticeId", item.get("id", "")),
-                title=item.get("title", ""),
-                type=item.get("type", item.get("noticeType", "")),
-                agency=item.get("agency", item.get("fullParentPathName", "")),
-                naics=item.get("naics", ""),
-                set_aside=item.get("set_aside", item.get("typeOfSetAsideDescription")),
-                description=item.get("description", ""),
-                attachments=item.get("attachments", []),
-            ))
-        logger.info("search_opportunities", keywords=query.keywords, results=len(opportunities))
+            opportunities.append(
+                ContractOpportunity(
+                    notice_id=item.get("noticeId", item.get("id", "")),
+                    title=item.get("title", ""),
+                    type=item.get("type", item.get("noticeType", "")),
+                    agency=item.get("agency", item.get("fullParentPathName", "")),
+                    naics=item.get("naics", ""),
+                    set_aside=item.get(
+                        "set_aside", item.get("typeOfSetAsideDescription")
+                    ),
+                    description=item.get("description", ""),
+                    attachments=item.get("attachments", []),
+                )
+            )
+        logger.info(
+            "search_opportunities", keywords=query.keywords, results=len(opportunities)
+        )
         return opportunities
 
-    async def monitor_awards(self, watch_list: Optional[List[WatchConfig]] = None) -> List[ContractAlert]:
+    async def monitor_awards(
+        self, watch_list: Optional[List[WatchConfig]] = None
+    ) -> List[ContractAlert]:
         """
         Check for new awards matching watch configurations.
         Returns alerts for new/modified awards since last check.
@@ -385,6 +411,7 @@ class SAMGovSync:
     ) -> List[ContractAward]:
         """All awards to a specific company in the given time period."""
         from datetime import timedelta
+
         end = date.today()
         start = end - timedelta(days=days)
         query = SearchQuery(awardee=company_name, date_range=(start, end), limit=100)
@@ -402,30 +429,36 @@ class SAMGovSync:
         for award in awards:
             try:
                 # Create contract node
-                await hub_client.post("/neo4j/nodes", json={
-                    "label": "Contract",
-                    "properties": {
-                        "award_id": award.award_id,
-                        "title": award.title,
-                        "value": award.value,
-                        "naics": award.naics,
-                        "agency": award.agency,
-                        "contract_type": award.contract_type,
+                await hub_client.post(
+                    "/neo4j/nodes",
+                    json={
+                        "label": "Contract",
+                        "properties": {
+                            "award_id": award.award_id,
+                            "title": award.title,
+                            "value": award.value,
+                            "naics": award.naics,
+                            "agency": award.agency,
+                            "contract_type": award.contract_type,
+                        },
                     },
-                })
+                )
                 result.nodes_created += 1
 
                 # Create AWARDED_TO relationship
                 if award.awardee:
-                    await hub_client.post("/neo4j/relationships", json={
-                        "from_label": "Contract",
-                        "from_key": "award_id",
-                        "from_value": award.award_id,
-                        "to_label": "Contractor",
-                        "to_key": "name",
-                        "to_value": award.awardee,
-                        "relationship": "AWARDED_TO",
-                    })
+                    await hub_client.post(
+                        "/neo4j/relationships",
+                        json={
+                            "from_label": "Contract",
+                            "from_key": "award_id",
+                            "from_value": award.award_id,
+                            "to_label": "Contractor",
+                            "to_key": "name",
+                            "to_value": award.awardee,
+                            "relationship": "AWARDED_TO",
+                        },
+                    )
                     result.relationships_created += 1
 
                 result.contracts_synced += 1

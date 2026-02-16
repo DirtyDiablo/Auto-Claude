@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class FaultType(str, Enum):
     LATENCY = "latency"
     ERROR = "error"
@@ -43,6 +44,7 @@ class ExperimentStatus(str, Enum):
 @dataclass
 class ChaosExperiment:
     """A single chaos experiment definition and outcome."""
+
     experiment_id: str
     name: str
     description: str = ""
@@ -74,6 +76,7 @@ class ChaosExperiment:
 @dataclass
 class SteadyStateHypothesis:
     """A hypothesis about normal system behaviour to verify."""
+
     metric_name: str
     operator: str = "gt"  # gt | lt | eq
     threshold: float = 0.0
@@ -140,6 +143,7 @@ _EXPERIMENT_TEMPLATES: Dict[str, Dict[str, Any]] = {
 # CHAOS EXPERIMENT ENGINE
 # =========================================
 
+
 class ChaosExperimentEngine:
     """Chaos engineering engine for fault injection and resilience testing.
 
@@ -183,7 +187,9 @@ class ChaosExperimentEngine:
         self._experiments[exp_id] = experiment
         logger.info(
             "Created chaos experiment '%s' [%s] targeting '%s'",
-            name, exp_id, target_service,
+            name,
+            exp_id,
+            target_service,
         )
         return experiment
 
@@ -217,7 +223,8 @@ class ChaosExperimentEngine:
         if experiment.status not in (ExperimentStatus.PENDING,):
             logger.warning(
                 "Experiment '%s' cannot run from status '%s'",
-                experiment_id, experiment.status.value,
+                experiment_id,
+                experiment.status.value,
             )
             return experiment
 
@@ -243,7 +250,8 @@ class ChaosExperimentEngine:
 
         logger.info(
             "Chaos experiment '%s' completed: %s",
-            experiment.name, results,
+            experiment.name,
+            results,
         )
         return experiment
 
@@ -365,7 +373,10 @@ class ChaosExperimentEngine:
             return {
                 "errors_injected": int(duration * 5 * intensity),
                 "error_rate_pct": round(error_rate, 1),
-                "http_status_codes": {500: int(duration * 3 * intensity), 503: int(duration * 2 * intensity)},
+                "http_status_codes": {
+                    500: int(duration * 3 * intensity),
+                    503: int(duration * 2 * intensity),
+                },
                 "fault_type": "error",
             }
 

@@ -20,10 +20,11 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class QueryComplexity(str, Enum):
-    SIMPLE = "simple"          # Single fact lookup, 1 round
-    MODERATE = "moderate"      # Multi-fact query, 1-2 rounds
-    COMPLEX = "complex"        # Multi-hop reasoning, 2-3 rounds
+    SIMPLE = "simple"  # Single fact lookup, 1 round
+    MODERATE = "moderate"  # Multi-fact query, 1-2 rounds
+    COMPLEX = "complex"  # Multi-hop reasoning, 2-3 rounds
     ANALYTICAL = "analytical"  # Trend/comparison, 3-5 rounds
 
 
@@ -52,9 +53,11 @@ class AgentState(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Citation:
     """A source citation for a piece of information."""
+
     source_id: str = ""
     source_type: str = ""  # collection name, graph, etc.
     text: str = ""
@@ -65,6 +68,7 @@ class Citation:
 @dataclass
 class RetrievalStep:
     """Record of a single retrieval action."""
+
     step_id: str = ""
     tool: str = ""
     query: str = ""
@@ -78,6 +82,7 @@ class RetrievalStep:
 @dataclass
 class RetrievalPlan:
     """Planned retrieval strategy for a query."""
+
     tools: List[str] = field(default_factory=list)
     queries: Dict[str, str] = field(default_factory=dict)  # tool → query
     parallel: bool = True
@@ -89,6 +94,7 @@ class RetrievalPlan:
 @dataclass
 class EvaluationResult:
     """Result of evaluating retrieved results."""
+
     relevance_score: float = 0.0
     coverage_score: float = 0.0
     confidence: float = 0.0
@@ -99,6 +105,7 @@ class EvaluationResult:
 @dataclass
 class AgenticRAGResult:
     """Complete result from the agentic RAG pipeline."""
+
     query_id: str = ""
     answer: str = ""
     confidence: float = 0.0
@@ -116,6 +123,7 @@ class AgenticRAGResult:
 @dataclass
 class RetrievalToolResult:
     """Result from a single retrieval tool execution."""
+
     tool: str = ""
     results: List[Dict[str, Any]] = field(default_factory=list)
     scores: List[float] = field(default_factory=list)
@@ -126,6 +134,7 @@ class RetrievalToolResult:
 @dataclass
 class OrchestratorState:
     """Full state of the agentic RAG pipeline."""
+
     query: str = ""
     query_id: str = ""
     context: Dict[str, Any] = field(default_factory=dict)
@@ -157,6 +166,7 @@ class OrchestratorState:
 # RETRIEVAL TOOL INTERFACE
 # =========================================
 
+
 class RetrievalTool:
     """Base interface for retrieval tools."""
 
@@ -164,7 +174,9 @@ class RetrievalTool:
         self.name = name
         self.description = description
 
-    async def search(self, query: str, limit: int = 10, **kwargs) -> RetrievalToolResult:
+    async def search(
+        self, query: str, limit: int = 10, **kwargs
+    ) -> RetrievalToolResult:
         """Execute a search with this tool."""
         return RetrievalToolResult(tool=self.name)
 
@@ -173,10 +185,14 @@ class VectorSearchTool(RetrievalTool):
     """Qdrant semantic similarity search."""
 
     def __init__(self, search_fn: Optional[Callable] = None):
-        super().__init__("vector_search", "Qdrant semantic similarity across collections")
+        super().__init__(
+            "vector_search", "Qdrant semantic similarity across collections"
+        )
         self._search_fn = search_fn
 
-    async def search(self, query: str, limit: int = 10, **kwargs) -> RetrievalToolResult:
+    async def search(
+        self, query: str, limit: int = 10, **kwargs
+    ) -> RetrievalToolResult:
         start = time.time()
         if self._search_fn:
             try:
@@ -184,22 +200,34 @@ class VectorSearchTool(RetrievalTool):
                 return RetrievalToolResult(
                     tool=self.name,
                     results=results if isinstance(results, list) else [results],
-                    scores=[r.get("score", 0.5) for r in results] if isinstance(results, list) else [0.5],
+                    scores=[r.get("score", 0.5) for r in results]
+                    if isinstance(results, list)
+                    else [0.5],
                     latency_ms=(time.time() - start) * 1000,
                 )
             except Exception as e:
-                return RetrievalToolResult(tool=self.name, error=str(e), latency_ms=(time.time() - start) * 1000)
-        return RetrievalToolResult(tool=self.name, latency_ms=(time.time() - start) * 1000)
+                return RetrievalToolResult(
+                    tool=self.name,
+                    error=str(e),
+                    latency_ms=(time.time() - start) * 1000,
+                )
+        return RetrievalToolResult(
+            tool=self.name, latency_ms=(time.time() - start) * 1000
+        )
 
 
 class GraphTraverseTool(RetrievalTool):
     """Neo4j Cypher relationship queries."""
 
     def __init__(self, query_fn: Optional[Callable] = None):
-        super().__init__("graph_traverse", "Neo4j Cypher for relationship-based queries")
+        super().__init__(
+            "graph_traverse", "Neo4j Cypher for relationship-based queries"
+        )
         self._query_fn = query_fn
 
-    async def search(self, query: str, limit: int = 10, **kwargs) -> RetrievalToolResult:
+    async def search(
+        self, query: str, limit: int = 10, **kwargs
+    ) -> RetrievalToolResult:
         start = time.time()
         if self._query_fn:
             try:
@@ -211,8 +239,14 @@ class GraphTraverseTool(RetrievalTool):
                     latency_ms=(time.time() - start) * 1000,
                 )
             except Exception as e:
-                return RetrievalToolResult(tool=self.name, error=str(e), latency_ms=(time.time() - start) * 1000)
-        return RetrievalToolResult(tool=self.name, latency_ms=(time.time() - start) * 1000)
+                return RetrievalToolResult(
+                    tool=self.name,
+                    error=str(e),
+                    latency_ms=(time.time() - start) * 1000,
+                )
+        return RetrievalToolResult(
+            tool=self.name, latency_ms=(time.time() - start) * 1000
+        )
 
 
 class TemporalQueryTool(RetrievalTool):
@@ -222,7 +256,9 @@ class TemporalQueryTool(RetrievalTool):
         super().__init__("temporal_query", "Temporal KG for time-bound questions")
         self._query_fn = query_fn
 
-    async def search(self, query: str, limit: int = 10, **kwargs) -> RetrievalToolResult:
+    async def search(
+        self, query: str, limit: int = 10, **kwargs
+    ) -> RetrievalToolResult:
         start = time.time()
         if self._query_fn:
             try:
@@ -234,18 +270,28 @@ class TemporalQueryTool(RetrievalTool):
                     latency_ms=(time.time() - start) * 1000,
                 )
             except Exception as e:
-                return RetrievalToolResult(tool=self.name, error=str(e), latency_ms=(time.time() - start) * 1000)
-        return RetrievalToolResult(tool=self.name, latency_ms=(time.time() - start) * 1000)
+                return RetrievalToolResult(
+                    tool=self.name,
+                    error=str(e),
+                    latency_ms=(time.time() - start) * 1000,
+                )
+        return RetrievalToolResult(
+            tool=self.name, latency_ms=(time.time() - start) * 1000
+        )
 
 
 class KeywordSearchTool(RetrievalTool):
     """BM25 sparse retrieval for exact term matching."""
 
     def __init__(self, search_fn: Optional[Callable] = None):
-        super().__init__("keyword_search", "BM25 sparse retrieval for exact term matching")
+        super().__init__(
+            "keyword_search", "BM25 sparse retrieval for exact term matching"
+        )
         self._search_fn = search_fn
 
-    async def search(self, query: str, limit: int = 10, **kwargs) -> RetrievalToolResult:
+    async def search(
+        self, query: str, limit: int = 10, **kwargs
+    ) -> RetrievalToolResult:
         start = time.time()
         if self._search_fn:
             try:
@@ -253,12 +299,20 @@ class KeywordSearchTool(RetrievalTool):
                 return RetrievalToolResult(
                     tool=self.name,
                     results=results if isinstance(results, list) else [results],
-                    scores=[r.get("score", 0.5) for r in results] if isinstance(results, list) else [0.5],
+                    scores=[r.get("score", 0.5) for r in results]
+                    if isinstance(results, list)
+                    else [0.5],
                     latency_ms=(time.time() - start) * 1000,
                 )
             except Exception as e:
-                return RetrievalToolResult(tool=self.name, error=str(e), latency_ms=(time.time() - start) * 1000)
-        return RetrievalToolResult(tool=self.name, latency_ms=(time.time() - start) * 1000)
+                return RetrievalToolResult(
+                    tool=self.name,
+                    error=str(e),
+                    latency_ms=(time.time() - start) * 1000,
+                )
+        return RetrievalToolResult(
+            tool=self.name, latency_ms=(time.time() - start) * 1000
+        )
 
 
 # =========================================
@@ -268,65 +322,104 @@ class KeywordSearchTool(RetrievalTool):
 # Intent classification patterns
 INTENT_PATTERNS = {
     "person_lookup": [
-        re.compile(r'\b(who is|contact|email|phone|find)\b', re.IGNORECASE),
-        re.compile(r'\b(manager|director|lead|pm)\b.*\b(of|for|at)\b', re.IGNORECASE),
+        re.compile(r"\b(who is|contact|email|phone|find)\b", re.IGNORECASE),
+        re.compile(r"\b(manager|director|lead|pm)\b.*\b(of|for|at)\b", re.IGNORECASE),
     ],
     "relationship": [
-        re.compile(r'\b(works at|reports to|manages|connected to|knows)\b', re.IGNORECASE),
-        re.compile(r'\b(relationship|connection|network)\b', re.IGNORECASE),
+        re.compile(
+            r"\b(works at|reports to|manages|connected to|knows)\b", re.IGNORECASE
+        ),
+        re.compile(r"\b(relationship|connection|network)\b", re.IGNORECASE),
     ],
     "program_intel": [
-        re.compile(r'\b(program|contract|award|prime|sub)\b.*\b(status|info|detail|update)\b', re.IGNORECASE),
-        re.compile(r'\b(dcgs|gbsd|ngen|jadc2|abms)\b', re.IGNORECASE),
+        re.compile(
+            r"\b(program|contract|award|prime|sub)\b.*\b(status|info|detail|update)\b",
+            re.IGNORECASE,
+        ),
+        re.compile(r"\b(dcgs|gbsd|ngen|jadc2|abms)\b", re.IGNORECASE),
     ],
     "hiring": [
-        re.compile(r'\b(hiring|recruiting|open positions?|vacancy|staffing)\b', re.IGNORECASE),
-        re.compile(r'\b(job|role|requisition|headcount)\b', re.IGNORECASE),
+        re.compile(
+            r"\b(hiring|recruiting|open positions?|vacancy|staffing)\b", re.IGNORECASE
+        ),
+        re.compile(r"\b(job|role|requisition|headcount)\b", re.IGNORECASE),
     ],
     "trend_analysis": [
-        re.compile(r'\b(trend|change|growth|decline|compare|comparison)\b', re.IGNORECASE),
-        re.compile(r'\b(over time|last \d+ months?|year over year|quarterly)\b', re.IGNORECASE),
+        re.compile(
+            r"\b(trend|change|growth|decline|compare|comparison)\b", re.IGNORECASE
+        ),
+        re.compile(
+            r"\b(over time|last \d+ months?|year over year|quarterly)\b", re.IGNORECASE
+        ),
     ],
     "competitive_intel": [
-        re.compile(r'\b(competitor|competing|rival|alternative)\b', re.IGNORECASE),
-        re.compile(r'\b(win rate|market share|bid|proposal)\b', re.IGNORECASE),
+        re.compile(r"\b(competitor|competing|rival|alternative)\b", re.IGNORECASE),
+        re.compile(r"\b(win rate|market share|bid|proposal)\b", re.IGNORECASE),
     ],
 }
 
 # Complexity indicators
 COMPLEXITY_INDICATORS = {
     "analytical": [
-        re.compile(r'\b(compare|trend|analyze|across|between)\b', re.IGNORECASE),
-        re.compile(r'\b(last \d+ months?|year over year|historically)\b', re.IGNORECASE),
-        re.compile(r'\b(forecast|predict|projection)\b', re.IGNORECASE),
+        re.compile(r"\b(compare|trend|analyze|across|between)\b", re.IGNORECASE),
+        re.compile(
+            r"\b(last \d+ months?|year over year|historically)\b", re.IGNORECASE
+        ),
+        re.compile(r"\b(forecast|predict|projection)\b", re.IGNORECASE),
     ],
     "complex": [
-        re.compile(r'\b(which|how many).*\b(that|who|where)\b', re.IGNORECASE),
-        re.compile(r'\b(connection|path|hop)\b', re.IGNORECASE),
-        re.compile(r'\band\b.*\band\b', re.IGNORECASE),
+        re.compile(r"\b(which|how many).*\b(that|who|where)\b", re.IGNORECASE),
+        re.compile(r"\b(connection|path|hop)\b", re.IGNORECASE),
+        re.compile(r"\band\b.*\band\b", re.IGNORECASE),
     ],
     "moderate": [
-        re.compile(r'\b(and|also|with|including)\b', re.IGNORECASE),
-        re.compile(r'\b(pain point|challenge|issue|concern)\b', re.IGNORECASE),
+        re.compile(r"\b(and|also|with|including)\b", re.IGNORECASE),
+        re.compile(r"\b(pain point|challenge|issue|concern)\b", re.IGNORECASE),
     ],
 }
 
 # Entity extraction patterns for query understanding
 ENTITY_PATTERNS = [
-    re.compile(r'\b([A-Z][a-z]+ [A-Z][a-z]+)\b'),  # Person names
-    re.compile(r'\b(DCGS|DCGS-A|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b', re.IGNORECASE),
-    re.compile(r'\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton)\b', re.IGNORECASE),
-    re.compile(r'\b(Langley|PACAF|Wright-Patterson|San Diego|Fort Meade)\b', re.IGNORECASE),
+    re.compile(r"\b([A-Z][a-z]+ [A-Z][a-z]+)\b"),  # Person names
+    re.compile(
+        r"\b(DCGS|DCGS-A|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b", re.IGNORECASE
+    ),
+    re.compile(
+        r"\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(Langley|PACAF|Wright-Patterson|San Diego|Fort Meade)\b", re.IGNORECASE
+    ),
 ]
 
 # Tool selection mapping per intent
 INTENT_TOOL_MAP = {
-    "person_lookup": [RetrievalToolType.VECTOR_SEARCH, RetrievalToolType.GRAPH_TRAVERSE],
+    "person_lookup": [
+        RetrievalToolType.VECTOR_SEARCH,
+        RetrievalToolType.GRAPH_TRAVERSE,
+    ],
     "relationship": [RetrievalToolType.GRAPH_TRAVERSE, RetrievalToolType.VECTOR_SEARCH],
-    "program_intel": [RetrievalToolType.VECTOR_SEARCH, RetrievalToolType.GRAPH_TRAVERSE, RetrievalToolType.DOCUMENT_LOOKUP],
-    "hiring": [RetrievalToolType.VECTOR_SEARCH, RetrievalToolType.TEMPORAL_QUERY, RetrievalToolType.KEYWORD_SEARCH],
-    "trend_analysis": [RetrievalToolType.TEMPORAL_QUERY, RetrievalToolType.VECTOR_SEARCH, RetrievalToolType.KEYWORD_SEARCH],
-    "competitive_intel": [RetrievalToolType.VECTOR_SEARCH, RetrievalToolType.GRAPH_TRAVERSE, RetrievalToolType.WEB_SEARCH],
+    "program_intel": [
+        RetrievalToolType.VECTOR_SEARCH,
+        RetrievalToolType.GRAPH_TRAVERSE,
+        RetrievalToolType.DOCUMENT_LOOKUP,
+    ],
+    "hiring": [
+        RetrievalToolType.VECTOR_SEARCH,
+        RetrievalToolType.TEMPORAL_QUERY,
+        RetrievalToolType.KEYWORD_SEARCH,
+    ],
+    "trend_analysis": [
+        RetrievalToolType.TEMPORAL_QUERY,
+        RetrievalToolType.VECTOR_SEARCH,
+        RetrievalToolType.KEYWORD_SEARCH,
+    ],
+    "competitive_intel": [
+        RetrievalToolType.VECTOR_SEARCH,
+        RetrievalToolType.GRAPH_TRAVERSE,
+        RetrievalToolType.WEB_SEARCH,
+    ],
     "general": [RetrievalToolType.VECTOR_SEARCH, RetrievalToolType.KEYWORD_SEARCH],
 }
 
@@ -370,7 +463,14 @@ def extract_query_entities(query: str) -> List[str]:
     for pattern in ENTITY_PATTERNS:
         for match in pattern.finditer(query):
             name = match.group(0)
-            if len(name) > 2 and name.lower() not in {"the", "and", "for", "who", "what", "how"}:
+            if len(name) > 2 and name.lower() not in {
+                "the",
+                "and",
+                "for",
+                "who",
+                "what",
+                "how",
+            }:
                 entities.append(name)
     return list(set(entities))
 
@@ -378,6 +478,7 @@ def extract_query_entities(query: str) -> List[str]:
 # =========================================
 # AGENTIC RAG ORCHESTRATOR
 # =========================================
+
 
 class AgenticRAGOrchestrator:
     """AI agent that plans and executes multi-step retrieval strategies."""
@@ -416,7 +517,8 @@ class AgenticRAGOrchestrator:
         state.entities = extract_query_entities(state.query)
         state.complexity = classify_complexity(state.query)
         state.max_iterations = COMPLEXITY_MAX_ITERATIONS.get(
-            state.complexity, self.max_iterations,
+            state.complexity,
+            self.max_iterations,
         )
         self._transition(state, AgentState.PLAN.value)
 
@@ -468,21 +570,25 @@ class AgenticRAGOrchestrator:
 
             query_text = state.plan.queries.get(tool_name, state.query)
             start = time.time()
-            result = await tool.search(query_text, limit=state.plan.max_results_per_tool)
+            result = await tool.search(
+                query_text, limit=state.plan.max_results_per_tool
+            )
             elapsed = (time.time() - start) * 1000
 
             state.tool_results.append(result)
 
             # Record trace
-            state.retrieval_trace.append(RetrievalStep(
-                step_id=uuid.uuid4().hex[:8],
-                tool=tool_name,
-                query=query_text,
-                results_count=len(result.results),
-                top_score=max(result.scores) if result.scores else 0.0,
-                latency_ms=round(elapsed, 2),
-                iteration=state.iteration,
-            ))
+            state.retrieval_trace.append(
+                RetrievalStep(
+                    step_id=uuid.uuid4().hex[:8],
+                    tool=tool_name,
+                    query=query_text,
+                    results_count=len(result.results),
+                    top_score=max(result.scores) if result.scores else 0.0,
+                    latency_ms=round(elapsed, 2),
+                    iteration=state.iteration,
+                )
+            )
 
             # Collect passages
             for i, doc in enumerate(result.results):
@@ -515,7 +621,7 @@ class AgenticRAGOrchestrator:
 
         # Score relevance: average of top passage scores
         scores = sorted([p["score"] for p in state.all_passages], reverse=True)
-        top_scores = scores[:min(5, len(scores))]
+        top_scores = scores[: min(5, len(scores))]
         relevance = sum(top_scores) / len(top_scores) if top_scores else 0.0
 
         # Score coverage: check how many entities from the query are mentioned in results
@@ -535,14 +641,20 @@ class AgenticRAGOrchestrator:
         if relevance < 0.5:
             gaps.append("Low relevance scores across retrieved passages")
         if entity_coverage < 0.5:
-            missing = [e for e in state.entities
-                       if e.lower() not in " ".join(p.get("text", "") for p in state.all_passages).lower()]
+            missing = [
+                e
+                for e in state.entities
+                if e.lower()
+                not in " ".join(p.get("text", "") for p in state.all_passages).lower()
+            ]
             gaps.append(f"Missing coverage for entities: {', '.join(missing)}")
         if len(state.all_passages) < 3:
             gaps.append("Too few passages retrieved")
 
-        confidence = (relevance * 0.6 + entity_coverage * 0.4)
-        threshold = state.plan.quality_threshold if state.plan else self.quality_threshold
+        confidence = relevance * 0.6 + entity_coverage * 0.4
+        threshold = (
+            state.plan.quality_threshold if state.plan else self.quality_threshold
+        )
         sufficient = confidence >= threshold and not gaps
 
         state.evaluation = EvaluationResult(
@@ -585,13 +697,17 @@ class AgenticRAGOrchestrator:
     def _synthesize(self, state: OrchestratorState) -> None:
         """Synthesize final answer from collected passages."""
         if not state.all_passages:
-            state.answer = "I could not find sufficient information to answer this query."
+            state.answer = (
+                "I could not find sufficient information to answer this query."
+            )
             state.confidence = 0.0
             self._transition(state, AgentState.DONE.value)
             return
 
         # Sort passages by score
-        ranked = sorted(state.all_passages, key=lambda p: p.get("score", 0), reverse=True)
+        ranked = sorted(
+            state.all_passages, key=lambda p: p.get("score", 0), reverse=True
+        )
         top_passages = ranked[:10]
 
         # Build answer from top passages
@@ -601,15 +717,21 @@ class AgenticRAGOrchestrator:
             text = p.get("text", "")
             if text and len(text) > 10:
                 answer_parts.append(text)
-                citations.append(Citation(
-                    source_id=f"src_{i}",
-                    source_type=p.get("source", "unknown"),
-                    text=text[:200],
-                    relevance_score=p.get("score", 0.0),
-                    metadata=p.get("metadata", {}),
-                ))
+                citations.append(
+                    Citation(
+                        source_id=f"src_{i}",
+                        source_type=p.get("source", "unknown"),
+                        text=text[:200],
+                        relevance_score=p.get("score", 0.0),
+                        metadata=p.get("metadata", {}),
+                    )
+                )
 
-        state.answer = "\n\n".join(answer_parts[:5]) if answer_parts else "No relevant information found."
+        state.answer = (
+            "\n\n".join(answer_parts[:5])
+            if answer_parts
+            else "No relevant information found."
+        )
         state.citations = citations
         state.confidence = state.evaluation.confidence if state.evaluation else 0.0
         self._transition(state, AgentState.DONE.value)
@@ -618,7 +740,9 @@ class AgenticRAGOrchestrator:
     # Main query method
     # -----------------------------------------
 
-    async def query(self, question: str, context: Optional[Dict] = None) -> AgenticRAGResult:
+    async def query(
+        self, question: str, context: Optional[Dict] = None
+    ) -> AgenticRAGResult:
         """Process a question through the agentic RAG pipeline."""
         query_id = uuid.uuid4().hex[:12]
         start_time = time.time()
@@ -634,7 +758,9 @@ class AgenticRAGOrchestrator:
         # Run state machine
         iteration_limit = self.max_iterations + 2  # safety limit
         steps = 0
-        while state.current_state != AgentState.DONE.value and steps < iteration_limit * 6:
+        while (
+            state.current_state != AgentState.DONE.value and steps < iteration_limit * 6
+        ):
             steps += 1
             if state.current_state == AgentState.ANALYZE.value:
                 self._analyze(state)
@@ -687,28 +813,40 @@ class AgenticRAGOrchestrator:
             result = await tool.search(question, limit=5)
             elapsed = (time.time() - start) * 1000
 
-            trace.append(RetrievalStep(
-                step_id=uuid.uuid4().hex[:8],
-                tool=tool_name,
-                query=question,
-                results_count=len(result.results),
-                top_score=max(result.scores) if result.scores else 0.0,
-                latency_ms=round(elapsed, 2),
-                iteration=1,
-            ))
+            trace.append(
+                RetrievalStep(
+                    step_id=uuid.uuid4().hex[:8],
+                    tool=tool_name,
+                    query=question,
+                    results_count=len(result.results),
+                    top_score=max(result.scores) if result.scores else 0.0,
+                    latency_ms=round(elapsed, 2),
+                    iteration=1,
+                )
+            )
 
             for i, doc in enumerate(result.results):
-                all_passages.append({
-                    "text": doc.get("text", doc.get("content", str(doc))),
-                    "source": tool_name,
-                    "score": result.scores[i] if i < len(result.scores) else 0.0,
-                })
+                all_passages.append(
+                    {
+                        "text": doc.get("text", doc.get("content", str(doc))),
+                        "source": tool_name,
+                        "score": result.scores[i] if i < len(result.scores) else 0.0,
+                    }
+                )
 
         # Build answer
         ranked = sorted(all_passages, key=lambda p: p["score"], reverse=True)[:5]
-        answer = "\n\n".join(p["text"] for p in ranked if p.get("text")) or "No results found."
+        answer = (
+            "\n\n".join(p["text"] for p in ranked if p.get("text"))
+            or "No results found."
+        )
         citations = [
-            Citation(source_id=f"src_{i}", source_type=p["source"], text=p["text"][:200], relevance_score=p["score"])
+            Citation(
+                source_id=f"src_{i}",
+                source_type=p["source"],
+                text=p["text"][:200],
+                relevance_score=p["score"],
+            )
             for i, p in enumerate(ranked)
         ]
 
@@ -745,11 +883,11 @@ class AgenticRAGOrchestrator:
             self._stats["avg_latency_ms"] = result.latency_ms
         else:
             self._stats["avg_iterations"] = (
-                (self._stats["avg_iterations"] * n + result.iterations) / (n + 1)
-            )
+                self._stats["avg_iterations"] * n + result.iterations
+            ) / (n + 1)
             self._stats["avg_latency_ms"] = (
-                (self._stats["avg_latency_ms"] * n + result.latency_ms) / (n + 1)
-            )
+                self._stats["avg_latency_ms"] * n + result.latency_ms
+            ) / (n + 1)
 
         # Complexity distribution
         cd = self._stats["complexity_distribution"]
@@ -765,9 +903,11 @@ class AgenticRAGOrchestrator:
 # BENCHMARK
 # =========================================
 
+
 @dataclass
 class BenchmarkResult:
     """Result of running the quality benchmark suite."""
+
     total_queries: int = 0
     avg_confidence: float = 0.0
     avg_iterations: float = 0.0
@@ -778,14 +918,35 @@ class BenchmarkResult:
 
 
 BENCHMARK_QUERIES = [
-    {"query": "Who is the program manager for DCGS-A?", "expected_complexity": "simple"},
-    {"query": "What are the hiring trends at Langley?", "expected_complexity": "moderate"},
-    {"query": "Which contacts at Leidos have connections to DCGS program managers?", "expected_complexity": "complex"},
-    {"query": "Compare staffing levels at Langley vs PACAF over the last 6 months", "expected_complexity": "analytical"},
+    {
+        "query": "Who is the program manager for DCGS-A?",
+        "expected_complexity": "simple",
+    },
+    {
+        "query": "What are the hiring trends at Langley?",
+        "expected_complexity": "moderate",
+    },
+    {
+        "query": "Which contacts at Leidos have connections to DCGS program managers?",
+        "expected_complexity": "complex",
+    },
+    {
+        "query": "Compare staffing levels at Langley vs PACAF over the last 6 months",
+        "expected_complexity": "analytical",
+    },
     {"query": "What is Jeff Bartsch's email?", "expected_complexity": "simple"},
-    {"query": "Who manages DCGS-A and what are their pain points?", "expected_complexity": "moderate"},
-    {"query": "What past performance does GDIT have on ISR programs?", "expected_complexity": "moderate"},
-    {"query": "How has the competitive landscape changed for DCGS contracts?", "expected_complexity": "analytical"},
+    {
+        "query": "Who manages DCGS-A and what are their pain points?",
+        "expected_complexity": "moderate",
+    },
+    {
+        "query": "What past performance does GDIT have on ISR programs?",
+        "expected_complexity": "moderate",
+    },
+    {
+        "query": "How has the competitive landscape changed for DCGS contracts?",
+        "expected_complexity": "analytical",
+    },
 ]
 
 
@@ -798,15 +959,17 @@ async def run_benchmark(orchestrator: AgenticRAGOrchestrator) -> BenchmarkResult
 
     for bq in BENCHMARK_QUERIES:
         r = await orchestrator.query(bq["query"])
-        results.append({
-            "query": bq["query"],
-            "expected_complexity": bq["expected_complexity"],
-            "actual_complexity": r.complexity,
-            "confidence": r.confidence,
-            "iterations": r.iterations,
-            "latency_ms": r.latency_ms,
-            "tools_used": r.tools_used,
-        })
+        results.append(
+            {
+                "query": bq["query"],
+                "expected_complexity": bq["expected_complexity"],
+                "actual_complexity": r.complexity,
+                "confidence": r.confidence,
+                "iterations": r.iterations,
+                "latency_ms": r.latency_ms,
+                "tools_used": r.tools_used,
+            }
+        )
         total_conf += r.confidence
         total_iter += r.iterations
         total_latency += r.latency_ms

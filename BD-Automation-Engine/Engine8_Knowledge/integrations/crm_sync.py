@@ -24,7 +24,13 @@ SYNC_QUEUE_PATH = DATA_DIR / "crm_sync_queue.jsonl"
 SYNC_LOG_PATH = DATA_DIR / "crm_sync_log.jsonl"
 
 # Bullhorn DB path
-BULLHORN_DB = Path(os.path.dirname(os.path.dirname(__file__))) / ".." / "Engine7_BullhornETL" / "data" / "bullhorn_master.db"
+BULLHORN_DB = (
+    Path(os.path.dirname(os.path.dirname(__file__)))
+    / ".."
+    / "Engine7_BullhornETL"
+    / "data"
+    / "bullhorn_master.db"
+)
 
 
 class CRMSyncManager:
@@ -121,8 +127,17 @@ class CRMSyncManager:
                 "status": "pending",
                 "contact_name": name,
                 "updates": {
-                    k: v for k, v in contact.items()
-                    if k in ("tier", "program", "priority", "bd_score", "notes", "matched_programs")
+                    k: v
+                    for k, v in contact.items()
+                    if k
+                    in (
+                        "tier",
+                        "program",
+                        "priority",
+                        "bd_score",
+                        "notes",
+                        "matched_programs",
+                    )
                     and v is not None
                 },
             }
@@ -176,13 +191,20 @@ class CRMSyncManager:
             if placements:
                 self._last_placement_id = max_id
                 self._records_pulled += len(placements)
-                self._save_sync_log("pull_placements", {"count": len(placements), "max_id": max_id})
+                self._save_sync_log(
+                    "pull_placements", {"count": len(placements), "max_id": max_id}
+                )
 
             logger.info(f"Pulled {len(placements)} new placements")
             return {"success": True, "placements": placements, "count": len(placements)}
 
         except FileNotFoundError:
-            return {"success": False, "error": "Bullhorn DB not found", "placements": [], "count": 0}
+            return {
+                "success": False,
+                "error": "Bullhorn DB not found",
+                "placements": [],
+                "count": 0,
+            }
         except Exception as e:
             error_msg = f"Pull placements error: {e}"
             logger.error(error_msg)
@@ -226,13 +248,20 @@ class CRMSyncManager:
             if activities:
                 self._last_activity_id = max_id
                 self._records_pulled += len(activities)
-                self._save_sync_log("pull_activities", {"count": len(activities), "max_id": max_id})
+                self._save_sync_log(
+                    "pull_activities", {"count": len(activities), "max_id": max_id}
+                )
 
             logger.info(f"Pulled {len(activities)} new activities")
             return {"success": True, "activities": activities, "count": len(activities)}
 
         except FileNotFoundError:
-            return {"success": False, "error": "Bullhorn DB not found", "activities": [], "count": 0}
+            return {
+                "success": False,
+                "error": "Bullhorn DB not found",
+                "activities": [],
+                "count": 0,
+            }
         except Exception as e:
             error_msg = f"Pull activities error: {e}"
             logger.error(error_msg)
@@ -257,10 +286,13 @@ class CRMSyncManager:
             "activities": self.pull_activity_updates(),
         }
 
-        self._save_sync_log("full_sync", {
-            "placements_pulled": results["placements"]["count"],
-            "activities_pulled": results["activities"]["count"],
-        })
+        self._save_sync_log(
+            "full_sync",
+            {
+                "placements_pulled": results["placements"]["count"],
+                "activities_pulled": results["activities"]["count"],
+            },
+        )
 
         return results
 

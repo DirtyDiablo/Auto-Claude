@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ConnectionInfo:
     """Metadata for a connected WebSocket client."""
+
     client_id: str
     websocket: WebSocket
     connected_at: float
@@ -76,18 +77,23 @@ class RealtimeServer:
             last_ping=now,
         )
 
-        logger.info(f"WebSocket client connected: {client_id} (total: {len(self._connections)})")
+        logger.info(
+            f"WebSocket client connected: {client_id} (total: {len(self._connections)})"
+        )
 
         # Send welcome message with client ID and recent events
-        await self._send_json(websocket, {
-            "type": "welcome",
-            "data": {
-                "client_id": client_id,
-                "server_uptime": int(time.time() - self._start_time),
-                "active_connections": len(self._connections),
-                "recent_events": len(self._event_history),
+        await self._send_json(
+            websocket,
+            {
+                "type": "welcome",
+                "data": {
+                    "client_id": client_id,
+                    "server_uptime": int(time.time() - self._start_time),
+                    "active_connections": len(self._connections),
+                    "recent_events": len(self._event_history),
+                },
             },
-        })
+        )
 
         # Start heartbeat if not running
         if self._heartbeat_task is None or self._heartbeat_task.done():
@@ -99,10 +105,16 @@ class RealtimeServer:
         """Remove a client connection."""
         if client_id in self._connections:
             del self._connections[client_id]
-            logger.info(f"WebSocket client disconnected: {client_id} (total: {len(self._connections)})")
+            logger.info(
+                f"WebSocket client disconnected: {client_id} (total: {len(self._connections)})"
+            )
 
         # Stop heartbeat if no connections
-        if not self._connections and self._heartbeat_task and not self._heartbeat_task.done():
+        if (
+            not self._connections
+            and self._heartbeat_task
+            and not self._heartbeat_task.done()
+        ):
             self._heartbeat_task.cancel()
 
     # ─── Message sending ──────────────────────────────────
@@ -151,58 +163,72 @@ class RealtimeServer:
 
     async def broadcast_event(self, event_type: str, payload: Dict):
         """Broadcast a typed event."""
-        await self.broadcast({
-            "type": "event",
-            "data": {
-                "event_type": event_type,
-                "payload": payload,
-                "timestamp": datetime.now().isoformat(),
-            },
-        })
+        await self.broadcast(
+            {
+                "type": "event",
+                "data": {
+                    "event_type": event_type,
+                    "payload": payload,
+                    "timestamp": datetime.now().isoformat(),
+                },
+            }
+        )
 
     async def broadcast_notification(self, level: str, title: str, message: str):
         """Broadcast a notification (info, warning, error, success)."""
-        await self.broadcast({
-            "type": "notification",
-            "data": {
-                "level": level,
-                "title": title,
-                "message": message,
-            },
-        })
+        await self.broadcast(
+            {
+                "type": "notification",
+                "data": {
+                    "level": level,
+                    "title": title,
+                    "message": message,
+                },
+            }
+        )
 
     async def broadcast_metric(self, metric_name: str, value: float, delta: float = 0):
         """Broadcast a metric update."""
-        await self.broadcast({
-            "type": "metric_update",
-            "data": {
-                "metric_name": metric_name,
-                "value": value,
-                "delta": delta,
-            },
-        })
+        await self.broadcast(
+            {
+                "type": "metric_update",
+                "data": {
+                    "metric_name": metric_name,
+                    "value": value,
+                    "delta": delta,
+                },
+            }
+        )
 
-    async def broadcast_pipeline_move(self, deal_id: str, from_stage: str, to_stage: str):
+    async def broadcast_pipeline_move(
+        self, deal_id: str, from_stage: str, to_stage: str
+    ):
         """Broadcast a pipeline stage change."""
-        await self.broadcast({
-            "type": "pipeline_move",
-            "data": {
-                "deal_id": deal_id,
-                "from_stage": from_stage,
-                "to_stage": to_stage,
-            },
-        })
+        await self.broadcast(
+            {
+                "type": "pipeline_move",
+                "data": {
+                    "deal_id": deal_id,
+                    "from_stage": from_stage,
+                    "to_stage": to_stage,
+                },
+            }
+        )
 
-    async def broadcast_agent_status(self, agent_name: str, status: str, last_output: str = ""):
+    async def broadcast_agent_status(
+        self, agent_name: str, status: str, last_output: str = ""
+    ):
         """Broadcast an agent status update."""
-        await self.broadcast({
-            "type": "agent_status",
-            "data": {
-                "agent_name": agent_name,
-                "status": status,
-                "last_output": last_output,
-            },
-        })
+        await self.broadcast(
+            {
+                "type": "agent_status",
+                "data": {
+                    "agent_name": agent_name,
+                    "status": status,
+                    "last_output": last_output,
+                },
+            }
+        )
 
     # ─── Heartbeat ────────────────────────────────────────
 
@@ -215,10 +241,13 @@ class RealtimeServer:
 
                 for client_id, conn in list(self._connections.items()):
                     try:
-                        await self._send_json(conn.websocket, {
-                            "type": "ping",
-                            "timestamp": datetime.now().isoformat(),
-                        })
+                        await self._send_json(
+                            conn.websocket,
+                            {
+                                "type": "ping",
+                                "timestamp": datetime.now().isoformat(),
+                            },
+                        )
                         conn.last_ping = time.time()
                     except Exception:
                         dead_clients.append(client_id)

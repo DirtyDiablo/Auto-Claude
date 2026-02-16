@@ -22,19 +22,16 @@ class TestPlaybookGeneration:
     def sample_hot_lead_job(self):
         """Sample hot lead job for playbook generation."""
         return {
-            'Job Title/Position': 'Senior Intelligence Analyst - DCGS',
-            'Prime Contractor': 'Leidos',
-            'Location': 'San Diego, CA',
-            'Security Clearance': 'TS/SCI',
-            '_mapping': {
-                'program_name': 'AF DCGS - PACAF',
-                'match_confidence': 0.90,
-                'match_type': 'direct'
+            "Job Title/Position": "Senior Intelligence Analyst - DCGS",
+            "Prime Contractor": "Leidos",
+            "Location": "San Diego, CA",
+            "Security Clearance": "TS/SCI",
+            "_mapping": {
+                "program_name": "AF DCGS - PACAF",
+                "match_confidence": 0.90,
+                "match_type": "direct",
             },
-            '_scoring': {
-                'BD Priority Score': 85,
-                'Priority Tier': 'Hot'
-            }
+            "_scoring": {"BD Priority Score": 85, "Priority Tier": "Hot"},
         }
 
     def test_generate_playbook_returns_result(self, sample_hot_lead_job):
@@ -56,13 +53,13 @@ class TestPlaybookGeneration:
             result = generate_playbook(sample_hot_lead_job)
 
             # Check for email template in result
-            if hasattr(result, 'email_template'):
+            if hasattr(result, "email_template"):
                 assert result.email_template is not None
                 assert len(result.email_template) > 0
-            elif hasattr(result, 'email'):
+            elif hasattr(result, "email"):
                 assert result.email is not None
-            elif isinstance(result, dict) and 'email_template' in result:
-                assert result['email_template'] is not None
+            elif isinstance(result, dict) and "email_template" in result:
+                assert result["email_template"] is not None
         except ImportError:
             pytest.skip("bd_playbook_generator not available")
 
@@ -74,12 +71,12 @@ class TestPlaybookGeneration:
             result = generate_playbook(sample_hot_lead_job)
 
             # Check for call script in result
-            if hasattr(result, 'call_script'):
+            if hasattr(result, "call_script"):
                 assert result.call_script is not None
-            elif hasattr(result, 'call'):
+            elif hasattr(result, "call"):
                 assert result.call is not None
-            elif isinstance(result, dict) and 'call_script' in result:
-                assert result['call_script'] is not None
+            elif isinstance(result, dict) and "call_script" in result:
+                assert result["call_script"] is not None
         except ImportError:
             pytest.skip("bd_playbook_generator not available")
 
@@ -92,10 +89,13 @@ class TestPlaybookGeneration:
 
             # Check for talking points or content in result
             has_content = (
-                (hasattr(result, 'talking_points') and result.talking_points is not None) or
-                (hasattr(result, 'content') and result.content is not None) or
-                (hasattr(result, 'playbook') and result.playbook is not None) or
-                (isinstance(result, dict) and 'talking_points' in result)
+                (
+                    hasattr(result, "talking_points")
+                    and result.talking_points is not None
+                )
+                or (hasattr(result, "content") and result.content is not None)
+                or (hasattr(result, "playbook") and result.playbook is not None)
+                or (isinstance(result, dict) and "talking_points" in result)
             )
             assert has_content, "Playbook should have talking_points or content"
         except ImportError:
@@ -110,29 +110,31 @@ class TestPlaybookBatchGeneration:
         """Sample jobs for batch testing."""
         return [
             {
-                'Job Title/Position': 'Systems Engineer',
-                'Prime Contractor': 'Leidos',
-                'Security Clearance': 'TS/SCI',
-                '_scoring': {'BD Priority Score': 85, 'Priority Tier': 'Hot'}
+                "Job Title/Position": "Systems Engineer",
+                "Prime Contractor": "Leidos",
+                "Security Clearance": "TS/SCI",
+                "_scoring": {"BD Priority Score": 85, "Priority Tier": "Hot"},
             },
             {
-                'Job Title/Position': 'Software Developer',
-                'Prime Contractor': 'GDIT',
-                'Security Clearance': 'Secret',
-                '_scoring': {'BD Priority Score': 65, 'Priority Tier': 'Warm'}
+                "Job Title/Position": "Software Developer",
+                "Prime Contractor": "GDIT",
+                "Security Clearance": "Secret",
+                "_scoring": {"BD Priority Score": 65, "Priority Tier": "Warm"},
             },
             {
-                'Job Title/Position': 'Data Analyst',
-                'Prime Contractor': 'CACI',
-                'Security Clearance': 'Top Secret',
-                '_scoring': {'BD Priority Score': 75, 'Priority Tier': 'Warm'}
-            }
+                "Job Title/Position": "Data Analyst",
+                "Prime Contractor": "CACI",
+                "Security Clearance": "Top Secret",
+                "_scoring": {"BD Priority Score": 75, "Priority Tier": "Warm"},
+            },
         ]
 
     def test_batch_generation_processes_all_jobs(self, sample_jobs):
         """Test batch playbook generation processes all jobs."""
         try:
-            from Engine4_Playbook.scripts.bd_playbook_generator import generate_playbooks_batch
+            from Engine4_Playbook.scripts.bd_playbook_generator import (
+                generate_playbooks_batch,
+            )
 
             results = generate_playbooks_batch(sample_jobs, min_score=60)
 
@@ -148,7 +150,9 @@ class TestPlaybookBatchGeneration:
     def test_batch_respects_min_score_filter(self, sample_jobs):
         """Test batch generation respects minimum score filter."""
         try:
-            from Engine4_Playbook.scripts.bd_playbook_generator import generate_playbooks_batch
+            from Engine4_Playbook.scripts.bd_playbook_generator import (
+                generate_playbooks_batch,
+            )
 
             # Only process jobs with score >= 80
             results = generate_playbooks_batch(sample_jobs, min_score=80)
@@ -190,11 +194,11 @@ class TestEmailTemplateFormat:
     def sample_job(self):
         """Sample job for email testing."""
         return {
-            'Job Title/Position': 'Senior SIGINT Analyst',
-            'Prime Contractor': 'Leidos',
-            'Location': 'Fort Meade, MD',
-            'Security Clearance': 'TS/SCI w/ Poly',
-            '_mapping': {'program_name': 'NSA Programs'}
+            "Job Title/Position": "Senior SIGINT Analyst",
+            "Prime Contractor": "Leidos",
+            "Location": "Fort Meade, MD",
+            "Security Clearance": "TS/SCI w/ Poly",
+            "_mapping": {"program_name": "NSA Programs"},
         }
 
     def test_email_contains_job_title(self, sample_job):
@@ -204,11 +208,14 @@ class TestEmailTemplateFormat:
 
             result = generate_playbook(sample_job)
 
-            if hasattr(result, 'email_template'):
+            if hasattr(result, "email_template"):
                 # Job title should be mentioned in email
-                assert 'SIGINT' in result.email_template or 'Analyst' in result.email_template
-            elif hasattr(result, 'content'):
-                assert sample_job['Job Title/Position'] in str(result.content)
+                assert (
+                    "SIGINT" in result.email_template
+                    or "Analyst" in result.email_template
+                )
+            elif hasattr(result, "content"):
+                assert sample_job["Job Title/Position"] in str(result.content)
         except ImportError:
             pytest.skip("bd_playbook_generator not available")
 
@@ -219,11 +226,11 @@ class TestEmailTemplateFormat:
 
             result = generate_playbook(sample_job)
 
-            if hasattr(result, 'email_template'):
+            if hasattr(result, "email_template"):
                 email = result.email_template
                 # Should have some form of greeting
-                has_greeting = any(g in email for g in ['Dear', 'Hi', 'Hello', 'Good'])
-                assert has_greeting or 'Subject:' in email
+                has_greeting = any(g in email for g in ["Dear", "Hi", "Hello", "Good"])
+                assert has_greeting or "Subject:" in email
         except ImportError:
             pytest.skip("bd_playbook_generator not available")
 
@@ -235,11 +242,11 @@ class TestTalkingPointsStructure:
     def sample_job(self):
         """Sample job for talking points testing."""
         return {
-            'Job Title/Position': 'Cloud Architect',
-            'Prime Contractor': 'AWS',
-            'Security Clearance': 'Secret',
-            '_mapping': {'program_name': 'Cloud Services'},
-            '_scoring': {'BD Priority Score': 70}
+            "Job Title/Position": "Cloud Architect",
+            "Prime Contractor": "AWS",
+            "Security Clearance": "Secret",
+            "_mapping": {"program_name": "Cloud Services"},
+            "_scoring": {"BD Priority Score": 70},
         }
 
     def test_talking_points_minimum_count(self, sample_job):
@@ -251,15 +258,15 @@ class TestTalkingPointsStructure:
 
             # Playbook should have some form of content
 
-            if hasattr(result, 'talking_points') and result.talking_points:
+            if hasattr(result, "talking_points") and result.talking_points:
                 # If talking_points exists and is non-empty, check it's a list
                 isinstance(result.talking_points, list)
-            if hasattr(result, 'playbook') and result.playbook:
+            if hasattr(result, "playbook") and result.playbook:
                 # Alternative: check playbook content
                 pass
-            if hasattr(result, 'content') and result.content:
+            if hasattr(result, "content") and result.content:
                 pass
-            if hasattr(result, 'data') and result.data:
+            if hasattr(result, "data") and result.data:
                 pass
 
             # At minimum, result should exist
@@ -275,10 +282,10 @@ class TestTalkingPointsStructure:
             result = generate_playbook(sample_job)
 
             # Check that result has some string content
-            if hasattr(result, 'talking_points') and result.talking_points:
+            if hasattr(result, "talking_points") and result.talking_points:
                 for point in result.talking_points:
                     assert isinstance(point, str)
-            elif hasattr(result, 'playbook') and result.playbook:
+            elif hasattr(result, "playbook") and result.playbook:
                 assert isinstance(result.playbook, str)
                 assert len(result.playbook) > 0
         except ImportError:
@@ -292,6 +299,7 @@ class TestPlaybookIntegration:
         """Test that playbook module can be imported."""
         try:
             from Engine4_Playbook.scripts import bd_playbook_generator
+
             assert bd_playbook_generator is not None
         except ImportError:
             pytest.skip("Engine4_Playbook module not available")
@@ -300,22 +308,20 @@ class TestPlaybookIntegration:
         """Test complete playbook generation workflow."""
         try:
             from Engine4_Playbook.scripts.bd_playbook_generator import (
-                generate_playbook, PlaybookOutput
+                generate_playbook,
+                PlaybookOutput,
             )
 
             job = {
-                'Job Title/Position': 'Program Manager',
-                'Prime Contractor': 'Leidos',
-                'Location': 'San Diego, CA',
-                'Security Clearance': 'TS/SCI',
-                '_mapping': {
-                    'program_name': 'AF DCGS - PACAF',
-                    'match_confidence': 0.95
+                "Job Title/Position": "Program Manager",
+                "Prime Contractor": "Leidos",
+                "Location": "San Diego, CA",
+                "Security Clearance": "TS/SCI",
+                "_mapping": {
+                    "program_name": "AF DCGS - PACAF",
+                    "match_confidence": 0.95,
                 },
-                '_scoring': {
-                    'BD Priority Score': 90,
-                    'Priority Tier': 'Hot'
-                }
+                "_scoring": {"BD Priority Score": 90, "Priority Tier": "Hot"},
             }
 
             result = generate_playbook(job)
@@ -327,9 +333,9 @@ class TestPlaybookIntegration:
             if isinstance(result, PlaybookOutput):
                 # Check for any content attribute
                 has_content = (
-                    hasattr(result, 'playbook') or
-                    hasattr(result, 'content') or
-                    hasattr(result, 'data')
+                    hasattr(result, "playbook")
+                    or hasattr(result, "content")
+                    or hasattr(result, "data")
                 )
                 assert has_content, "PlaybookOutput should have content"
         except ImportError:

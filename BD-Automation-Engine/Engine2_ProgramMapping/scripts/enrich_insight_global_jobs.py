@@ -6,6 +6,7 @@ maps to federal programs, matches PTS contacts & past performance.
 
 Usage: python enrich_insight_global_jobs.py <path_to_scraper_json>
 """
+
 import sys
 import os
 import re
@@ -26,8 +27,30 @@ OUTPUT_DIR = os.path.join(ENGINE2_DATA)
 # === PROGRAM MAPPING SIGNALS ===
 # Location -> likely programs/primes mapping
 LOCATION_PROGRAM_MAP = {
-    "colorado springs": ["MDA", "Space Force", "NORAD", "NORTHCOM", "Schriever", "Peterson", "SBIRS", "GPS", "AEHF", "SDA"],
-    "huntsville": ["MDA", "PEO Missiles", "AMCOM", "SLS", "NASA", "THAAD", "Patriot", "IBCS", "Sentinel", "AUSA"],
+    "colorado springs": [
+        "MDA",
+        "Space Force",
+        "NORAD",
+        "NORTHCOM",
+        "Schriever",
+        "Peterson",
+        "SBIRS",
+        "GPS",
+        "AEHF",
+        "SDA",
+    ],
+    "huntsville": [
+        "MDA",
+        "PEO Missiles",
+        "AMCOM",
+        "SLS",
+        "NASA",
+        "THAAD",
+        "Patriot",
+        "IBCS",
+        "Sentinel",
+        "AUSA",
+    ],
     "san diego": ["Navy", "SPAWAR", "NAVWAR", "PMS", "Aegis", "DDG", "LCS"],
     "el segundo": ["Space Force", "SMC", "GPS", "SBIRS", "AEHF", "NRO", "MILSATCOM"],
     "redondo beach": ["Northrop Grumman", "Space Force", "B-21", "GBSD", "Sentinel"],
@@ -174,7 +197,7 @@ def load_json(filepath):
     if not os.path.exists(filepath):
         print(f"  WARNING: File not found: {filepath}")
         return []
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
         return json.load(f)
 
 
@@ -183,7 +206,7 @@ def load_csv_data(filepath):
     if not os.path.exists(filepath):
         print(f"  WARNING: File not found: {filepath}")
         return []
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
         return list(csv.DictReader(f))
 
 
@@ -204,7 +227,9 @@ def load_reference_data():
     print(f"  Placements: {len(placements)}")
 
     # Federal programs
-    fed_programs = load_csv_data(os.path.join(ENGINE2_DATA, "Federal Programs MASTER ENRICHED.csv"))
+    fed_programs = load_csv_data(
+        os.path.join(ENGINE2_DATA, "Federal Programs MASTER ENRICHED.csv")
+    )
     print(f"  Federal Programs: {len(fed_programs)}")
 
     # Bullhorn contacts with notes
@@ -232,14 +257,23 @@ def load_reference_data():
 
 # === DESCRIPTION PARSING ===
 
+
 def parse_description(desc):
     """Parse job description into structured sections."""
     if not desc:
         return {
-            "overview": "", "responsibilities": [], "qualifications_required": [],
-            "qualifications_preferred": [], "skills": [], "technologies": [],
-            "certifications": [], "education": [], "experience_years": "",
-            "clearance_details": "", "work_schedule": "", "compensation_details": "",
+            "overview": "",
+            "responsibilities": [],
+            "qualifications_required": [],
+            "qualifications_preferred": [],
+            "skills": [],
+            "technologies": [],
+            "certifications": [],
+            "education": [],
+            "experience_years": "",
+            "clearance_details": "",
+            "work_schedule": "",
+            "compensation_details": "",
         }
 
     # Clean up
@@ -263,13 +297,25 @@ def parse_description(desc):
 
     # Split into sections by common headers
     section_patterns = [
-        (r'(?:responsibilities|duties|what you.?ll do|key responsibilities|day to day)[:\s]*', 'responsibilities'),
-        (r'(?:required\s*(?:skills|qualifications|experience)|must.?have|minimum qualifications|qualifications)[:\s]*', 'qualifications_required'),
-        (r'(?:preferred|nice.?to.?have|desired|plus|bonus)[:\s]*', 'qualifications_preferred'),
-        (r'(?:skills|technical skills|core competencies)[:\s]*', 'skills'),
-        (r'(?:education|degree)[:\s]*', 'education'),
-        (r'(?:certifications?|certs?)[:\s]*', 'certifications'),
-        (r'(?:compensation|salary|pay|benefits|exact compensation)[:\s]*', 'compensation_details'),
+        (
+            r"(?:responsibilities|duties|what you.?ll do|key responsibilities|day to day)[:\s]*",
+            "responsibilities",
+        ),
+        (
+            r"(?:required\s*(?:skills|qualifications|experience)|must.?have|minimum qualifications|qualifications)[:\s]*",
+            "qualifications_required",
+        ),
+        (
+            r"(?:preferred|nice.?to.?have|desired|plus|bonus)[:\s]*",
+            "qualifications_preferred",
+        ),
+        (r"(?:skills|technical skills|core competencies)[:\s]*", "skills"),
+        (r"(?:education|degree)[:\s]*", "education"),
+        (r"(?:certifications?|certs?)[:\s]*", "certifications"),
+        (
+            r"(?:compensation|salary|pay|benefits|exact compensation)[:\s]*",
+            "compensation_details",
+        ),
     ]
 
     # Find section boundaries
@@ -283,17 +329,25 @@ def parse_description(desc):
 
     if boundaries:
         # Overview is everything before first section header
-        sections["overview"] = text[:boundaries[0][0]].strip()
+        sections["overview"] = text[: boundaries[0][0]].strip()
 
         # Extract each section
         for i, (start, content_start, section_name) in enumerate(boundaries):
             end = boundaries[i + 1][0] if i + 1 < len(boundaries) else len(text)
             content = text[content_start:end].strip()
             # Split into bullet points
-            items = re.split(r'\n\s*[-•*]\s*|\n\s*\d+[.)]\s*|\n\s*', content)
-            items = [item.strip() for item in items if item.strip() and len(item.strip()) > 5]
-            if section_name in ('responsibilities', 'qualifications_required',
-                                'qualifications_preferred', 'skills', 'education', 'certifications'):
+            items = re.split(r"\n\s*[-•*]\s*|\n\s*\d+[.)]\s*|\n\s*", content)
+            items = [
+                item.strip() for item in items if item.strip() and len(item.strip()) > 5
+            ]
+            if section_name in (
+                "responsibilities",
+                "qualifications_required",
+                "qualifications_preferred",
+                "skills",
+                "education",
+                "certifications",
+            ):
                 sections[section_name] = items
             else:
                 sections[section_name] = content
@@ -301,44 +355,148 @@ def parse_description(desc):
         # No clear sections found - use the whole text as overview
         sections["overview"] = text[:500]
         # Try to extract bullet points as responsibilities
-        bullets = re.findall(r'[-•*]\s*(.+?)(?:\n|$)', text)
+        bullets = re.findall(r"[-•*]\s*(.+?)(?:\n|$)", text)
         if bullets:
-            sections["responsibilities"] = [b.strip() for b in bullets if len(b.strip()) > 10]
+            sections["responsibilities"] = [
+                b.strip() for b in bullets if len(b.strip()) > 10
+            ]
 
     # Extract technologies from full text
     tech_keywords = [
-        "Python", "Java", "C++", "C#", ".NET", "JavaScript", "TypeScript", "React",
-        "Angular", "Node.js", "AWS", "Azure", "GCP", "Docker", "Kubernetes",
-        "Terraform", "Ansible", "Jenkins", "GitLab", "Jira", "Confluence",
-        "Splunk", "Elasticsearch", "Kafka", "Redis", "PostgreSQL", "MongoDB",
-        "Oracle", "SQL Server", "Linux", "Red Hat", "RHEL", "Windows Server",
-        "VMware", "Cisco", "Palo Alto", "Fortinet", "SIEM", "SOAR",
-        "MATLAB", "Simulink", "Cameo", "DOORS", "Teamcenter", "Creo",
-        "SolidWorks", "CATIA", "NX", "AutoCAD", "LabVIEW", "Verilog", "VHDL",
-        "FPGA", "Embedded", "RTOS", "VxWorks", "STK", "AFSIM",
-        "Wireshark", "Nessus", "Tenable", "ServiceNow", "Remedy", "BMC",
-        "Tableau", "Power BI", "Snowflake", "Databricks", "Hadoop",
-        "Spring Boot", "Microservices", "REST API", "GraphQL", "CI/CD",
-        "SAP", "Deltek", "Costpoint", "Cobra", "Crystal Reports",
-        "SharePoint", "Active Directory", "LDAP", "PKI", "STIG",
-        "Agile", "Scrum", "SAFe", "DevSecOps", "RMF", "NIST",
+        "Python",
+        "Java",
+        "C++",
+        "C#",
+        ".NET",
+        "JavaScript",
+        "TypeScript",
+        "React",
+        "Angular",
+        "Node.js",
+        "AWS",
+        "Azure",
+        "GCP",
+        "Docker",
+        "Kubernetes",
+        "Terraform",
+        "Ansible",
+        "Jenkins",
+        "GitLab",
+        "Jira",
+        "Confluence",
+        "Splunk",
+        "Elasticsearch",
+        "Kafka",
+        "Redis",
+        "PostgreSQL",
+        "MongoDB",
+        "Oracle",
+        "SQL Server",
+        "Linux",
+        "Red Hat",
+        "RHEL",
+        "Windows Server",
+        "VMware",
+        "Cisco",
+        "Palo Alto",
+        "Fortinet",
+        "SIEM",
+        "SOAR",
+        "MATLAB",
+        "Simulink",
+        "Cameo",
+        "DOORS",
+        "Teamcenter",
+        "Creo",
+        "SolidWorks",
+        "CATIA",
+        "NX",
+        "AutoCAD",
+        "LabVIEW",
+        "Verilog",
+        "VHDL",
+        "FPGA",
+        "Embedded",
+        "RTOS",
+        "VxWorks",
+        "STK",
+        "AFSIM",
+        "Wireshark",
+        "Nessus",
+        "Tenable",
+        "ServiceNow",
+        "Remedy",
+        "BMC",
+        "Tableau",
+        "Power BI",
+        "Snowflake",
+        "Databricks",
+        "Hadoop",
+        "Spring Boot",
+        "Microservices",
+        "REST API",
+        "GraphQL",
+        "CI/CD",
+        "SAP",
+        "Deltek",
+        "Costpoint",
+        "Cobra",
+        "Crystal Reports",
+        "SharePoint",
+        "Active Directory",
+        "LDAP",
+        "PKI",
+        "STIG",
+        "Agile",
+        "Scrum",
+        "SAFe",
+        "DevSecOps",
+        "RMF",
+        "NIST",
     ]
     found_tech = []
     for tech in tech_keywords:
-        if re.search(r'\b' + re.escape(tech) + r'\b', text, re.IGNORECASE):
+        if re.search(r"\b" + re.escape(tech) + r"\b", text, re.IGNORECASE):
             found_tech.append(tech)
     sections["technologies"] = found_tech
 
     # Extract certifications from full text
     cert_patterns = [
-        r'(?:Security\+|Sec\+)', r'CISSP', r'CISM', r'CEH', r'CompTIA',
-        r'CCNA', r'CCNP', r'CCIE', r'AWS\s+(?:Solutions?\s+Architect|Developer|SysOps)',
-        r'PMP', r'ITIL', r'Six Sigma', r'CAPM', r'Agile\s+Certified',
-        r'MCSE', r'MCSA', r'A\+', r'Network\+', r'Linux\+', r'CySA\+',
-        r'GIAC', r'GSEC', r'GCIH', r'OSCP', r'CISA',
-        r'TS/SCI', r'Secret\s+Clearance', r'Top\s+Secret',
-        r'8570', r'8140', r'DoD\s+8570', r'IAT\s+Level',
-        r'PE\b', r'EIT\b', r'FE\b',
+        r"(?:Security\+|Sec\+)",
+        r"CISSP",
+        r"CISM",
+        r"CEH",
+        r"CompTIA",
+        r"CCNA",
+        r"CCNP",
+        r"CCIE",
+        r"AWS\s+(?:Solutions?\s+Architect|Developer|SysOps)",
+        r"PMP",
+        r"ITIL",
+        r"Six Sigma",
+        r"CAPM",
+        r"Agile\s+Certified",
+        r"MCSE",
+        r"MCSA",
+        r"A\+",
+        r"Network\+",
+        r"Linux\+",
+        r"CySA\+",
+        r"GIAC",
+        r"GSEC",
+        r"GCIH",
+        r"OSCP",
+        r"CISA",
+        r"TS/SCI",
+        r"Secret\s+Clearance",
+        r"Top\s+Secret",
+        r"8570",
+        r"8140",
+        r"DoD\s+8570",
+        r"IAT\s+Level",
+        r"PE\b",
+        r"EIT\b",
+        r"FE\b",
     ]
     found_certs = []
     for pat in cert_patterns:
@@ -349,23 +507,29 @@ def parse_description(desc):
         sections["certifications"] = list(set(found_certs))
 
     # Extract experience years
-    exp_match = re.search(r'(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s+)?(?:experience|exp)', text, re.IGNORECASE)
+    exp_match = re.search(
+        r"(\d+)\+?\s*(?:years?|yrs?)\s*(?:of\s+)?(?:experience|exp)",
+        text,
+        re.IGNORECASE,
+    )
     if exp_match:
         sections["experience_years"] = exp_match.group()
 
     # Extract clearance details
     clearance_match = re.search(
-        r'(?:clearance|security)[:\s]*((?:TS/SCI|Top\s*Secret|Secret|Public\s*Trust|'
-        r'Confidential|CI\s*Poly|Full\s*Scope\s*Poly|Polygraph)[^.]*)',
-        text, re.IGNORECASE
+        r"(?:clearance|security)[:\s]*((?:TS/SCI|Top\s*Secret|Secret|Public\s*Trust|"
+        r"Confidential|CI\s*Poly|Full\s*Scope\s*Poly|Polygraph)[^.]*)",
+        text,
+        re.IGNORECASE,
     )
     if clearance_match:
         sections["clearance_details"] = clearance_match.group(1).strip()
 
     # Extract work schedule
     schedule_match = re.search(
-        r'(?:schedule|shift|hours)[:\s]*([^.]*(?:AM|PM|shift|remote|hybrid|onsite|on-site)[^.]*)',
-        text, re.IGNORECASE
+        r"(?:schedule|shift|hours)[:\s]*([^.]*(?:AM|PM|shift|remote|hybrid|onsite|on-site)[^.]*)",
+        text,
+        re.IGNORECASE,
     )
     if schedule_match:
         sections["work_schedule"] = schedule_match.group(1).strip()
@@ -374,6 +538,7 @@ def parse_description(desc):
 
 
 # === PROGRAM MAPPING ===
+
 
 def extract_state_from_location(location):
     """Extract state from location string."""
@@ -468,7 +633,9 @@ def map_job_to_programs(job, parsed_desc, federal_programs):
 
     # Sort and return top matches
     sorted_programs = sorted(scores.items(), key=lambda x: x[1], reverse=True)
-    top_programs = [(prog, score, evidence[prog]) for prog, score in sorted_programs if score >= 3.0][:5]
+    top_programs = [
+        (prog, score, evidence[prog]) for prog, score in sorted_programs if score >= 3.0
+    ][:5]
 
     return {
         "primary_program": top_programs[0][0] if top_programs else "Unknown",
@@ -476,13 +643,18 @@ def map_job_to_programs(job, parsed_desc, federal_programs):
         "primary_evidence": top_programs[0][2] if top_programs else [],
         "all_program_matches": top_programs,
         "identified_primes": primes,
-        "confidence": "High" if (top_programs and top_programs[0][1] >= 8) else
-                      "Moderate" if (top_programs and top_programs[0][1] >= 5) else
-                      "Low" if top_programs else "Unknown",
+        "confidence": "High"
+        if (top_programs and top_programs[0][1] >= 8)
+        else "Moderate"
+        if (top_programs and top_programs[0][1] >= 5)
+        else "Low"
+        if top_programs
+        else "Unknown",
     }
 
 
 # === CONTACT MATCHING ===
+
 
 def build_contact_index(contacts, bullhorn_contacts, bullhorn_timeline):
     """Build searchable indexes for contacts."""
@@ -509,7 +681,9 @@ def build_contact_index(contacts, bullhorn_contacts, bullhorn_timeline):
 
     # Also map GDIT -> General Dynamics since dashboard contacts are GDIT-labeled
     if "gdit" in company_contacts:
-        company_contacts["general dynamics"] = company_contacts.get("general dynamics", []) + company_contacts["gdit"]
+        company_contacts["general dynamics"] = (
+            company_contacts.get("general dynamics", []) + company_contacts["gdit"]
+        )
     elif "general dynamics" not in company_contacts:
         # Check if all contacts are GDIT-labeled
         for c in contacts:
@@ -522,20 +696,24 @@ def build_contact_index(contacts, bullhorn_contacts, bullhorn_timeline):
     for entry in bullhorn_timeline:
         contact_name = (entry.get("contact") or "").strip()
         if contact_name:
-            contact_notes[contact_name.lower()].append({
-                "date": entry.get("date", ""),
-                "author": entry.get("author", ""),
-                "summary": entry.get("summary", "")[:200],
-                "companies": entry.get("companies", ""),
-                "programs": entry.get("programs", ""),
-            })
+            contact_notes[contact_name.lower()].append(
+                {
+                    "date": entry.get("date", ""),
+                    "author": entry.get("author", ""),
+                    "summary": entry.get("summary", "")[:200],
+                    "companies": entry.get("companies", ""),
+                    "programs": entry.get("programs", ""),
+                }
+            )
 
     # Index bullhorn contacts by company
     bh_company_contacts = defaultdict(list)
     for bc in bullhorn_contacts:
         companies_str = bc.get("companies", "[]")
         try:
-            companies = eval(companies_str) if companies_str and companies_str != "[]" else []
+            companies = (
+                eval(companies_str) if companies_str and companies_str != "[]" else []
+            )
         except:
             companies = []
         for company in companies:
@@ -548,17 +726,30 @@ def build_contact_index(contacts, bullhorn_contacts, bullhorn_timeline):
         summary = entry.get("summary", "")
         if contact_name and summary:
             import re as re_mod
-            emails = re_mod.findall(r'[\w.+-]+@[\w.-]+\.\w+', summary)
-            phones = re_mod.findall(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', summary)
+
+            emails = re_mod.findall(r"[\w.+-]+@[\w.-]+\.\w+", summary)
+            phones = re_mod.findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", summary)
             contact_details_from_notes[contact_name]["emails"].update(emails)
             contact_details_from_notes[contact_name]["phones"].update(phones)
 
-    return company_contacts, contact_notes, bh_company_contacts, name_to_dashboard, contact_details_from_notes
+    return (
+        company_contacts,
+        contact_notes,
+        bh_company_contacts,
+        name_to_dashboard,
+        contact_details_from_notes,
+    )
 
 
 def find_matching_contacts(program_mapping, ref_data, contact_index):
     """Find contacts relevant to the job's program and prime."""
-    company_contacts, contact_notes, bh_company_contacts, name_to_dashboard, contact_details_from_notes = contact_index
+    (
+        company_contacts,
+        contact_notes,
+        bh_company_contacts,
+        name_to_dashboard,
+        contact_details_from_notes,
+    ) = contact_index
     primes = program_mapping.get("identified_primes", [])
     programs = [m[0] for m in program_mapping.get("all_program_matches", [])]
 
@@ -571,57 +762,73 @@ def find_matching_contacts(program_mapping, ref_data, contact_index):
         for c in company_contacts.get(prime_lower, []):
             c_name_lower = (c.get("name") or "").lower()
             notes_for_contact = contact_notes.get(c_name_lower, [])
-            note_summary = "; ".join([n["summary"][:100] for n in notes_for_contact[-3:]])
+            note_summary = "; ".join(
+                [n["summary"][:100] for n in notes_for_contact[-3:]]
+            )
             # Also check notes for email/phone if dashboard doesn't have them
             email = c.get("email", "") or ""
             phone = c.get("phone", "") or ""
-            if (not email or email == "None") and c_name_lower in contact_details_from_notes:
+            if (
+                not email or email == "None"
+            ) and c_name_lower in contact_details_from_notes:
                 emails = contact_details_from_notes[c_name_lower]["emails"]
                 email = next(iter(emails), "")
-            if (not phone or phone == "None") and c_name_lower in contact_details_from_notes:
+            if (
+                not phone or phone == "None"
+            ) and c_name_lower in contact_details_from_notes:
                 phones = contact_details_from_notes[c_name_lower]["phones"]
                 phone = next(iter(phones), "")
-            matched.append({
-                "name": c.get("name", ""),
-                "job_title": c.get("jobTitle", ""),
-                "company": c.get("company", ""),
-                "email": email if email != "None" else "",
-                "phone": phone if phone != "None" else "",
-                "city": c.get("city", ""),
-                "state": c.get("state", ""),
-                "tier": c.get("tier", ""),
-                "source": "Dashboard",
-                "recent_notes": note_summary,
-            })
+            matched.append(
+                {
+                    "name": c.get("name", ""),
+                    "job_title": c.get("jobTitle", ""),
+                    "company": c.get("company", ""),
+                    "email": email if email != "None" else "",
+                    "phone": phone if phone != "None" else "",
+                    "city": c.get("city", ""),
+                    "state": c.get("state", ""),
+                    "tier": c.get("tier", ""),
+                    "source": "Dashboard",
+                    "recent_notes": note_summary,
+                }
+            )
         # Bullhorn contacts - cross-reference with dashboard for details
         for bc in bh_company_contacts.get(prime_lower, []):
             bc_name = bc.get("name", "")
             bc_name_lower = bc_name.lower().strip()
             notes_for_contact = contact_notes.get(bc_name_lower, [])
-            note_summary = "; ".join([n["summary"][:100] for n in notes_for_contact[-3:]])
+            note_summary = "; ".join(
+                [n["summary"][:100] for n in notes_for_contact[-3:]]
+            )
             # Try to find this contact in dashboard data for email/phone/title
             dashboard_match = name_to_dashboard.get(bc_name_lower, {})
             # Also check notes for extracted emails/phones
             email = dashboard_match.get("email", "") or ""
             phone = dashboard_match.get("phone", "") or ""
-            if (not email or email == "None") and bc_name_lower in contact_details_from_notes:
+            if (
+                not email or email == "None"
+            ) and bc_name_lower in contact_details_from_notes:
                 emails = contact_details_from_notes[bc_name_lower]["emails"]
                 email = next(iter(emails), "")
-            if (not phone or phone == "None") and bc_name_lower in contact_details_from_notes:
+            if (
+                not phone or phone == "None"
+            ) and bc_name_lower in contact_details_from_notes:
                 phones = contact_details_from_notes[bc_name_lower]["phones"]
                 phone = next(iter(phones), "")
-            matched.append({
-                "name": bc_name,
-                "job_title": dashboard_match.get("jobTitle", ""),
-                "company": prime,
-                "email": email if email != "None" else "",
-                "phone": phone if phone != "None" else "",
-                "city": dashboard_match.get("city", ""),
-                "state": dashboard_match.get("state", ""),
-                "tier": dashboard_match.get("tier", ""),
-                "source": "Bullhorn+Dashboard" if dashboard_match else "Bullhorn",
-                "recent_notes": note_summary,
-            })
+            matched.append(
+                {
+                    "name": bc_name,
+                    "job_title": dashboard_match.get("jobTitle", ""),
+                    "company": prime,
+                    "email": email if email != "None" else "",
+                    "phone": phone if phone != "None" else "",
+                    "city": dashboard_match.get("city", ""),
+                    "state": dashboard_match.get("state", ""),
+                    "tier": dashboard_match.get("tier", ""),
+                    "source": "Bullhorn+Dashboard" if dashboard_match else "Bullhorn",
+                    "recent_notes": note_summary,
+                }
+            )
 
     # Deduplicate by name
     seen = set()
@@ -638,6 +845,7 @@ def find_matching_contacts(program_mapping, ref_data, contact_index):
 
 
 # === PAST PERFORMANCE ===
+
 
 def find_past_performance(program_mapping, ref_data):
     """Find PTS past performance data for the job's prime/program/location."""
@@ -661,19 +869,23 @@ def find_past_performance(program_mapping, ref_data):
         for pp in past_perf:
             pp_prime = (pp.get("prime_contractor") or "").lower()
             if prime_lower in pp_prime or pp_prime in prime_lower:
-                results["prime_performance"].append({
-                    "prime": pp.get("prime_contractor", ""),
-                    "total_jobs": pp.get("total_jobs", 0),
-                    "filled_jobs": pp.get("filled_jobs", 0),
-                    "total_placements": pp.get("total_placements", 0),
-                    "avg_bill_rate": pp.get("avg_bill_rate", 0),
-                    "avg_pay_rate": pp.get("avg_pay_rate", 0),
-                    "avg_margin": pp.get("avg_margin", 0),
-                    "fill_rate": pp.get("fill_rate", 0),
-                    "relationship_strength": pp.get("relationship_strength", ""),
-                    "is_defense_prime": pp.get("is_defense_prime", ""),
-                    "estimated_annual_revenue": pp.get("estimated_annual_revenue", 0),
-                })
+                results["prime_performance"].append(
+                    {
+                        "prime": pp.get("prime_contractor", ""),
+                        "total_jobs": pp.get("total_jobs", 0),
+                        "filled_jobs": pp.get("filled_jobs", 0),
+                        "total_placements": pp.get("total_placements", 0),
+                        "avg_bill_rate": pp.get("avg_bill_rate", 0),
+                        "avg_pay_rate": pp.get("avg_pay_rate", 0),
+                        "avg_margin": pp.get("avg_margin", 0),
+                        "fill_rate": pp.get("fill_rate", 0),
+                        "relationship_strength": pp.get("relationship_strength", ""),
+                        "is_defense_prime": pp.get("is_defense_prime", ""),
+                        "estimated_annual_revenue": pp.get(
+                            "estimated_annual_revenue", 0
+                        ),
+                    }
+                )
                 results["relationship_strength"] = pp.get("relationship_strength", "")
                 try:
                     results["avg_bill_rate"] = float(pp.get("avg_bill_rate", 0) or 0)
@@ -688,14 +900,16 @@ def find_past_performance(program_mapping, ref_data):
                 results["total_placements_at_prime"] += 1
                 if pl.get("status") in ("Active", "Submitted"):
                     results["active_placements_at_prime"] += 1
-                results["relevant_placements"].append({
-                    "candidate": pl.get("candidate", ""),
-                    "job_title": pl.get("job_title", ""),
-                    "status": pl.get("status", ""),
-                    "start_date": pl.get("start_date", ""),
-                    "bill_rate": pl.get("bill_rate", ""),
-                    "margin_percent": pl.get("margin_percent", ""),
-                })
+                results["relevant_placements"].append(
+                    {
+                        "candidate": pl.get("candidate", ""),
+                        "job_title": pl.get("job_title", ""),
+                        "status": pl.get("status", ""),
+                        "start_date": pl.get("start_date", ""),
+                        "bill_rate": pl.get("bill_rate", ""),
+                        "margin_percent": pl.get("margin_percent", ""),
+                    }
+                )
 
     # Limit placements shown
     results["relevant_placements"] = results["relevant_placements"][:15]
@@ -703,6 +917,7 @@ def find_past_performance(program_mapping, ref_data):
 
 
 # === BD SCORING ===
+
 
 def calculate_bd_score(job, program_mapping, past_perf):
     """Calculate a BD priority score for the job."""
@@ -790,6 +1005,7 @@ def calculate_bd_score(job, program_mapping, past_perf):
 
 # === MAIN PIPELINE ===
 
+
 def enrich_jobs(jobs, ref_data):
     """Main enrichment pipeline for all jobs."""
     print(f"\nEnriching {len(jobs)} jobs...")
@@ -798,7 +1014,7 @@ def enrich_jobs(jobs, ref_data):
     contact_index = build_contact_index(
         ref_data["contacts"],
         ref_data["bullhorn_contacts"],
-        ref_data["bullhorn_timeline"]
+        ref_data["bullhorn_timeline"],
     )
 
     enriched = []
@@ -810,16 +1026,22 @@ def enrich_jobs(jobs, ref_data):
         parsed_desc = parse_description(job.get("description", ""))
 
         # Map to programs
-        program_mapping = map_job_to_programs(job, parsed_desc, ref_data["federal_programs"])
+        program_mapping = map_job_to_programs(
+            job, parsed_desc, ref_data["federal_programs"]
+        )
 
         # Find matching contacts
-        matched_contacts = find_matching_contacts(program_mapping, ref_data, contact_index)
+        matched_contacts = find_matching_contacts(
+            program_mapping, ref_data, contact_index
+        )
 
         # Find past performance
         past_perf = find_past_performance(program_mapping, ref_data)
 
         # Calculate BD score
-        bd_score, bd_priority, bd_reasons = calculate_bd_score(job, program_mapping, past_perf)
+        bd_score, bd_priority, bd_reasons = calculate_bd_score(
+            job, program_mapping, past_perf
+        )
 
         # Build enriched record
         record = {
@@ -837,12 +1059,15 @@ def enrich_jobs(jobs, ref_data):
             "category": job.get("category", ""),
             "req_number": job.get("reqNumber", ""),
             "scraped_at": job.get("scrapedAt", ""),
-
             # === PARSED DESCRIPTION ===
             "job_overview": parsed_desc["overview"][:500],
             "responsibilities": " | ".join(parsed_desc["responsibilities"][:10]),
-            "qualifications_required": " | ".join(parsed_desc["qualifications_required"][:10]),
-            "qualifications_preferred": " | ".join(parsed_desc["qualifications_preferred"][:10]),
+            "qualifications_required": " | ".join(
+                parsed_desc["qualifications_required"][:10]
+            ),
+            "qualifications_preferred": " | ".join(
+                parsed_desc["qualifications_preferred"][:10]
+            ),
             "skills_extracted": " | ".join(parsed_desc["skills"][:10]),
             "technologies": " | ".join(parsed_desc["technologies"]),
             "certifications": " | ".join(parsed_desc["certifications"]),
@@ -850,41 +1075,65 @@ def enrich_jobs(jobs, ref_data):
             "experience_years": parsed_desc["experience_years"],
             "clearance_details": parsed_desc["clearance_details"],
             "work_schedule": parsed_desc["work_schedule"],
-            "compensation_details": str(parsed_desc["compensation_details"])[:200] if parsed_desc["compensation_details"] else "",
-
+            "compensation_details": str(parsed_desc["compensation_details"])[:200]
+            if parsed_desc["compensation_details"]
+            else "",
             # === PROGRAM MAPPING ===
             "mapped_program": program_mapping["primary_program"],
             "program_confidence": program_mapping["confidence"],
             "program_match_score": program_mapping["primary_score"],
             "program_evidence": " | ".join(program_mapping["primary_evidence"][:5]),
-            "all_program_matches": " | ".join([f"{p[0]} ({p[1]:.0f})" for p in program_mapping["all_program_matches"]]),
-            "identified_prime_contractor": " | ".join(program_mapping["identified_primes"]) if program_mapping["identified_primes"] else "Unknown - Requires Research",
-
+            "all_program_matches": " | ".join(
+                [f"{p[0]} ({p[1]:.0f})" for p in program_mapping["all_program_matches"]]
+            ),
+            "identified_prime_contractor": " | ".join(
+                program_mapping["identified_primes"]
+            )
+            if program_mapping["identified_primes"]
+            else "Unknown - Requires Research",
             # === BD SCORING ===
             "bd_score": bd_score,
             "bd_priority": bd_priority,
             "bd_score_reasons": " | ".join(bd_reasons),
-
             # === MATCHING CONTACTS ===
             "contacts_count": len(matched_contacts),
             "contacts_summary": "",
-            "contact_1_name": "", "contact_1_title": "", "contact_1_company": "",
-            "contact_1_email": "", "contact_1_phone": "", "contact_1_location": "",
+            "contact_1_name": "",
+            "contact_1_title": "",
+            "contact_1_company": "",
+            "contact_1_email": "",
+            "contact_1_phone": "",
+            "contact_1_location": "",
             "contact_1_notes": "",
-            "contact_2_name": "", "contact_2_title": "", "contact_2_company": "",
-            "contact_2_email": "", "contact_2_phone": "", "contact_2_location": "",
+            "contact_2_name": "",
+            "contact_2_title": "",
+            "contact_2_company": "",
+            "contact_2_email": "",
+            "contact_2_phone": "",
+            "contact_2_location": "",
             "contact_2_notes": "",
-            "contact_3_name": "", "contact_3_title": "", "contact_3_company": "",
-            "contact_3_email": "", "contact_3_phone": "", "contact_3_location": "",
+            "contact_3_name": "",
+            "contact_3_title": "",
+            "contact_3_company": "",
+            "contact_3_email": "",
+            "contact_3_phone": "",
+            "contact_3_location": "",
             "contact_3_notes": "",
-            "contact_4_name": "", "contact_4_title": "", "contact_4_company": "",
-            "contact_4_email": "", "contact_4_phone": "", "contact_4_location": "",
+            "contact_4_name": "",
+            "contact_4_title": "",
+            "contact_4_company": "",
+            "contact_4_email": "",
+            "contact_4_phone": "",
+            "contact_4_location": "",
             "contact_4_notes": "",
-            "contact_5_name": "", "contact_5_title": "", "contact_5_company": "",
-            "contact_5_email": "", "contact_5_phone": "", "contact_5_location": "",
+            "contact_5_name": "",
+            "contact_5_title": "",
+            "contact_5_company": "",
+            "contact_5_email": "",
+            "contact_5_phone": "",
+            "contact_5_location": "",
             "contact_5_notes": "",
             "all_contacts_detail": "",
-
             # === PAST PERFORMANCE ===
             "pts_relationship_strength": past_perf["relationship_strength"],
             "pts_total_placements_at_prime": past_perf["total_placements_at_prime"],
@@ -904,7 +1153,11 @@ def enrich_jobs(jobs, ref_data):
             record[f"{prefix}_company"] = contact["company"]
             record[f"{prefix}_email"] = contact["email"]
             record[f"{prefix}_phone"] = contact["phone"]
-            record[f"{prefix}_location"] = f"{contact['city']}, {contact['state']}" if contact["city"] else contact["state"]
+            record[f"{prefix}_location"] = (
+                f"{contact['city']}, {contact['state']}"
+                if contact["city"]
+                else contact["state"]
+            )
             record[f"{prefix}_notes"] = contact["recent_notes"][:300]
             contacts_summary_parts.append(
                 f"{contact['name']} ({contact['job_title']}) at {contact['company']} "
@@ -916,7 +1169,11 @@ def enrich_jobs(jobs, ref_data):
         # All contacts detail (for the full list beyond top 5)
         all_contacts_lines = []
         for contact in matched_contacts:
-            loc = f"{contact['city']}, {contact['state']}" if contact["city"] else contact["state"]
+            loc = (
+                f"{contact['city']}, {contact['state']}"
+                if contact["city"]
+                else contact["state"]
+            )
             all_contacts_lines.append(
                 f"{contact['name']} | {contact['job_title']} | {contact['company']} | "
                 f"{loc} | {contact['phone']} | {contact['email']} | Notes: {contact['recent_notes'][:150]}"
@@ -955,23 +1212,29 @@ def write_output(enriched, output_dir):
     timestamp = datetime.now().strftime("%Y-%m-%d")
 
     # CSV output
-    csv_path = os.path.join(output_dir, f"Insight_Global_Jobs_DataMapped_Enriched_{timestamp}.csv")
+    csv_path = os.path.join(
+        output_dir, f"Insight_Global_Jobs_DataMapped_Enriched_{timestamp}.csv"
+    )
     if enriched:
         fieldnames = list(enriched[0].keys())
-        with open(csv_path, 'w', encoding='utf-8', newline='') as f:
+        with open(csv_path, "w", encoding="utf-8", newline="") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames)
             writer.writeheader()
             writer.writerows(enriched)
     print(f"\nCSV output: {csv_path}")
 
     # JSON output
-    json_path = os.path.join(output_dir, f"Insight_Global_Jobs_DataMapped_Enriched_{timestamp}.json")
-    with open(json_path, 'w', encoding='utf-8') as f:
+    json_path = os.path.join(
+        output_dir, f"Insight_Global_Jobs_DataMapped_Enriched_{timestamp}.json"
+    )
+    with open(json_path, "w", encoding="utf-8") as f:
         json.dump(enriched, f, indent=2, default=str)
     print(f"JSON output: {json_path}")
 
     # Summary report
-    summary_path = os.path.join(output_dir, f"Insight_Global_Jobs_Enrichment_Summary_{timestamp}.md")
+    summary_path = os.path.join(
+        output_dir, f"Insight_Global_Jobs_Enrichment_Summary_{timestamp}.md"
+    )
     write_summary_report(enriched, summary_path)
     print(f"Summary: {summary_path}")
 
@@ -1004,8 +1267,8 @@ def write_summary_report(enriched, filepath):
         "",
         f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         f"**Total Jobs Processed:** {total}",
-        f"**Jobs with Matching Contacts:** {with_contacts} ({with_contacts*100//total}%)",
-        f"**Jobs with PTS Past Performance:** {with_past_perf} ({with_past_perf*100//total}%)",
+        f"**Jobs with Matching Contacts:** {with_contacts} ({with_contacts * 100 // total}%)",
+        f"**Jobs with PTS Past Performance:** {with_past_perf} ({with_past_perf * 100 // total}%)",
         "",
         "---",
         "",
@@ -1016,90 +1279,106 @@ def write_summary_report(enriched, filepath):
     ]
     for p in ["Critical", "High", "Medium", "Low", "Research"]:
         count = priorities.get(p, 0)
-        lines.append(f"| {p} | {count} | {count*100//total}% |")
+        lines.append(f"| {p} | {count} | {count * 100 // total}% |")
 
-    lines.extend([
-        "",
-        "## Program Mapping Confidence",
-        "",
-        "| Confidence | Count | % |",
-        "|-----------|-------|---|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Program Mapping Confidence",
+            "",
+            "| Confidence | Count | % |",
+            "|-----------|-------|---|",
+        ]
+    )
     for c in ["High", "Moderate", "Low", "Unknown"]:
         count = confidences.get(c, 0)
-        lines.append(f"| {c} | {count} | {count*100//total}% |")
+        lines.append(f"| {c} | {count} | {count * 100 // total}% |")
 
-    lines.extend([
-        "",
-        "## Top Mapped Programs",
-        "",
-        "| Program | Jobs |",
-        "|---------|------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Top Mapped Programs",
+            "",
+            "| Program | Jobs |",
+            "|---------|------|",
+        ]
+    )
     for prog, count in programs.most_common(20):
         lines.append(f"| {prog} | {count} |")
 
-    lines.extend([
-        "",
-        "## Identified Prime Contractors",
-        "",
-        "| Prime | Jobs |",
-        "|-------|------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Identified Prime Contractors",
+            "",
+            "| Prime | Jobs |",
+            "|-------|------|",
+        ]
+    )
     for prime, count in primes.most_common():
         lines.append(f"| {prime} | {count} |")
 
-    lines.extend([
-        "",
-        "## Clearance Distribution",
-        "",
-        "| Clearance | Jobs |",
-        "|-----------|------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Clearance Distribution",
+            "",
+            "| Clearance | Jobs |",
+            "|-----------|------|",
+        ]
+    )
     for cl, count in clearances.most_common():
         lines.append(f"| {cl or 'None'} | {count} |")
 
-    lines.extend([
-        "",
-        "## Employment Type",
-        "",
-        "| Type | Jobs |",
-        "|------|------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Employment Type",
+            "",
+            "| Type | Jobs |",
+            "|------|------|",
+        ]
+    )
     for et, count in emp_types.most_common():
         lines.append(f"| {et} | {count} |")
 
-    lines.extend([
-        "",
-        "## Top States",
-        "",
-        "| State | Jobs |",
-        "|-------|------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Top States",
+            "",
+            "| State | Jobs |",
+            "|-------|------|",
+        ]
+    )
     for state, count in states.most_common(15):
         lines.append(f"| {state or 'Unknown'} | {count} |")
 
-    lines.extend([
-        "",
-        "## Top Categories",
-        "",
-        "| Category | Jobs |",
-        "|----------|------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Top Categories",
+            "",
+            "| Category | Jobs |",
+            "|----------|------|",
+        ]
+    )
     for cat, count in categories.most_common(15):
         lines.append(f"| {cat} | {count} |")
 
     # Top BD-scored jobs
     top_jobs = sorted(enriched, key=lambda x: x["bd_score"], reverse=True)[:20]
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## Top 20 BD Priority Jobs",
-        "",
-        "| Rank | Score | Priority | Job Title | Location | Clearance | Prime | Program |",
-        "|------|-------|----------|-----------|----------|-----------|-------|---------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## Top 20 BD Priority Jobs",
+            "",
+            "| Rank | Score | Priority | Job Title | Location | Clearance | Prime | Program |",
+            "|------|-------|----------|-----------|----------|-----------|-------|---------|",
+        ]
+    )
     for i, job in enumerate(top_jobs, 1):
         lines.append(
             f"| {i} | {job['bd_score']} | {job['bd_priority']} | "
@@ -1108,14 +1387,15 @@ def write_summary_report(enriched, filepath):
             f"{job['mapped_program'][:20]} |"
         )
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
 
 
 def main():
     if len(sys.argv) < 2:
         # Try to find the file in the project root
         import glob
+
         pattern = os.path.join(PROJECT_DIR, "dataset_puppeteer-scraper_*.json")
         files = sorted(glob.glob(pattern), key=os.path.getmtime, reverse=True)
         if files:
@@ -1136,7 +1416,7 @@ def main():
 
     # Load raw jobs
     print("Loading scraper data...")
-    with open(input_path, 'r', encoding='utf-8') as f:
+    with open(input_path, "r", encoding="utf-8") as f:
         jobs = json.load(f)
     print(f"  Raw jobs: {len(jobs)}")
 
@@ -1155,6 +1435,7 @@ def main():
     dest_path = os.path.join(scraper_data_dir, os.path.basename(input_path))
     if not os.path.exists(dest_path):
         import shutil
+
         shutil.move(input_path, dest_path)
         print(f"\nMoved source file to: {dest_path}")
     else:
@@ -1162,6 +1443,7 @@ def main():
 
     # Print summary stats
     from collections import Counter
+
     priorities = Counter(r["bd_priority"] for r in enriched)
     print(f"\n=== ENRICHMENT COMPLETE ===")
     print(f"Total jobs enriched: {len(enriched)}")

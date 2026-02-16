@@ -9,6 +9,7 @@ from src.nlq.autocomplete import SmartAutocomplete, Suggestion
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def autocomplete():
     return SmartAutocomplete()
@@ -17,6 +18,7 @@ def autocomplete():
 # =========================================
 # SUGGESTION BASICS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestSuggestionBasics:
@@ -47,6 +49,7 @@ class TestSuggestionBasics:
 # TEMPLATE MATCHING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestTemplateMatching:
     async def test_show_me_completions(self, autocomplete):
@@ -69,6 +72,7 @@ class TestTemplateMatching:
 # ENTITY MATCHING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestEntityMatching:
     async def test_company_match(self, autocomplete):
@@ -87,6 +91,7 @@ class TestEntityMatching:
 # INDEX BUILDING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestIndexBuilding:
     async def test_build_index(self, autocomplete):
@@ -95,19 +100,25 @@ class TestIndexBuilding:
 
     async def test_index_contains_companies(self, autocomplete):
         await autocomplete.build_suggestion_index()
-        entities = [s.text for s in autocomplete._index if s.metadata.get("type") == "company"]
+        entities = [
+            s.text for s in autocomplete._index if s.metadata.get("type") == "company"
+        ]
         assert "Leidos" in entities
         assert "GDIT" in entities
 
     async def test_index_contains_programs(self, autocomplete):
         await autocomplete.build_suggestion_index()
-        entities = [s.text for s in autocomplete._index if s.metadata.get("type") == "program"]
+        entities = [
+            s.text for s in autocomplete._index if s.metadata.get("type") == "program"
+        ]
         assert "AF DCGS" in entities
 
     async def test_custom_entities(self, autocomplete):
         autocomplete.add_custom_entities("custom", ["CustomEntity1", "CustomEntity2"])
         await autocomplete.build_suggestion_index()
-        entities = [s.text for s in autocomplete._index if s.metadata.get("type") == "custom"]
+        entities = [
+            s.text for s in autocomplete._index if s.metadata.get("type") == "custom"
+        ]
         assert "CustomEntity1" in entities
         assert "CustomEntity2" in entities
 
@@ -115,6 +126,7 @@ class TestIndexBuilding:
 # =========================================
 # RECENT QUERIES
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestRecentQueries:
@@ -137,6 +149,7 @@ class TestRecentQueries:
 # =========================================
 # DEDUPLICATION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestDeduplication:

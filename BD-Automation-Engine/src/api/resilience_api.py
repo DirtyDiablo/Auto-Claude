@@ -17,6 +17,7 @@ router = APIRouter()
 # REQUEST MODELS
 # =========================================
 
+
 class RegisterBreakerRequest(BaseModel):
     name: str
     failure_threshold: int = 5
@@ -46,10 +47,12 @@ class SetDegradationRequest(BaseModel):
 # CIRCUIT BREAKER ENDPOINTS
 # =========================================
 
+
 @router.get("/api/resilience/breakers")
 def list_breakers():
     """List all circuit breakers."""
     from src.resilience.circuit_breaker import get_circuit_registry
+
     registry = get_circuit_registry()
     breakers = registry.list_breakers()
     return {"breakers": [b.to_dict() for b in breakers], "total": len(breakers)}
@@ -59,6 +62,7 @@ def list_breakers():
 def get_breaker(name: str):
     """Get a specific circuit breaker."""
     from src.resilience.circuit_breaker import get_circuit_registry
+
     registry = get_circuit_registry()
     breaker = registry.get_breaker(name)
     if not breaker:
@@ -70,6 +74,7 @@ def get_breaker(name: str):
 def trip_breaker(name: str):
     """Force trip a circuit breaker to OPEN."""
     from src.resilience.circuit_breaker import get_circuit_registry
+
     registry = get_circuit_registry()
     success = registry.trip(name)
     if not success:
@@ -81,6 +86,7 @@ def trip_breaker(name: str):
 def reset_breaker(name: str):
     """Reset a circuit breaker to CLOSED."""
     from src.resilience.circuit_breaker import get_circuit_registry
+
     registry = get_circuit_registry()
     success = registry.reset(name)
     if not success:
@@ -92,10 +98,12 @@ def reset_breaker(name: str):
 # CHAOS EXPERIMENT ENDPOINTS
 # =========================================
 
+
 @router.post("/api/resilience/chaos/experiments")
 def create_experiment(req: CreateExperimentRequest):
     """Create a chaos experiment."""
     from src.resilience.chaos_engine import get_chaos_engine, FaultType
+
     engine = get_chaos_engine()
     ft_map = {ft.value: ft for ft in FaultType}
     fault_type = ft_map.get(req.fault_type, FaultType.LATENCY)
@@ -113,16 +121,21 @@ def create_experiment(req: CreateExperimentRequest):
 def list_experiments(status: Optional[str] = Query(None), limit: int = Query(50)):
     """List chaos experiments."""
     from src.resilience.chaos_engine import get_chaos_engine, ExperimentStatus
+
     engine = get_chaos_engine()
     st = ExperimentStatus(status) if status else None
     experiments = engine.list_experiments(status=st, limit=limit)
-    return {"experiments": [e.to_dict() for e in experiments], "total": len(experiments)}
+    return {
+        "experiments": [e.to_dict() for e in experiments],
+        "total": len(experiments),
+    }
 
 
 @router.post("/api/resilience/chaos/experiments/{experiment_id}/run")
 def run_experiment(experiment_id: str):
     """Run a chaos experiment."""
     from src.resilience.chaos_engine import get_chaos_engine
+
     engine = get_chaos_engine()
     exp = engine.run_experiment(experiment_id)
     if not exp:
@@ -134,6 +147,7 @@ def run_experiment(experiment_id: str):
 def list_templates():
     """List pre-built experiment templates."""
     from src.resilience.chaos_engine import get_chaos_engine
+
     engine = get_chaos_engine()
     templates = engine.list_templates()
     return {"templates": templates, "total": len(templates)}
@@ -143,10 +157,12 @@ def list_templates():
 # BULKHEAD ENDPOINTS
 # =========================================
 
+
 @router.get("/api/resilience/bulkheads")
 def list_bulkheads():
     """List all bulkheads."""
     from src.resilience.bulkhead import get_bulkhead_manager
+
     mgr = get_bulkhead_manager()
     bulkheads = mgr.list_bulkheads()
     return {"bulkheads": [b.to_dict() for b in bulkheads], "total": len(bulkheads)}
@@ -156,6 +172,7 @@ def list_bulkheads():
 def get_degradation():
     """Get current degradation level and plan."""
     from src.resilience.bulkhead import get_degradation
+
     deg = get_degradation()
     return deg.get_degradation_plan()
 
@@ -164,6 +181,7 @@ def get_degradation():
 def set_degradation(req: SetDegradationRequest):
     """Set degradation level."""
     from src.resilience.bulkhead import get_degradation, DegradationLevel
+
     deg = get_degradation()
     level_map = {dl.value: dl for dl in DegradationLevel}
     level = level_map.get(req.level, DegradationLevel.NORMAL)
@@ -174,6 +192,7 @@ def set_degradation(req: SetDegradationRequest):
 # =========================================
 # HEALTH
 # =========================================
+
 
 @router.get("/api/resilience/health")
 def resilience_health():
@@ -199,6 +218,7 @@ def resilience_health():
 # =========================================
 # ROUTER REGISTRATION
 # =========================================
+
 
 def include_resilience_router(app: FastAPI) -> None:
     app.include_router(router)

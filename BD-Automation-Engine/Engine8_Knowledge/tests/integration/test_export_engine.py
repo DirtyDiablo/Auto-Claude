@@ -27,9 +27,23 @@ def make_chart() -> OrgChart:
         title="Export Test Org",
         mode="tree",
         nodes=[
-            Person(name="Alice VP", title="VP", tier=2, company="GDIT", reports_to=None),
-            Person(name="Bob Director", title="Director", tier=3, company="GDIT", reports_to="Alice VP"),
-            Person(name="Carol Manager", title="Manager", tier=4, company="GDIT", reports_to="Bob Director"),
+            Person(
+                name="Alice VP", title="VP", tier=2, company="GDIT", reports_to=None
+            ),
+            Person(
+                name="Bob Director",
+                title="Director",
+                tier=3,
+                company="GDIT",
+                reports_to="Alice VP",
+            ),
+            Person(
+                name="Carol Manager",
+                title="Manager",
+                tier=4,
+                company="GDIT",
+                reports_to="Bob Director",
+            ),
         ],
         edges=[
             {"source": "Alice VP", "target": "Bob Director", "type": "REPORTS_TO"},
@@ -105,7 +119,9 @@ class TestToPNG:
     @pytest.mark.asyncio
     async def test_to_png_no_playwright(self, exporter):
         """Without Playwright, returns empty bytes."""
-        with patch.dict("sys.modules", {"playwright": None, "playwright.async_api": None}):
+        with patch.dict(
+            "sys.modules", {"playwright": None, "playwright.async_api": None}
+        ):
             result = await exporter.to_png(SAMPLE_HTML_WITH_SVG)
         assert isinstance(result, bytes)
         assert result == b""
@@ -120,7 +136,9 @@ class TestToPDF:
     @pytest.mark.asyncio
     async def test_to_pdf_no_playwright(self, exporter):
         """Without Playwright, returns empty bytes."""
-        with patch.dict("sys.modules", {"playwright": None, "playwright.async_api": None}):
+        with patch.dict(
+            "sys.modules", {"playwright": None, "playwright.async_api": None}
+        ):
             result = await exporter.to_pdf(SAMPLE_HTML_WITH_SVG)
         assert isinstance(result, bytes)
         assert result == b""

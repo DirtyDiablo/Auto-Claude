@@ -27,18 +27,66 @@ from Engine8_Knowledge.visualization.org_chart_engine import (
 
 
 SAMPLE_PEOPLE = [
-    Person(id="1", name="John CEO", title="CEO", company="GDIT", program="DCGS", tier=1,
-           location="Fairfax", reports_to=None),
-    Person(id="2", name="Alice VP", title="VP Engineering", company="GDIT", program="DCGS", tier=2,
-           location="Fairfax", reports_to="John CEO"),
-    Person(id="3", name="Bob Director", title="Director", company="GDIT", program="DCGS", tier=3,
-           location="San Diego", reports_to="Alice VP"),
-    Person(id="4", name="Carol Manager", title="Manager", company="GDIT", program="DCGS", tier=4,
-           location="San Diego", reports_to="Bob Director"),
-    Person(id="5", name="Dave Analyst", title="Senior Analyst", company="GDIT", program="DCGS", tier=5,
-           location="San Diego", reports_to="Carol Manager"),
-    Person(id="6", name="Eve Engineer", title="Engineer", company="GDIT", program="ISR", tier=6,
-           location="Tampa", reports_to=None),
+    Person(
+        id="1",
+        name="John CEO",
+        title="CEO",
+        company="GDIT",
+        program="DCGS",
+        tier=1,
+        location="Fairfax",
+        reports_to=None,
+    ),
+    Person(
+        id="2",
+        name="Alice VP",
+        title="VP Engineering",
+        company="GDIT",
+        program="DCGS",
+        tier=2,
+        location="Fairfax",
+        reports_to="John CEO",
+    ),
+    Person(
+        id="3",
+        name="Bob Director",
+        title="Director",
+        company="GDIT",
+        program="DCGS",
+        tier=3,
+        location="San Diego",
+        reports_to="Alice VP",
+    ),
+    Person(
+        id="4",
+        name="Carol Manager",
+        title="Manager",
+        company="GDIT",
+        program="DCGS",
+        tier=4,
+        location="San Diego",
+        reports_to="Bob Director",
+    ),
+    Person(
+        id="5",
+        name="Dave Analyst",
+        title="Senior Analyst",
+        company="GDIT",
+        program="DCGS",
+        tier=5,
+        location="San Diego",
+        reports_to="Carol Manager",
+    ),
+    Person(
+        id="6",
+        name="Eve Engineer",
+        title="Engineer",
+        company="GDIT",
+        program="ISR",
+        tier=6,
+        location="Tampa",
+        reports_to=None,
+    ),
 ]
 
 
@@ -136,12 +184,36 @@ class TestInferReportsTo:
         """People in same program should get higher match scores."""
         # Create people with no reports_to
         people = [
-            Person(id="a", name="Sr Manager", title="Manager", company="GDIT",
-                   program="DCGS", tier=4, location="Fairfax", reports_to=None),
-            Person(id="b", name="Analyst X", title="Analyst", company="GDIT",
-                   program="DCGS", tier=6, location="Fairfax", reports_to=None),
-            Person(id="c", name="Director Y", title="Director", company="GDIT",
-                   program="DCGS", tier=3, location="Fairfax", reports_to=None),
+            Person(
+                id="a",
+                name="Sr Manager",
+                title="Manager",
+                company="GDIT",
+                program="DCGS",
+                tier=4,
+                location="Fairfax",
+                reports_to=None,
+            ),
+            Person(
+                id="b",
+                name="Analyst X",
+                title="Analyst",
+                company="GDIT",
+                program="DCGS",
+                tier=6,
+                location="Fairfax",
+                reports_to=None,
+            ),
+            Person(
+                id="c",
+                name="Director Y",
+                title="Director",
+                company="GDIT",
+                program="DCGS",
+                tier=3,
+                location="Fairfax",
+                reports_to=None,
+            ),
         ]
         engine._fetch_people = AsyncMock(return_value=people)
         report = await engine.infer_reports_to()
@@ -152,10 +224,26 @@ class TestInferReportsTo:
     async def test_infer_same_location(self, engine):
         """Location match boosts inference confidence."""
         people = [
-            Person(id="a", name="Lead A", title="Lead", company="GDIT",
-                   program="DCGS", tier=4, location="Tampa", reports_to=None),
-            Person(id="b", name="Staff B", title="Analyst", company="GDIT",
-                   program="DCGS", tier=5, location="Tampa", reports_to=None),
+            Person(
+                id="a",
+                name="Lead A",
+                title="Lead",
+                company="GDIT",
+                program="DCGS",
+                tier=4,
+                location="Tampa",
+                reports_to=None,
+            ),
+            Person(
+                id="b",
+                name="Staff B",
+                title="Analyst",
+                company="GDIT",
+                program="DCGS",
+                tier=5,
+                location="Tampa",
+                reports_to=None,
+            ),
         ]
         engine._fetch_people = AsyncMock(return_value=people)
         report = await engine.infer_reports_to()
@@ -283,6 +371,7 @@ class TestCaching:
 class TestSingleton:
     def test_singleton(self):
         import Engine8_Knowledge.visualization.org_chart_engine as mod
+
         original = mod._engine
         mod._engine = None
         e1 = mod.get_org_chart_engine()

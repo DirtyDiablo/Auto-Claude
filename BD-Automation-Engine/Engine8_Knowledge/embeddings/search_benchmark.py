@@ -56,7 +56,12 @@ GOLDEN_QUERIES: List[Dict] = [
     {
         "query": "Northrop Grumman capture manager GBSD",
         "category": "contacts",
-        "relevant_keywords": ["Northrop Grumman", "capture", "GBSD", "Ground Based Strategic Deterrent"],
+        "relevant_keywords": [
+            "Northrop Grumman",
+            "capture",
+            "GBSD",
+            "Ground Based Strategic Deterrent",
+        ],
     },
     {
         "query": "cybersecurity ISSO with TS/SCI clearance",
@@ -76,7 +81,12 @@ GOLDEN_QUERIES: List[Dict] = [
     {
         "query": "Raytheon SIGINT program technical lead",
         "category": "contacts",
-        "relevant_keywords": ["Raytheon", "SIGINT", "signals intelligence", "technical lead"],
+        "relevant_keywords": [
+            "Raytheon",
+            "SIGINT",
+            "signals intelligence",
+            "technical lead",
+        ],
     },
     # --- 10 Program queries ---
     {
@@ -87,7 +97,12 @@ GOLDEN_QUERIES: List[Dict] = [
     {
         "query": "AF DCGS recompete timeline",
         "category": "programs",
-        "relevant_keywords": ["AF DCGS", "recompete", "timeline", "period of performance"],
+        "relevant_keywords": [
+            "AF DCGS",
+            "recompete",
+            "timeline",
+            "period of performance",
+        ],
     },
     {
         "query": "BICES NATO coalition intelligence system",
@@ -186,6 +201,7 @@ GOLDEN_QUERIES: List[Dict] = [
 @dataclass
 class QueryResult:
     """Result for a single benchmark query."""
+
     query: str
     category: str
     precision_at_5: float = 0.0
@@ -199,6 +215,7 @@ class QueryResult:
 @dataclass
 class BenchmarkResult:
     """Aggregated benchmark results for a search method."""
+
     method: str
     avg_precision_at_5: float = 0.0
     avg_recall_at_10: float = 0.0
@@ -212,6 +229,7 @@ class BenchmarkResult:
 @dataclass
 class ComparisonReport:
     """Comparison across multiple search methods."""
+
     methods: List[Dict] = field(default_factory=list)
     best_method: str = ""
     improvement_pct: float = 0.0
@@ -226,7 +244,9 @@ class SearchBenchmark:
     def __init__(self):
         self.queries = GOLDEN_QUERIES
 
-    def _compute_relevance(self, result_text: str, relevant_keywords: List[str]) -> float:
+    def _compute_relevance(
+        self, result_text: str, relevant_keywords: List[str]
+    ) -> float:
         """Score how relevant a result is based on keyword overlap."""
         text_lower = result_text.lower()
         matched = sum(1 for kw in relevant_keywords if kw.lower() in text_lower)
@@ -311,7 +331,9 @@ class SearchBenchmark:
                     text = h
                 elif hasattr(h, "payload"):
                     text = str(h.payload.get("text", h.payload.get("content", "")))
-                relevance_scores.append(self._compute_relevance(str(text), q["relevant_keywords"]))
+                relevance_scores.append(
+                    self._compute_relevance(str(text), q["relevant_keywords"])
+                )
 
             p5 = self._precision_at_k(relevance_scores, 5)
             r10 = self._recall_at_k(relevance_scores, 10)
@@ -323,15 +345,17 @@ class SearchBenchmark:
             all_mrr.append(mrr)
             all_ndcg.append(ndcg)
 
-            result.per_query.append({
-                "query": q["query"],
-                "category": q["category"],
-                "precision_at_5": round(p5, 4),
-                "recall_at_10": round(r10, 4),
-                "mrr": round(mrr, 4),
-                "ndcg_at_10": round(ndcg, 4),
-                "results_returned": len(hits),
-            })
+            result.per_query.append(
+                {
+                    "query": q["query"],
+                    "category": q["category"],
+                    "precision_at_5": round(p5, 4),
+                    "recall_at_10": round(r10, 4),
+                    "mrr": round(mrr, 4),
+                    "ndcg_at_10": round(ndcg, 4),
+                    "results_returned": len(hits),
+                }
+            )
 
         result.avg_precision_at_5 = round(sum(all_p5) / max(1, len(all_p5)), 4)
         result.avg_recall_at_10 = round(sum(all_r10) / max(1, len(all_r10)), 4)
@@ -353,18 +377,22 @@ class SearchBenchmark:
         report = ComparisonReport(run_at=datetime.now().isoformat())
 
         for r in results:
-            report.methods.append({
-                "method": r.method,
-                "precision_at_5": r.avg_precision_at_5,
-                "recall_at_10": r.avg_recall_at_10,
-                "mrr": r.avg_mrr,
-                "ndcg_at_10": r.avg_ndcg_at_10,
-            })
+            report.methods.append(
+                {
+                    "method": r.method,
+                    "precision_at_5": r.avg_precision_at_5,
+                    "recall_at_10": r.avg_recall_at_10,
+                    "mrr": r.avg_mrr,
+                    "ndcg_at_10": r.avg_ndcg_at_10,
+                }
+            )
 
         # Find best method by average of all metrics
         best_score = -1
         for m in report.methods:
-            avg = (m["precision_at_5"] + m["recall_at_10"] + m["mrr"] + m["ndcg_at_10"]) / 4
+            avg = (
+                m["precision_at_5"] + m["recall_at_10"] + m["mrr"] + m["ndcg_at_10"]
+            ) / 4
             if avg > best_score:
                 best_score = avg
                 report.best_method = m["method"]
@@ -373,10 +401,20 @@ class SearchBenchmark:
         if len(report.methods) >= 2:
             scores = []
             for m in report.methods:
-                scores.append((m["precision_at_5"] + m["recall_at_10"] + m["mrr"] + m["ndcg_at_10"]) / 4)
+                scores.append(
+                    (
+                        m["precision_at_5"]
+                        + m["recall_at_10"]
+                        + m["mrr"]
+                        + m["ndcg_at_10"]
+                    )
+                    / 4
+                )
             worst = min(scores)
             best = max(scores)
-            report.improvement_pct = round(((best - worst) / max(0.001, worst)) * 100, 1) if worst > 0 else 0
+            report.improvement_pct = (
+                round(((best - worst) / max(0.001, worst)) * 100, 1) if worst > 0 else 0
+            )
 
         return report
 

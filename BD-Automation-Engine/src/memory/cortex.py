@@ -34,6 +34,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class MemoryType(str, Enum):
     EPISODIC = "episodic"
     SEMANTIC = "semantic"
@@ -41,20 +42,22 @@ class MemoryType(str, Enum):
 
 
 class ImportanceLevel(str, Enum):
-    CRITICAL = "critical"    # 0.9-1.0: never forget
-    HIGH = "high"            # 0.7-0.9: long-term retention
-    MEDIUM = "medium"        # 0.4-0.7: normal decay
-    LOW = "low"              # 0.1-0.4: fast decay
-    TRIVIAL = "trivial"      # 0.0-0.1: forget quickly
+    CRITICAL = "critical"  # 0.9-1.0: never forget
+    HIGH = "high"  # 0.7-0.9: long-term retention
+    MEDIUM = "medium"  # 0.4-0.7: normal decay
+    LOW = "low"  # 0.1-0.4: fast decay
+    TRIVIAL = "trivial"  # 0.0-0.1: forget quickly
 
 
 # =========================================
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Memory:
     """A single memory entry in any tier."""
+
     id: str = ""
     content: str = ""
     memory_type: str = MemoryType.EPISODIC.value
@@ -76,6 +79,7 @@ class Memory:
 @dataclass
 class MemoryResult:
     """A memory retrieval result with scoring."""
+
     memory: Memory
     relevance_score: float = 0.0
     recency_score: float = 0.0
@@ -86,6 +90,7 @@ class MemoryResult:
 @dataclass
 class AgentContext:
     """Context describing what an agent is currently working on."""
+
     task_type: str = ""
     task_description: str = ""
     entities: List[str] = field(default_factory=list)
@@ -98,6 +103,7 @@ class AgentContext:
 @dataclass
 class ContextMemory:
     """Structured memory context for agent consumption."""
+
     episodic: List[MemoryResult] = field(default_factory=list)
     semantic: List[MemoryResult] = field(default_factory=list)
     procedural: List[MemoryResult] = field(default_factory=list)
@@ -108,6 +114,7 @@ class ContextMemory:
 @dataclass
 class ProceduralInsight:
     """An insight extracted from episodic patterns."""
+
     id: str = ""
     pattern: str = ""
     insight: str = ""
@@ -122,6 +129,7 @@ class ProceduralInsight:
 @dataclass
 class ConsolidationReport:
     """Report from a memory consolidation run."""
+
     episodes_scanned: int = 0
     facts_extracted: int = 0
     facts_updated: int = 0
@@ -135,6 +143,7 @@ class ConsolidationReport:
 @dataclass
 class ForgetReport:
     """Report from a memory decay/forget run."""
+
     memories_scanned: int = 0
     memories_decayed: int = 0
     memories_removed: int = 0
@@ -148,25 +157,25 @@ class ForgetReport:
 
 # Programs
 _PROGRAM_RE = re.compile(
-    r'\b(DCGS|DCGS-[A-Z]|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b',
+    r"\b(DCGS|DCGS-[A-Z]|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b",
     re.IGNORECASE,
 )
 
 # Organizations
 _ORG_RE = re.compile(
-    r'\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton'
-    r'|Navy|Army|Air Force|PACAF)\b',
+    r"\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton"
+    r"|Navy|Army|Air Force|PACAF)\b",
     re.IGNORECASE,
 )
 
 # Locations
 _LOC_RE = re.compile(
-    r'\b(Norfolk|Langley|Wright-Patterson|San Diego|Fort Meade|Huntsville)\b',
+    r"\b(Norfolk|Langley|Wright-Patterson|San Diego|Fort Meade|Huntsville)\b",
     re.IGNORECASE,
 )
 
 # People (Capitalized First Last)
-_PERSON_RE = re.compile(r'\b([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,})\b')
+_PERSON_RE = re.compile(r"\b([A-Z][a-z]{2,}\s+[A-Z][a-z]{2,})\b")
 
 
 def _extract_entities(text: str) -> Dict[str, List[str]]:
@@ -197,10 +206,30 @@ def _extract_entities(text: str) -> Dict[str, List[str]]:
         name = m.group(0)
         # Filter out common false positives
         if name.split()[0].lower() not in {
-            "the", "this", "that", "what", "when", "where", "which",
-            "monday", "tuesday", "wednesday", "thursday", "friday",
-            "january", "february", "march", "april", "may", "june",
-            "july", "august", "september", "october", "november", "december",
+            "the",
+            "this",
+            "that",
+            "what",
+            "when",
+            "where",
+            "which",
+            "monday",
+            "tuesday",
+            "wednesday",
+            "thursday",
+            "friday",
+            "january",
+            "february",
+            "march",
+            "april",
+            "may",
+            "june",
+            "july",
+            "august",
+            "september",
+            "october",
+            "november",
+            "december",
         }:
             if name not in entities["people"]:
                 entities["people"].append(name)
@@ -208,7 +237,9 @@ def _extract_entities(text: str) -> Dict[str, List[str]]:
     return entities
 
 
-def _compute_importance(content: str, memory_type: str, metadata: Dict[str, Any]) -> float:
+def _compute_importance(
+    content: str, memory_type: str, metadata: Dict[str, Any]
+) -> float:
     """Compute importance score for a memory."""
     score = 0.3  # base
 
@@ -241,6 +272,7 @@ def _compute_importance(content: str, memory_type: str, metadata: Dict[str, Any]
 # =========================================
 # SIMILARITY SCORING
 # =========================================
+
 
 def _token_overlap(text_a: str, text_b: str) -> float:
     """Simple token overlap similarity."""
@@ -293,6 +325,7 @@ def _recency_score(memory: Memory) -> float:
 # MEMORY CORTEX
 # =========================================
 
+
 class MemoryCortex:
     """Unified memory system with episodic, semantic, and procedural tiers."""
 
@@ -332,7 +365,9 @@ class MemoryCortex:
         if not memory.entities and not memory.programs and not memory.contacts:
             extracted = _extract_entities(memory.content)
             memory.entities = (
-                extracted["people"] + extracted["organizations"] + extracted["locations"]
+                extracted["people"]
+                + extracted["organizations"]
+                + extracted["locations"]
             )
             memory.programs = extracted["programs"]
             memory.contacts = extracted["people"]
@@ -340,14 +375,20 @@ class MemoryCortex:
         # Auto-compute importance if not set
         if memory.importance == 0.5 and "importance" not in memory.metadata:
             memory.importance = _compute_importance(
-                memory.content, memory.memory_type, memory.metadata,
+                memory.content,
+                memory.memory_type,
+                memory.metadata,
             )
 
         store = self._store_for(memory.memory_type)
         store[memory.id] = memory
 
-        logger.debug("Stored %s memory %s (importance=%.2f)",
-                      memory.memory_type, memory.id, memory.importance)
+        logger.debug(
+            "Stored %s memory %s (importance=%.2f)",
+            memory.memory_type,
+            memory.id,
+            memory.importance,
+        )
         return memory.id
 
     # -----------------------------------------
@@ -386,20 +427,24 @@ class MemoryCortex:
                 relevance = (text_sim * 0.5) + (entity_sim * 0.5)
                 recency = _recency_score(mem)
 
-                combined = (relevance * 0.5) + (recency * 0.25) + (mem.importance * 0.25)
+                combined = (
+                    (relevance * 0.5) + (recency * 0.25) + (mem.importance * 0.25)
+                )
 
                 if combined >= min_score:
                     # Update access tracking
                     mem.access_count += 1
                     mem.last_accessed = datetime.now(timezone.utc).isoformat()
 
-                    candidates.append(MemoryResult(
-                        memory=mem,
-                        relevance_score=round(relevance, 4),
-                        recency_score=round(recency, 4),
-                        importance_score=round(mem.importance, 4),
-                        combined_score=round(combined, 4),
-                    ))
+                    candidates.append(
+                        MemoryResult(
+                            memory=mem,
+                            relevance_score=round(relevance, 4),
+                            recency_score=round(recency, 4),
+                            importance_score=round(mem.importance, 4),
+                            combined_score=round(combined, 4),
+                        )
+                    )
 
         # Sort by combined score descending
         candidates.sort(key=lambda r: r.combined_score, reverse=True)
@@ -416,13 +461,19 @@ class MemoryCortex:
 
         # Recall from each tier
         episodic = await self.recall(
-            query, memory_types=[MemoryType.EPISODIC.value], limit=5,
+            query,
+            memory_types=[MemoryType.EPISODIC.value],
+            limit=5,
         )
         semantic = await self.recall(
-            query, memory_types=[MemoryType.SEMANTIC.value], limit=5,
+            query,
+            memory_types=[MemoryType.SEMANTIC.value],
+            limit=5,
         )
         procedural = await self.recall(
-            query, memory_types=[MemoryType.PROCEDURAL.value], limit=3,
+            query,
+            memory_types=[MemoryType.PROCEDURAL.value],
+            limit=3,
         )
 
         total = len(episodic) + len(semantic) + len(procedural)
@@ -434,15 +485,13 @@ class MemoryCortex:
                 f"Found {len(episodic)} past interactions related to this task."
             )
         if semantic:
-            summary_parts.append(
-                f"Found {len(semantic)} relevant facts."
-            )
+            summary_parts.append(f"Found {len(semantic)} relevant facts.")
         if procedural:
-            summary_parts.append(
-                f"Found {len(procedural)} strategy insights."
-            )
+            summary_parts.append(f"Found {len(procedural)} strategy insights.")
 
-        summary = " ".join(summary_parts) if summary_parts else "No relevant memories found."
+        summary = (
+            " ".join(summary_parts) if summary_parts else "No relevant memories found."
+        )
 
         return ContextMemory(
             episodic=episodic,
@@ -459,6 +508,7 @@ class MemoryCortex:
     async def consolidate(self, age_threshold_days: int = 7) -> ConsolidationReport:
         """Memory consolidation: compress old episodes into semantic facts."""
         import time as _time
+
         start = _time.time()
 
         now = datetime.now(timezone.utc)
@@ -483,8 +533,10 @@ class MemoryCortex:
             # Extract entities as semantic facts
             extracted = _extract_entities(episode.content)
             all_entities = (
-                extracted["programs"] + extracted["organizations"]
-                + extracted["people"] + extracted["locations"]
+                extracted["programs"]
+                + extracted["organizations"]
+                + extracted["people"]
+                + extracted["locations"]
             )
 
             for entity in all_entities:
@@ -551,7 +603,9 @@ class MemoryCortex:
         episodes = list(self._episodic.values())
         return await self._extract_patterns(episodes)
 
-    async def _extract_patterns(self, episodes: List[Memory]) -> List[ProceduralInsight]:
+    async def _extract_patterns(
+        self, episodes: List[Memory]
+    ) -> List[ProceduralInsight]:
         """Extract procedural insights from a set of episodes."""
         insights: List[ProceduralInsight] = []
 
@@ -567,7 +621,7 @@ class MemoryCortex:
                     id=uuid.uuid4().hex[:10],
                     pattern=f"outreach_channel:{channel}",
                     insight=f"{channel} outreach has {effectiveness:.0%} effectiveness "
-                            f"based on {data['count']} interactions.",
+                    f"based on {data['count']} interactions.",
                     confidence=min(data["count"] / 10, 1.0),
                     evidence_count=data["count"],
                     effectiveness_score=round(effectiveness, 4),
@@ -614,7 +668,7 @@ class MemoryCortex:
                     id=uuid.uuid4().hex[:10],
                     pattern=f"hiring_surge:{program}",
                     insight=f"{program} has {data['hiring_mentions']} hiring-related episodes "
-                            f"— potential BD opportunity.",
+                    f"— potential BD opportunity.",
                     confidence=min(data["hiring_mentions"] / 5, 1.0),
                     evidence_count=data["hiring_mentions"],
                     effectiveness_score=0.0,
@@ -627,7 +681,9 @@ class MemoryCortex:
         self._insights.extend(insights)
         return insights
 
-    def _analyze_channel_patterns(self, episodes: List[Memory]) -> Dict[str, Dict[str, Any]]:
+    def _analyze_channel_patterns(
+        self, episodes: List[Memory]
+    ) -> Dict[str, Dict[str, Any]]:
         """Analyze outreach channel patterns from episodes."""
         channels: Dict[str, Dict[str, Any]] = {}
         channel_keywords = {
@@ -646,10 +702,18 @@ class MemoryCortex:
                     channels[channel]["count"] += 1
 
                     # Check for positive outcome signals
-                    if any(w in content_lower for w in [
-                        "responded", "replied", "accepted", "agreed",
-                        "interested", "positive", "scheduled",
-                    ]):
+                    if any(
+                        w in content_lower
+                        for w in [
+                            "responded",
+                            "replied",
+                            "accepted",
+                            "agreed",
+                            "interested",
+                            "positive",
+                            "scheduled",
+                        ]
+                    ):
                         channels[channel]["success"] += 1
 
                     for p in ep.programs:
@@ -670,12 +734,20 @@ class MemoryCortex:
                     seen.add(key)
         return freq
 
-    def _analyze_program_mentions(self, episodes: List[Memory]) -> Dict[str, Dict[str, int]]:
+    def _analyze_program_mentions(
+        self, episodes: List[Memory]
+    ) -> Dict[str, Dict[str, int]]:
         """Analyze program mentions and hiring signals."""
         programs: Dict[str, Dict[str, int]] = {}
         hiring_keywords = [
-            "hiring", "position", "vacancy", "staffing", "recruiting",
-            "headcount", "opening", "job posting",
+            "hiring",
+            "position",
+            "vacancy",
+            "staffing",
+            "recruiting",
+            "headcount",
+            "opening",
+            "job posting",
         ]
 
         for ep in episodes:
@@ -702,7 +774,9 @@ class MemoryCortex:
     # FORGET
     # -----------------------------------------
 
-    async def forget(self, decay_factor: float = 0.95, removal_threshold: float = 0.05) -> ForgetReport:
+    async def forget(
+        self, decay_factor: float = 0.95, removal_threshold: float = 0.05
+    ) -> ForgetReport:
         """Intelligent forgetting with importance decay."""
         now = datetime.now(timezone.utc)
         scanned = 0
@@ -712,7 +786,11 @@ class MemoryCortex:
 
         remove_ids: List[str] = []
 
-        for store_type in [MemoryType.EPISODIC.value, MemoryType.SEMANTIC.value, MemoryType.PROCEDURAL.value]:
+        for store_type in [
+            MemoryType.EPISODIC.value,
+            MemoryType.SEMANTIC.value,
+            MemoryType.PROCEDURAL.value,
+        ]:
             store = self._store_for(store_type)
             for mem_id, mem in store.items():
                 scanned += 1
@@ -770,18 +848,28 @@ class MemoryCortex:
         entity_lower = entity_id.lower()
         results: List[MemoryResult] = []
 
-        for store_type in [MemoryType.EPISODIC.value, MemoryType.SEMANTIC.value, MemoryType.PROCEDURAL.value]:
+        for store_type in [
+            MemoryType.EPISODIC.value,
+            MemoryType.SEMANTIC.value,
+            MemoryType.PROCEDURAL.value,
+        ]:
             store = self._store_for(store_type)
             for mem in store.values():
-                all_entities = [e.lower() for e in mem.entities + mem.programs + mem.contacts]
+                all_entities = [
+                    e.lower() for e in mem.entities + mem.programs + mem.contacts
+                ]
                 if entity_lower in all_entities:
-                    results.append(MemoryResult(
-                        memory=mem,
-                        relevance_score=1.0,
-                        recency_score=_recency_score(mem),
-                        importance_score=mem.importance,
-                        combined_score=round((1.0 + _recency_score(mem) + mem.importance) / 3, 4),
-                    ))
+                    results.append(
+                        MemoryResult(
+                            memory=mem,
+                            relevance_score=1.0,
+                            recency_score=_recency_score(mem),
+                            importance_score=mem.importance,
+                            combined_score=round(
+                                (1.0 + _recency_score(mem) + mem.importance) / 3, 4
+                            ),
+                        )
+                    )
 
         results.sort(key=lambda r: r.combined_score, reverse=True)
         return results
@@ -792,6 +880,7 @@ class MemoryCortex:
 
     def get_stats(self) -> Dict[str, Any]:
         """Get memory statistics by tier."""
+
         def tier_stats(store: Dict[str, Memory]) -> Dict[str, Any]:
             if not store:
                 return {"count": 0, "avg_importance": 0, "avg_confidence": 0}
@@ -799,10 +888,12 @@ class MemoryCortex:
             return {
                 "count": len(memories),
                 "avg_importance": round(
-                    sum(m.importance for m in memories) / len(memories), 4,
+                    sum(m.importance for m in memories) / len(memories),
+                    4,
                 ),
                 "avg_confidence": round(
-                    sum(m.confidence for m in memories) / len(memories), 4,
+                    sum(m.confidence for m in memories) / len(memories),
+                    4,
                 ),
             }
 

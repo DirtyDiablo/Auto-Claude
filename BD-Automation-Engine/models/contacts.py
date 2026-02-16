@@ -1,5 +1,6 @@
 """Contact data models for BD contacts."""
-from pydantic import BaseModel, Field
+
+from pydantic import Field
 from typing import Optional, List
 from enum import Enum
 from .base import BaseDocument
@@ -7,6 +8,7 @@ from .base import BaseDocument
 
 class HierarchyTier(str, Enum):
     """Contact hierarchy tier classification."""
+
     TIER_1_EXECUTIVE = "Tier 1 - Executive"
     TIER_2_DIRECTOR = "Tier 2 - Director"
     TIER_3_PROGRAM_LEADERSHIP = "Tier 3 - Program Leadership"
@@ -17,6 +19,7 @@ class HierarchyTier(str, Enum):
 
 class BDPriority(str, Enum):
     """BD priority classification for contacts."""
+
     CRITICAL = "Critical"
     HIGH = "High"
     MEDIUM = "Medium"
@@ -25,6 +28,7 @@ class BDPriority(str, Enum):
 
 class DCGSProgram(str, Enum):
     """DCGS program assignments."""
+
     AF_LANGLEY = "AF DCGS - Langley"
     AF_WRIGHT_PATT = "AF DCGS - Wright-Patt"
     AF_PACAF = "AF DCGS - PACAF"
@@ -38,6 +42,7 @@ class DCGSProgram(str, Enum):
 
 class LocationHub(str, Enum):
     """Geographic location hub classification."""
+
     HAMPTON_ROADS = "Hampton Roads"
     SAN_DIEGO = "San Diego Metro"
     DC_METRO = "DC Metro"
@@ -53,6 +58,7 @@ class Contact(BaseDocument):
 
     Matches the unified contacts_unified Qdrant collection schema.
     """
+
     first_name: str
     last_name: str
     job_title: Optional[str] = None

@@ -13,7 +13,7 @@ Usage:
 """
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, List, Optional, Any
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,9 @@ class DailyActionEngine:
 
         # Stage 2: Get program-driven tasks (recompetes, new opportunities)
         try:
-            program_tasks = self._generate_program_tasks(max(5, max_actions - len(tasks)))
+            program_tasks = self._generate_program_tasks(
+                max(5, max_actions - len(tasks))
+            )
             tasks.extend(program_tasks)
         except Exception as e:
             logger.error(f"Program task generation failed: {e}")
@@ -117,7 +119,11 @@ class DailyActionEngine:
                 )
 
                 for result in results:
-                    payload = result.payload if hasattr(result, "payload") else result.get("payload", {})
+                    payload = (
+                        result.payload
+                        if hasattr(result, "payload")
+                        else result.get("payload", {})
+                    )
                     name = payload.get("name", "Unknown")
                     company = payload.get("company", "")
                     title = payload.get("title", "")
@@ -145,9 +151,12 @@ class DailyActionEngine:
                         "priority": priority,
                         "priority_score": priority_score,
                         "title": f"{'Call' if task_type == 'call' else 'Email'} {name} — {title}",
-                        "description": f"{'Executive outreach' if tier <= 2 else 'Follow-up'} with {name} at {company}" + (f" re: {program}" if program else ""),
+                        "description": f"{'Executive outreach' if tier <= 2 else 'Follow-up'} with {name} at {company}"
+                        + (f" re: {program}" if program else ""),
                         "contact": name,
-                        "contact_id": str(result.id) if hasattr(result, "id") else payload.get("id", ""),
+                        "contact_id": str(result.id)
+                        if hasattr(result, "id")
+                        else payload.get("id", ""),
                         "company": company,
                         "program": program,
                         "tier": tier,
@@ -191,7 +200,11 @@ class DailyActionEngine:
                 )
 
                 for result in results:
-                    payload = result.payload if hasattr(result, "payload") else result.get("payload", {})
+                    payload = (
+                        result.payload
+                        if hasattr(result, "payload")
+                        else result.get("payload", {})
+                    )
                     name = payload.get("name", payload.get("program_name", "Unknown"))
                     agency = payload.get("agency", "")
                     prime = payload.get("prime_contractor", "")
@@ -202,7 +215,9 @@ class DailyActionEngine:
                         "priority": "high",
                         "priority_score": 65,
                         "title": f"Research {name} opportunity",
-                        "description": f"Investigate {name}" + (f" ({agency})" if agency else "") + (f" — Prime: {prime}" if prime else ""),
+                        "description": f"Investigate {name}"
+                        + (f" ({agency})" if agency else "")
+                        + (f" — Prime: {prime}" if prime else ""),
                         "program": name,
                         "program_id": str(result.id) if hasattr(result, "id") else "",
                         "source_type": "program",
@@ -236,7 +251,11 @@ class DailyActionEngine:
             )
 
             for result in results:
-                payload = result.payload if hasattr(result, "payload") else result.get("payload", {})
+                payload = (
+                    result.payload
+                    if hasattr(result, "payload")
+                    else result.get("payload", {})
+                )
                 title = payload.get("title", "Unknown Position")
                 company = payload.get("company", "")
                 program = payload.get("program_name", payload.get("mapped_program", ""))
@@ -248,7 +267,9 @@ class DailyActionEngine:
                     except ValueError:
                         bd_score = 50
 
-                priority = "high" if bd_score >= 70 else "medium" if bd_score >= 40 else "low"
+                priority = (
+                    "high" if bd_score >= 70 else "medium" if bd_score >= 40 else "low"
+                )
 
                 task = {
                     "id": f"job-{hash(title) % 100000}",
@@ -256,7 +277,8 @@ class DailyActionEngine:
                     "priority": priority,
                     "priority_score": bd_score,
                     "title": f"Investigate: {title} at {company}",
-                    "description": f"New opening indicates staffing need" + (f" on {program}" if program else ""),
+                    "description": f"New opening indicates staffing need"
+                    + (f" on {program}" if program else ""),
                     "company": company,
                     "program": program,
                     "job_id": str(result.id) if hasattr(result, "id") else "",
@@ -308,7 +330,16 @@ class DailyActionEngine:
     def _assign_time_slots(self, tasks: List[Dict]) -> List[Dict]:
         """Assign suggested time slots to tasks."""
         time_map = {
-            "call": ["09:00", "09:30", "10:00", "10:30", "11:00", "14:00", "14:30", "15:00"],
+            "call": [
+                "09:00",
+                "09:30",
+                "10:00",
+                "10:30",
+                "11:00",
+                "14:00",
+                "14:30",
+                "15:00",
+            ],
             "email": ["08:00", "08:15", "08:30", "12:00", "16:00", "16:30"],
             "meeting": ["11:00", "13:00", "14:00", "15:00"],
             "research": ["13:00", "15:00", "16:00"],

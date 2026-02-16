@@ -13,17 +13,36 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.production.competitive_intel import (
     COMPETITIVE_INTEL_STATE,
-    plan_collection, scrape_job_boards, scrape_sam_gov, scrape_linkedin,
-    scrape_news, merge_raw_intel, analyze_with_llm, validate_findings,
-    generate_briefing, get_competitive_intel_definition,
+    plan_collection,
+    scrape_job_boards,
+    scrape_sam_gov,
+    scrape_linkedin,
+    scrape_news,
+    merge_raw_intel,
+    analyze_with_llm,
+    validate_findings,
+    generate_briefing,
+    get_competitive_intel_definition,
 )
 
 
 def test_state_schema_keys():
-    expected = {"collection_plan", "raw_intel", "raw_job_boards", "raw_sam_gov",
-                "raw_linkedin", "raw_news", "merged_intel", "analysis",
-                "human_validated", "graph_links", "briefing",
-                "distribution_results", "errors", "step_timings"}
+    expected = {
+        "collection_plan",
+        "raw_intel",
+        "raw_job_boards",
+        "raw_sam_gov",
+        "raw_linkedin",
+        "raw_news",
+        "merged_intel",
+        "analysis",
+        "human_validated",
+        "graph_links",
+        "briefing",
+        "distribution_results",
+        "errors",
+        "step_timings",
+    }
     assert set(COMPETITIVE_INTEL_STATE.keys()) == expected
 
 
@@ -76,7 +95,9 @@ async def test_scrape_news():
 @pytest.mark.asyncio
 async def test_merge_raw_intel_dedup():
     state = {
-        "raw_job_boards": [{"source": "job_board", "title": "Analyst", "company": "GDIT"}],
+        "raw_job_boards": [
+            {"source": "job_board", "title": "Analyst", "company": "GDIT"}
+        ],
         "raw_sam_gov": [{"source": "sam_gov", "title": "Contract", "company": ""}],
         "raw_linkedin": [{"source": "linkedin", "title": "Analyst", "company": "GDIT"}],
         "raw_news": [],
@@ -87,9 +108,9 @@ async def test_merge_raw_intel_dedup():
 
 @pytest.mark.asyncio
 async def test_analyze_with_llm_alerts():
-    state = {"merged_intel": [
-        {"source": "job_board", "company": "GDIT"} for _ in range(6)
-    ]}
+    state = {
+        "merged_intel": [{"source": "job_board", "company": "GDIT"} for _ in range(6)]
+    }
     result = await analyze_with_llm(state)
     assert len(result["analysis"]["high_confidence_alerts"]) >= 1
 
@@ -111,9 +132,13 @@ async def test_validate_findings():
 @pytest.mark.asyncio
 async def test_generate_briefing():
     state = {
-        "analysis": {"high_confidence_alerts": [{"description": "Test alert"}],
-                      "hiring_trends": {"GDIT": [1, 2]}, "contract_signals": [],
-                      "total_signals": 5, "risk_factors": []},
+        "analysis": {
+            "high_confidence_alerts": [{"description": "Test alert"}],
+            "hiring_trends": {"GDIT": [1, 2]},
+            "contract_signals": [],
+            "total_signals": 5,
+            "risk_factors": [],
+        },
         "graph_links": [],
     }
     result = await generate_briefing(state)

@@ -16,12 +16,21 @@ from typing import Any, AsyncGenerator, Dict, List, Optional
 
 import structlog
 
-from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, get_checkpoint_store
-from Engine8_Knowledge.workflows.graph_builder import (
-    CompiledProductionGraph, ProductionGraphBuilder, WorkflowDefinition,
-    WorkflowInfo, get_graph_builder,
+from Engine8_Knowledge.workflows.checkpoint_store import (
+    CheckpointStore,
+    get_checkpoint_store,
 )
-from Engine8_Knowledge.workflows.human_loop import HumanInTheLoopManager, get_hitl_manager
+from Engine8_Knowledge.workflows.graph_builder import (
+    CompiledProductionGraph,
+    ProductionGraphBuilder,
+    WorkflowDefinition,
+    WorkflowInfo,
+    get_graph_builder,
+)
+from Engine8_Knowledge.workflows.human_loop import (
+    HumanInTheLoopManager,
+    get_hitl_manager,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -29,6 +38,7 @@ logger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class WorkflowExecution:
@@ -69,13 +79,16 @@ class StreamEvent:
 # WorkflowOrchestratorV2
 # ---------------------------------------------------------------------------
 
+
 class WorkflowOrchestratorV2:
     """Manages lifecycle of all production workflows."""
 
-    def __init__(self,
-                 checkpoint_store: Optional[CheckpointStore] = None,
-                 hitl_manager: Optional[HumanInTheLoopManager] = None,
-                 graph_builder: Optional[ProductionGraphBuilder] = None):
+    def __init__(
+        self,
+        checkpoint_store: Optional[CheckpointStore] = None,
+        hitl_manager: Optional[HumanInTheLoopManager] = None,
+        graph_builder: Optional[ProductionGraphBuilder] = None,
+    ):
         self.checkpoint_store = checkpoint_store or get_checkpoint_store()
         self.hitl_manager = hitl_manager or get_hitl_manager()
         self.graph_builder = graph_builder or get_graph_builder()
@@ -121,8 +134,11 @@ class WorkflowOrchestratorV2:
         compiled = self.graph_builder.build(workflow_def)
         self._workflows[workflow_def.name] = compiled
         self._definitions[workflow_def.name] = workflow_def
-        logger.info("orchestrator_v2.registered", workflow=workflow_def.name,
-                     nodes=len(workflow_def.nodes))
+        logger.info(
+            "orchestrator_v2.registered",
+            workflow=workflow_def.name,
+            nodes=len(workflow_def.nodes),
+        )
 
     def list_workflows(self) -> List[WorkflowInfo]:
         """List all registered workflows."""
@@ -145,7 +161,9 @@ class WorkflowOrchestratorV2:
         """Start a workflow execution."""
         graph = self._workflows.get(workflow_name)
         if not graph:
-            raise ValueError(f"Workflow '{workflow_name}' not registered. Available: {list(self._workflows.keys())}")
+            raise ValueError(
+                f"Workflow '{workflow_name}' not registered. Available: {list(self._workflows.keys())}"
+            )
 
         tid = thread_id or f"wf_{uuid.uuid4().hex[:10]}"
         now = datetime.utcnow().isoformat()
@@ -160,12 +178,17 @@ class WorkflowOrchestratorV2:
         self._executions[tid] = execution
 
         # Emit start event
-        await self._emit_event(StreamEvent(
-            event_type="node_start",
-            thread_id=tid,
-            timestamp=now,
-            data={"workflow": workflow_name, "input_keys": list(input_state.keys())}
-        ))
+        await self._emit_event(
+            StreamEvent(
+                event_type="node_start",
+                thread_id=tid,
+                timestamp=now,
+                data={
+                    "workflow": workflow_name,
+                    "input_keys": list(input_state.keys()),
+                },
+            )
+        )
 
         # Execute the workflow
         try:
@@ -185,20 +208,30 @@ class WorkflowOrchestratorV2:
                         node_name=result["_interrupted_at"],
                         state_snapshot=result,
                         description=f"Workflow '{workflow_name}' requires approval at node '{result['_interrupted_at']}'",
-                        urgency="high" if any(
-                            r.get("severity") == "critical" for r in result.get("risks", [])
-                        ) else "normal",
+                        urgency="high"
+                        if any(
+                            r.get("severity") == "critical"
+                            for r in result.get("risks", [])
+                        )
+                        else "normal",
                     )
                     execution.pending_approvals.append(request.request_id)
 
-                await self._emit_event(StreamEvent(
-                    event_type="interrupt",
-                    thread_id=tid,
-                    timestamp=datetime.utcnow().isoformat(),
-                    data={"node": result["_interrupted_at"], "reason": "human_approval_required"}
-                ))
+                await self._emit_event(
+                    StreamEvent(
+                        event_type="interrupt",
+                        thread_id=tid,
+                        timestamp=datetime.utcnow().isoformat(),
+                        data={
+                            "node": result["_interrupted_at"],
+                            "reason": "human_approval_required",
+                        },
+                    )
+                )
             elif result.get("errors"):
-                execution.status = "failed" if not result.get("_completed") else "completed"
+                execution.status = (
+                    "failed" if not result.get("_completed") else "completed"
+                )
                 execution.errors = result.get("errors", [])
             else:
                 execution.status = "completed"
@@ -211,21 +244,25 @@ class WorkflowOrchestratorV2:
             execution.status = "failed"
             execution.errors = [{"error": str(e)}]
             execution.completed_at = datetime.utcnow().isoformat()
-            logger.error("orchestrator_v2.execution_error",
-                         workflow=workflow_name, error=str(e))
+            logger.error(
+                "orchestrator_v2.execution_error", workflow=workflow_name, error=str(e)
+            )
 
         # Emit completion event
-        await self._emit_event(StreamEvent(
-            event_type="completion",
-            thread_id=tid,
-            timestamp=datetime.utcnow().isoformat(),
-            data={"status": execution.status, "step_count": execution.step_count}
-        ))
+        await self._emit_event(
+            StreamEvent(
+                event_type="completion",
+                thread_id=tid,
+                timestamp=datetime.utcnow().isoformat(),
+                data={"status": execution.status, "step_count": execution.step_count},
+            )
+        )
 
         return execution
 
-    async def resume_workflow(self, thread_id: str,
-                              updated_state: Optional[dict] = None) -> WorkflowExecution:
+    async def resume_workflow(
+        self, thread_id: str, updated_state: Optional[dict] = None
+    ) -> WorkflowExecution:
         """Resume an interrupted workflow."""
         execution = self._executions.get(thread_id)
         if not execution:
@@ -240,7 +277,9 @@ class WorkflowOrchestratorV2:
         try:
             result = await graph.resume(thread_id, updated_state)
             execution.output_state = result
-            execution.status = "completed" if result.get("_completed") else "interrupted"
+            execution.status = (
+                "completed" if result.get("_completed") else "interrupted"
+            )
             execution.completed_at = datetime.utcnow().isoformat()
         except Exception as e:
             execution.status = "failed"
@@ -264,12 +303,14 @@ class WorkflowOrchestratorV2:
         if reason:
             execution.errors.append({"cancellation_reason": reason})
 
-        await self._emit_event(StreamEvent(
-            event_type="completion",
-            thread_id=thread_id,
-            timestamp=datetime.utcnow().isoformat(),
-            data={"status": "cancelled", "reason": reason}
-        ))
+        await self._emit_event(
+            StreamEvent(
+                event_type="completion",
+                thread_id=thread_id,
+                timestamp=datetime.utcnow().isoformat(),
+                data={"status": "cancelled", "reason": reason},
+            )
+        )
 
         logger.info("orchestrator_v2.cancelled", thread_id=thread_id, reason=reason)
         return True
@@ -281,12 +322,14 @@ class WorkflowOrchestratorV2:
     async def get_active_workflows(self) -> List[WorkflowExecution]:
         """List all active (running/interrupted) workflow executions."""
         return [
-            e for e in self._executions.values()
+            e
+            for e in self._executions.values()
             if e.status in ("running", "interrupted", "pending")
         ]
 
-    async def get_workflow_history(self, workflow_name: Optional[str] = None,
-                                   limit: int = 20) -> List[WorkflowExecution]:
+    async def get_workflow_history(
+        self, workflow_name: Optional[str] = None, limit: int = 20
+    ) -> List[WorkflowExecution]:
         """Get workflow execution history."""
         results = list(self._executions.values())
         if workflow_name:
@@ -326,9 +369,12 @@ class WorkflowOrchestratorV2:
         self._schedules[schedule_id] = schedule
         self._save_schedules()
 
-        logger.info("orchestrator_v2.scheduled",
-                     schedule_id=schedule_id, workflow=workflow_name,
-                     cron=cron_expression)
+        logger.info(
+            "orchestrator_v2.scheduled",
+            schedule_id=schedule_id,
+            workflow=workflow_name,
+            cron=cron_expression,
+        )
         return schedule
 
     async def list_schedules(self) -> List[ScheduledWorkflow]:
@@ -343,8 +389,9 @@ class WorkflowOrchestratorV2:
 
         schedule.enabled = enabled
         self._save_schedules()
-        logger.info("orchestrator_v2.schedule_toggled",
-                     schedule_id=schedule_id, enabled=enabled)
+        logger.info(
+            "orchestrator_v2.schedule_toggled", schedule_id=schedule_id, enabled=enabled
+        )
         return True
 
     async def delete_schedule(self, schedule_id: str) -> bool:
@@ -359,7 +406,9 @@ class WorkflowOrchestratorV2:
     # Streaming
     # ------------------------------------------------------------------
 
-    async def stream_workflow(self, thread_id: str) -> AsyncGenerator[StreamEvent, None]:
+    async def stream_workflow(
+        self, thread_id: str
+    ) -> AsyncGenerator[StreamEvent, None]:
         """Stream real-time events from a running workflow."""
         queue: asyncio.Queue = asyncio.Queue()
         self._event_listeners.setdefault(thread_id, []).append(queue)
@@ -423,7 +472,9 @@ class WorkflowOrchestratorV2:
             "total_executions": len(executions),
             "by_status": by_status,
             "by_workflow": by_workflow,
-            "avg_duration_seconds": round(sum(durations) / len(durations), 1) if durations else 0,
+            "avg_duration_seconds": round(sum(durations) / len(durations), 1)
+            if durations
+            else 0,
             "registered_workflows": len(self._workflows),
             "active_schedules": sum(1 for s in self._schedules.values() if s.enabled),
             "checkpoint_stats": checkpoint_stats,
@@ -450,28 +501,39 @@ def get_workflow_orchestrator() -> WorkflowOrchestratorV2:
 def _register_production_workflows(orch: WorkflowOrchestratorV2):
     """Auto-register all production workflow definitions."""
     try:
-        from Engine8_Knowledge.workflows.production.contact_enrichment import get_contact_enrichment_definition
+        from Engine8_Knowledge.workflows.production.contact_enrichment import (
+            get_contact_enrichment_definition,
+        )
+
         orch.register_workflow(get_contact_enrichment_definition())
     except ImportError as e:
         logger.warning("orchestrator_v2.skip_contact_enrichment", error=str(e))
 
     try:
-        from Engine8_Knowledge.workflows.production.competitive_intel import get_competitive_intel_definition
+        from Engine8_Knowledge.workflows.production.competitive_intel import (
+            get_competitive_intel_definition,
+        )
+
         orch.register_workflow(get_competitive_intel_definition())
     except ImportError as e:
         logger.warning("orchestrator_v2.skip_competitive_intel", error=str(e))
 
     try:
-        from Engine8_Knowledge.workflows.production.morning_briefing import get_morning_briefing_definition
+        from Engine8_Knowledge.workflows.production.morning_briefing import (
+            get_morning_briefing_definition,
+        )
+
         orch.register_workflow(get_morning_briefing_definition())
     except ImportError as e:
         logger.warning("orchestrator_v2.skip_morning_briefing", error=str(e))
 
     try:
-        from Engine8_Knowledge.workflows.production.pipeline_manager import get_pipeline_manager_definition
+        from Engine8_Knowledge.workflows.production.pipeline_manager import (
+            get_pipeline_manager_definition,
+        )
+
         orch.register_workflow(get_pipeline_manager_definition())
     except ImportError as e:
         logger.warning("orchestrator_v2.skip_pipeline_manager", error=str(e))
 
-    logger.info("orchestrator_v2.workflows_registered",
-                count=len(orch._workflows))
+    logger.info("orchestrator_v2.workflows_registered", count=len(orch._workflows))

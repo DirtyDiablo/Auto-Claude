@@ -11,10 +11,12 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from src.workflows.temporal_engine import (
-    get_temporal_engine, WorkflowStatus,
+    get_temporal_engine,
+    WorkflowStatus,
 )
 from src.workflows.cross_project_orchestrator import (
-    get_orchestrator, TaskQueueName,
+    get_orchestrator,
+    TaskQueueName,
     TaskPriority,
 )
 from src.workflows.nl_to_workflow import (
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class StartWorkflowRequest(BaseModel):
     workflow_id: str
@@ -59,6 +62,7 @@ class NLAutocompleteRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_workflows_router(app: FastAPI) -> None:
     """Register all workflow intelligence endpoints on the FastAPI app."""
@@ -237,4 +241,6 @@ def include_workflows_router(app: FastAPI) -> None:
             "nl_engine": nl_engine.get_stats(),
         }
 
-    logger.info("Workflow Intelligence API: 12 endpoints registered under /api/workflows/*")
+    logger.info(
+        "Workflow Intelligence API: 12 endpoints registered under /api/workflows/*"
+    )

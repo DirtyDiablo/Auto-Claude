@@ -17,8 +17,9 @@ try:
         answer_relevancy,
         context_precision,
         context_recall,
-        answer_correctness
+        answer_correctness,
     )
+
     RAGAS_AVAILABLE = True
 except ImportError:
     RAGAS_AVAILABLE = False
@@ -35,7 +36,7 @@ class RAGASEvaluator:
                 answer_relevancy,
                 context_precision,
                 context_recall,
-                answer_correctness
+                answer_correctness,
             ]
         else:
             self.metrics = []
@@ -45,7 +46,7 @@ class RAGASEvaluator:
         questions: List[str],
         answers: List[str],
         contexts: List[List[str]],
-        ground_truths: List[str]
+        ground_truths: List[str],
     ) -> Dict:
         """
         Evaluate RAG responses using RAGAS metrics.
@@ -66,7 +67,7 @@ class RAGASEvaluator:
             "question": questions,
             "answer": answers,
             "contexts": contexts,
-            "ground_truth": ground_truths
+            "ground_truth": ground_truths,
         }
         dataset = Dataset.from_dict(data)
 
@@ -79,23 +80,17 @@ class RAGASEvaluator:
                 "context_precision": results.get("context_precision", 0),
                 "context_recall": results.get("context_recall", 0),
                 "answer_correctness": results.get("answer_correctness", 0),
-                "overall": sum(results.values()) / len(results) if results else 0
+                "overall": sum(results.values()) / len(results) if results else 0,
             }
         except Exception as e:
             logger.error(f"RAGAS evaluation error: {e}")
             return {"error": str(e)}
 
     def evaluate_single(
-        self,
-        question: str,
-        answer: str,
-        contexts: List[str],
-        ground_truth: str
+        self, question: str, answer: str, contexts: List[str], ground_truth: str
     ) -> Dict:
         """Evaluate a single response."""
-        return self.evaluate_responses(
-            [question], [answer], [contexts], [ground_truth]
-        )
+        return self.evaluate_responses([question], [answer], [contexts], [ground_truth])
 
     def evaluate_batch(self, test_cases: List[Dict]) -> List[Dict]:
         """
@@ -113,7 +108,7 @@ class RAGASEvaluator:
                 question=tc["question"],
                 answer=tc["answer"],
                 contexts=tc.get("contexts", []),
-                ground_truth=tc["ground_truth"]
+                ground_truth=tc["ground_truth"],
             )
             result["question"] = tc["question"]
             results.append(result)

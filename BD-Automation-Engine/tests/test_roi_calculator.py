@@ -12,44 +12,136 @@ from src.revenue.roi_calculator import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def calculator():
     calc = ROICalculator()
-    calc.set_campaign_data([
-        {"id": "camp-1", "name": "DCGS Outreach", "investment": 10000, "revenue": 50000, "placements": 3,
-         "time_to_revenue_days": 45},
-        {"id": "camp-2", "name": "NGEN Push", "investment": 8000, "revenue": 12000, "placements": 1,
-         "time_to_revenue_days": 90},
-        {"id": "camp-3", "name": "GBSD Prospect", "investment": 5000, "revenue": 0, "placements": 0},
-    ])
-    calc.set_contact_data([
-        {"id": "c1", "name": "VP Smith", "touchpoints": 20, "revenue": 100000, "placements": 5,
-         "first_contact_date": "2024-06-01", "first_revenue_date": "2024-09-15"},
-        {"id": "c2", "name": "Dir Jones", "touchpoints": 8, "revenue": 25000, "placements": 1,
-         "first_contact_date": "2024-08-01", "first_revenue_date": "2025-01-01"},
-        {"id": "c3", "name": "PM Brown", "touchpoints": 15, "revenue": 0, "placements": 0},
-    ])
-    calc.set_program_data([
-        {"program": "DCGS", "investment": 25000, "revenue": 150000, "placements": 8,
-         "active_placements": 5, "avg_margin_pct": 35, "time_to_revenue_days": 60},
-        {"program": "NGEN", "investment": 15000, "revenue": 40000, "placements": 3,
-         "active_placements": 2, "avg_margin_pct": 30, "time_to_revenue_days": 90},
-    ])
-    calc.set_channel_data([
-        {"channel": "referral", "deals_sourced": 20, "deals_won": 12, "revenue": 120000, "cost": 5000},
-        {"channel": "cold_outreach", "deals_sourced": 50, "deals_won": 5, "revenue": 30000, "cost": 15000},
-        {"channel": "inbound", "deals_sourced": 10, "deals_won": 4, "revenue": 45000, "cost": 2000},
-    ])
-    calc.set_tool_data([
-        {"name": "Apify", "monthly_cost": 150, "attributed_revenue": 20000, "placements": 2},
-        {"name": "OpenAI", "monthly_cost": 200, "attributed_revenue": 35000, "placements": 3},
-    ])
+    calc.set_campaign_data(
+        [
+            {
+                "id": "camp-1",
+                "name": "DCGS Outreach",
+                "investment": 10000,
+                "revenue": 50000,
+                "placements": 3,
+                "time_to_revenue_days": 45,
+            },
+            {
+                "id": "camp-2",
+                "name": "NGEN Push",
+                "investment": 8000,
+                "revenue": 12000,
+                "placements": 1,
+                "time_to_revenue_days": 90,
+            },
+            {
+                "id": "camp-3",
+                "name": "GBSD Prospect",
+                "investment": 5000,
+                "revenue": 0,
+                "placements": 0,
+            },
+        ]
+    )
+    calc.set_contact_data(
+        [
+            {
+                "id": "c1",
+                "name": "VP Smith",
+                "touchpoints": 20,
+                "revenue": 100000,
+                "placements": 5,
+                "first_contact_date": "2024-06-01",
+                "first_revenue_date": "2024-09-15",
+            },
+            {
+                "id": "c2",
+                "name": "Dir Jones",
+                "touchpoints": 8,
+                "revenue": 25000,
+                "placements": 1,
+                "first_contact_date": "2024-08-01",
+                "first_revenue_date": "2025-01-01",
+            },
+            {
+                "id": "c3",
+                "name": "PM Brown",
+                "touchpoints": 15,
+                "revenue": 0,
+                "placements": 0,
+            },
+        ]
+    )
+    calc.set_program_data(
+        [
+            {
+                "program": "DCGS",
+                "investment": 25000,
+                "revenue": 150000,
+                "placements": 8,
+                "active_placements": 5,
+                "avg_margin_pct": 35,
+                "time_to_revenue_days": 60,
+            },
+            {
+                "program": "NGEN",
+                "investment": 15000,
+                "revenue": 40000,
+                "placements": 3,
+                "active_placements": 2,
+                "avg_margin_pct": 30,
+                "time_to_revenue_days": 90,
+            },
+        ]
+    )
+    calc.set_channel_data(
+        [
+            {
+                "channel": "referral",
+                "deals_sourced": 20,
+                "deals_won": 12,
+                "revenue": 120000,
+                "cost": 5000,
+            },
+            {
+                "channel": "cold_outreach",
+                "deals_sourced": 50,
+                "deals_won": 5,
+                "revenue": 30000,
+                "cost": 15000,
+            },
+            {
+                "channel": "inbound",
+                "deals_sourced": 10,
+                "deals_won": 4,
+                "revenue": 45000,
+                "cost": 2000,
+            },
+        ]
+    )
+    calc.set_tool_data(
+        [
+            {
+                "name": "Apify",
+                "monthly_cost": 150,
+                "attributed_revenue": 20000,
+                "placements": 2,
+            },
+            {
+                "name": "OpenAI",
+                "monthly_cost": 200,
+                "attributed_revenue": 35000,
+                "placements": 3,
+            },
+        ]
+    )
     return calc
 
 
 # =========================================
 # CAMPAIGN ROI
 # =========================================
+
 
 class TestCampaignROI:
     def test_returns_list(self, calculator):
@@ -63,7 +155,9 @@ class TestCampaignROI:
         assert dcgs.roi_pct == 400.0  # (50000 - 10000) / 10000 * 100
 
     def test_zero_investment_handled(self, calculator):
-        calculator.set_campaign_data([{"id": "x", "name": "Free", "investment": 0, "revenue": 1000}])
+        calculator.set_campaign_data(
+            [{"id": "x", "name": "Free", "investment": 0, "revenue": 1000}]
+        )
         results = calculator.calculate_campaign_roi()
         assert results[0].roi_pct == 0  # No division by zero
 
@@ -76,6 +170,7 @@ class TestCampaignROI:
 # =========================================
 # CONTACT ROI
 # =========================================
+
 
 class TestContactROI:
     def test_returns_list(self, calculator):
@@ -104,6 +199,7 @@ class TestContactROI:
 # PROGRAM ROI
 # =========================================
 
+
 class TestProgramROI:
     def test_returns_list(self, calculator):
         results = calculator.calculate_program_roi()
@@ -119,6 +215,7 @@ class TestProgramROI:
 # =========================================
 # CHANNEL ROI
 # =========================================
+
 
 class TestChannelROI:
     def test_returns_list(self, calculator):
@@ -141,6 +238,7 @@ class TestChannelROI:
 # TOOL ROI
 # =========================================
 
+
 class TestToolROI:
     def test_returns_list(self, calculator):
         results = calculator.calculate_tool_roi()
@@ -157,6 +255,7 @@ class TestToolROI:
 # ROI SUMMARY
 # =========================================
 
+
 class TestROISummary:
     def test_summary(self, calculator):
         summary = calculator.get_roi_summary()
@@ -169,6 +268,7 @@ class TestROISummary:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_calculator_returns_instance(self):

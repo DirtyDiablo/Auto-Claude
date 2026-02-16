@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class SLAStatus(str, Enum):
     MEETING = "meeting"
     AT_RISK = "at_risk"
@@ -35,19 +36,22 @@ class AlertLevel(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class SLATarget:
     """A single target within an SLA."""
-    metric: str = ""          # freshness_hours, completeness, accuracy, uptime, latency_ms
+
+    metric: str = ""  # freshness_hours, completeness, accuracy, uptime, latency_ms
     target_value: float = 0.0
-    operator: str = ">="      # direction: >= means "at least", <= means "at most"
-    window: str = "7d"        # measurement window: 1d, 7d, 30d
+    operator: str = ">="  # direction: >= means "at least", <= means "at most"
+    window: str = "7d"  # measurement window: 1d, 7d, 30d
     description: str = ""
 
 
 @dataclass
 class QualitySLA:
     """A quality SLA for a data asset or service."""
+
     id: str = ""
     name: str = ""
     asset_id: str = ""
@@ -63,6 +67,7 @@ class QualitySLA:
 @dataclass
 class SLAAlert:
     """An alert generated when an SLA is at risk or violated."""
+
     id: str = ""
     sla_id: str = ""
     sla_name: str = ""
@@ -79,6 +84,7 @@ class SLAAlert:
 @dataclass
 class SLACheckResult:
     """Result of checking an SLA against current metrics."""
+
     sla_id: str = ""
     sla_name: str = ""
     status: str = SLAStatus.MEETING.value
@@ -93,6 +99,7 @@ class SLACheckResult:
 @dataclass
 class SLAHistoryEntry:
     """Historical record of SLA compliance."""
+
     sla_id: str = ""
     status: str = ""
     compliance_pct: float = 0.0
@@ -103,6 +110,7 @@ class SLAHistoryEntry:
 # =========================================
 # SLA ENGINE
 # =========================================
+
 
 class SLAEngine:
     """Quality SLA management and enforcement."""
@@ -126,12 +134,27 @@ class SLAEngine:
                 owner="Engine7_BullhornETL",
                 description="Contact data must be refreshed weekly with 95% accuracy",
                 targets=[
-                    SLATarget(metric="freshness_hours", target_value=168.0, operator="<=",
-                              window="7d", description="Max 168 hours (1 week) staleness"),
-                    SLATarget(metric="accuracy", target_value=0.95, operator=">=",
-                              window="30d", description="At least 95% accuracy"),
-                    SLATarget(metric="completeness", target_value=0.90, operator=">=",
-                              window="30d", description="At least 90% field completeness"),
+                    SLATarget(
+                        metric="freshness_hours",
+                        target_value=168.0,
+                        operator="<=",
+                        window="7d",
+                        description="Max 168 hours (1 week) staleness",
+                    ),
+                    SLATarget(
+                        metric="accuracy",
+                        target_value=0.95,
+                        operator=">=",
+                        window="30d",
+                        description="At least 95% accuracy",
+                    ),
+                    SLATarget(
+                        metric="completeness",
+                        target_value=0.90,
+                        operator=">=",
+                        window="30d",
+                        description="At least 90% field completeness",
+                    ),
                 ],
             ),
             QualitySLA(
@@ -141,10 +164,20 @@ class SLAEngine:
                 owner="Engine1_Scraper",
                 description="Job data scraped daily with 4-hour max staleness",
                 targets=[
-                    SLATarget(metric="freshness_hours", target_value=4.0, operator="<=",
-                              window="1d", description="Max 4 hours staleness"),
-                    SLATarget(metric="completeness", target_value=0.85, operator=">=",
-                              window="7d", description="At least 85% completeness"),
+                    SLATarget(
+                        metric="freshness_hours",
+                        target_value=4.0,
+                        operator="<=",
+                        window="1d",
+                        description="Max 4 hours staleness",
+                    ),
+                    SLATarget(
+                        metric="completeness",
+                        target_value=0.85,
+                        operator=">=",
+                        window="7d",
+                        description="At least 85% completeness",
+                    ),
                 ],
             ),
             QualitySLA(
@@ -154,12 +187,27 @@ class SLAEngine:
                 owner="Engine2_ProgramMapping",
                 description="Program data maintained with high accuracy and completeness",
                 targets=[
-                    SLATarget(metric="accuracy", target_value=0.90, operator=">=",
-                              window="30d", description="At least 90% accuracy"),
-                    SLATarget(metric="completeness", target_value=0.80, operator=">=",
-                              window="30d", description="At least 80% completeness"),
-                    SLATarget(metric="freshness_hours", target_value=168.0, operator="<=",
-                              window="7d", description="Updated at least weekly"),
+                    SLATarget(
+                        metric="accuracy",
+                        target_value=0.90,
+                        operator=">=",
+                        window="30d",
+                        description="At least 90% accuracy",
+                    ),
+                    SLATarget(
+                        metric="completeness",
+                        target_value=0.80,
+                        operator=">=",
+                        window="30d",
+                        description="At least 80% completeness",
+                    ),
+                    SLATarget(
+                        metric="freshness_hours",
+                        target_value=168.0,
+                        operator="<=",
+                        window="7d",
+                        description="Updated at least weekly",
+                    ),
                 ],
             ),
         ]
@@ -216,7 +264,9 @@ class SLAEngine:
     # CHECK / ENFORCE
     # -----------------------------------------
 
-    def check_sla(self, sla_id: str, current_metrics: Dict[str, float]) -> SLACheckResult:
+    def check_sla(
+        self, sla_id: str, current_metrics: Dict[str, float]
+    ) -> SLACheckResult:
         """Check an SLA against current metrics."""
         sla = self._slas.get(sla_id)
         if not sla:
@@ -235,33 +285,39 @@ class SLAEngine:
             if met:
                 targets_met += 1
                 # Check at-risk: within 10% of threshold
-                margin = self._compute_margin(target.operator, actual, target.target_value)
+                margin = self._compute_margin(
+                    target.operator, actual, target.target_value
+                )
                 if margin < 0.1:
                     targets_at_risk += 1
-                    alerts.append(SLAAlert(
+                    alerts.append(
+                        SLAAlert(
+                            id=uuid.uuid4().hex[:10],
+                            sla_id=sla_id,
+                            sla_name=sla.name,
+                            level=AlertLevel.INFO.value,
+                            target_metric=target.metric,
+                            expected=f"{target.operator} {target.target_value}",
+                            actual=str(actual),
+                            message=f"{target.metric} at risk: {actual} (threshold: {target.target_value})",
+                            created_at=now_iso,
+                        )
+                    )
+            else:
+                targets_violated += 1
+                alerts.append(
+                    SLAAlert(
                         id=uuid.uuid4().hex[:10],
                         sla_id=sla_id,
                         sla_name=sla.name,
-                        level=AlertLevel.INFO.value,
+                        level=AlertLevel.CRITICAL.value,
                         target_metric=target.metric,
                         expected=f"{target.operator} {target.target_value}",
                         actual=str(actual),
-                        message=f"{target.metric} at risk: {actual} (threshold: {target.target_value})",
+                        message=f"{target.metric} violated: {actual} (expected {target.operator} {target.target_value})",
                         created_at=now_iso,
-                    ))
-            else:
-                targets_violated += 1
-                alerts.append(SLAAlert(
-                    id=uuid.uuid4().hex[:10],
-                    sla_id=sla_id,
-                    sla_name=sla.name,
-                    level=AlertLevel.CRITICAL.value,
-                    target_metric=target.metric,
-                    expected=f"{target.operator} {target.target_value}",
-                    actual=str(actual),
-                    message=f"{target.metric} violated: {actual} (expected {target.operator} {target.target_value})",
-                    created_at=now_iso,
-                ))
+                    )
+                )
 
         # Determine overall status
         if targets_violated > 0:
@@ -278,13 +334,15 @@ class SLAEngine:
         # Record history
         total_targets = len(sla.targets)
         compliance = targets_met / total_targets if total_targets > 0 else 1.0
-        self._history.append(SLAHistoryEntry(
-            sla_id=sla_id,
-            status=status,
-            compliance_pct=round(compliance * 100, 1),
-            period=now_iso[:10],
-            checked_at=now_iso,
-        ))
+        self._history.append(
+            SLAHistoryEntry(
+                sla_id=sla_id,
+                status=status,
+                compliance_pct=round(compliance * 100, 1),
+                period=now_iso[:10],
+                checked_at=now_iso,
+            )
+        )
 
         result = SLACheckResult(
             sla_id=sla_id,
@@ -300,7 +358,9 @@ class SLAEngine:
         self._check_results.append(result)
         return result
 
-    def check_all(self, metrics_by_asset: Dict[str, Dict[str, float]]) -> List[SLACheckResult]:
+    def check_all(
+        self, metrics_by_asset: Dict[str, Dict[str, float]]
+    ) -> List[SLACheckResult]:
         """Check all active SLAs against provided metrics."""
         results = []
         for sla in self._slas.values():

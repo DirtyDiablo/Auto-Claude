@@ -18,6 +18,7 @@ def catalog():
 # SEEDED ASSETS
 # =========================================
 
+
 def test_seeded_assets(catalog):
     assets = catalog.list_assets()
     assert len(assets) >= 5
@@ -38,10 +39,15 @@ def test_get_seeded(catalog):
 # REGISTER & CRUD
 # =========================================
 
+
 def test_register(catalog):
-    asset_id = catalog.register(DataAsset(
-        name="Test Asset", domain="test", asset_type="file",
-    ))
+    asset_id = catalog.register(
+        DataAsset(
+            name="Test Asset",
+            domain="test",
+            asset_type="file",
+        )
+    )
     assert asset_id != ""
     assert catalog.get(asset_id) is not None
 
@@ -70,6 +76,7 @@ def test_delete_nonexistent(catalog):
 # LIST & FILTER
 # =========================================
 
+
 def test_list_by_domain(catalog):
     results = catalog.list_assets(domain="contacts")
     assert all(a.domain == "contacts" for a in results)
@@ -88,6 +95,7 @@ def test_list_with_limit(catalog):
 # =========================================
 # SEARCH
 # =========================================
+
 
 def test_search_by_name(catalog):
     results = catalog.search("Contacts")
@@ -114,6 +122,7 @@ def test_search_no_match(catalog):
 # LINEAGE
 # =========================================
 
+
 def test_lineage(catalog):
     lineage = catalog.get_lineage("contacts")
     assert lineage is not None
@@ -128,6 +137,7 @@ def test_lineage_nonexistent(catalog):
 # =========================================
 # USAGE TRACKING
 # =========================================
+
 
 def test_record_read(catalog):
     catalog.record_read("contacts")
@@ -153,11 +163,17 @@ def test_popularity(catalog):
 # QUALITY
 # =========================================
 
+
 def test_update_quality(catalog):
-    q = catalog.update_quality("contacts", {
-        "completeness": 0.92, "accuracy": 0.95,
-        "freshness_hours": 24.0, "consistency": 0.88,
-    })
+    q = catalog.update_quality(
+        "contacts",
+        {
+            "completeness": 0.92,
+            "accuracy": 0.95,
+            "freshness_hours": 24.0,
+            "consistency": 0.88,
+        },
+    )
     assert q is not None
     assert q.overall_score > 0
 
@@ -170,6 +186,7 @@ def test_update_quality_nonexistent(catalog):
 # STATS
 # =========================================
 
+
 def test_stats(catalog):
     stats = catalog.get_stats()
     assert stats["total_assets"] >= 5
@@ -180,6 +197,7 @@ def test_stats(catalog):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     c1 = get_data_catalog()

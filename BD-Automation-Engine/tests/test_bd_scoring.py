@@ -182,25 +182,29 @@ class TestRecencyBoost:
     def test_recent_job_highest(self):
         """Jobs within last 7 days should get 10 points."""
         from datetime import datetime, timedelta
-        recent_date = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d')
+
+        recent_date = (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d")
         assert calculate_recency_boost(recent_date) == 10
 
     def test_month_old_job(self):
         """Jobs within last 30 days should get 5 points."""
         from datetime import datetime, timedelta
-        month_date = (datetime.now() - timedelta(days=20)).strftime('%Y-%m-%d')
+
+        month_date = (datetime.now() - timedelta(days=20)).strftime("%Y-%m-%d")
         assert calculate_recency_boost(month_date) == 5
 
     def test_quarter_old_job(self):
         """Jobs within last 90 days should get 2 points."""
         from datetime import datetime, timedelta
-        quarter_date = (datetime.now() - timedelta(days=60)).strftime('%Y-%m-%d')
+
+        quarter_date = (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")
         assert calculate_recency_boost(quarter_date) == 2
 
     def test_old_job_zero(self):
         """Jobs older than 90 days should get 0 points."""
         from datetime import datetime, timedelta
-        old_date = (datetime.now() - timedelta(days=120)).strftime('%Y-%m-%d')
+
+        old_date = (datetime.now() - timedelta(days=120)).strftime("%Y-%m-%d")
         assert calculate_recency_boost(old_date) == 0
 
     def test_invalid_date_zero(self):
@@ -287,7 +291,11 @@ class TestCalculateBDScore:
 
     def test_score_in_valid_range(self):
         """Scores should be 0-100."""
-        item = {"clearance": "TS/SCI w/ Poly", "location": "San Diego", "match_confidence": 1.0}
+        item = {
+            "clearance": "TS/SCI w/ Poly",
+            "location": "San Diego",
+            "match_confidence": 1.0,
+        }
         result = calculate_bd_score(item)
         assert 0 <= result.bd_score <= 100
 
@@ -303,7 +311,8 @@ class TestCalculateBDScore:
             "pain_points_count": 10,
         }
         from datetime import datetime
-        item["date_posted"] = datetime.now().strftime('%Y-%m-%d')
+
+        item["date_posted"] = datetime.now().strftime("%Y-%m-%d")
 
         result = calculate_bd_score(item)
         assert result.bd_score == 100
@@ -333,7 +342,10 @@ class TestCalculateBDScore:
         result1 = calculate_bd_score({"clearance": "TS/SCI"})
         # Alternative format
         result2 = calculate_bd_score({"Security Clearance": "TS/SCI"})
-        assert result1.score_breakdown["clearance_boost"] == result2.score_breakdown["clearance_boost"]
+        assert (
+            result1.score_breakdown["clearance_boost"]
+            == result2.score_breakdown["clearance_boost"]
+        )
 
     def test_handles_string_tier(self):
         """Should parse tier from string format."""
@@ -433,7 +445,10 @@ class TestGenerateScoringReport:
 
     def test_top_opportunities(self):
         """Report should list top 10 opportunities."""
-        scored_items = [{"_scoring": {"BD Priority Score": i * 10, "Priority Tier": "Warm"}} for i in range(15)]
+        scored_items = [
+            {"_scoring": {"BD Priority Score": i * 10, "Priority Tier": "Warm"}}
+            for i in range(15)
+        ]
         report = generate_scoring_report(scored_items)
 
         assert len(report["top_opportunities"]) == 10
@@ -462,7 +477,7 @@ class TestScoringIntegration:
                 "Location": "San Diego, CA",
                 "match_confidence": 0.85,
                 "program": "AF DCGS - PACAF",
-                "date_posted": datetime.now().strftime('%Y-%m-%d'),
+                "date_posted": datetime.now().strftime("%Y-%m-%d"),
             },
             {
                 "Job Title/Position": "Software Developer",

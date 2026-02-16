@@ -2,6 +2,7 @@
 Index Dashboard Public Data
 Contacts, Programs, Activities, Documents from dashboard_public
 """
+
 import os
 import sys
 import json
@@ -12,6 +13,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 import openai
@@ -29,8 +31,13 @@ BATCH_SIZE = 100
 BASE_DIR = Path(__file__).parent.parent.parent
 DASHBOARD_DIR = BASE_DIR / "engine_data" / "dashboard_public"
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(message)s', datefmt='%H:%M:%S')
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    datefmt="%H:%M:%S",
+)
 logger = logging.getLogger(__name__)
+
 
 @openai_retry
 def get_embeddings_batch(texts: list) -> list:
@@ -39,23 +46,25 @@ def get_embeddings_batch(texts: list) -> list:
     response = client.embeddings.create(model=EMBEDDING_MODEL, input=truncated)
     return [item.embedding for item in response.data]
 
+
 def ensure_collection(client: QdrantClient, name: str):
     collections = [c.name for c in client.get_collections().collections]
     if name not in collections:
         client.create_collection(
             collection_name=name,
-            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
         logger.info(f"Created collection: {name}")
 
+
 def load_json(path: Path) -> list:
     try:
-        with open(path, encoding='utf-8') as f:
+        with open(path, encoding="utf-8") as f:
             data = json.load(f)
             if isinstance(data, list):
                 return data
             elif isinstance(data, dict):
-                for key in ['data', 'records', 'items', 'results']:
+                for key in ["data", "records", "items", "results"]:
                     if key in data and isinstance(data[key], list):
                         return data[key]
                 return [data]
@@ -63,12 +72,14 @@ def load_json(path: Path) -> list:
         logger.error(f"Error loading {path}: {e}")
     return []
 
+
 def build_text(r: dict) -> str:
     parts = []
     for key, val in r.items():
         if val and isinstance(val, str) and val.strip() and len(val) < 5000:
             parts.append(f"{key}: {val}")
     return " | ".join(parts)
+
 
 def index_records(qdrant: QdrantClient, records: list, collection: str, source: str):
     logger.info(f"Indexing {len(records)} records to {collection} from {source}")
@@ -79,18 +90,20 @@ def index_records(qdrant: QdrantClient, records: list, collection: str, source: 
     points = []
 
     for i in range(0, len(records), BATCH_SIZE):
-        batch = records[i:i+BATCH_SIZE]
+        batch = records[i : i + BATCH_SIZE]
         texts = [build_text(r) for r in batch]
         texts = [t if t.strip() else "empty" for t in texts]
 
         try:
             embeddings = get_embeddings_batch(texts)
             for r, emb, txt in zip(batch, embeddings, texts):
-                points.append(PointStruct(
-                    id=str(uuid.uuid4()),
-                    vector=emb,
-                    payload={**r, "content": txt, "_source": source}
-                ))
+                points.append(
+                    PointStruct(
+                        id=str(uuid.uuid4()),
+                        vector=emb,
+                        payload={**r, "content": txt, "_source": source},
+                    )
+                )
             indexed += len(batch)
 
             if len(points) >= 500:
@@ -108,6 +121,7 @@ def index_records(qdrant: QdrantClient, records: list, collection: str, source: 
         logger.info(f"  Uploaded final {len(points)} points")
 
     return indexed
+
 
 def main():
     logger.info("=" * 60)
@@ -165,6 +179,7 @@ def main():
     for coll in qdrant.get_collections().collections:
         info = qdrant.get_collection(coll.name)
         logger.info(f"{coll.name}: {info.points_count} points")
+
 
 if __name__ == "__main__":
     main()

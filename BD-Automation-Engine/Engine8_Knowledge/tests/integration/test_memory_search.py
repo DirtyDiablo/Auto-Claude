@@ -24,12 +24,14 @@ from Engine8_Knowledge.search.memory_search import MemoryAwareSearch, MemorySear
 @pytest.fixture
 def mock_unified():
     us = AsyncMock()
-    us.search = AsyncMock(return_value={
-        "results": [
-            {"id": "r1", "content": "DCGS analyst result", "score": 0.9},
-            {"id": "r2", "content": "ISR program result", "score": 0.7},
-        ]
-    })
+    us.search = AsyncMock(
+        return_value={
+            "results": [
+                {"id": "r1", "content": "DCGS analyst result", "score": 0.9},
+                {"id": "r2", "content": "ISR program result", "score": 0.7},
+            ]
+        }
+    )
     return us
 
 
@@ -47,7 +49,9 @@ def mock_memory_store():
 
 @pytest.fixture
 def search(mock_unified, mock_memory_store):
-    return MemoryAwareSearch(unified_search=mock_unified, memory_store=mock_memory_store)
+    return MemoryAwareSearch(
+        unified_search=mock_unified, memory_store=mock_memory_store
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -113,7 +117,10 @@ class TestSearchWithHistory:
     async def test_search_with_history(self, search):
         conversation = [
             {"role": "user", "content": "Tell me about DCGS Program contacts"},
-            {"role": "assistant", "content": "Here are the DCGS contacts at Northrop Grumman"},
+            {
+                "role": "assistant",
+                "content": "Here are the DCGS contacts at Northrop Grumman",
+            },
         ]
         result = await search.search_with_history(
             "Who is the PM?", user_id="u1", conversation=conversation
@@ -130,7 +137,10 @@ class TestSearchWithHistory:
 class TestQueryExpansion:
     def test_expand_query(self, search):
         conversation = [
-            {"role": "user", "content": "Tell me about Alice Smith at Northrop Grumman"},
+            {
+                "role": "user",
+                "content": "Tell me about Alice Smith at Northrop Grumman",
+            },
         ]
         expanded = search._expand_query("Who is the PM?", conversation)
         assert "Who is the PM?" in expanded

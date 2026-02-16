@@ -14,7 +14,8 @@ from src.embeddings.synthetic_data_generator import (
     get_synthetic_generator,
 )
 from src.embeddings.fine_tuner import (
-    TrainingConfig, get_fine_tuner,
+    TrainingConfig,
+    get_fine_tuner,
 )
 from src.embeddings.benchmark_suite import (
     get_benchmark_suite,
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class SyntheticGenerateRequest(BaseModel):
     strategies: Optional[List[str]] = None
@@ -71,6 +73,7 @@ class ABTestStartRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_embeddings_router(app: FastAPI) -> None:
     """Register all embedding fine-tuning endpoints on the FastAPI app."""
@@ -140,8 +143,7 @@ def include_embeddings_router(app: FastAPI) -> None:
             "eval_triplets": job.eval_triplets,
             "best_dimension": job.best_dimension,
             "metrics": {
-                str(dim): metrics.to_dict()
-                for dim, metrics in job.metrics.items()
+                str(dim): metrics.to_dict() for dim, metrics in job.metrics.items()
             },
             "training_loss_final": job.training_loss[-1] if job.training_loss else None,
             "duration_sec": job.duration_sec,
@@ -165,8 +167,7 @@ def include_embeddings_router(app: FastAPI) -> None:
             "eval_triplets": job.eval_triplets,
             "best_dimension": job.best_dimension,
             "metrics": {
-                str(dim): metrics.to_dict()
-                for dim, metrics in job.metrics.items()
+                str(dim): metrics.to_dict() for dim, metrics in job.metrics.items()
             },
             "training_loss": job.training_loss,
             "created_at": job.created_at,
@@ -258,7 +259,11 @@ def include_embeddings_router(app: FastAPI) -> None:
             model_b_id=req.model_b_id,
             traffic_split=req.traffic_split,
         )
-        winner = test.model_a_id if test.model_a_wins > test.model_b_wins else test.model_b_id
+        winner = (
+            test.model_a_id
+            if test.model_a_wins > test.model_b_wins
+            else test.model_b_id
+        )
         return {
             "test_id": test.id,
             "model_a_id": test.model_a_id,

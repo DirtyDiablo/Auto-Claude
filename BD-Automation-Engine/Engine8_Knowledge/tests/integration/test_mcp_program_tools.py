@@ -22,17 +22,21 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 @pytest.fixture
 def mock_hub():
     hub = AsyncMock()
-    hub.get = AsyncMock(return_value={
-        "programs": [
-            {"name": "DCGS", "prime": "Raytheon", "value": 500_000_000},
-            {"name": "GBSD", "prime": "Northrop Grumman", "value": 1_200_000_000},
-        ],
-        "total": 2,
-    })
-    hub.post = AsyncMock(return_value={
-        "results": [{"id": "r1", "content": "DCGS data", "score": 0.85}],
-        "count": 1,
-    })
+    hub.get = AsyncMock(
+        return_value={
+            "programs": [
+                {"name": "DCGS", "prime": "Raytheon", "value": 500_000_000},
+                {"name": "GBSD", "prime": "Northrop Grumman", "value": 1_200_000_000},
+            ],
+            "total": 2,
+        }
+    )
+    hub.post = AsyncMock(
+        return_value={
+            "results": [{"id": "r1", "content": "DCGS data", "score": 0.85}],
+            "count": 1,
+        }
+    )
     return hub
 
 
@@ -45,6 +49,7 @@ def mock_mcp():
         def wrapper(fn):
             registered_tools[fn.__name__] = fn
             return fn
+
         return wrapper
 
     mcp.tool = tool_decorator
@@ -55,6 +60,7 @@ def mock_mcp():
 @pytest.fixture
 def tools(mock_mcp, mock_hub):
     from Engine8_Knowledge.mcp.program_tools import register_program_tools
+
     count = register_program_tools(mock_mcp, mock_hub)
     return mock_mcp._registered, count
 
@@ -91,11 +97,13 @@ class TestGetProgramIntel:
     async def test_get_program_intel(self, tools, mock_hub):
         fns, _ = tools
         # get_program_intel makes 3 hub calls
-        mock_hub.get = AsyncMock(side_effect=[
-            {"name": "DCGS", "prime": "Raytheon", "value": 500_000_000},
-            {"jobs": [{"title": "Analyst", "company": "GDIT"}], "total": 1},
-            {"contacts": [{"name": "Alice", "program": "DCGS"}], "total": 1},
-        ])
+        mock_hub.get = AsyncMock(
+            side_effect=[
+                {"name": "DCGS", "prime": "Raytheon", "value": 500_000_000},
+                {"jobs": [{"title": "Analyst", "company": "GDIT"}], "total": 1},
+                {"contacts": [{"name": "Alice", "program": "DCGS"}], "total": 1},
+            ]
+        )
         result = await fns["get_program_intel"]("DCGS")
         assert "matching_jobs" in result
         assert "contacts" in result
@@ -103,11 +111,13 @@ class TestGetProgramIntel:
     @pytest.mark.asyncio
     async def test_program_intel_enriched(self, tools, mock_hub):
         fns, _ = tools
-        mock_hub.get = AsyncMock(side_effect=[
-            {"name": "GBSD", "prime": "Northrop", "subs": ["L3Harris"]},
-            {"jobs": [{"title": "Engineer"}, {"title": "PM"}], "total": 2},
-            {"contacts": [], "total": 0},
-        ])
+        mock_hub.get = AsyncMock(
+            side_effect=[
+                {"name": "GBSD", "prime": "Northrop", "subs": ["L3Harris"]},
+                {"jobs": [{"title": "Engineer"}, {"title": "PM"}], "total": 2},
+                {"contacts": [], "total": 0},
+            ]
+        )
         result = await fns["get_program_intel"]("GBSD")
         assert result["name"] == "GBSD"
         assert len(result["matching_jobs"]) == 2
@@ -122,13 +132,20 @@ class TestGetProgramIntel:
 class TestFindHiringSignals:
     @pytest.mark.asyncio
     async def test_find_hiring_signals(self, tools, mock_hub):
-        mock_hub.get = AsyncMock(return_value={
-            "jobs": [
-                {"title": "DCGS Analyst", "company": "GDIT", "program": "DCGS",
-                 "location": "San Diego", "clearance": "TS/SCI"},
-            ],
-            "total": 1,
-        })
+        mock_hub.get = AsyncMock(
+            return_value={
+                "jobs": [
+                    {
+                        "title": "DCGS Analyst",
+                        "company": "GDIT",
+                        "program": "DCGS",
+                        "location": "San Diego",
+                        "clearance": "TS/SCI",
+                    },
+                ],
+                "total": 1,
+            }
+        )
         fns, _ = tools
         result = await fns["find_hiring_signals"](program="DCGS")
         assert len(result) == 1
@@ -151,11 +168,13 @@ class TestFindHiringSignals:
 class TestGetCompetitiveLandscape:
     @pytest.mark.asyncio
     async def test_get_competitive_landscape(self, tools, mock_hub):
-        mock_hub.get = AsyncMock(return_value={
-            "program": "DCGS",
-            "competitors": ["Raytheon", "Northrop", "GDIT"],
-            "contract_count": 5,
-        })
+        mock_hub.get = AsyncMock(
+            return_value={
+                "program": "DCGS",
+                "competitors": ["Raytheon", "Northrop", "GDIT"],
+                "contract_count": 5,
+            }
+        )
         fns, _ = tools
         result = await fns["get_competitive_landscape"]("DCGS")
         assert "competitors" in result
@@ -163,14 +182,19 @@ class TestGetCompetitiveLandscape:
     @pytest.mark.asyncio
     async def test_competitive_fallback(self, tools, mock_hub):
         """Fallback when /competitive/landscape returns empty."""
-        mock_hub.get = AsyncMock(side_effect=[
-            {},  # /competitive/landscape empty
-            {"name": "DCGS"},  # /bdgraph/program/DCGS
-            {"jobs": [
-                {"title": "Analyst", "company": "GDIT"},
-                {"title": "Engineer", "company": "Raytheon"},
-            ], "total": 2},  # /api/v2/jobs
-        ])
+        mock_hub.get = AsyncMock(
+            side_effect=[
+                {},  # /competitive/landscape empty
+                {"name": "DCGS"},  # /bdgraph/program/DCGS
+                {
+                    "jobs": [
+                        {"title": "Analyst", "company": "GDIT"},
+                        {"title": "Engineer", "company": "Raytheon"},
+                    ],
+                    "total": 2,
+                },  # /api/v2/jobs
+            ]
+        )
         fns, _ = tools
         result = await fns["get_competitive_landscape"]("DCGS")
         assert "program" in result
@@ -207,11 +231,13 @@ class TestHybridSearch:
 class TestGraphQuery:
     @pytest.mark.asyncio
     async def test_graph_query(self, tools, mock_hub):
-        mock_hub.post = AsyncMock(return_value={
-            "results": [
-                {"name": "Alice", "title": "PM", "program": "DCGS"},
-            ]
-        })
+        mock_hub.post = AsyncMock(
+            return_value={
+                "results": [
+                    {"name": "Alice", "title": "PM", "program": "DCGS"},
+                ]
+            }
+        )
         fns, _ = tools
         result = await fns["graph_query"]("MATCH (p:Person) RETURN p LIMIT 1")
         assert len(result) == 1

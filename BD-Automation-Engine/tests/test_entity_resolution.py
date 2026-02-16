@@ -24,6 +24,7 @@ from src.knowledge.entity_resolution import (
 # STRING SIMILARITY
 # =========================================
 
+
 def test_levenshtein_distance_identical():
     assert levenshtein_distance("hello", "hello") == 0
 
@@ -100,6 +101,7 @@ def test_name_similarity_completely_different():
 # ORG & PROGRAM SIMILARITY
 # =========================================
 
+
 def test_org_similarity_alias():
     sim = org_name_similarity("GDIT", "General Dynamics IT")
     assert sim >= 0.9
@@ -128,6 +130,7 @@ def test_program_similarity_same():
 # =========================================
 # PERSON RESOLVER
 # =========================================
+
 
 @pytest.fixture
 def resolver():
@@ -159,15 +162,37 @@ def test_person_resolve_different_people(resolver):
 
 
 def test_person_resolve_email_definitive(resolver):
-    a = {"id": "a", "name": "J. Smith", "type": "person", "email": "john.smith@leidos.com"}
-    b = {"id": "b", "name": "John Smith", "type": "person", "email": "john.smith@leidos.com"}
+    a = {
+        "id": "a",
+        "name": "J. Smith",
+        "type": "person",
+        "email": "john.smith@leidos.com",
+    }
+    b = {
+        "id": "b",
+        "name": "John Smith",
+        "type": "person",
+        "email": "john.smith@leidos.com",
+    }
     result = resolver.resolve(a, b)
     assert result.confidence >= 0.95
 
 
 def test_person_resolve_company_title(resolver):
-    a = {"id": "a", "name": "John Smith", "type": "person", "company": "GDIT", "title": "Analyst"}
-    b = {"id": "b", "name": "John Smith", "type": "person", "company": "GDIT", "title": "Sr Analyst"}
+    a = {
+        "id": "a",
+        "name": "John Smith",
+        "type": "person",
+        "company": "GDIT",
+        "title": "Analyst",
+    }
+    b = {
+        "id": "b",
+        "name": "John Smith",
+        "type": "person",
+        "company": "GDIT",
+        "title": "Sr Analyst",
+    }
     result = resolver.resolve(a, b)
     # name(1.0)*0.4 + company_title(~0.95)*0.25 ≈ 0.64
     assert result.confidence > 0.6
@@ -175,7 +200,12 @@ def test_person_resolve_company_title(resolver):
 
 
 def test_person_find_candidates(resolver):
-    entity = {"id": "a", "name": "John Smith", "type": "person", "email": "jsmith@gdit.com"}
+    entity = {
+        "id": "a",
+        "name": "John Smith",
+        "type": "person",
+        "email": "jsmith@gdit.com",
+    }
     pool = [
         {"id": "b", "name": "Jon Smith", "type": "person"},
         {"id": "c", "name": "John Smith", "type": "person", "email": "jsmith@gdit.com"},
@@ -191,6 +221,7 @@ def test_person_find_candidates(resolver):
 # ORGANIZATION RESOLVER
 # =========================================
 
+
 def test_org_resolver():
     resolver = OrganizationResolver()
     result = resolver.resolve("GDIT", "General Dynamics IT")
@@ -201,6 +232,7 @@ def test_org_resolver():
 # PROGRAM RESOLVER
 # =========================================
 
+
 def test_program_resolver():
     resolver = ProgramResolver()
     result = resolver.resolve("DCGS", "DCGS-A")
@@ -210,6 +242,7 @@ def test_program_resolver():
 # =========================================
 # ENGINE
 # =========================================
+
 
 @pytest.fixture
 def engine():
@@ -257,8 +290,18 @@ def test_engine_merge_entities(engine):
 
 
 def test_engine_merge_keeps_primary_values(engine):
-    primary = {"id": "p1", "name": "John Smith", "email": "jsmith@test.com", "company": "GDIT"}
-    duplicate = {"id": "d1", "name": "Jon Smith", "email": "old@test.com", "company": "Old Corp"}
+    primary = {
+        "id": "p1",
+        "name": "John Smith",
+        "email": "jsmith@test.com",
+        "company": "GDIT",
+    }
+    duplicate = {
+        "id": "d1",
+        "name": "Jon Smith",
+        "email": "old@test.com",
+        "company": "Old Corp",
+    }
     engine.merge_entities(primary, duplicate)
     # Primary's values should be preserved
     assert primary["email"] == "jsmith@test.com"
@@ -277,6 +320,7 @@ def test_engine_merge_log(engine):
 # =========================================
 # GLOBAL RESOLUTION
 # =========================================
+
 
 def test_global_resolution_basic(engine):
     entities = [
@@ -308,6 +352,7 @@ def test_global_resolution_finds_duplicates(engine):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_resolution_engine_singleton():
     e1 = get_resolution_engine()

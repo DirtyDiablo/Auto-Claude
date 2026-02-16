@@ -1,4 +1,5 @@
 """Tests for Phase 29A - Auto-Optimizer."""
+
 import sys
 import pytest
 from pathlib import Path
@@ -23,6 +24,7 @@ from Engine8_Knowledge.optimization.self_assessment import (
 # =============================================================================
 # Fixtures
 # =============================================================================
+
 
 @pytest.fixture
 def optimizer(tmp_path):
@@ -78,6 +80,7 @@ def red_assessment():
 # Optimization Dataclass Tests
 # =============================================================================
 
+
 class TestOptimizationDataclass:
     """Tests for Optimization and ApplyResult dataclasses."""
 
@@ -106,21 +109,29 @@ class TestOptimizationDataclass:
 # Category Constants Tests
 # =============================================================================
 
+
 class TestCategories:
     """Tests for safe vs approval-required category lists."""
 
     def test_safe_categories_list(self):
         """Test SAFE_CATEGORIES contains expected entries."""
         expected = [
-            "create_index", "adjust_cache_ttl", "rewrite_query",
-            "adjust_threshold", "cleanup_expired", "rebalance_vectors",
+            "create_index",
+            "adjust_cache_ttl",
+            "rewrite_query",
+            "adjust_threshold",
+            "cleanup_expired",
+            "rebalance_vectors",
         ]
         assert SAFE_CATEGORIES == expected
 
     def test_approval_required_list(self):
         """Test APPROVAL_REQUIRED contains expected entries."""
         expected = [
-            "retrain_model", "modify_schema", "change_workflow", "update_scoring",
+            "retrain_model",
+            "modify_schema",
+            "change_workflow",
+            "update_scoring",
         ]
         assert APPROVAL_REQUIRED == expected
 
@@ -134,6 +145,7 @@ class TestCategories:
 # AutoOptimizer Core Tests
 # =============================================================================
 
+
 class TestAutoOptimizer:
     """Tests for AutoOptimizer engine."""
 
@@ -145,7 +157,9 @@ class TestAutoOptimizer:
         assert opt._storage_path == str(tmp_path)
 
     @pytest.mark.asyncio
-    async def test_generate_recommendations_from_assessment(self, optimizer, red_assessment):
+    async def test_generate_recommendations_from_assessment(
+        self, optimizer, red_assessment
+    ):
         """Test generate_recommendations produces optimizations from a red assessment."""
         recommendations = await optimizer.generate_recommendations(red_assessment)
 
@@ -156,7 +170,9 @@ class TestAutoOptimizer:
             assert rec.opt_id.startswith("opt_")
 
     @pytest.mark.asyncio
-    async def test_generate_recommendations_includes_api_latency_fix(self, optimizer, red_assessment):
+    async def test_generate_recommendations_includes_api_latency_fix(
+        self, optimizer, red_assessment
+    ):
         """Test recommendations include create_index for red api_latency."""
         recs = await optimizer.generate_recommendations(red_assessment)
         api_recs = [r for r in recs if r.parameters.get("subsystem") == "api_latency"]
@@ -165,10 +181,14 @@ class TestAutoOptimizer:
         assert api_recs[0].risk_level == "safe"
 
     @pytest.mark.asyncio
-    async def test_generate_recommendations_model_accuracy_needs_approval(self, optimizer, red_assessment):
+    async def test_generate_recommendations_model_accuracy_needs_approval(
+        self, optimizer, red_assessment
+    ):
         """Test recommendations for red model_accuracy require approval."""
         recs = await optimizer.generate_recommendations(red_assessment)
-        model_recs = [r for r in recs if r.parameters.get("subsystem") == "model_accuracy"]
+        model_recs = [
+            r for r in recs if r.parameters.get("subsystem") == "model_accuracy"
+        ]
         assert len(model_recs) >= 1
         assert model_recs[0].category == "retrain_model"
         assert model_recs[0].risk_level == "approval_required"
@@ -195,7 +215,9 @@ class TestAutoOptimizer:
         assert "Requires approval" in result.message
 
     @pytest.mark.asyncio
-    async def test_request_approval_sets_pending(self, optimizer, approval_optimization):
+    async def test_request_approval_sets_pending(
+        self, optimizer, approval_optimization
+    ):
         """Test request_approval sets status to pending_approval."""
         optimizer._optimizations.append(approval_optimization)
 
@@ -252,8 +274,10 @@ class TestAutoOptimizer:
         """Test optimizations persist to disk and can be reloaded."""
         opt1 = AutoOptimizer(storage_path=str(tmp_path))
         safe_opt = Optimization(
-            opt_id="opt_0001", category="create_index",
-            description="Test index", expected_impact="Faster",
+            opt_id="opt_0001",
+            category="create_index",
+            description="Test index",
+            expected_impact="Faster",
             risk_level="safe",
         )
         opt1._optimizations.append(safe_opt)
@@ -270,12 +294,14 @@ class TestAutoOptimizer:
 # Singleton Tests
 # =============================================================================
 
+
 class TestGetAutoOptimizer:
     """Tests for the get_auto_optimizer singleton factory."""
 
     def test_get_auto_optimizer_returns_instance(self):
         """Test get_auto_optimizer returns an AutoOptimizer instance."""
         import Engine8_Knowledge.optimization.auto_optimizer as mod
+
         original = mod._optimizer
         try:
             mod._optimizer = None
@@ -287,6 +313,7 @@ class TestGetAutoOptimizer:
     def test_get_auto_optimizer_returns_same_instance(self):
         """Test get_auto_optimizer returns the same singleton."""
         import Engine8_Knowledge.optimization.auto_optimizer as mod
+
         original = mod._optimizer
         try:
             mod._optimizer = None

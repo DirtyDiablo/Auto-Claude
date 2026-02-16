@@ -351,36 +351,68 @@ def create_database():
     # =========================================
 
     # Jobs indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_bullhorn_id ON jobs(bullhorn_job_id)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_jobs_bullhorn_id ON jobs(bullhorn_job_id)"
+    )
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_job_number ON jobs(job_number)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_client ON jobs(client_corporation)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_prime ON jobs(prime_contractor)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_jobs_client ON jobs(client_corporation)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_jobs_prime ON jobs(prime_contractor)"
+    )
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_status ON jobs(status)")
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_jobs_date_added ON jobs(date_added)")
 
     # Candidates indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_bullhorn_id ON candidates(bullhorn_candidate_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_name ON candidates(full_name)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_email ON candidates(email)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_candidates_company ON candidates(company_name)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_candidates_bullhorn_id ON candidates(bullhorn_candidate_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_candidates_name ON candidates(full_name)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_candidates_email ON candidates(email)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_candidates_company ON candidates(company_name)"
+    )
 
     # Placements indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_placements_job_id ON placements(job_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_placements_candidate_id ON placements(candidate_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_placements_date ON placements(placement_date)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_placements_job_id ON placements(job_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_placements_candidate_id ON placements(candidate_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_placements_date ON placements(placement_date)"
+    )
 
     # Activities indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_activities_job_id ON activities(related_job_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_activities_candidate_id ON activities(related_candidate_id)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_activities_date ON activities(activity_date)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_activities_job_id ON activities(related_job_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_activities_candidate_id ON activities(related_candidate_id)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_activities_date ON activities(activity_date)"
+    )
 
     # Prime contractors indexes
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_primes_name ON prime_contractors(name)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_primes_normalized ON prime_contractors(normalized_name)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_primes_name ON prime_contractors(name)"
+    )
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_primes_normalized ON prime_contractors(normalized_name)"
+    )
 
     # Programs indexes
     cursor.execute("CREATE INDEX IF NOT EXISTS idx_programs_name ON programs(name)")
-    cursor.execute("CREATE INDEX IF NOT EXISTS idx_programs_prime ON programs(prime_contractor_id)")
+    cursor.execute(
+        "CREATE INDEX IF NOT EXISTS idx_programs_prime ON programs(prime_contractor_id)"
+    )
 
     conn.commit()
     conn.close()
@@ -400,9 +432,16 @@ def get_table_counts():
     cursor = conn.cursor()
 
     tables = [
-        'jobs', 'candidates', 'placements', 'activities',
-        'prime_contractors', 'programs', 'past_performance',
-        'source_files', 'data_quality_log', 'processing_stats'
+        "jobs",
+        "candidates",
+        "placements",
+        "activities",
+        "prime_contractors",
+        "programs",
+        "past_performance",
+        "source_files",
+        "data_quality_log",
+        "processing_stats",
     ]
 
     counts = {}

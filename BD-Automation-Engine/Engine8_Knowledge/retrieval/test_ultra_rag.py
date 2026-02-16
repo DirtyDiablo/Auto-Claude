@@ -1,4 +1,5 @@
 """Test UltraRAG implementation."""
+
 import sys
 import asyncio
 from pathlib import Path
@@ -38,7 +39,7 @@ async def test_async_queries():
     print("\nTesting complex pipeline...")
     plan = await ultra.query(
         "Compare AF DCGS and Army DCGS-A: Who are the prime contractors and what are the contract values?",
-        pipeline="complex"
+        pipeline="complex",
     )
     print(f"    Sub-queries: {plan.sub_queries}")
     print(f"    Answer: {plan.final_answer}")
@@ -49,8 +50,7 @@ async def test_async_queries():
     # Test BD intelligence pipeline
     print("\nTesting BD intelligence pipeline...")
     plan = await ultra.query(
-        "Analyze GDIT opportunities on DCGS programs",
-        pipeline="bd_intelligence"
+        "Analyze GDIT opportunities on DCGS programs", pipeline="bd_intelligence"
     )
     print(f"    Answer: {plan.final_answer}")
     print(f"    Intermediate results keys: {list(plan.intermediate_results.keys())}")
@@ -92,6 +92,7 @@ def test_sync_wrapper():
 def test_routes():
     """Test routes import."""
     from ultra_rag_routes import router
+
     print(f"\n[OK] Router created with prefix: {router.prefix}")
 
 

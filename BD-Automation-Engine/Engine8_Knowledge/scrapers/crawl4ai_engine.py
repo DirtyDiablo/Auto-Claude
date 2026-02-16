@@ -25,6 +25,7 @@ logger = structlog.get_logger(__name__)
 
 class JobExtraction(BaseModel):
     """Schema for job posting extraction."""
+
     title: str = ""
     company: str = ""
     location: str = ""
@@ -37,6 +38,7 @@ class JobExtraction(BaseModel):
 
 class ContractExtraction(BaseModel):
     """Schema for federal contract extraction."""
+
     award_title: str = ""
     awardee: str = ""
     value: Optional[str] = None
@@ -48,6 +50,7 @@ class ContractExtraction(BaseModel):
 
 class ContactExtraction(BaseModel):
     """Schema for contact/personnel extraction."""
+
     name: str = ""
     title: str = ""
     company: str = ""
@@ -64,6 +67,7 @@ class ContactExtraction(BaseModel):
 @dataclass
 class CrawlResult:
     """Result from a single URL crawl."""
+
     url: str = ""
     raw_html: str = ""
     markdown: str = ""
@@ -238,6 +242,7 @@ class Crawl4AIEngine:
             extracted = []
             if result.extracted_content:
                 import json
+
                 try:
                     extracted = json.loads(result.extracted_content)
                     if isinstance(extracted, dict):
@@ -316,9 +321,7 @@ class Crawl4AIEngine:
             if not batch:
                 break
 
-            tasks = [
-                self.crawl_url(url, extraction_strategy) for url in batch
-            ]
+            tasks = [self.crawl_url(url, extraction_strategy) for url in batch]
             batch_results = await asyncio.gather(*tasks, return_exceptions=True)
 
             for r in batch_results:
@@ -347,7 +350,9 @@ class Crawl4AIEngine:
         self, url: str, schema: Type[BaseModel]
     ) -> List[BaseModel]:
         """Extract structured data matching a Pydantic schema."""
-        result = await self.crawl_url(url, extraction_strategy="custom", custom_schema=schema)
+        result = await self.crawl_url(
+            url, extraction_strategy="custom", custom_schema=schema
+        )
         instances = []
         for item in result.extracted_data:
             try:
@@ -411,9 +416,7 @@ class Crawl4AIEngine:
         try:
             import httpx
 
-            async with httpx.AsyncClient(
-                follow_redirects=True, timeout=30.0
-            ) as client:
+            async with httpx.AsyncClient(follow_redirects=True, timeout=30.0) as client:
                 resp = await client.get(url)
                 html = resp.text
                 elapsed = int((time.time() - start) * 1000)

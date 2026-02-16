@@ -12,110 +12,101 @@ DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 # Company name normalization rules
 COMPANY_NORMALIZATIONS = {
     # Defense Primes
-    'Leidos - ONLY ONE YOU ARE TO USE': 'Leidos',
-    'LEIDOS': 'Leidos',
-    'Boeing - ONLY ONE YOU ARE TO USE': 'Boeing',
-    'BOEING': 'Boeing',
-    'AMENTUM THIS IS THE ONLY ONE TO USE': 'Amentum',
-    'AMENTUM': 'Amentum',
-    'GDIT': 'General Dynamics IT',
-    'General Dynamics IT': 'General Dynamics IT',
-    'Peraton': 'Peraton',
-    'PERATON': 'Peraton',
-    'CACI': 'CACI International',
-    'Northrop Grumman': 'Northrop Grumman',
-    'NORTHROP GRUMMAN': 'Northrop Grumman',
-    'Lockheed Martin': 'Lockheed Martin',
-    'LOCKHEED MARTIN': 'Lockheed Martin',
-    'SRA International': 'SRA International',
-
+    "Leidos - ONLY ONE YOU ARE TO USE": "Leidos",
+    "LEIDOS": "Leidos",
+    "Boeing - ONLY ONE YOU ARE TO USE": "Boeing",
+    "BOEING": "Boeing",
+    "AMENTUM THIS IS THE ONLY ONE TO USE": "Amentum",
+    "AMENTUM": "Amentum",
+    "GDIT": "General Dynamics IT",
+    "General Dynamics IT": "General Dynamics IT",
+    "Peraton": "Peraton",
+    "PERATON": "Peraton",
+    "CACI": "CACI International",
+    "Northrop Grumman": "Northrop Grumman",
+    "NORTHROP GRUMMAN": "Northrop Grumman",
+    "Lockheed Martin": "Lockheed Martin",
+    "LOCKHEED MARTIN": "Lockheed Martin",
+    "SRA International": "SRA International",
     # Tech Companies
-    'Microsoft': 'Microsoft',
-    'MICROSOFT': 'Microsoft',
-    'Dell Technologies': 'Dell Technologies',
-    'DELL SERVICES FEDERAL GOVERNMENT, INC.': 'Dell Federal Services',
-    'Hewlett Packard': 'Hewlett Packard',
-    'HP': 'Hewlett Packard',
-    'Deloitte': 'Deloitte',
-    'DELOITTE': 'Deloitte',
-
+    "Microsoft": "Microsoft",
+    "MICROSOFT": "Microsoft",
+    "Dell Technologies": "Dell Technologies",
+    "DELL SERVICES FEDERAL GOVERNMENT, INC.": "Dell Federal Services",
+    "Hewlett Packard": "Hewlett Packard",
+    "HP": "Hewlett Packard",
+    "Deloitte": "Deloitte",
+    "DELOITTE": "Deloitte",
     # Commercial
-    'Home Depot': 'The Home Depot',
-    'Home Depot - SSC': 'The Home Depot',
-    'The Home Depot': 'The Home Depot',
-    'Delta Airlines': 'Delta Air Lines',
-    'Georgia Power Company': 'Georgia Power',
-    'The Southern Company': 'Southern Company',
-    'Norfolk Southern': 'Norfolk Southern',
-    'Cox Enterprises': 'Cox Enterprises',
-    'Genuine Parts Company': 'Genuine Parts Company',
-    'UPS Capital': 'UPS Capital',
-    'ADP': 'ADP',
-    'Fedex Truckload Brokerage': 'FedEx',
-
+    "Home Depot": "The Home Depot",
+    "Home Depot - SSC": "The Home Depot",
+    "The Home Depot": "The Home Depot",
+    "Delta Airlines": "Delta Air Lines",
+    "Georgia Power Company": "Georgia Power",
+    "The Southern Company": "Southern Company",
+    "Norfolk Southern": "Norfolk Southern",
+    "Cox Enterprises": "Cox Enterprises",
+    "Genuine Parts Company": "Genuine Parts Company",
+    "UPS Capital": "UPS Capital",
+    "ADP": "ADP",
+    "Fedex Truckload Brokerage": "FedEx",
     # Research/Education
-    'Georgia Tech Research Institute (GTRI)': 'GTRI',
-    'Emory University': 'Emory University',
-
+    "Georgia Tech Research Institute (GTRI)": "GTRI",
+    "Emory University": "Emory University",
     # Manufacturing
-    'Koch Industries - Georgia Pacific': 'Georgia-Pacific',
-    'Lonza (Arch) - Conley, GA': 'Lonza',
-    'Lonza - Hayward, CA': 'Lonza',
-    'Lonza - Walkersville, MD': 'Lonza',
-    'Pangborn Corporation': 'Pangborn Corporation',
-    'North American Container': 'North American Container',
-    'CRH Americas': 'CRH Americas',
-    'Peachtree Protective Covers': 'Peachtree Protective Covers',
-
+    "Koch Industries - Georgia Pacific": "Georgia-Pacific",
+    "Lonza (Arch) - Conley, GA": "Lonza",
+    "Lonza - Hayward, CA": "Lonza",
+    "Lonza - Walkersville, MD": "Lonza",
+    "Pangborn Corporation": "Pangborn Corporation",
+    "North American Container": "North American Container",
+    "CRH Americas": "CRH Americas",
+    "Peachtree Protective Covers": "Peachtree Protective Covers",
     # Healthcare/Other
-    'Altera Digital Health': 'Altera Digital Health',
-    'First Advantage Corp.': 'First Advantage',
-    'ITsavvy': 'ITsavvy',
-    'Merlin International, Inc.': 'Merlin International',
+    "Altera Digital Health": "Altera Digital Health",
+    "First Advantage Corp.": "First Advantage",
+    "ITsavvy": "ITsavvy",
+    "Merlin International, Inc.": "Merlin International",
 }
 
 # Category mapping for companies
 COMPANY_CATEGORIES = {
-    'Leidos': 'Defense Prime',
-    'Boeing': 'Defense Prime',
-    'Amentum': 'Defense Prime',
-    'General Dynamics IT': 'Defense Prime',
-    'Peraton': 'Defense Prime',
-    'CACI International': 'Defense Prime',
-    'Northrop Grumman': 'Defense Prime',
-    'Lockheed Martin': 'Defense Prime',
-    'SRA International': 'Defense Prime',
-    'Dell Federal Services': 'Defense Prime',
-
-    'Microsoft': 'Technology',
-    'Dell Technologies': 'Technology',
-    'Hewlett Packard': 'Technology',
-    'Deloitte': 'Consulting',
-    'GTRI': 'Research',
-    'Emory University': 'Education',
-
-    'The Home Depot': 'Retail',
-    'Delta Air Lines': 'Transportation',
-    'Georgia Power': 'Utilities',
-    'Southern Company': 'Utilities',
-    'Norfolk Southern': 'Transportation',
-    'Cox Enterprises': 'Media/Telecom',
-    'UPS Capital': 'Transportation',
-    'FedEx': 'Transportation',
-    'ADP': 'HR Services',
-    'Genuine Parts Company': 'Retail',
-
-    'Georgia-Pacific': 'Manufacturing',
-    'Lonza': 'Pharmaceutical',
-    'Pangborn Corporation': 'Manufacturing',
-    'North American Container': 'Manufacturing',
-    'CRH Americas': 'Construction',
-
-    'Altera Digital Health': 'Healthcare IT',
-    'First Advantage': 'HR Services',
-    'ITsavvy': 'Technology',
-    'Merlin International': 'Technology',
-    'Peachtree Protective Covers': 'Manufacturing',
+    "Leidos": "Defense Prime",
+    "Boeing": "Defense Prime",
+    "Amentum": "Defense Prime",
+    "General Dynamics IT": "Defense Prime",
+    "Peraton": "Defense Prime",
+    "CACI International": "Defense Prime",
+    "Northrop Grumman": "Defense Prime",
+    "Lockheed Martin": "Defense Prime",
+    "SRA International": "Defense Prime",
+    "Dell Federal Services": "Defense Prime",
+    "Microsoft": "Technology",
+    "Dell Technologies": "Technology",
+    "Hewlett Packard": "Technology",
+    "Deloitte": "Consulting",
+    "GTRI": "Research",
+    "Emory University": "Education",
+    "The Home Depot": "Retail",
+    "Delta Air Lines": "Transportation",
+    "Georgia Power": "Utilities",
+    "Southern Company": "Utilities",
+    "Norfolk Southern": "Transportation",
+    "Cox Enterprises": "Media/Telecom",
+    "UPS Capital": "Transportation",
+    "FedEx": "Transportation",
+    "ADP": "HR Services",
+    "Genuine Parts Company": "Retail",
+    "Georgia-Pacific": "Manufacturing",
+    "Lonza": "Pharmaceutical",
+    "Pangborn Corporation": "Manufacturing",
+    "North American Container": "Manufacturing",
+    "CRH Americas": "Construction",
+    "Altera Digital Health": "Healthcare IT",
+    "First Advantage": "HR Services",
+    "ITsavvy": "Technology",
+    "Merlin International": "Technology",
+    "Peachtree Protective Covers": "Manufacturing",
 }
 
 
@@ -130,9 +121,9 @@ def normalize_company_name(name: str) -> str:
 
     # Clean up common patterns
     cleaned = name.strip()
-    cleaned = re.sub(r'\s*-\s*ONLY ONE.*$', '', cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r'\s*THIS IS THE ONLY ONE.*$', '', cleaned, flags=re.IGNORECASE)
-    cleaned = re.sub(r'\s+', ' ', cleaned)
+    cleaned = re.sub(r"\s*-\s*ONLY ONE.*$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s*THIS IS THE ONLY ONE.*$", "", cleaned, flags=re.IGNORECASE)
+    cleaned = re.sub(r"\s+", " ", cleaned)
 
     # Check mapping again after cleanup
     if cleaned in COMPANY_NORMALIZATIONS:
@@ -143,17 +134,19 @@ def normalize_company_name(name: str) -> str:
 
 def run_cleanup():
     """Run data cleanup on the database."""
-    print("="*80)
+    print("=" * 80)
     print("DATA CLEANUP AND NORMALIZATION")
     print(f"Database: {DATABASE_PATH}")
-    print("="*80)
+    print("=" * 80)
 
     conn = sqlite3.connect(DATABASE_PATH)
     cursor = conn.cursor()
 
     # 1. Update placements with normalized company names
     print("\n1. Normalizing company names in placements...")
-    cursor.execute("SELECT DISTINCT client_name FROM placements WHERE client_name IS NOT NULL")
+    cursor.execute(
+        "SELECT DISTINCT client_name FROM placements WHERE client_name IS NOT NULL"
+    )
     companies = cursor.fetchall()
 
     updates = 0
@@ -162,7 +155,7 @@ def run_cleanup():
         if normalized != company:
             cursor.execute(
                 "UPDATE placements SET client_name = ? WHERE client_name = ?",
-                (normalized, company)
+                (normalized, company),
             )
             updates += cursor.rowcount
             print(f"  '{company}' -> '{normalized}'")
@@ -176,11 +169,11 @@ def run_cleanup():
 
     for prime_id, name in primes:
         normalized = normalize_company_name(name)
-        category = COMPANY_CATEGORIES.get(normalized, 'Other')
+        category = COMPANY_CATEGORIES.get(normalized, "Other")
 
         cursor.execute(
             "UPDATE prime_contractors SET normalized_name = ? WHERE id = ?",
-            (normalized.lower(), prime_id)
+            (normalized.lower(), prime_id),
         )
 
     # 3. Merge duplicate prime contractors
@@ -219,7 +212,7 @@ def run_cleanup():
     for company, category in COMPANY_CATEGORIES.items():
         cursor.execute(
             "UPDATE prime_contractors SET category = ? WHERE name = ? OR normalized_name = ?",
-            (category, company, company.lower())
+            (category, company, company.lower()),
         )
 
     # 6. Update past_performance with normalized names
@@ -232,15 +225,15 @@ def run_cleanup():
         if normalized != name:
             cursor.execute(
                 "UPDATE past_performance SET prime_contractor_name = ? WHERE prime_contractor_name = ?",
-                (normalized, name)
+                (normalized, name),
             )
 
     conn.commit()
 
     # 7. Print summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("CLEANUP SUMMARY")
-    print("="*80)
+    print("=" * 80)
 
     cursor.execute("""
         SELECT name, category, total_jobs, total_placements
@@ -251,16 +244,18 @@ def run_cleanup():
 
     print("\nPrime Contractors with Activity:")
     print(f"{'Company':<35} {'Category':<20} {'Jobs':<8} {'Placements':<10}")
-    print("-"*75)
+    print("-" * 75)
 
     for row in cursor.fetchall():
         name, category, jobs, placements = row
-        print(f"{name:<35} {category or 'N/A':<20} {jobs or 0:<8} {placements or 0:<10}")
+        print(
+            f"{name:<35} {category or 'N/A':<20} {jobs or 0:<8} {placements or 0:<10}"
+        )
 
     # Defense Primes summary
-    print("\n" + "="*80)
+    print("\n" + "=" * 80)
     print("DEFENSE PRIME CONTRACTORS SUMMARY")
-    print("="*80)
+    print("=" * 80)
 
     cursor.execute("""
         SELECT name, total_jobs, total_placements

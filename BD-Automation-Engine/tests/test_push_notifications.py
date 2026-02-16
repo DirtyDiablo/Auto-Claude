@@ -19,6 +19,7 @@ def svc():
 # SUBSCRIPTIONS
 # =========================================
 
+
 def test_subscribe(svc):
     sub = svc.subscribe("user1")
     assert sub.subscription_id.startswith("sub_")
@@ -58,6 +59,7 @@ def test_list_by_user(svc):
 # SEND NOTIFICATIONS
 # =========================================
 
+
 def test_send_with_subscriber(svc):
     svc.subscribe("user1")
     notif = svc.send("Test Title", "Test Body", target_user_id="user1")
@@ -94,6 +96,7 @@ def test_notification_to_dict(svc):
 # TEMPLATES
 # =========================================
 
+
 def test_send_from_template(svc):
     svc.subscribe("user1")
     notif = svc.send_from_template("high_score_alert", target_user_id="user1")
@@ -115,6 +118,7 @@ def test_list_templates(svc):
 # =========================================
 # QUERIES
 # =========================================
+
 
 def test_list_notifications(svc):
     svc.subscribe("user1")
@@ -139,6 +143,7 @@ def test_get_notification_not_found(svc):
 # STATS & SINGLETON
 # =========================================
 
+
 def test_stats(svc):
     svc.subscribe("user1")
     svc.send("Test", target_user_id="user1")
@@ -156,6 +161,7 @@ def test_subscription_to_dict(svc):
 
 def test_singleton():
     import src.pwa.push_notifications as mod
+
     mod._instance = None
     a1 = get_push_service()
     a2 = get_push_service()

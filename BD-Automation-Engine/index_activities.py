@@ -17,7 +17,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 # Fix Windows encoding
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Change to project directory
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
@@ -31,17 +31,22 @@ DB_PATH = "Engine7_BullhornETL/data/bullhorn_master.db"
 BATCH_SIZE = 500  # Larger batches for speed
 PROGRESS_INTERVAL = 5000  # Show progress every N records
 
+
 def get_indexed_count():
     """Get current count of indexed activities."""
     try:
         import urllib.request
         import json
-        response = urllib.request.urlopen(f"{QDRANT_URL}/collections/activities", timeout=10)
+
+        response = urllib.request.urlopen(
+            f"{QDRANT_URL}/collections/activities", timeout=10
+        )
         data = json.loads(response.read())
         return data["result"]["points_count"]
     except (ConnectionError, TimeoutError, KeyError, ValueError) as e:
         logger.debug("qdrant_count_fetch_failed: %s", e)
         return 0
+
 
 def main():
     print("=" * 70)
@@ -105,8 +110,12 @@ def main():
     """)
 
     indexed, errors = process_cursor(
-        cursor, store, 'activities', total_activities, start_time,
-        transform_fn=transform_activity
+        cursor,
+        store,
+        "activities",
+        total_activities,
+        start_time,
+        transform_fn=transform_activity,
     )
     grand_total_indexed += indexed
     grand_total_errors += errors
@@ -132,8 +141,12 @@ def main():
     """)
 
     indexed, errors = process_cursor(
-        cursor, store, 'call_notes', total_call_notes, time.time(),
-        transform_fn=transform_activity
+        cursor,
+        store,
+        "call_notes",
+        total_call_notes,
+        time.time(),
+        transform_fn=transform_activity,
     )
     grand_total_indexed += indexed
     grand_total_errors += errors
@@ -159,8 +172,12 @@ def main():
     """)
 
     indexed, errors = process_cursor(
-        cursor, store, 'placements', total_placements, time.time(),
-        transform_fn=transform_activity
+        cursor,
+        store,
+        "placements",
+        total_placements,
+        time.time(),
+        transform_fn=transform_activity,
     )
     grand_total_indexed += indexed
     grand_total_errors += errors
@@ -177,8 +194,8 @@ def main():
     print("=" * 70)
     print(f"  Total processed: {grand_total_indexed:,}")
     print(f"  Total errors: {grand_total_errors:,}")
-    print(f"  Time elapsed: {elapsed/60:.1f} minutes")
-    print(f"  Average rate: {grand_total_indexed/elapsed:.0f} records/sec")
+    print(f"  Time elapsed: {elapsed / 60:.1f} minutes")
+    print(f"  Average rate: {grand_total_indexed / elapsed:.0f} records/sec")
     print(f"  Final Qdrant count: {final_indexed:,} activities")
     print("=" * 70)
 
@@ -186,17 +203,17 @@ def main():
 def transform_activity(row):
     """Transform database row to activity dict."""
     return {
-        'id': f"{row['activity_type']}_{row['id']}",
-        'activity_type': row['activity_type'] or 'unknown',
-        'content': row['content'] or '',
-        'subject': row['subject'] or '',
-        'date': row['date'] or '',
-        'contact_id': str(row['contact_id']) if row['contact_id'] else '',
-        'job_id': str(row['job_id']) if row['job_id'] else '',
-        'source_db': 'bullhorn_master',
-        'contact_name': '',  # Not available in this query
-        'company_name': '',  # Not available in this query
-        'company': ''
+        "id": f"{row['activity_type']}_{row['id']}",
+        "activity_type": row["activity_type"] or "unknown",
+        "content": row["content"] or "",
+        "subject": row["subject"] or "",
+        "date": row["date"] or "",
+        "contact_id": str(row["contact_id"]) if row["contact_id"] else "",
+        "job_id": str(row["job_id"]) if row["job_id"] else "",
+        "source_db": "bullhorn_master",
+        "contact_name": "",  # Not available in this query
+        "company_name": "",  # Not available in this query
+        "company": "",
     }
 
 
@@ -231,8 +248,12 @@ def process_cursor(cursor, store, source_name, total_count, start_time, transfor
                 eta_seconds = remaining / rate if rate > 0 else 0
                 eta_minutes = eta_seconds / 60
 
-                print(f"  [{source_name}] Progress: {total_indexed:,}/{total_count:,} ({total_indexed*100/total_count:.1f}%)")
-                print(f"  Rate: {rate:.0f} records/sec | ETA: {eta_minutes:.1f} min | Errors: {total_errors:,}")
+                print(
+                    f"  [{source_name}] Progress: {total_indexed:,}/{total_count:,} ({total_indexed * 100 / total_count:.1f}%)"
+                )
+                print(
+                    f"  Rate: {rate:.0f} records/sec | ETA: {eta_minutes:.1f} min | Errors: {total_errors:,}"
+                )
                 print("-" * 70)
 
     # Index remaining batch
@@ -245,7 +266,9 @@ def process_cursor(cursor, store, source_name, total_count, start_time, transfor
             print(f"  [ERROR] Final batch failed: {e}")
             total_errors += len(batch)
 
-    print(f"  [{source_name}] Completed: {total_indexed:,} indexed, {total_errors:,} errors")
+    print(
+        f"  [{source_name}] Completed: {total_indexed:,} indexed, {total_errors:,} errors"
+    )
     return total_indexed, total_errors
 
 

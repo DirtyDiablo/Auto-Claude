@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from sentence_transformers import SentenceTransformer
+
     SENTENCE_TRANSFORMERS_AVAILABLE = True
 except ImportError:
     SENTENCE_TRANSFORMERS_AVAILABLE = False
@@ -23,6 +24,7 @@ except ImportError:
 
 try:
     import redis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -70,7 +72,7 @@ class SemanticCache:
         self,
         redis_url: str = None,
         similarity_threshold: float = 0.85,
-        ttl_hours: int = 24
+        ttl_hours: int = 24,
     ):
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379")
         self.similarity_threshold = similarity_threshold
@@ -91,7 +93,7 @@ class SemanticCache:
 
         if SENTENCE_TRANSFORMERS_AVAILABLE:
             try:
-                self.embedder = SentenceTransformer('all-MiniLM-L6-v2')
+                self.embedder = SentenceTransformer("all-MiniLM-L6-v2")
             except Exception as e:
                 logger.warning("sentence_transformer_load_failed: %s", e)
                 self.embedder = None
@@ -142,8 +144,8 @@ class SemanticCache:
                     continue
             else:
                 entry = self.redis.get(cached_key)
-                if entry and 'embedding' in entry:
-                    cached_embed = entry['embedding']
+                if entry and "embedding" in entry:
+                    cached_embed = entry["embedding"]
                 else:
                     continue
 
@@ -157,14 +159,14 @@ class SemanticCache:
                 data = self.redis.get(f"{self.CACHE_PREFIX}{best_match}")
                 if data:
                     result = json.loads(data)
-                    result['cache_hit'] = True
-                    result['similarity'] = best_sim
+                    result["cache_hit"] = True
+                    result["similarity"] = best_sim
                     return result
             else:
                 entry = self.redis.get(best_match)
                 if entry:
-                    entry['cache_hit'] = True
-                    entry['similarity'] = best_sim
+                    entry["cache_hit"] = True
+                    entry["similarity"] = best_sim
                     return entry
 
         return None
@@ -174,22 +176,16 @@ class SemanticCache:
         key = self._generate_key(query)
         embedding = self._get_embedding(query)
 
-        cache_data = {
-            "query": query,
-            "result": result,
-            "embedding": embedding
-        }
+        cache_data = {"query": query, "result": result, "embedding": embedding}
 
         if self.backend == "redis":
             self.redis.setex(
                 f"{self.CACHE_PREFIX}{key}",
                 self.ttl,
-                json.dumps({"query": query, "result": result})
+                json.dumps({"query": query, "result": result}),
             )
             self.redis.setex(
-                f"{self.EMBED_PREFIX}{key}",
-                self.ttl,
-                json.dumps(embedding)
+                f"{self.EMBED_PREFIX}{key}", self.ttl, json.dumps(embedding)
             )
             self.redis.sadd(self.INDEX_KEY, key)
         else:
@@ -232,11 +228,12 @@ class SemanticCache:
         return {
             "cached_queries": count,
             "backend": self.backend,
-            "threshold": self.similarity_threshold
+            "threshold": self.similarity_threshold,
         }
 
 
 _cache_instance = None
+
 
 def get_cache(redis_url: str = None) -> SemanticCache:
     global _cache_instance

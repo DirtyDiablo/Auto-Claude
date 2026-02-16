@@ -15,6 +15,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 try:
     from fastapi import FastAPI
     from fastapi.testclient import TestClient
+
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
@@ -75,7 +76,10 @@ def mock_mcp_server():
 
 class TestHealth:
     def test_mcp_health(self, client, mock_mcp_server):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=mock_mcp_server):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server",
+            return_value=mock_mcp_server,
+        ):
             resp = client.get("/mcp/health")
         assert resp.status_code == 200
         data = resp.json()
@@ -83,7 +87,9 @@ class TestHealth:
         assert data["tools_registered"] == 16
 
     def test_mcp_health_unavailable(self, client):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None
+        ):
             resp = client.get("/mcp/health")
         assert resp.status_code == 200
         data = resp.json()
@@ -97,7 +103,10 @@ class TestHealth:
 
 class TestListTools:
     def test_list_tools(self, client, mock_mcp_server):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=mock_mcp_server):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server",
+            return_value=mock_mcp_server,
+        ):
             resp = client.get("/mcp/tools")
         assert resp.status_code == 200
         data = resp.json()
@@ -106,7 +115,9 @@ class TestListTools:
         assert data["tools"][0]["name"] == "search_contacts"
 
     def test_list_tools_no_server(self, client):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None
+        ):
             resp = client.get("/mcp/tools")
         assert resp.status_code == 200
         data = resp.json()
@@ -121,7 +132,10 @@ class TestListTools:
 
 class TestGetConfig:
     def test_get_config(self, client, mock_mcp_server):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=mock_mcp_server):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server",
+            return_value=mock_mcp_server,
+        ):
             resp = client.get("/mcp/config")
         assert resp.status_code == 200
         data = resp.json()
@@ -130,7 +144,9 @@ class TestGetConfig:
 
     def test_get_config_no_server(self, client):
         """Fallback config when server is unavailable."""
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None
+        ):
             resp = client.get("/mcp/config")
         assert resp.status_code == 200
         data = resp.json()
@@ -148,19 +164,30 @@ class TestTestTool:
         mock_mcp_server.get_tools.return_value = [
             {"name": "search_contacts", "description": "Search"},
         ]
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=mock_mcp_server):
-            resp = client.post("/mcp/test-tool", json={
-                "tool_name": "nonexistent_tool",
-                "parameters": {},
-            })
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server",
+            return_value=mock_mcp_server,
+        ):
+            resp = client.post(
+                "/mcp/test-tool",
+                json={
+                    "tool_name": "nonexistent_tool",
+                    "parameters": {},
+                },
+            )
         assert resp.status_code == 404
 
     def test_test_tool_no_server(self, client):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None):
-            resp = client.post("/mcp/test-tool", json={
-                "tool_name": "search_contacts",
-                "parameters": {"query": "test"},
-            })
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None
+        ):
+            resp = client.post(
+                "/mcp/test-tool",
+                json={
+                    "tool_name": "search_contacts",
+                    "parameters": {"query": "test"},
+                },
+            )
         assert resp.status_code == 503
 
 
@@ -171,7 +198,10 @@ class TestTestTool:
 
 class TestStats:
     def test_mcp_stats(self, client, mock_mcp_server):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=mock_mcp_server):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server",
+            return_value=mock_mcp_server,
+        ):
             resp = client.get("/mcp/stats")
         assert resp.status_code == 200
         data = resp.json()
@@ -179,7 +209,9 @@ class TestStats:
         assert data["server_ready"] is True
 
     def test_mcp_stats_no_server(self, client):
-        with patch("Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.mcp_api._get_mcp_server", return_value=None
+        ):
             resp = client.get("/mcp/stats")
         assert resp.status_code == 200
         data = resp.json()

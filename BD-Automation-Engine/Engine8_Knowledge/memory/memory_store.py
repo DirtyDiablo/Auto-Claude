@@ -30,6 +30,7 @@ LAYERS = ["short_term", "episodic", "semantic", "graph", "procedural"]
 @dataclass
 class MemoryContext:
     """Context for memory operations."""
+
     user_id: str = ""
     agent_id: Optional[str] = None
     contact_id: Optional[str] = None
@@ -41,6 +42,7 @@ class MemoryContext:
 @dataclass
 class InteractionRecord:
     """Record of an interaction with a contact."""
+
     interaction_type: str = ""  # call, email, meeting, note
     contact_id: str = ""
     contact_name: str = ""
@@ -54,6 +56,7 @@ class InteractionRecord:
 @dataclass
 class OutcomeRecord:
     """Record of a campaign/action outcome."""
+
     action: str = ""
     outcome: str = ""
     score: float = 0.0  # 0-1 success
@@ -67,6 +70,7 @@ class OutcomeRecord:
 @dataclass
 class ContactMemory:
     """All memories related to a specific contact."""
+
     contact_id: str = ""
     contact_name: str = ""
     interactions: List[Dict[str, Any]] = field(default_factory=list)
@@ -79,6 +83,7 @@ class ContactMemory:
 @dataclass
 class LayerStats:
     """Stats for a single memory layer."""
+
     layer: str = ""
     total_entries: int = 0
     size_bytes: int = 0
@@ -89,6 +94,7 @@ class LayerStats:
 @dataclass
 class MemoryRecall:
     """Result from cross-layer memory recall."""
+
     query: str = ""
     results: Dict[str, List[Dict[str, Any]]] = field(default_factory=dict)
     total_results: int = 0
@@ -139,7 +145,9 @@ class MemoryStore:
                 pass
 
     def _save_procedural(self):
-        self._procedural_path.write_text(json.dumps(self._procedural, indent=2, default=str))
+        self._procedural_path.write_text(
+            json.dumps(self._procedural, indent=2, default=str)
+        )
 
     # ------------------------------------------------------------------
     # Layer routing
@@ -161,11 +169,16 @@ class MemoryStore:
             return "procedural"
 
         content_lower = content.lower()
-        if any(kw in content_lower for kw in ["called", "emailed", "met with", "spoke to"]):
+        if any(
+            kw in content_lower for kw in ["called", "emailed", "met with", "spoke to"]
+        ):
             return "episodic"
         elif any(kw in content_lower for kw in ["reports to", "knows", "introduced"]):
             return "graph"
-        elif any(kw in content_lower for kw in ["worked because", "effective", "response rate"]):
+        elif any(
+            kw in content_lower
+            for kw in ["worked because", "effective", "response rate"]
+        ):
             return "procedural"
 
         return "episodic"
@@ -184,7 +197,9 @@ class MemoryStore:
             "tags": context.tags,
             "type": layer or "",
         }
-        actual_layer = layer if layer in LAYERS else self._classify_layer(content, metadata)
+        actual_layer = (
+            layer if layer in LAYERS else self._classify_layer(content, metadata)
+        )
 
         if actual_layer == "short_term":
             return self._add_short_term(content, context, metadata)
@@ -301,24 +316,36 @@ class MemoryStore:
             recall_time_ms=round(elapsed, 2),
         )
 
-    def _recall_short_term(self, query: str, ctx: MemoryContext) -> List[Dict[str, Any]]:
+    def _recall_short_term(
+        self, query: str, ctx: MemoryContext
+    ) -> List[Dict[str, Any]]:
         q = query.lower()
         return [
-            v for v in self._short_term.values()
-            if q in v.get("content", "").lower()
+            v for v in self._short_term.values() if q in v.get("content", "").lower()
         ][:5]
 
-    async def _recall_episodic(self, query: str, ctx: MemoryContext) -> List[Dict[str, Any]]:
+    async def _recall_episodic(
+        self, query: str, ctx: MemoryContext
+    ) -> List[Dict[str, Any]]:
         if self.mem0:
-            memories = await self.mem0.search(query, user_id=ctx.user_id, agent_id=ctx.agent_id)
-            return [{"content": m.content, "score": m.score, "id": m.memory_id} for m in memories]
+            memories = await self.mem0.search(
+                query, user_id=ctx.user_id, agent_id=ctx.agent_id
+            )
+            return [
+                {"content": m.content, "score": m.score, "id": m.memory_id}
+                for m in memories
+            ]
         q = query.lower()
         return [e for e in self._episodic if q in e.get("content", "").lower()][:5]
 
-    async def _recall_semantic(self, query: str, ctx: MemoryContext) -> List[Dict[str, Any]]:
+    async def _recall_semantic(
+        self, query: str, ctx: MemoryContext
+    ) -> List[Dict[str, Any]]:
         return await self._recall_episodic(query, ctx)
 
-    async def _recall_graph(self, query: str, ctx: MemoryContext) -> List[Dict[str, Any]]:
+    async def _recall_graph(
+        self, query: str, ctx: MemoryContext
+    ) -> List[Dict[str, Any]]:
         if self.neo4j:
             try:
                 results = await self.neo4j.search(query)
@@ -327,7 +354,9 @@ class MemoryStore:
                 pass
         return []
 
-    def _recall_procedural(self, query: str, ctx: MemoryContext) -> List[Dict[str, Any]]:
+    def _recall_procedural(
+        self, query: str, ctx: MemoryContext
+    ) -> List[Dict[str, Any]]:
         q = query.lower()
         return [p for p in self._procedural if q in p.get("content", "").lower()][:5]
 
@@ -350,9 +379,7 @@ class MemoryStore:
         )
         return await self.add_memory(content, "episodic", ctx)
 
-    async def remember_outcome(
-        self, campaign_id: str, outcome: OutcomeRecord
-    ) -> str:
+    async def remember_outcome(self, campaign_id: str, outcome: OutcomeRecord) -> str:
         """Store in procedural layer for pattern learning."""
         content = (
             f"Action: {outcome.action} | Outcome: {outcome.outcome} | "

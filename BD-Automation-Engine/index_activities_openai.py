@@ -25,7 +25,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Fix Windows encoding
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Change to project directory
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
@@ -49,7 +49,8 @@ PROGRESS_FILE = "index_activities_progress.json"
 client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # UUID namespace for deterministic ID generation
-NAMESPACE_ACTIVITIES = uuid.UUID('12345678-1234-5678-1234-567812345678')
+NAMESPACE_ACTIVITIES = uuid.UUID("12345678-1234-5678-1234-567812345678")
+
 
 def string_to_uuid(s: str) -> str:
     """Convert string ID to deterministic UUID."""
@@ -61,14 +62,11 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
     all_embeddings = []
 
     for i in range(0, len(texts), EMBED_BATCH_SIZE):
-        batch = texts[i:i + EMBED_BATCH_SIZE]
+        batch = texts[i : i + EMBED_BATCH_SIZE]
         batch = [t if t.strip() else "empty" for t in batch]
 
         try:
-            response = client_openai.embeddings.create(
-                model=OPENAI_MODEL,
-                input=batch
-            )
+            response = client_openai.embeddings.create(model=OPENAI_MODEL, input=batch)
             embeddings = [item.embedding for item in response.data]
             all_embeddings.extend(embeddings)
         except Exception as e:
@@ -81,36 +79,38 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
 def create_text_for_embedding(activity: dict) -> str:
     """Create searchable text from activity fields."""
     parts = [
-        activity.get('content', ''),
-        activity.get('subject', ''),
-        activity.get('activity_type', ''),
-        activity.get('contact_name', ''),
-        activity.get('company_name', ''),
+        activity.get("content", ""),
+        activity.get("subject", ""),
+        activity.get("activity_type", ""),
+        activity.get("contact_name", ""),
+        activity.get("company_name", ""),
     ]
-    return ' '.join(p for p in parts if p)
+    return " ".join(p for p in parts if p)
 
 
 def save_progress(table: str, last_id: int, indexed: int):
     """Save progress to file for resume capability."""
     progress = load_progress()
-    progress[table] = {'last_id': last_id, 'indexed': indexed}
-    progress['timestamp'] = datetime.now().isoformat()
-    with open(PROGRESS_FILE, 'w') as f:
+    progress[table] = {"last_id": last_id, "indexed": indexed}
+    progress["timestamp"] = datetime.now().isoformat()
+    with open(PROGRESS_FILE, "w") as f:
         json.dump(progress, f)
 
 
 def load_progress() -> dict:
     """Load progress from file."""
     if os.path.exists(PROGRESS_FILE):
-        with open(PROGRESS_FILE, 'r') as f:
+        with open(PROGRESS_FILE, "r") as f:
             return json.load(f)
     return {}
 
 
 def main():
     # Parse arguments
-    parser = argparse.ArgumentParser(description='Index activities to Qdrant')
-    parser.add_argument('--resume', action='store_true', help='Resume from last checkpoint')
+    parser = argparse.ArgumentParser(description="Index activities to Qdrant")
+    parser.add_argument(
+        "--resume", action="store_true", help="Resume from last checkpoint"
+    )
     args = parser.parse_args()
 
     print("=" * 70)
@@ -142,12 +142,16 @@ def main():
             print(f"\n[2/6] No existing collection found, starting fresh...")
             qdrant.create_collection(
                 collection_name=COLLECTION_NAME,
-                vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+                vectors_config=VectorParams(
+                    size=EMBEDDING_DIM, distance=Distance.COSINE
+                ),
             )
             progress = {}
     else:
         # Fresh start - delete and recreate
-        print(f"\n[2/6] Recreating '{COLLECTION_NAME}' collection with OpenAI dimensions...")
+        print(
+            f"\n[2/6] Recreating '{COLLECTION_NAME}' collection with OpenAI dimensions..."
+        )
         try:
             qdrant.delete_collection(COLLECTION_NAME)
             print(f"  Deleted existing collection.")
@@ -157,7 +161,7 @@ def main():
 
         qdrant.create_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
         print(f"  Created collection: {COLLECTION_NAME} ({EMBEDDING_DIM} dimensions)")
 
@@ -188,17 +192,20 @@ def main():
     # =========================================
     # INDEX ACTIVITIES TABLE
     # =========================================
-    activity_progress = progress.get('activity', {})
-    start_id = activity_progress.get('last_id', 0)
+    activity_progress = progress.get("activity", {})
+    start_id = activity_progress.get("last_id", 0)
     remaining = conn.execute(
         "SELECT COUNT(*) FROM activities WHERE id > ?", (start_id,)
     ).fetchone()[0]
 
     if remaining > 0:
-        print(f"\n[4/6] Indexing ACTIVITIES ({remaining:,} remaining, id > {start_id})...")
+        print(
+            f"\n[4/6] Indexing ACTIVITIES ({remaining:,} remaining, id > {start_id})..."
+        )
         print("-" * 70)
 
-        cursor = conn.execute("""
+        cursor = conn.execute(
+            """
             SELECT
                 id,
                 activity_type,
@@ -211,10 +218,12 @@ def main():
             FROM activities
             WHERE id > ?
             ORDER BY id
-        """, (start_id,))
+        """,
+            (start_id,),
+        )
 
         indexed, errors = process_table(
-            cursor, qdrant, 'activity', remaining, start_time
+            cursor, qdrant, "activity", remaining, start_time
         )
         grand_total += indexed
         grand_errors += errors
@@ -224,17 +233,20 @@ def main():
     # =========================================
     # INDEX CALL_NOTES TABLE
     # =========================================
-    call_notes_progress = progress.get('call_note', {})
-    start_id = call_notes_progress.get('last_id', 0)
+    call_notes_progress = progress.get("call_note", {})
+    start_id = call_notes_progress.get("last_id", 0)
     remaining = conn.execute(
         "SELECT COUNT(*) FROM call_notes WHERE id > ?", (start_id,)
     ).fetchone()[0]
 
     if remaining > 0:
-        print(f"\n[5/6] Indexing CALL_NOTES ({remaining:,} remaining, id > {start_id})...")
+        print(
+            f"\n[5/6] Indexing CALL_NOTES ({remaining:,} remaining, id > {start_id})..."
+        )
         print("-" * 70)
 
-        cursor = conn.execute("""
+        cursor = conn.execute(
+            """
             SELECT
                 id,
                 COALESCE(note_type, 'call_note') as activity_type,
@@ -247,10 +259,12 @@ def main():
             FROM call_notes
             WHERE id > ?
             ORDER BY id
-        """, (start_id,))
+        """,
+            (start_id,),
+        )
 
         indexed, errors = process_table(
-            cursor, qdrant, 'call_note', remaining, time.time()
+            cursor, qdrant, "call_note", remaining, time.time()
         )
         grand_total += indexed
         grand_errors += errors
@@ -260,17 +274,20 @@ def main():
     # =========================================
     # INDEX PLACEMENTS TABLE
     # =========================================
-    placements_progress = progress.get('placement', {})
-    start_id = placements_progress.get('last_id', 0)
+    placements_progress = progress.get("placement", {})
+    start_id = placements_progress.get("last_id", 0)
     remaining = conn.execute(
         "SELECT COUNT(*) FROM placements WHERE id > ?", (start_id,)
     ).fetchone()[0]
 
     if remaining > 0:
-        print(f"\n[6/6] Indexing PLACEMENTS ({remaining:,} remaining, id > {start_id})...")
+        print(
+            f"\n[6/6] Indexing PLACEMENTS ({remaining:,} remaining, id > {start_id})..."
+        )
         print("-" * 70)
 
-        cursor = conn.execute("""
+        cursor = conn.execute(
+            """
             SELECT
                 id,
                 'placement' as activity_type,
@@ -283,10 +300,12 @@ def main():
             FROM placements
             WHERE id > ?
             ORDER BY id
-        """, (start_id,))
+        """,
+            (start_id,),
+        )
 
         indexed, errors = process_table(
-            cursor, qdrant, 'placement', remaining, time.time()
+            cursor, qdrant, "placement", remaining, time.time()
         )
         grand_total += indexed
         grand_errors += errors
@@ -306,9 +325,9 @@ def main():
     print(f"  Previously indexed: {already_indexed:,}")
     print(f"  Total in Qdrant: {final_count:,}")
     print(f"  Total errors: {grand_errors:,}")
-    print(f"  Time elapsed: {elapsed/60:.1f} minutes")
+    print(f"  Time elapsed: {elapsed / 60:.1f} minutes")
     if grand_total > 0:
-        print(f"  Rate: {grand_total/elapsed:.0f} records/sec")
+        print(f"  Rate: {grand_total / elapsed:.0f} records/sec")
     print("=" * 70)
     print("\nTo resume later: python index_activities_openai.py --resume")
     print("=" * 70)
@@ -330,32 +349,32 @@ def process_table(cursor, qdrant, prefix: str, total_count: int, start_time: flo
 
     for row in cursor:
         activity = {
-            'id': f"{prefix}_{row['id']}",
-            'activity_type': row['activity_type'] or 'unknown',
-            'content': row['content'] or '',
-            'subject': row['subject'] or '',
-            'date': row['date'] or '',
-            'contact_id': str(row['contact_id']) if row['contact_id'] else '',
-            'job_id': str(row['job_id']) if row['job_id'] else '',
-            'source_db': 'bullhorn_master',
-            'contact_name': '',
-            'company_name': '',
-            'company': '',
-            '_indexed_at': datetime.now().isoformat(),
-            '_embedding_model': OPENAI_MODEL
+            "id": f"{prefix}_{row['id']}",
+            "activity_type": row["activity_type"] or "unknown",
+            "content": row["content"] or "",
+            "subject": row["subject"] or "",
+            "date": row["date"] or "",
+            "contact_id": str(row["contact_id"]) if row["contact_id"] else "",
+            "job_id": str(row["job_id"]) if row["job_id"] else "",
+            "source_db": "bullhorn_master",
+            "contact_name": "",
+            "company_name": "",
+            "company": "",
+            "_indexed_at": datetime.now().isoformat(),
+            "_embedding_model": OPENAI_MODEL,
         }
 
         text = create_text_for_embedding(activity)
         batch_activities.append(activity)
         batch_texts.append(text)
-        last_id = row['id']
+        last_id = row["id"]
 
         # Process batch
         if len(batch_activities) >= BATCH_SIZE:
             try:
                 embeddings = get_embeddings(batch_texts)
                 points = [
-                    PointStruct(id=string_to_uuid(a['id']), vector=e, payload=a)
+                    PointStruct(id=string_to_uuid(a["id"]), vector=e, payload=a)
                     for a, e in zip(batch_activities, embeddings)
                 ]
                 qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
@@ -376,8 +395,12 @@ def process_table(cursor, qdrant, prefix: str, total_count: int, start_time: flo
             remaining = total_count - total_indexed
             eta = remaining / rate if rate > 0 else 0
 
-            print(f"  [{prefix}] {total_indexed:,}/{total_count:,} ({100*total_indexed/total_count:.1f}%)")
-            print(f"  Rate: {rate:.0f}/sec | ETA: {eta/60:.1f} min | Errors: {total_errors}")
+            print(
+                f"  [{prefix}] {total_indexed:,}/{total_count:,} ({100 * total_indexed / total_count:.1f}%)"
+            )
+            print(
+                f"  Rate: {rate:.0f}/sec | ETA: {eta / 60:.1f} min | Errors: {total_errors}"
+            )
             print("-" * 70)
 
     # Remaining batch
@@ -385,7 +408,7 @@ def process_table(cursor, qdrant, prefix: str, total_count: int, start_time: flo
         try:
             embeddings = get_embeddings(batch_texts)
             points = [
-                PointStruct(id=string_to_uuid(a['id']), vector=e, payload=a)
+                PointStruct(id=string_to_uuid(a["id"]), vector=e, payload=a)
                 for a, e in zip(batch_activities, embeddings)
             ]
             qdrant.upsert(collection_name=COLLECTION_NAME, points=points)

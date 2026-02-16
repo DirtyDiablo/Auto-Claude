@@ -15,6 +15,7 @@ from pathlib import Path
 # Try to import pandas for CSV loading
 try:
     import pandas as pd
+
     HAS_PANDAS = True
 except ImportError:
     HAS_PANDAS = False
@@ -31,7 +32,9 @@ except ImportError:
 # ============================================
 
 # Default path to Federal Programs CSV
-DEFAULT_FEDERAL_PROGRAMS_CSV = Path(__file__).parent.parent / "data" / "Federal Programs.csv"
+DEFAULT_FEDERAL_PROGRAMS_CSV = (
+    Path(__file__).parent.parent / "data" / "Federal Programs.csv"
+)
 
 # Global cache for loaded programs database
 _FEDERAL_PROGRAMS_CACHE: Optional[pd.DataFrame] = None
@@ -46,6 +49,7 @@ _LOCATION_INDEX_CACHE: Optional[Dict[str, List[str]]] = None
 @dataclass
 class FederalProgram:
     """Represents a federal program from the database."""
+
     program_name: str
     acronym: str = ""
     agency_owner: str = ""
@@ -59,8 +63,7 @@ class FederalProgram:
 
 
 def load_federal_programs(
-    csv_path: Optional[str] = None,
-    force_reload: bool = False
+    csv_path: Optional[str] = None, force_reload: bool = False
 ) -> pd.DataFrame:
     """
     Load the Federal Programs database from CSV.
@@ -99,9 +102,9 @@ def load_federal_programs(
 
     # Load CSV with proper encoding handling
     try:
-        df = pd.read_csv(path, encoding='utf-8-sig')
+        df = pd.read_csv(path, encoding="utf-8-sig")
     except UnicodeDecodeError:
-        df = pd.read_csv(path, encoding='latin-1')
+        df = pd.read_csv(path, encoding="latin-1")
 
     # Clean column names (remove leading/trailing whitespace)
     df.columns = df.columns.str.strip()
@@ -179,15 +182,14 @@ def parse_locations_field(locations_str: str) -> List[str]:
     locations_str = str(locations_str)
 
     # Split by semicolons
-    locations = [loc.strip() for loc in locations_str.split(';')]
+    locations = [loc.strip() for loc in locations_str.split(";")]
 
     # Remove empty strings and clean up
     return [loc for loc in locations if loc]
 
 
 def get_program_by_name(
-    program_name: str,
-    df: Optional[pd.DataFrame] = None
+    program_name: str, df: Optional[pd.DataFrame] = None
 ) -> Optional[FederalProgram]:
     """
     Get a federal program by its name.
@@ -203,7 +205,7 @@ def get_program_by_name(
         df = load_federal_programs()
 
     # Case-insensitive search
-    matches = df[df['Program Name'].str.lower() == program_name.lower()]
+    matches = df[df["Program Name"].str.lower() == program_name.lower()]
 
     if matches.empty:
         return None
@@ -213,8 +215,7 @@ def get_program_by_name(
 
 
 def get_program_by_acronym(
-    acronym: str,
-    df: Optional[pd.DataFrame] = None
+    acronym: str, df: Optional[pd.DataFrame] = None
 ) -> Optional[FederalProgram]:
     """
     Get a federal program by its acronym.
@@ -230,10 +231,10 @@ def get_program_by_acronym(
         df = load_federal_programs()
 
     # Case-insensitive search
-    if 'Acronym' not in df.columns:
+    if "Acronym" not in df.columns:
         return None
 
-    matches = df[df['Acronym'].str.lower() == acronym.lower()]
+    matches = df[df["Acronym"].str.lower() == acronym.lower()]
 
     if matches.empty:
         return None
@@ -252,21 +253,22 @@ def _row_to_program(row: pd.Series) -> FederalProgram:
     Returns:
         FederalProgram object.
     """
+
     def safe_get(col: str, default: str = "") -> str:
         val = row.get(col, default)
         return str(val) if pd.notna(val) else default
 
     return FederalProgram(
-        program_name=safe_get('Program Name'),
-        acronym=safe_get('Acronym'),
-        agency_owner=safe_get('Agency Owner'),
-        program_type=safe_get('Program Type'),
-        key_locations=parse_locations_field(safe_get('Key Locations')),
-        keywords=parse_keywords_field(safe_get('Keywords/Signals')),
-        clearance_requirements=safe_get('Clearance Requirements'),
-        prime_contractor=safe_get('Prime Contractor'),
-        priority_level=safe_get('Priority Level'),
-        typical_roles=parse_keywords_field(safe_get('Typical Roles')),
+        program_name=safe_get("Program Name"),
+        acronym=safe_get("Acronym"),
+        agency_owner=safe_get("Agency Owner"),
+        program_type=safe_get("Program Type"),
+        key_locations=parse_locations_field(safe_get("Key Locations")),
+        keywords=parse_keywords_field(safe_get("Keywords/Signals")),
+        clearance_requirements=safe_get("Clearance Requirements"),
+        prime_contractor=safe_get("Prime Contractor"),
+        priority_level=safe_get("Priority Level"),
+        typical_roles=parse_keywords_field(safe_get("Typical Roles")),
     )
 
 
@@ -306,18 +308,18 @@ def build_keyword_index(df: Optional[pd.DataFrame] = None) -> Dict[str, List[str
     keyword_index: Dict[str, List[str]] = {}
 
     for _, row in df.iterrows():
-        program_name = row.get('Program Name', '')
+        program_name = row.get("Program Name", "")
         if pd.isna(program_name) or not program_name:
             continue
 
-        keywords_raw = row.get('Keywords/Signals', '')
+        keywords_raw = row.get("Keywords/Signals", "")
         keywords = parse_keywords_field(keywords_raw)
 
         # Add program name itself as a keyword
         keywords.append(str(program_name))
 
         # Add acronym as a keyword
-        acronym = row.get('Acronym', '')
+        acronym = row.get("Acronym", "")
         if pd.notna(acronym) and acronym:
             keywords.append(str(acronym))
 
@@ -369,11 +371,11 @@ def build_location_index(df: Optional[pd.DataFrame] = None) -> Dict[str, List[st
     location_index: Dict[str, List[str]] = {}
 
     for _, row in df.iterrows():
-        program_name = row.get('Program Name', '')
+        program_name = row.get("Program Name", "")
         if pd.isna(program_name) or not program_name:
             continue
 
-        locations_raw = row.get('Key Locations', '')
+        locations_raw = row.get("Key Locations", "")
         locations = parse_locations_field(locations_raw)
 
         for loc in locations:
@@ -430,14 +432,14 @@ def normalize_location_for_matching(location: str) -> str:
     loc = location.lower().strip()
 
     # Remove parenthetical notes like "(DGS-1)" or "(test & evaluation)"
-    loc = re.sub(r'\([^)]*\)', '', loc).strip()
+    loc = re.sub(r"\([^)]*\)", "", loc).strip()
 
     # Normalize common abbreviations
-    loc = re.sub(r'\bft\.?\s+', 'fort ', loc)
-    loc = re.sub(r'\bafb\b', 'air force base', loc)
-    loc = re.sub(r'\bjba\b', 'joint base andrews', loc)
-    loc = re.sub(r'\bjblm\b', 'joint base lewis-mcchord', loc)
-    loc = re.sub(r'\bjbsa\b', 'joint base san antonio', loc)
+    loc = re.sub(r"\bft\.?\s+", "fort ", loc)
+    loc = re.sub(r"\bafb\b", "air force base", loc)
+    loc = re.sub(r"\bjba\b", "joint base andrews", loc)
+    loc = re.sub(r"\bjblm\b", "joint base lewis-mcchord", loc)
+    loc = re.sub(r"\bjbsa\b", "joint base san antonio", loc)
 
     return loc.strip()
 
@@ -450,28 +452,23 @@ DCGS_LOCATIONS = {
     # AF DCGS - PACAF (Critical Priority)
     "San Diego": "AF DCGS - PACAF",
     "La Mesa": "AF DCGS - PACAF",
-
     # AF DCGS - Langley (DGS-1)
     "Hampton": "AF DCGS - Langley",
     "Newport News": "AF DCGS - Langley",
     "Langley": "AF DCGS - Langley",
     "Yorktown": "AF DCGS - Langley",
-
     # AF DCGS - Wright-Patterson (NASIC)
     "Dayton": "AF DCGS - Wright-Patt",
     "Beavercreek": "AF DCGS - Wright-Patt",
     "Fairborn": "AF DCGS - Wright-Patt",
-
     # Navy DCGS-N
     "Norfolk": "Navy DCGS-N",
     "Suffolk": "Navy DCGS-N",
     "Tracy": "Navy DCGS-N",
-
     # Army DCGS-A
     "Fort Belvoir": "Army DCGS-A",
     "Fort Detrick": "Army DCGS-A",
     "Aberdeen": "Army DCGS-A",
-
     # Corporate HQ
     "Herndon": "Corporate HQ",
     "Falls Church": "Corporate HQ",
@@ -499,31 +496,32 @@ ALL_LOCATIONS = {**DCGS_LOCATIONS, **IC_DOD_LOCATIONS}
 
 PROGRAM_KEYWORDS = {
     "AF DCGS": [
-        "dcgs", "distributed common ground", "isr", "480th",
-        "dgs-1", "dgs-2", "nasic", "pacaf", "beale", "langley",
-        "intelligence surveillance reconnaissance"
+        "dcgs",
+        "distributed common ground",
+        "isr",
+        "480th",
+        "dgs-1",
+        "dgs-2",
+        "nasic",
+        "pacaf",
+        "beale",
+        "langley",
+        "intelligence surveillance reconnaissance",
     ],
-    "Army DCGS-A": [
-        "dcgs-a", "inscom", "g2", "army intelligence", "army dcgs"
-    ],
-    "Navy DCGS-N": [
-        "dcgs-n", "n2", "naval intelligence", "navy dcgs"
-    ],
+    "Army DCGS-A": ["dcgs-a", "inscom", "g2", "army intelligence", "army dcgs"],
+    "Navy DCGS-N": ["dcgs-n", "n2", "naval intelligence", "navy dcgs"],
     "NSA Programs": [
-        "sigint", "nsa", "uscybercom", "cnss", "fort meade", "signals intelligence"
+        "sigint",
+        "nsa",
+        "uscybercom",
+        "cnss",
+        "fort meade",
+        "signals intelligence",
     ],
-    "DIA Programs": [
-        "dia", "humint", "j2", "defense intelligence"
-    ],
-    "NGA Programs": [
-        "geoint", "nga", "imagery", "geospatial"
-    ],
-    "NRO Programs": [
-        "nro", "reconnaissance", "satellite"
-    ],
-    "Space Force": [
-        "ussf", "spacecom", "space force", "space delta"
-    ],
+    "DIA Programs": ["dia", "humint", "j2", "defense intelligence"],
+    "NGA Programs": ["geoint", "nga", "imagery", "geospatial"],
+    "NRO Programs": ["nro", "reconnaissance", "satellite"],
+    "Space Force": ["ussf", "spacecom", "space force", "space delta"],
 }
 
 
@@ -549,9 +547,11 @@ SCORING_WEIGHTS = {
 # DATA CLASSES
 # ============================================
 
+
 @dataclass
 class MappingResult:
     """Result of mapping a job to a program."""
+
     program_name: str
     match_confidence: float
     match_type: str  # 'direct', 'fuzzy', 'inferred'
@@ -565,9 +565,9 @@ class MappingResult:
 # MATCHING FUNCTIONS
 # ============================================
 
+
 def extract_location_signal(
-    job: Dict,
-    use_dynamic_locations: bool = True
+    job: Dict, use_dynamic_locations: bool = True
 ) -> Tuple[Optional[str], int, List[Tuple[str, int, str]]]:
     """
     Extract program signal from job location.
@@ -587,7 +587,7 @@ def extract_location_signal(
         - all_location_signals: List of (program_name, score, signal_description) tuples
           for all location matches found (useful for secondary candidates)
     """
-    location = job.get('location', '') or job.get('Location', '')
+    location = job.get("location", "") or job.get("Location", "")
     if not location:
         return None, 0, []
 
@@ -600,7 +600,7 @@ def extract_location_signal(
     # Check hardcoded DCGS/IC locations first (exact matches)
     for loc_key, program in ALL_LOCATIONS.items():
         if loc_key.lower() in location_lower:
-            score = SCORING_WEIGHTS['location_match_exact']
+            score = SCORING_WEIGHTS["location_match_exact"]
             signal_desc = f"Location match: {loc_key} -> {program}"
 
             # Keep highest score per program
@@ -637,7 +637,7 @@ def extract_location_signal(
             # (e.g., job has "Colorado Springs" and CSV has "Colorado Springs CO")
             if not match_found:
                 # Extract city/base names from job location
-                for word in location_lower.split(','):
+                for word in location_lower.split(","):
                     word = word.strip()
                     if len(word) >= 4 and word in csv_loc_lower:
                         match_found = True
@@ -647,7 +647,7 @@ def extract_location_signal(
             # Strategy 3: State-based region matching (weaker signal)
             if not match_found:
                 # Check for state abbreviations
-                state_pattern = r'\b([A-Z]{2})\b'
+                state_pattern = r"\b([A-Z]{2})\b"
                 job_states = set(re.findall(state_pattern, location))
                 csv_states = set(re.findall(state_pattern, csv_location))
                 if job_states & csv_states:  # Intersection
@@ -657,17 +657,20 @@ def extract_location_signal(
             if match_found:
                 # Determine score based on match type
                 if match_type == "exact":
-                    score = SCORING_WEIGHTS['location_match_exact']
+                    score = SCORING_WEIGHTS["location_match_exact"]
                 elif match_type == "partial":
-                    score = SCORING_WEIGHTS['location_match_region'] + 5
+                    score = SCORING_WEIGHTS["location_match_region"] + 5
                 else:  # region
-                    score = SCORING_WEIGHTS['location_match_region']
+                    score = SCORING_WEIGHTS["location_match_region"]
 
                 for program_name in program_list:
                     signal_desc = f"Location match ({match_type}): {location} -> {program_name} via '{csv_location}'"
 
                     # Keep highest score per program
-                    if program_name not in program_scores or program_scores[program_name][0] < score:
+                    if (
+                        program_name not in program_scores
+                        or program_scores[program_name][0] < score
+                    ):
                         program_scores[program_name] = (score, signal_desc)
 
     # Convert to signals list
@@ -684,8 +687,7 @@ def extract_location_signal(
 
 
 def extract_keyword_signals(
-    job: Dict,
-    use_dynamic_keywords: bool = True
+    job: Dict, use_dynamic_keywords: bool = True
 ) -> List[Tuple[str, int, str]]:
     """
     Extract program signals from job text using keywords.
@@ -708,8 +710,10 @@ def extract_keyword_signals(
     signals = []
 
     # Combine all text fields
-    title = (job.get('title', '') or job.get('Job Title/Position', '')).lower()
-    description = (job.get('description', '') or job.get('Position Overview', '')).lower()
+    title = (job.get("title", "") or job.get("Job Title/Position", "")).lower()
+    description = (
+        job.get("description", "") or job.get("Position Overview", "")
+    ).lower()
     full_text = f"{title} {description}"
 
     # Track matched programs to avoid duplicate signals per program
@@ -735,20 +739,26 @@ def extract_keyword_signals(
             for program_name in program_list:
                 # Check title (highest weight)
                 if keyword_lower in title:
-                    score = SCORING_WEIGHTS['program_name_in_title']
+                    score = SCORING_WEIGHTS["program_name_in_title"]
                     signal_desc = f"'{keyword}' in title"
 
                     # Keep only the highest-scoring signal per program
-                    if program_name not in matched_programs or matched_programs[program_name][0] < score:
+                    if (
+                        program_name not in matched_programs
+                        or matched_programs[program_name][0] < score
+                    ):
                         matched_programs[program_name] = (score, signal_desc)
 
                 # Check description (lower weight)
                 elif keyword_lower in description:
-                    score = SCORING_WEIGHTS['program_name_in_description']
+                    score = SCORING_WEIGHTS["program_name_in_description"]
                     signal_desc = f"'{keyword}' in description"
 
                     # Keep only the highest-scoring signal per program
-                    if program_name not in matched_programs or matched_programs[program_name][0] < score:
+                    if (
+                        program_name not in matched_programs
+                        or matched_programs[program_name][0] < score
+                    ):
                         matched_programs[program_name] = (score, signal_desc)
     else:
         # Fallback to hardcoded PROGRAM_KEYWORDS
@@ -758,18 +768,24 @@ def extract_keyword_signals(
 
                 # Check title (highest weight)
                 if keyword_lower in title:
-                    score = SCORING_WEIGHTS['program_name_in_title']
+                    score = SCORING_WEIGHTS["program_name_in_title"]
                     signal_desc = f"'{keyword}' in title"
 
-                    if program not in matched_programs or matched_programs[program][0] < score:
+                    if (
+                        program not in matched_programs
+                        or matched_programs[program][0] < score
+                    ):
                         matched_programs[program] = (score, signal_desc)
 
                 # Check description (lower weight)
                 elif keyword_lower in description:
-                    score = SCORING_WEIGHTS['program_name_in_description']
+                    score = SCORING_WEIGHTS["program_name_in_description"]
                     signal_desc = f"'{keyword}' in description"
 
-                    if program not in matched_programs or matched_programs[program][0] < score:
+                    if (
+                        program not in matched_programs
+                        or matched_programs[program][0] < score
+                    ):
                         matched_programs[program] = (score, signal_desc)
 
     # Convert matched_programs dict to signals list
@@ -777,16 +793,18 @@ def extract_keyword_signals(
         signals.append((program_name, score, signal_desc))
 
     # Check for DCGS-specific keywords (always check for these)
-    dcgs_keywords = ['dcgs', '480th', 'dgs-', 'distributed common ground', 'isr']
+    dcgs_keywords = ["dcgs", "480th", "dgs-", "distributed common ground", "isr"]
     for kw in dcgs_keywords:
         if kw in full_text:
             # Only add DCGS Family signal if not already matched through dynamic keywords
             if "DCGS Family" not in matched_programs:
-                signals.append((
-                    "DCGS Family",
-                    SCORING_WEIGHTS['dcgs_specific_keyword'],
-                    f"DCGS keyword: '{kw}'"
-                ))
+                signals.append(
+                    (
+                        "DCGS Family",
+                        SCORING_WEIGHTS["dcgs_specific_keyword"],
+                        f"DCGS keyword: '{kw}'",
+                    )
+                )
             break
 
     return signals
@@ -806,11 +824,11 @@ def calculate_match_confidence(total_score: int) -> Tuple[float, str]:
     confidence = min(1.0, total_score / 100)
 
     if confidence >= 0.70:
-        return confidence, 'direct'
+        return confidence, "direct"
     elif confidence >= 0.50:
-        return confidence, 'fuzzy'
+        return confidence, "fuzzy"
     else:
-        return confidence, 'inferred'
+        return confidence, "inferred"
 
 
 def calculate_bd_priority_score(job: Dict, match_confidence: float) -> Tuple[int, str]:
@@ -827,12 +845,12 @@ def calculate_bd_priority_score(job: Dict, match_confidence: float) -> Tuple[int
     score = 50  # Base score
 
     # Clearance boost (0-35)
-    clearance = (job.get('clearance', '') or job.get('Security Clearance', '')).lower()
+    clearance = (job.get("clearance", "") or job.get("Security Clearance", "")).lower()
     clearance_boosts = {
-        'poly': 35,
-        'ts/sci': 25,
-        'top secret': 15,
-        'secret': 5,
+        "poly": 35,
+        "ts/sci": 25,
+        "top secret": 15,
+        "secret": 5,
     }
     for key, boost in clearance_boosts.items():
         if key in clearance:
@@ -843,13 +861,15 @@ def calculate_bd_priority_score(job: Dict, match_confidence: float) -> Tuple[int
     score += int(match_confidence * 20)
 
     # DCGS relevance boost (0-20)
-    description = (job.get('description', '') or job.get('Position Overview', '')).lower()
-    if 'dcgs' in description:
+    description = (
+        job.get("description", "") or job.get("Position Overview", "")
+    ).lower()
+    if "dcgs" in description:
         score += 20
 
     # Priority location boost (0-10)
-    location = (job.get('location', '') or job.get('Location', '')).lower()
-    if 'san diego' in location:
+    location = (job.get("location", "") or job.get("Location", "")).lower()
+    if "san diego" in location:
         score += 10
 
     # Cap at 100
@@ -857,11 +877,11 @@ def calculate_bd_priority_score(job: Dict, match_confidence: float) -> Tuple[int
 
     # Determine tier
     if score >= 80:
-        tier = 'Hot'
+        tier = "Hot"
     elif score >= 50:
-        tier = 'Warm'
+        tier = "Warm"
     else:
-        tier = 'Cold'
+        tier = "Cold"
 
     return score, tier
 
@@ -897,7 +917,9 @@ def map_job_to_program(job: Dict) -> MappingResult:
         best_score = program_scores[best_program]
 
         # Get secondary candidates
-        sorted_programs = sorted(program_scores.items(), key=lambda x: x[1], reverse=True)
+        sorted_programs = sorted(
+            program_scores.items(), key=lambda x: x[1], reverse=True
+        )
         secondary = [p[0] for p in sorted_programs[1:4] if p[1] > 20]
     else:
         best_program = "Unmatched"
@@ -917,13 +939,14 @@ def map_job_to_program(job: Dict) -> MappingResult:
         bd_priority_score=bd_score,
         priority_tier=tier,
         signals=all_signals,
-        secondary_candidates=secondary
+        secondary_candidates=secondary,
     )
 
 
 # ============================================
 # BATCH PROCESSING
 # ============================================
+
 
 def process_jobs_batch(jobs: List[Dict]) -> List[Dict]:
     """
@@ -941,14 +964,14 @@ def process_jobs_batch(jobs: List[Dict]) -> List[Dict]:
         result = map_job_to_program(job)
 
         enriched = job.copy()
-        enriched['_mapping'] = {
-            'program_name': result.program_name,
-            'match_confidence': result.match_confidence,
-            'match_type': result.match_type,
-            'bd_priority_score': result.bd_priority_score,
-            'priority_tier': result.priority_tier,
-            'signals': result.signals,
-            'secondary_candidates': result.secondary_candidates,
+        enriched["_mapping"] = {
+            "program_name": result.program_name,
+            "match_confidence": result.match_confidence,
+            "match_type": result.match_type,
+            "bd_priority_score": result.bd_priority_score,
+            "priority_tier": result.priority_tier,
+            "signals": result.signals,
+            "secondary_candidates": result.secondary_candidates,
         }
 
         results.append(enriched)
@@ -960,18 +983,20 @@ def process_jobs_batch(jobs: List[Dict]) -> List[Dict]:
 # CLI INTERFACE
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Map jobs to federal programs')
-    parser.add_argument('--input', '-i', required=True, help='Input JSON file with jobs')
-    parser.add_argument('--output', '-o', required=True, help='Output JSON file')
-    parser.add_argument('--test', action='store_true', help='Process only first 5 jobs')
+    parser = argparse.ArgumentParser(description="Map jobs to federal programs")
+    parser.add_argument(
+        "--input", "-i", required=True, help="Input JSON file with jobs"
+    )
+    parser.add_argument("--output", "-o", required=True, help="Output JSON file")
+    parser.add_argument("--test", action="store_true", help="Process only first 5 jobs")
 
     args = parser.parse_args()
 
     # Load jobs
-    with open(args.input, 'r') as f:
+    with open(args.input, "r") as f:
         jobs = json.load(f)
 
     if args.test:
@@ -982,20 +1007,24 @@ if __name__ == '__main__':
     results = process_jobs_batch(jobs)
 
     # Save results
-    with open(args.output, 'w') as f:
+    with open(args.output, "w") as f:
         json.dump(results, f, indent=2)
 
     # Summary
-    by_tier = {'Hot': 0, 'Warm': 0, 'Cold': 0}
-    by_type = {'direct': 0, 'fuzzy': 0, 'inferred': 0}
+    by_tier = {"Hot": 0, "Warm": 0, "Cold": 0}
+    by_type = {"direct": 0, "fuzzy": 0, "inferred": 0}
 
     for r in results:
-        mapping = r.get('_mapping', {})
-        tier = mapping.get('priority_tier', 'Cold')
-        mtype = mapping.get('match_type', 'inferred')
+        mapping = r.get("_mapping", {})
+        tier = mapping.get("priority_tier", "Cold")
+        mtype = mapping.get("match_type", "inferred")
         by_tier[tier] = by_tier.get(tier, 0) + 1
         by_type[mtype] = by_type.get(mtype, 0) + 1
 
     print(f"\nProcessed {len(results)} jobs:")
-    print(f"  By Tier: Hot={by_tier['Hot']}, Warm={by_tier['Warm']}, Cold={by_tier['Cold']}")
-    print(f"  By Match: Direct={by_type['direct']}, Fuzzy={by_type['fuzzy']}, Inferred={by_type['inferred']}")
+    print(
+        f"  By Tier: Hot={by_tier['Hot']}, Warm={by_tier['Warm']}, Cold={by_tier['Cold']}"
+    )
+    print(
+        f"  By Match: Direct={by_type['direct']}, Fuzzy={by_type['fuzzy']}, Inferred={by_type['inferred']}"
+    )

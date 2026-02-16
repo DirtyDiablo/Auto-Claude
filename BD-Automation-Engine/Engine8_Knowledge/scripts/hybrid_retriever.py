@@ -10,6 +10,7 @@ import numpy as np
 import logging
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from rank_bm25 import BM25Okapi
+
     BM25_AVAILABLE = True
 except ImportError:
     BM25_AVAILABLE = False
@@ -24,6 +26,7 @@ except ImportError:
 
 try:
     from sentence_transformers import CrossEncoder
+
     CROSSENCODER_AVAILABLE = True
 except ImportError:
     CROSSENCODER_AVAILABLE = False
@@ -31,6 +34,7 @@ except ImportError:
 
 try:
     import openai
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
@@ -38,6 +42,7 @@ except ImportError:
 
 try:
     from qdrant_client import QdrantClient
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -73,10 +78,10 @@ class HybridRetriever:
         self,
         qdrant_url: str = None,
         collection_name: str = "bd_knowledge",
-        use_reranker: bool = True
+        use_reranker: bool = True,
     ):
         # Qdrant - prefer server URL from environment
-        qdrant_url = qdrant_url or os.getenv('QDRANT_URL', 'http://localhost:6333')
+        qdrant_url = qdrant_url or os.getenv("QDRANT_URL", "http://localhost:6333")
 
         # Qdrant client - connect to server
         if QDRANT_AVAILABLE:
@@ -97,7 +102,9 @@ class HybridRetriever:
         if OPENAI_AVAILABLE:
             try:
                 self.openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-                logger.info(f"HybridRetriever using OpenAI embeddings: {self.embedding_model}")
+                logger.info(
+                    f"HybridRetriever using OpenAI embeddings: {self.embedding_model}"
+                )
             except Exception as e:
                 logger.warning(f"OpenAI init failed: {e}")
                 self.openai_client = None
@@ -109,7 +116,7 @@ class HybridRetriever:
         self.reranker = None
         if use_reranker and CROSSENCODER_AVAILABLE:
             try:
-                self.reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-6-v2')
+                self.reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
             except Exception as e:
                 logger.warning(f"Reranker init failed: {e}")
                 self.use_reranker = False
@@ -122,7 +129,7 @@ class HybridRetriever:
         """Build BM25 index for collection."""
         if not BM25_AVAILABLE:
             return
-        tokenized = [doc.get('text', '').lower().split() for doc in documents]
+        tokenized = [doc.get("text", "").lower().split() for doc in documents]
         self._bm25_indices[collection] = BM25Okapi(tokenized)
         self._bm25_docs[collection] = documents
 
@@ -130,38 +137,54 @@ class HybridRetriever:
     def _extract_text(payload: Dict) -> str:
         """Extract readable text from a Qdrant payload across different collection schemas."""
         # Try common text fields first
-        for key in ('content', 'text', 'summary', 'description', 'Raw Notes', 'notes'):
-            val = payload.get(key, '')
+        for key in ("content", "text", "summary", "description", "Raw Notes", "notes"):
+            val = payload.get(key, "")
             if val and len(str(val)) > 10:
                 return str(val)
 
         # Build text from name/title/company fields
         parts = []
-        name = payload.get('\ufeffContact Name', '') or payload.get('Name', '') or payload.get('name', '') or payload.get('Program Name', '')
+        name = (
+            payload.get("\ufeffContact Name", "")
+            or payload.get("Name", "")
+            or payload.get("name", "")
+            or payload.get("Program Name", "")
+        )
         if name:
             parts.append(str(name))
-        for key in ('Role/Title', 'jobTitle', 'title'):
-            val = payload.get(key, '')
+        for key in ("Role/Title", "jobTitle", "title"):
+            val = payload.get(key, "")
             if val:
                 parts.append(str(val))
                 break
-        for key in ('company', 'employer', 'Agency', 'agency', 'Prime Contractor', 'prime_contractor'):
-            val = payload.get(key, '')
+        for key in (
+            "company",
+            "employer",
+            "Agency",
+            "agency",
+            "Prime Contractor",
+            "prime_contractor",
+        ):
+            val = payload.get(key, "")
             if val:
                 parts.append(str(val))
                 break
-        for key in ('Program', 'program', 'program_name'):
-            val = payload.get(key, '')
+        for key in ("Program", "program", "program_name"):
+            val = payload.get(key, "")
             if val:
                 parts.append(str(val))
                 break
 
         if parts:
-            return ' | '.join(parts)
+            return " | ".join(parts)
 
         # Last resort: concatenate all non-empty string values
-        vals = [str(v) for v in payload.values() if v and isinstance(v, str) and len(str(v)) > 3]
-        return ' | '.join(vals[:5]) if vals else ''
+        vals = [
+            str(v)
+            for v in payload.values()
+            if v and isinstance(v, str) and len(str(v)) > 3
+        ]
+        return " | ".join(vals[:5]) if vals else ""
 
     @openai_retry
     def _generate_embedding(self, text: str) -> List[float]:
@@ -170,8 +193,7 @@ class HybridRetriever:
             return []
         try:
             response = self.openai_client.embeddings.create(
-                model=self.embedding_model,
-                input=text
+                model=self.embedding_model, input=text
             )
             return response.data[0].embedding
         except Exception as e:
@@ -191,17 +213,15 @@ class HybridRetriever:
 
         try:
             results = self.qdrant.query_points(
-                collection_name=collection,
-                query=query_vector,
-                limit=limit
+                collection_name=collection, query=query_vector, limit=limit
             )
             return [
                 SearchResult(
                     id=str(r.id),
                     text=self._extract_text(r.payload),
                     score=r.score,
-                    source='semantic',
-                    metadata=r.payload
+                    source="semantic",
+                    metadata=r.payload,
                 )
                 for r in results.points
             ]
@@ -233,13 +253,14 @@ class HybridRetriever:
 
         return [
             SearchResult(
-                id=docs[idx].get('id', str(idx)),
-                text=docs[idx].get('text', ''),
+                id=docs[idx].get("id", str(idx)),
+                text=docs[idx].get("text", ""),
                 score=float(scores[idx]),
-                source='keyword',
-                metadata=docs[idx]
+                source="keyword",
+                metadata=docs[idx],
             )
-            for idx in top_indices if scores[idx] > 0
+            for idx in top_indices
+            if scores[idx] > 0
         ]
 
     def _fetch_all_docs(self, collection: str) -> List[Dict]:
@@ -256,14 +277,16 @@ class HybridRetriever:
                     collection_name=collection,
                     limit=100,
                     offset=offset,
-                    with_payload=True
+                    with_payload=True,
                 )
                 for r in results:
-                    docs.append({
-                        'id': str(r.id),
-                        'text': r.payload.get('text', ''),
-                        **r.payload
-                    })
+                    docs.append(
+                        {
+                            "id": str(r.id),
+                            "text": r.payload.get("text", ""),
+                            **r.payload,
+                        }
+                    )
                 if offset is None:
                     break
         except Exception as e:
@@ -292,7 +315,7 @@ class HybridRetriever:
         for doc_id in sorted_ids:
             result = results_map[doc_id]
             result.score = scores[doc_id]
-            result.source = 'hybrid'
+            result.source = "hybrid"
             final.append(result)
 
         return final
@@ -323,7 +346,7 @@ class HybridRetriever:
         collection: str = "bd_knowledge",
         limit: int = 10,
         use_hybrid: bool = True,
-        use_rerank: bool = True
+        use_rerank: bool = True,
     ) -> List[SearchResult]:
         """
         Main search method.
@@ -361,14 +384,12 @@ class HybridRetriever:
         self, query: str, collections: List[str], limit_per: int = 5
     ) -> Dict[str, List[SearchResult]]:
         """Search across multiple collections."""
-        return {
-            col: self.search(query, col, limit_per)
-            for col in collections
-        }
+        return {col: self.search(query, col, limit_per) for col in collections}
 
 
 # Singleton
 _retriever_instance = None
+
 
 def get_hybrid_retriever(qdrant_path: str = None) -> HybridRetriever:
     global _retriever_instance

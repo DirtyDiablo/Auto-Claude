@@ -136,7 +136,11 @@ class TestEventTransformer:
         event = Event(
             event_type="test",
             source="test",
-            metadata={"correlation_id": "abc", "causation_id": "def", "internal_key": "secret"},
+            metadata={
+                "correlation_id": "abc",
+                "causation_id": "def",
+                "internal_key": "secret",
+            },
         )
         result = transformer.transform_for_dashboard(event)
         assert "correlation_id" in result["metadata"]
@@ -176,7 +180,9 @@ class TestClientSubscription:
         sub = ClientSubscription(ws, "dashboard")
         sub.filters = {"program": "PACAF"}
 
-        match_event = Event(event_type="test", source="test", payload={"program": "AF DCGS - PACAF"})
+        match_event = Event(
+            event_type="test", source="test", payload={"program": "AF DCGS - PACAF"}
+        )
         no_match = Event(event_type="test", source="test", payload={"program": "F-35"})
 
         assert sub.matches_event(match_event) is True

@@ -19,9 +19,14 @@ async def _check_service(url: str, timeout: float = 3.0) -> dict:
     """Check if a service is reachable and return status."""
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=timeout) as client:
             r = await client.get(url)
-            return {"status": "online", "code": r.status_code, "latency_ms": round(r.elapsed.total_seconds() * 1000)}
+            return {
+                "status": "online",
+                "code": r.status_code,
+                "latency_ms": round(r.elapsed.total_seconds() * 1000),
+            }
     except Exception as e:
         return {"status": "offline", "error": str(e)[:100]}
 
@@ -43,8 +48,11 @@ async def platform_stats():
     contacts_stats = {"total": 0, "by_tier": {}, "by_program_top5": []}
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=5) as client:
-            r = await client.get("http://127.0.0.1:8100/api/v2/contacts", params={"limit": 1})
+            r = await client.get(
+                "http://127.0.0.1:8100/api/v2/contacts", params={"limit": 1}
+            )
             if r.status_code == 200:
                 contacts_stats["total"] = r.json().get("total", 0)
     except Exception:
@@ -54,8 +62,11 @@ async def platform_stats():
     programs_stats = {"total": 0}
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=5) as client:
-            r = await client.get("http://127.0.0.1:8100/api/v2/programs", params={"limit": 1})
+            r = await client.get(
+                "http://127.0.0.1:8100/api/v2/programs", params={"limit": 1}
+            )
             if r.status_code == 200:
                 programs_stats["total"] = r.json().get("total", 0)
     except Exception:
@@ -65,8 +76,11 @@ async def platform_stats():
     jobs_stats = {"total": 0}
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=5) as client:
-            r = await client.get("http://127.0.0.1:8100/api/v2/jobs", params={"limit": 1})
+            r = await client.get(
+                "http://127.0.0.1:8100/api/v2/jobs", params={"limit": 1}
+            )
             if r.status_code == 200:
                 jobs_stats["total"] = r.json().get("total", 0)
     except Exception:
@@ -76,6 +90,7 @@ async def platform_stats():
     vector_stats = {"total_vectors": 0, "collections": []}
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=5) as client:
             r = await client.get("http://127.0.0.1:6333/collections")
             if r.status_code == 200:
@@ -83,10 +98,14 @@ async def platform_stats():
                 total = 0
                 for col in collections:
                     col_name = col.get("name", "")
-                    cr = await client.get(f"http://127.0.0.1:6333/collections/{col_name}")
+                    cr = await client.get(
+                        f"http://127.0.0.1:6333/collections/{col_name}"
+                    )
                     if cr.status_code == 200:
                         count = cr.json().get("result", {}).get("points_count", 0)
-                        vector_stats["collections"].append({"name": col_name, "points": count})
+                        vector_stats["collections"].append(
+                            {"name": col_name, "points": count}
+                        )
                         total += count
                 vector_stats["total_vectors"] = total
     except Exception:
@@ -96,6 +115,7 @@ async def platform_stats():
     ml_stats = {"model_loaded": False, "model_type": "N/A", "drift_status": "unknown"}
     try:
         from Engine8_Knowledge.ml.response_predictor import get_response_predictor
+
         predictor = get_response_predictor()
         info = predictor.get_model_info()
         ml_stats["model_loaded"] = True
@@ -108,6 +128,7 @@ async def platform_stats():
     automation_stats = {"scheduled_tasks": 0, "active_workflows": 0, "claude_queue": 0}
     try:
         from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
         scheduler = get_task_scheduler()
         schedule = scheduler.get_schedule()
         automation_stats["scheduled_tasks"] = len(schedule)
@@ -118,6 +139,7 @@ async def platform_stats():
 
     try:
         from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
         coordinator = get_agent_coordinator()
         automation_stats["active_workflows"] = len(coordinator.get_active_workflows())
         automation_stats["workflow_definitions"] = len(coordinator.workflows)
@@ -125,7 +147,10 @@ async def platform_stats():
         pass
 
     try:
-        from Engine8_Knowledge.automation.auto_claude_tasks import get_claude_task_manager
+        from Engine8_Knowledge.automation.auto_claude_tasks import (
+            get_claude_task_manager,
+        )
+
         mgr = get_claude_task_manager()
         stats = mgr.get_stats()
         automation_stats["claude_queue"] = stats.get("pending", 0)
@@ -137,6 +162,7 @@ async def platform_stats():
     graph_stats = {"entities": 0, "relationships": 0}
     try:
         from Engine8_Knowledge.graph.bd_knowledge_graph import get_bd_knowledge_graph
+
         bg = get_bd_knowledge_graph()
         if bg:
             g_stats = bg.get_stats()

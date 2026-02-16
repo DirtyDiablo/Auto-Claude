@@ -23,6 +23,7 @@ from src.data_quality.engine import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def engine():
     return DataQualityEngine()
@@ -35,42 +36,95 @@ def loaded_engine(engine):
     recent = (now - timedelta(days=10)).isoformat()
     stale = (now - timedelta(days=120)).isoformat()
 
-    engine.set_data("contacts", [
-        {"id": "c1", "first_name": "John", "last_name": "Smith",
-         "email": "john@acme.com", "phone": "+12025551234",
-         "job_title": "Vice President", "hierarchy_tier": 2,
-         "location": "San Diego, CA", "program": "AF DCGS - PACAF",
-         "last_updated": recent},
-        {"id": "c2", "first_name": "Jane", "last_name": "Doe",
-         "email": "jane@bad", "phone": "555",
-         "job_title": "Analyst", "hierarchy_tier": 5,
-         "location": "Langley, VA", "program": "AF DCGS - Langley",
-         "last_updated": stale},
-        {"id": "c3", "first_name": "", "last_name": "Brown",
-         "email": "", "phone": "",
-         "job_title": "Director", "hierarchy_tier": 5,
-         "location": "San Diego, CA", "program": "WRONG PROGRAM",
-         "last_updated": recent},
-    ])
+    engine.set_data(
+        "contacts",
+        [
+            {
+                "id": "c1",
+                "first_name": "John",
+                "last_name": "Smith",
+                "email": "john@acme.com",
+                "phone": "+12025551234",
+                "job_title": "Vice President",
+                "hierarchy_tier": 2,
+                "location": "San Diego, CA",
+                "program": "AF DCGS - PACAF",
+                "last_updated": recent,
+            },
+            {
+                "id": "c2",
+                "first_name": "Jane",
+                "last_name": "Doe",
+                "email": "jane@bad",
+                "phone": "555",
+                "job_title": "Analyst",
+                "hierarchy_tier": 5,
+                "location": "Langley, VA",
+                "program": "AF DCGS - Langley",
+                "last_updated": stale,
+            },
+            {
+                "id": "c3",
+                "first_name": "",
+                "last_name": "Brown",
+                "email": "",
+                "phone": "",
+                "job_title": "Director",
+                "hierarchy_tier": 5,
+                "location": "San Diego, CA",
+                "program": "WRONG PROGRAM",
+                "last_updated": recent,
+            },
+        ],
+    )
 
-    engine.set_data("programs", [
-        {"id": "p1", "name": "AF DCGS - PACAF", "contract_value": 500_000_000,
-         "contract_end": (now + timedelta(days=365)).isoformat()},
-        {"id": "p2", "name": "", "contract_value": -100,
-         "contract_end": (now - timedelta(days=30)).isoformat()},
-    ])
+    engine.set_data(
+        "programs",
+        [
+            {
+                "id": "p1",
+                "name": "AF DCGS - PACAF",
+                "contract_value": 500_000_000,
+                "contract_end": (now + timedelta(days=365)).isoformat(),
+            },
+            {
+                "id": "p2",
+                "name": "",
+                "contract_value": -100,
+                "contract_end": (now - timedelta(days=30)).isoformat(),
+            },
+        ],
+    )
 
-    engine.set_data("jobs", [
-        {"id": "j1", "title": "Systems Engineer", "location": "San Diego",
-         "clearance": "top_secret", "program": "DCGS", "url": "https://example.com/job1"},
-        {"id": "j2", "title": "", "location": "", "clearance": "INVALID_LEVEL",
-         "program": "", "url": ""},
-    ])
+    engine.set_data(
+        "jobs",
+        [
+            {
+                "id": "j1",
+                "title": "Systems Engineer",
+                "location": "San Diego",
+                "clearance": "top_secret",
+                "program": "DCGS",
+                "url": "https://example.com/job1",
+            },
+            {
+                "id": "j2",
+                "title": "",
+                "location": "",
+                "clearance": "INVALID_LEVEL",
+                "program": "",
+                "url": "",
+            },
+        ],
+    )
 
-    engine.set_data("enrichments", [
-        {"id": "e1", "embedding": [0.1, 0.2, 0.3], "confidence": 0.95},
-        {"id": "e2", "embedding": None, "confidence": 0.4},
-    ])
+    engine.set_data(
+        "enrichments",
+        [
+            {"id": "e1", "embedding": [0.1, 0.2, 0.3], "confidence": 0.95},
+            {"id": "e2", "embedding": None, "confidence": 0.4},
+        ],
+    )
 
     return engine
 
@@ -78,6 +132,7 @@ def loaded_engine(engine):
 # =========================================
 # VALIDATION HELPERS
 # =========================================
+
 
 class TestValidateEmail:
     def test_valid_email(self):
@@ -207,6 +262,7 @@ class TestDuplicateDetection:
 # FULL AUDIT
 # =========================================
 
+
 class TestFullAudit:
     def test_audit_returns_report(self, loaded_engine):
         report = loaded_engine.run_full_audit()
@@ -244,7 +300,9 @@ class TestFullAudit:
 
     def test_audit_records_audited(self, loaded_engine):
         report = loaded_engine.run_full_audit()
-        assert report.records_audited == 9  # 3 contacts + 2 programs + 2 jobs + 2 enrichments
+        assert (
+            report.records_audited == 9
+        )  # 3 contacts + 2 programs + 2 jobs + 2 enrichments
 
     def test_empty_data_perfect_score(self, engine):
         report = engine.run_full_audit()
@@ -259,13 +317,19 @@ class TestFullAudit:
 # SINGLE RECORD SCORING
 # =========================================
 
+
 class TestSingleRecordScoring:
     def test_perfect_contact(self, engine):
         record = {
-            "id": "c1", "first_name": "John", "last_name": "Smith",
-            "email": "john@acme.com", "phone": "+12025551234",
-            "job_title": "Vice President", "hierarchy_tier": 2,
-            "location": "San Diego", "program": "AF DCGS - PACAF",
+            "id": "c1",
+            "first_name": "John",
+            "last_name": "Smith",
+            "email": "john@acme.com",
+            "phone": "+12025551234",
+            "job_title": "Vice President",
+            "hierarchy_tier": 2,
+            "location": "San Diego",
+            "program": "AF DCGS - PACAF",
             "last_updated": datetime.now(timezone.utc).isoformat(),
         }
         score = engine.score_single_record("contacts", record)
@@ -274,17 +338,28 @@ class TestSingleRecordScoring:
 
     def test_bad_contact_low_score(self, engine):
         record = {
-            "id": "c2", "first_name": "", "last_name": "",
-            "email": "bad_email", "phone": "x",
-            "job_title": "VP", "hierarchy_tier": 6,
-            "location": "San Diego", "program": "WRONG",
+            "id": "c2",
+            "first_name": "",
+            "last_name": "",
+            "email": "bad_email",
+            "phone": "x",
+            "job_title": "VP",
+            "hierarchy_tier": 6,
+            "location": "San Diego",
+            "program": "WRONG",
         }
         score = engine.score_single_record("contacts", record)
         assert score.overall_score < 60
         assert len(score.issues) > 0
 
     def test_single_record_dimensions(self, engine):
-        record = {"id": "j1", "title": "", "clearance": "INVALID", "location": "", "program": ""}
+        record = {
+            "id": "j1",
+            "title": "",
+            "clearance": "INVALID",
+            "location": "",
+            "program": "",
+        }
         score = engine.score_single_record("jobs", record)
         assert len(score.dimension_scores) > 0
 
@@ -292,6 +367,7 @@ class TestSingleRecordScoring:
 # =========================================
 # ISSUES & HEALTH
 # =========================================
+
 
 class TestIssuesAndHealth:
     def test_get_issues_filtered(self, loaded_engine):
@@ -321,6 +397,7 @@ class TestIssuesAndHealth:
 # RULES
 # =========================================
 
+
 class TestRules:
     def test_default_rules_registered(self, engine):
         rules = engine.get_rules()
@@ -328,8 +405,11 @@ class TestRules:
 
     def test_add_custom_rule(self, engine):
         rule = DataQualityRule(
-            name="custom_check", dimension="validity", domain="contacts",
-            severity="low", description="Custom test rule",
+            name="custom_check",
+            dimension="validity",
+            domain="contacts",
+            severity="low",
+            description="Custom test rule",
         )
         engine.add_rule(rule)
         assert any(r.name == "custom_check" for r in engine.get_rules())
@@ -338,6 +418,7 @@ class TestRules:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_engine(self):

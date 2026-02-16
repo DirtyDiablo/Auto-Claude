@@ -12,6 +12,7 @@ from src.api.relationship_api import router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     test_app = FastAPI()
@@ -27,6 +28,7 @@ def client(app):
 # =========================================
 # RELATIONSHIP STRENGTH ENDPOINTS
 # =========================================
+
 
 class TestRelationshipStrengthEndpoints:
     def test_score_relationship(self, client):
@@ -56,6 +58,7 @@ class TestRelationshipStrengthEndpoints:
 # INFLUENCE ENDPOINTS
 # =========================================
 
+
 class TestInfluenceEndpoints:
     def test_global_influence(self, client):
         resp = client.get("/relationships/influence/global")
@@ -82,6 +85,7 @@ class TestInfluenceEndpoints:
 # PATH ENDPOINTS
 # =========================================
 
+
 class TestPathEndpoints:
     def test_optimal_path(self, client):
         resp = client.get("/relationships/path/from-id/to-id")
@@ -107,6 +111,7 @@ class TestPathEndpoints:
 # =========================================
 # NETWORK ENDPOINTS
 # =========================================
+
 
 class TestNetworkEndpoints:
     def test_communities(self, client):
@@ -141,6 +146,7 @@ class TestNetworkEndpoints:
 # RECOMPUTE ENDPOINT
 # =========================================
 
+
 class TestRecomputeEndpoint:
     def test_recompute(self, client):
         resp = client.post("/relationships/recompute", json={"scope": "all"})
@@ -153,10 +159,12 @@ class TestRecomputeEndpoint:
 # ENDPOINT COUNT
 # =========================================
 
+
 class TestEndpointCount:
     def test_fourteen_endpoints(self, app):
         rel_routes = [
-            r for r in app.routes
+            r
+            for r in app.routes
             if hasattr(r, "path") and r.path.startswith("/relationships")
         ]
         assert len(rel_routes) == 14

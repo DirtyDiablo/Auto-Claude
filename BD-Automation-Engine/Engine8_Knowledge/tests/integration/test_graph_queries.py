@@ -19,6 +19,7 @@ from Engine8_Knowledge.graph.queries import GraphQueries
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def mock_mgr():
     mgr = MagicMock()
@@ -38,12 +39,21 @@ def gq(mock_mgr):
 # TestContactsByProgram
 # ---------------------------------------------------------------------------
 
+
 class TestContactsByProgram:
     """Test find_contacts_by_program query."""
 
     def test_returns_list(self, gq, mock_mgr):
         mock_mgr.run_query.return_value = [
-            {"name": "Alice", "title": "PM", "tier": 1, "bd_priority": "High", "company": "Leidos", "email": "a@b.com", "phone": ""},
+            {
+                "name": "Alice",
+                "title": "PM",
+                "tier": 1,
+                "bd_priority": "High",
+                "company": "Leidos",
+                "email": "a@b.com",
+                "phone": "",
+            },
         ]
         results = gq.find_contacts_by_program("DCGS")
         assert len(results) == 1
@@ -64,12 +74,16 @@ class TestContactsByProgram:
 # TestShortestPath
 # ---------------------------------------------------------------------------
 
+
 class TestShortestPath:
     """Test find_shortest_path query."""
 
     def test_path_found(self, gq, mock_mgr):
         mock_mgr.run_single.return_value = {
-            "path_nodes": [{"name": "Alice", "type": "Person"}, {"name": "Bob", "type": "Person"}],
+            "path_nodes": [
+                {"name": "Alice", "type": "Person"},
+                {"name": "Bob", "type": "Person"},
+            ],
             "path_rels": ["WORKS_AT"],
             "hops": 2,
         }
@@ -96,12 +110,18 @@ class TestShortestPath:
 # TestIntroductionPath
 # ---------------------------------------------------------------------------
 
+
 class TestIntroductionPath:
     """Test find_introduction_path query."""
 
     def test_returns_list(self, gq, mock_mgr):
         mock_mgr.run_query.return_value = [
-            {"from_person": "PTS Employee", "to_person": "Target", "hops": 2, "path_names": ["PTS", "Middleman", "Target"]},
+            {
+                "from_person": "PTS Employee",
+                "to_person": "Target",
+                "hops": 2,
+                "path_names": ["PTS", "Middleman", "Target"],
+            },
         ]
         results = gq.find_introduction_path("Target")
         assert len(results) == 1
@@ -117,15 +137,31 @@ class TestIntroductionPath:
 # TestProgramOrgChart
 # ---------------------------------------------------------------------------
 
+
 class TestProgramOrgChart:
     """Test get_program_org_chart query."""
 
     def test_returns_structure(self, gq, mock_mgr):
-        mock_mgr.run_query.return_value = [{
-            "program": "DCGS", "acronym": "DCGS", "prime": "NG", "agency": "Army",
-            "managers": [{"name": "Jane", "title": "PM", "tier": 1, "role": "manager"}],
-            "team": [{"name": "Bob", "title": "Eng", "tier": 3, "company": "Leidos", "role": "team"}],
-        }]
+        mock_mgr.run_query.return_value = [
+            {
+                "program": "DCGS",
+                "acronym": "DCGS",
+                "prime": "NG",
+                "agency": "Army",
+                "managers": [
+                    {"name": "Jane", "title": "PM", "tier": 1, "role": "manager"}
+                ],
+                "team": [
+                    {
+                        "name": "Bob",
+                        "title": "Eng",
+                        "tier": 3,
+                        "company": "Leidos",
+                        "role": "team",
+                    }
+                ],
+            }
+        ]
         result = gq.get_program_org_chart("DCGS")
         assert result["program"] == "DCGS"
         assert len(result["managers"]) == 1
@@ -143,15 +179,23 @@ class TestProgramOrgChart:
 # TestCompanyNetwork
 # ---------------------------------------------------------------------------
 
+
 class TestCompanyNetwork:
     """Test get_company_network query."""
 
     def test_returns_data(self, gq, mock_mgr):
-        mock_mgr.run_query.return_value = [{
-            "company": "Leidos", "type": "prime", "defense_prime": True,
-            "programs": [{"name": "DCGS"}], "people": [{"name": "Alice"}],
-            "subs": ["SAIC"], "program_count": 1, "people_count": 1,
-        }]
+        mock_mgr.run_query.return_value = [
+            {
+                "company": "Leidos",
+                "type": "prime",
+                "defense_prime": True,
+                "programs": [{"name": "DCGS"}],
+                "people": [{"name": "Alice"}],
+                "subs": ["SAIC"],
+                "program_count": 1,
+                "people_count": 1,
+            }
+        ]
         result = gq.get_company_network("Leidos")
         assert result["company"] == "Leidos"
         assert result["program_count"] == 1
@@ -167,12 +211,19 @@ class TestCompanyNetwork:
 # TestHiringSignals
 # ---------------------------------------------------------------------------
 
+
 class TestHiringSignals:
     """Test find_hiring_signals query."""
 
     def test_returns_list(self, gq, mock_mgr):
         mock_mgr.run_query.return_value = [
-            {"program": "DCGS", "acronym": "DCGS", "job_count": 15, "sample_titles": ["Eng", "PM"], "prime_contractor": "NG"},
+            {
+                "program": "DCGS",
+                "acronym": "DCGS",
+                "job_count": 15,
+                "sample_titles": ["Eng", "PM"],
+                "prime_contractor": "NG",
+            },
         ]
         signals = gq.find_hiring_signals(30)
         assert len(signals) == 1
@@ -188,12 +239,21 @@ class TestHiringSignals:
 # TestInfluenceLeaders
 # ---------------------------------------------------------------------------
 
+
 class TestInfluenceLeaders:
     """Test find_influence_leaders query."""
 
     def test_returns_leaders(self, gq, mock_mgr):
         mock_mgr.run_query.return_value = [
-            {"name": "Alice", "title": "VP", "tier": 1, "company": "Leidos", "influence_score": 42, "relationships": 30, "interactions": 12},
+            {
+                "name": "Alice",
+                "title": "VP",
+                "tier": 1,
+                "company": "Leidos",
+                "influence_score": 42,
+                "relationships": 30,
+                "interactions": 12,
+            },
         ]
         leaders = gq.find_influence_leaders("DCGS")
         assert len(leaders) == 1
@@ -204,15 +264,24 @@ class TestInfluenceLeaders:
 # TestContact360
 # ---------------------------------------------------------------------------
 
+
 class TestContact360:
     """Test get_contact_360 query."""
 
     def test_found(self, gq, mock_mgr):
         mock_mgr.run_single.return_value = {
-            "name": "Alice", "title": "PM", "tier": 1, "bd_priority": "High",
-            "email": "alice@test.com", "phone": "", "linkedin": "",
-            "company": "Leidos", "programs": ["DCGS"],
-            "interaction_count": 5, "recent_interactions": [], "connections": [],
+            "name": "Alice",
+            "title": "PM",
+            "tier": 1,
+            "bd_priority": "High",
+            "email": "alice@test.com",
+            "phone": "",
+            "linkedin": "",
+            "company": "Leidos",
+            "programs": ["DCGS"],
+            "interaction_count": 5,
+            "recent_interactions": [],
+            "connections": [],
         }
         result = gq.get_contact_360("Alice")
         assert result["found"] is True
@@ -227,6 +296,7 @@ class TestContact360:
 # ---------------------------------------------------------------------------
 # TestCompetitiveOverlap
 # ---------------------------------------------------------------------------
+
 
 class TestCompetitiveOverlap:
     """Test find_competitive_overlap query."""
@@ -250,16 +320,26 @@ class TestCompetitiveOverlap:
 # TestLocationIntel
 # ---------------------------------------------------------------------------
 
+
 class TestLocationIntel:
     """Test get_location_intel query."""
 
     def test_location_found(self, gq, mock_mgr):
-        mock_mgr.run_query.return_value = [{
-            "location": "Fort Meade", "city": "Fort Meade", "state": "MD",
-            "lat": 39.1, "lon": -76.7,
-            "programs": [{"name": "DCGS"}], "people": [], "jobs": [],
-            "program_count": 1, "people_count": 0, "job_count": 0,
-        }]
+        mock_mgr.run_query.return_value = [
+            {
+                "location": "Fort Meade",
+                "city": "Fort Meade",
+                "state": "MD",
+                "lat": 39.1,
+                "lon": -76.7,
+                "programs": [{"name": "DCGS"}],
+                "people": [],
+                "jobs": [],
+                "program_count": 1,
+                "people_count": 0,
+                "job_count": 0,
+            }
+        ]
         result = gq.get_location_intel("Fort Meade")
         assert result["location"] == "Fort Meade"
         assert result["program_count"] == 1
@@ -275,12 +355,19 @@ class TestLocationIntel:
 # TestOrphanContacts
 # ---------------------------------------------------------------------------
 
+
 class TestOrphanContacts:
     """Test find_orphan_contacts query."""
 
     def test_returns_orphans(self, gq, mock_mgr):
         mock_mgr.run_query.return_value = [
-            {"name": "Orphan", "title": "Analyst", "company": "Unknown", "tier": 5, "email": "orphan@test.com"},
+            {
+                "name": "Orphan",
+                "title": "Analyst",
+                "company": "Unknown",
+                "tier": 5,
+                "email": "orphan@test.com",
+            },
         ]
         orphans = gq.find_orphan_contacts()
         assert len(orphans) == 1
@@ -294,6 +381,7 @@ class TestOrphanContacts:
 # ---------------------------------------------------------------------------
 # TestGraphStats
 # ---------------------------------------------------------------------------
+
 
 class TestGraphStats:
     """Test get_graph_stats query."""
@@ -326,11 +414,13 @@ class TestGraphStats:
 # TestSingleton
 # ---------------------------------------------------------------------------
 
+
 class TestGraphQueriesSingleton:
     """Test singleton factory."""
 
     def test_get_graph_queries_returns_instance(self):
         import Engine8_Knowledge.graph.queries as mod
+
         mod._instance = None
         with patch("Engine8_Knowledge.graph.queries.get_neo4j_manager") as mock_get:
             mock_get.return_value = MagicMock()

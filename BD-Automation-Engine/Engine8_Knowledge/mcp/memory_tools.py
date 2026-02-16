@@ -60,18 +60,21 @@ def register_memory_tools(mcp, hub) -> int:
         query: str, tags: List[str] = None, limit: int = 10
     ) -> List[Dict[str, Any]]:
         """Search institutional knowledge base."""
-        data = await hub.post("/search", json={
-            "query": query,
-            "collection": "documents",
-            "limit": limit,
-        })
+        data = await hub.post(
+            "/search",
+            json={
+                "query": query,
+                "collection": "documents",
+                "limit": limit,
+            },
+        )
         results = data.get("results", [])
         if tags and isinstance(results, list):
             results = [
-                r for r in results
+                r
+                for r in results
                 if any(
-                    tag.lower() in str(r.get("metadata", {})).lower()
-                    for tag in tags
+                    tag.lower() in str(r.get("metadata", {})).lower() for tag in tags
                 )
             ]
         return results[:limit]
@@ -95,7 +98,9 @@ def register_memory_tools(mcp, hub) -> int:
     ) -> Dict[str, Any]:
         """Generate personalized outreach following the PTS BD Formula."""
         # Gather contact intel
-        contact_data = await hub.get("/api/v2/contacts", params={"q": contact_name, "limit": 1})
+        contact_data = await hub.get(
+            "/api/v2/contacts", params={"q": contact_name, "limit": 1}
+        )
         contacts = contact_data.get("contacts", [])
         memory = await hub.get(f"/memory/contact/{contact_name}")
 

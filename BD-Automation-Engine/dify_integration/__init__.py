@@ -21,11 +21,11 @@ from .dify_apps import BDDifyApps
 from .tools_config import DIFY_EXTERNAL_TOOLS
 
 __all__ = [
-    'DifyQdrantBridge',
-    'DifyCrewAIBridge',
-    'DifyN8NBridge',
-    'BDDifyApps',
-    'DIFY_EXTERNAL_TOOLS'
+    "DifyQdrantBridge",
+    "DifyCrewAIBridge",
+    "DifyN8NBridge",
+    "BDDifyApps",
+    "DIFY_EXTERNAL_TOOLS",
 ]
 
-__version__ = '1.0.0'
+__version__ = "1.0.0"

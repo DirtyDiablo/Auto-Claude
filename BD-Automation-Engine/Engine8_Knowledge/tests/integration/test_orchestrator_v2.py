@@ -13,11 +13,16 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, DictMetaStore
 from Engine8_Knowledge.workflows.graph_builder import (
-    ProductionGraphBuilder, WorkflowDefinition, NodeSpec, EdgeSpec,
+    ProductionGraphBuilder,
+    WorkflowDefinition,
+    NodeSpec,
+    EdgeSpec,
 )
 from Engine8_Knowledge.workflows.human_loop import HumanInTheLoopManager
 from Engine8_Knowledge.workflows.orchestrator_v2 import (
-    WorkflowOrchestratorV2, WorkflowExecution, ScheduledWorkflow,
+    WorkflowOrchestratorV2,
+    WorkflowExecution,
+    ScheduledWorkflow,
 )
 
 
@@ -25,11 +30,14 @@ from Engine8_Knowledge.workflows.orchestrator_v2 import (
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 async def simple_node_a(state):
     return {**state, "step_a": True}
 
+
 async def simple_node_b(state):
     return {**state, "step_b": True}
+
 
 async def interrupt_node(state):
     return {**state, "reviewed": True}
@@ -39,10 +47,19 @@ def make_test_definition():
     return WorkflowDefinition(
         name="test_workflow",
         description="Test workflow",
-        state_schema={"step_a": False, "step_b": False, "errors": [], "step_timings": {}},
+        state_schema={
+            "step_a": False,
+            "step_b": False,
+            "errors": [],
+            "step_timings": {},
+        },
         nodes={
-            "node_a": NodeSpec(name="node_a", function=simple_node_a, description="Step A"),
-            "node_b": NodeSpec(name="node_b", function=simple_node_b, description="Step B"),
+            "node_a": NodeSpec(
+                name="node_a", function=simple_node_a, description="Step A"
+            ),
+            "node_b": NodeSpec(
+                name="node_b", function=simple_node_b, description="Step B"
+            ),
         },
         edges=[
             EdgeSpec(source="node_a", target="node_b"),
@@ -58,7 +75,9 @@ def make_interrupt_definition():
         description="Workflow with interrupt",
         state_schema={"reviewed": False, "errors": [], "step_timings": {}},
         nodes={
-            "review": NodeSpec(name="review", function=interrupt_node, description="Review"),
+            "review": NodeSpec(
+                name="review", function=interrupt_node, description="Review"
+            ),
             "done": NodeSpec(name="done", function=simple_node_b, description="Done"),
         },
         edges=[
@@ -80,7 +99,9 @@ def orchestrator(tmp_path):
     )
     builder = ProductionGraphBuilder(checkpoint_store=store)
     orch = WorkflowOrchestratorV2(
-        checkpoint_store=store, hitl_manager=hitl, graph_builder=builder,
+        checkpoint_store=store,
+        hitl_manager=hitl,
+        graph_builder=builder,
     )
     orch._schedules_path = tmp_path / "schedules.json"
     return orch
@@ -89,6 +110,7 @@ def orchestrator(tmp_path):
 # ---------------------------------------------------------------------------
 # Tests
 # ---------------------------------------------------------------------------
+
 
 def test_init(orchestrator):
     assert orchestrator is not None
@@ -182,7 +204,10 @@ async def test_get_execution_status(orchestrator):
 async def test_schedule_workflow(orchestrator):
     orchestrator.register_workflow(make_test_definition())
     schedule = await orchestrator.schedule_workflow(
-        "test_workflow", "0 6 * * *", {"input": "daily"}, enabled=True,
+        "test_workflow",
+        "0 6 * * *",
+        {"input": "daily"},
+        enabled=True,
     )
     assert isinstance(schedule, ScheduledWorkflow)
     assert schedule.cron_expression == "0 6 * * *"

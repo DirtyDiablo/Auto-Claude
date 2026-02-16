@@ -44,9 +44,16 @@ def _make_mock_ner():
     mock = MagicMock()
     mock._trained = True
     mock.ENTITY_TYPES = [
-        "PROGRAM", "CONTRACT", "COMPANY", "INSTALLATION",
-        "CLEARANCE", "NAICS", "ROLE_TITLE", "SET_ASIDE",
-        "AGENCY", "VALUE",
+        "PROGRAM",
+        "CONTRACT",
+        "COMPANY",
+        "INSTALLATION",
+        "CLEARANCE",
+        "NAICS",
+        "ROLE_TITLE",
+        "SET_ASIDE",
+        "AGENCY",
+        "VALUE",
     ]
 
     @dataclass
@@ -120,9 +127,15 @@ def _make_mock_predictor():
     mock = MagicMock()
     mock._trained = True
     mock.feature_names = [
-        "contact_tier", "days_since_last_contact", "interaction_count",
-        "response_rate", "sentiment_score", "program_pain_score",
-        "pts_past_perf_match", "clearance_match", "location_match",
+        "contact_tier",
+        "days_since_last_contact",
+        "interaction_count",
+        "response_rate",
+        "sentiment_score",
+        "program_pain_score",
+        "pts_past_perf_match",
+        "clearance_match",
+        "location_match",
     ]
 
     @dataclass
@@ -225,8 +238,13 @@ class TestNEREndpoints:
 
     def test_ner_predict_returns_entities(self, client):
         """POST /ml/ner/predict should return extracted entities."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_ner", return_value=_make_mock_ner()):
-            resp = client.post("/ml/ner/predict", json={"text": "GDIT requires TS/SCI clearance"})
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_ner",
+            return_value=_make_mock_ner(),
+        ):
+            resp = client.post(
+                "/ml/ner/predict", json={"text": "GDIT requires TS/SCI clearance"}
+            )
         assert resp.status_code == 200
         data = resp.json()
         assert "entities" in data
@@ -241,7 +259,10 @@ class TestNEREndpoints:
 
     def test_ner_train_endpoint(self, client):
         """POST /ml/ner/train should train and return metrics."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_ner", return_value=_make_mock_ner()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_ner",
+            return_value=_make_mock_ner(),
+        ):
             resp = client.post("/ml/ner/train", json={"epochs": 5})
         assert resp.status_code == 200
         data = resp.json()
@@ -251,7 +272,10 @@ class TestNEREndpoints:
 
     def test_ner_metrics_endpoint(self, client):
         """GET /ml/ner/metrics should return model status and entity types."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_ner", return_value=_make_mock_ner()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_ner",
+            return_value=_make_mock_ner(),
+        ):
             resp = client.get("/ml/ner/metrics")
         assert resp.status_code == 200
         data = resp.json()
@@ -276,10 +300,16 @@ class TestTopicEndpoints:
 
     def test_cluster_jobs_endpoint(self, client):
         """POST /ml/topics/cluster-jobs should return topic clusters."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_modeler", return_value=_make_mock_modeler()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_modeler",
+            return_value=_make_mock_modeler(),
+        ):
             resp = client.post(
                 "/ml/topics/cluster-jobs",
-                json={"documents": ["DCGS analyst job", "ISR engineer position"], "days": 90},
+                json={
+                    "documents": ["DCGS analyst job", "ISR engineer position"],
+                    "days": 90,
+                },
             )
         assert resp.status_code == 200
         data = resp.json()
@@ -289,7 +319,10 @@ class TestTopicEndpoints:
 
     def test_cluster_notes_endpoint(self, client):
         """POST /ml/topics/cluster-notes should return topic clusters."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_modeler", return_value=_make_mock_modeler()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_modeler",
+            return_value=_make_mock_modeler(),
+        ):
             resp = client.post(
                 "/ml/topics/cluster-notes",
                 json={"documents": ["Call with Leidos PM"], "days": 180},
@@ -300,13 +333,18 @@ class TestTopicEndpoints:
 
     def test_cluster_jobs_unavailable(self, client):
         """POST /ml/topics/cluster-jobs should return 503 when modeler is unavailable."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_modeler", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_modeler", return_value=None
+        ):
             resp = client.post("/ml/topics/cluster-jobs", json={"documents": []})
         assert resp.status_code == 503
 
     def test_topic_trends_endpoint(self, client):
         """GET /ml/topics/trends/{topic_id} should return trend data."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_modeler", return_value=_make_mock_modeler()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_modeler",
+            return_value=_make_mock_modeler(),
+        ):
             resp = client.get("/ml/topics/trends/0?days=90")
         assert resp.status_code == 200
         data = resp.json()
@@ -325,7 +363,10 @@ class TestPlacementEndpoints:
 
     def test_predict_placement_endpoint(self, client):
         """POST /ml/predict/placement should return a prediction."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=_make_mock_predictor()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_predictor",
+            return_value=_make_mock_predictor(),
+        ):
             resp = client.post(
                 "/ml/predict/placement",
                 json={
@@ -348,13 +389,18 @@ class TestPlacementEndpoints:
 
     def test_predict_placement_unavailable(self, client):
         """POST /ml/predict/placement should return 503 when predictor is unavailable."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=None
+        ):
             resp = client.post("/ml/predict/placement", json={})
         assert resp.status_code == 503
 
     def test_train_predictor_endpoint(self, client):
         """POST /ml/predict/train should train and return results."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=_make_mock_predictor()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_predictor",
+            return_value=_make_mock_predictor(),
+        ):
             resp = client.post("/ml/predict/train")
         assert resp.status_code == 200
         data = resp.json()
@@ -363,7 +409,10 @@ class TestPlacementEndpoints:
 
     def test_feature_importance_endpoint(self, client):
         """GET /ml/predict/feature-importance should return feature rankings."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=_make_mock_predictor()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_predictor",
+            return_value=_make_mock_predictor(),
+        ):
             resp = client.get("/ml/predict/feature-importance")
         assert resp.status_code == 200
         data = resp.json()
@@ -372,7 +421,10 @@ class TestPlacementEndpoints:
 
     def test_predictor_metrics_endpoint(self, client):
         """GET /ml/predict/metrics should return model status."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=_make_mock_predictor()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_predictor",
+            return_value=_make_mock_predictor(),
+        ):
             resp = client.get("/ml/predict/metrics")
         assert resp.status_code == 200
         data = resp.json()
@@ -381,7 +433,9 @@ class TestPlacementEndpoints:
 
     def test_predictor_metrics_unavailable(self, client):
         """GET /ml/predict/metrics should return trained=False when unavailable."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_predictor", return_value=None
+        ):
             resp = client.get("/ml/predict/metrics")
         assert resp.status_code == 200
         assert resp.json()["trained"] is False
@@ -397,7 +451,10 @@ class TestEmbeddingsEndpoints:
 
     def test_train_embeddings_endpoint(self, client):
         """POST /ml/embeddings/train should start training and return status."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_adapter", return_value=_make_mock_adapter()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_adapter",
+            return_value=_make_mock_adapter(),
+        ):
             resp = client.post("/ml/embeddings/train", json={"epochs": 5})
         assert resp.status_code == 200
         data = resp.json()
@@ -405,13 +462,18 @@ class TestEmbeddingsEndpoints:
 
     def test_train_embeddings_unavailable(self, client):
         """POST /ml/embeddings/train should return 503 when adapter is unavailable."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_adapter", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_adapter", return_value=None
+        ):
             resp = client.post("/ml/embeddings/train", json={"epochs": 5})
         assert resp.status_code == 503
 
     def test_embeddings_benchmark_endpoint(self, client):
         """GET /ml/embeddings/benchmark should return benchmark metrics."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_adapter", return_value=_make_mock_adapter()):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_adapter",
+            return_value=_make_mock_adapter(),
+        ):
             resp = client.get("/ml/embeddings/benchmark")
         assert resp.status_code == 200
         data = resp.json()
@@ -422,7 +484,9 @@ class TestEmbeddingsEndpoints:
 
     def test_embeddings_benchmark_unavailable(self, client):
         """GET /ml/embeddings/benchmark should return unavailable status when adapter is missing."""
-        with patch("Engine8_Knowledge.api_routers.ml_api._get_adapter", return_value=None):
+        with patch(
+            "Engine8_Knowledge.api_routers.ml_api._get_adapter", return_value=None
+        ):
             resp = client.get("/ml/embeddings/benchmark")
         assert resp.status_code == 200
         assert resp.json()["status"] == "unavailable"

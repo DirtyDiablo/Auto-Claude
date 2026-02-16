@@ -2,6 +2,7 @@
 BD-specific entity extraction for LightRAG.
 Extracts contractors, programs, contacts, locations, and technologies.
 """
+
 import re
 from enum import Enum
 from typing import List, Dict, Optional
@@ -10,6 +11,7 @@ from dataclasses import dataclass
 
 class EntityType(str, Enum):
     """Types of BD entities."""
+
     CONTRACTOR = "contractor"
     PROGRAM = "program"
     CONTACT = "contact"
@@ -22,6 +24,7 @@ class EntityType(str, Enum):
 @dataclass
 class Entity:
     """Represents an extracted entity."""
+
     name: str
     type: EntityType
     aliases: List[str]
@@ -32,6 +35,7 @@ class Entity:
 @dataclass
 class Relationship:
     """Represents a relationship between entities."""
+
     source: str
     target: str
     relationship_type: str
@@ -47,7 +51,11 @@ class BDEntityExtractor:
 
     # Known contractors
     CONTRACTORS = {
-        "gdit": ["General Dynamics IT", "General Dynamics Information Technology", "GDIT"],
+        "gdit": [
+            "General Dynamics IT",
+            "General Dynamics Information Technology",
+            "GDIT",
+        ],
         "leidos": ["Leidos", "Leidos Holdings"],
         "saic": ["SAIC", "Science Applications International Corporation"],
         "northrop": ["Northrop Grumman", "NGC", "Northrop"],
@@ -70,7 +78,10 @@ class BDEntityExtractor:
     # Known programs
     PROGRAMS = {
         "dcgs": ["DCGS", "Distributed Common Ground System", "AF DCGS", "Army DCGS"],
-        "bices": ["BICES", "Battlefield Information Collection and Exploitation System"],
+        "bices": [
+            "BICES",
+            "Battlefield Information Collection and Exploitation System",
+        ],
         "gsm_o": ["GSM-O", "Global Solutions Management - Operations"],
         "gbsd": ["GBSD", "Ground Based Strategic Deterrent", "Sentinel"],
         "abms": ["ABMS", "Advanced Battle Management System"],
@@ -133,11 +144,20 @@ class BDEntityExtractor:
     # Relationship patterns - flexible patterns for BD document extraction
     RELATIONSHIP_PATTERNS = [
         # Prime contractor patterns
-        (r"(\w+)\s+(?:is|are)\s+(?:the\s+)?prime\s+(?:contractor\s+)?(?:for|on)\s+(\w+)", "primes"),
-        (r"(\w+)\s+(?:has\s+been\s+)?awarded\s+(?:the\s+)?prime\s+(?:contractor\s+)?(?:role|contract)?\s*(?:for|on)?\s*(\w+)?", "primes"),
+        (
+            r"(\w+)\s+(?:is|are)\s+(?:the\s+)?prime\s+(?:contractor\s+)?(?:for|on)\s+(\w+)",
+            "primes",
+        ),
+        (
+            r"(\w+)\s+(?:has\s+been\s+)?awarded\s+(?:the\s+)?prime\s+(?:contractor\s+)?(?:role|contract)?\s*(?:for|on)?\s*(\w+)?",
+            "primes",
+        ),
         (r"(\w+)\s+primes?\s+(?:on|for)\s+(\w+)", "primes"),
         # Subcontractor patterns
-        (r"(\w+)\s+(?:is|are)\s+(?:a\s+)?(?:key\s+)?subcontractor\s+(?:to|for|on|providing)?\s*(\w+)?", "subcontracts"),
+        (
+            r"(\w+)\s+(?:is|are)\s+(?:a\s+)?(?:key\s+)?subcontractor\s+(?:to|for|on|providing)?\s*(\w+)?",
+            "subcontracts",
+        ),
         (r"(\w+)\s+subcontracts?\s+(?:to|for|on)\s+(\w+)", "subcontracts"),
         # Teaming patterns
         (r"(\w+)\s+(?:and|&)\s+(\w+)\s+(?:are\s+)?team(?:ing|ed)", "teams_with"),
@@ -213,7 +233,7 @@ class BDEntityExtractor:
                     type=self._alias_to_type[alias],
                     aliases=[alias],
                     confidence=0.9,
-                    context=context
+                    context=context,
                 )
                 entities.append(entity)
 
@@ -249,13 +269,15 @@ class BDEntityExtractor:
                 source_canonical = self._alias_to_canonical.get(source.lower(), source)
                 target_canonical = self._alias_to_canonical.get(target.lower(), target)
 
-                relationships.append(Relationship(
-                    source=source_canonical,
-                    target=target_canonical,
-                    relationship_type=rel_type,
-                    confidence=0.7,
-                    evidence=match.group(0)
-                ))
+                relationships.append(
+                    Relationship(
+                        source=source_canonical,
+                        target=target_canonical,
+                        relationship_type=rel_type,
+                        confidence=0.7,
+                        evidence=match.group(0),
+                    )
+                )
 
         return relationships
 
@@ -291,10 +313,12 @@ class BDEntityExtractor:
 
         # Add relationship summary
         if relationships:
-            rel_summary = "; ".join([
-                f"{r.source} {r.relationship_type} {r.target}"
-                for r in relationships[:5]  # Limit to 5
-            ])
+            rel_summary = "; ".join(
+                [
+                    f"{r.source} {r.relationship_type} {r.target}"
+                    for r in relationships[:5]  # Limit to 5
+                ]
+            )
             metadata_parts.append(f"[RELATIONSHIPS: {rel_summary}]")
 
         if metadata_parts:
@@ -333,7 +357,7 @@ class BDEntityExtractor:
         return {
             "canonical_name": canonical,
             "type": entity_type.value if entity_type else "unknown",
-            "aliases": aliases
+            "aliases": aliases,
         }
 
     def suggest_tags(self, text: str) -> List[str]:
@@ -362,5 +386,5 @@ class BDEntityExtractor:
             "programs": list(cls.PROGRAMS.keys()),
             "locations": list(cls.LOCATIONS.keys()),
             "technologies": list(cls.TECHNOLOGIES.keys()),
-            "agencies": list(cls.AGENCIES.keys())
+            "agencies": list(cls.AGENCIES.keys()),
         }

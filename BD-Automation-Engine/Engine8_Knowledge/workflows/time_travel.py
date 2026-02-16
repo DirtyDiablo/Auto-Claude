@@ -12,7 +12,10 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import structlog
 
-from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, get_checkpoint_store
+from Engine8_Knowledge.workflows.checkpoint_store import (
+    CheckpointStore,
+    get_checkpoint_store,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -20,6 +23,7 @@ logger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class NodeVisit:
@@ -91,6 +95,7 @@ class ComparisonReport:
 # TimeTravelDebugger
 # ---------------------------------------------------------------------------
 
+
 class TimeTravelDebugger:
     """Inspect, replay, and fork workflow executions from any checkpoint."""
 
@@ -136,36 +141,42 @@ class TimeTravelDebugger:
             )
             output_summary = self._summarize_state(snap.state, max_len=200)
 
-            nodes_visited.append(NodeVisit(
-                step=snap.step,
-                node_name=snap.node_name,
-                started_at=snap.timestamp,
-                duration_seconds=round(duration, 3),
-                state_keys_modified=modified,
-                input_summary=input_summary,
-                output_summary=output_summary,
-            ))
+            nodes_visited.append(
+                NodeVisit(
+                    step=snap.step,
+                    node_name=snap.node_name,
+                    started_at=snap.timestamp,
+                    duration_seconds=round(duration, 3),
+                    state_keys_modified=modified,
+                    input_summary=input_summary,
+                    output_summary=output_summary,
+                )
+            )
 
             # Check for errors in state
             for err in snap.state.get("errors", []):
                 if isinstance(err, dict) and err.get("node") == snap.node_name:
-                    errors.append(ErrorEvent(
-                        step=snap.step,
-                        node_name=snap.node_name,
-                        error=err.get("error", ""),
-                        traceback=err.get("traceback", ""),
-                        timestamp=snap.timestamp,
-                    ))
+                    errors.append(
+                        ErrorEvent(
+                            step=snap.step,
+                            node_name=snap.node_name,
+                            error=err.get("error", ""),
+                            traceback=err.get("traceback", ""),
+                            timestamp=snap.timestamp,
+                        )
+                    )
 
             # Check for interrupts
             if snap.metadata.get("interrupted"):
-                interrupts.append(InterruptEvent(
-                    step=snap.step,
-                    node_name=snap.node_name,
-                    description=f"Workflow interrupted at {snap.node_name}",
-                    timestamp=snap.timestamp,
-                    resolved=thread.status != "interrupted",
-                ))
+                interrupts.append(
+                    InterruptEvent(
+                        step=snap.step,
+                        node_name=snap.node_name,
+                        description=f"Workflow interrupted at {snap.node_name}",
+                        timestamp=snap.timestamp,
+                        resolved=thread.status != "interrupted",
+                    )
+                )
 
         # Calculate total duration
         if snapshots:
@@ -182,7 +193,9 @@ class TimeTravelDebugger:
             thread_id=thread_id,
             workflow_name=thread.workflow_name,
             started_at=thread.created_at,
-            completed_at=thread.updated_at if thread.status in ("completed", "failed") else None,
+            completed_at=thread.updated_at
+            if thread.status in ("completed", "failed")
+            else None,
             status=thread.status,
             total_steps=thread.step_count,
             nodes_visited=nodes_visited,
@@ -212,7 +225,9 @@ class TimeTravelDebugger:
         snap_b = await self.checkpoint_store.get_checkpoint_at(thread_id, step_b)
 
         if not snap_a or not snap_b:
-            raise ValueError(f"Could not find checkpoints at steps {step_a} and/or {step_b}")
+            raise ValueError(
+                f"Could not find checkpoints at steps {step_a} and/or {step_b}"
+            )
 
         state_a = snap_a.state
         state_b = snap_b.state
@@ -242,8 +257,9 @@ class TimeTravelDebugger:
             modified_keys=modified,
         )
 
-    async def replay_from(self, thread_id: str, step: int,
-                          modified_state: Optional[dict] = None) -> str:
+    async def replay_from(
+        self, thread_id: str, step: int, modified_state: Optional[dict] = None
+    ) -> str:
         """Fork a new execution from a historical checkpoint.
         Returns new thread_id for the forked execution."""
         snap = await self.checkpoint_store.get_checkpoint_at(thread_id, step)
@@ -265,7 +281,7 @@ class TimeTravelDebugger:
                 "forked_from": thread_id,
                 "forked_at_step": step,
                 "has_modifications": modified_state is not None,
-            }
+            },
         )
 
         # Copy state and apply modifications
@@ -275,19 +291,25 @@ class TimeTravelDebugger:
 
         # Save initial snapshot
         await self.checkpoint_store.save_snapshot(
-            thread_id=new_tid, step=0,
+            thread_id=new_tid,
+            step=0,
             node_name=f"forked_from_{snap.node_name}",
             state=forked_state,
-            metadata={"forked_from": thread_id, "original_step": step}
+            metadata={"forked_from": thread_id, "original_step": step},
         )
 
-        logger.info("time_travel.replay_forked",
-                     original=thread_id, step=step,
-                     new_thread=new_tid, modified=modified_state is not None)
+        logger.info(
+            "time_travel.replay_forked",
+            original=thread_id,
+            step=step,
+            new_thread=new_tid,
+            modified=modified_state is not None,
+        )
         return new_tid
 
-    async def compare_executions(self, thread_id_a: str,
-                                  thread_id_b: str) -> ComparisonReport:
+    async def compare_executions(
+        self, thread_id_a: str, thread_id_b: str
+    ) -> ComparisonReport:
         """Compare two executions of the same workflow."""
         timeline_a = await self.get_execution_timeline(thread_id_a)
         timeline_b = await self.get_execution_timeline(thread_id_b)
@@ -327,13 +349,15 @@ class TimeTravelDebugger:
                     )
 
             if modified or (keys_a_set != keys_b_set):
-                state_diffs.append(StateDiff(
-                    step_a=snapshots_a[i].step,
-                    step_b=snapshots_b[i].step,
-                    added_keys=list(keys_b_set - keys_a_set),
-                    removed_keys=list(keys_a_set - keys_b_set),
-                    modified_keys=modified,
-                ))
+                state_diffs.append(
+                    StateDiff(
+                        step_a=snapshots_a[i].step,
+                        step_b=snapshots_b[i].step,
+                        added_keys=list(keys_b_set - keys_a_set),
+                        removed_keys=list(keys_a_set - keys_b_set),
+                        modified_keys=modified,
+                    )
+                )
 
         return ComparisonReport(
             thread_id_a=thread_id_a,

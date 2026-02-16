@@ -21,6 +21,7 @@ from src.data_quality.lineage import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def tracker():
     return DataLineageTracker()
@@ -42,28 +43,43 @@ def populated_tracker(tracker, source):
     """Tracker with a full lineage chain."""
     # Step 1: Ingest raw records
     raw_records = [
-        {"id": "r1", "_type": "job", "title": "Systems Engineer", "location": "San Diego"},
+        {
+            "id": "r1",
+            "_type": "job",
+            "title": "Systems Engineer",
+            "location": "San Diego",
+        },
         {"id": "r2", "_type": "job", "title": "Analyst", "location": "Langley"},
     ]
     raw_nodes = tracker.record_ingestion(source, raw_records)
 
     # Step 2: Transform (LLM enrichment)
     enrichment_process = TransformProcess(
-        name="llm_enrichment", version="1.0", model="gpt-4o",
+        name="llm_enrichment",
+        version="1.0",
+        model="gpt-4o",
         params={"temperature": 0.0},
         transform_type=TransformType.LLM_ENRICHMENT.value,
     )
     enriched = [
-        {"id": "r1", "_type": "enriched", "title": "Systems Engineer",
-         "program": "AF DCGS - PACAF", "tier": 4},
+        {
+            "id": "r1",
+            "_type": "enriched",
+            "title": "Systems Engineer",
+            "program": "AF DCGS - PACAF",
+            "tier": 4,
+        },
     ]
     enriched_nodes = tracker.record_transformation(
-        [raw_nodes[0].id], enrichment_process, enriched,
+        [raw_nodes[0].id],
+        enrichment_process,
+        enriched,
     )
 
     # Step 3: Transform (scoring)
     scoring_process = TransformProcess(
-        name="bd_scoring", version="2.0",
+        name="bd_scoring",
+        version="2.0",
         params={"weights": "default"},
         transform_type=TransformType.SCORING.value,
     )
@@ -71,7 +87,9 @@ def populated_tracker(tracker, source):
         {"id": "r1", "_type": "scored", "bd_score": 85, "priority": "high"},
     ]
     scored_nodes = tracker.record_transformation(
-        [enriched_nodes[0].id], scoring_process, scored,
+        [enriched_nodes[0].id],
+        scoring_process,
+        scored,
     )
 
     return tracker
@@ -80,6 +98,7 @@ def populated_tracker(tracker, source):
 # =========================================
 # INGESTION
 # =========================================
+
 
 class TestIngestion:
     def test_creates_source_node(self, tracker, source):
@@ -112,6 +131,7 @@ class TestIngestion:
 # =========================================
 # TRANSFORMATION
 # =========================================
+
 
 class TestTransformation:
     def test_creates_process_node(self, tracker, source):
@@ -148,7 +168,9 @@ class TestTransformation:
         raw = tracker.record_ingestion(source, [{"id": "r1"}, {"id": "r2"}])
         process = TransformProcess(name="merge", version="1.0")
         merged = tracker.record_transformation(
-            [raw[0].id, raw[1].id], process, [{"id": "merged"}],
+            [raw[0].id, raw[1].id],
+            process,
+            [{"id": "merged"}],
         )
         edges = tracker.get_all_edges()
         fed = [e for e in edges if e.edge_type == "FED_INTO"]
@@ -158,6 +180,7 @@ class TestTransformation:
 # =========================================
 # LINEAGE TRACING
 # =========================================
+
 
 class TestLineageTracing:
     def test_trace_returns_graph(self, populated_tracker):
@@ -191,6 +214,7 @@ class TestLineageTracing:
 # IMPACT ANALYSIS
 # =========================================
 
+
 class TestImpactAnalysis:
     def test_impact_finds_downstream(self, populated_tracker):
         # r1 raw -> r1 enriched -> r1 scored
@@ -211,14 +235,18 @@ class TestImpactAnalysis:
 # FRESHNESS REPORT
 # =========================================
 
+
 class TestFreshnessReport:
     def test_freshness_report(self, tracker):
         now = datetime.now(timezone.utc)
-        tracker.set_domain_records("contacts", [
-            {"id": "c1", "last_updated": (now - timedelta(days=10)).isoformat()},
-            {"id": "c2", "last_updated": (now - timedelta(days=50)).isoformat()},
-            {"id": "c3", "last_updated": (now - timedelta(days=120)).isoformat()},
-        ])
+        tracker.set_domain_records(
+            "contacts",
+            [
+                {"id": "c1", "last_updated": (now - timedelta(days=10)).isoformat()},
+                {"id": "c2", "last_updated": (now - timedelta(days=50)).isoformat()},
+                {"id": "c3", "last_updated": (now - timedelta(days=120)).isoformat()},
+            ],
+        )
         report = tracker.get_freshness_report()
         assert isinstance(report, FreshnessReport)
         assert len(report.entries) == 1
@@ -236,9 +264,12 @@ class TestFreshnessReport:
 
     def test_overall_freshness_score(self, tracker):
         now = datetime.now(timezone.utc)
-        tracker.set_domain_records("contacts", [
-            {"id": "c1", "last_updated": (now - timedelta(days=5)).isoformat()},
-        ])
+        tracker.set_domain_records(
+            "contacts",
+            [
+                {"id": "c1", "last_updated": (now - timedelta(days=5)).isoformat()},
+            ],
+        )
         report = tracker.get_freshness_report()
         assert report.overall_freshness_score == 100.0
 
@@ -246,6 +277,7 @@ class TestFreshnessReport:
 # =========================================
 # STATS & QUERIES
 # =========================================
+
 
 class TestStatsAndQueries:
     def test_get_stats(self, populated_tracker):
@@ -267,6 +299,7 @@ class TestStatsAndQueries:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_tracker(self):

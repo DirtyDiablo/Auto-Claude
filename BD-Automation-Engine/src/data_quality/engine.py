@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class QualityDimension(str, Enum):
     COMPLETENESS = "completeness"
     ACCURACY = "accuracy"
@@ -52,9 +53,11 @@ class Domain(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class DataIssue:
     """A single data quality issue."""
+
     id: str
     domain: str
     dimension: str
@@ -74,6 +77,7 @@ class DataIssue:
 @dataclass
 class DataQualityScore:
     """Quality score for a single dimension."""
+
     dimension: str
     score: float  # 0-100
     issues: List[DataIssue] = field(default_factory=list)
@@ -86,6 +90,7 @@ class DataQualityScore:
 @dataclass
 class RecordQualityScore:
     """Quality score for a single record."""
+
     record_id: str
     record_type: str
     overall_score: float
@@ -97,6 +102,7 @@ class RecordQualityScore:
 @dataclass
 class DataQualityReport:
     """Full audit report."""
+
     id: str
     overall_score: float
     domain_scores: Dict[str, float] = field(default_factory=dict)
@@ -114,6 +120,7 @@ class DataQualityReport:
 @dataclass
 class DataQualityRule:
     """A single quality rule definition."""
+
     name: str
     dimension: str
     domain: str
@@ -129,37 +136,76 @@ class DataQualityRule:
 # VALIDATION HELPERS
 # =========================================
 
-EMAIL_REGEX = re.compile(
-    r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$'
-)
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$")
 
 DISPOSABLE_DOMAINS = {
-    "mailinator.com", "guerrillamail.com", "tempmail.com",
-    "throwaway.email", "yopmail.com", "sharklasers.com",
-    "trashmail.com", "10minutemail.com",
+    "mailinator.com",
+    "guerrillamail.com",
+    "tempmail.com",
+    "throwaway.email",
+    "yopmail.com",
+    "sharklasers.com",
+    "trashmail.com",
+    "10minutemail.com",
 }
 
 VALID_CLEARANCE_LEVELS = {
-    "none", "public_trust", "secret", "top_secret", "ts_sci",
-    "top_secret/sci", "ts/sci", "confidential",
+    "none",
+    "public_trust",
+    "secret",
+    "top_secret",
+    "ts_sci",
+    "top_secret/sci",
+    "ts/sci",
+    "confidential",
 }
 
 # E.164: + followed by 1-15 digits
-PHONE_E164_REGEX = re.compile(r'^\+[1-9]\d{1,14}$')
+PHONE_E164_REGEX = re.compile(r"^\+[1-9]\d{1,14}$")
 
 # Common phone patterns
-PHONE_LOOSE_REGEX = re.compile(r'[\d\(\)\-\.\s\+]{7,}')
+PHONE_LOOSE_REGEX = re.compile(r"[\d\(\)\-\.\s\+]{7,}")
 
 TITLE_TIER_MAP = {
-    1: ["ceo", "president", "chief", "cto", "cfo", "cio", "coo", "evp",
-        "executive vice president", "managing director"],
-    2: ["vice president", "vp", "svp", "senior vice president", "director",
-        "senior director", "general manager"],
-    3: ["manager", "senior manager", "program manager", "project manager",
-        "department head", "section chief"],
+    1: [
+        "ceo",
+        "president",
+        "chief",
+        "cto",
+        "cfo",
+        "cio",
+        "coo",
+        "evp",
+        "executive vice president",
+        "managing director",
+    ],
+    2: [
+        "vice president",
+        "vp",
+        "svp",
+        "senior vice president",
+        "director",
+        "senior director",
+        "general manager",
+    ],
+    3: [
+        "manager",
+        "senior manager",
+        "program manager",
+        "project manager",
+        "department head",
+        "section chief",
+    ],
     4: ["lead", "senior", "principal", "staff", "architect", "team lead"],
-    5: ["analyst", "engineer", "specialist", "developer", "consultant",
-        "coordinator", "associate"],
+    5: [
+        "analyst",
+        "engineer",
+        "specialist",
+        "developer",
+        "consultant",
+        "coordinator",
+        "associate",
+    ],
     6: ["intern", "assistant", "junior", "trainee", "entry"],
 }
 
@@ -196,7 +242,7 @@ def validate_phone(phone: str) -> Tuple[bool, str]:
     if PHONE_E164_REGEX.match(phone):
         return True, "valid_e164"
     if PHONE_LOOSE_REGEX.match(phone):
-        digits = re.sub(r'\D', '', phone)
+        digits = re.sub(r"\D", "", phone)
         if 7 <= len(digits) <= 15:
             return True, "valid_loose"
     return False, f"Invalid phone: {phone}"
@@ -231,7 +277,10 @@ def check_location_program(location: str, program: str) -> Tuple[bool, str]:
     for loc_key, expected_program in PROGRAM_LOCATION_MAP.items():
         if loc_key in loc_lower:
             if program and program != expected_program:
-                return False, f"Location '{location}' should map to '{expected_program}', got '{program}'"
+                return (
+                    False,
+                    f"Location '{location}' should map to '{expected_program}', got '{program}'",
+                )
             return True, "match"
     return True, "unmapped_location"
 
@@ -253,7 +302,9 @@ def compute_freshness_score(last_updated: str, max_days: int = 90) -> float:
         return 0.0
 
 
-def detect_duplicates(records: List[Dict[str, Any]], keys: List[str]) -> List[Tuple[int, int, float]]:
+def detect_duplicates(
+    records: List[Dict[str, Any]], keys: List[str]
+) -> List[Tuple[int, int, float]]:
     """Detect duplicate records using field-level comparison.
     Returns list of (idx1, idx2, similarity_score) tuples.
     """
@@ -291,6 +342,7 @@ def _record_similarity(r1: Dict, r2: Dict, keys: List[str]) -> float:
 # =========================================
 # DATA QUALITY ENGINE
 # =========================================
+
 
 class DataQualityEngine:
     """Continuously monitors and scores data health across the platform."""
@@ -337,107 +389,202 @@ class DataQualityEngine:
         rules = []
 
         # --- Contact rules ---
-        rules.append(DataQualityRule(
-            name="email_required", dimension="completeness", domain="contacts",
-            severity="high", impact_score=0.8,
-            description="Contact must have a valid email address",
-        ))
-        rules.append(DataQualityRule(
-            name="email_valid", dimension="validity", domain="contacts",
-            severity="high", impact_score=0.8,
-            description="Email must match RFC 5322 format and not be disposable",
-        ))
-        rules.append(DataQualityRule(
-            name="phone_valid", dimension="validity", domain="contacts",
-            severity="medium", impact_score=0.5,
-            description="Phone must be in valid format",
-        ))
-        rules.append(DataQualityRule(
-            name="name_required", dimension="completeness", domain="contacts",
-            severity="critical", impact_score=0.9,
-            description="Contact must have first name and last name",
-        ))
-        rules.append(DataQualityRule(
-            name="title_tier_consistency", dimension="consistency", domain="contacts",
-            severity="critical", impact_score=0.9,
-            description="Job title must be consistent with hierarchy tier",
-        ))
-        rules.append(DataQualityRule(
-            name="location_program_consistency", dimension="consistency", domain="contacts",
-            severity="critical", impact_score=0.95,
-            description="Location must be consistent with assigned program",
-        ))
-        rules.append(DataQualityRule(
-            name="contact_freshness", dimension="freshness", domain="contacts",
-            severity="medium", impact_score=0.6,
-            description="Contact must have been updated within 90 days",
-        ))
-        rules.append(DataQualityRule(
-            name="contact_dedup", dimension="accuracy", domain="contacts",
-            severity="high", impact_score=0.7,
-            description="No duplicate contacts based on name+email+company",
-        ))
+        rules.append(
+            DataQualityRule(
+                name="email_required",
+                dimension="completeness",
+                domain="contacts",
+                severity="high",
+                impact_score=0.8,
+                description="Contact must have a valid email address",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="email_valid",
+                dimension="validity",
+                domain="contacts",
+                severity="high",
+                impact_score=0.8,
+                description="Email must match RFC 5322 format and not be disposable",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="phone_valid",
+                dimension="validity",
+                domain="contacts",
+                severity="medium",
+                impact_score=0.5,
+                description="Phone must be in valid format",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="name_required",
+                dimension="completeness",
+                domain="contacts",
+                severity="critical",
+                impact_score=0.9,
+                description="Contact must have first name and last name",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="title_tier_consistency",
+                dimension="consistency",
+                domain="contacts",
+                severity="critical",
+                impact_score=0.9,
+                description="Job title must be consistent with hierarchy tier",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="location_program_consistency",
+                dimension="consistency",
+                domain="contacts",
+                severity="critical",
+                impact_score=0.95,
+                description="Location must be consistent with assigned program",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="contact_freshness",
+                dimension="freshness",
+                domain="contacts",
+                severity="medium",
+                impact_score=0.6,
+                description="Contact must have been updated within 90 days",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="contact_dedup",
+                dimension="accuracy",
+                domain="contacts",
+                severity="high",
+                impact_score=0.7,
+                description="No duplicate contacts based on name+email+company",
+            )
+        )
 
         # --- Program rules ---
-        rules.append(DataQualityRule(
-            name="contract_not_expired", dimension="freshness", domain="programs",
-            severity="high", impact_score=0.85,
-            description="Contract end date must not have passed",
-        ))
-        rules.append(DataQualityRule(
-            name="value_range_valid", dimension="validity", domain="programs",
-            severity="medium", impact_score=0.6,
-            description="Contract value must be within reasonable bounds",
-        ))
-        rules.append(DataQualityRule(
-            name="program_name_required", dimension="completeness", domain="programs",
-            severity="critical", impact_score=0.9,
-            description="Program must have a name",
-        ))
-        rules.append(DataQualityRule(
-            name="prime_sub_consistent", dimension="consistency", domain="programs",
-            severity="high", impact_score=0.75,
-            description="Prime/sub relationships must be bidirectionally consistent",
-        ))
+        rules.append(
+            DataQualityRule(
+                name="contract_not_expired",
+                dimension="freshness",
+                domain="programs",
+                severity="high",
+                impact_score=0.85,
+                description="Contract end date must not have passed",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="value_range_valid",
+                dimension="validity",
+                domain="programs",
+                severity="medium",
+                impact_score=0.6,
+                description="Contract value must be within reasonable bounds",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="program_name_required",
+                dimension="completeness",
+                domain="programs",
+                severity="critical",
+                impact_score=0.9,
+                description="Program must have a name",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="prime_sub_consistent",
+                dimension="consistency",
+                domain="programs",
+                severity="high",
+                impact_score=0.75,
+                description="Prime/sub relationships must be bidirectionally consistent",
+            )
+        )
 
         # --- Job rules ---
-        rules.append(DataQualityRule(
-            name="job_title_standard", dimension="accuracy", domain="jobs",
-            severity="medium", impact_score=0.5,
-            description="Job title should match standardized taxonomy",
-        ))
-        rules.append(DataQualityRule(
-            name="clearance_valid", dimension="validity", domain="jobs",
-            severity="high", impact_score=0.7,
-            description="Clearance level must be a recognized value",
-        ))
-        rules.append(DataQualityRule(
-            name="job_location_parsed", dimension="completeness", domain="jobs",
-            severity="medium", impact_score=0.5,
-            description="Job must have a parsed location",
-        ))
-        rules.append(DataQualityRule(
-            name="program_mapped", dimension="completeness", domain="jobs",
-            severity="high", impact_score=0.8,
-            description="Job must be mapped to a program",
-        ))
-        rules.append(DataQualityRule(
-            name="job_url_present", dimension="completeness", domain="jobs",
-            severity="low", impact_score=0.3,
-            description="Job posting should have a source URL",
-        ))
+        rules.append(
+            DataQualityRule(
+                name="job_title_standard",
+                dimension="accuracy",
+                domain="jobs",
+                severity="medium",
+                impact_score=0.5,
+                description="Job title should match standardized taxonomy",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="clearance_valid",
+                dimension="validity",
+                domain="jobs",
+                severity="high",
+                impact_score=0.7,
+                description="Clearance level must be a recognized value",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="job_location_parsed",
+                dimension="completeness",
+                domain="jobs",
+                severity="medium",
+                impact_score=0.5,
+                description="Job must have a parsed location",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="program_mapped",
+                dimension="completeness",
+                domain="jobs",
+                severity="high",
+                impact_score=0.8,
+                description="Job must be mapped to a program",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="job_url_present",
+                dimension="completeness",
+                domain="jobs",
+                severity="low",
+                impact_score=0.3,
+                description="Job posting should have a source URL",
+            )
+        )
 
         # --- Enrichment rules ---
-        rules.append(DataQualityRule(
-            name="embedding_present", dimension="completeness", domain="enrichments",
-            severity="high", impact_score=0.7,
-            description="Record should have vector embedding",
-        ))
-        rules.append(DataQualityRule(
-            name="classification_confidence", dimension="accuracy", domain="enrichments",
-            severity="medium", impact_score=0.6,
-            description="Classification confidence should be above 0.7",
-        ))
+        rules.append(
+            DataQualityRule(
+                name="embedding_present",
+                dimension="completeness",
+                domain="enrichments",
+                severity="high",
+                impact_score=0.7,
+                description="Record should have vector embedding",
+            )
+        )
+        rules.append(
+            DataQualityRule(
+                name="classification_confidence",
+                dimension="accuracy",
+                domain="enrichments",
+                severity="medium",
+                impact_score=0.6,
+                description="Classification confidence should be above 0.7",
+            )
+        )
 
         return rules
 
@@ -448,6 +595,7 @@ class DataQualityEngine:
     def run_full_audit(self) -> DataQualityReport:
         """Run all monitors across all data stores."""
         import time
+
         start = time.time()
         now = datetime.now(timezone.utc).isoformat()
 
@@ -531,7 +679,9 @@ class DataQualityEngine:
         self._history.append(report)
         return report
 
-    def score_single_record(self, record_type: str, record: Dict[str, Any]) -> RecordQualityScore:
+    def score_single_record(
+        self, record_type: str, record: Dict[str, Any]
+    ) -> RecordQualityScore:
         """Score a single record across all applicable dimensions."""
         now = datetime.now(timezone.utc).isoformat()
         rules = [r for r in self._rules if r.domain == record_type and r.enabled]
@@ -545,7 +695,11 @@ class DataQualityEngine:
             if dim_rules:
                 dim_scores[dim] = round(100 * (1 - len(dim_issues) / len(dim_rules)), 1)
 
-        overall = round(sum(dim_scores.values()) / len(dim_scores), 1) if dim_scores else 100.0
+        overall = (
+            round(sum(dim_scores.values()) / len(dim_scores), 1)
+            if dim_scores
+            else 100.0
+        )
 
         return RecordQualityScore(
             record_id=record.get("id", "unknown"),
@@ -592,7 +746,9 @@ class DataQualityEngine:
 
     def get_trends(self, periods: int = 10) -> List[Dict[str, Any]]:
         """Get quality score trends over time."""
-        recent = self._history[-periods:] if len(self._history) >= periods else self._history
+        recent = (
+            self._history[-periods:] if len(self._history) >= periods else self._history
+        )
         return [
             {
                 "report_id": r.id,
@@ -613,7 +769,10 @@ class DataQualityEngine:
     # -----------------------------------------
 
     def _check_domain(
-        self, domain: str, records: List[Dict], rules: List[DataQualityRule],
+        self,
+        domain: str,
+        records: List[Dict],
+        rules: List[DataQualityRule],
     ) -> List[DataIssue]:
         """Run all rules for a domain against its records."""
         issues = []
@@ -623,7 +782,10 @@ class DataQualityEngine:
         return issues
 
     def _check_single_record(
-        self, domain: str, record: Dict, rules: List[DataQualityRule],
+        self,
+        domain: str,
+        record: Dict,
+        rules: List[DataQualityRule],
     ) -> List[DataIssue]:
         """Check a single record against all domain rules."""
         issues = []
@@ -638,8 +800,12 @@ class DataQualityEngine:
         return issues
 
     def _evaluate_rule(
-        self, domain: str, record: Dict, record_id: str,
-        rule: DataQualityRule, now: str,
+        self,
+        domain: str,
+        record: Dict,
+        record_id: str,
+        rule: DataQualityRule,
+        now: str,
     ) -> Optional[DataIssue]:
         """Evaluate a single rule against a record."""
 
@@ -649,12 +815,18 @@ class DataQualityEngine:
                 email = record.get("email", record.get("email_address", ""))
                 if not email:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="contact", field_name="email",
-                        current_value=email, expected_pattern="non-empty email",
-                        severity=rule.severity, description="Missing email address",
-                        auto_fixable=True, detected_at=now,
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="contact",
+                        field_name="email",
+                        current_value=email,
+                        expected_pattern="non-empty email",
+                        severity=rule.severity,
+                        description="Missing email address",
+                        auto_fixable=True,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -664,13 +836,20 @@ class DataQualityEngine:
                     valid, reason = validate_email(email)
                     if not valid:
                         return DataIssue(
-                            id=uuid.uuid4().hex[:8], domain=domain,
-                            dimension=rule.dimension, record_id=record_id,
-                            record_type="contact", field_name="email",
-                            current_value=email, expected_pattern="RFC 5322 format",
-                            severity=rule.severity, description=reason,
-                            auto_fixable=True, suggested_fix=email.strip().lower(),
-                            detected_at=now, impact_score=rule.impact_score,
+                            id=uuid.uuid4().hex[:8],
+                            domain=domain,
+                            dimension=rule.dimension,
+                            record_id=record_id,
+                            record_type="contact",
+                            field_name="email",
+                            current_value=email,
+                            expected_pattern="RFC 5322 format",
+                            severity=rule.severity,
+                            description=reason,
+                            auto_fixable=True,
+                            suggested_fix=email.strip().lower(),
+                            detected_at=now,
+                            impact_score=rule.impact_score,
                         )
 
             elif rule.name == "phone_valid":
@@ -679,12 +858,18 @@ class DataQualityEngine:
                     valid, reason = validate_phone(phone)
                     if not valid:
                         return DataIssue(
-                            id=uuid.uuid4().hex[:8], domain=domain,
-                            dimension=rule.dimension, record_id=record_id,
-                            record_type="contact", field_name="phone",
-                            current_value=phone, expected_pattern="E.164 or valid format",
-                            severity=rule.severity, description=reason,
-                            auto_fixable=True, detected_at=now,
+                            id=uuid.uuid4().hex[:8],
+                            domain=domain,
+                            dimension=rule.dimension,
+                            record_id=record_id,
+                            record_type="contact",
+                            field_name="phone",
+                            current_value=phone,
+                            expected_pattern="E.164 or valid format",
+                            severity=rule.severity,
+                            description=reason,
+                            auto_fixable=True,
+                            detected_at=now,
                             impact_score=rule.impact_score,
                         )
 
@@ -693,13 +878,18 @@ class DataQualityEngine:
                 last = record.get("last_name", "")
                 if not first or not last:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="contact", field_name="name",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="contact",
+                        field_name="name",
                         current_value=f"{first} {last}".strip(),
                         expected_pattern="first and last name required",
-                        severity=rule.severity, description="Missing first or last name",
-                        auto_fixable=False, detected_at=now,
+                        severity=rule.severity,
+                        description="Missing first or last name",
+                        auto_fixable=False,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -710,14 +900,20 @@ class DataQualityEngine:
                     expected = classify_title_tier(title)
                     if int(tier) != expected:
                         return DataIssue(
-                            id=uuid.uuid4().hex[:8], domain=domain,
-                            dimension=rule.dimension, record_id=record_id,
-                            record_type="contact", field_name="hierarchy_tier",
-                            current_value=tier, expected_pattern=f"tier {expected}",
+                            id=uuid.uuid4().hex[:8],
+                            domain=domain,
+                            dimension=rule.dimension,
+                            record_id=record_id,
+                            record_type="contact",
+                            field_name="hierarchy_tier",
+                            current_value=tier,
+                            expected_pattern=f"tier {expected}",
                             severity=rule.severity,
                             description=f"Title '{title}' maps to tier {expected}, got {tier}",
-                            auto_fixable=True, suggested_fix=expected,
-                            detected_at=now, impact_score=rule.impact_score,
+                            auto_fixable=True,
+                            suggested_fix=expected,
+                            detected_at=now,
+                            impact_score=rule.impact_score,
                         )
 
             elif rule.name == "location_program_consistency":
@@ -728,13 +924,20 @@ class DataQualityEngine:
                     if not consistent:
                         expected = reason.split("'")[1] if "'" in reason else ""
                         return DataIssue(
-                            id=uuid.uuid4().hex[:8], domain=domain,
-                            dimension=rule.dimension, record_id=record_id,
-                            record_type="contact", field_name="program",
-                            current_value=program, expected_pattern=expected,
-                            severity=rule.severity, description=reason,
-                            auto_fixable=True, suggested_fix=expected,
-                            detected_at=now, impact_score=rule.impact_score,
+                            id=uuid.uuid4().hex[:8],
+                            domain=domain,
+                            dimension=rule.dimension,
+                            record_id=record_id,
+                            record_type="contact",
+                            field_name="program",
+                            current_value=program,
+                            expected_pattern=expected,
+                            severity=rule.severity,
+                            description=reason,
+                            auto_fixable=True,
+                            suggested_fix=expected,
+                            detected_at=now,
+                            impact_score=rule.impact_score,
                         )
 
             elif rule.name == "contact_freshness":
@@ -742,13 +945,18 @@ class DataQualityEngine:
                 score = compute_freshness_score(updated, max_days=90)
                 if score < 50:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="contact", field_name="last_updated",
-                        current_value=updated, expected_pattern="within 90 days",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="contact",
+                        field_name="last_updated",
+                        current_value=updated,
+                        expected_pattern="within 90 days",
                         severity=rule.severity,
                         description=f"Contact is stale (freshness score: {score})",
-                        auto_fixable=True, detected_at=now,
+                        auto_fixable=True,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -762,12 +970,18 @@ class DataQualityEngine:
                 name = record.get("name", record.get("program_name", ""))
                 if not name:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="program", field_name="name",
-                        current_value="", expected_pattern="non-empty",
-                        severity=rule.severity, description="Program name is missing",
-                        auto_fixable=False, detected_at=now,
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="program",
+                        field_name="name",
+                        current_value="",
+                        expected_pattern="non-empty",
+                        severity=rule.severity,
+                        description="Program name is missing",
+                        auto_fixable=False,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -778,14 +992,18 @@ class DataQualityEngine:
                         end = datetime.fromisoformat(end_date.replace("Z", "+00:00"))
                         if end < datetime.now(timezone.utc):
                             return DataIssue(
-                                id=uuid.uuid4().hex[:8], domain=domain,
-                                dimension=rule.dimension, record_id=record_id,
-                                record_type="program", field_name="contract_end",
+                                id=uuid.uuid4().hex[:8],
+                                domain=domain,
+                                dimension=rule.dimension,
+                                record_id=record_id,
+                                record_type="program",
+                                field_name="contract_end",
                                 current_value=end_date,
                                 expected_pattern="future date or null",
                                 severity=rule.severity,
                                 description=f"Contract expired on {end_date}",
-                                auto_fixable=True, detected_at=now,
+                                auto_fixable=True,
+                                detected_at=now,
                                 impact_score=rule.impact_score,
                             )
                     except (ValueError, TypeError):
@@ -796,14 +1014,18 @@ class DataQualityEngine:
                 if isinstance(value, (int, float)):
                     if value < 0 or value > 100_000_000_000:  # > 100B seems wrong
                         return DataIssue(
-                            id=uuid.uuid4().hex[:8], domain=domain,
-                            dimension=rule.dimension, record_id=record_id,
-                            record_type="program", field_name="contract_value",
+                            id=uuid.uuid4().hex[:8],
+                            domain=domain,
+                            dimension=rule.dimension,
+                            record_id=record_id,
+                            record_type="program",
+                            field_name="contract_value",
                             current_value=value,
                             expected_pattern="0 to 100B",
                             severity=rule.severity,
                             description=f"Contract value {value} outside valid range",
-                            auto_fixable=False, detected_at=now,
+                            auto_fixable=False,
+                            detected_at=now,
                             impact_score=rule.impact_score,
                         )
 
@@ -812,13 +1034,18 @@ class DataQualityEngine:
                 is_prime = record.get("is_prime", None)
                 if is_prime is True and not prime:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="program", field_name="prime_contractor",
-                        current_value="", expected_pattern="non-empty when is_prime=True",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="program",
+                        field_name="prime_contractor",
+                        current_value="",
+                        expected_pattern="non-empty when is_prime=True",
                         severity=rule.severity,
                         description="Prime contractor name missing for prime contract",
-                        auto_fixable=False, detected_at=now,
+                        auto_fixable=False,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -830,14 +1057,18 @@ class DataQualityEngine:
                     cl = clearance.lower().strip().replace(" ", "_")
                     if cl not in VALID_CLEARANCE_LEVELS:
                         return DataIssue(
-                            id=uuid.uuid4().hex[:8], domain=domain,
-                            dimension=rule.dimension, record_id=record_id,
-                            record_type="job", field_name="clearance",
+                            id=uuid.uuid4().hex[:8],
+                            domain=domain,
+                            dimension=rule.dimension,
+                            record_id=record_id,
+                            record_type="job",
+                            field_name="clearance",
                             current_value=clearance,
                             expected_pattern=f"one of {VALID_CLEARANCE_LEVELS}",
                             severity=rule.severity,
                             description=f"Unrecognized clearance: {clearance}",
-                            auto_fixable=True, detected_at=now,
+                            auto_fixable=True,
+                            detected_at=now,
                             impact_score=rule.impact_score,
                         )
 
@@ -845,13 +1076,18 @@ class DataQualityEngine:
                 program = record.get("program", "")
                 if not program:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="job", field_name="program",
-                        current_value="", expected_pattern="non-empty program",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="job",
+                        field_name="program",
+                        current_value="",
+                        expected_pattern="non-empty program",
                         severity=rule.severity,
                         description="Job not mapped to a program",
-                        auto_fixable=True, detected_at=now,
+                        auto_fixable=True,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -859,13 +1095,18 @@ class DataQualityEngine:
                 location = record.get("location", "")
                 if not location:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="job", field_name="location",
-                        current_value="", expected_pattern="non-empty",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="job",
+                        field_name="location",
+                        current_value="",
+                        expected_pattern="non-empty",
                         severity=rule.severity,
                         description="Job location not parsed",
-                        auto_fixable=True, detected_at=now,
+                        auto_fixable=True,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -873,13 +1114,18 @@ class DataQualityEngine:
                 title = record.get("title", record.get("job_title", ""))
                 if not title:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="job", field_name="title",
-                        current_value="", expected_pattern="non-empty standardized title",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="job",
+                        field_name="title",
+                        current_value="",
+                        expected_pattern="non-empty standardized title",
                         severity=rule.severity,
                         description="Job title missing",
-                        auto_fixable=False, detected_at=now,
+                        auto_fixable=False,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -887,13 +1133,18 @@ class DataQualityEngine:
                 url = record.get("url", record.get("source_url", ""))
                 if not url:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="job", field_name="url",
-                        current_value="", expected_pattern="non-empty URL",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="job",
+                        field_name="url",
+                        current_value="",
+                        expected_pattern="non-empty URL",
                         severity=rule.severity,
                         description="Job source URL missing",
-                        auto_fixable=False, detected_at=now,
+                        auto_fixable=False,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -903,13 +1154,18 @@ class DataQualityEngine:
                 embedding = record.get("embedding", record.get("vector"))
                 if not embedding:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="enrichment", field_name="embedding",
-                        current_value=None, expected_pattern="non-null vector",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="enrichment",
+                        field_name="embedding",
+                        current_value=None,
+                        expected_pattern="non-null vector",
                         severity=rule.severity,
                         description="Vector embedding missing",
-                        auto_fixable=True, detected_at=now,
+                        auto_fixable=True,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -917,14 +1173,18 @@ class DataQualityEngine:
                 confidence = record.get("confidence", 1.0)
                 if isinstance(confidence, (int, float)) and confidence < 0.7:
                     return DataIssue(
-                        id=uuid.uuid4().hex[:8], domain=domain,
-                        dimension=rule.dimension, record_id=record_id,
-                        record_type="enrichment", field_name="confidence",
+                        id=uuid.uuid4().hex[:8],
+                        domain=domain,
+                        dimension=rule.dimension,
+                        record_id=record_id,
+                        record_type="enrichment",
+                        field_name="confidence",
                         current_value=confidence,
                         expected_pattern=">= 0.7",
                         severity=rule.severity,
                         description=f"Low classification confidence: {confidence}",
-                        auto_fixable=True, detected_at=now,
+                        auto_fixable=True,
+                        detected_at=now,
                         impact_score=rule.impact_score,
                     )
 
@@ -956,17 +1216,25 @@ class DataQualityEngine:
         recs = []
         for domain, score in domain_scores.items():
             if score < 60:
-                recs.append(f"Critical: {domain} quality is {score}/100 — immediate attention needed")
+                recs.append(
+                    f"Critical: {domain} quality is {score}/100 — immediate attention needed"
+                )
             elif score < 80:
-                recs.append(f"Warning: {domain} quality is {score}/100 — review open issues")
+                recs.append(
+                    f"Warning: {domain} quality is {score}/100 — review open issues"
+                )
 
         auto_fixable = [i for i in issues if i.auto_fixable]
         if auto_fixable:
-            recs.append(f"{len(auto_fixable)} issues can be auto-fixed — run self-healing pipeline")
+            recs.append(
+                f"{len(auto_fixable)} issues can be auto-fixed — run self-healing pipeline"
+            )
 
         critical = [i for i in issues if i.severity == "critical"]
         if critical:
-            recs.append(f"{len(critical)} critical issues detected — prioritize these first")
+            recs.append(
+                f"{len(critical)} critical issues detected — prioritize these first"
+            )
 
         if not recs:
             recs.append("Data quality is healthy — continue monitoring")

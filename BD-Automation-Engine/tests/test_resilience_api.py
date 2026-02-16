@@ -40,6 +40,7 @@ def client(app):
 # CIRCUIT BREAKERS
 # =========================================
 
+
 def test_list_breakers(client):
     resp = client.get("/api/resilience/breakers")
     assert resp.status_code == 200
@@ -74,29 +75,43 @@ def test_reset_breaker(client):
 # CHAOS EXPERIMENTS
 # =========================================
 
+
 def test_create_experiment(client):
-    resp = client.post("/api/resilience/chaos/experiments", json={
-        "name": "test_latency",
-        "fault_type": "latency",
-        "target_service": "qdrant_search",
-    })
+    resp = client.post(
+        "/api/resilience/chaos/experiments",
+        json={
+            "name": "test_latency",
+            "fault_type": "latency",
+            "target_service": "qdrant_search",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["name"] == "test_latency"
 
 
 def test_list_experiments(client):
-    client.post("/api/resilience/chaos/experiments", json={
-        "name": "e1", "fault_type": "latency", "target_service": "qdrant_search",
-    })
+    client.post(
+        "/api/resilience/chaos/experiments",
+        json={
+            "name": "e1",
+            "fault_type": "latency",
+            "target_service": "qdrant_search",
+        },
+    )
     resp = client.get("/api/resilience/chaos/experiments")
     assert resp.status_code == 200
     assert resp.json()["total"] >= 1
 
 
 def test_run_experiment(client):
-    create = client.post("/api/resilience/chaos/experiments", json={
-        "name": "run_test", "fault_type": "latency", "target_service": "qdrant_search",
-    })
+    create = client.post(
+        "/api/resilience/chaos/experiments",
+        json={
+            "name": "run_test",
+            "fault_type": "latency",
+            "target_service": "qdrant_search",
+        },
+    )
     exp_id = create.json()["experiment_id"]
     resp = client.post(f"/api/resilience/chaos/experiments/{exp_id}/run")
     assert resp.status_code == 200
@@ -117,6 +132,7 @@ def test_list_templates(client):
 # =========================================
 # BULKHEADS & DEGRADATION
 # =========================================
+
 
 def test_list_bulkheads(client):
     resp = client.get("/api/resilience/bulkheads")
@@ -139,6 +155,7 @@ def test_set_degradation(client):
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_health(client):
     resp = client.get("/api/resilience/health")

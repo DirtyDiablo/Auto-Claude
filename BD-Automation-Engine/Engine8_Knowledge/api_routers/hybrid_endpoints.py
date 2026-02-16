@@ -35,6 +35,7 @@ except ImportError:
     def openai_retry(fn):
         return fn
 
+
 logger = logging.getLogger("BDKnowledgeAPI.hybrid")
 
 router = APIRouter(tags=["hybrid"])
@@ -47,6 +48,7 @@ BULLHORN_DB = PROJECT_ROOT / "Engine7_BullhornETL" / "data" / "bullhorn_master.d
 # =========================================
 # Pydantic Models
 # =========================================
+
 
 class HybridSearchRequest(BaseModel):
     query: str = Field(..., description="Search query text")
@@ -107,24 +109,27 @@ class CreateCollectionsResponse(BaseModel):
 # Helper: get store and client from app state
 # =========================================
 
+
 def _get_store():
     """Get the global BDKnowledgeStore instance."""
     import sys
+
     # Try direct import now that api_routers/ no longer shadows api.py
     try:
         from Engine8_Knowledge.api import store
+
         if store is not None:
             return store
     except (ImportError, AttributeError):
         pass
     # Fallback: scan sys.modules
     for mod_name, mod in sys.modules.items():
-        if hasattr(mod, 'store') and hasattr(mod, 'BDKnowledgeStore'):
-            s = getattr(mod, 'store', None)
+        if hasattr(mod, "store") and hasattr(mod, "BDKnowledgeStore"):
+            s = getattr(mod, "store", None)
             if s is not None:
                 return s
-    main_mod = sys.modules.get('__main__')
-    s = getattr(main_mod, 'store', None)
+    main_mod = sys.modules.get("__main__")
+    s = getattr(main_mod, "store", None)
     if s is not None:
         return s
     raise HTTPException(status_code=503, detail="Store not initialized")
@@ -146,6 +151,7 @@ def _generate_query_embedding(openai_client, model_name: str, query: str):
 # =========================================
 # 1. Hybrid Search (Qdrant-native Prefetch + RRF)
 # =========================================
+
 
 @router.post("/search/hybrid/v2", response_model=HybridSearchResponse)
 async def hybrid_search_v2(request: HybridSearchRequest):
@@ -170,9 +176,18 @@ async def hybrid_search_v2(request: HybridSearchRequest):
     except Exception:
         existing = all_collections
 
-    available = [c for c in existing if c in all_collections or c in (
-        "bullhorn_notes", "federal_contracts", "intelligence_reports", "opportunities"
-    )]
+    available = [
+        c
+        for c in existing
+        if c in all_collections
+        or c
+        in (
+            "bullhorn_notes",
+            "federal_contracts",
+            "intelligence_reports",
+            "opportunities",
+        )
+    ]
 
     if request.collections:
         target_collections = [c for c in request.collections if c in available]
@@ -187,7 +202,9 @@ async def hybrid_search_v2(request: HybridSearchRequest):
     # Generate dense embedding for query
     openai_client, model_name = _get_openai_client()
     try:
-        query_vector = _generate_query_embedding(openai_client, model_name, request.query)
+        query_vector = _generate_query_embedding(
+            openai_client, model_name, request.query
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Embedding error: {e}")
 
@@ -234,12 +251,14 @@ async def hybrid_search_v2(request: HybridSearchRequest):
                 )
 
             for r in results.points:
-                all_results.append(HybridSearchResult(
-                    id=str(r.id),
-                    score=r.score,
-                    payload=r.payload or {},
-                    collection=coll,
-                ))
+                all_results.append(
+                    HybridSearchResult(
+                        id=str(r.id),
+                        score=r.score,
+                        payload=r.payload or {},
+                        collection=coll,
+                    )
+                )
 
         except Exception as e:
             logger.warning(f"Hybrid search failed for {coll}: {e}")
@@ -261,6 +280,7 @@ async def hybrid_search_v2(request: HybridSearchRequest):
 # =========================================
 # 2. Collection Stats
 # =========================================
+
 
 @router.get("/collections/stats", response_model=CollectionStatsResponse)
 async def collection_stats():
@@ -286,7 +306,11 @@ async def collection_stats():
             info = client.get_collection(name)
             points_count = getattr(info, "points_count", 0)
             vectors_count = getattr(info, "vectors_count", points_count)
-            status = getattr(info.status, "name", str(info.status)) if hasattr(info, "status") else "unknown"
+            status = (
+                getattr(info.status, "name", str(info.status))
+                if hasattr(info, "status")
+                else "unknown"
+            )
             has_sparse = collection_has_sparse(client, name)
 
             collections_info[name] = {
@@ -316,13 +340,17 @@ async def collection_stats():
 # 3-5. Notion Sync Endpoints
 # =========================================
 
+
 def _get_notion_sync():
     """Get or create NotionQdrantSync instance."""
     notion_token = os.getenv("NOTION_TOKEN")
     if not notion_token:
-        raise HTTPException(status_code=400, detail="NOTION_TOKEN not set in environment")
+        raise HTTPException(
+            status_code=400, detail="NOTION_TOKEN not set in environment"
+        )
 
     from services.notion_qdrant_sync import NotionQdrantSync
+
     return NotionQdrantSync()
 
 
@@ -402,7 +430,9 @@ async def sync_notion_contacts(
 
     db_id = NOTION_DATABASES.get("dcgs_contacts")
     if not db_id:
-        raise HTTPException(status_code=500, detail="dcgs_contacts database ID not configured")
+        raise HTTPException(
+            status_code=500, detail="dcgs_contacts database ID not configured"
+        )
 
     pages = _fetch_notion_pages(db_id, limit=limit)
     records = [_notion_page_to_dict(p) for p in pages]
@@ -429,7 +459,9 @@ async def sync_notion_programs(
 
     db_id = NOTION_DATABASES.get("federal_programs")
     if not db_id:
-        raise HTTPException(status_code=500, detail="federal_programs database ID not configured")
+        raise HTTPException(
+            status_code=500, detail="federal_programs database ID not configured"
+        )
 
     pages = _fetch_notion_pages(db_id, limit=limit)
     records = [_notion_page_to_dict(p) for p in pages]
@@ -456,7 +488,9 @@ async def sync_notion_jobs(
 
     db_id = NOTION_DATABASES.get("gdit_jobs")
     if not db_id:
-        raise HTTPException(status_code=500, detail="gdit_jobs database ID not configured")
+        raise HTTPException(
+            status_code=500, detail="gdit_jobs database ID not configured"
+        )
 
     pages = _fetch_notion_pages(db_id, limit=limit)
     records = [_notion_page_to_dict(p) for p in pages]
@@ -478,9 +512,12 @@ async def sync_notion_jobs(
 # 6. Bullhorn Notes Indexing
 # =========================================
 
+
 @router.post("/index/bullhorn-notes", response_model=IndexBullhornResponse)
 async def index_bullhorn_notes(
-    batch_size: int = Query(200, ge=1, le=500, description="Texts per OpenAI embedding call"),
+    batch_size: int = Query(
+        200, ge=1, le=500, description="Texts per OpenAI embedding call"
+    ),
     limit: int = Query(0, ge=0, description="Max notes to index (0=all)"),
 ):
     """Index Bullhorn call notes into the bullhorn_notes hybrid collection.
@@ -534,13 +571,18 @@ async def index_bullhorn_notes(
     cursor.execute(query)
     rows = cursor.fetchall()
     columns = [desc[0] for desc in cursor.description]
-    total_available = cursor.execute(f"SELECT COUNT(*) FROM {notes_table}").fetchone()[0]
+    total_available = cursor.execute(f"SELECT COUNT(*) FROM {notes_table}").fetchone()[
+        0
+    ]
     conn.close()
 
     if not rows:
         return IndexBullhornResponse(
-            success=True, indexed=0, errors=0,
-            total_available=total_available, timestamp=datetime.now().isoformat(),
+            success=True,
+            indexed=0,
+            errors=0,
+            total_available=total_available,
+            timestamp=datetime.now().isoformat(),
         )
 
     # Build text and payload for each note
@@ -556,7 +598,15 @@ async def index_bullhorn_notes(
         record = dict(zip(columns, row))
         # Build composite text for embedding
         parts = []
-        for field in ["about", "personReference", "note_type", "noteType", "action", "note_body", "comments"]:
+        for field in [
+            "about",
+            "personReference",
+            "note_type",
+            "noteType",
+            "action",
+            "note_body",
+            "comments",
+        ]:
             val = record.get(field)
             if val and str(val).strip():
                 parts.append(str(val).strip())
@@ -569,8 +619,12 @@ async def index_bullhorn_notes(
 
         if len(batch_texts) >= batch_size:
             count, errs = _upsert_bullhorn_batch(
-                client, openai_client, model_name, encoder,
-                batch_texts, batch_meta,
+                client,
+                openai_client,
+                model_name,
+                encoder,
+                batch_texts,
+                batch_meta,
             )
             indexed += count
             errors += errs
@@ -580,8 +634,12 @@ async def index_bullhorn_notes(
     # Final batch
     if batch_texts:
         count, errs = _upsert_bullhorn_batch(
-            client, openai_client, model_name, encoder,
-            batch_texts, batch_meta,
+            client,
+            openai_client,
+            model_name,
+            encoder,
+            batch_texts,
+            batch_meta,
         )
         indexed += count
         errors += errs
@@ -629,12 +687,14 @@ def _upsert_bullhorn_batch(
 
         # Generate deterministic UUID from record
         namespace = uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8")
-        point_id = str(uuid.uuid5(namespace, f"bullhorn_notes:{json.dumps(record, sort_keys=True, default=str)}"))
+        point_id = str(
+            uuid.uuid5(
+                namespace,
+                f"bullhorn_notes:{json.dumps(record, sort_keys=True, default=str)}",
+            )
+        )
 
-        payload = {
-            k: (str(v) if v is not None else None)
-            for k, v in record.items()
-        }
+        payload = {k: (str(v) if v is not None else None) for k, v in record.items()}
         payload["_indexed_at"] = datetime.now().isoformat()
         payload["_embedding_model"] = model_name
         payload["_source"] = "bullhorn_master_db"
@@ -644,11 +704,13 @@ def _upsert_bullhorn_batch(
         if sparse_vector.indices:
             vectors["bm25"] = sparse_vector
 
-        points.append(PointStruct(
-            id=point_id,
-            vector=vectors,
-            payload=payload,
-        ))
+        points.append(
+            PointStruct(
+                id=point_id,
+                vector=vectors,
+                payload=payload,
+            )
+        )
 
     try:
         client.upsert(collection_name="bullhorn_notes", points=points)
@@ -661,6 +723,7 @@ def _upsert_bullhorn_batch(
 # =========================================
 # 7. Create Hybrid Collections
 # =========================================
+
 
 @router.post("/collections/create-hybrid", response_model=CreateCollectionsResponse)
 async def create_hybrid_collections():

@@ -42,13 +42,14 @@ DATABASE_IDS = {
 HEADERS = {
     "Authorization": f"Bearer {NOTION_TOKEN}",
     "Notion-Version": NOTION_VERSION,
-    "Content-Type": "application/json"
+    "Content-Type": "application/json",
 }
 
 
 @dataclass
 class PropertyDefinition:
     """Definition for a database property"""
+
     name: str
     type: str
     config: Dict[str, Any] = None
@@ -91,7 +92,7 @@ class NotionSchemaManager:
             return response.json()
         except requests.exceptions.RequestException as e:
             print(f"Error making request to {endpoint}: {e}")
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, "response") and e.response is not None:
                 print(f"Response: {e.response.text}")
             return None
 
@@ -112,12 +113,12 @@ class NotionSchemaManager:
         if not db:
             return None
 
-        data_sources = db.get('data_sources', [])
+        data_sources = db.get("data_sources", [])
         if not data_sources:
             print(f"  [WARN] No data sources found for database {database_id}")
             return None
 
-        data_source_id = data_sources[0]['id']
+        data_source_id = data_sources[0]["id"]
         self._data_source_cache[database_id] = data_source_id
         return data_source_id
 
@@ -156,7 +157,9 @@ class NotionSchemaManager:
 
         return self.update_data_source(data_source_id, properties)
 
-    def update_data_source(self, data_source_id: str, properties: Dict[str, Any]) -> Dict:
+    def update_data_source(
+        self, data_source_id: str, properties: Dict[str, Any]
+    ) -> Dict:
         """Update data source properties (schema).
 
         In API 2025-09-03, this is the endpoint for schema modifications.
@@ -164,7 +167,13 @@ class NotionSchemaManager:
         data = {"properties": properties}
         return self._make_request("PATCH", f"data_sources/{data_source_id}", data)
 
-    def create_database(self, parent_page_id: str, title: str, properties: Dict[str, Any], icon: str = None) -> Dict:
+    def create_database(
+        self,
+        parent_page_id: str,
+        title: str,
+        properties: Dict[str, Any],
+        icon: str = None,
+    ) -> Dict:
         """Create a new database with initial data source.
 
         In API 2025-09-03, properties go under initial_data_source[properties]
@@ -173,9 +182,7 @@ class NotionSchemaManager:
         data = {
             "parent": {"page_id": parent_page_id},
             "title": [{"type": "text", "text": {"content": title}}],
-            "initial_data_source": {
-                "properties": properties
-            }
+            "initial_data_source": {"properties": properties},
         }
         if icon:
             data["icon"] = {"type": "emoji", "emoji": icon}
@@ -200,6 +207,7 @@ class NotionSchemaManager:
 # =============================================================================
 # PHASE 1: Schema Updates - Add Missing Fields
 # =============================================================================
+
 
 def get_jobs_new_properties() -> Dict[str, Any]:
     """Properties to add to Jobs (Program Mapping Intelligence Hub)"""
@@ -306,6 +314,7 @@ def get_contractors_new_properties() -> Dict[str, Any]:
 # =============================================================================
 # PHASE 2: Create New Databases
 # =============================================================================
+
 
 def get_locations_hub_schema() -> Dict[str, Any]:
     """Schema for new Locations Hub database"""
@@ -509,6 +518,7 @@ def get_pts_bench_schema() -> Dict[str, Any]:
 # PHASE 1.5: Database Cleanup
 # =============================================================================
 
+
 def get_cleanup_recommendations(manager: NotionSchemaManager) -> Dict[str, List[str]]:
     """Analyze databases and return cleanup recommendations.
 
@@ -535,7 +545,9 @@ def get_cleanup_recommendations(manager: NotionSchemaManager) -> Dict[str, List[
         for i, name in enumerate(prop_names_lower):
             for j, other_name in enumerate(prop_names_lower):
                 if i < j and (name in other_name or other_name in name):
-                    issues.append(f"Potential duplicate: '{list(props.keys())[i]}' and '{list(props.keys())[j]}'")
+                    issues.append(
+                        f"Potential duplicate: '{list(props.keys())[i]}' and '{list(props.keys())[j]}'"
+                    )
 
         # Check for unused formula properties that might need cleanup
         for prop_name, prop_config in props.items():
@@ -545,7 +557,9 @@ def get_cleanup_recommendations(manager: NotionSchemaManager) -> Dict[str, List[
             if prop_type == "formula":
                 formula_expr = prop_config.get("formula", {}).get("expression", "")
                 if len(formula_expr) > 500:
-                    issues.append(f"Complex formula in '{prop_name}' - consider simplifying")
+                    issues.append(
+                        f"Complex formula in '{prop_name}' - consider simplifying"
+                    )
 
             # Flag empty select options
             if prop_type == "select":
@@ -565,9 +579,12 @@ def get_cleanup_recommendations(manager: NotionSchemaManager) -> Dict[str, List[
     return recommendations
 
 
-def cleanup_database_properties(manager: NotionSchemaManager, database_id: str,
-                                 properties_to_remove: List[str] = None,
-                                 properties_to_rename: Dict[str, str] = None) -> bool:
+def cleanup_database_properties(
+    manager: NotionSchemaManager,
+    database_id: str,
+    properties_to_remove: List[str] = None,
+    properties_to_rename: Dict[str, str] = None,
+) -> bool:
     """
     Clean up database properties
     Note: Notion API doesn't support removing properties, only setting them to null
@@ -584,7 +601,9 @@ def cleanup_database_properties(manager: NotionSchemaManager, database_id: str,
     # (migration of data would need separate step)
     if properties_to_rename:
         for old_name, new_name in properties_to_rename.items():
-            print(f"  Note: To rename '{old_name}' to '{new_name}', manual migration needed")
+            print(
+                f"  Note: To rename '{old_name}' to '{new_name}', manual migration needed"
+            )
 
     if updates:
         result = manager.update_database(database_id, updates)
@@ -597,11 +616,12 @@ def cleanup_database_properties(manager: NotionSchemaManager, database_id: str,
 # Main Execution
 # =============================================================================
 
+
 def run_phase_1(manager: NotionSchemaManager):
     """Phase 1: Add missing fields to existing databases"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PHASE 1: Adding Missing Fields to Existing Databases")
-    print("="*60)
+    print("=" * 60)
 
     # 1A: Jobs Database
     print("\n[1A] Updating Jobs (Program Mapping Intelligence Hub)...")
@@ -612,7 +632,9 @@ def run_phase_1(manager: NotionSchemaManager):
     if props_to_add:
         result = manager.update_database(DATABASE_IDS["jobs"], props_to_add)
         if result:
-            print(f"  [OK] Added {len(props_to_add)} properties: {list(props_to_add.keys())}")
+            print(
+                f"  [OK] Added {len(props_to_add)} properties: {list(props_to_add.keys())}"
+            )
         else:
             print(f"  [FAIL] Failed to add properties")
     else:
@@ -627,7 +649,9 @@ def run_phase_1(manager: NotionSchemaManager):
     if props_to_add:
         result = manager.update_database(DATABASE_IDS["programs"], props_to_add)
         if result:
-            print(f"  [OK] Added {len(props_to_add)} properties: {list(props_to_add.keys())}")
+            print(
+                f"  [OK] Added {len(props_to_add)} properties: {list(props_to_add.keys())}"
+            )
         else:
             print(f"  [FAIL] Failed to add properties")
     else:
@@ -662,7 +686,9 @@ def run_phase_1(manager: NotionSchemaManager):
     if props_to_add:
         result = manager.update_database(DATABASE_IDS["contractors"], props_to_add)
         if result:
-            print(f"  [OK] Added {len(props_to_add)} properties: {list(props_to_add.keys())}")
+            print(
+                f"  [OK] Added {len(props_to_add)} properties: {list(props_to_add.keys())}"
+            )
         else:
             print(f"  [FAIL] Failed to add properties")
     else:
@@ -671,9 +697,9 @@ def run_phase_1(manager: NotionSchemaManager):
 
 def run_phase_1_5(manager: NotionSchemaManager):
     """Phase 1.5: Database Cleanup & Optimization"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PHASE 1.5: Database Cleanup & Property Optimization")
-    print("="*60)
+    print("=" * 60)
 
     recommendations = get_cleanup_recommendations(manager)
 
@@ -693,9 +719,9 @@ def run_phase_1_5(manager: NotionSchemaManager):
 
 def run_phase_2_3_4(manager: NotionSchemaManager, parent_page_id: str):
     """Phases 2-4: Create new databases"""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("PHASES 2-4: Creating New Databases")
-    print("="*60)
+    print("=" * 60)
 
     # Phase 2: Locations Hub
     print("\n[Phase 2] Creating Locations Hub database...")
@@ -703,7 +729,7 @@ def run_phase_2_3_4(manager: NotionSchemaManager, parent_page_id: str):
         parent_page_id=parent_page_id,
         title="Locations Hub",
         properties=get_locations_hub_schema(),
-        icon=None  # Skip emoji icons for Windows compatibility
+        icon=None,  # Skip emoji icons for Windows compatibility
     )
     if result:
         print(f"  [OK] Created Locations Hub: {result.get('id')}")
@@ -716,7 +742,7 @@ def run_phase_2_3_4(manager: NotionSchemaManager, parent_page_id: str):
         parent_page_id=parent_page_id,
         title="Customers (Agencies)",
         properties=get_customers_schema(),
-        icon=None
+        icon=None,
     )
     if result:
         print(f"  [OK] Created Customers: {result.get('id')}")
@@ -729,7 +755,7 @@ def run_phase_2_3_4(manager: NotionSchemaManager, parent_page_id: str):
         parent_page_id=parent_page_id,
         title="PTS Bench",
         properties=get_pts_bench_schema(),
-        icon=None
+        icon=None,
     )
     if result:
         print(f"  [OK] Created PTS Bench: {result.get('id')}")
@@ -741,15 +767,29 @@ def main():
     """Main execution"""
     import argparse
 
-    parser = argparse.ArgumentParser(description="Notion Schema Manager for BD Dashboard")
-    parser.add_argument("--phase", type=str, choices=["1", "1.5", "2-4", "all"],
-                        default="all", help="Which phase to run")
-    parser.add_argument("--parent-page", type=str,
-                        help="Parent page ID for new databases (required for phase 2-4)")
-    parser.add_argument("--apply-cleanup", action="store_true",
-                        help="Apply automatic cleanup fixes")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Show what would be done without making changes")
+    parser = argparse.ArgumentParser(
+        description="Notion Schema Manager for BD Dashboard"
+    )
+    parser.add_argument(
+        "--phase",
+        type=str,
+        choices=["1", "1.5", "2-4", "all"],
+        default="all",
+        help="Which phase to run",
+    )
+    parser.add_argument(
+        "--parent-page",
+        type=str,
+        help="Parent page ID for new databases (required for phase 2-4)",
+    )
+    parser.add_argument(
+        "--apply-cleanup", action="store_true", help="Apply automatic cleanup fixes"
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Show what would be done without making changes",
+    )
 
     args = parser.parse_args()
 
@@ -757,9 +797,9 @@ def main():
         print("[ERROR] NOTION_TOKEN not found in environment")
         return
 
-    print("="*60)
+    print("=" * 60)
     print("BD Intelligence Dashboard - Notion Schema Manager")
-    print("="*60)
+    print("=" * 60)
 
     manager = NotionSchemaManager()
 
@@ -774,14 +814,18 @@ def main():
 
     if args.phase in ["2-4", "all"]:
         if not args.parent_page:
-            print("\n[WARN] Skipping Phase 2-4: --parent-page required for creating new databases")
-            print("   Use: python notion_schema_manager.py --phase 2-4 --parent-page <page-id>")
+            print(
+                "\n[WARN] Skipping Phase 2-4: --parent-page required for creating new databases"
+            )
+            print(
+                "   Use: python notion_schema_manager.py --phase 2-4 --parent-page <page-id>"
+            )
         else:
             run_phase_2_3_4(manager, args.parent_page)
 
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("Schema management complete!")
-    print("="*60)
+    print("=" * 60)
 
 
 if __name__ == "__main__":

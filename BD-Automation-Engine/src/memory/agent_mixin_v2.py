@@ -75,7 +75,8 @@ class MemoryAwareAgentV2:
 
         logger.debug(
             "Agent %s recalled %d memories for task: %s",
-            self.agent_type, memory_context.total_memories,
+            self.agent_type,
+            memory_context.total_memories,
             task_description[:60],
         )
 
@@ -116,7 +117,9 @@ class MemoryAwareAgentV2:
         episode = Memory(
             content=" | ".join(content_parts),
             memory_type=MemoryType.EPISODIC.value,
-            importance=0.6 if success else 0.7,  # failures are slightly more important to remember
+            importance=0.6
+            if success
+            else 0.7,  # failures are slightly more important to remember
             source=f"agent:{self.agent_type}",
             tags=["task_execution", self.agent_type, status],
             metadata={
@@ -129,7 +132,9 @@ class MemoryAwareAgentV2:
         mem_id = await self._cortex.store(episode)
         self._task_memories.append(mem_id)
 
-        logger.debug("Stored episodic memory %s for task: %s", mem_id, task_description[:60])
+        logger.debug(
+            "Stored episodic memory %s for task: %s", mem_id, task_description[:60]
+        )
         return mem_id
 
     # -----------------------------------------
@@ -213,7 +218,9 @@ class MemoryAwareAgentV2:
         mem_id = await self._cortex.store(procedural)
         self._task_memories.append(mem_id)
 
-        logger.debug("Stored procedural memory %s: %s → %s", mem_id, strategy[:40], outcome[:40])
+        logger.debug(
+            "Stored procedural memory %s: %s → %s", mem_id, strategy[:40], outcome[:40]
+        )
         return mem_id
 
     # -----------------------------------------
@@ -226,8 +233,15 @@ class MemoryAwareAgentV2:
             return str(result)[:100]
 
         parts = []
-        for key in ["status", "contacts_found", "jobs_found", "documents_generated",
-                     "insights", "matches_found", "messages_crafted"]:
+        for key in [
+            "status",
+            "contacts_found",
+            "jobs_found",
+            "documents_generated",
+            "insights",
+            "matches_found",
+            "messages_crafted",
+        ]:
             if key in result:
                 val = result[key]
                 if isinstance(val, list):

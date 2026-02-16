@@ -22,6 +22,7 @@ def tracer():
 # SPAN LIFECYCLE
 # =========================================
 
+
 def test_start_span(tracer):
     span = tracer.start_span("test.operation")
     assert isinstance(span, Span)
@@ -74,6 +75,7 @@ def test_span_kind(tracer):
 # TRACES
 # =========================================
 
+
 def test_start_trace(tracer):
     root = tracer.start_trace("api.request")
     assert root.parent_span_id is None
@@ -101,7 +103,9 @@ def test_get_trace(tracer):
 
 def test_get_trace_spans(tracer):
     root = tracer.start_trace("api.request")
-    child = tracer.start_span("db.query", trace_id=root.trace_id, parent_span_id=root.span_id)
+    child = tracer.start_span(
+        "db.query", trace_id=root.trace_id, parent_span_id=root.span_id
+    )
     tracer.end_span(child)
     tracer.end_span(root)
     spans = tracer.get_trace_spans(root.trace_id)
@@ -110,7 +114,9 @@ def test_get_trace_spans(tracer):
 
 def test_trace_has_error_status(tracer):
     root = tracer.start_trace("api.request")
-    child = tracer.start_span("db.query", trace_id=root.trace_id, parent_span_id=root.span_id)
+    child = tracer.start_span(
+        "db.query", trace_id=root.trace_id, parent_span_id=root.span_id
+    )
     child.set_status(SpanStatus.ERROR)
     tracer.end_span(child)
     tracer.end_span(root)
@@ -133,6 +139,7 @@ def test_get_trace_not_found(tracer):
 # =========================================
 # CONTEXT PROPAGATION
 # =========================================
+
 
 def test_inject_context(tracer):
     span = tracer.start_trace("api.request")
@@ -161,6 +168,7 @@ def test_extract_context_invalid(tracer):
 # SEARCH
 # =========================================
 
+
 def test_search_by_operation(tracer):
     s1 = tracer.start_span("api.users")
     tracer.end_span(s1)
@@ -183,6 +191,7 @@ def test_search_by_min_duration(tracer):
 # =========================================
 # SAMPLING
 # =========================================
+
 
 def test_sampling_always(tracer):
     tracer.set_sampling(SamplingConfig(strategy="always"))
@@ -207,6 +216,7 @@ def test_get_sampling(tracer):
 # EXPORT
 # =========================================
 
+
 def test_export_traces(tracer):
     root = tracer.start_trace("api.request")
     tracer.end_span(root)
@@ -219,6 +229,7 @@ def test_export_traces(tracer):
 # =========================================
 # TO_DICT & STATS
 # =========================================
+
 
 def test_span_to_dict(tracer):
     span = tracer.start_span("test")
@@ -249,8 +260,10 @@ def test_stats(tracer):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.observability.distributed_tracer as mod
+
     mod._instance = None
     t1 = get_tracer()
     t2 = get_tracer()

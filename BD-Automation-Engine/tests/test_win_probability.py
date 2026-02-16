@@ -16,6 +16,7 @@ from src.ml.win_probability import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def model():
     return WinProbabilityModel()
@@ -88,6 +89,7 @@ def weak_opportunity():
 # FEATURE DEFINITIONS
 # =========================================
 
+
 class TestFeatureDefinitions:
     def test_all_features_count(self):
         assert len(ALL_FEATURES) == 22
@@ -108,6 +110,7 @@ class TestFeatureDefinitions:
 # HEURISTIC PREDICTION (no model trained)
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestHeuristicPrediction:
     async def test_predict_returns_win_prediction(self, model, sample_opportunity):
@@ -122,7 +125,9 @@ class TestHeuristicPrediction:
         pred = await model.predict(sample_opportunity)
         assert pred.confidence in ("low", "medium", "high")
 
-    async def test_strong_opp_higher_than_weak(self, model, sample_opportunity, weak_opportunity):
+    async def test_strong_opp_higher_than_weak(
+        self, model, sample_opportunity, weak_opportunity
+    ):
         strong = await model.predict(sample_opportunity)
         weak = await model.predict(weak_opportunity)
         assert strong.win_probability > weak.win_probability
@@ -152,9 +157,12 @@ class TestHeuristicPrediction:
 # BATCH PREDICTION
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestBatchPrediction:
-    async def test_batch_returns_list(self, model, sample_opportunity, weak_opportunity):
+    async def test_batch_returns_list(
+        self, model, sample_opportunity, weak_opportunity
+    ):
         preds = await model.predict_batch([sample_opportunity, weak_opportunity])
         assert isinstance(preds, list)
         assert len(preds) == 2
@@ -171,6 +179,7 @@ class TestBatchPrediction:
 # =========================================
 # TRAINING
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestTraining:
@@ -190,6 +199,7 @@ class TestTraining:
 # MODEL METRICS
 # =========================================
 
+
 class TestModelMetrics:
     def test_untrained_model_metrics(self, model):
         metrics = model.get_model_metrics()
@@ -208,6 +218,7 @@ class TestModelMetrics:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_win_model_returns_instance(self):

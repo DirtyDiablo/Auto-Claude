@@ -17,15 +17,16 @@ logger = logging.getLogger(__name__)
 
 
 class RetrievalStrategy(str, Enum):
-    LIGHTRAG = "lightrag"        # Graph + vector
-    BM25 = "bm25"                # Keyword search
-    HYBRID = "hybrid"            # Combination
-    AUTO = "auto"                # Auto-select based on query
+    LIGHTRAG = "lightrag"  # Graph + vector
+    BM25 = "bm25"  # Keyword search
+    HYBRID = "hybrid"  # Combination
+    AUTO = "auto"  # Auto-select based on query
 
 
 @dataclass
 class RouterResult:
     """Result from RAG router."""
+
     strategy: str
     query: str
     results: List[Dict]
@@ -46,6 +47,7 @@ class RAGRouter:
         # LightRAG (graph-based)
         try:
             from Engine8_Knowledge.scripts.lightrag_engine import get_knowledge_graph
+
             self.strategies["lightrag"] = get_knowledge_graph()
             logger.info("LightRAG strategy initialized")
         except Exception as e:
@@ -54,6 +56,7 @@ class RAGRouter:
         # Hybrid Retriever (includes BM25)
         try:
             from Engine8_Knowledge.scripts.hybrid_retriever import get_hybrid_retriever
+
             self.strategies["hybrid"] = get_hybrid_retriever()
             logger.info("Hybrid retriever strategy initialized")
         except Exception as e:
@@ -65,24 +68,43 @@ class RAGRouter:
 
         # Relationship queries -> LightRAG
         relationship_keywords = [
-            "who", "connect", "related", "relationship", "between",
-            "teaming", "partners", "works with", "subcontracts"
+            "who",
+            "connect",
+            "related",
+            "relationship",
+            "between",
+            "teaming",
+            "partners",
+            "works with",
+            "subcontracts",
         ]
         if any(kw in query_lower for kw in relationship_keywords):
             return RetrievalStrategy.LIGHTRAG
 
         # Exact match queries -> BM25
         exact_keywords = [
-            "contract number", "piid", "uei", "cage code", "exact",
-            "specific", "id:", "number:"
+            "contract number",
+            "piid",
+            "uei",
+            "cage code",
+            "exact",
+            "specific",
+            "id:",
+            "number:",
         ]
         if any(kw in query_lower for kw in exact_keywords):
             return RetrievalStrategy.BM25
 
         # Complex reasoning queries -> Hybrid
         complex_keywords = [
-            "why", "how", "explain", "analyze", "compare",
-            "strategy", "recommend", "best"
+            "why",
+            "how",
+            "explain",
+            "analyze",
+            "compare",
+            "strategy",
+            "recommend",
+            "best",
         ]
         if any(kw in query_lower for kw in complex_keywords):
             return RetrievalStrategy.HYBRID
@@ -96,7 +118,7 @@ class RAGRouter:
         strategy: RetrievalStrategy = RetrievalStrategy.AUTO,
         limit: int = 10,
         collection: str = "bd_knowledge",
-        **kwargs
+        **kwargs,
     ) -> RouterResult:
         """Retrieve using specified or auto-selected strategy."""
 
@@ -139,7 +161,7 @@ class RAGRouter:
                 query=query,
                 results=results,
                 count=len(results),
-                strategies_used=strategies_used
+                strategies_used=strategies_used,
             )
         except Exception as e:
             logger.error(f"LightRAG retrieval failed: {e}")
@@ -155,7 +177,7 @@ class RAGRouter:
                 query=query,
                 results=[],
                 count=0,
-                strategies_used=["none"]
+                strategies_used=["none"],
             )
 
         try:
@@ -173,7 +195,7 @@ class RAGRouter:
                 query=query,
                 results=formatted,
                 count=len(formatted),
-                strategies_used=strategies_used
+                strategies_used=strategies_used,
             )
         except Exception as e:
             logger.error(f"BM25 retrieval failed: {e}")
@@ -182,7 +204,7 @@ class RAGRouter:
                 query=query,
                 results=[],
                 count=0,
-                strategies_used=["error"]
+                strategies_used=["error"],
             )
 
     def _hybrid_retrieve(
@@ -195,14 +217,13 @@ class RAGRouter:
                 query=query,
                 results=[],
                 count=0,
-                strategies_used=["none"]
+                strategies_used=["none"],
             )
 
         try:
             retriever = self.strategies["hybrid"]
             results = retriever.search(
-                query, collection, limit,
-                use_hybrid=True, use_rerank=True
+                query, collection, limit, use_hybrid=True, use_rerank=True
             )
             strategies_used.extend(["semantic", "bm25", "rerank"])
 
@@ -212,7 +233,7 @@ class RAGRouter:
                     "text": r.text,
                     "score": r.score,
                     "source": r.source,
-                    "metadata": r.metadata
+                    "metadata": r.metadata,
                 }
                 for r in results
             ]
@@ -222,7 +243,7 @@ class RAGRouter:
                 query=query,
                 results=formatted,
                 count=len(formatted),
-                strategies_used=strategies_used
+                strategies_used=strategies_used,
             )
         except Exception as e:
             logger.error(f"Hybrid retrieval failed: {e}")
@@ -231,7 +252,7 @@ class RAGRouter:
                 query=query,
                 results=[],
                 count=0,
-                strategies_used=["error"]
+                strategies_used=["error"],
             )
 
     def get_available_strategies(self) -> List[str]:

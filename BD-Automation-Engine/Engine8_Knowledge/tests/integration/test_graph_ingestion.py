@@ -13,13 +13,15 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.graph.ingestion import (
-    GraphIngestionEngine, LOCATION_COORDS,
+    GraphIngestionEngine,
+    LOCATION_COORDS,
 )
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def mock_mgr():
@@ -50,6 +52,7 @@ def engine(mock_mgr):
 # TestIngestionEngine — init and stats
 # ---------------------------------------------------------------------------
 
+
 class TestIngestionEngineInit:
     """Test engine initialization."""
 
@@ -74,6 +77,7 @@ class TestIngestionEngineInit:
 # TestContactIngestion
 # ---------------------------------------------------------------------------
 
+
 class TestContactIngestion:
     """Test contact CSV loading and ingestion."""
 
@@ -84,8 +88,10 @@ class TestContactIngestion:
 
     def test_ingest_contacts_with_data(self, engine, mock_mgr):
         csv_data = "name,title,email,phone,company,linkedin,program,tier,bd_priority,source_db,location\nAlice,Eng,alice@test.com,,Lockheed,,DCGS,1,High,csv,Herndon\nBob,PM,bob@test.com,,GDIT,,JSTARS,2,Medium,csv,McLean\n"
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             result = engine.ingest_contacts()
         assert result["status"] == "completed"
         assert result["ingested"] == 2
@@ -93,15 +99,19 @@ class TestContactIngestion:
 
     def test_ingest_contacts_with_limit(self, engine, mock_mgr):
         csv_data = "name,title,email\nAlice,Eng,alice@test.com\nBob,PM,bob@test.com\nCarol,Mgr,carol@test.com\n"
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             result = engine.ingest_contacts(limit=2)
         assert result["ingested"] == 2
 
     def test_load_contacts_csv_parses_fields(self, engine):
         csv_data = "name,title,email,phone,company,linkedin,program,tier,bd_priority,source_db,location\nJane Doe,Director,jane@doe.com,555-1234,Raytheon,linkedin.com/jane,DCGS,1,Critical,bullhorn,Fort Meade\n"
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             contacts = engine._load_contacts_csv()
         assert len(contacts) == 1
         assert contacts[0]["name"] == "Jane Doe"
@@ -114,8 +124,10 @@ class TestContactIngestion:
         assert contacts == []
 
     def test_load_contacts_csv_handles_read_error(self, engine):
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", side_effect=Exception("permission denied")):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", side_effect=Exception("permission denied")),
+        ):
             contacts = engine._load_contacts_csv()
         assert contacts == []
 
@@ -123,6 +135,7 @@ class TestContactIngestion:
 # ---------------------------------------------------------------------------
 # TestProgramIngestion
 # ---------------------------------------------------------------------------
+
 
 class TestProgramIngestion:
     """Test federal program CSV loading and ingestion."""
@@ -134,8 +147,10 @@ class TestProgramIngestion:
 
     def test_ingest_programs_with_data(self, engine, mock_mgr):
         csv_data = 'Program Name,Acronym,Contract Value,Agency Owner,Prime Contractor,Clearance Requirements,Program Type,Contract Vehicle,Hiring Velocity,Recompete Date,Confidence Level,Known Subcontractors\nDistributed Common Ground System,DCGS,$950M,Army,Northrop Grumman,TS/SCI,C5ISR,IDIQ,High,2027,High,"Leidos, Raytheon"\n'
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             result = engine.ingest_programs()
         assert result["status"] == "completed"
         assert result["ingested"] == 1
@@ -145,18 +160,22 @@ class TestProgramIngestion:
         assert mock_mgr.write_query.call_count == 2
 
     def test_ingest_programs_no_subs(self, engine, mock_mgr):
-        csv_data = 'Program Name,Acronym,Contract Value,Agency Owner,Prime Contractor,Clearance Requirements,Program Type,Contract Vehicle,Hiring Velocity,Recompete Date,Confidence Level,Known Subcontractors\nJSTARS,JSTARS,$2B,Air Force,GDIT,Secret,C5ISR,FFP,Medium,2028,Medium,\n'
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        csv_data = "Program Name,Acronym,Contract Value,Agency Owner,Prime Contractor,Clearance Requirements,Program Type,Contract Vehicle,Hiring Velocity,Recompete Date,Confidence Level,Known Subcontractors\nJSTARS,JSTARS,$2B,Air Force,GDIT,Secret,C5ISR,FFP,Medium,2028,Medium,\n"
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             result = engine.ingest_programs()
         assert result["status"] == "completed"
         # No subs = no write_query calls for subs
         mock_mgr.write_query.assert_not_called()
 
     def test_load_programs_csv_field_mapping(self, engine):
-        csv_data = 'Program Name,Acronym,Contract Value,Agency Owner,Prime Contractor\nDCGS,DCGS,$950M,Army,Northrop Grumman\n'
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        csv_data = "Program Name,Acronym,Contract Value,Agency Owner,Prime Contractor\nDCGS,DCGS,$950M,Army,Northrop Grumman\n"
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             progs = engine._load_programs_csv()
         assert len(progs) == 1
         assert progs[0]["acronym"] == "DCGS"
@@ -166,8 +185,10 @@ class TestProgramIngestion:
     def test_ingest_programs_sub_error_increments_errors(self, engine, mock_mgr):
         csv_data = 'Program Name,Acronym,Contract Value,Agency Owner,Prime Contractor,Clearance Requirements,Program Type,Contract Vehicle,Hiring Velocity,Recompete Date,Confidence Level,Known Subcontractors\nDCGS,DCGS,$950M,Army,NG,TS/SCI,C5ISR,IDIQ,High,2027,High,"BadSub"\n'
         mock_mgr.write_query.side_effect = Exception("cypher error")
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             engine.ingest_programs()
         assert engine._stats["errors"] >= 1
 
@@ -175,6 +196,7 @@ class TestProgramIngestion:
 # ---------------------------------------------------------------------------
 # TestJobIngestion
 # ---------------------------------------------------------------------------
+
 
 class TestJobIngestion:
     """Test job ingestion from API."""
@@ -186,9 +208,18 @@ class TestJobIngestion:
 
     def test_ingest_jobs_with_api_data(self, engine, mock_mgr):
         mock_jobs = [
-            {"title": "SW Eng", "status": "Open", "clearance": "TS", "location": "McLean",
-             "company": "Booz Allen", "program": "DCGS", "source_url": "", "bd_priority": "High",
-             "functional_area": "Engineering", "date_added": "2026-01-01"},
+            {
+                "title": "SW Eng",
+                "status": "Open",
+                "clearance": "TS",
+                "location": "McLean",
+                "company": "Booz Allen",
+                "program": "DCGS",
+                "source_url": "",
+                "bd_priority": "High",
+                "functional_area": "Engineering",
+                "date_added": "2026-01-01",
+            },
         ]
         with patch.object(engine, "_load_jobs_from_api", return_value=mock_jobs):
             result = engine.ingest_jobs()
@@ -221,6 +252,7 @@ class TestJobIngestion:
 # TestInteractionIngestion
 # ---------------------------------------------------------------------------
 
+
 class TestInteractionIngestion:
     """Test interaction/notes ingestion."""
 
@@ -231,16 +263,20 @@ class TestInteractionIngestion:
 
     def test_ingest_interactions_with_data(self, engine, mock_mgr):
         csv_data = "date_added,type,action,status,note_body_clean,about,note_author\n2026-01-15,call,Follow-up,done,Discussed DCGS timeline,Jane Doe,John Smith\n"
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             result = engine.ingest_interactions()
         assert result["status"] == "completed"
         assert result["ingested"] == 1
 
     def test_load_interactions_csv_fields(self, engine):
         csv_data = "date_added,type,action,status,note_body_clean,about,note_author\n2026-01-15,call,Follow-up,done,Discussed timeline,Jane Doe,John Smith\n"
-        with patch.object(Path, "exists", return_value=True), \
-             patch("builtins.open", mock_open(read_data=csv_data)):
+        with (
+            patch.object(Path, "exists", return_value=True),
+            patch("builtins.open", mock_open(read_data=csv_data)),
+        ):
             interactions = engine._load_interactions_csv()
         assert len(interactions) == 1
         assert interactions[0]["date"] == "2026-01-15"
@@ -252,6 +288,7 @@ class TestInteractionIngestion:
 # ---------------------------------------------------------------------------
 # TestLocationIngestion
 # ---------------------------------------------------------------------------
+
 
 class TestLocationIngestion:
     """Test location node creation."""
@@ -288,15 +325,28 @@ class TestLocationIngestion:
 # TestIngestAll
 # ---------------------------------------------------------------------------
 
+
 class TestIngestAll:
     """Test full graph rebuild."""
 
     def test_ingest_all_calls_all_sources(self, engine):
-        with patch.object(engine, "ingest_locations", return_value={"status": "completed"}) as m_loc, \
-             patch.object(engine, "ingest_contacts", return_value={"status": "completed"}) as m_con, \
-             patch.object(engine, "ingest_programs", return_value={"status": "completed"}) as m_prg, \
-             patch.object(engine, "ingest_jobs", return_value={"status": "completed"}) as m_job, \
-             patch.object(engine, "ingest_interactions", return_value={"status": "completed"}) as m_int:
+        with (
+            patch.object(
+                engine, "ingest_locations", return_value={"status": "completed"}
+            ) as m_loc,
+            patch.object(
+                engine, "ingest_contacts", return_value={"status": "completed"}
+            ) as m_con,
+            patch.object(
+                engine, "ingest_programs", return_value={"status": "completed"}
+            ) as m_prg,
+            patch.object(
+                engine, "ingest_jobs", return_value={"status": "completed"}
+            ) as m_job,
+            patch.object(
+                engine, "ingest_interactions", return_value={"status": "completed"}
+            ) as m_int,
+        ):
             engine.ingest_all()
         m_loc.assert_called_once()
         m_con.assert_called_once()
@@ -305,21 +355,43 @@ class TestIngestAll:
         m_int.assert_called_once()
 
     def test_ingest_all_includes_elapsed(self, engine):
-        with patch.object(engine, "ingest_locations", return_value={"status": "completed"}), \
-             patch.object(engine, "ingest_contacts", return_value={"status": "completed"}), \
-             patch.object(engine, "ingest_programs", return_value={"status": "completed"}), \
-             patch.object(engine, "ingest_jobs", return_value={"status": "completed"}), \
-             patch.object(engine, "ingest_interactions", return_value={"status": "completed"}):
+        with (
+            patch.object(
+                engine, "ingest_locations", return_value={"status": "completed"}
+            ),
+            patch.object(
+                engine, "ingest_contacts", return_value={"status": "completed"}
+            ),
+            patch.object(
+                engine, "ingest_programs", return_value={"status": "completed"}
+            ),
+            patch.object(engine, "ingest_jobs", return_value={"status": "completed"}),
+            patch.object(
+                engine, "ingest_interactions", return_value={"status": "completed"}
+            ),
+        ):
             result = engine.ingest_all()
         assert "elapsed_sec" in result
         assert "timestamp" in result
 
     def test_ingest_all_with_limit(self, engine):
-        with patch.object(engine, "ingest_locations", return_value={"status": "completed"}), \
-             patch.object(engine, "ingest_contacts", return_value={"status": "completed"}) as m_con, \
-             patch.object(engine, "ingest_programs", return_value={"status": "completed"}) as m_prg, \
-             patch.object(engine, "ingest_jobs", return_value={"status": "completed"}) as m_job, \
-             patch.object(engine, "ingest_interactions", return_value={"status": "completed"}) as m_int:
+        with (
+            patch.object(
+                engine, "ingest_locations", return_value={"status": "completed"}
+            ),
+            patch.object(
+                engine, "ingest_contacts", return_value={"status": "completed"}
+            ) as m_con,
+            patch.object(
+                engine, "ingest_programs", return_value={"status": "completed"}
+            ) as m_prg,
+            patch.object(
+                engine, "ingest_jobs", return_value={"status": "completed"}
+            ) as m_job,
+            patch.object(
+                engine, "ingest_interactions", return_value={"status": "completed"}
+            ) as m_int,
+        ):
             engine.ingest_all(limit=50)
         m_con.assert_called_once_with(50)
         m_prg.assert_called_once_with(50)

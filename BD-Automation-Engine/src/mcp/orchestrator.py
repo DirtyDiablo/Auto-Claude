@@ -20,6 +20,7 @@ from src.mcp.tool_registry import MCPToolRegistry, get_tool_registry
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class StepStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -100,34 +101,82 @@ class MCPExecutionResult:
 
 _PLAN_TEMPLATES: Dict[str, List[Dict[str, Any]]] = {
     "outreach_prep": [
-        {"server_id": "mcp_notion", "tool_name": "query_database",
-         "parameters": {"filter": "program_contacts"}, "depends_on": []},
-        {"server_id": "mcp_day_ai", "tool_name": "enrich_contact",
-         "parameters": {"enrich": True}, "depends_on": ["step_0"]},
-        {"server_id": "mcp_google_maps", "tool_name": "distance_matrix",
-         "parameters": {"calculate": True}, "depends_on": ["step_0"]},
-        {"server_id": "mcp_google_workspace", "tool_name": "draft_email",
-         "parameters": {"draft": True}, "depends_on": ["step_1"]},
-        {"server_id": "mcp_slack", "tool_name": "send_message",
-         "parameters": {"channel": "#bd-team", "notify": True}, "depends_on": ["step_3"]},
+        {
+            "server_id": "mcp_notion",
+            "tool_name": "query_database",
+            "parameters": {"filter": "program_contacts"},
+            "depends_on": [],
+        },
+        {
+            "server_id": "mcp_day_ai",
+            "tool_name": "enrich_contact",
+            "parameters": {"enrich": True},
+            "depends_on": ["step_0"],
+        },
+        {
+            "server_id": "mcp_google_maps",
+            "tool_name": "distance_matrix",
+            "parameters": {"calculate": True},
+            "depends_on": ["step_0"],
+        },
+        {
+            "server_id": "mcp_google_workspace",
+            "tool_name": "draft_email",
+            "parameters": {"draft": True},
+            "depends_on": ["step_1"],
+        },
+        {
+            "server_id": "mcp_slack",
+            "tool_name": "send_message",
+            "parameters": {"channel": "#bd-team", "notify": True},
+            "depends_on": ["step_3"],
+        },
     ],
     "competitor_scan": [
-        {"server_id": "mcp_notion", "tool_name": "query_database",
-         "parameters": {"filter": "competitor_jobs"}, "depends_on": []},
-        {"server_id": "mcp_day_ai", "tool_name": "company_intel",
-         "parameters": {"deep_scan": True}, "depends_on": ["step_0"]},
-        {"server_id": "mcp_slack", "tool_name": "send_message",
-         "parameters": {"channel": "#competitive-intel"}, "depends_on": ["step_1"]},
+        {
+            "server_id": "mcp_notion",
+            "tool_name": "query_database",
+            "parameters": {"filter": "competitor_jobs"},
+            "depends_on": [],
+        },
+        {
+            "server_id": "mcp_day_ai",
+            "tool_name": "company_intel",
+            "parameters": {"deep_scan": True},
+            "depends_on": ["step_0"],
+        },
+        {
+            "server_id": "mcp_slack",
+            "tool_name": "send_message",
+            "parameters": {"channel": "#competitive-intel"},
+            "depends_on": ["step_1"],
+        },
     ],
     "meeting_prep": [
-        {"server_id": "mcp_notion", "tool_name": "query_database",
-         "parameters": {"filter": "contact_details"}, "depends_on": []},
-        {"server_id": "mcp_day_ai", "tool_name": "enrich_contact",
-         "parameters": {"enrich": True}, "depends_on": ["step_0"]},
-        {"server_id": "mcp_google_workspace", "tool_name": "list_events",
-         "parameters": {"days": 7}, "depends_on": []},
-        {"server_id": "mcp_memory", "tool_name": "recall_memory",
-         "parameters": {"query": "meeting_history"}, "depends_on": []},
+        {
+            "server_id": "mcp_notion",
+            "tool_name": "query_database",
+            "parameters": {"filter": "contact_details"},
+            "depends_on": [],
+        },
+        {
+            "server_id": "mcp_day_ai",
+            "tool_name": "enrich_contact",
+            "parameters": {"enrich": True},
+            "depends_on": ["step_0"],
+        },
+        {
+            "server_id": "mcp_google_workspace",
+            "tool_name": "list_events",
+            "parameters": {"days": 7},
+            "depends_on": [],
+        },
+        {
+            "server_id": "mcp_memory",
+            "tool_name": "recall_memory",
+            "parameters": {"query": "meeting_history"},
+            "depends_on": [],
+        },
     ],
 }
 
@@ -135,6 +184,7 @@ _PLAN_TEMPLATES: Dict[str, List[Dict[str, Any]]] = {
 # =========================================
 # MCP ORCHESTRATOR
 # =========================================
+
 
 class MCPOrchestrator:
     """Orchestrates complex multi-tool MCP operations."""
@@ -148,18 +198,26 @@ class MCPOrchestrator:
     # PLAN GENERATION
     # --------------------------------------------------
 
-    def plan_from_intent(self, intent: str, context: Optional[Dict] = None) -> MCPExecutionPlan:
+    def plan_from_intent(
+        self, intent: str, context: Optional[Dict] = None
+    ) -> MCPExecutionPlan:
         """Decompose natural language intent into an MCP execution plan."""
         context = context or {}
         intent_lower = intent.lower()
 
         # Match intent to plan template
         template_key = ""
-        if any(kw in intent_lower for kw in ["outreach", "contact", "reach out", "engage"]):
+        if any(
+            kw in intent_lower for kw in ["outreach", "contact", "reach out", "engage"]
+        ):
             template_key = "outreach_prep"
-        elif any(kw in intent_lower for kw in ["competitor", "competitive", "market scan"]):
+        elif any(
+            kw in intent_lower for kw in ["competitor", "competitive", "market scan"]
+        ):
             template_key = "competitor_scan"
-        elif any(kw in intent_lower for kw in ["meeting", "call prep", "prepare for call"]):
+        elif any(
+            kw in intent_lower for kw in ["meeting", "call prep", "prepare for call"]
+        ):
             template_key = "meeting_prep"
 
         steps: List[MCPExecutionStep] = []
@@ -237,7 +295,8 @@ class MCPOrchestrator:
         while remaining and iteration < max_iterations:
             iteration += 1
             ready = [
-                s for s in remaining
+                s
+                for s in remaining
                 if all(dep in completed_steps for dep in s.depends_on)
             ]
             if not ready:
@@ -261,20 +320,28 @@ class MCPOrchestrator:
                         if step.status == StepStatus.COMPLETED.value:
                             completed_steps[step.step_id] = fallback_result
                         else:
-                            errors.append({
+                            errors.append(
+                                {
+                                    "step_id": step.step_id,
+                                    "error": step.error,
+                                }
+                            )
+                    else:
+                        errors.append(
+                            {
                                 "step_id": step.step_id,
                                 "error": step.error,
-                            })
-                    else:
-                        errors.append({
-                            "step_id": step.step_id,
-                            "error": step.error,
-                        })
+                            }
+                        )
                 remaining.remove(step) if step in remaining else None
 
-        steps_completed = sum(1 for s in plan.steps if s.status == StepStatus.COMPLETED.value)
+        steps_completed = sum(
+            1 for s in plan.steps if s.status == StepStatus.COMPLETED.value
+        )
         steps_failed = sum(1 for s in plan.steps if s.status == StepStatus.FAILED.value)
-        steps_skipped = sum(1 for s in plan.steps if s.status == StepStatus.SKIPPED.value)
+        steps_skipped = sum(
+            1 for s in plan.steps if s.status == StepStatus.SKIPPED.value
+        )
 
         if steps_failed == 0 and steps_skipped == 0:
             plan.status = PlanStatus.COMPLETED.value
@@ -300,8 +367,9 @@ class MCPOrchestrator:
         self._executions.append(execution_result)
         return execution_result
 
-    def _execute_step(self, step: MCPExecutionStep,
-                      _prior_results: Dict[str, Any]) -> Dict[str, Any]:
+    def _execute_step(
+        self, step: MCPExecutionStep, _prior_results: Dict[str, Any]
+    ) -> Dict[str, Any]:
         """Execute a single step. Simulates actual MCP tool call."""
         step.status = StepStatus.RUNNING.value
 
@@ -331,7 +399,9 @@ class MCPOrchestrator:
         }
 
         # Record usage
-        self._registry.record_usage(step.server_id, step.tool_name, success=True, latency_ms=100)
+        self._registry.record_usage(
+            step.server_id, step.tool_name, success=True, latency_ms=100
+        )
 
         return result
 
@@ -361,7 +431,9 @@ class MCPOrchestrator:
             "failed": sum(1 for e in self._executions if e.status == "failed"),
             "total_cost": round(total_cost, 4),
             "avg_steps_per_plan": round(
-                sum(len(p.steps) for p in self._plans.values()) / max(len(self._plans), 1), 1
+                sum(len(p.steps) for p in self._plans.values())
+                / max(len(self._plans), 1),
+                1,
             ),
         }
 

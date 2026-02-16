@@ -15,6 +15,7 @@ router = APIRouter(prefix="/embeddings", tags=["Domain Embeddings"])
 
 # ─── Request models ───────────────────────────────────────
 
+
 class EmbedRequest(BaseModel):
     text: str
     use_adapter: bool = True
@@ -26,16 +27,21 @@ class ExpandRequest(BaseModel):
 
 # ─── Corpus endpoints ────────────────────────────────────
 
+
 @router.get("/corpus-stats")
 async def corpus_stats():
     """Get domain corpus size and category distribution."""
     try:
         from Engine8_Knowledge.embeddings.corpus_builder import DomainCorpusBuilder
+
         builder = DomainCorpusBuilder()
         stats = builder.get_stats()
         if stats:
             return stats
-        return {"total_documents": 0, "message": "Corpus not built yet. POST /embeddings/build-corpus to create."}
+        return {
+            "total_documents": 0,
+            "message": "Corpus not built yet. POST /embeddings/build-corpus to create.",
+        }
     except Exception as e:
         logger.error(f"Corpus stats error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -46,8 +52,10 @@ async def build_corpus():
     """Build the domain corpus from all platform sources."""
     try:
         from Engine8_Knowledge.embeddings.corpus_builder import DomainCorpusBuilder
+
         builder = DomainCorpusBuilder()
         from dataclasses import asdict
+
         stats = builder.build_corpus()
         return asdict(stats)
     except Exception as e:
@@ -60,6 +68,7 @@ async def corpus_sample(n: int = Query(10, description="Number of samples")):
     """Get random sample from the corpus."""
     try:
         from Engine8_Knowledge.embeddings.corpus_builder import DomainCorpusBuilder
+
         builder = DomainCorpusBuilder()
         return {"samples": builder.get_corpus_sample(n)}
     except Exception as e:
@@ -68,11 +77,13 @@ async def corpus_sample(n: int = Query(10, description="Number of samples")):
 
 # ─── Embedding endpoints ─────────────────────────────────
 
+
 @router.post("/embed")
 async def embed_text(data: EmbedRequest):
     """Embed text with domain adapter (or base embeddings if not trained)."""
     try:
         from Engine8_Knowledge.embeddings.domain_embedder import get_domain_embedder
+
         embedder = get_domain_embedder()
         vector = embedder.embed(data.text)
         return {
@@ -90,17 +101,20 @@ async def embedder_status():
     """Get adapter model status, training date, improvement metrics."""
     try:
         from Engine8_Knowledge.embeddings.domain_embedder import get_domain_embedder
+
         embedder = get_domain_embedder()
         status = embedder.get_status()
 
         # Also get corpus stats
         from Engine8_Knowledge.embeddings.corpus_builder import DomainCorpusBuilder
+
         builder = DomainCorpusBuilder()
         corpus = builder.get_stats()
         status["corpus"] = corpus or {"total_documents": 0}
 
         # Also get benchmark results
         from Engine8_Knowledge.embeddings.search_benchmark import SearchBenchmark
+
         bench = SearchBenchmark()
         results = bench.load_results()
         status["benchmark"] = results
@@ -117,6 +131,7 @@ async def train_adapter(epochs: int = Query(10)):
     try:
         from Engine8_Knowledge.embeddings.domain_embedder import get_domain_embedder
         from dataclasses import asdict
+
         embedder = get_domain_embedder()
         result = embedder.train_adapter(epochs=epochs)
         return asdict(result)
@@ -129,12 +144,14 @@ async def train_adapter(epochs: int = Query(10)):
 
 # ─── Query expansion endpoints ───────────────────────────
 
+
 @router.post("/expand-query")
 async def expand_query(data: ExpandRequest):
     """Expand a query with acronym resolutions and domain synonyms."""
     try:
         from Engine8_Knowledge.embeddings.query_expander import get_query_expander
         from dataclasses import asdict
+
         expander = get_query_expander()
         result = expander.expand_query(data.query)
         return asdict(result)
@@ -147,6 +164,7 @@ async def expander_stats():
     """Get query expander statistics."""
     try:
         from Engine8_Knowledge.embeddings.query_expander import get_query_expander
+
         expander = get_query_expander()
         return expander.get_stats()
     except Exception as e:
@@ -155,11 +173,13 @@ async def expander_stats():
 
 # ─── Benchmark endpoints ─────────────────────────────────
 
+
 @router.get("/benchmark/queries")
 async def benchmark_queries():
     """Get the golden test query set."""
     try:
         from Engine8_Knowledge.embeddings.search_benchmark import SearchBenchmark
+
         bench = SearchBenchmark()
         return {"queries": bench.get_golden_queries(), "total": len(bench.queries)}
     except Exception as e:
@@ -171,11 +191,14 @@ async def benchmark_results():
     """Get latest benchmark comparison results."""
     try:
         from Engine8_Knowledge.embeddings.search_benchmark import SearchBenchmark
+
         bench = SearchBenchmark()
         results = bench.load_results()
         if results:
             return results
-        return {"message": "No benchmark results yet. POST /embeddings/benchmark to run."}
+        return {
+            "message": "No benchmark results yet. POST /embeddings/benchmark to run."
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -196,6 +219,7 @@ async def run_benchmark():
         # Try to get a search function from vector store
         try:
             from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
+
             store = BDKnowledgeStore()
 
             def base_search(query: str, limit: int) -> list:

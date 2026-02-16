@@ -30,6 +30,7 @@ def _log_sample(trail, user_id="u1", action=AuditAction.READ, rt="contact", rid=
 # LOGGING EVENTS
 # =========================================
 
+
 def test_log_event(trail):
     eid = _log_sample(trail)
     assert eid.startswith("evt_")
@@ -95,6 +96,7 @@ def test_unique_event_ids(trail):
 # =========================================
 # QUERYING
 # =========================================
+
 
 def test_get_event(trail):
     eid = _log_sample(trail)
@@ -168,6 +170,7 @@ def test_query_resource_trail(trail):
 # CHAIN VERIFICATION
 # =========================================
 
+
 def test_verify_empty_chain(trail):
     result = trail.verify_chain()
     assert result.verified is True
@@ -217,6 +220,7 @@ def test_verify_out_of_range(trail):
 # =========================================
 # COMPLIANCE REPORTS
 # =========================================
+
 
 def test_generate_soc2_report(trail):
     for i in range(10):
@@ -274,6 +278,7 @@ def test_report_counts_denials(trail):
 # SOC2 / FEDRAMP READINESS
 # =========================================
 
+
 def test_soc2_readiness(trail):
     trail.log_event(
         actor=AuditActor(user_id="u1"),
@@ -313,6 +318,7 @@ def test_soc2_empty_trail(trail):
 # TO_DICT / STATS
 # =========================================
 
+
 def test_event_to_dict(trail):
     eid = _log_sample(trail)
     event = trail.get_event(eid)
@@ -344,8 +350,10 @@ def test_stats(trail):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.security.audit_trail as mod
+
     mod._instance = None
     t1 = get_audit_trail()
     t2 = get_audit_trail()

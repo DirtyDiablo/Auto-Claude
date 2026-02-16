@@ -30,6 +30,7 @@ RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 # Task types and templates
 # ---------------------------------------------------------------------------
 
+
 class TaskType(str, Enum):
     DEEP_RESEARCH = "deep_research"
     CONTACT_ANALYSIS = "contact_analysis"
@@ -97,6 +98,7 @@ TASK_TEMPLATES: dict[str, dict[str, str]] = {
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ClaudeTask:
     task_id: str = field(default_factory=lambda: uuid.uuid4().hex[:12])
@@ -137,6 +139,7 @@ class TaskResult:
 # AutoClaudeTaskManager
 # ---------------------------------------------------------------------------
 
+
 class AutoClaudeTaskManager:
     """Manages complex research tasks delegated to Claude."""
 
@@ -157,14 +160,21 @@ class AutoClaudeTaskManager:
                         self._queue.append(task)
                     elif task.status == TaskStatus.IN_PROGRESS.value:
                         self._in_progress[task.task_id] = task
-                    elif task.status in (TaskStatus.COMPLETED.value, TaskStatus.FAILED.value):
+                    elif task.status in (
+                        TaskStatus.COMPLETED.value,
+                        TaskStatus.FAILED.value,
+                    ):
                         self._completed[task.task_id] = task
                 except Exception:
                     pass
 
     def _persist_queue(self) -> None:
         """Write full queue state to disk."""
-        all_tasks = list(self._queue) + list(self._in_progress.values()) + list(self._completed.values())
+        all_tasks = (
+            list(self._queue)
+            + list(self._in_progress.values())
+            + list(self._completed.values())
+        )
         QUEUE_FILE.write_text(
             "\n".join(json.dumps(t.to_dict()) for t in all_tasks) + "\n"
         )
@@ -182,7 +192,9 @@ class AutoClaudeTaskManager:
         """Submit a new task to the queue."""
         template = TASK_TEMPLATES.get(task_type)
         if not template:
-            return {"error": f"Unknown task type: {task_type}. Valid: {list(TASK_TEMPLATES.keys())}"}
+            return {
+                "error": f"Unknown task type: {task_type}. Valid: {list(TASK_TEMPLATES.keys())}"
+            }
 
         task = ClaudeTask(
             task_type=task_type,
@@ -276,9 +288,15 @@ class AutoClaudeTaskManager:
                 context_parts.append(f"=== Document: {doc_path} (not found) ===")
 
         if task.context_data:
-            context_parts.append(f"=== Structured Data ===\n{json.dumps(task.context_data, indent=2)}")
+            context_parts.append(
+                f"=== Structured Data ===\n{json.dumps(task.context_data, indent=2)}"
+            )
 
-        context_block = "\n\n".join(context_parts) if context_parts else "No additional context provided."
+        context_block = (
+            "\n\n".join(context_parts)
+            if context_parts
+            else "No additional context provided."
+        )
 
         return {
             "task_id": task.task_id,
@@ -311,7 +329,9 @@ class AutoClaudeTaskManager:
                 return True
         return False
 
-    def complete_task(self, task_id: str, result_text: str, sections: Optional[dict] = None) -> bool:
+    def complete_task(
+        self, task_id: str, result_text: str, sections: Optional[dict] = None
+    ) -> bool:
         """Mark a task as completed with results."""
         task = self._in_progress.pop(task_id, None)
         if not task:
@@ -356,8 +376,16 @@ class AutoClaudeTaskManager:
         return {
             "pending": len(self._queue),
             "in_progress": len(self._in_progress),
-            "completed": sum(1 for t in self._completed.values() if t.status == TaskStatus.COMPLETED.value),
-            "failed": sum(1 for t in self._completed.values() if t.status == TaskStatus.FAILED.value),
+            "completed": sum(
+                1
+                for t in self._completed.values()
+                if t.status == TaskStatus.COMPLETED.value
+            ),
+            "failed": sum(
+                1
+                for t in self._completed.values()
+                if t.status == TaskStatus.FAILED.value
+            ),
             "total": len(self._queue) + len(self._in_progress) + len(self._completed),
             "task_types": list(TASK_TEMPLATES.keys()),
         }

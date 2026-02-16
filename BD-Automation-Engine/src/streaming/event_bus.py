@@ -39,12 +39,14 @@ from pydantic import BaseModel, Field
 
 try:
     from ulid import ULID as _ULID
+
     ULID_AVAILABLE = True
 except ImportError:
     ULID_AVAILABLE = False
 
 try:
     import redis.asyncio as aioredis
+
     REDIS_AVAILABLE = True
 except ImportError:
     REDIS_AVAILABLE = False
@@ -164,7 +166,9 @@ class EventBus:
     async def connect(self) -> None:
         """Connect to Redis and initialize streams and consumer groups."""
         if not REDIS_AVAILABLE:
-            raise RuntimeError("redis package not installed. Install with: pip install redis")
+            raise RuntimeError(
+                "redis package not installed. Install with: pip install redis"
+            )
         self.redis = aioredis.from_url(self.redis_url, decode_responses=False)
         await self._initialize_streams()
         self._running = True
@@ -227,7 +231,11 @@ class EventBus:
         decoded_id = msg_id.decode() if isinstance(msg_id, bytes) else msg_id
         logger.debug(
             "Event published",
-            extra={"stream": stream, "event_type": event.event_type, "msg_id": decoded_id},
+            extra={
+                "stream": stream,
+                "event_type": event.event_type,
+                "msg_id": decoded_id,
+            },
         )
         return decoded_id
 
@@ -317,7 +325,11 @@ class EventBus:
                 )
                 if pending:
                     entry = pending[0]
-                    retry_count = entry.get("times_delivered", 0) if isinstance(entry, dict) else 0
+                    retry_count = (
+                        entry.get("times_delivered", 0)
+                        if isinstance(entry, dict)
+                        else 0
+                    )
             except Exception:
                 pass
 
@@ -325,8 +337,14 @@ class EventBus:
                 # Move to dead letter queue
                 dlq_stream = stream + DLQ_SUFFIX
                 dlq_data = dict(msg_data)
-                dlq_data[b"_error" if isinstance(list(msg_data.keys())[0], bytes) else "_error"] = (
-                    str(error).encode() if isinstance(list(msg_data.keys())[0], bytes) else str(error)
+                dlq_data[
+                    b"_error"
+                    if isinstance(list(msg_data.keys())[0], bytes)
+                    else "_error"
+                ] = (
+                    str(error).encode()
+                    if isinstance(list(msg_data.keys())[0], bytes)
+                    else str(error)
                 )
                 await self.redis.xadd(dlq_stream, dlq_data, maxlen=1000)
                 await self.redis.xack(stream, group, msg_id)
@@ -346,9 +364,7 @@ class EventBus:
         import fnmatch
 
         matching = [
-            name
-            for name in self.STREAM_DEFINITIONS
-            if fnmatch.fnmatch(name, pattern)
+            name for name in self.STREAM_DEFINITIONS if fnmatch.fnmatch(name, pattern)
         ]
         if not matching:
             logger.warning("No streams match pattern", extra={"pattern": pattern})
@@ -383,7 +399,7 @@ class EventBus:
                 # Get pending count
                 pending = 0
                 try:
-                    for group_info in (groups if group_count > 0 else []):
+                    for group_info in groups if group_count > 0 else []:
                         gi = {}
                         for k, v in group_info.items():
                             key = k.decode() if isinstance(k, bytes) else k
@@ -395,9 +411,7 @@ class EventBus:
                 # Calculate throughput from tracked counts
                 now = time.time()
                 recent = [
-                    t
-                    for t in self._event_counts.get(stream_name, [])
-                    if now - t < 60
+                    t for t in self._event_counts.get(stream_name, []) if now - t < 60
                 ]
                 events_per_minute = len(recent)
 
@@ -408,21 +422,37 @@ class EventBus:
                 last_entry = decoded_info.get("last-entry")
                 if first_entry:
                     try:
-                        data = first_entry[1] if isinstance(first_entry, (list, tuple)) else None
+                        data = (
+                            first_entry[1]
+                            if isinstance(first_entry, (list, tuple))
+                            else None
+                        )
                         if data:
                             ts_raw = data.get(b"timestamp") or data.get("timestamp")
                             if ts_raw:
-                                ts_str = ts_raw.decode() if isinstance(ts_raw, bytes) else ts_raw
+                                ts_str = (
+                                    ts_raw.decode()
+                                    if isinstance(ts_raw, bytes)
+                                    else ts_raw
+                                )
                                 oldest = datetime.fromisoformat(ts_str)
                     except Exception:
                         pass
                 if last_entry:
                     try:
-                        data = last_entry[1] if isinstance(last_entry, (list, tuple)) else None
+                        data = (
+                            last_entry[1]
+                            if isinstance(last_entry, (list, tuple))
+                            else None
+                        )
                         if data:
                             ts_raw = data.get(b"timestamp") or data.get("timestamp")
                             if ts_raw:
-                                ts_str = ts_raw.decode() if isinstance(ts_raw, bytes) else ts_raw
+                                ts_str = (
+                                    ts_raw.decode()
+                                    if isinstance(ts_raw, bytes)
+                                    else ts_raw
+                                )
                                 newest = datetime.fromisoformat(ts_str)
                     except Exception:
                         pass
@@ -459,7 +489,9 @@ class EventBus:
             try:
                 events.append(Event.from_redis(msg_data))
             except Exception as e:
-                logger.warning("Failed to parse event during replay", extra={"error": str(e)})
+                logger.warning(
+                    "Failed to parse event during replay", extra={"error": str(e)}
+                )
         return events
 
     async def get_event_chain(self, correlation_id: str) -> List[Event]:

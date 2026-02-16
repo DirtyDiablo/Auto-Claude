@@ -17,6 +17,7 @@ from src.agents.swarm.workers import WorkerStatus as WStatus
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def coordinator():
     return SwarmCoordinator()
@@ -42,6 +43,7 @@ def enrichment_task():
 # =========================================
 # EXECUTE SWARM
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_execute_swarm_returns_result(coordinator, simple_task):
@@ -106,6 +108,7 @@ async def test_execute_swarm_timing(coordinator, simple_task):
 # COORDINATION MODES
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_sequential_mode(coordinator):
     task = SwarmTask(
@@ -156,6 +159,7 @@ async def test_map_reduce_mode(coordinator):
 # MONITORING & CANCELLATION
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_monitor_nonexistent(coordinator):
     state = await coordinator.monitor_swarm("nonexistent")
@@ -180,6 +184,7 @@ async def test_swarm_appears_in_history(coordinator, simple_task):
 # ENRICHMENT TASK
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_enrichment_task(coordinator, enrichment_task):
     result = await coordinator.execute_swarm(enrichment_task)
@@ -190,6 +195,7 @@ async def test_enrichment_task(coordinator, enrichment_task):
 # =========================================
 # QUALITY COMPUTATION
 # =========================================
+
 
 def test_compute_quality_all_completed(coordinator):
     results = [
@@ -224,6 +230,7 @@ def test_compute_quality_all_failed(coordinator):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     c1 = get_swarm_coordinator()

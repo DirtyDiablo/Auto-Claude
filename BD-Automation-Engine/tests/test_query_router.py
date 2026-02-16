@@ -15,6 +15,7 @@ from src.nlq.query_router import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def router():
     return NLQueryRouter()
@@ -23,6 +24,7 @@ def router():
 # =========================================
 # INTENT CLASSIFICATION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestIntentClassification:
@@ -43,7 +45,9 @@ class TestIntentClassification:
         assert plan.intent == QueryIntent.SEARCH_CONTRACTS.value
 
     async def test_graph_query(self, router):
-        plan = await router.route_query("Show the relationship path connected to the site lead")
+        plan = await router.route_query(
+            "Show the relationship path connected to the site lead"
+        )
         assert plan.intent == QueryIntent.GRAPH_QUERY.value
 
     async def test_analytics(self, router):
@@ -59,7 +63,9 @@ class TestIntentClassification:
         assert plan.intent == QueryIntent.FORECAST.value
 
     async def test_campaign(self, router):
-        plan = await router.route_query("Launch an outreach campaign sequence to engage them")
+        plan = await router.route_query(
+            "Launch an outreach campaign sequence to engage them"
+        )
         assert plan.intent == QueryIntent.CAMPAIGN.value
 
     async def test_generate(self, router):
@@ -86,6 +92,7 @@ class TestIntentClassification:
 # =========================================
 # PARAMETER EXTRACTION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestParameterExtraction:
@@ -127,6 +134,7 @@ class TestParameterExtraction:
 # QUERY PLAN STRUCTURE
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestQueryPlanStructure:
     async def test_plan_has_intent(self, router):
@@ -157,6 +165,7 @@ class TestQueryPlanStructure:
 # MULTI-STEP QUERIES
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestMultiStepQueries:
     async def test_simple_query_no_sub_queries(self, router):
@@ -173,6 +182,7 @@ class TestMultiStepQueries:
 # =========================================
 # RESPONSE FORMATTING
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestResponseFormatting:
@@ -215,10 +225,13 @@ class TestResponseFormatting:
 # EXAMPLE QUERIES
 # =========================================
 
+
 class TestExampleQueries:
     def test_all_intents_have_examples(self):
         for intent in QueryIntent:
-            assert intent.value in EXAMPLE_QUERIES, f"Missing examples for {intent.value}"
+            assert intent.value in EXAMPLE_QUERIES, (
+                f"Missing examples for {intent.value}"
+            )
 
     def test_examples_are_non_empty(self):
         for intent, examples in EXAMPLE_QUERIES.items():

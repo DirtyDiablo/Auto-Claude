@@ -189,7 +189,9 @@ class TestKeywordClustering:
         for topic in result.topics:
             assert len(topic.keywords) > 0
 
-    def test_keyword_cluster_topics_have_representative_docs(self, modeler, sample_job_docs):
+    def test_keyword_cluster_topics_have_representative_docs(
+        self, modeler, sample_job_docs
+    ):
         """Each topic should have at most 3 representative docs."""
         result = asyncio.get_event_loop().run_until_complete(
             modeler.cluster_jobs(documents=sample_job_docs)
@@ -264,6 +266,7 @@ class TestSingleton:
     def test_get_topic_modeler_returns_instance(self):
         """get_topic_modeler() should return a TopicModeler instance."""
         import Engine8_Knowledge.ml.topic_modeler as mod
+
         mod._modeler = None
         instance = get_topic_modeler()
         assert isinstance(instance, TopicModeler)
@@ -271,6 +274,7 @@ class TestSingleton:
     def test_get_topic_modeler_is_singleton(self):
         """Calling get_topic_modeler() twice should return the same instance."""
         import Engine8_Knowledge.ml.topic_modeler as mod
+
         mod._modeler = None
         a = get_topic_modeler()
         b = get_topic_modeler()

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # QUERY INTENTS
 # =========================================
 
+
 class QueryIntent(str, Enum):
     SEARCH_CONTACTS = "search_contacts"
     SEARCH_JOBS = "search_jobs"
@@ -42,6 +43,7 @@ class QueryIntent(str, Enum):
 # =========================================
 # DATA CLASSES
 # =========================================
+
 
 @dataclass
 class QueryPlan:
@@ -73,97 +75,200 @@ class QueryResult:
 # Keyword patterns for rule-based classification
 _INTENT_PATTERNS: Dict[str, List[str]] = {
     QueryIntent.SEARCH_CONTACTS: [
-        r"\bcontact", r"\bwho\b.*\bat\b", r"\bfind\b.*\bpeople\b",
-        r"\bpm\b", r"\bprogram manager\b", r"\bsite lead\b",
-        r"\btier\s*[1-6]", r"\bdecision maker", r"\bperson\b",
-        r"\bemployee", r"\bstaff\b", r"\brecruiter\b",
+        r"\bcontact",
+        r"\bwho\b.*\bat\b",
+        r"\bfind\b.*\bpeople\b",
+        r"\bpm\b",
+        r"\bprogram manager\b",
+        r"\bsite lead\b",
+        r"\btier\s*[1-6]",
+        r"\bdecision maker",
+        r"\bperson\b",
+        r"\bemployee",
+        r"\bstaff\b",
+        r"\brecruiter\b",
     ],
     QueryIntent.SEARCH_JOBS: [
-        r"\bjob", r"\bposition", r"\bopening", r"\bposting",
-        r"\bhiring\b", r"\bvacancy", r"\brole\b.*\bopen",
-        r"\bts/sci\b", r"\bclearance\b.*\bjob", r"\banalyst\b.*\bposition",
+        r"\bjob",
+        r"\bposition",
+        r"\bopening",
+        r"\bposting",
+        r"\bhiring\b",
+        r"\bvacancy",
+        r"\brole\b.*\bopen",
+        r"\bts/sci\b",
+        r"\bclearance\b.*\bjob",
+        r"\banalyst\b.*\bposition",
     ],
     QueryIntent.SEARCH_PROGRAMS: [
-        r"\bprogram\b", r"\bcontract\b.*\bprogram", r"\bprime\b",
-        r"\bvehicle\b", r"\bidiq\b", r"\bbpa\b",
-        r"\bwhat program", r"\bwhich program",
+        r"\bprogram\b",
+        r"\bcontract\b.*\bprogram",
+        r"\bprime\b",
+        r"\bvehicle\b",
+        r"\bidiq\b",
+        r"\bbpa\b",
+        r"\bwhat program",
+        r"\bwhich program",
     ],
     QueryIntent.SEARCH_CONTRACTS: [
-        r"\bcontract\b", r"\baward", r"\btask order\b",
-        r"\brecompete\b", r"\bsolicitation\b", r"\brfp\b", r"\brfi\b",
-        r"\bpop\b.*\bend", r"\boption year",
+        r"\bcontract\b",
+        r"\baward",
+        r"\btask order\b",
+        r"\brecompete\b",
+        r"\bsolicitation\b",
+        r"\brfp\b",
+        r"\brfi\b",
+        r"\bpop\b.*\bend",
+        r"\boption year",
     ],
     QueryIntent.GRAPH_QUERY: [
-        r"\bwho knows\b", r"\bconnected to\b", r"\brelationship\b",
-        r"\bnetwork\b", r"\bpath\b.*\bto\b", r"\bintroduc",
-        r"\bmutual\b", r"\bdegree", r"\blinked\b",
+        r"\bwho knows\b",
+        r"\bconnected to\b",
+        r"\brelationship\b",
+        r"\bnetwork\b",
+        r"\bpath\b.*\bto\b",
+        r"\bintroduc",
+        r"\bmutual\b",
+        r"\bdegree",
+        r"\blinked\b",
     ],
     QueryIntent.ANALYTICS: [
         r"\bpipeline\b.*\b(value|worth|size|conversion)",
-        r"\bmetric", r"\bkpi\b", r"\bconversion rate",
-        r"\banalytic", r"\bdashboard\b", r"\bsummary\b",
-        r"\bhow many\b", r"\btotal\b.*\b(jobs|contacts|programs)",
+        r"\bmetric",
+        r"\bkpi\b",
+        r"\bconversion rate",
+        r"\banalytic",
+        r"\bdashboard\b",
+        r"\bsummary\b",
+        r"\bhow many\b",
+        r"\btotal\b.*\b(jobs|contacts|programs)",
     ],
     QueryIntent.PREDICTION: [
-        r"\bwin prob", r"\blikelihood\b", r"\bchance\b",
-        r"\bpredict\b", r"\bscore\b.*\bopportunity",
-        r"\bcomposite score\b", r"\bwhat.?if\b",
+        r"\bwin prob",
+        r"\blikelihood\b",
+        r"\bchance\b",
+        r"\bpredict\b",
+        r"\bscore\b.*\bopportunity",
+        r"\bcomposite score\b",
+        r"\bwhat.?if\b",
     ],
     QueryIntent.FORECAST: [
-        r"\bforecast", r"\btrend\b", r"\bramp\b",
-        r"\bhiring trend", r"\bbudget cycle",
-        r"\bnext quarter\b", r"\bproject\b.*\b(growth|demand)",
+        r"\bforecast",
+        r"\btrend\b",
+        r"\bramp\b",
+        r"\bhiring trend",
+        r"\bbudget cycle",
+        r"\bnext quarter\b",
+        r"\bproject\b.*\b(growth|demand)",
     ],
     QueryIntent.CAMPAIGN: [
-        r"\bstart\b.*\boutreach\b", r"\bcampaign\b", r"\blaunch\b.*\boutreach",
-        r"\bengage\b", r"\bsequence\b", r"\bcadence\b",
+        r"\bstart\b.*\boutreach\b",
+        r"\bcampaign\b",
+        r"\blaunch\b.*\boutreach",
+        r"\bengage\b",
+        r"\bsequence\b",
+        r"\bcadence\b",
     ],
     QueryIntent.GENERATE: [
-        r"\bwrite\b", r"\bgenerate\b", r"\bdraft\b", r"\bcreate\b.*\b(email|message|brief)",
-        r"\boutreach\b.*\b(email|message)", r"\bcall\b.*\bscript",
-        r"\bmeeting\b.*\bprep", r"\bplaybook\b",
+        r"\bwrite\b",
+        r"\bgenerate\b",
+        r"\bdraft\b",
+        r"\bcreate\b.*\b(email|message|brief)",
+        r"\boutreach\b.*\b(email|message)",
+        r"\bcall\b.*\bscript",
+        r"\bmeeting\b.*\bprep",
+        r"\bplaybook\b",
     ],
     QueryIntent.COMPARE: [
-        r"\bcompare\b", r"\bvs\.?\b", r"\bversus\b",
-        r"\bdifference\b.*\bbetween\b", r"\bhead.to.head\b",
+        r"\bcompare\b",
+        r"\bvs\.?\b",
+        r"\bversus\b",
+        r"\bdifference\b.*\bbetween\b",
+        r"\bhead.to.head\b",
     ],
     QueryIntent.EXPLAIN: [
-        r"\bwhy\b.*\bscore", r"\bexplain\b", r"\breason\b",
-        r"\bwhy is\b", r"\bhow is\b.*\bcalculated",
+        r"\bwhy\b.*\bscore",
+        r"\bexplain\b",
+        r"\breason\b",
+        r"\bwhy is\b",
+        r"\bhow is\b.*\bcalculated",
     ],
     QueryIntent.STATUS: [
-        r"\bwhat happened\b", r"\btoday\b", r"\bdigest\b",
-        r"\bstatus\b", r"\brecent\b.*\bactivity", r"\bupdate\b.*\bme",
+        r"\bwhat happened\b",
+        r"\btoday\b",
+        r"\bdigest\b",
+        r"\bstatus\b",
+        r"\brecent\b.*\bactivity",
+        r"\bupdate\b.*\bme",
         r"\bwhat.?s new\b",
     ],
     QueryIntent.MEMORY: [
-        r"\bwhat do we know\b", r"\bremember\b", r"\blast time\b",
-        r"\bhistory\b.*\bwith\b", r"\bprevious\b.*\binteraction",
+        r"\bwhat do we know\b",
+        r"\bremember\b",
+        r"\blast time\b",
+        r"\bhistory\b.*\bwith\b",
+        r"\bprevious\b.*\binteraction",
         r"\bnotes\b.*\bon\b",
     ],
 }
 
 # Entity extraction patterns
 _COMPANY_PATTERNS = [
-    "leidos", "gdit", "booz allen", "northrop grumman", "raytheon",
-    "lockheed", "bae systems", "saic", "perspecta", "caci",
-    "mantech", "l3harris", "general dynamics", "parsons", "aecom",
+    "leidos",
+    "gdit",
+    "booz allen",
+    "northrop grumman",
+    "raytheon",
+    "lockheed",
+    "bae systems",
+    "saic",
+    "perspecta",
+    "caci",
+    "mantech",
+    "l3harris",
+    "general dynamics",
+    "parsons",
+    "aecom",
 ]
 
 _CLEARANCE_PATTERNS = [
-    r"\bts/sci\b", r"\btop secret\b", r"\bsecret\b", r"\bpublic trust\b",
-    r"\bsci\b", r"\bts\b",
+    r"\bts/sci\b",
+    r"\btop secret\b",
+    r"\bsecret\b",
+    r"\bpublic trust\b",
+    r"\bsci\b",
+    r"\bts\b",
 ]
 
 _LOCATION_PATTERNS = [
-    "san diego", "langley", "fort meade", "colorado springs",
-    "hickam", "beale", "ramstein", "wright-patt", "san antonio",
-    "huntsville", "tampa", "norfolk", "honolulu", "springfield",
+    "san diego",
+    "langley",
+    "fort meade",
+    "colorado springs",
+    "hickam",
+    "beale",
+    "ramstein",
+    "wright-patt",
+    "san antonio",
+    "huntsville",
+    "tampa",
+    "norfolk",
+    "honolulu",
+    "springfield",
 ]
 
 _PROGRAM_PATTERNS = [
-    "dcgs", "pacaf", "gbsd", "ngen", "f-35", "sentinel",
-    "jadc2", "abms", "navy isr", "disa", "centcom",
+    "dcgs",
+    "pacaf",
+    "gbsd",
+    "ngen",
+    "f-35",
+    "sentinel",
+    "jadc2",
+    "abms",
+    "navy isr",
+    "disa",
+    "centcom",
 ]
 
 _TIMEFRAME_PATTERNS = {
@@ -191,7 +296,9 @@ class NLQueryRouter:
         self._llm = llm_client
 
     async def route_query(
-        self, query: str, context: Optional[Dict[str, Any]] = None,
+        self,
+        query: str,
+        context: Optional[Dict[str, Any]] = None,
     ) -> QueryPlan:
         """Classify query into intent and extract parameters."""
         query_lower = query.lower().strip()
@@ -210,7 +317,9 @@ class NLQueryRouter:
             parameters["context_entities"] = context["last_entities"]
 
         # Check if clarification is needed
-        clarification = self._check_clarification(intent, confidence, parameters, query_lower)
+        clarification = self._check_clarification(
+            intent, confidence, parameters, query_lower
+        )
 
         # Detect multi-step queries
         sub_queries = self._detect_sub_queries(query_lower, intent, parameters)
@@ -226,7 +335,9 @@ class NLQueryRouter:
         )
 
     async def format_response(
-        self, result: QueryResult, format: str = "natural",
+        self,
+        result: QueryResult,
+        format: str = "natural",
     ) -> str:
         """Format query results for display."""
         if format == "brief":
@@ -249,7 +360,9 @@ class NLQueryRouter:
         scores: Dict[str, float] = {}
 
         for intent_value, patterns in _INTENT_PATTERNS.items():
-            intent_name = intent_value if isinstance(intent_value, str) else intent_value.value
+            intent_name = (
+                intent_value if isinstance(intent_value, str) else intent_value.value
+            )
             match_count = 0
             for pattern in patterns:
                 if re.search(pattern, query, re.IGNORECASE):
@@ -315,13 +428,17 @@ class NLQueryRouter:
 
         # Comparison entities (for COMPARE intent)
         if intent == QueryIntent.COMPARE.value:
-            vs_match = re.search(r"(.+?)\s+(?:vs\.?|versus)\s+(.+?)(?:\s+(?:in|at|for)\s+|$)", query)
+            vs_match = re.search(
+                r"(.+?)\s+(?:vs\.?|versus)\s+(.+?)(?:\s+(?:in|at|for)\s+|$)", query
+            )
             if vs_match:
                 params["entity_a"] = vs_match.group(1).strip()
                 params["entity_b"] = vs_match.group(2).strip()
 
         # Person names (heuristic: capitalized words not matching known entities)
-        name_candidates = re.findall(r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b", query.replace(query.lower(), query))
+        name_candidates = re.findall(
+            r"\b([A-Z][a-z]+(?:\s+[A-Z][a-z]+)+)\b", query.replace(query.lower(), query)
+        )
         if name_candidates:
             params["names"] = name_candidates
 
@@ -335,17 +452,22 @@ class NLQueryRouter:
     # =========================================
 
     def _check_clarification(
-        self, intent: str, confidence: float,
-        parameters: Dict[str, Any], query: str,
+        self,
+        intent: str,
+        confidence: float,
+        parameters: Dict[str, Any],
+        query: str,
     ) -> Optional[str]:
         """Determine if clarification is needed."""
         if confidence < 0.4:
             return f"I'm not sure what you're looking for. Did you mean to search for jobs, contacts, or programs?"
 
         # Ambiguous location for known multi-location programs
-        if (intent in (QueryIntent.SEARCH_CONTACTS.value, QueryIntent.SEARCH_JOBS.value)
-                and "pacaf" in query
-                and not parameters.get("locations")):
+        if (
+            intent in (QueryIntent.SEARCH_CONTACTS.value, QueryIntent.SEARCH_JOBS.value)
+            and "pacaf" in query
+            and not parameters.get("locations")
+        ):
             return "PACAF operates at multiple locations. Did you mean Hickam (Hawaii), Langley (Virginia), or all sites?"
 
         return None
@@ -355,7 +477,10 @@ class NLQueryRouter:
     # =========================================
 
     def _detect_sub_queries(
-        self, query: str, intent: str, parameters: Dict[str, Any],
+        self,
+        query: str,
+        intent: str,
+        parameters: Dict[str, Any],
     ) -> List[QueryPlan]:
         """Detect if query requires multiple steps."""
         sub_queries = []
@@ -367,23 +492,31 @@ class NLQueryRouter:
                 # Check if second part is a different intent
                 second_intent, second_conf = self._classify_intent(parts[1].strip())
                 if second_intent != intent and second_conf > 0.3:
-                    sub_queries.append(QueryPlan(
-                        intent=second_intent,
-                        parameters=self._extract_parameters(parts[1].strip(), second_intent),
-                        confidence=second_conf,
-                        original_query=parts[1].strip(),
-                        created_at=datetime.now(timezone.utc).isoformat(),
-                    ))
+                    sub_queries.append(
+                        QueryPlan(
+                            intent=second_intent,
+                            parameters=self._extract_parameters(
+                                parts[1].strip(), second_intent
+                            ),
+                            confidence=second_conf,
+                            original_query=parts[1].strip(),
+                            created_at=datetime.now(timezone.utc).isoformat(),
+                        )
+                    )
 
         # "Compare X vs Y" with forecast → compare + forecast
-        if intent == QueryIntent.COMPARE.value and re.search(r"\bforecast|trend\b", query):
-            sub_queries.append(QueryPlan(
-                intent=QueryIntent.FORECAST.value,
-                parameters=parameters.copy(),
-                confidence=0.6,
-                original_query=query,
-                created_at=datetime.now(timezone.utc).isoformat(),
-            ))
+        if intent == QueryIntent.COMPARE.value and re.search(
+            r"\bforecast|trend\b", query
+        ):
+            sub_queries.append(
+                QueryPlan(
+                    intent=QueryIntent.FORECAST.value,
+                    parameters=parameters.copy(),
+                    confidence=0.6,
+                    original_query=query,
+                    created_at=datetime.now(timezone.utc).isoformat(),
+                )
+            )
 
         return sub_queries
 
@@ -400,7 +533,9 @@ class NLQueryRouter:
         if result.summary:
             parts.append(result.summary)
         elif result.count > 0:
-            parts.append(f"Found {result.count} result{'s' if result.count != 1 else ''}.")
+            parts.append(
+                f"Found {result.count} result{'s' if result.count != 1 else ''}."
+            )
 
         data = result.data
         if isinstance(data, list) and data:
@@ -457,6 +592,7 @@ class NLQueryRouter:
     def _format_chart(self, result: QueryResult) -> str:
         """Chart-ready data structure (JSON-like)."""
         import json
+
         chart_data = {
             "type": "bar",
             "title": result.summary or f"{result.intent} results",

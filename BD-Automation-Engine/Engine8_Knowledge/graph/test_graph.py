@@ -8,9 +8,7 @@ import tempfile
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-from Engine8_Knowledge.graph.bd_knowledge_graph import (
-    BDKnowledgeGraph
-)
+from Engine8_Knowledge.graph.bd_knowledge_graph import BDKnowledgeGraph
 
 
 def cleanup_graph(graph, db_path):
@@ -33,35 +31,37 @@ def test_entity_creation():
     graph = BDKnowledgeGraph(db_path)
 
     # Create contractors
-    gdit = graph.add_entity("Contractor", "GDIT", {
-        "type": "Large Prime",
-        "uei": "123456789",
-        "headquarters": "Falls Church, VA"
-    })
+    gdit = graph.add_entity(
+        "Contractor",
+        "GDIT",
+        {"type": "Large Prime", "uei": "123456789", "headquarters": "Falls Church, VA"},
+    )
     print(f"Created: {gdit.name} ({gdit.type}) - ID: {gdit.id}")
 
-    leidos = graph.add_entity("Contractor", "Leidos", {
-        "type": "Large Prime",
-        "headquarters": "Reston, VA"
-    })
+    leidos = graph.add_entity(
+        "Contractor", "Leidos", {"type": "Large Prime", "headquarters": "Reston, VA"}
+    )
     print(f"Created: {leidos.name} ({leidos.type}) - ID: {leidos.id}")
 
     # Create program
-    dcgs = graph.add_entity("Program", "AF DCGS", {
-        "acronym": "DCGS",
-        "agency": "Air Force",
-        "value": "$500M",
-        "prime": "GDIT"
-    })
+    dcgs = graph.add_entity(
+        "Program",
+        "AF DCGS",
+        {"acronym": "DCGS", "agency": "Air Force", "value": "$500M", "prime": "GDIT"},
+    )
     print(f"Created: {dcgs.name} ({dcgs.type}) - ID: {dcgs.id}")
 
     # Create contact
-    contact = graph.add_entity("Contact", "John Smith", {
-        "title": "Program Manager",
-        "company": "GDIT",
-        "tier": "Tier 1",
-        "clearance": "TS/SCI"
-    })
+    contact = graph.add_entity(
+        "Contact",
+        "John Smith",
+        {
+            "title": "Program Manager",
+            "company": "GDIT",
+            "tier": "Tier 1",
+            "clearance": "TS/SCI",
+        },
+    )
     print(f"Created: {contact.name} ({contact.type}) - ID: {contact.id}")
 
     # Verify entities were created
@@ -142,8 +142,8 @@ def test_program_ecosystem():
     print(f"Jobs: {len(ecosystem['jobs'])}")
     print(f"Locations: {len(ecosystem['locations'])}")
 
-    assert len(ecosystem['primes']) == 1
-    assert len(ecosystem['contacts']) == 2
+    assert len(ecosystem["primes"]) == 1
+    assert len(ecosystem["contacts"]) == 2
 
     print("PASS: Program ecosystem works")
     cleanup_graph(graph, db_path)
@@ -232,8 +232,8 @@ def test_stats():
     print(f"By type: {stats['entities_by_type']}")
     print(f"Total relationships: {stats['total_relationships']}")
 
-    assert stats['total_entities'] == 4
-    assert stats['entities_by_type']['Contractor'] == 2
+    assert stats["total_entities"] == 4
+    assert stats["entities_by_type"]["Contractor"] == 2
 
     print("PASS: Statistics work")
     cleanup_graph(graph, db_path)

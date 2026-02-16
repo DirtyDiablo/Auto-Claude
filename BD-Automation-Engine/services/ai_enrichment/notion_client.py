@@ -1,6 +1,7 @@
 """
 Notion API Client with rate limiting and batch operations
 """
+
 import os
 import time
 import logging
@@ -22,29 +23,29 @@ class NotionClient:
 
     # Database IDs
     DATABASES = {
-        'PROGRAM_MAPPING_HUB': '0a0d7e46-3d88-40b6-853a-3c9680347644',
-        'FEDERAL_PROGRAMS': '9db40fce-0781-42b9-902c-d4b0263b1e23',
-        'CONTRACTORS': 'ca67175b-df3d-442d-a2e7-cc24e9a1bf78',
-        'CONTRACT_VEHICLES': 'e1166305-1b1f-4812-b665-bcfa6a87a2ab',
-        'DCGS_CONTACTS': '2ccdef65-baa5-80d0-9b66-c67d66e7a54d',
-        'GDIT_CONTACTS': 'c1b1d358-9d82-4f03-b77c-db43d9795c6f',
-        'GDIT_PTS_CONTACTS': 'ff111f82-fdbd-4353-ad59-ea4de70a058b',
-        'BD_OPPORTUNITIES': '2bcdef65-baa5-8015-bf09-c01813f24b0a',
-        'BD_EVENTS': '782080b1-d182-4410-bef5-8a952dc8ca85',
-        'ENRICHMENT_LOG': '9b9328d2-f969-40e3-9d33-a4168620fb1b',
-        'GDIT_JOBS': '2ccdef65-baa5-8066-9cb6-ee688ede23f4',
-        'INSIGHT_GLOBAL_JOBS': '1ccb65ff-7d9f-4358-9d02-407cb32121ac',
+        "PROGRAM_MAPPING_HUB": "0a0d7e46-3d88-40b6-853a-3c9680347644",
+        "FEDERAL_PROGRAMS": "9db40fce-0781-42b9-902c-d4b0263b1e23",
+        "CONTRACTORS": "ca67175b-df3d-442d-a2e7-cc24e9a1bf78",
+        "CONTRACT_VEHICLES": "e1166305-1b1f-4812-b665-bcfa6a87a2ab",
+        "DCGS_CONTACTS": "2ccdef65-baa5-80d0-9b66-c67d66e7a54d",
+        "GDIT_CONTACTS": "c1b1d358-9d82-4f03-b77c-db43d9795c6f",
+        "GDIT_PTS_CONTACTS": "ff111f82-fdbd-4353-ad59-ea4de70a058b",
+        "BD_OPPORTUNITIES": "2bcdef65-baa5-8015-bf09-c01813f24b0a",
+        "BD_EVENTS": "782080b1-d182-4410-bef5-8a952dc8ca85",
+        "ENRICHMENT_LOG": "9b9328d2-f969-40e3-9d33-a4168620fb1b",
+        "GDIT_JOBS": "2ccdef65-baa5-8066-9cb6-ee688ede23f4",
+        "INSIGHT_GLOBAL_JOBS": "1ccb65ff-7d9f-4358-9d02-407cb32121ac",
     }
 
     def __init__(self, token: Optional[str] = None):
-        self.token = token or os.getenv('NOTION_TOKEN')
+        self.token = token or os.getenv("NOTION_TOKEN")
         if not self.token:
             raise ValueError("NOTION_TOKEN not found in environment")
 
         self.headers = {
             "Authorization": f"Bearer {self.token}",
             "Content-Type": "application/json",
-            "Notion-Version": self.NOTION_VERSION
+            "Notion-Version": self.NOTION_VERSION,
         }
         self.request_count = 0
         self.last_request_time = 0
@@ -102,7 +103,7 @@ class NotionClient:
         filter: Optional[Dict] = None,
         sorts: Optional[List[Dict]] = None,
         page_size: int = 100,
-        start_cursor: Optional[str] = None
+        start_cursor: Optional[str] = None,
     ) -> Dict:
         """Query a database with optional filters and sorting"""
         data = {"page_size": page_size}
@@ -119,7 +120,7 @@ class NotionClient:
         self,
         database_id: str,
         filter: Optional[Dict] = None,
-        sorts: Optional[List[Dict]] = None
+        sorts: Optional[List[Dict]] = None,
     ) -> List[Dict]:
         """Query all pages from a database (handles pagination)"""
         all_pages = []
@@ -127,10 +128,7 @@ class NotionClient:
 
         while True:
             result = self.query_database(
-                database_id,
-                filter=filter,
-                sorts=sorts,
-                start_cursor=start_cursor
+                database_id, filter=filter, sorts=sorts, start_cursor=start_cursor
             )
 
             if result.get("error"):
@@ -156,44 +154,36 @@ class NotionClient:
 
     def create_page(self, database_id: str, properties: Dict) -> Dict:
         """Create a new page in a database"""
-        data = {
-            "parent": {"database_id": database_id},
-            "properties": properties
-        }
+        data = {"parent": {"database_id": database_id}, "properties": properties}
         return self._request("POST", "pages", data)
 
     def get_pages_modified_since(
-        self,
-        database_id: str,
-        since: datetime,
-        status_filter: Optional[str] = None
+        self, database_id: str, since: datetime, status_filter: Optional[str] = None
     ) -> List[Dict]:
         """Get pages modified since a given datetime"""
         filter_conditions = [
             {
                 "timestamp": "last_edited_time",
-                "last_edited_time": {
-                    "after": since.isoformat()
-                }
+                "last_edited_time": {"after": since.isoformat()},
             }
         ]
 
         if status_filter:
-            filter_conditions.append({
-                "property": "Status",
-                "select": {"equals": status_filter}
-            })
+            filter_conditions.append(
+                {"property": "Status", "select": {"equals": status_filter}}
+            )
 
-        filter = {"and": filter_conditions} if len(filter_conditions) > 1 else filter_conditions[0]
+        filter = (
+            {"and": filter_conditions}
+            if len(filter_conditions) > 1
+            else filter_conditions[0]
+        )
 
         return self.query_all_pages(database_id, filter=filter)
 
     def get_pages_by_status(self, database_id: str, status: str) -> List[Dict]:
         """Get pages with a specific status"""
-        filter = {
-            "property": "Status",
-            "select": {"equals": status}
-        }
+        filter = {"property": "Status", "select": {"equals": status}}
         return self.query_all_pages(database_id, filter=filter)
 
     # Property value builders
@@ -207,7 +197,7 @@ class NotionClient:
         if len(text) > 2000:
             blocks = []
             for i in range(0, len(text), 2000):
-                blocks.append({"text": {"content": text[i:i+2000]}})
+                blocks.append({"text": {"content": text[i : i + 2000]}})
             return {"rich_text": blocks}
         return {"rich_text": [{"text": {"content": text}}]}
 

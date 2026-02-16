@@ -22,6 +22,7 @@ except ImportError:
 @dataclass
 class ScraperAlert:
     """Alert from scraper monitoring."""
+
     alert_type: str  # "new_jobs", "competitor_activity", "high_value", "anomaly"
     severity: str  # "critical", "high", "medium", "low"
     message: str
@@ -32,6 +33,7 @@ class ScraperAlert:
 @dataclass
 class ScrapeAnalysis:
     """Analysis of a scrape run."""
+
     scraper_name: str
     total_jobs: int
     new_jobs: int
@@ -55,8 +57,16 @@ class ScraperMonitorAgent(BDAgent):
 
     # Competitor keywords to monitor
     COMPETITORS = [
-        "leidos", "northrop", "booz allen", "peraton", "caci",
-        "saic", "mantech", "raytheon", "l3harris", "parsons"
+        "leidos",
+        "northrop",
+        "booz allen",
+        "peraton",
+        "caci",
+        "saic",
+        "mantech",
+        "raytheon",
+        "l3harris",
+        "parsons",
     ]
 
     # High-value clearance levels
@@ -64,16 +74,25 @@ class ScraperMonitorAgent(BDAgent):
 
     # DCGS-related keywords
     DCGS_KEYWORDS = [
-        "dcgs", "distributed ground", "dgs", "sensor data",
-        "isr", "sigint", "geoint", "humint", "masint",
-        "fusion", "exploitation", "dissemination"
+        "dcgs",
+        "distributed ground",
+        "dgs",
+        "sensor data",
+        "isr",
+        "sigint",
+        "geoint",
+        "humint",
+        "masint",
+        "fusion",
+        "exploitation",
+        "dissemination",
     ]
 
     def __init__(self):
         super().__init__(
             name="Scraper Monitor Agent",
             description="Monitor job scraper results and identify high-value BD opportunities. "
-                       "Expert in competitor analysis and opportunity detection."
+            "Expert in competitor analysis and opportunity detection.",
         )
         self.recent_alerts: List[ScraperAlert] = []
 
@@ -154,35 +173,46 @@ class ScraperMonitorAgent(BDAgent):
             is_high, signals = self.is_high_value(job)
             if is_high:
                 high_value_count += 1
-                alerts.append(ScraperAlert(
-                    alert_type="high_value",
-                    severity="high",
-                    message=f"High-value job detected: {job.get('title', 'Unknown')}",
-                    data={"job": job, "signals": signals},
-                    timestamp=datetime.utcnow(),
-                ))
+                alerts.append(
+                    ScraperAlert(
+                        alert_type="high_value",
+                        severity="high",
+                        message=f"High-value job detected: {job.get('title', 'Unknown')}",
+                        data={"job": job, "signals": signals},
+                        timestamp=datetime.utcnow(),
+                    )
+                )
 
             # Check competitors
             competitors = self.detect_competitors(job)
             if competitors:
                 all_competitor_signals.extend(competitors)
-                alerts.append(ScraperAlert(
-                    alert_type="competitor_activity",
-                    severity="medium",
-                    message=f"Competitor activity: {', '.join(competitors)}",
-                    data={"job": job, "competitors": competitors},
-                    timestamp=datetime.utcnow(),
-                ))
+                alerts.append(
+                    ScraperAlert(
+                        alert_type="competitor_activity",
+                        severity="medium",
+                        message=f"Competitor activity: {', '.join(competitors)}",
+                        data={"job": job, "competitors": competitors},
+                        timestamp=datetime.utcnow(),
+                    )
+                )
 
         # Generate recommendations
         if high_value_count > 5:
-            recommendations.append(f"Review {high_value_count} high-value opportunities immediately")
+            recommendations.append(
+                f"Review {high_value_count} high-value opportunities immediately"
+            )
         if ts_sci_count > 10:
-            recommendations.append(f"Heavy TS/SCI hiring ({ts_sci_count} jobs) - program expansion likely")
+            recommendations.append(
+                f"Heavy TS/SCI hiring ({ts_sci_count} jobs) - program expansion likely"
+            )
         if all_competitor_signals:
             from collections import Counter
+
             top_competitors = Counter(all_competitor_signals).most_common(3)
-            recommendations.append(f"Top competitor activity: {', '.join(c[0] for c in top_competitors)}")
+            recommendations.append(
+                f"Top competitor activity: {', '.join(c[0] for c in top_competitors)}"
+            )
 
         # Create analysis result
         analysis = ScrapeAnalysis(
@@ -208,7 +238,9 @@ class ScraperMonitorAgent(BDAgent):
         cutoff = datetime.utcnow() - timedelta(hours=hours)
         return [a for a in self.recent_alerts if a.timestamp > cutoff]
 
-    async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def process(
+        self, query: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """Process a scraper monitoring request."""
         if context and "jobs" in context:
             scraper_name = context.get("scraper_name", "unknown")
@@ -294,7 +326,7 @@ if __name__ == "__main__":
     async def test():
         result = await agent.process(
             "Analyze recent scrape",
-            context={"jobs": test_jobs, "scraper_name": "insight_global"}
+            context={"jobs": test_jobs, "scraper_name": "insight_global"},
         )
         print(result.content)
 

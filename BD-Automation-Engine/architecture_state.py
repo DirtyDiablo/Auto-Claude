@@ -34,8 +34,17 @@ ARCH_FILE = PROJECT_ROOT / "data_architecture_bd_engine.json"
 
 # Box-drawing characters
 H, V, TL, TR, BL, BR, LT, RT, TT, BT, CROSS = (
-    "\u2500", "\u2502", "\u250c", "\u2510", "\u2514", "\u2518",
-    "\u251c", "\u2524", "\u252c", "\u2534", "\u253c",
+    "\u2500",
+    "\u2502",
+    "\u250c",
+    "\u2510",
+    "\u2514",
+    "\u2518",
+    "\u251c",
+    "\u2524",
+    "\u252c",
+    "\u2534",
+    "\u253c",
 )
 
 # ---------------------------------------------------------------------------
@@ -43,28 +52,57 @@ H, V, TL, TR, BL, BR, LT, RT, TT, BT, CROSS = (
 # ---------------------------------------------------------------------------
 NO_COLOR = os.environ.get("NO_COLOR")
 
+
 def _c(code, text):
     if NO_COLOR:
         return text
     return f"\033[{code}m{text}\033[0m"
 
-def bold(t):      return _c("1", t)
-def dim(t):       return _c("2", t)
-def green(t):     return _c("32", t)
-def red(t):       return _c("31", t)
-def yellow(t):    return _c("33", t)
-def cyan(t):      return _c("36", t)
-def magenta(t):   return _c("35", t)
-def blue(t):      return _c("34", t)
-def white(t):     return _c("97", t)
+
+def bold(t):
+    return _c("1", t)
+
+
+def dim(t):
+    return _c("2", t)
+
+
+def green(t):
+    return _c("32", t)
+
+
+def red(t):
+    return _c("31", t)
+
+
+def yellow(t):
+    return _c("33", t)
+
+
+def cyan(t):
+    return _c("36", t)
+
+
+def magenta(t):
+    return _c("35", t)
+
+
+def blue(t):
+    return _c("34", t)
+
+
+def white(t):
+    return _c("97", t)
+
 
 STATUS_ICONS = {
-    "complete":    green("[OK]"),
-    "configured":  cyan("[CFG]"),
+    "complete": green("[OK]"),
+    "configured": cyan("[CFG]"),
     "in_progress": yellow("[WIP]"),
-    "planned":     dim("[--]"),
-    "error":       red("[ERR]"),
+    "planned": dim("[--]"),
+    "error": red("[ERR]"),
 }
+
 
 # ---------------------------------------------------------------------------
 # Load architecture JSON
@@ -77,6 +115,7 @@ def load_arch() -> dict:
     with open(ARCH_FILE, "r", encoding="utf-8") as f:
         return json.load(f)
 
+
 # ---------------------------------------------------------------------------
 # Live service probes
 # ---------------------------------------------------------------------------
@@ -84,6 +123,7 @@ def probe_service(url: str, timeout: float = 3.0) -> tuple:
     """Returns (ok: bool, body: str). Full body for JSON parsing."""
     try:
         import urllib.request
+
         resp = urllib.request.urlopen(url, timeout=timeout)
         data = resp.read().decode("utf-8", errors="replace")
         return True, data
@@ -127,13 +167,14 @@ def probe_dashboard() -> dict:
     ok, body = probe_service("http://localhost:5173")
     return {"online": ok}
 
+
 # ---------------------------------------------------------------------------
 # Section renderers
 # ---------------------------------------------------------------------------
 def section(title: str):
     w = 78
     print()
-    print(f"  {bold(cyan(f'{H*3} {title} {H * (w - len(title) - 5)}'))}")
+    print(f"  {bold(cyan(f'{H * 3} {title} {H * (w - len(title) - 5)}'))}")
 
 
 def kv(label: str, value, indent: int = 4):
@@ -147,8 +188,12 @@ def render_header(arch: dict):
     w = 78
     print()
     print(f"  {bold(white(f'{TL}{H * (w - 2)}{TR}'))}")
-    print(f"  {bold(white(V))}  {bold(magenta('BD-AUTOMATION-ENGINE   MASTER ARCHITECTURE STATE')):<{w+7}}{bold(white(V))}")
-    print(f"  {bold(white(V))}  {dim(pi.get('description', '')[:w-6]):<{w-2}}{bold(white(V))}")
+    print(
+        f"  {bold(white(V))}  {bold(magenta('BD-AUTOMATION-ENGINE   MASTER ARCHITECTURE STATE')):<{w + 7}}{bold(white(V))}"
+    )
+    print(
+        f"  {bold(white(V))}  {dim(pi.get('description', '')[: w - 6]):<{w - 2}}{bold(white(V))}"
+    )
     print(f"  {bold(white(f'{BL}{H * (w - 2)}{BR}'))}")
     print()
     kv("Scan date", arch.get("scan_date", "?"))
@@ -202,7 +247,7 @@ def render_engines(arch: dict):
         print("    (no engine data)")
         return
     print(f"    {'#':<4} {'Engine':<35} {'Status':<8} {'Input':<18} {'Output'}")
-    print(f"    {H*4} {H*35} {H*8} {H*18} {H*25}")
+    print(f"    {H * 4} {H * 35} {H * 8} {H * 18} {H * 25}")
     for i, e in enumerate(engines, 1):
         name = e.get("name", "?")[:35]
         status = e.get("status", "?")
@@ -238,7 +283,9 @@ def render_entities(arch: dict):
             props = len(e.get("properties", []))
             storage = e.get("storage", [])
             storage_str = ", ".join(str(s)[:20] for s in storage[:3]) if storage else ""
-            print(f"      {cyan(name):<30} {dim(f'{records:>8} records')}  {dim(f'{props:>3} props')}  {dim(storage_str)}")
+            print(
+                f"      {cyan(name):<30} {dim(f'{records:>8} records')}  {dim(f'{props:>3} props')}  {dim(storage_str)}"
+            )
 
 
 def render_databases(arch: dict):
@@ -248,8 +295,10 @@ def render_databases(arch: dict):
     section("QDRANT VECTOR COLLECTIONS")
     qc = dbs.get("qdrant_collections", [])
     if qc:
-        print(f"    {'Collection':<25} {'Vectors':<12} {'Dim':<6} {'Distance':<10} {'Hybrid'}")
-        print(f"    {H*25} {H*12} {H*6} {H*10} {H*8}")
+        print(
+            f"    {'Collection':<25} {'Vectors':<12} {'Dim':<6} {'Distance':<10} {'Hybrid'}"
+        )
+        print(f"    {H * 25} {H * 12} {H * 6} {H * 10} {H * 8}")
         total_v = 0
         for c in qc:
             name = c.get("name", "?")
@@ -257,9 +306,15 @@ def render_databases(arch: dict):
             total_v += count if isinstance(count, int) else 0
             dim_val = c.get("vector_size", c.get("dimension", "?"))
             dist = c.get("distance", "?")
-            hybrid = green("Yes") if c.get("hybrid_enabled") or c.get("bm25_index") else dim("No")
-            print(f"    {name:<25} {str(count):>10}   {str(dim_val):<6} {str(dist):<10} {hybrid}")
-        print(f"    {H*25} {H*12}")
+            hybrid = (
+                green("Yes")
+                if c.get("hybrid_enabled") or c.get("bm25_index")
+                else dim("No")
+            )
+            print(
+                f"    {name:<25} {str(count):>10}   {str(dim_val):<6} {str(dist):<10} {hybrid}"
+            )
+        print(f"    {H * 25} {H * 12}")
         print(f"    {'TOTAL':<25} {bold(f'{total_v:>10,}')}")
     else:
         print("    (no Qdrant data)")
@@ -270,11 +325,19 @@ def render_databases(arch: dict):
     node_types = neo.get("node_types", [])
     rel_types = neo.get("relationship_types", [])
     if node_types:
-        names = [n.get("type", n.get("label", str(n))) if isinstance(n, dict) else str(n) for n in node_types]
+        names = [
+            n.get("type", n.get("label", str(n))) if isinstance(n, dict) else str(n)
+            for n in node_types
+        ]
         kv("Node types", f"{len(names)} — {', '.join(names)}")
     if rel_types:
-        names = [r.get("type", str(r)) if isinstance(r, dict) else str(r) for r in rel_types]
-        kv("Rel types", f"{len(names)} — {', '.join(names[:12])}{'...' if len(names) > 12 else ''}")
+        names = [
+            r.get("type", str(r)) if isinstance(r, dict) else str(r) for r in rel_types
+        ]
+        kv(
+            "Rel types",
+            f"{len(names)} — {', '.join(names[:12])}{'...' if len(names) > 12 else ''}",
+        )
 
     # SQLite
     section("SQLITE DATABASES")
@@ -296,7 +359,9 @@ def render_databases(arch: dict):
                     table_names.append(str(t))
             size_str = f"{size}" if size != "?" else ""
             row_str = f"{row_count:,} rows" if row_count else ""
-            print(f"    {bold(name)} {dim(size_str)}  {dim(row_str)}  {dim(f'{len(tables)} tables')}")
+            print(
+                f"    {bold(name)} {dim(size_str)}  {dim(row_str)}  {dim(f'{len(tables)} tables')}"
+            )
             if table_names:
                 line = ", ".join(table_names)
                 for chunk in textwrap.wrap(line, width=68):
@@ -363,10 +428,16 @@ def render_api(arch: dict):
     subs = api.get("engine8_sub_routers", [])
     if subs:
         total_ep = sum(r.get("endpoints", 0) for r in subs if isinstance(r, dict))
-        print(f"\n    {bold(f'Engine8 sub-routers: {len(subs)} files, ~{total_ep} endpoints')}")
+        print(
+            f"\n    {bold(f'Engine8 sub-routers: {len(subs)} files, ~{total_ep} endpoints')}"
+        )
         print(f"    {'Router file':<42} {'Endpoints':>9}")
-        print(f"    {H*42} {H*9}")
-        for r in sorted(subs, key=lambda x: x.get("endpoints", 0) if isinstance(x, dict) else 0, reverse=True):
+        print(f"    {H * 42} {H * 9}")
+        for r in sorted(
+            subs,
+            key=lambda x: x.get("endpoints", 0) if isinstance(x, dict) else 0,
+            reverse=True,
+        ):
             if isinstance(r, dict):
                 fname = r.get("file", "?")
                 count = r.get("endpoints", 0)
@@ -375,8 +446,12 @@ def render_api(arch: dict):
     # Src routers
     src_routers = api.get("src_api_routers", [])
     if src_routers:
-        total_ep2 = sum(r.get("endpoints", 0) for r in src_routers if isinstance(r, dict))
-        print(f"\n    {bold(f'src/ API routers: {len(src_routers)} files, ~{total_ep2} endpoints')}")
+        total_ep2 = sum(
+            r.get("endpoints", 0) for r in src_routers if isinstance(r, dict)
+        )
+        print(
+            f"\n    {bold(f'src/ API routers: {len(src_routers)} files, ~{total_ep2} endpoints')}"
+        )
 
 
 def render_relationships(arch: dict):
@@ -391,7 +466,7 @@ def render_relationships(arch: dict):
         by_type[r.get("type", r.get("label", "?"))] += 1
     # Show relationships
     print(f"    {'Relationship':<25} {'Count':<6} {'Example':<35} {'Card.'}")
-    print(f"    {H*25} {H*6} {H*35} {H*12}")
+    print(f"    {H * 25} {H * 6} {H * 35} {H * 12}")
     for rtype, count in by_type.most_common(25):
         example = ""
         card = ""
@@ -462,18 +537,24 @@ def render_live_services(include_live: bool):
     qdrant = probe_qdrant()
     if qdrant["online"]:
         total = sum(qdrant["collections"].values())
-        print(f"    Qdrant (6333)      {green('[RUNNING]')}  {total:,} vectors across {len(qdrant['collections'])} collections")
+        print(
+            f"    Qdrant (6333)      {green('[RUNNING]')}  {total:,} vectors across {len(qdrant['collections'])} collections"
+        )
         for name, count in sorted(qdrant["collections"].items()):
             print(f"      {name:<25} {count:>10,}")
     else:
-        print(f"    Qdrant (6333)      {red('[OFFLINE]')}  {dim(qdrant.get('error', ''))}")
+        print(
+            f"    Qdrant (6333)      {red('[OFFLINE]')}  {dim(qdrant.get('error', ''))}"
+        )
 
     # API
     api = probe_api()
     if api["online"]:
         print(f"    Knowledge API (8100) {green('[RUNNING]')}")
     else:
-        print(f"    Knowledge API (8100) {red('[OFFLINE]')}  {dim(api.get('error', ''))}")
+        print(
+            f"    Knowledge API (8100) {red('[OFFLINE]')}  {dim(api.get('error', ''))}"
+        )
 
     # Dashboard
     dash = probe_dashboard()
@@ -487,9 +568,14 @@ def render_filesystem_snapshot():
     section("FILESYSTEM SNAPSHOT")
     # Count files by engine directory
     engine_dirs = [
-        "Engine1_Scraper", "Engine2_ProgramMapping", "Engine3_OrgChart",
-        "Engine4_Playbook", "Engine5_Scoring", "Engine6_QA",
-        "Engine7_BullhornETL", "Engine8_Knowledge",
+        "Engine1_Scraper",
+        "Engine2_ProgramMapping",
+        "Engine3_OrgChart",
+        "Engine4_Playbook",
+        "Engine5_Scoring",
+        "Engine6_QA",
+        "Engine7_BullhornETL",
+        "Engine8_Knowledge",
     ]
     for d in engine_dirs:
         dp = PROJECT_ROOT / d
@@ -529,16 +615,21 @@ def render_git_status():
     section("GIT STATUS")
     try:
         import subprocess
+
         result = subprocess.run(
             ["git", "branch", "--show-current"],
-            capture_output=True, text=True, cwd=str(PROJECT_ROOT)
+            capture_output=True,
+            text=True,
+            cwd=str(PROJECT_ROOT),
         )
         branch = result.stdout.strip()
         kv("Branch", bold(branch))
 
         result = subprocess.run(
             ["git", "log", "--oneline", "-5"],
-            capture_output=True, text=True, cwd=str(PROJECT_ROOT)
+            capture_output=True,
+            text=True,
+            cwd=str(PROJECT_ROOT),
         )
         if result.stdout.strip():
             print(f"\n    {bold('Recent commits:')}")
@@ -547,7 +638,9 @@ def render_git_status():
 
         result = subprocess.run(
             ["git", "status", "--short"],
-            capture_output=True, text=True, cwd=str(PROJECT_ROOT)
+            capture_output=True,
+            text=True,
+            cwd=str(PROJECT_ROOT),
         )
         changes = [l for l in result.stdout.strip().split("\n") if l.strip()]
         staged = sum(1 for l in changes if l[0] in "MADR")
@@ -564,13 +657,29 @@ def render_git_status():
 def render_stack_upgrades(arch: dict = None):
     section("STACK UPGRADE STATUS")
     upgrades = [
-        ("LightRAG Neo4j backend", "Engine8_Knowledge/bd_lightrag/graph_rag.py", "2.1a"),
+        (
+            "LightRAG Neo4j backend",
+            "Engine8_Knowledge/bd_lightrag/graph_rag.py",
+            "2.1a",
+        ),
         ("Datasette SQL explorer", "Engine8_Knowledge/datasette_config.py", "2.1b"),
-        ("tree-sitter parser", "Engine8_Knowledge/scripts/treesitter_parser.py", "2.1c"),
-        ("Docling doc extractor", "Engine8_Knowledge/scripts/docling_extractor.py", "2.1d"),
+        (
+            "tree-sitter parser",
+            "Engine8_Knowledge/scripts/treesitter_parser.py",
+            "2.1c",
+        ),
+        (
+            "Docling doc extractor",
+            "Engine8_Knowledge/scripts/docling_extractor.py",
+            "2.1d",
+        ),
         ("LanceDB hybrid search", "Engine8_Knowledge/scripts/lancedb_hybrid.py", "2.2"),
         ("Neo4j file lineage", "Engine8_Knowledge/graph/lineage.py", "2.3"),
-        ("Classification pipeline", "Engine8_Knowledge/scripts/classifier_pipeline.py", "2.4"),
+        (
+            "Classification pipeline",
+            "Engine8_Knowledge/scripts/classifier_pipeline.py",
+            "2.4",
+        ),
         ("FastMCP Python server", "mcp/knowledge-mcp-server/server.py", "2.5"),
         ("GraphViewer component", "dashboard/src/components/GraphViewer.tsx", "2.6"),
     ]
@@ -578,7 +687,9 @@ def render_stack_upgrades(arch: dict = None):
         fp = PROJECT_ROOT / path
         if fp.exists():
             size_kb = fp.stat().st_size / 1024
-            print(f"    {green('[DONE]')}  Step {step}  {label:<30}  {dim(f'{size_kb:.0f} KB')}")
+            print(
+                f"    {green('[DONE]')}  Step {step}  {label:<30}  {dim(f'{size_kb:.0f} KB')}"
+            )
         else:
             print(f"    {red('[MISS]')}  Step {step}  {label:<30}  {dim(path)}")
 
@@ -590,8 +701,14 @@ def render_quick_commands():
         ("Start dashboard", "cd dashboard && npm run dev"),
         ("Run status check", "python status_check.py"),
         ("Architecture state", "python architecture_state.py --live"),
-        ("Search knowledge", "python Engine8_Knowledge/scripts/vector_store.py --search \"DCGS\" --collection contacts"),
-        ("Validate arch JSON", "python -m json.tool data_architecture_bd_engine.json > NUL"),
+        (
+            "Search knowledge",
+            'python Engine8_Knowledge/scripts/vector_store.py --search "DCGS" --collection contacts',
+        ),
+        (
+            "Validate arch JSON",
+            "python -m json.tool data_architecture_bd_engine.json > NUL",
+        ),
     ]
     for label, cmd in cmds:
         print(f"    {label:<25} {dim(cmd)}")
@@ -601,29 +718,42 @@ def render_quick_commands():
 # Section-only mode
 # ---------------------------------------------------------------------------
 SECTION_MAP = {
-    "header":        render_header,
-    "stats":         render_scan_stats,
-    "engines":       render_engines,
-    "entities":      render_entities,
-    "databases":     render_databases,
-    "api":           render_api,
+    "header": render_header,
+    "stats": render_scan_stats,
+    "engines": render_engines,
+    "entities": render_entities,
+    "databases": render_databases,
+    "api": render_api,
     "relationships": render_relationships,
-    "flows":         render_data_flows,
-    "agents":        render_ai_agents,
-    "filesystem":    render_filesystem_snapshot,
-    "git":           render_git_status,
-    "upgrades":      render_stack_upgrades,
-    "commands":      render_quick_commands,
+    "flows": render_data_flows,
+    "agents": render_ai_agents,
+    "filesystem": render_filesystem_snapshot,
+    "git": render_git_status,
+    "upgrades": render_stack_upgrades,
+    "commands": render_quick_commands,
 }
+
 
 # ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 def main():
-    parser = argparse.ArgumentParser(description="BD-Automation-Engine Master Architecture State")
-    parser.add_argument("--json", action="store_true", help="Dump raw architecture JSON")
-    parser.add_argument("--live", action="store_true", help="Include live service probes (Qdrant, API, dashboard)")
-    parser.add_argument("--section", type=str, help=f"Show only one section: {', '.join(SECTION_MAP.keys())}")
+    parser = argparse.ArgumentParser(
+        description="BD-Automation-Engine Master Architecture State"
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="Dump raw architecture JSON"
+    )
+    parser.add_argument(
+        "--live",
+        action="store_true",
+        help="Include live service probes (Qdrant, API, dashboard)",
+    )
+    parser.add_argument(
+        "--section",
+        type=str,
+        help=f"Show only one section: {', '.join(SECTION_MAP.keys())}",
+    )
     parser.add_argument("--no-color", action="store_true", help="Disable ANSI colors")
     args = parser.parse_args()
 
@@ -664,8 +794,12 @@ def main():
     render_live_services(args.live)
     render_quick_commands()
 
-    print(f"\n  {dim(f'Source: {ARCH_FILE.name} ({ARCH_FILE.stat().st_size / 1024:.0f} KB)')}")
-    print(f"  {dim(f'Run with --live for service health checks, --section <name> for one section')}")
+    print(
+        f"\n  {dim(f'Source: {ARCH_FILE.name} ({ARCH_FILE.stat().st_size / 1024:.0f} KB)')}"
+    )
+    print(
+        f"  {dim(f'Run with --live for service health checks, --section <name> for one section')}"
+    )
     print()
 
 

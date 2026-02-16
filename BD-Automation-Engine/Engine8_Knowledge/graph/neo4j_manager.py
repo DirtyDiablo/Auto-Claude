@@ -23,12 +23,19 @@ try:
         SessionExpired,
         TransientError,
     )
+
     NEO4J_AVAILABLE = True
 except ImportError:
     NEO4J_AVAILABLE = False
 
 try:
-    from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
+    from tenacity import (
+        retry,
+        stop_after_attempt,
+        wait_exponential,
+        retry_if_exception_type,
+    )
+
     TENACITY_AVAILABLE = True
 except ImportError:
     TENACITY_AVAILABLE = False
@@ -53,10 +60,13 @@ if TENACITY_AVAILABLE and NEO4J_AVAILABLE:
     _retry_on_transient = retry(
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=1, max=10),
-        retry=retry_if_exception_type((ServiceUnavailable, SessionExpired, TransientError)),
+        retry=retry_if_exception_type(
+            (ServiceUnavailable, SessionExpired, TransientError)
+        ),
         reraise=True,
     )
 else:
+
     def _retry_on_transient(fn):  # type: ignore[misc]
         return fn
 
@@ -64,6 +74,7 @@ else:
 # ---------------------------------------------------------------------------
 # Neo4jManager
 # ---------------------------------------------------------------------------
+
 
 class Neo4jManager:
     """Manages Neo4j driver lifecycle, connection pooling, and query execution."""
@@ -135,7 +146,11 @@ class Neo4jManager:
                 result = session.run("RETURN 1 AS n")
                 record = result.single()
                 if record and record["n"] == 1:
-                    return {"status": "healthy", "uri": self._uri, "database": self._database}
+                    return {
+                        "status": "healthy",
+                        "uri": self._uri,
+                        "database": self._database,
+                    }
             return {"status": "unhealthy", "error": "unexpected result"}
         except Exception as e:
             return {"status": "unhealthy", "uri": self._uri, "error": str(e)[:200]}
@@ -146,7 +161,12 @@ class Neo4jManager:
     # -- Query execution --
 
     @_retry_on_transient
-    def run_query(self, cypher: str, parameters: Optional[dict] = None, database: Optional[str] = None) -> list[dict]:
+    def run_query(
+        self,
+        cypher: str,
+        parameters: Optional[dict] = None,
+        database: Optional[str] = None,
+    ) -> list[dict]:
         """Execute a Cypher query and return results as list of dicts."""
         db = database or self._database
         with self.driver.session(database=db) as session:
@@ -154,7 +174,9 @@ class Neo4jManager:
             return [dict(record) for record in result]
 
     @_retry_on_transient
-    def run_single(self, cypher: str, parameters: Optional[dict] = None) -> Optional[dict]:
+    def run_single(
+        self, cypher: str, parameters: Optional[dict] = None
+    ) -> Optional[dict]:
         """Execute a query and return a single result."""
         with self.driver.session(database=self._database) as session:
             result = session.run(cypher, parameters or {})
@@ -192,7 +214,9 @@ class Neo4jManager:
 
     # -- Batch operations --
 
-    def run_batch(self, cypher: str, batch_data: list[dict], batch_size: int = 500) -> dict:
+    def run_batch(
+        self, cypher: str, batch_data: list[dict], batch_size: int = 500
+    ) -> dict:
         """Execute a parameterized query in batches.
 
         Uses UNWIND for efficient batch processing:
@@ -232,7 +256,9 @@ class Neo4jManager:
     def get_relationship_count(self, rel_type: Optional[str] = None) -> int:
         """Count relationships, optionally filtered by type."""
         if rel_type:
-            result = self.run_single(f"MATCH ()-[r:`{rel_type}`]->() RETURN count(r) AS c")
+            result = self.run_single(
+                f"MATCH ()-[r:`{rel_type}`]->() RETURN count(r) AS c"
+            )
         else:
             result = self.run_single("MATCH ()-[r]->() RETURN count(r) AS c")
         return result["c"] if result else 0

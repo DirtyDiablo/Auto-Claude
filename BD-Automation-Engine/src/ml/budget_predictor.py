@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class SpendingWindow:
     agency: str
@@ -136,7 +137,11 @@ FEDERAL_CONFERENCES = [
     {"month": 5, "name": "GEOINT Symposium", "focus": "GEOINT/ISR"},
     {"month": 6, "name": "DoDIIS Worldwide", "focus": "Defense intelligence"},
     {"month": 8, "name": "AFCEA TechNet Augusta", "focus": "Army cyber"},
-    {"month": 9, "name": "Air & Space Forces Association", "focus": "USAF modernization"},
+    {
+        "month": 9,
+        "name": "Air & Space Forces Association",
+        "focus": "USAF modernization",
+    },
     {"month": 10, "name": "AUSA Annual Meeting", "focus": "Army programs"},
     {"month": 11, "name": "AFCEA MILCOM", "focus": "Military communications"},
 ]
@@ -232,7 +237,8 @@ class BudgetCyclePredictor:
         )
 
     async def predict_recompete_timing(
-        self, contract_id: str,
+        self,
+        contract_id: str,
         contract_data: Optional[dict] = None,
     ) -> RecompetePrediction:
         """Predict when a contract will recompete."""
@@ -260,8 +266,12 @@ class BudgetCyclePredictor:
             )
 
         contract_name = contract.get("name", contract.get("title", "Unknown"))
-        pop_end_str = contract.get("pop_end", contract.get("period_of_performance_end", ""))
-        options_remaining = contract.get("options_remaining", contract.get("option_years", 0))
+        pop_end_str = contract.get(
+            "pop_end", contract.get("period_of_performance_end", "")
+        )
+        options_remaining = contract.get(
+            "options_remaining", contract.get("option_years", 0)
+        )
 
         # Parse POP end date
         now = datetime.now(timezone.utc)
@@ -271,7 +281,11 @@ class BudgetCyclePredictor:
                 if pop_end.tzinfo is None:
                     pop_end = pop_end.replace(tzinfo=timezone.utc)
             elif isinstance(pop_end_str, datetime):
-                pop_end = pop_end_str if pop_end_str.tzinfo else pop_end_str.replace(tzinfo=timezone.utc)
+                pop_end = (
+                    pop_end_str
+                    if pop_end_str.tzinfo
+                    else pop_end_str.replace(tzinfo=timezone.utc)
+                )
             else:
                 pop_end = now + timedelta(days=365)
         except Exception:
@@ -306,7 +320,9 @@ class BudgetCyclePredictor:
         if months_to_rfi <= 18:
             actions.append("Start teaming discussions and past performance collection")
         if options_remaining > 0:
-            actions.append(f"Monitor: {options_remaining} option year(s) may be exercised first")
+            actions.append(
+                f"Monitor: {options_remaining} option year(s) may be exercised first"
+            )
         actions.append("Track SAM.gov for pre-solicitation notices")
 
         return RecompetePrediction(
@@ -332,22 +348,44 @@ class BudgetCyclePredictor:
         # Budget milestones
         fy = self._get_fiscal_year(now)
         budget_events = [
-            (datetime(fy - 1, 10, 1, tzinfo=timezone.utc), f"FY{fy} Start", "New fiscal year begins"),
-            (datetime(fy, 2, 1, tzinfo=timezone.utc), f"FY{fy} President's Budget", "Budget request submitted to Congress"),
-            (datetime(fy, 7, 1, tzinfo=timezone.utc), f"FY{fy} Q4 Begins", "Use-or-lose spending surge starts"),
-            (datetime(fy, 9, 30, tzinfo=timezone.utc), f"FY{fy} Ends", "Fiscal year ends, final obligations"),
-            (datetime(fy, 10, 1, tzinfo=timezone.utc), f"FY{fy+1} Start", "New fiscal year begins"),
+            (
+                datetime(fy - 1, 10, 1, tzinfo=timezone.utc),
+                f"FY{fy} Start",
+                "New fiscal year begins",
+            ),
+            (
+                datetime(fy, 2, 1, tzinfo=timezone.utc),
+                f"FY{fy} President's Budget",
+                "Budget request submitted to Congress",
+            ),
+            (
+                datetime(fy, 7, 1, tzinfo=timezone.utc),
+                f"FY{fy} Q4 Begins",
+                "Use-or-lose spending surge starts",
+            ),
+            (
+                datetime(fy, 9, 30, tzinfo=timezone.utc),
+                f"FY{fy} Ends",
+                "Fiscal year ends, final obligations",
+            ),
+            (
+                datetime(fy, 10, 1, tzinfo=timezone.utc),
+                f"FY{fy + 1} Start",
+                "New fiscal year begins",
+            ),
         ]
 
         for dt, title, details in budget_events:
             if now <= dt <= end_date:
-                events.append(CalendarEvent(
-                    date=dt.strftime("%Y-%m-%d"),
-                    event_type="budget",
-                    title=title,
-                    priority="high",
-                    details=details,
-                ))
+                events.append(
+                    CalendarEvent(
+                        date=dt.strftime("%Y-%m-%d"),
+                        event_type="budget",
+                        title=title,
+                        priority="high",
+                        details=details,
+                    )
+                )
 
         # Conference events
         for conf in FEDERAL_CONFERENCES:
@@ -355,13 +393,15 @@ class BudgetCyclePredictor:
             if conf_date < now:
                 conf_date = conf_date.replace(year=now.year + 1)
             if conf_date <= end_date:
-                events.append(CalendarEvent(
-                    date=conf_date.strftime("%Y-%m-%d"),
-                    event_type="conference",
-                    title=conf["name"],
-                    details=conf["focus"],
-                    priority="medium",
-                ))
+                events.append(
+                    CalendarEvent(
+                        date=conf_date.strftime("%Y-%m-%d"),
+                        event_type="conference",
+                        title=conf["name"],
+                        details=conf["focus"],
+                        priority="medium",
+                    )
+                )
 
         # Recompete predictions from stored contracts
         for contract in self._contracts[:20]:  # Limit to 20
@@ -371,14 +411,18 @@ class BudgetCyclePredictor:
                 )
                 rfi_date = datetime.fromisoformat(pred.predicted_rfi_date)
                 if isinstance(rfi_date, datetime) and now <= rfi_date <= end_date:
-                    events.append(CalendarEvent(
-                        date=pred.predicted_rfi_date,
-                        event_type="recompete",
-                        title=f"Predicted RFI: {pred.contract_name}",
-                        program=contract.get("program", ""),
-                        priority="high" if pred.recompete_probability > 0.7 else "medium",
-                        details=f"Recompete prob: {pred.recompete_probability:.0%}",
-                    ))
+                    events.append(
+                        CalendarEvent(
+                            date=pred.predicted_rfi_date,
+                            event_type="recompete",
+                            title=f"Predicted RFI: {pred.contract_name}",
+                            program=contract.get("program", ""),
+                            priority="high"
+                            if pred.recompete_probability > 0.7
+                            else "medium",
+                            details=f"Recompete prob: {pred.recompete_probability:.0%}",
+                        )
+                    )
             except Exception:
                 pass
 
@@ -390,13 +434,15 @@ class BudgetCyclePredictor:
                 q_start = datetime(q_year, q_start_month, 1, tzinfo=timezone.utc)
                 if now <= q_start <= end_date:
                     priority = "high" if q == 4 else "medium"
-                    events.append(CalendarEvent(
-                        date=q_start.strftime("%Y-%m-%d"),
-                        event_type="hiring_surge" if q == 4 else "budget",
-                        title=f"FY{fy} Q{q} Begins",
-                        priority=priority,
-                        details=f"Federal Q{q} hiring and procurement window",
-                    ))
+                    events.append(
+                        CalendarEvent(
+                            date=q_start.strftime("%Y-%m-%d"),
+                            event_type="hiring_surge" if q == 4 else "budget",
+                            title=f"FY{fy} Q{q} Begins",
+                            priority=priority,
+                            details=f"Federal Q{q} hiring and procurement window",
+                        )
+                    )
             except Exception:
                 pass
 
@@ -417,7 +463,10 @@ class BudgetCyclePredictor:
         surge_months = pattern.get("surge_months", [7, 8, 9])
 
         # Find next peak or surge month
-        for check_months, label in [(peak_months, "Peak procurement"), (surge_months, "Q4 surge")]:
+        for check_months, label in [
+            (peak_months, "Peak procurement"),
+            (surge_months, "Q4 surge"),
+        ]:
             for m in sorted(check_months):
                 target_year = now.year
                 if m <= month:
@@ -428,7 +477,11 @@ class BudgetCyclePredictor:
                     return label, days
 
         # Default: next fiscal year start
-        fy_start = datetime(now.year + 1, 10, 1, tzinfo=timezone.utc) if now.month >= 10 else datetime(now.year, 10, 1, tzinfo=timezone.utc)
+        fy_start = (
+            datetime(now.year + 1, 10, 1, tzinfo=timezone.utc)
+            if now.month >= 10
+            else datetime(now.year, 10, 1, tzinfo=timezone.utc)
+        )
         return "New fiscal year", max(1, (fy_start - now).days)
 
 

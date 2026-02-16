@@ -11,6 +11,7 @@ from src.api.rag_api import include_rag_router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     app = FastAPI()
@@ -26,6 +27,7 @@ def client(app):
 # =========================================
 # QUERY ENDPOINTS
 # =========================================
+
 
 def test_rag_query(client):
     resp = client.post("/rag/query", json={"question": "Who manages DCGS-A?"})
@@ -52,10 +54,14 @@ def test_rag_query_empty(client):
 # DECOMPOSE
 # =========================================
 
+
 def test_decompose(client):
-    resp = client.post("/rag/query/decompose", json={
-        "query": "Compare hiring at Langley vs PACAF",
-    })
+    resp = client.post(
+        "/rag/query/decompose",
+        json={
+            "query": "Compare hiring at Langley vs PACAF",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "sub_queries" in data
@@ -66,14 +72,18 @@ def test_decompose(client):
 # EVALUATION
 # =========================================
 
+
 def test_evaluate_relevance(client):
-    resp = client.post("/rag/evaluate/relevance", json={
-        "query": "DCGS program at GDIT",
-        "passages": [
-            "GDIT manages the DCGS-A program at Langley.",
-            "The weather is sunny today.",
-        ],
-    })
+    resp = client.post(
+        "/rag/evaluate/relevance",
+        json={
+            "query": "DCGS program at GDIT",
+            "passages": [
+                "GDIT manages the DCGS-A program at Langley.",
+                "The weather is sunny today.",
+            ],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["count"] == 2
@@ -81,10 +91,13 @@ def test_evaluate_relevance(client):
 
 
 def test_evaluate_support(client):
-    resp = client.post("/rag/evaluate/support", json={
-        "answer": "John Smith works at GDIT on DCGS.",
-        "passages": ["John Smith is a GDIT analyst working on DCGS-A."],
-    })
+    resp = client.post(
+        "/rag/evaluate/support",
+        json={
+            "answer": "John Smith works at GDIT on DCGS.",
+            "passages": ["John Smith is a GDIT analyst working on DCGS-A."],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "score" in data
@@ -95,20 +108,24 @@ def test_evaluate_support(client):
 # RERANK
 # =========================================
 
+
 def test_rerank(client):
-    resp = client.post("/rag/rerank", json={
-        "query": "DCGS program",
-        "channel_results": {
-            "vector": [
-                {"doc_id": "d1", "text": "DCGS-A at GDIT.", "score": 0.9},
-                {"doc_id": "d2", "text": "Weather report.", "score": 0.5},
-            ],
-            "bm25": [
-                {"doc_id": "d3", "text": "DCGS program status.", "score": 0.85},
-            ],
+    resp = client.post(
+        "/rag/rerank",
+        json={
+            "query": "DCGS program",
+            "channel_results": {
+                "vector": [
+                    {"doc_id": "d1", "text": "DCGS-A at GDIT.", "score": 0.9},
+                    {"doc_id": "d2", "text": "Weather report.", "score": 0.5},
+                ],
+                "bm25": [
+                    {"doc_id": "d3", "text": "DCGS program status.", "score": 0.85},
+                ],
+            },
+            "top_k": 5,
         },
-        "top_k": 5,
-    })
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "docs" in data
@@ -118,6 +135,7 @@ def test_rerank(client):
 # =========================================
 # STATS & BENCHMARK
 # =========================================
+
 
 def test_get_stats(client):
     resp = client.get("/rag/stats")
@@ -141,6 +159,7 @@ def test_run_benchmark(client):
 # =========================================
 # TRACE
 # =========================================
+
 
 def test_trace_not_found(client):
     resp = client.get("/rag/trace/nonexistent")

@@ -44,7 +44,9 @@ def register_program_tools(mcp, hub) -> int:
         enriched["matching_jobs"] = jobs.get("jobs", [])[:5]
 
         # Add contacts
-        contacts = await hub.get("/api/v2/contacts", params={"q": program_name, "limit": 10})
+        contacts = await hub.get(
+            "/api/v2/contacts", params={"q": program_name, "limit": 10}
+        )
         enriched["contacts"] = contacts.get("contacts", [])[:5]
 
         return enriched
@@ -67,14 +69,16 @@ def register_program_tools(mcp, hub) -> int:
 
         signals = []
         for job in jobs:
-            signals.append({
-                "type": "new_job",
-                "title": job.get("title", ""),
-                "company": job.get("company", ""),
-                "program": job.get("program", ""),
-                "location": job.get("location", ""),
-                "clearance": job.get("clearance", ""),
-            })
+            signals.append(
+                {
+                    "type": "new_job",
+                    "title": job.get("title", ""),
+                    "company": job.get("company", ""),
+                    "program": job.get("program", ""),
+                    "location": job.get("location", ""),
+                    "clearance": job.get("clearance", ""),
+                }
+            )
 
         return signals[:20]
 
@@ -109,11 +113,14 @@ def register_program_tools(mcp, hub) -> int:
         query: str, search_type: str = "auto", limit: int = 10
     ) -> Dict[str, Any]:
         """Full hybrid search across all data. Types: auto, dense, bm25, graph, combined."""
-        data = await hub.post("/search", json={
-            "query": query,
-            "mode": search_type,
-            "limit": limit,
-        })
+        data = await hub.post(
+            "/search",
+            json={
+                "query": query,
+                "mode": search_type,
+                "limit": limit,
+            },
+        )
         return data or {"results": [], "count": 0}
 
     count += 1

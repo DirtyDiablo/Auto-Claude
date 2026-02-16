@@ -2,6 +2,7 @@
 FastAPI routes for UltraRAG multi-step reasoning.
 Import this into main api.py during integration step.
 """
+
 from fastapi import APIRouter, HTTPException
 
 try:
@@ -23,6 +24,7 @@ def get_ultra_rag() -> BDUltraRAG:
     if _ultra_rag is None:
         # Get absolute path for PageIndex database
         import os
+
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         db_path = os.path.join(base_dir, "data", "page_index.db")
 
@@ -36,10 +38,10 @@ def get_ultra_rag() -> BDUltraRAG:
 
         _ultra_rag = BDUltraRAG(
             qdrant_client=None,  # Add your Qdrant client
-            bm25_index=None,     # Add your BM25 index
+            bm25_index=None,  # Add your BM25 index
             page_index=page_index,
             knowledge_graph=None,
-            llm_client=None      # Add your LLM client
+            llm_client=None,  # Add your LLM client
         )
     return _ultra_rag
 
@@ -68,7 +70,7 @@ async def ultrarag_query(query: str, pipeline: str = "auto"):
             "confidence": plan.confidence,
             "sub_queries": plan.sub_queries,
             "citations": plan.citations,
-            "execution_time_ms": plan.execution_time_ms
+            "execution_time_ms": plan.execution_time_ms,
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -118,9 +120,7 @@ async def ultrarag_verify_fact(claim: str):
 async def list_pipelines():
     """List available reasoning pipelines."""
     ultra = get_ultra_rag()
-    return {
-        "pipelines": ultra.list_pipelines()
-    }
+    return {"pipelines": ultra.list_pipelines()}
 
 
 @router.get("/status")
@@ -132,5 +132,5 @@ async def ultrarag_status():
         "pipelines_available": len(ultra.ultra.pipelines),
         "llm_enabled": ultra.llm is not None,
         "page_index_enabled": ultra.page_index is not None,
-        "qdrant_enabled": ultra.qdrant is not None
+        "qdrant_enabled": ultra.qdrant is not None,
     }

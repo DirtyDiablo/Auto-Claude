@@ -35,9 +35,12 @@ router = APIRouter(prefix="/rag", tags=["rag"])
 # REQUEST MODELS
 # =========================================
 
+
 class RAGQueryRequest(BaseModel):
     question: str = Field(..., min_length=1, description="Natural language question")
-    context: Dict[str, Any] = Field(default_factory=dict, description="Optional context")
+    context: Dict[str, Any] = Field(
+        default_factory=dict, description="Optional context"
+    )
 
 
 class SimpleQueryRequest(BaseModel):
@@ -61,7 +64,8 @@ class SupportRequest(BaseModel):
 class RerankRequest(BaseModel):
     query: str = Field(..., min_length=1)
     channel_results: Dict[str, List[Dict[str, Any]]] = Field(
-        ..., description="Channel name → list of docs (each with 'text', optional 'doc_id', 'score')",
+        ...,
+        description="Channel name → list of docs (each with 'text', optional 'doc_id', 'score')",
     )
     top_k: int = Field(10, ge=1, le=100)
 
@@ -69,6 +73,7 @@ class RerankRequest(BaseModel):
 # =========================================
 # SERIALIZATION
 # =========================================
+
 
 def _serialize(obj: Any) -> Any:
     """Convert dataclass to dict."""
@@ -85,6 +90,7 @@ def _serialize_list(items: list) -> list:
 # =========================================
 # ENDPOINTS
 # =========================================
+
 
 @router.post("/query")
 async def rag_query(request: RAGQueryRequest):
@@ -162,7 +168,9 @@ async def get_benchmark():
     rag = get_agentic_rag()
     history = rag.get_history()
     if not history:
-        return {"message": "No benchmark results available. Run POST /rag/benchmark/run first."}
+        return {
+            "message": "No benchmark results available. Run POST /rag/benchmark/run first."
+        }
     return {
         "total_queries": len(history),
         "latest": _serialize(history[-1]) if history else None,
@@ -183,13 +191,16 @@ async def get_trace(query_id: str):
     rag = get_agentic_rag()
     trace = rag.get_trace(query_id)
     if trace is None:
-        raise HTTPException(status_code=404, detail=f"No trace found for query_id: {query_id}")
+        raise HTTPException(
+            status_code=404, detail=f"No trace found for query_id: {query_id}"
+        )
     return _serialize(trace)
 
 
 # =========================================
 # INTEGRATION
 # =========================================
+
 
 def include_rag_router(app: FastAPI) -> None:
     """Register the RAG router with the FastAPI app."""

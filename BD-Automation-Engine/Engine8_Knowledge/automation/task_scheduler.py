@@ -30,6 +30,7 @@ HISTORY_FILE = DATA_DIR / "task_history.jsonl"
 # Supports: *, specific numbers, */N (step), ranges (a-b), lists (a,b,c)
 # ---------------------------------------------------------------------------
 
+
 def _cron_field_matches(field_expr: str, current: int, max_val: int) -> bool:
     """Check if a cron field expression matches the current value."""
     for part in field_expr.split(","):
@@ -72,9 +73,13 @@ def cron_matches(expression: str, dt: Optional[datetime] = None) -> bool:
     )
 
 
-def next_cron_time(expression: str, after: Optional[datetime] = None) -> Optional[datetime]:
+def next_cron_time(
+    expression: str, after: Optional[datetime] = None
+) -> Optional[datetime]:
     """Find the next datetime matching a cron expression (within 7 days)."""
-    dt = (after or datetime.now()).replace(second=0, microsecond=0) + timedelta(minutes=1)
+    dt = (after or datetime.now()).replace(second=0, microsecond=0) + timedelta(
+        minutes=1
+    )
     limit = dt + timedelta(days=7)
     while dt < limit:
         if cron_matches(expression, dt):
@@ -86,6 +91,7 @@ def next_cron_time(expression: str, after: Optional[datetime] = None) -> Optiona
 # ---------------------------------------------------------------------------
 # Task definition
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ScheduledTask:
@@ -125,11 +131,19 @@ class TaskExecution:
 # Built-in handlers (light wrappers around existing subsystems)
 # ---------------------------------------------------------------------------
 
+
 async def _handler_daily_scrape(**_: Any) -> str:
     """Trigger all 9 prime scrapers sequentially."""
     primes = [
-        "GDIT", "Leidos", "Northrop Grumman", "Raytheon", "Booz Allen",
-        "SAIC", "ManTech", "Peraton", "L3Harris",
+        "GDIT",
+        "Leidos",
+        "Northrop Grumman",
+        "Raytheon",
+        "Booz Allen",
+        "SAIC",
+        "ManTech",
+        "Peraton",
+        "L3Harris",
     ]
     results = []
     for prime in primes:
@@ -141,6 +155,7 @@ async def _handler_morning_brief(**_: Any) -> str:
     """Generate daily briefing via Phase 15A autonomous agents."""
     try:
         from Engine8_Knowledge.autonomous.agents import get_autonomous_manager
+
         mgr = get_autonomous_manager()
         result = await asyncio.to_thread(mgr.generate_morning_briefing)
         return f"Morning briefing generated: {len(result.get('sections', []))} sections"
@@ -152,6 +167,7 @@ async def _handler_contact_enrichment(**_: Any) -> str:
     """Weekly scan for stale contacts (Phase 15A)."""
     try:
         from Engine8_Knowledge.autonomous.agents import get_autonomous_manager
+
         mgr = get_autonomous_manager()
         result = await asyncio.to_thread(mgr.run_contact_enrichment)
         return f"Enrichment complete: {result.get('enriched', 0)} contacts updated"
@@ -163,6 +179,7 @@ async def _handler_competitive_scan(**_: Any) -> str:
     """Daily competitive intelligence scan."""
     try:
         from Engine8_Knowledge.autonomous.agents import get_autonomous_manager
+
         mgr = get_autonomous_manager()
         result = await asyncio.to_thread(mgr.run_competitive_scan)
         return f"Competitive scan: {result.get('alerts', 0)} new alerts"
@@ -174,6 +191,7 @@ async def _handler_pipeline_health(**_: Any) -> str:
     """Check pipeline health every 2 hours."""
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=10) as client:
             r = await client.get("http://127.0.0.1:8100/health")
             data = r.json()
@@ -186,6 +204,7 @@ async def _handler_model_drift(**_: Any) -> str:
     """Daily check for ML model drift (Phase 16B)."""
     try:
         from Engine8_Knowledge.ml.response_predictor import get_response_predictor
+
         predictor = get_response_predictor()
         info = predictor.get_model_info()
         return f"Model info: {info.get('model_type', 'N/A')}, trained: {info.get('trained_at', 'never')}"
@@ -199,7 +218,12 @@ async def _handler_weekly_report(**_: Any) -> str:
     report = {
         "generated_at": datetime.now().isoformat(),
         "period": "last_7_days",
-        "sections": ["pipeline_metrics", "contact_activity", "outreach_results", "model_performance"],
+        "sections": [
+            "pipeline_metrics",
+            "contact_activity",
+            "outreach_results",
+            "model_performance",
+        ],
         "status": "generated",
     }
     report_path.write_text(json.dumps(report, indent=2))
@@ -210,6 +234,7 @@ async def _handler_monthly_retrain(**_: Any) -> str:
     """Monthly model retraining with new outcome data."""
     try:
         from Engine8_Knowledge.ml.response_predictor import get_response_predictor
+
         predictor = get_response_predictor()
         result = predictor.train()
         return f"Monthly retrain: {result.get('status', 'unknown')}"
@@ -241,6 +266,7 @@ async def _handler_event_cleanup(**_: Any) -> str:
 async def _handler_backup(**_: Any) -> str:
     """Daily backup of SQLite databases."""
     import shutil
+
     backup_dir = DATA_DIR / "backups" / datetime.now().strftime("%Y%m%d")
     backup_dir.mkdir(parents=True, exist_ok=True)
     db_files = list(Path(__file__).parent.parent.parent.glob("**/*.db"))
@@ -343,6 +369,7 @@ DEFAULT_TASKS: list[dict] = [
 # AutomatedTaskRunner
 # ---------------------------------------------------------------------------
 
+
 class AutomatedTaskRunner:
     """Manages recurring platform operations with cron-style scheduling."""
 
@@ -370,9 +397,9 @@ class AutomatedTaskRunner:
 
     def _save_state(self) -> None:
         state_file = DATA_DIR / "scheduler_state.json"
-        state_file.write_text(json.dumps(
-            [asdict(t) for t in self._tasks.values()], indent=2
-        ))
+        state_file.write_text(
+            json.dumps([asdict(t) for t in self._tasks.values()], indent=2)
+        )
 
     # -- Schedule --
 
@@ -471,7 +498,9 @@ class AutomatedTaskRunner:
         with open(HISTORY_FILE, "a") as f:
             f.write(json.dumps(asdict(execution)) + "\n")
 
-    def get_execution_history(self, name: Optional[str] = None, days: int = 7) -> list[dict]:
+    def get_execution_history(
+        self, name: Optional[str] = None, days: int = 7
+    ) -> list[dict]:
         """Get execution history, optionally filtered by task name."""
         cutoff = (datetime.now() - timedelta(days=days)).isoformat()
         results = []

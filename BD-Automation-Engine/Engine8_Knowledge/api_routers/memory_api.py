@@ -69,6 +69,7 @@ class BriefingRequest(BaseModel):
 def _get_mem0():
     try:
         from Engine8_Knowledge.memory.mem0_manager import get_mem0_manager
+
         return get_mem0_manager()
     except Exception:
         return None
@@ -77,6 +78,7 @@ def _get_mem0():
 def _get_store():
     try:
         from Engine8_Knowledge.memory.memory_store import get_memory_store
+
         return get_memory_store()
     except Exception:
         return None
@@ -85,6 +87,7 @@ def _get_store():
 def _get_lifecycle():
     try:
         from Engine8_Knowledge.memory.lifecycle import get_memory_lifecycle
+
         return get_memory_lifecycle()
     except Exception:
         return None
@@ -102,6 +105,7 @@ async def add_memory(req: AddMemoryRequest):
     if not store:
         raise HTTPException(503, "Memory store not available")
     from Engine8_Knowledge.memory.memory_store import MemoryContext
+
     ctx = MemoryContext(
         user_id=req.user_id,
         agent_id=req.agent_id,
@@ -120,6 +124,7 @@ async def search_memory(req: SearchMemoryRequest):
         raise HTTPException(503, "Memory store not available")
     from Engine8_Knowledge.memory.memory_store import MemoryContext
     from dataclasses import asdict
+
     ctx = MemoryContext(user_id=req.user_id, agent_id=req.agent_id)
     recall = await store.recall(req.query, ctx, layers=req.layers)
     return asdict(recall)
@@ -132,6 +137,7 @@ async def get_contact_memory(contact_id: str):
     if not store:
         raise HTTPException(503, "Memory store not available")
     from dataclasses import asdict
+
     cm = await store.get_contact_memory(contact_id)
     return asdict(cm)
 
@@ -169,6 +175,7 @@ async def memory_history(memory_id: str):
     mem0 = _get_mem0()
     if mem0:
         from dataclasses import asdict
+
         history = await mem0.get_history(memory_id)
         return {"memory_id": memory_id, "versions": [asdict(v) for v in history]}
     return {"memory_id": memory_id, "versions": []}
@@ -181,6 +188,7 @@ async def record_interaction(req: InteractionRequest):
     if not store:
         raise HTTPException(503, "Memory store not available")
     from Engine8_Knowledge.memory.memory_store import InteractionRecord
+
     record = InteractionRecord(
         interaction_type=req.interaction_type,
         contact_id=req.contact_id,
@@ -200,6 +208,7 @@ async def record_outcome(req: OutcomeRequest):
     if not store:
         raise HTTPException(503, "Memory store not available")
     from Engine8_Knowledge.memory.memory_store import OutcomeRecord
+
     record = OutcomeRecord(
         action=req.action,
         outcome=req.outcome,
@@ -216,6 +225,7 @@ async def record_outcome(req: OutcomeRequest):
 async def generate_briefing(req: BriefingRequest):
     """Generate pre-task briefing from memories."""
     from Engine8_Knowledge.memory.agent_mixin import AgentMemoryMixin
+
     store = _get_store()
     mixin = AgentMemoryMixin(agent_id=req.agent_id, memory_store=store)
     briefing = await mixin.get_briefing(req.task_context)
@@ -228,6 +238,7 @@ async def memory_stats():
     store = _get_store()
     if store:
         from dataclasses import asdict
+
         stats = await store.get_layer_stats()
         return {"layers": {k: asdict(v) for k, v in stats.items()}}
     return {"layers": {}}
@@ -239,12 +250,10 @@ async def layer_health():
     store = _get_store()
     if store:
         from dataclasses import asdict
+
         stats = await store.get_layer_stats()
         return {
-            "layers": {
-                k: {"status": "healthy", **asdict(v)}
-                for k, v in stats.items()
-            },
+            "layers": {k: {"status": "healthy", **asdict(v)} for k, v in stats.items()},
             "total_layers": len(stats),
         }
     return {"layers": {}, "total_layers": 0}
@@ -257,5 +266,6 @@ async def run_lifecycle():
     if not lifecycle:
         raise HTTPException(503, "Memory lifecycle not available")
     from dataclasses import asdict
+
     report = await lifecycle.run_lifecycle()
     return asdict(report)

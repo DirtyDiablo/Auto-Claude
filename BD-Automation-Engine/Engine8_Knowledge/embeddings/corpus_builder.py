@@ -39,6 +39,7 @@ OUTPUT_DIR = E8_DATA / "embeddings"
 @dataclass
 class CorpusStats:
     """Statistics about the built corpus."""
+
     total_documents: int = 0
     total_tokens_approx: int = 0
     category_distribution: Dict[str, int] = field(default_factory=dict)
@@ -57,11 +58,33 @@ class DomainCorpusBuilder:
 
     def __init__(self):
         self.sources: List[Dict[str, str]] = [
-            {"name": "bullhorn_notes", "type": "sqlite", "path": str(E7_DATA / "bullhorn_master.db")},
-            {"name": "master_notes", "type": "csv", "path": str(E7_ANALYSIS / "master_notes.csv")},
-            {"name": "federal_programs", "type": "csv", "path": str(DATA_DIR / "from_data_scraper" / "Federal_Programs_Enriched.csv")},
-            {"name": "contacts", "type": "csv", "path": str(E7_ANALYSIS / "contacts.csv")},
-            {"name": "acronyms", "type": "csv", "path": str(E7_ANALYSIS / "acronyms.csv")},
+            {
+                "name": "bullhorn_notes",
+                "type": "sqlite",
+                "path": str(E7_DATA / "bullhorn_master.db"),
+            },
+            {
+                "name": "master_notes",
+                "type": "csv",
+                "path": str(E7_ANALYSIS / "master_notes.csv"),
+            },
+            {
+                "name": "federal_programs",
+                "type": "csv",
+                "path": str(
+                    DATA_DIR / "from_data_scraper" / "Federal_Programs_Enriched.csv"
+                ),
+            },
+            {
+                "name": "contacts",
+                "type": "csv",
+                "path": str(E7_ANALYSIS / "contacts.csv"),
+            },
+            {
+                "name": "acronyms",
+                "type": "csv",
+                "path": str(E7_ANALYSIS / "acronyms.csv"),
+            },
         ]
         self._seen_hashes: set = set()
 
@@ -78,7 +101,7 @@ class DomainCorpusBuilder:
 
         chunks = []
         for i in range(0, len(words), max_tokens):
-            chunk = " ".join(words[i:i + max_tokens])
+            chunk = " ".join(words[i : i + max_tokens])
             if chunk.strip():
                 chunks.append(chunk)
         return chunks
@@ -116,10 +139,23 @@ class DomainCorpusBuilder:
                     cols_cursor = conn.execute(f"PRAGMA table_info({table})")
                     cols = [row[1] for row in cols_cursor]
 
-                    text_cols = [c for c in cols if c.lower() in (
-                        "comments", "notes", "note", "description", "action",
-                        "about", "subject", "body", "text", "comment"
-                    )]
+                    text_cols = [
+                        c
+                        for c in cols
+                        if c.lower()
+                        in (
+                            "comments",
+                            "notes",
+                            "note",
+                            "description",
+                            "action",
+                            "about",
+                            "subject",
+                            "body",
+                            "text",
+                            "comment",
+                        )
+                    ]
 
                     if not text_cols:
                         continue
@@ -128,18 +164,24 @@ class DomainCorpusBuilder:
                     rows = conn.execute(f"SELECT {select} FROM {table} LIMIT 50000")
 
                     for row in rows:
-                        parts = [str(v).strip() for v in row if v and str(v).strip() and str(v) != "None"]
+                        parts = [
+                            str(v).strip()
+                            for v in row
+                            if v and str(v).strip() and str(v) != "None"
+                        ]
                         text = " | ".join(parts)
                         if len(text) < 20:
                             continue
 
                         for chunk in self._chunk_text(text):
                             if self._deduplicate(chunk):
-                                docs.append({
-                                    "text": chunk,
-                                    "source": "bullhorn",
-                                    "category": "call_notes",
-                                })
+                                docs.append(
+                                    {
+                                        "text": chunk,
+                                        "source": "bullhorn",
+                                        "category": "call_notes",
+                                    }
+                                )
                     logger.info(f"Extracted {len(docs)} docs from {table}")
                     break  # Use first table that works
                 except sqlite3.OperationalError:
@@ -164,7 +206,15 @@ class DomainCorpusBuilder:
                 reader = csv.DictReader(f)
                 for row in reader:
                     parts = []
-                    for key in ["about", "notes", "note", "action", "subject", "description", "comments"]:
+                    for key in [
+                        "about",
+                        "notes",
+                        "note",
+                        "action",
+                        "subject",
+                        "description",
+                        "comments",
+                    ]:
                         val = row.get(key, "")
                         if val and val.strip() and val != "None":
                             parts.append(val.strip())
@@ -175,11 +225,13 @@ class DomainCorpusBuilder:
 
                     for chunk in self._chunk_text(text):
                         if self._deduplicate(chunk):
-                            docs.append({
-                                "text": chunk,
-                                "source": "master_notes",
-                                "category": "meeting_notes",
-                            })
+                            docs.append(
+                                {
+                                    "text": chunk,
+                                    "source": "master_notes",
+                                    "category": "meeting_notes",
+                                }
+                            )
         except Exception as e:
             logger.warning(f"Error extracting master notes: {e}")
 
@@ -190,7 +242,10 @@ class DomainCorpusBuilder:
         docs = []
         candidates = [
             DATA_DIR / "from_data_scraper" / "Federal_Programs_Enriched.csv",
-            DATA_DIR / "from_n8n_builder" / "analytical_outputs" / "Federal_Programs_Enriched.csv",
+            DATA_DIR
+            / "from_n8n_builder"
+            / "analytical_outputs"
+            / "Federal_Programs_Enriched.csv",
         ]
 
         path = None
@@ -219,11 +274,13 @@ class DomainCorpusBuilder:
 
                     for chunk in self._chunk_text(text):
                         if self._deduplicate(chunk):
-                            docs.append({
-                                "text": chunk,
-                                "source": "federal_programs",
-                                "category": "programs",
-                            })
+                            docs.append(
+                                {
+                                    "text": chunk,
+                                    "source": "federal_programs",
+                                    "category": "programs",
+                                }
+                            )
         except Exception as e:
             logger.warning(f"Error extracting federal programs: {e}")
 
@@ -246,17 +303,23 @@ class DomainCorpusBuilder:
                     company = row.get("company", row.get("Company", ""))
                     program = row.get("program", row.get("Program", ""))
 
-                    parts = [p for p in [name, title, company, program] if p and p.strip() and p != "None"]
+                    parts = [
+                        p
+                        for p in [name, title, company, program]
+                        if p and p.strip() and p != "None"
+                    ]
                     text = " | ".join(parts)
                     if len(text) < 15:
                         continue
 
                     if self._deduplicate(text):
-                        docs.append({
-                            "text": text,
-                            "source": "contacts",
-                            "category": "contacts",
-                        })
+                        docs.append(
+                            {
+                                "text": text,
+                                "source": "contacts",
+                                "category": "contacts",
+                            }
+                        )
         except Exception as e:
             logger.warning(f"Error extracting contacts: {e}")
 
@@ -267,6 +330,7 @@ class DomainCorpusBuilder:
         docs = []
         try:
             from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
+
             store = BDKnowledgeStore()
 
             for collection in ["jobs", "programs", "contacts", "documents"]:
@@ -274,7 +338,13 @@ class DomainCorpusBuilder:
                     results = store.get_all(collection, limit=2000)
                     for r in results:
                         payload = r.payload if hasattr(r, "payload") else r
-                        text_fields = ["text", "content", "description", "name", "title"]
+                        text_fields = [
+                            "text",
+                            "content",
+                            "description",
+                            "name",
+                            "title",
+                        ]
                         parts = []
                         for field in text_fields:
                             val = payload.get(field, "")
@@ -287,11 +357,13 @@ class DomainCorpusBuilder:
 
                         for chunk in self._chunk_text(text):
                             if self._deduplicate(chunk):
-                                docs.append({
-                                    "text": chunk,
-                                    "source": f"qdrant_{collection}",
-                                    "category": collection,
-                                })
+                                docs.append(
+                                    {
+                                        "text": chunk,
+                                        "source": f"qdrant_{collection}",
+                                        "category": collection,
+                                    }
+                                )
                 except Exception:
                     continue
         except ImportError:
@@ -355,7 +427,9 @@ class DomainCorpusBuilder:
         with open(stats_path, "w") as f:
             json.dump(asdict(stats), f, indent=2)
 
-        logger.info(f"Corpus built: {stats.total_documents} documents, ~{stats.total_tokens_approx} tokens")
+        logger.info(
+            f"Corpus built: {stats.total_documents} documents, ~{stats.total_tokens_approx} tokens"
+        )
         return stats
 
     def get_corpus_sample(self, n: int = 10) -> List[Dict]:
@@ -365,6 +439,7 @@ class DomainCorpusBuilder:
             return []
 
         import random
+
         docs = []
         with open(corpus_path, "r", encoding="utf-8") as f:
             for line in f:

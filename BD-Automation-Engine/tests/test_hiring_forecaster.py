@@ -17,6 +17,7 @@ from src.ml.hiring_forecaster import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def forecaster():
     return HiringForecaster()
@@ -27,18 +28,48 @@ def forecaster_with_data():
     """Forecaster seeded with sample job history."""
     f = HiringForecaster()
     sample_jobs = [
-        {"program": "AF DCGS", "location": "Hickam AFB", "role": "analyst",
-         "posted_date": "2025-01-15", "company": "Leidos"},
-        {"program": "AF DCGS", "location": "Hickam AFB", "role": "analyst",
-         "posted_date": "2025-02-10", "company": "Leidos"},
-        {"program": "AF DCGS", "location": "Langley", "role": "engineer",
-         "posted_date": "2025-03-05", "company": "Leidos"},
-        {"program": "NGEN", "location": "San Diego", "role": "cyber",
-         "posted_date": "2025-01-20", "company": "GDIT"},
-        {"program": "NGEN", "location": "San Diego", "role": "analyst",
-         "posted_date": "2025-04-01", "company": "GDIT"},
-        {"program": "GBSD", "location": "Colorado Springs", "role": "engineer",
-         "posted_date": "2025-05-15", "company": "NGC"},
+        {
+            "program": "AF DCGS",
+            "location": "Hickam AFB",
+            "role": "analyst",
+            "posted_date": "2025-01-15",
+            "company": "Leidos",
+        },
+        {
+            "program": "AF DCGS",
+            "location": "Hickam AFB",
+            "role": "analyst",
+            "posted_date": "2025-02-10",
+            "company": "Leidos",
+        },
+        {
+            "program": "AF DCGS",
+            "location": "Langley",
+            "role": "engineer",
+            "posted_date": "2025-03-05",
+            "company": "Leidos",
+        },
+        {
+            "program": "NGEN",
+            "location": "San Diego",
+            "role": "cyber",
+            "posted_date": "2025-01-20",
+            "company": "GDIT",
+        },
+        {
+            "program": "NGEN",
+            "location": "San Diego",
+            "role": "analyst",
+            "posted_date": "2025-04-01",
+            "company": "GDIT",
+        },
+        {
+            "program": "GBSD",
+            "location": "Colorado Springs",
+            "role": "engineer",
+            "posted_date": "2025-05-15",
+            "company": "NGC",
+        },
     ]
     f.set_historical_data(sample_jobs)
     return f
@@ -47,6 +78,7 @@ def forecaster_with_data():
 # =========================================
 # PROGRAM FORECAST
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestProgramForecast:
@@ -87,6 +119,7 @@ class TestProgramForecast:
 # LOCATION FORECAST
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestLocationForecast:
     async def test_returns_forecast(self, forecaster_with_data):
@@ -105,6 +138,7 @@ class TestLocationForecast:
 # =========================================
 # ROLE FORECAST
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestRoleForecast:
@@ -129,6 +163,7 @@ class TestRoleForecast:
 # RAMP SIGNALS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestRampSignals:
     async def test_returns_list(self, forecaster_with_data):
@@ -151,6 +186,7 @@ class TestRampSignals:
 # =========================================
 # TIMING RECOMMENDATION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestTimingRecommendation:
@@ -175,6 +211,7 @@ class TestTimingRecommendation:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_forecaster_returns_instance(self):

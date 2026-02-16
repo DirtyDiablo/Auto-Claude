@@ -14,6 +14,7 @@ router = APIRouter(prefix="/ml", tags=["ML Predictions"])
 
 # ─── Request/Response Models ────────────────────────────────────────────────
 
+
 class PredictRequestSingle(BaseModel):
     contact_tier: int = 3
     interaction_count: int = 0
@@ -33,6 +34,7 @@ class TrainRequest(BaseModel):
 
 
 # ─── Response Prediction Endpoints ──────────────────────────────────────────
+
 
 @router.post("/predict-response")
 async def predict_response(request: PredictRequestSingle):
@@ -116,8 +118,11 @@ async def train_model(request: TrainRequest):
 
 # ─── Hiring Signal Endpoints ────────────────────────────────────────────────
 
+
 @router.get("/hiring-signals")
-async def get_hiring_signals(refresh: bool = Query(False, description="Re-run detection on latest data")):
+async def get_hiring_signals(
+    refresh: bool = Query(False, description="Re-run detection on latest data"),
+):
     """
     Get active hiring signals.
 
@@ -155,13 +160,16 @@ async def hiring_signals_status():
 
 # ─── Helper ─────────────────────────────────────────────────────────────────
 
+
 async def _fetch_jobs_for_signals() -> list:
     """Fetch job data for signal detection from the API's own data."""
     import httpx
 
     try:
         async with httpx.AsyncClient(base_url="http://localhost:8100") as client:
-            resp = await client.get("/api/v2/jobs", params={"limit": 2000}, timeout=10.0)
+            resp = await client.get(
+                "/api/v2/jobs", params={"limit": 2000}, timeout=10.0
+            )
             if resp.status_code == 200:
                 data = resp.json()
                 return data.get("jobs", [])

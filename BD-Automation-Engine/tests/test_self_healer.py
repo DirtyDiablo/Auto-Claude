@@ -25,21 +25,33 @@ from src.data_quality.engine import DataIssue
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def healer():
     return SelfHealingPipeline(confidence_threshold=0.85)
 
 
 def _make_issue(
-    field="email", value="bad", domain="contacts", auto_fixable=True,
-    severity="high", record_id="c1", suggested_fix=None,
+    field="email",
+    value="bad",
+    domain="contacts",
+    auto_fixable=True,
+    severity="high",
+    record_id="c1",
+    suggested_fix=None,
 ):
     return DataIssue(
-        id="test_issue", domain=domain, dimension="validity",
-        record_id=record_id, record_type="contact",
-        field_name=field, current_value=value,
-        expected_pattern="valid", severity=severity,
-        description=f"Invalid {field}", auto_fixable=auto_fixable,
+        id="test_issue",
+        domain=domain,
+        dimension="validity",
+        record_id=record_id,
+        record_type="contact",
+        field_name=field,
+        current_value=value,
+        expected_pattern="valid",
+        severity=severity,
+        description=f"Invalid {field}",
+        auto_fixable=auto_fixable,
         suggested_fix=suggested_fix,
     )
 
@@ -47,6 +59,7 @@ def _make_issue(
 # =========================================
 # FIX FUNCTIONS
 # =========================================
+
 
 class TestEmailNormalizer:
     def test_lowercase(self):
@@ -241,6 +254,7 @@ class TestLinkedinFixer:
 # HEALING PIPELINE
 # =========================================
 
+
 class TestHealingPipeline:
     def test_heal_auto_fixable(self, healer):
         issues = [_make_issue(field="email", value="USER@GMAIL.CON")]
@@ -267,23 +281,34 @@ class TestHealingPipeline:
         assert len(log) >= 1
 
     def test_heal_with_suggested_fix(self, healer):
-        issues = [_make_issue(
-            field="hierarchy_tier", value=5,
-            suggested_fix=2, domain="contacts",
-        )]
+        issues = [
+            _make_issue(
+                field="hierarchy_tier",
+                value=5,
+                suggested_fix=2,
+                domain="contacts",
+            )
+        ]
         results = healer.heal(issues)
         fixed = [r for r in results if r.status == FixStatus.FIXED.value]
         assert len(fixed) == 1
         assert fixed[0].new_value == 2
 
     def test_cascading_title_change(self, healer):
-        healer.set_records("contacts", [
-            {"id": "c1", "job_title": "Sr. Engineer", "hierarchy_tier": 3},
-        ])
-        issues = [_make_issue(
-            field="job_title", value="Sr. Engineer",
-            suggested_fix="Senior Engineer", record_id="c1",
-        )]
+        healer.set_records(
+            "contacts",
+            [
+                {"id": "c1", "job_title": "Sr. Engineer", "hierarchy_tier": 3},
+            ],
+        )
+        issues = [
+            _make_issue(
+                field="job_title",
+                value="Sr. Engineer",
+                suggested_fix="Senior Engineer",
+                record_id="c1",
+            )
+        ]
         results = healer.heal(issues)
         # Title fix should cascade to tier recalculation
         fixed_results = [r for r in results if r.status == FixStatus.FIXED.value]
@@ -293,13 +318,20 @@ class TestHealingPipeline:
         assert len(cascading) >= 1
 
     def test_cascading_location_change(self, healer):
-        healer.set_records("contacts", [
-            {"id": "c1", "location": "hampton, va", "program": "Unknown"},
-        ])
-        issues = [_make_issue(
-            field="location", value="hampton, va",
-            suggested_fix="Hampton, VA", record_id="c1",
-        )]
+        healer.set_records(
+            "contacts",
+            [
+                {"id": "c1", "location": "hampton, va", "program": "Unknown"},
+            ],
+        )
+        issues = [
+            _make_issue(
+                field="location",
+                value="hampton, va",
+                suggested_fix="Hampton, VA",
+                record_id="c1",
+            )
+        ]
         results = healer.heal(issues)
         fixed = [r for r in results if r.status == FixStatus.FIXED.value]
         assert len(fixed) >= 1
@@ -324,6 +356,7 @@ class TestBatchValidation:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_healer(self):

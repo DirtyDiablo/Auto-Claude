@@ -12,6 +12,7 @@ from src.api.revenue_api import router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     test_app = FastAPI()
@@ -27,6 +28,7 @@ def client(app):
 # =========================================
 # REVENUE ENDPOINTS
 # =========================================
+
 
 class TestRevenueEndpoints:
     def test_summary(self, client):
@@ -81,6 +83,7 @@ class TestRevenueEndpoints:
 # DEAL LIFECYCLE ENDPOINTS
 # =========================================
 
+
 class TestDealEndpoints:
     def test_lifecycle(self, client):
         resp = client.get("/revenue/deals/lifecycle")
@@ -103,6 +106,7 @@ class TestDealEndpoints:
 # =========================================
 # ROI ENDPOINTS
 # =========================================
+
 
 class TestROIEndpoints:
     def test_campaign_roi(self, client):
@@ -130,6 +134,7 @@ class TestROIEndpoints:
 # EXECUTIVE SUMMARY ENDPOINT
 # =========================================
 
+
 class TestExecutiveSummaryEndpoint:
     def test_executive_summary(self, client):
         resp = client.get("/revenue/executive-summary")
@@ -143,18 +148,22 @@ class TestExecutiveSummaryEndpoint:
 # PLACEMENT RECORDING
 # =========================================
 
+
 class TestPlacementEndpoint:
     def test_record_placement(self, client):
-        resp = client.post("/revenue/placements", json={
-            "id": "p-test-1",
-            "contractor_name": "Test Person",
-            "client": "Leidos",
-            "program": "DCGS",
-            "role_title": "Intelligence Analyst",
-            "bill_rate": 120,
-            "pay_rate": 75,
-            "start_date": "2025-03-01",
-        })
+        resp = client.post(
+            "/revenue/placements",
+            json={
+                "id": "p-test-1",
+                "contractor_name": "Test Person",
+                "client": "Leidos",
+                "program": "DCGS",
+                "role_title": "Intelligence Analyst",
+                "bill_rate": 120,
+                "pay_rate": 75,
+                "start_date": "2025-03-01",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "recorded"
@@ -165,10 +174,12 @@ class TestPlacementEndpoint:
 # ENDPOINT COUNT
 # =========================================
 
+
 class TestEndpointCount:
     def test_sixteen_endpoints(self, app):
         revenue_routes = [
-            r for r in app.routes
+            r
+            for r in app.routes
             if hasattr(r, "path") and r.path.startswith("/revenue")
         ]
         assert len(revenue_routes) == 16

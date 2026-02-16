@@ -92,12 +92,14 @@ class TestDecay:
     async def test_decay_old(self, store, lifecycle):
         """Memories older than threshold get decayed."""
         old_date = (datetime.utcnow() - timedelta(days=120)).isoformat()
-        store._episodic.append({
-            "id": "old_1",
-            "content": "Old DCGS meeting",
-            "created_at": old_date,
-            "score": 0.8,
-        })
+        store._episodic.append(
+            {
+                "id": "old_1",
+                "content": "Old DCGS meeting",
+                "created_at": old_date,
+                "score": 0.8,
+            }
+        )
 
         decayed = await lifecycle.decay(days_threshold=90)
         assert decayed >= 1
@@ -125,10 +127,12 @@ class TestCompress:
     async def test_compress_long(self, store, lifecycle):
         """Long memories get truncated."""
         long_content = "A" * 800
-        store._episodic.append({
-            "id": "long_1",
-            "content": long_content,
-        })
+        store._episodic.append(
+            {
+                "id": "long_1",
+                "content": long_content,
+            }
+        )
 
         compressed = await lifecycle.compress()
         assert compressed == 1
@@ -155,12 +159,14 @@ class TestImportanceScore:
     async def test_importance_score(self, store, lifecycle):
         """Importance score based on recency and outcome."""
         recent_date = datetime.utcnow().isoformat()
-        store._episodic.append({
-            "id": "ep_1",
-            "content": "Recent interaction",
-            "created_at": recent_date,
-            "outcome": "positive",
-        })
+        store._episodic.append(
+            {
+                "id": "ep_1",
+                "content": "Recent interaction",
+                "created_at": recent_date,
+                "outcome": "positive",
+            }
+        )
 
         score = await lifecycle.importance_score("ep_1")
         assert 0.0 <= score <= 1.0
@@ -192,11 +198,13 @@ class TestRunLifecycle:
         # Add some data
         await store.add_memory("DCGS meeting", "episodic", ctx)
         await store.add_memory("DCGS meeting", "episodic", ctx)  # duplicate
-        store._episodic.append({
-            "id": "old_1",
-            "content": "Ancient data " * 100,
-            "created_at": (datetime.utcnow() - timedelta(days=200)).isoformat(),
-        })
+        store._episodic.append(
+            {
+                "id": "old_1",
+                "content": "Ancient data " * 100,
+                "created_at": (datetime.utcnow() - timedelta(days=200)).isoformat(),
+            }
+        )
 
         report = await lifecycle.run_lifecycle()
         assert isinstance(report, LifecycleReport)

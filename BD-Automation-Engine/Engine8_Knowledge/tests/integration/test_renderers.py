@@ -31,8 +31,16 @@ def make_chart(nodes=None, edges=None) -> OrgChart:
     """Build a test OrgChart."""
     default_nodes = [
         Person(name="John CEO", title="CEO", tier=1, company="GDIT", reports_to=None),
-        Person(name="Alice VP", title="VP", tier=2, company="GDIT", reports_to="John CEO"),
-        Person(name="Bob Director", title="Director", tier=3, company="GDIT", reports_to="Alice VP"),
+        Person(
+            name="Alice VP", title="VP", tier=2, company="GDIT", reports_to="John CEO"
+        ),
+        Person(
+            name="Bob Director",
+            title="Director",
+            tier=3,
+            company="GDIT",
+            reports_to="Alice VP",
+        ),
     ]
     default_edges = [
         {"source": "John CEO", "target": "Alice VP", "type": "REPORTS_TO"},

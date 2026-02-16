@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 class TemplateVariant(str, Enum):
     ONE_PAGE = "one_page"
     TWO_PAGE = "two_page"
@@ -96,7 +97,10 @@ COMPANY_PROFILE = {
 # SECTION GENERATORS
 # =========================================
 
-def _generate_company_overview(program: str, agency: str, variant: TemplateVariant) -> CapabilitySection:
+
+def _generate_company_overview(
+    program: str, agency: str, variant: TemplateVariant
+) -> CapabilitySection:
     """Generate company overview section."""
     profile = COMPANY_PROFILE
     certs = ", ".join(profile["certifications"])
@@ -128,7 +132,10 @@ def _generate_company_overview(program: str, agency: str, variant: TemplateVaria
 
 
 def _generate_core_capabilities(
-    program: str, agency: str, variant: TemplateVariant, program_data: Optional[dict] = None,
+    program: str,
+    agency: str,
+    variant: TemplateVariant,
+    program_data: Optional[dict] = None,
 ) -> CapabilitySection:
     """Generate core capabilities section."""
     capabilities = COMPANY_PROFILE["core_capabilities"]
@@ -152,7 +159,9 @@ def _generate_core_capabilities(
 
 
 def _generate_past_performance_section(
-    program: str, variant: TemplateVariant, placements: Optional[List[dict]] = None,
+    program: str,
+    variant: TemplateVariant,
+    placements: Optional[List[dict]] = None,
 ) -> CapabilitySection:
     """Generate past performance section."""
     if placements:
@@ -190,7 +199,9 @@ def _generate_past_performance_section(
     )
 
 
-def _generate_differentiators(program: str, variant: TemplateVariant) -> CapabilitySection:
+def _generate_differentiators(
+    program: str, variant: TemplateVariant
+) -> CapabilitySection:
     """Generate differentiators section."""
     diffs = COMPANY_PROFILE["differentiators"]
     if variant == TemplateVariant.ONE_PAGE:
@@ -228,6 +239,7 @@ def _generate_certs_clearances(variant: TemplateVariant) -> CapabilitySection:
 # =========================================
 # GENERATOR
 # =========================================
+
 
 class CapabilityStatementGenerator:
     """Auto-generate PTS capability statements."""
@@ -284,11 +296,15 @@ class CapabilityStatementGenerator:
         )
 
         self._history.append(statement)
-        logger.info(f"Generated {variant.value} capability statement for {program} ({word_count} words)")
+        logger.info(
+            f"Generated {variant.value} capability statement for {program} ({word_count} words)"
+        )
         return statement
 
     async def generate_batch(
-        self, programs: List[str], variant: TemplateVariant = TemplateVariant.TWO_PAGE,
+        self,
+        programs: List[str],
+        variant: TemplateVariant = TemplateVariant.TWO_PAGE,
     ) -> List[CapabilityStatement]:
         """Generate capability statements for multiple programs."""
         results = []
@@ -304,9 +320,21 @@ class CapabilityStatementGenerator:
     def get_templates(self) -> List[Dict[str, str]]:
         """Return available template variants."""
         return [
-            {"id": "one_page", "name": "1-Page Summary", "description": "Concise overview for quick briefs"},
-            {"id": "two_page", "name": "2-Page Detailed", "description": "Standard capability statement"},
-            {"id": "full_brief", "name": "Full Capability Brief", "description": "Comprehensive multi-section brief"},
+            {
+                "id": "one_page",
+                "name": "1-Page Summary",
+                "description": "Concise overview for quick briefs",
+            },
+            {
+                "id": "two_page",
+                "name": "2-Page Detailed",
+                "description": "Standard capability statement",
+            },
+            {
+                "id": "full_brief",
+                "name": "Full Capability Brief",
+                "description": "Comprehensive multi-section brief",
+            },
         ]
 
     def export_to_dict(self, statement: CapabilityStatement) -> Dict[str, Any]:
@@ -334,7 +362,9 @@ class CapabilityStatementGenerator:
         """Fetch program info from knowledge base."""
         if self._knowledge and hasattr(self._knowledge, "search"):
             try:
-                results = await self._knowledge.search(program, collection="programs", limit=1)
+                results = await self._knowledge.search(
+                    program, collection="programs", limit=1
+                )
                 if results:
                     return results[0] if isinstance(results, list) else results
             except Exception as e:

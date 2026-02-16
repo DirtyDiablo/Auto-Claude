@@ -46,8 +46,10 @@ _preprocessor: Optional[BDDocumentPreprocessor] = None
 # Request/Response Models
 # =============================================================================
 
+
 class HealthResponse(BaseModel):
     """Health check response."""
+
     status: str
     ragflow_available: bool
     ragflow_url: str = ""
@@ -57,11 +59,13 @@ class HealthResponse(BaseModel):
 
 class InitializeRequest(BaseModel):
     """Request to initialize knowledge bases."""
+
     force_recreate: bool = Field(False, description="Force recreate existing KBs")
 
 
 class InitializeResponse(BaseModel):
     """Response from KB initialization."""
+
     success: bool
     knowledge_bases: Dict[str, str]
     message: str
@@ -69,6 +73,7 @@ class InitializeResponse(BaseModel):
 
 class UploadRequest(BaseModel):
     """Document upload metadata."""
+
     kb_name: str = Field(..., description="Target knowledge base name")
     chunk_method: Optional[str] = Field(None, description="Override chunk method")
     preprocess: bool = Field(True, description="Preprocess document before upload")
@@ -76,6 +81,7 @@ class UploadRequest(BaseModel):
 
 class UploadResponse(BaseModel):
     """Document upload response."""
+
     success: bool
     doc_id: Optional[str] = None
     kb_name: str
@@ -85,14 +91,19 @@ class UploadResponse(BaseModel):
 
 class QueryRequest(BaseModel):
     """Query request."""
+
     question: str = Field(..., description="Query question")
-    context: str = Field("general", description="Query context: program, contact, rfp, past_performance, humint, general")
+    context: str = Field(
+        "general",
+        description="Query context: program, contact, rfp, past_performance, humint, general",
+    )
     top_k: int = Field(5, ge=1, le=20, description="Max results")
     with_answer: bool = Field(True, description="Generate LLM answer")
 
 
 class QueryResponse(BaseModel):
     """Query response."""
+
     question: str
     answer: Optional[str]
     chunks: List[Dict[str, Any]]
@@ -102,24 +113,28 @@ class QueryResponse(BaseModel):
 
 class ProgramIntelRequest(BaseModel):
     """Program intelligence request."""
+
     program_name: str = Field(..., description="Program name to research")
     include_related: bool = Field(True, description="Include related programs")
 
 
 class ContactPrepRequest(BaseModel):
     """Call prep request."""
+
     contact_name: str = Field(..., description="Contact name")
     program_context: Optional[str] = Field(None, description="Program context for call")
 
 
 class SyncNotionRequest(BaseModel):
     """Notion sync request."""
+
     database_id: str = Field(..., description="Notion database ID")
     kb_name: str = Field(..., description="Target KB name")
 
 
 class GraphBuildResponse(BaseModel):
     """Graph build response."""
+
     success: bool
     tasks: Dict[str, str]
     message: str
@@ -128,6 +143,7 @@ class GraphBuildResponse(BaseModel):
 # =============================================================================
 # Helper Functions
 # =============================================================================
+
 
 async def get_client() -> RAGflowClient:
     """Get or create RAGflow client."""
@@ -163,6 +179,7 @@ def get_preprocessor() -> BDDocumentPreprocessor:
 # Health & Status Endpoints
 # =============================================================================
 
+
 @router.get("/health", response_model=HealthResponse)
 async def health_check():
     """
@@ -188,7 +205,7 @@ async def health_check():
             ragflow_available=health.get("status") == "healthy",
             ragflow_url=config.base_url,
             knowledge_bases=kb_status,
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
     except Exception as e:
         logger.error(f"Health check failed: {e}")
@@ -197,7 +214,7 @@ async def health_check():
             ragflow_available=False,
             ragflow_url=os.getenv("RAGFLOW_BASE_URL", "http://localhost"),
             knowledge_bases={},
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
 
 
@@ -216,7 +233,7 @@ async def get_status():
             "status": "operational",
             "knowledge_bases": stats,
             "available_kbs": list(BD_KNOWLEDGE_BASES.keys()),
-            "timestamp": datetime.now().isoformat()
+            "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
         logger.error(f"Status check failed: {e}")
@@ -226,6 +243,7 @@ async def get_status():
 # =============================================================================
 # Knowledge Base Management
 # =============================================================================
+
 
 @router.post("/kb/initialize", response_model=InitializeResponse)
 async def initialize_knowledge_bases(request: InitializeRequest):
@@ -247,7 +265,7 @@ async def initialize_knowledge_bases(request: InitializeRequest):
         return InitializeResponse(
             success=True,
             knowledge_bases=kb_ids,
-            message=f"Initialized {len(kb_ids)} knowledge bases"
+            message=f"Initialized {len(kb_ids)} knowledge bases",
         )
     except Exception as e:
         logger.error(f"KB initialization failed: {e}")
@@ -265,9 +283,12 @@ async def list_knowledge_bases():
         return {
             "knowledge_bases": stats,
             "definitions": {
-                kb: {"description": config.description, "chunk_method": config.chunk_method.value}
+                kb: {
+                    "description": config.description,
+                    "chunk_method": config.chunk_method.value,
+                }
                 for kb, config in BD_KNOWLEDGE_BASES.items()
-            }
+            },
         }
     except Exception as e:
         logger.error(f"Failed to list KBs: {e}")
@@ -278,12 +299,13 @@ async def list_knowledge_bases():
 # Document Upload
 # =============================================================================
 
+
 @router.post("/upload", response_model=UploadResponse)
 async def upload_document(
     file: UploadFile = File(...),
     kb_name: str = Form(...),
     chunk_method: Optional[str] = Form(None),
-    preprocess: bool = Form(True)
+    preprocess: bool = Form(True),
 ):
     """
     Upload a document to the appropriate knowledge base.
@@ -299,7 +321,7 @@ async def upload_document(
         if kb_name not in manager.kb_ids:
             raise HTTPException(
                 status_code=400,
-                detail=f"Unknown KB: {kb_name}. Available: {list(manager.kb_ids.keys())}"
+                detail=f"Unknown KB: {kb_name}. Available: {list(manager.kb_ids.keys())}",
             )
 
         # Save uploaded file temporarily
@@ -346,7 +368,7 @@ async def upload_document(
             doc_id=doc_id,
             kb_name=kb_name,
             file_name=file.filename,
-            message="Document uploaded successfully"
+            message="Document uploaded successfully",
         )
 
     except HTTPException:
@@ -359,8 +381,7 @@ async def upload_document(
 
 @router.post("/ingest")
 async def ingest_project_files(
-    project_path: str = Form(...),
-    auto_categorize: bool = Form(True)
+    project_path: str = Form(...), auto_categorize: bool = Form(True)
 ):
     """
     Ingest all documents from a project folder.
@@ -375,7 +396,7 @@ async def ingest_project_files(
         return {
             "success": True,
             "summary": result,
-            "message": f"Ingested {result['total_files']} files"
+            "message": f"Ingested {result['total_files']} files",
         }
     except Exception as e:
         logger.error(f"Ingest failed: {e}")
@@ -385,6 +406,7 @@ async def ingest_project_files(
 # =============================================================================
 # Query Endpoints
 # =============================================================================
+
 
 @router.post("/query", response_model=QueryResponse)
 async def query_knowledge(request: QueryRequest):
@@ -402,9 +424,7 @@ async def query_knowledge(request: QueryRequest):
     try:
         manager = await get_manager()
         result = await manager.query_bd_intelligence(
-            question=request.question,
-            context=request.context,
-            top_k=request.top_k
+            question=request.question, context=request.context, top_k=request.top_k
         )
 
         return QueryResponse(
@@ -412,7 +432,7 @@ async def query_knowledge(request: QueryRequest):
             answer=result.answer,
             chunks=result.chunks,
             citations=result.citations,
-            query_time_ms=result.query_time_ms
+            query_time_ms=result.query_time_ms,
         )
     except Exception as e:
         logger.error(f"Query failed: {e}")
@@ -420,10 +440,7 @@ async def query_knowledge(request: QueryRequest):
 
 
 @router.get("/program/{program_name}")
-async def get_program_intelligence(
-    program_name: str,
-    include_related: bool = True
-):
+async def get_program_intelligence(program_name: str, include_related: bool = True):
     """
     Get comprehensive intelligence about a federal program.
 
@@ -437,8 +454,7 @@ async def get_program_intelligence(
     try:
         manager = await get_manager()
         intel = await manager.get_program_intelligence(
-            program_name=program_name,
-            include_related=include_related
+            program_name=program_name, include_related=include_related
         )
 
         return intel.to_dict()
@@ -465,10 +481,7 @@ async def get_contact_context(contact_name: str):
 
 
 @router.post("/contact/{contact_name}/prep")
-async def generate_call_prep(
-    contact_name: str,
-    request: ContactPrepRequest
-):
+async def generate_call_prep(contact_name: str, request: ContactPrepRequest):
     """
     Generate a call preparation brief for a contact.
 
@@ -482,8 +495,7 @@ async def generate_call_prep(
     try:
         manager = await get_manager()
         prep = await manager.generate_call_prep(
-            contact_name=contact_name,
-            program_context=request.program_context
+            contact_name=contact_name, program_context=request.program_context
         )
 
         return prep.to_dict()
@@ -496,6 +508,7 @@ async def generate_call_prep(
 # Notion Sync
 # =============================================================================
 
+
 @router.post("/sync/notion")
 async def sync_notion_to_ragflow(request: SyncNotionRequest):
     """
@@ -507,13 +520,14 @@ async def sync_notion_to_ragflow(request: SyncNotionRequest):
     # For now, return not implemented
     raise HTTPException(
         status_code=501,
-        detail="Notion sync not yet implemented. Use /upload endpoint with exported files."
+        detail="Notion sync not yet implemented. Use /upload endpoint with exported files.",
     )
 
 
 # =============================================================================
 # GraphRAG Operations
 # =============================================================================
+
 
 @router.post("/graph/build", response_model=GraphBuildResponse)
 async def build_knowledge_graph():
@@ -529,9 +543,7 @@ async def build_knowledge_graph():
         tasks = await manager.build_program_knowledge_graph()
 
         return GraphBuildResponse(
-            success=True,
-            tasks=tasks,
-            message="Knowledge graph build started"
+            success=True, tasks=tasks, message="Knowledge graph build started"
         )
     except Exception as e:
         logger.error(f"Graph build failed: {e}")
@@ -549,10 +561,7 @@ async def get_graph_status():
         manager = await get_manager()
         status = await manager.get_graph_status()
 
-        return {
-            "status": status,
-            "timestamp": datetime.now().isoformat()
-        }
+        return {"status": status, "timestamp": datetime.now().isoformat()}
     except Exception as e:
         logger.error(f"Graph status check failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -562,11 +571,10 @@ async def get_graph_status():
 # Hybrid Search
 # =============================================================================
 
+
 @router.post("/search/hybrid")
 async def hybrid_search(
-    question: str = Form(...),
-    keyword_weight: float = Form(0.3),
-    top_k: int = Form(5)
+    question: str = Form(...), keyword_weight: float = Form(0.3), top_k: int = Form(5)
 ):
     """
     Perform hybrid vector + BM25 keyword search.
@@ -582,10 +590,7 @@ async def hybrid_search(
         kb_ids = list(manager.kb_ids.values())
 
         result = await client.hybrid_search(
-            kb_ids=kb_ids,
-            question=question,
-            keyword_weight=keyword_weight,
-            top_k=top_k
+            kb_ids=kb_ids, question=question, keyword_weight=keyword_weight, top_k=top_k
         )
 
         return {
@@ -593,7 +598,7 @@ async def hybrid_search(
             "chunks": result.chunks,
             "query_time_ms": result.query_time_ms,
             "search_type": "hybrid",
-            "keyword_weight": keyword_weight
+            "keyword_weight": keyword_weight,
         }
     except Exception as e:
         logger.error(f"Hybrid search failed: {e}")
@@ -604,11 +609,9 @@ async def hybrid_search(
 # Dify-Compatible Endpoints
 # =============================================================================
 
+
 @router.post("/dify/knowledge/search")
-async def dify_knowledge_search(
-    query: str = Form(...),
-    top_k: int = Form(5)
-):
+async def dify_knowledge_search(query: str = Form(...), top_k: int = Form(5)):
     """
     Dify-compatible knowledge search endpoint.
 
@@ -617,9 +620,7 @@ async def dify_knowledge_search(
     try:
         manager = await get_manager()
         result = await manager.query_bd_intelligence(
-            question=query,
-            context="general",
-            top_k=top_k
+            question=query, context="general", top_k=top_k
         )
 
         # Format for Dify
@@ -631,8 +632,8 @@ async def dify_knowledge_search(
                     "title": chunk.get("source_doc", ""),
                     "metadata": {
                         "source": chunk.get("source_doc"),
-                        "page": chunk.get("page_num")
-                    }
+                        "page": chunk.get("page_num"),
+                    },
                 }
                 for chunk in result.chunks
             ]
@@ -643,10 +644,7 @@ async def dify_knowledge_search(
 
 
 @router.post("/dify/knowledge/rag")
-async def dify_rag_query(
-    query: str = Form(...),
-    top_k: int = Form(5)
-):
+async def dify_rag_query(query: str = Form(...), top_k: int = Form(5)):
     """
     Dify-compatible RAG query endpoint.
 
@@ -655,9 +653,7 @@ async def dify_rag_query(
     try:
         manager = await get_manager()
         result = await manager.query_bd_intelligence(
-            question=query,
-            context="general",
-            top_k=top_k
+            question=query, context="general", top_k=top_k
         )
 
         return {
@@ -666,10 +662,10 @@ async def dify_rag_query(
             "context": [
                 {
                     "content": chunk.get("text", ""),
-                    "source": chunk.get("source_doc", "")
+                    "source": chunk.get("source_doc", ""),
                 }
                 for chunk in result.chunks
-            ]
+            ],
         }
     except Exception as e:
         logger.error(f"Dify RAG query failed: {e}")

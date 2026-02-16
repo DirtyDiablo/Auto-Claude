@@ -21,18 +21,23 @@ load_dotenv()
 # Logging
 try:
     from utils.logging_config import get_logger
+
     logger = get_logger(__name__)
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
 
 # Try to import cross-encoder
 try:
     from sentence_transformers import CrossEncoder
+
     CROSSENCODER_AVAILABLE = True
 except ImportError:
     CROSSENCODER_AVAILABLE = False
-    logger.warning("sentence-transformers not installed. Run: pip install sentence-transformers")
+    logger.warning(
+        "sentence-transformers not installed. Run: pip install sentence-transformers"
+    )
 
 
 # Global reranker instance (lazy loaded)
@@ -150,7 +155,9 @@ class Reranker:
         Returns:
             Documents with rerank_score >= threshold
         """
-        reranked = self.rerank(query, documents, top_k=len(documents), content_key=content_key)
+        reranked = self.rerank(
+            query, documents, top_k=len(documents), content_key=content_key
+        )
         return [doc for doc in reranked if doc.get("rerank_score", 0) >= threshold]
 
 

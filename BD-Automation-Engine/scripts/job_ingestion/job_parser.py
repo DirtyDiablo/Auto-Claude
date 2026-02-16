@@ -18,31 +18,44 @@ from pathlib import Path
 # ===========================================
 
 CLEARANCE_PATTERNS = {
-    'TS/SCI CI Poly': [
-        r'ts/sci.*ci.*poly', r'top secret.*sci.*ci.*poly',
-        r'ts/sci with ci poly', r'tssci ci poly'
+    "TS/SCI CI Poly": [
+        r"ts/sci.*ci.*poly",
+        r"top secret.*sci.*ci.*poly",
+        r"ts/sci with ci poly",
+        r"tssci ci poly",
     ],
-    'TS/SCI FS Poly': [
-        r'ts/sci.*fs.*poly', r'ts/sci.*full.*scope.*poly',
-        r'top secret.*sci.*full.*scope', r'tssci.*fsp',
-        r'ts/sci with full scope poly'
+    "TS/SCI FS Poly": [
+        r"ts/sci.*fs.*poly",
+        r"ts/sci.*full.*scope.*poly",
+        r"top secret.*sci.*full.*scope",
+        r"tssci.*fsp",
+        r"ts/sci with full scope poly",
     ],
-    'TS/SCI': [
-        r'ts/sci(?!.*poly)', r'top secret.*sci(?!.*poly)',
-        r'tssci(?!.*poly)', r'ts sci(?!.*poly)'
+    "TS/SCI": [
+        r"ts/sci(?!.*poly)",
+        r"top secret.*sci(?!.*poly)",
+        r"tssci(?!.*poly)",
+        r"ts sci(?!.*poly)",
     ],
-    'Top Secret': [
-        r'top secret(?!.*sci)', r'\bts\b(?!.*sci)',
-        r'active ts(?!.*sci)', r'ts clearance(?!.*sci)'
+    "Top Secret": [
+        r"top secret(?!.*sci)",
+        r"\bts\b(?!.*sci)",
+        r"active ts(?!.*sci)",
+        r"ts clearance(?!.*sci)",
     ],
-    'Secret': [
-        r'\bsecret\b(?!.*top)', r'dod secret',
-        r'secret clearance', r'secret security clearance'
+    "Secret": [
+        r"\bsecret\b(?!.*top)",
+        r"dod secret",
+        r"secret clearance",
+        r"secret security clearance",
     ],
-    'Public Trust': [
-        r'public trust', r'moderate risk public trust',
-        r'high risk public trust', r'mrpt', r'hrpt'
-    ]
+    "Public Trust": [
+        r"public trust",
+        r"moderate risk public trust",
+        r"high risk public trust",
+        r"mrpt",
+        r"hrpt",
+    ],
 }
 
 
@@ -67,18 +80,25 @@ def normalize_clearance(raw_clearance: str) -> Optional[str]:
 # ===========================================
 
 EMPLOYMENT_TYPE_MAP = {
-    'Contract': ['contract', 'contractor', 'w2'],
-    'Contract-to-perm': ['contract-to-perm', 'contract to perm', 'cth', 'c2h',
-                         'contract to hire', 'contract-to-hire', 'perm possible'],
-    'Perm': ['fulltime', 'full-time', 'full time', 'permanent', 'direct hire', 'perm'],
-    'Surge': []  # Will be determined by duration < 6 months
+    "Contract": ["contract", "contractor", "w2"],
+    "Contract-to-perm": [
+        "contract-to-perm",
+        "contract to perm",
+        "cth",
+        "c2h",
+        "contract to hire",
+        "contract-to-hire",
+        "perm possible",
+    ],
+    "Perm": ["fulltime", "full-time", "full time", "permanent", "direct hire", "perm"],
+    "Surge": [],  # Will be determined by duration < 6 months
 }
 
 
 def normalize_employment_type(raw_type: str, duration: str = None) -> str:
     """Normalize employment type to standard selections."""
     if not raw_type:
-        return 'Contract'  # Default
+        return "Contract"  # Default
 
     text = raw_type.lower().strip()
 
@@ -90,10 +110,12 @@ def normalize_employment_type(raw_type: str, duration: str = None) -> str:
     # Check duration for Surge classification
     if duration:
         duration_lower = duration.lower()
-        if any(x in duration_lower for x in ['6 month', '3 month', '90 day', 'short term']):
-            return 'Surge'
+        if any(
+            x in duration_lower for x in ["6 month", "3 month", "90 day", "short term"]
+        ):
+            return "Surge"
 
-    return 'Contract'  # Default
+    return "Contract"  # Default
 
 
 # ===========================================
@@ -101,11 +123,11 @@ def normalize_employment_type(raw_type: str, duration: str = None) -> str:
 # ===========================================
 
 DATE_FORMATS = [
-    '%Y-%m-%d',           # 2025-10-13 (Apex format)
-    '%b %d, %Y',          # Nov 05, 2025 (Insight Global format)
-    '%B %d, %Y',          # November 05, 2025
-    '%m/%d/%Y',           # 10/13/2025
-    '%d/%m/%Y',           # 13/10/2025
+    "%Y-%m-%d",  # 2025-10-13 (Apex format)
+    "%b %d, %Y",  # Nov 05, 2025 (Insight Global format)
+    "%B %d, %Y",  # November 05, 2025
+    "%m/%d/%Y",  # 10/13/2025
+    "%d/%m/%Y",  # 13/10/2025
 ]
 
 
@@ -119,12 +141,12 @@ def normalize_date(raw_date: str) -> Optional[str]:
     for fmt in DATE_FORMATS:
         try:
             parsed = datetime.strptime(text, fmt)
-            return parsed.strftime('%Y-%m-%d')
+            return parsed.strftime("%Y-%m-%d")
         except ValueError:
             continue
 
     # If all formats fail, return as-is if it looks like a date
-    if re.match(r'\d{4}-\d{2}-\d{2}', text):
+    if re.match(r"\d{4}-\d{2}-\d{2}", text):
         return text
 
     return None
@@ -134,36 +156,39 @@ def normalize_date(raw_date: str) -> Optional[str]:
 # COMPANY EXTRACTION
 # ===========================================
 
+
 def extract_company_from_url(url: str) -> str:
     """Extract staffing company name from job URL."""
     if not url:
-        return 'Unknown'
+        return "Unknown"
 
     url_lower = url.lower()
 
-    if 'apexsystems.com' in url_lower:
-        return 'Apex Systems'
-    elif 'insightglobal.com' in url_lower:
-        return 'Insight Global'
-    elif 'teksystems.com' in url_lower:
-        return 'TEKsystems'
-    elif 'kforce.com' in url_lower:
-        return 'Kforce'
-    elif 'randstad.com' in url_lower:
-        return 'Randstad'
-    elif 'roberthalftechnology' in url_lower or 'roberthalf.com' in url_lower:
-        return 'Robert Half'
+    if "apexsystems.com" in url_lower:
+        return "Apex Systems"
+    elif "insightglobal.com" in url_lower:
+        return "Insight Global"
+    elif "teksystems.com" in url_lower:
+        return "TEKsystems"
+    elif "kforce.com" in url_lower:
+        return "Kforce"
+    elif "randstad.com" in url_lower:
+        return "Randstad"
+    elif "roberthalftechnology" in url_lower or "roberthalf.com" in url_lower:
+        return "Robert Half"
 
-    return 'Unknown'
+    return "Unknown"
 
 
 # ===========================================
 # JOB DATA CLASS
 # ===========================================
 
+
 @dataclass
 class NormalizedJob:
     """Normalized job data structure matching Notion schema."""
+
     # Direct extraction fields
     title: str
     company: str  # Staffing company
@@ -179,7 +204,7 @@ class NormalizedJob:
     description: str
 
     # Status tracking
-    status: str = 'pending_enrichment'
+    status: str = "pending_enrichment"
 
     # AI-enriched fields (populated later)
     experience_years: Optional[int] = None
@@ -226,30 +251,32 @@ class NormalizedJob:
         - Task Order / Site (rich_text)
         """
         props = {
-            'Job Title': {'title': [{'text': {'content': self.title[:2000]}}]},
-            'Location': {'rich_text': [{'text': {'content': self.location or ''}}]},
-            'Job URL': {'url': self.url if self.url else None},
+            "Job Title": {"title": [{"text": {"content": self.title[:2000]}}]},
+            "Location": {"rich_text": [{"text": {"content": self.location or ""}}]},
+            "Job URL": {"url": self.url if self.url else None},
         }
 
         # Add optional fields
         if self.clearance:
-            props['Clearance'] = {'select': {'name': self.clearance}}
+            props["Clearance"] = {"select": {"name": self.clearance}}
 
         if self.date_posted:
-            props['Scraped Date'] = {'date': {'start': self.date_posted}}
+            props["Scraped Date"] = {"date": {"start": self.date_posted}}
 
         # Relational fields mapped to database schema
         if self.prime:
-            props['Prime Contractor'] = {'rich_text': [{'text': {'content': self.prime}}]}
+            props["Prime Contractor"] = {
+                "rich_text": [{"text": {"content": self.prime}}]
+            }
 
         if self.task_order:
-            props['Program'] = {'rich_text': [{'text': {'content': self.task_order}}]}
+            props["Program"] = {"rich_text": [{"text": {"content": self.task_order}}]}
 
         # Extract state from location
         if self.location:
             state = self._extract_state(self.location)
             if state:
-                props['State'] = {'select': {'name': state}}
+                props["State"] = {"select": {"name": state}}
 
         # Note: The following fields exist in our data but not in the Notion DB:
         # Company, Job Number, Duration, Employment Type, Status,
@@ -265,15 +292,64 @@ class NormalizedJob:
             return None
 
         # State abbreviations
-        states = ['AL', 'AK', 'AZ', 'AR', 'CA', 'CO', 'CT', 'DE', 'FL', 'GA',
-                  'HI', 'ID', 'IL', 'IN', 'IA', 'KS', 'KY', 'LA', 'ME', 'MD',
-                  'MA', 'MI', 'MN', 'MS', 'MO', 'MT', 'NE', 'NV', 'NH', 'NJ',
-                  'NM', 'NY', 'NC', 'ND', 'OH', 'OK', 'OR', 'PA', 'RI', 'SC',
-                  'SD', 'TN', 'TX', 'UT', 'VT', 'VA', 'WA', 'WV', 'WI', 'WY', 'DC']
+        states = [
+            "AL",
+            "AK",
+            "AZ",
+            "AR",
+            "CA",
+            "CO",
+            "CT",
+            "DE",
+            "FL",
+            "GA",
+            "HI",
+            "ID",
+            "IL",
+            "IN",
+            "IA",
+            "KS",
+            "KY",
+            "LA",
+            "ME",
+            "MD",
+            "MA",
+            "MI",
+            "MN",
+            "MS",
+            "MO",
+            "MT",
+            "NE",
+            "NV",
+            "NH",
+            "NJ",
+            "NM",
+            "NY",
+            "NC",
+            "ND",
+            "OH",
+            "OK",
+            "OR",
+            "PA",
+            "RI",
+            "SC",
+            "SD",
+            "TN",
+            "TX",
+            "UT",
+            "VT",
+            "VA",
+            "WA",
+            "WV",
+            "WI",
+            "WY",
+            "DC",
+        ]
 
         # Look for state abbreviation pattern (e.g., "City, ST" or "City, ST ZIP")
         import re
-        match = re.search(r',\s*([A-Z]{2})(?:\s|\d|$)', location)
+
+        match = re.search(r",\s*([A-Z]{2})(?:\s|\d|$)", location)
         if match and match.group(1) in states:
             return match.group(1)
 
@@ -284,49 +360,54 @@ class NormalizedJob:
 # PARSER FUNCTIONS
 # ===========================================
 
+
 def parse_apex_job(raw: Dict, source_file: str = None) -> NormalizedJob:
     """Parse Apex Systems job format."""
     return NormalizedJob(
-        title=raw.get('jobTitle', 'Unknown Title'),
-        company=extract_company_from_url(raw.get('url', '')),
-        location=raw.get('location', ''),
-        date_posted=normalize_date(raw.get('datePosted')),
-        duration=raw.get('duration'),
-        employment_type=normalize_employment_type(raw.get('employmentType'), raw.get('duration')),
-        job_number=str(raw.get('jobNumber', '')),
-        url=raw.get('url', ''),
-        clearance=normalize_clearance(raw.get('securityClearance')),
-        description=raw.get('description', ''),
-        scraped_at=raw.get('scrapedAt'),
-        source_file=source_file
+        title=raw.get("jobTitle", "Unknown Title"),
+        company=extract_company_from_url(raw.get("url", "")),
+        location=raw.get("location", ""),
+        date_posted=normalize_date(raw.get("datePosted")),
+        duration=raw.get("duration"),
+        employment_type=normalize_employment_type(
+            raw.get("employmentType"), raw.get("duration")
+        ),
+        job_number=str(raw.get("jobNumber", "")),
+        url=raw.get("url", ""),
+        clearance=normalize_clearance(raw.get("securityClearance")),
+        description=raw.get("description", ""),
+        scraped_at=raw.get("scrapedAt"),
+        source_file=source_file,
     )
 
 
 def parse_insight_global_job(raw: Dict, source_file: str = None) -> NormalizedJob:
     """Parse Insight Global job format."""
     return NormalizedJob(
-        title=raw.get('jobTitle', 'Unknown Title'),
-        company=extract_company_from_url(raw.get('url', '')),
-        location=raw.get('location', ''),
-        date_posted=normalize_date(raw.get('datePosted')),
-        duration=raw.get('duration'),
-        employment_type=normalize_employment_type(raw.get('employmentType'), raw.get('duration')),
-        job_number=str(raw.get('jobNumber', '')),
-        url=raw.get('url', ''),
-        clearance=normalize_clearance(raw.get('securityClearance')),
-        description=raw.get('description', ''),
-        scraped_at=raw.get('scrapedAt'),
-        source_file=source_file
+        title=raw.get("jobTitle", "Unknown Title"),
+        company=extract_company_from_url(raw.get("url", "")),
+        location=raw.get("location", ""),
+        date_posted=normalize_date(raw.get("datePosted")),
+        duration=raw.get("duration"),
+        employment_type=normalize_employment_type(
+            raw.get("employmentType"), raw.get("duration")
+        ),
+        job_number=str(raw.get("jobNumber", "")),
+        url=raw.get("url", ""),
+        clearance=normalize_clearance(raw.get("securityClearance")),
+        description=raw.get("description", ""),
+        scraped_at=raw.get("scrapedAt"),
+        source_file=source_file,
     )
 
 
 def detect_source_and_parse(raw: Dict, source_file: str = None) -> NormalizedJob:
     """Auto-detect source and parse accordingly."""
-    url = raw.get('url', '')
+    url = raw.get("url", "")
 
-    if 'apexsystems.com' in url.lower():
+    if "apexsystems.com" in url.lower():
         return parse_apex_job(raw, source_file)
-    elif 'insightglobal.com' in url.lower():
+    elif "insightglobal.com" in url.lower():
         return parse_insight_global_job(raw, source_file)
     else:
         # Default to Apex format as it's more common
@@ -340,7 +421,7 @@ def parse_job_file(file_path: str) -> List[NormalizedJob]:
     if not path.exists():
         raise FileNotFoundError(f"File not found: {file_path}")
 
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         data = json.load(f)
 
     # Handle both array and single object
@@ -379,15 +460,16 @@ def deduplicate_jobs(jobs: List[NormalizedJob]) -> List[NormalizedJob]:
 # CLI INTERFACE
 # ===========================================
 
+
 def main():
     """CLI for testing job parser."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='Job Parser - Normalize scrape data')
-    parser.add_argument('files', nargs='+', help='JSON files to parse')
-    parser.add_argument('--output', '-o', help='Output JSON file')
-    parser.add_argument('--dedupe', action='store_true', help='Remove duplicates')
-    parser.add_argument('--stats', action='store_true', help='Show statistics')
+    parser = argparse.ArgumentParser(description="Job Parser - Normalize scrape data")
+    parser.add_argument("files", nargs="+", help="JSON files to parse")
+    parser.add_argument("--output", "-o", help="Output JSON file")
+    parser.add_argument("--dedupe", action="store_true", help="Remove duplicates")
+    parser.add_argument("--stats", action="store_true", help="Show statistics")
 
     args = parser.parse_args()
 
@@ -419,7 +501,7 @@ def main():
         # By clearance
         by_clearance = {}
         for job in all_jobs:
-            key = job.clearance or 'Unknown'
+            key = job.clearance or "Unknown"
             by_clearance[key] = by_clearance.get(key, 0) + 1
         print("\nBy Clearance:")
         for clearance, count in sorted(by_clearance.items(), key=lambda x: -x[1]):
@@ -435,12 +517,12 @@ def main():
 
     if args.output:
         output_data = [job.to_dict() for job in all_jobs]
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2)
         print(f"\nSaved to: {args.output}")
 
     return all_jobs
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

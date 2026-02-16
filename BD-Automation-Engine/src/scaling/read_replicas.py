@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class ReplicaStatus(Enum):
     ACTIVE = "active"
     STANDBY = "standby"
@@ -76,6 +77,7 @@ class ReplicaSetConfig:
 # READ REPLICA MANAGER
 # =========================================
 
+
 class ReadReplicaManager:
     """Manages read replicas with query routing, lag tracking,
     and promotion capabilities.
@@ -86,14 +88,45 @@ class ReadReplicaManager:
         self._config = ReplicaSetConfig()
         self._round_robin_idx = 0
         self._register_defaults()
-        logger.info("ReadReplicaManager initialized with %d replicas", len(self._replicas))
+        logger.info(
+            "ReadReplicaManager initialized with %d replicas", len(self._replicas)
+        )
 
     def _register_defaults(self) -> None:
         defaults = [
-            ReadReplica(replica_id="qdrant_primary", name="Qdrant Primary", host="localhost", port=6333, weight=1.0, lag_ms=0.0),
-            ReadReplica(replica_id="qdrant_replica_1", name="Qdrant Replica 1", host="localhost", port=6334, weight=1.0, lag_ms=5.0),
-            ReadReplica(replica_id="qdrant_replica_2", name="Qdrant Replica 2", host="localhost", port=6335, status=ReplicaStatus.STANDBY, weight=0.5, lag_ms=15.0),
-            ReadReplica(replica_id="analytics_replica", name="Analytics Replica", host="localhost", port=6336, weight=0.8, lag_ms=10.0),
+            ReadReplica(
+                replica_id="qdrant_primary",
+                name="Qdrant Primary",
+                host="localhost",
+                port=6333,
+                weight=1.0,
+                lag_ms=0.0,
+            ),
+            ReadReplica(
+                replica_id="qdrant_replica_1",
+                name="Qdrant Replica 1",
+                host="localhost",
+                port=6334,
+                weight=1.0,
+                lag_ms=5.0,
+            ),
+            ReadReplica(
+                replica_id="qdrant_replica_2",
+                name="Qdrant Replica 2",
+                host="localhost",
+                port=6335,
+                status=ReplicaStatus.STANDBY,
+                weight=0.5,
+                lag_ms=15.0,
+            ),
+            ReadReplica(
+                replica_id="analytics_replica",
+                name="Analytics Replica",
+                host="localhost",
+                port=6336,
+                weight=0.8,
+                lag_ms=10.0,
+            ),
         ]
         for r in defaults:
             self._replicas[r.replica_id] = r
@@ -109,8 +142,11 @@ class ReadReplicaManager:
             return "qdrant_primary"
 
         # Get active replicas within acceptable lag
-        active = [r for r in self._replicas.values()
-                   if r.status == ReplicaStatus.ACTIVE and r.lag_ms <= self._config.max_lag_ms]
+        active = [
+            r
+            for r in self._replicas.values()
+            if r.status == ReplicaStatus.ACTIVE and r.lag_ms <= self._config.max_lag_ms
+        ]
 
         if not active:
             # Fall back to primary
@@ -130,7 +166,9 @@ class ReadReplicaManager:
     def get_replica(self, replica_id: str) -> Optional[ReadReplica]:
         return self._replicas.get(replica_id)
 
-    def list_replicas(self, status_filter: Optional[ReplicaStatus] = None) -> List[ReadReplica]:
+    def list_replicas(
+        self, status_filter: Optional[ReplicaStatus] = None
+    ) -> List[ReadReplica]:
         replicas = list(self._replicas.values())
         if status_filter is not None:
             replicas = [r for r in replicas if r.status == status_filter]
@@ -171,8 +209,14 @@ class ReadReplicaManager:
         return {
             "total_replicas": len(self._replicas),
             "by_status": by_status,
-            "total_queries_served": sum(r.queries_served for r in self._replicas.values()),
-            "avg_lag_ms": round(sum(r.lag_ms for r in self._replicas.values()) / max(len(self._replicas), 1), 1),
+            "total_queries_served": sum(
+                r.queries_served for r in self._replicas.values()
+            ),
+            "avg_lag_ms": round(
+                sum(r.lag_ms for r in self._replicas.values())
+                / max(len(self._replicas), 1),
+                1,
+            ),
         }
 
 

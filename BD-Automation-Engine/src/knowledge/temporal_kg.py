@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class EpisodeType(str, Enum):
     CONVERSATION_NOTE = "conversation_note"
     SCRAPE_RESULT = "scrape_result"
@@ -74,9 +75,11 @@ class ContradictionType(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Episode:
     """A unit of information ingested into the knowledge graph."""
+
     id: str = ""
     episode_type: str = EpisodeType.CONVERSATION_NOTE.value
     content: str = ""
@@ -89,6 +92,7 @@ class Episode:
 @dataclass
 class Entity:
     """A resolved real-world entity in the graph."""
+
     id: str
     entity_type: str
     name: str
@@ -104,6 +108,7 @@ class Entity:
 @dataclass
 class TemporalFact:
     """A timestamped relationship between two entities."""
+
     id: str
     subject_id: str
     predicate: str  # EdgeType value
@@ -119,6 +124,7 @@ class TemporalFact:
 @dataclass
 class EpisodeResult:
     """Result of processing an episode."""
+
     episode_id: str
     entities_discovered: int = 0
     entities_resolved: int = 0
@@ -133,6 +139,7 @@ class EpisodeResult:
 @dataclass
 class TimelineEntry:
     """A single entry in an entity's timeline."""
+
     timestamp: str
     event_type: str  # added, expired, modified
     fact: TemporalFact
@@ -142,6 +149,7 @@ class TimelineEntry:
 @dataclass
 class EntityTimeline:
     """Full history of an entity."""
+
     entity_id: str
     entity_name: str
     entity_type: str
@@ -155,6 +163,7 @@ class EntityTimeline:
 @dataclass
 class ChangeEvent:
     """A change detected for an entity."""
+
     entity_id: str
     change_type: str  # added, expired, modified
     fact: TemporalFact
@@ -165,6 +174,7 @@ class ChangeEvent:
 @dataclass
 class Contradiction:
     """A logical contradiction in the graph."""
+
     id: str
     contradiction_type: str
     entity_id: str
@@ -182,26 +192,63 @@ class Contradiction:
 
 # Simple patterns for entity extraction
 PERSON_PATTERNS = [
-    re.compile(r'\b([A-Z][a-z]+ [A-Z][a-z]+)\b'),  # "John Smith"
-    re.compile(r'\b([A-Z]\. [A-Z][a-z]+)\b'),  # "J. Smith"
-    re.compile(r'\b(Dr\.|Mr\.|Mrs\.|Ms\.) ([A-Z][a-z]+ [A-Z][a-z]+)\b'),
+    re.compile(r"\b([A-Z][a-z]+ [A-Z][a-z]+)\b"),  # "John Smith"
+    re.compile(r"\b([A-Z]\. [A-Z][a-z]+)\b"),  # "J. Smith"
+    re.compile(r"\b(Dr\.|Mr\.|Mrs\.|Ms\.) ([A-Z][a-z]+ [A-Z][a-z]+)\b"),
 ]
 
 ORG_KEYWORDS = {
-    "gdit", "general dynamics", "leidos", "booz allen", "saic", "northrop",
-    "raytheon", "lockheed", "bae systems", "caci", "mantech", "peraton",
-    "l3harris", "parsons", "jacobs", "kbr", "amentum",
+    "gdit",
+    "general dynamics",
+    "leidos",
+    "booz allen",
+    "saic",
+    "northrop",
+    "raytheon",
+    "lockheed",
+    "bae systems",
+    "caci",
+    "mantech",
+    "peraton",
+    "l3harris",
+    "parsons",
+    "jacobs",
+    "kbr",
+    "amentum",
 }
 
 PROGRAM_KEYWORDS = {
-    "dcgs", "dcgs-a", "gbsd", "ngen", "deos", "ces", "jadc2",
-    "abms", "odin", "titan", "maven", "jedi", "jwcc",
+    "dcgs",
+    "dcgs-a",
+    "gbsd",
+    "ngen",
+    "deos",
+    "ces",
+    "jadc2",
+    "abms",
+    "odin",
+    "titan",
+    "maven",
+    "jedi",
+    "jwcc",
 }
 
 TITLE_KEYWORDS = {
-    "ceo", "cto", "cfo", "vp", "vice president", "director",
-    "manager", "lead", "engineer", "analyst", "architect",
-    "pm", "program manager", "site lead", "team lead",
+    "ceo",
+    "cto",
+    "cfo",
+    "vp",
+    "vice president",
+    "director",
+    "manager",
+    "lead",
+    "engineer",
+    "analyst",
+    "architect",
+    "pm",
+    "program manager",
+    "site lead",
+    "team lead",
 }
 
 
@@ -215,30 +262,37 @@ def extract_entities_simple(text: str) -> List[Dict[str, Any]]:
         for match in pattern.finditer(text):
             name = match.group(0).strip()
             if len(name) > 3 and name.lower() not in ORG_KEYWORDS:
-                entities.append({
-                    "name": name, "type": EntityType.PERSON.value,
-                    "span": (match.start(), match.end()),
-                })
+                entities.append(
+                    {
+                        "name": name,
+                        "type": EntityType.PERSON.value,
+                        "span": (match.start(), match.end()),
+                    }
+                )
 
     # Extract organizations
     for org in ORG_KEYWORDS:
         idx = text_lower.find(org)
         if idx >= 0:
-            entities.append({
-                "name": org.upper() if len(org) <= 4 else org.title(),
-                "type": EntityType.ORGANIZATION.value,
-                "span": (idx, idx + len(org)),
-            })
+            entities.append(
+                {
+                    "name": org.upper() if len(org) <= 4 else org.title(),
+                    "type": EntityType.ORGANIZATION.value,
+                    "span": (idx, idx + len(org)),
+                }
+            )
 
     # Extract programs
     for prog in PROGRAM_KEYWORDS:
         idx = text_lower.find(prog)
         if idx >= 0:
-            entities.append({
-                "name": prog.upper(),
-                "type": EntityType.PROGRAM.value,
-                "span": (idx, idx + len(prog)),
-            })
+            entities.append(
+                {
+                    "name": prog.upper(),
+                    "type": EntityType.PROGRAM.value,
+                    "span": (idx, idx + len(prog)),
+                }
+            )
 
     # Deduplicate by name
     seen = set()
@@ -253,7 +307,8 @@ def extract_entities_simple(text: str) -> List[Dict[str, Any]]:
 
 
 def extract_relationships_simple(
-    text: str, entities: List[Dict],
+    text: str,
+    entities: List[Dict],
 ) -> List[Dict[str, Any]]:
     """Extract relationships between entities from text."""
     relationships = []
@@ -268,11 +323,13 @@ def extract_relationships_simple(
             pname = person["name"].lower()
             oname = org["name"].lower()
             if any(f"{pname} {v} {oname}" in text_lower for v in works_at_verbs):
-                relationships.append({
-                    "subject": person["name"],
-                    "predicate": EdgeType.WORKS_AT.value,
-                    "object": org["name"],
-                })
+                relationships.append(
+                    {
+                        "subject": person["name"],
+                        "predicate": EdgeType.WORKS_AT.value,
+                        "object": org["name"],
+                    }
+                )
 
     # Pattern: "X manages Y" or "X leads Y"
     manage_patterns = ["manages", "leads", "runs", "heads", "oversees"]
@@ -282,22 +339,30 @@ def extract_relationships_simple(
                 if person["name"].lower() in text_lower.split(pattern)[0][-50:]:
                     for target in entities:
                         if target["name"] != person["name"]:
-                            after = text_lower.split(pattern)[1][:50] if pattern in text_lower else ""
+                            after = (
+                                text_lower.split(pattern)[1][:50]
+                                if pattern in text_lower
+                                else ""
+                            )
                             if target["name"].lower() in after:
-                                relationships.append({
-                                    "subject": person["name"],
-                                    "predicate": EdgeType.MANAGES.value,
-                                    "object": target["name"],
-                                })
+                                relationships.append(
+                                    {
+                                        "subject": person["name"],
+                                        "predicate": EdgeType.MANAGES.value,
+                                        "object": target["name"],
+                                    }
+                                )
 
     # Pattern: "hiring X" → HIRING
     if "hiring" in text_lower or "looking for" in text_lower:
         for org in [e for e in entities if e["type"] == EntityType.ORGANIZATION.value]:
-            relationships.append({
-                "subject": org["name"],
-                "predicate": EdgeType.HIRING.value,
-                "object": "open_position",
-            })
+            relationships.append(
+                {
+                    "subject": org["name"],
+                    "predicate": EdgeType.HIRING.value,
+                    "object": "open_position",
+                }
+            )
 
     return relationships
 
@@ -305,6 +370,7 @@ def extract_relationships_simple(
 # =========================================
 # TEMPORAL KNOWLEDGE GRAPH
 # =========================================
+
 
 class TemporalKnowledgeGraph:
     """Knowledge graph where every fact has a time dimension."""
@@ -365,6 +431,7 @@ class TemporalKnowledgeGraph:
     def ingest_episode(self, episode: Episode) -> EpisodeResult:
         """Process a new piece of intelligence."""
         import time
+
         start = time.time()
         now = datetime.now(timezone.utc).isoformat()
 
@@ -452,7 +519,9 @@ class TemporalKnowledgeGraph:
     # -----------------------------------------
 
     def query_facts_at_time(
-        self, timestamp: str, entity_id: Optional[str] = None,
+        self,
+        timestamp: str,
+        entity_id: Optional[str] = None,
         predicate: Optional[str] = None,
     ) -> List[TemporalFact]:
         """Get all facts valid at a specific point in time."""
@@ -464,7 +533,11 @@ class TemporalKnowledgeGraph:
         results = []
         for fact in self._facts.values():
             # Filter by entity if specified
-            if entity_id and fact.subject_id != entity_id and fact.object_id != entity_id:
+            if (
+                entity_id
+                and fact.subject_id != entity_id
+                and fact.object_id != entity_id
+            ):
                 continue
             # Filter by predicate if specified
             if predicate and fact.predicate != predicate:
@@ -473,7 +546,9 @@ class TemporalKnowledgeGraph:
             # Check temporal validity
             if fact.valid_from:
                 try:
-                    valid_from = datetime.fromisoformat(fact.valid_from.replace("Z", "+00:00"))
+                    valid_from = datetime.fromisoformat(
+                        fact.valid_from.replace("Z", "+00:00")
+                    )
                     if query_time < valid_from:
                         continue
                 except (ValueError, TypeError):
@@ -481,7 +556,9 @@ class TemporalKnowledgeGraph:
 
             if fact.valid_to:
                 try:
-                    valid_to = datetime.fromisoformat(fact.valid_to.replace("Z", "+00:00"))
+                    valid_to = datetime.fromisoformat(
+                        fact.valid_to.replace("Z", "+00:00")
+                    )
                     if query_time > valid_to:
                         continue
                 except (ValueError, TypeError):
@@ -497,7 +574,11 @@ class TemporalKnowledgeGraph:
         for fact in self._facts.values():
             if fact.valid_to:
                 continue
-            if entity_id and fact.subject_id != entity_id and fact.object_id != entity_id:
+            if (
+                entity_id
+                and fact.subject_id != entity_id
+                and fact.object_id != entity_id
+            ):
                 continue
             results.append(fact)
         return results
@@ -518,20 +599,24 @@ class TemporalKnowledgeGraph:
         entries = []
         for fact in sorted(facts, key=lambda f: f.valid_from or f.created_at):
             # Added entry
-            entries.append(TimelineEntry(
-                timestamp=fact.valid_from or fact.created_at,
-                event_type=ChangeType.ADDED.value,
-                fact=fact,
-                description=self._describe_fact(fact),
-            ))
+            entries.append(
+                TimelineEntry(
+                    timestamp=fact.valid_from or fact.created_at,
+                    event_type=ChangeType.ADDED.value,
+                    fact=fact,
+                    description=self._describe_fact(fact),
+                )
+            )
             # Expired entry
             if fact.valid_to:
-                entries.append(TimelineEntry(
-                    timestamp=fact.valid_to,
-                    event_type=ChangeType.EXPIRED.value,
-                    fact=fact,
-                    description=f"Expired: {self._describe_fact(fact)}",
-                ))
+                entries.append(
+                    TimelineEntry(
+                        timestamp=fact.valid_to,
+                        event_type=ChangeType.EXPIRED.value,
+                        fact=fact,
+                        description=f"Expired: {self._describe_fact(fact)}",
+                    )
+                )
 
         entries.sort(key=lambda e: e.timestamp)
         active = [f for f in facts if not f.valid_to]
@@ -569,30 +654,38 @@ class TemporalKnowledgeGraph:
             # New facts added since
             if fact.created_at:
                 try:
-                    created = datetime.fromisoformat(fact.created_at.replace("Z", "+00:00"))
+                    created = datetime.fromisoformat(
+                        fact.created_at.replace("Z", "+00:00")
+                    )
                     if created > since_dt:
-                        changes.append(ChangeEvent(
-                            entity_id=entity_id,
-                            change_type=ChangeType.ADDED.value,
-                            fact=fact,
-                            detected_at=fact.created_at,
-                            description=f"New: {self._describe_fact(fact)}",
-                        ))
+                        changes.append(
+                            ChangeEvent(
+                                entity_id=entity_id,
+                                change_type=ChangeType.ADDED.value,
+                                fact=fact,
+                                detected_at=fact.created_at,
+                                description=f"New: {self._describe_fact(fact)}",
+                            )
+                        )
                 except (ValueError, TypeError):
                     pass
 
             # Facts expired since
             if fact.valid_to:
                 try:
-                    expired = datetime.fromisoformat(fact.valid_to.replace("Z", "+00:00"))
+                    expired = datetime.fromisoformat(
+                        fact.valid_to.replace("Z", "+00:00")
+                    )
                     if expired > since_dt:
-                        changes.append(ChangeEvent(
-                            entity_id=entity_id,
-                            change_type=ChangeType.EXPIRED.value,
-                            fact=fact,
-                            detected_at=fact.valid_to,
-                            description=f"Expired: {self._describe_fact(fact)}",
-                        ))
+                        changes.append(
+                            ChangeEvent(
+                                entity_id=entity_id,
+                                change_type=ChangeType.EXPIRED.value,
+                                fact=fact,
+                                detected_at=fact.valid_to,
+                                description=f"Expired: {self._describe_fact(fact)}",
+                            )
+                        )
                 except (ValueError, TypeError):
                     pass
 
@@ -625,44 +718,50 @@ class TemporalKnowledgeGraph:
                 continue
 
             active_work = [
-                f for f in self.get_active_facts(entity.id)
+                f
+                for f in self.get_active_facts(entity.id)
                 if f.predicate == EdgeType.WORKS_AT.value and f.subject_id == entity.id
             ]
             if len(active_work) > 1:
                 for i in range(len(active_work)):
                     for j in range(i + 1, len(active_work)):
                         if active_work[i].object_id != active_work[j].object_id:
-                            contradictions.append(Contradiction(
-                                id=uuid.uuid4().hex[:8],
-                                contradiction_type=ContradictionType.DUAL_EMPLOYMENT.value,
-                                entity_id=entity.id,
-                                entity_name=entity.name,
-                                fact_a=active_work[i],
-                                fact_b=active_work[j],
-                                description=f"{entity.name} works at two orgs simultaneously",
-                                severity="high",
-                                detected_at=now,
-                            ))
+                            contradictions.append(
+                                Contradiction(
+                                    id=uuid.uuid4().hex[:8],
+                                    contradiction_type=ContradictionType.DUAL_EMPLOYMENT.value,
+                                    entity_id=entity.id,
+                                    entity_name=entity.name,
+                                    fact_a=active_work[i],
+                                    fact_b=active_work[j],
+                                    description=f"{entity.name} works at two orgs simultaneously",
+                                    severity="high",
+                                    detected_at=now,
+                                )
+                            )
 
             # Check conflicting titles at same company
             active_roles = [
-                f for f in self.get_active_facts(entity.id)
+                f
+                for f in self.get_active_facts(entity.id)
                 if f.predicate == EdgeType.ACTS_AS.value and f.subject_id == entity.id
             ]
             if len(active_roles) > 1:
                 for i in range(len(active_roles)):
                     for j in range(i + 1, len(active_roles)):
-                        contradictions.append(Contradiction(
-                            id=uuid.uuid4().hex[:8],
-                            contradiction_type=ContradictionType.CONFLICTING_TITLE.value,
-                            entity_id=entity.id,
-                            entity_name=entity.name,
-                            fact_a=active_roles[i],
-                            fact_b=active_roles[j],
-                            description=f"{entity.name} has conflicting active roles",
-                            severity="medium",
-                            detected_at=now,
-                        ))
+                        contradictions.append(
+                            Contradiction(
+                                id=uuid.uuid4().hex[:8],
+                                contradiction_type=ContradictionType.CONFLICTING_TITLE.value,
+                                entity_id=entity.id,
+                                entity_name=entity.name,
+                                fact_a=active_roles[i],
+                                fact_b=active_roles[j],
+                                description=f"{entity.name} has conflicting active roles",
+                                severity="medium",
+                                detected_at=now,
+                            )
+                        )
 
         return contradictions
 
@@ -671,7 +770,10 @@ class TemporalKnowledgeGraph:
     # -----------------------------------------
 
     def search_entities(
-        self, query: str, entity_type: Optional[str] = None, limit: int = 20,
+        self,
+        query: str,
+        entity_type: Optional[str] = None,
+        limit: int = 20,
     ) -> List[Entity]:
         """Search entities by name (substring match)."""
         query_lower = query.lower()
@@ -686,7 +788,8 @@ class TemporalKnowledgeGraph:
         return results[:limit]
 
     def search_facts(
-        self, predicate: Optional[str] = None,
+        self,
+        predicate: Optional[str] = None,
         subject_id: Optional[str] = None,
         object_id: Optional[str] = None,
         active_only: bool = False,

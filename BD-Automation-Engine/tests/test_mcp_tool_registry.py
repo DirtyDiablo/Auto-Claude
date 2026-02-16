@@ -26,6 +26,7 @@ def empty_registry():
 # SEEDED SERVERS
 # =========================================
 
+
 def test_seeded_servers(registry):
     servers = registry.list_servers()
     assert len(servers) >= 9
@@ -51,6 +52,7 @@ def test_capability_index(registry):
 # =========================================
 # REGISTRATION
 # =========================================
+
 
 def test_register_server(empty_registry):
     config = MCPServerConfig(
@@ -91,6 +93,7 @@ def test_unregister_nonexistent(empty_registry):
 # DISCOVERY
 # =========================================
 
+
 def test_discover_tools(registry):
     tools = registry.discover_tools("mcp_notion")
     assert len(tools) >= 3
@@ -112,6 +115,7 @@ def test_get_all_tools(registry):
 # =========================================
 # ROUTING
 # =========================================
+
 
 def test_route_email(registry):
     result = registry.route_request("send email to Craig Lindahl")
@@ -157,6 +161,7 @@ def test_route_matched_servers(registry):
 # HEALTH
 # =========================================
 
+
 def test_health_check(registry):
     status = registry.health_check("mcp_notion", healthy=True, latency_ms=50)
     assert status == "healthy"
@@ -185,7 +190,9 @@ def test_health_check_unhealthy(registry):
 def test_health_check_all(registry):
     statuses = registry.health_check_all()
     assert len(statuses) >= 9
-    assert all(v in ("healthy", "degraded", "unhealthy", "unknown") for v in statuses.values())
+    assert all(
+        v in ("healthy", "degraded", "unhealthy", "unknown") for v in statuses.values()
+    )
 
 
 def test_health_check_nonexistent(registry):
@@ -196,6 +203,7 @@ def test_health_check_nonexistent(registry):
 # =========================================
 # USAGE TRACKING
 # =========================================
+
 
 def test_record_usage(registry):
     registry.record_usage("mcp_notion", "query_database", success=True, latency_ms=100)
@@ -223,6 +231,7 @@ def test_usage_tracker(registry):
 # LIST & FILTER
 # =========================================
 
+
 def test_list_by_capability(registry):
     servers = registry.list_servers(capability="geocoding")
     assert len(servers) >= 1
@@ -239,6 +248,7 @@ def test_list_healthy_only(registry):
 # STATS
 # =========================================
 
+
 def test_stats(registry):
     stats = registry.get_stats()
     assert stats["total_servers"] >= 9
@@ -252,6 +262,7 @@ def test_stats(registry):
 # =========================================
 # HEALTH MONITOR
 # =========================================
+
 
 def test_health_monitor_history():
     monitor = HealthMonitor()
@@ -272,6 +283,7 @@ def test_health_monitor_limit():
 # USAGE TRACKER
 # =========================================
 
+
 def test_usage_tracker_empty():
     tracker = UsageTracker()
     usage = tracker.get_usage()
@@ -281,6 +293,7 @@ def test_usage_tracker_empty():
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     r1 = get_tool_registry()

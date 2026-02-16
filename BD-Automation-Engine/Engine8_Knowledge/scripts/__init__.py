@@ -11,29 +11,29 @@ from .web_scrapers import get_web_scraper, UnifiedWebScraper
 
 __all__ = [
     # Memory Layer
-    'get_memory',
-    'BDMemoryLayer',
+    "get_memory",
+    "BDMemoryLayer",
     # Knowledge Graph
-    'get_knowledge_graph',
-    'BDKnowledgeGraph',
+    "get_knowledge_graph",
+    "BDKnowledgeGraph",
     # Hybrid Retriever
-    'get_hybrid_retriever',
-    'HybridRetriever',
-    'SearchResult',
+    "get_hybrid_retriever",
+    "HybridRetriever",
+    "SearchResult",
     # Query Router
-    'QueryRouter',
-    'QueryType',
-    'smart_query',
+    "QueryRouter",
+    "QueryType",
+    "smart_query",
     # PageIndex
-    'get_pageindex',
-    'PageIndexEngine',
+    "get_pageindex",
+    "PageIndexEngine",
     # Cache
-    'get_cache',
-    'SemanticCache',
+    "get_cache",
+    "SemanticCache",
     # Document Processing
-    'get_docling',
-    'DoclingProcessor',
+    "get_docling",
+    "DoclingProcessor",
     # Web Scraping
-    'get_web_scraper',
-    'UnifiedWebScraper',
+    "get_web_scraper",
+    "UnifiedWebScraper",
 ]

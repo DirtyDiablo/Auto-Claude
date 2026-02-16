@@ -2,6 +2,7 @@
 UltraRAG - Multi-Step Reasoning RAG Pipeline
 Handles complex queries through decomposition and iterative refinement.
 """
+
 import yaml
 import json
 from typing import List, Dict, Optional, Callable
@@ -23,17 +24,18 @@ class RetrievalStrategy(Enum):
 
 
 class ReasoningStep(Enum):
-    DECOMPOSE = "decompose"       # Break complex query into sub-queries
-    RETRIEVE = "retrieve"         # Fetch relevant information
-    SYNTHESIZE = "synthesize"     # Combine retrieved information
-    VERIFY = "verify"             # Self-check the answer
-    REFINE = "refine"             # Improve the answer
-    CITE = "cite"                 # Add citations
+    DECOMPOSE = "decompose"  # Break complex query into sub-queries
+    RETRIEVE = "retrieve"  # Fetch relevant information
+    SYNTHESIZE = "synthesize"  # Combine retrieved information
+    VERIFY = "verify"  # Self-check the answer
+    REFINE = "refine"  # Improve the answer
+    CITE = "cite"  # Add citations
 
 
 @dataclass
 class QueryPlan:
     """Execution plan for a complex query."""
+
     original_query: str
     sub_queries: List[str] = field(default_factory=list)
     steps: List[Dict] = field(default_factory=list)
@@ -48,6 +50,7 @@ class QueryPlan:
 @dataclass
 class PipelineConfig:
     """Configuration for UltraRAG pipeline."""
+
     max_iterations: int = 3
     min_confidence: float = 0.7
     parallel_retrieval: bool = True
@@ -63,10 +66,12 @@ class UltraRAG:
     Multi-step reasoning RAG with configurable pipelines.
     """
 
-    def __init__(self,
-                 retriever_func: Callable,
-                 llm_func: Callable = None,
-                 config: PipelineConfig = None):
+    def __init__(
+        self,
+        retriever_func: Callable,
+        llm_func: Callable = None,
+        config: PipelineConfig = None,
+    ):
         """
         Args:
             retriever_func: Function(query, strategy, top_k, collection) -> List[Dict]
@@ -88,8 +93,8 @@ class UltraRAG:
             "steps": [
                 {"type": "retrieve", "strategy": "hybrid", "top_k": 5},
                 {"type": "synthesize"},
-                {"type": "cite"}
-            ]
+                {"type": "cite"},
+            ],
         }
 
         # Complex query pipeline (decomposition)
@@ -97,12 +102,17 @@ class UltraRAG:
             "name": "Complex Query Decomposition",
             "steps": [
                 {"type": "decompose", "max_sub_queries": 3},
-                {"type": "retrieve", "strategy": "hybrid", "top_k": 3, "parallel": True},
+                {
+                    "type": "retrieve",
+                    "strategy": "hybrid",
+                    "top_k": 3,
+                    "parallel": True,
+                },
                 {"type": "synthesize"},
                 {"type": "verify"},
                 {"type": "refine", "condition": "confidence < 0.7"},
-                {"type": "cite"}
-            ]
+                {"type": "cite"},
+            ],
         }
 
         # Fact-checking pipeline
@@ -111,8 +121,8 @@ class UltraRAG:
             "steps": [
                 {"type": "retrieve", "strategy": "pageindex", "top_k": 10},
                 {"type": "verify", "strict": True},
-                {"type": "cite", "required": True}
-            ]
+                {"type": "cite", "required": True},
+            ],
         }
 
         # Multi-source pipeline
@@ -124,8 +134,8 @@ class UltraRAG:
                 {"type": "retrieve", "strategy": "knowledge_graph", "top_k": 5},
                 {"type": "synthesize", "mode": "merge_dedupe"},
                 {"type": "verify"},
-                {"type": "cite"}
-            ]
+                {"type": "cite"},
+            ],
         }
 
         # BD-specific pipeline
@@ -133,13 +143,28 @@ class UltraRAG:
             "name": "BD Intelligence Analysis",
             "steps": [
                 {"type": "decompose", "template": "bd_query"},
-                {"type": "retrieve", "strategy": "hybrid", "collection": "programs", "top_k": 3},
-                {"type": "retrieve", "strategy": "hybrid", "collection": "contacts", "top_k": 5},
-                {"type": "retrieve", "strategy": "hybrid", "collection": "jobs", "top_k": 5},
+                {
+                    "type": "retrieve",
+                    "strategy": "hybrid",
+                    "collection": "programs",
+                    "top_k": 3,
+                },
+                {
+                    "type": "retrieve",
+                    "strategy": "hybrid",
+                    "collection": "contacts",
+                    "top_k": 5,
+                },
+                {
+                    "type": "retrieve",
+                    "strategy": "hybrid",
+                    "collection": "jobs",
+                    "top_k": 5,
+                },
                 {"type": "synthesize", "mode": "bd_report"},
                 {"type": "verify"},
-                {"type": "cite"}
-            ]
+                {"type": "cite"},
+            ],
         }
 
     def load_pipeline_from_yaml(self, yaml_path: str) -> str:
@@ -153,34 +178,54 @@ class UltraRAG:
 
     def add_pipeline(self, pipeline_id: str, name: str, steps: List[Dict]) -> None:
         """Add a custom pipeline programmatically."""
-        self.pipelines[pipeline_id] = {
-            "name": name,
-            "steps": steps
-        }
+        self.pipelines[pipeline_id] = {"name": name, "steps": steps}
 
     def _classify_query(self, query: str) -> str:
         """Classify query complexity to select appropriate pipeline."""
         query_lower = query.lower()
 
         # BD-specific queries
-        bd_keywords = ["program", "contract", "contractor", "contact", "dcgs", "gdit", "opportunity"]
+        bd_keywords = [
+            "program",
+            "contract",
+            "contractor",
+            "contact",
+            "dcgs",
+            "gdit",
+            "opportunity",
+        ]
         if any(kw in query_lower for kw in bd_keywords):
             return "bd_intelligence"
 
         # Complex queries (multiple questions, comparisons)
-        complex_indicators = ["compare", "difference between", "how does", "why", "analyze", "relationship"]
+        complex_indicators = [
+            "compare",
+            "difference between",
+            "how does",
+            "why",
+            "analyze",
+            "relationship",
+        ]
         if any(ind in query_lower for ind in complex_indicators):
             return "complex"
 
         # Fact-checking queries
-        fact_indicators = ["is it true", "verify", "fact check", "according to", "source"]
+        fact_indicators = [
+            "is it true",
+            "verify",
+            "fact check",
+            "according to",
+            "source",
+        ]
         if any(ind in query_lower for ind in fact_indicators):
             return "factcheck"
 
         # Default to simple
         return "simple"
 
-    def _decompose_query(self, query: str, max_sub: int = 3, template: str = None) -> List[str]:
+    def _decompose_query(
+        self, query: str, max_sub: int = 3, template: str = None
+    ) -> List[str]:
         """Break a complex query into sub-queries."""
         if not self.llm:
             # Simple heuristic decomposition
@@ -209,10 +254,7 @@ Return as JSON array: ["sub_question_1", "sub_question_2", ...]"""
             logger.warning("sub_question_parse_failed: %s", e)
             return [query]
 
-    async def _execute_step(self,
-                           step: Dict,
-                           plan: QueryPlan,
-                           context: Dict) -> Dict:
+    async def _execute_step(self, step: Dict, plan: QueryPlan, context: Dict) -> Dict:
         """Execute a single pipeline step."""
         step_type = step.get("type")
         result = {"step": step_type, "success": False}
@@ -221,7 +263,7 @@ Return as JSON array: ["sub_question_1", "sub_question_2", ...]"""
             sub_queries = self._decompose_query(
                 plan.original_query,
                 step.get("max_sub_queries", 3),
-                step.get("template")
+                step.get("template"),
             )
             plan.sub_queries = sub_queries
             result["sub_queries"] = sub_queries
@@ -238,7 +280,9 @@ Return as JSON array: ["sub_question_1", "sub_question_2", ...]"""
             all_results = []
             for q in queries:
                 try:
-                    results = self.retrieve(q, strategy=strategy, top_k=top_k, collection=collection)
+                    results = self.retrieve(
+                        q, strategy=strategy, top_k=top_k, collection=collection
+                    )
                     if results:
                         all_results.extend(results)
                 except Exception as e:
@@ -272,10 +316,12 @@ Return as JSON array: ["sub_question_1", "sub_question_2", ...]"""
 
             # Generate answer
             if self.llm and unique_results:
-                context_text = "\n\n".join([
-                    f"[{i+1}] {r.get('content', r.get('text', str(r)))[:500]}"
-                    for i, r in enumerate(unique_results[:10])
-                ])
+                context_text = "\n\n".join(
+                    [
+                        f"[{i + 1}] {r.get('content', r.get('text', str(r)))[:500]}"
+                        for i, r in enumerate(unique_results[:10])
+                    ]
+                )
 
                 prompt = f"""Based on the following information, answer the question.
 
@@ -345,11 +391,13 @@ Improved Answer:"""
 
             citations = []
             for r in synthesized[:5]:
-                citations.append({
-                    "source": r.get("source", r.get("document_name", "Unknown")),
-                    "excerpt": r.get("content", r.get("text", ""))[:200],
-                    "score": r.get("score", 0)
-                })
+                citations.append(
+                    {
+                        "source": r.get("source", r.get("document_name", "Unknown")),
+                        "excerpt": r.get("content", r.get("text", ""))[:200],
+                        "score": r.get("score", 0),
+                    }
+                )
 
             plan.citations = citations
             result["num_citations"] = len(citations)
@@ -357,9 +405,7 @@ Improved Answer:"""
 
         return result
 
-    async def query(self,
-                   query: str,
-                   pipeline: str = "auto") -> QueryPlan:
+    async def query(self, query: str, pipeline: str = "auto") -> QueryPlan:
         """
         Execute a query through the reasoning pipeline.
 
@@ -403,6 +449,7 @@ Improved Answer:"""
             asyncio.get_running_loop()
             # If there's a running loop, create a new thread
             import concurrent.futures
+
             with concurrent.futures.ThreadPoolExecutor() as pool:
                 future = pool.submit(asyncio.run, self.query(query, pipeline))
                 return future.result()
@@ -413,11 +460,7 @@ Improved Answer:"""
     def list_pipelines(self) -> List[Dict]:
         """List all available pipelines."""
         return [
-            {
-                "id": pid,
-                "name": p.get("name", pid),
-                "steps": len(p.get("steps", []))
-            }
+            {"id": pid, "name": p.get("name", pid), "steps": len(p.get("steps", []))}
             for pid, p in self.pipelines.items()
         ]
 

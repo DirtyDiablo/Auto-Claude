@@ -20,6 +20,7 @@ from src.rag.self_rag import (
 # FIXTURES
 # =========================================
 
+
 async def mock_retrieval(query: str, limit: int = 10):
     """Mock retrieval function that returns canned passages."""
     return [
@@ -43,6 +44,7 @@ def empty_rag():
 # HELPER FUNCTIONS
 # =========================================
 
+
 def test_token_overlap_identical():
     score = _compute_token_overlap("DCGS program status", "DCGS program status update")
     assert score > 0.5
@@ -59,7 +61,9 @@ def test_token_overlap_empty():
 
 
 def test_entity_overlap_found():
-    score = _compute_entity_overlap("Find John Smith at GDIT", "John Smith works at GDIT.")
+    score = _compute_entity_overlap(
+        "Find John Smith at GDIT", "John Smith works at GDIT."
+    )
     assert score >= 0.5
 
 
@@ -85,6 +89,7 @@ def test_assess_retrieval_not_needed():
 # =========================================
 # RELEVANCE EVALUATION
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_evaluate_relevance(self_rag):
@@ -120,6 +125,7 @@ async def test_evaluate_relevance_marks_relevant(self_rag):
 # SUPPORT EVALUATION
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_evaluate_support_supported(self_rag):
     answer = "John Smith works at GDIT on the DCGS program."
@@ -147,6 +153,7 @@ async def test_evaluate_support_empty(self_rag):
 # =========================================
 # UTILITY EVALUATION
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_evaluate_utility_useful(self_rag):
@@ -178,6 +185,7 @@ async def test_evaluate_utility_empty(self_rag):
 # QUERY REFORMULATION
 # =========================================
 
+
 def test_reformulate_round2():
     result = reformulate_query("Who manages DCGS?", ["low_relevance"], 2)
     assert "DCGS" in result
@@ -192,6 +200,7 @@ def test_reformulate_round3():
 # =========================================
 # ADAPTIVE RETRIEVAL
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_adaptive_retrieve(self_rag):
@@ -233,6 +242,7 @@ async def test_adaptive_retrieve_measures_latency(self_rag):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_self_rag_singleton():
     s1 = get_self_rag()

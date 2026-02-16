@@ -24,6 +24,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class DimensionScore:
     name: str
@@ -75,16 +76,36 @@ DIMENSION_WEIGHTS = {
 
 # PTS strategic growth priorities
 PTS_PRIORITY_PROGRAMS = {
-    "AF DCGS", "PACAF", "GBSD", "F-35", "Sentinel",
-    "Navy ISR", "NGEN", "JADC2", "ABMS",
+    "AF DCGS",
+    "PACAF",
+    "GBSD",
+    "F-35",
+    "Sentinel",
+    "Navy ISR",
+    "NGEN",
+    "JADC2",
+    "ABMS",
 }
 PTS_PRIORITY_CAPABILITIES = {
-    "ISR", "SIGINT", "GEOINT", "C4ISR", "cyber", "data fusion",
-    "mission systems", "DevSecOps", "cloud", "AI/ML",
+    "ISR",
+    "SIGINT",
+    "GEOINT",
+    "C4ISR",
+    "cyber",
+    "data fusion",
+    "mission systems",
+    "DevSecOps",
+    "cloud",
+    "AI/ML",
 }
 PTS_PRIORITY_LOCATIONS = {
-    "Langley", "San Diego", "Colorado Springs", "Fort Meade",
-    "Hickam", "Beale", "Ramstein",
+    "Langley",
+    "San Diego",
+    "Colorado Springs",
+    "Fort Meade",
+    "Hickam",
+    "Beale",
+    "Ramstein",
 }
 
 
@@ -110,63 +131,87 @@ class OpportunityScorer:
         # 1. Win Probability (30%)
         win_pred = await self.win_model.predict(opp)
         win_score = win_pred.win_probability * 100
-        dimensions.append(DimensionScore(
-            name="win_probability",
-            score=round(win_score, 1),
-            weight=DIMENSION_WEIGHTS["win_probability"],
-            weighted_score=round(win_score * DIMENSION_WEIGHTS["win_probability"], 1),
-            details=f"ML model: {win_pred.confidence} confidence",
-        ))
+        dimensions.append(
+            DimensionScore(
+                name="win_probability",
+                score=round(win_score, 1),
+                weight=DIMENSION_WEIGHTS["win_probability"],
+                weighted_score=round(
+                    win_score * DIMENSION_WEIGHTS["win_probability"], 1
+                ),
+                details=f"ML model: {win_pred.confidence} confidence",
+            )
+        )
 
         # 2. Revenue Potential (20%)
         rev_score = self._score_revenue(opp)
-        dimensions.append(DimensionScore(
-            name="revenue_potential",
-            score=round(rev_score, 1),
-            weight=DIMENSION_WEIGHTS["revenue_potential"],
-            weighted_score=round(rev_score * DIMENSION_WEIGHTS["revenue_potential"], 1),
-            details=self._revenue_details(opp),
-        ))
+        dimensions.append(
+            DimensionScore(
+                name="revenue_potential",
+                score=round(rev_score, 1),
+                weight=DIMENSION_WEIGHTS["revenue_potential"],
+                weighted_score=round(
+                    rev_score * DIMENSION_WEIGHTS["revenue_potential"], 1
+                ),
+                details=self._revenue_details(opp),
+            )
+        )
 
         # 3. Strategic Fit (15%)
         strat_score = self._score_strategic_fit(opp)
-        dimensions.append(DimensionScore(
-            name="strategic_fit",
-            score=round(strat_score, 1),
-            weight=DIMENSION_WEIGHTS["strategic_fit"],
-            weighted_score=round(strat_score * DIMENSION_WEIGHTS["strategic_fit"], 1),
-            details=self._strategic_details(opp),
-        ))
+        dimensions.append(
+            DimensionScore(
+                name="strategic_fit",
+                score=round(strat_score, 1),
+                weight=DIMENSION_WEIGHTS["strategic_fit"],
+                weighted_score=round(
+                    strat_score * DIMENSION_WEIGHTS["strategic_fit"], 1
+                ),
+                details=self._strategic_details(opp),
+            )
+        )
 
         # 4. Relationship Strength (15%)
         rel_score = self._score_relationship(opp)
-        dimensions.append(DimensionScore(
-            name="relationship_strength",
-            score=round(rel_score, 1),
-            weight=DIMENSION_WEIGHTS["relationship_strength"],
-            weighted_score=round(rel_score * DIMENSION_WEIGHTS["relationship_strength"], 1),
-            details=self._relationship_details(opp),
-        ))
+        dimensions.append(
+            DimensionScore(
+                name="relationship_strength",
+                score=round(rel_score, 1),
+                weight=DIMENSION_WEIGHTS["relationship_strength"],
+                weighted_score=round(
+                    rel_score * DIMENSION_WEIGHTS["relationship_strength"], 1
+                ),
+                details=self._relationship_details(opp),
+            )
+        )
 
         # 5. Timing Urgency (10%)
         time_score = self._score_timing(opp)
-        dimensions.append(DimensionScore(
-            name="timing_urgency",
-            score=round(time_score, 1),
-            weight=DIMENSION_WEIGHTS["timing_urgency"],
-            weighted_score=round(time_score * DIMENSION_WEIGHTS["timing_urgency"], 1),
-            details=self._timing_details(opp),
-        ))
+        dimensions.append(
+            DimensionScore(
+                name="timing_urgency",
+                score=round(time_score, 1),
+                weight=DIMENSION_WEIGHTS["timing_urgency"],
+                weighted_score=round(
+                    time_score * DIMENSION_WEIGHTS["timing_urgency"], 1
+                ),
+                details=self._timing_details(opp),
+            )
+        )
 
         # 6. Competitive Position (10%)
         comp_score = self._score_competitive(opp)
-        dimensions.append(DimensionScore(
-            name="competitive_position",
-            score=round(comp_score, 1),
-            weight=DIMENSION_WEIGHTS["competitive_position"],
-            weighted_score=round(comp_score * DIMENSION_WEIGHTS["competitive_position"], 1),
-            details=self._competitive_details(opp),
-        ))
+        dimensions.append(
+            DimensionScore(
+                name="competitive_position",
+                score=round(comp_score, 1),
+                weight=DIMENSION_WEIGHTS["competitive_position"],
+                weighted_score=round(
+                    comp_score * DIMENSION_WEIGHTS["competitive_position"], 1
+                ),
+                details=self._competitive_details(opp),
+            )
+        )
 
         composite = sum(d.weighted_score for d in dimensions)
         approach = self._recommend_approach(composite, dimensions, opp)
@@ -183,8 +228,9 @@ class OpportunityScorer:
             scored_at=datetime.now(timezone.utc).isoformat(),
         )
 
-    async def rank_pipeline(self, opportunities: Optional[List[dict]] = None,
-                            limit: int = 50) -> List[ScoredOpportunity]:
+    async def rank_pipeline(
+        self, opportunities: Optional[List[dict]] = None, limit: int = 50
+    ) -> List[ScoredOpportunity]:
         """Rank all active opportunities."""
         if opportunities is None:
             opportunities = await self._fetch_active_opportunities()
@@ -200,8 +246,9 @@ class OpportunityScorer:
 
         return scored
 
-    async def weekly_pipeline_review(self,
-                                     opportunities: Optional[List[dict]] = None) -> PipelineReview:
+    async def weekly_pipeline_review(
+        self, opportunities: Optional[List[dict]] = None
+    ) -> PipelineReview:
         """Automated weekly pipeline analysis."""
         if opportunities is None:
             opportunities = await self._fetch_active_opportunities()
@@ -212,27 +259,39 @@ class OpportunityScorer:
 
         # Identify new opportunities (last 7 days)
         new_this_week = [
-            {"id": opp.get("id"), "title": opp.get("title"),
-             "days_open": opp.get("days_job_open", 0)}
+            {
+                "id": opp.get("id"),
+                "title": opp.get("title"),
+                "days_open": opp.get("days_job_open", 0),
+            }
             for opp in opportunities
             if opp.get("days_job_open", 999) <= 7
         ]
 
         # At-risk: high score but declining activity
         at_risk = [
-            {"id": s.opportunity_id, "title": s.title, "score": s.composite_score,
-             "reason": "No recent activity"}
+            {
+                "id": s.opportunity_id,
+                "title": s.title,
+                "score": s.composite_score,
+                "reason": "No recent activity",
+            }
             for s in ranked
-            if s.composite_score > 50 and any(
-                opp.get("id") == s.opportunity_id and opp.get("days_since_last_contact", 0) > 14
+            if s.composite_score > 50
+            and any(
+                opp.get("id") == s.opportunity_id
+                and opp.get("days_since_last_contact", 0) > 14
                 for opp in opportunities
             )
         ]
 
         # Stale: no activity in 14+ days
         stale = [
-            {"id": opp.get("id"), "title": opp.get("title"),
-             "days_inactive": opp.get("days_since_last_contact", 0)}
+            {
+                "id": opp.get("id"),
+                "title": opp.get("title"),
+                "days_inactive": opp.get("days_since_last_contact", 0),
+            }
             for opp in opportunities
             if opp.get("days_since_last_contact", 0) > 14
         ]
@@ -240,16 +299,24 @@ class OpportunityScorer:
         # Focus areas
         focus = []
         if top_10:
-            focus.append(f"Prioritize top {len(top_10)} opportunities (avg score: {sum(s.composite_score for s in top_10)/len(top_10):.0f})")
+            focus.append(
+                f"Prioritize top {len(top_10)} opportunities (avg score: {sum(s.composite_score for s in top_10) / len(top_10):.0f})"
+            )
         if new_this_week:
             focus.append(f"Evaluate {len(new_this_week)} new opportunities this week")
         if stale:
-            focus.append(f"Re-engage {len(stale)} stale opportunities or close them out")
+            focus.append(
+                f"Re-engage {len(stale)} stale opportunities or close them out"
+            )
         if at_risk:
-            focus.append(f"Attention needed: {len(at_risk)} high-value opportunities at risk")
+            focus.append(
+                f"Attention needed: {len(at_risk)} high-value opportunities at risk"
+            )
 
         total_value = sum(opp.get("estimated_value", 0) for opp in opportunities)
-        avg_score = sum(s.composite_score for s in ranked) / len(ranked) if ranked else 0
+        avg_score = (
+            sum(s.composite_score for s in ranked) / len(ranked) if ranked else 0
+        )
 
         return PipelineReview(
             review_date=datetime.now(timezone.utc).isoformat(),
@@ -279,12 +346,14 @@ class OpportunityScorer:
 
         dimension_changes = []
         for orig_dim, mod_dim in zip(original.dimensions, modified_scored.dimensions):
-            dimension_changes.append({
-                "dimension": orig_dim.name,
-                "original": orig_dim.score,
-                "modified": mod_dim.score,
-                "delta": round(mod_dim.score - orig_dim.score, 1),
-            })
+            dimension_changes.append(
+                {
+                    "dimension": orig_dim.name,
+                    "original": orig_dim.score,
+                    "modified": mod_dim.score,
+                    "delta": round(mod_dim.score - orig_dim.score, 1),
+                }
+            )
 
         return {
             "original_score": original.composite_score,
@@ -292,7 +361,11 @@ class OpportunityScorer:
             "score_delta": round(delta, 1),
             "changes_applied": changes,
             "dimension_changes": dimension_changes,
-            "impact": "positive" if delta > 0 else "negative" if delta < 0 else "neutral",
+            "impact": "positive"
+            if delta > 0
+            else "negative"
+            if delta < 0
+            else "neutral",
             "recommendation": modified_scored.recommended_approach,
         }
 
@@ -324,7 +397,9 @@ class OpportunityScorer:
             score += 30
 
         desc = str(opp.get("description", opp.get("title", "")))
-        cap_matches = sum(1 for c in PTS_PRIORITY_CAPABILITIES if c.lower() in desc.lower())
+        cap_matches = sum(
+            1 for c in PTS_PRIORITY_CAPABILITIES if c.lower() in desc.lower()
+        )
         score += min(cap_matches * 8, 24)
 
         location = str(opp.get("location", ""))
@@ -397,7 +472,7 @@ class OpportunityScorer:
     def _revenue_details(self, opp: dict) -> str:
         value = opp.get("estimated_value", 0)
         if value >= 1_000_000:
-            return f"${value/1_000_000:.1f}M estimated value"
+            return f"${value / 1_000_000:.1f}M estimated value"
         if value > 0:
             return f"${value:,.0f} estimated value"
         return "Value unknown"
@@ -428,11 +503,17 @@ class OpportunityScorer:
     def _competitive_details(self, opp: dict) -> str:
         inv = opp.get("pts_involvement", 0)
         comp = opp.get("competitor_density", 0)
-        labels = {3: "Current incumbent", 2: "Past performer", 1: "Target", 0: "No history"}
+        labels = {
+            3: "Current incumbent",
+            2: "Past performer",
+            1: "Target",
+            0: "No history",
+        }
         return f"{labels.get(inv, 'Unknown')}, {comp} competitors"
 
-    def _recommend_approach(self, score: float,
-                            dimensions: List[DimensionScore], opp: dict) -> str:
+    def _recommend_approach(
+        self, score: float, dimensions: List[DimensionScore], opp: dict
+    ) -> str:
         """Generate recommended approach based on overall score profile."""
         if score >= 75:
             return "Full pursuit: assign BD lead, submit candidates immediately, executive outreach"

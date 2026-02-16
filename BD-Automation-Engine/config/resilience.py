@@ -33,6 +33,7 @@ _TRANSIENT_EXCEPTIONS = (
 
 try:
     from openai import RateLimitError, APITimeoutError, APIConnectionError
+
     _TRANSIENT_EXCEPTIONS = (
         *_TRANSIENT_EXCEPTIONS,
         RateLimitError,

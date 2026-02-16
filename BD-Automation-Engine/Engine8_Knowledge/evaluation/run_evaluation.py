@@ -15,6 +15,7 @@ from ragas_evaluator import get_evaluator
 
 try:
     from scripts.query_router import QueryRouter
+
     ROUTER_AVAILABLE = True
 except ImportError:
     ROUTER_AVAILABLE = False
@@ -48,9 +49,9 @@ async def run_evaluation(test_file: str = "test_cases.json") -> Dict:
     results = []
     total_score = 0
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("BD Intelligence Hub - RAGAS Evaluation")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Running {len(test_cases)} test cases...\n")
 
     for i, tc in enumerate(test_cases, 1):
@@ -76,18 +77,20 @@ async def run_evaluation(test_file: str = "test_cases.json") -> Dict:
             question=tc["question"],
             answer=answer,
             contexts=contexts,
-            ground_truth=tc["ground_truth"]
+            ground_truth=tc["ground_truth"],
         )
 
         score = eval_result.get("overall", 0)
         total_score += score
 
-        results.append({
-            "question": tc["question"],
-            "system_answer": answer[:200] + "..." if len(answer) > 200 else answer,
-            "ground_truth": tc["ground_truth"],
-            "metrics": eval_result
-        })
+        results.append(
+            {
+                "question": tc["question"],
+                "system_answer": answer[:200] + "..." if len(answer) > 200 else answer,
+                "ground_truth": tc["ground_truth"],
+                "metrics": eval_result,
+            }
+        )
 
         status = "PASS" if score >= 0.5 else "FAIL"
         print(f"  Score: {score:.2f} [{status}]")
@@ -95,18 +98,30 @@ async def run_evaluation(test_file: str = "test_cases.json") -> Dict:
     # Calculate averages
     avg_score = total_score / len(test_cases) if test_cases else 0
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print("EVALUATION SUMMARY")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
     print(f"Total Test Cases: {len(test_cases)}")
     print(f"Average Score: {avg_score:.2f}")
-    print(f"Pass Rate: {sum(1 for r in results if r['metrics'].get('overall', 0) >= 0.5)}/{len(test_cases)}")
+    print(
+        f"Pass Rate: {sum(1 for r in results if r['metrics'].get('overall', 0) >= 0.5)}/{len(test_cases)}"
+    )
 
     # Metric averages
-    metrics = ["faithfulness", "answer_relevancy", "context_precision", "context_recall", "answer_correctness"]
+    metrics = [
+        "faithfulness",
+        "answer_relevancy",
+        "context_precision",
+        "context_recall",
+        "answer_correctness",
+    ]
     print("\nMetric Averages:")
     for metric in metrics:
-        avg = sum(r["metrics"].get(metric, 0) for r in results) / len(results) if results else 0
+        avg = (
+            sum(r["metrics"].get(metric, 0) for r in results) / len(results)
+            if results
+            else 0
+        )
         print(f"  {metric}: {avg:.2f}")
 
     # Save results
@@ -114,7 +129,7 @@ async def run_evaluation(test_file: str = "test_cases.json") -> Dict:
         "timestamp": datetime.now().isoformat(),
         "total_cases": len(test_cases),
         "average_score": avg_score,
-        "results": results
+        "results": results,
     }
 
     output_path = os.path.join(os.path.dirname(__file__), "evaluation_results.json")
@@ -130,7 +145,9 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(description="Run RAGAS evaluation")
-    parser.add_argument("--test-file", default="test_cases.json", help="Test cases file")
+    parser.add_argument(
+        "--test-file", default="test_cases.json", help="Test cases file"
+    )
     args = parser.parse_args()
 
     asyncio.run(run_evaluation(args.test_file))

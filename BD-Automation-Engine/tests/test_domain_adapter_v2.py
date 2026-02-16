@@ -99,7 +99,18 @@ class TestDefenseSynonyms:
 
     def test_all_synonym_keys_present(self):
         """All expected acronym keys should be present in the dict."""
-        expected_keys = {"DCGS", "ISR", "C2", "EW", "SIGINT", "DevSecOps", "JADC2", "ABMS", "GBSD", "NGEN"}
+        expected_keys = {
+            "DCGS",
+            "ISR",
+            "C2",
+            "EW",
+            "SIGINT",
+            "DevSecOps",
+            "JADC2",
+            "ABMS",
+            "GBSD",
+            "NGEN",
+        }
         assert expected_keys == set(DEFENSE_SYNONYMS.keys())
 
 
@@ -160,7 +171,9 @@ class TestSynonymManagement:
 
     def test_add_synonyms(self, adapter):
         """add_synonyms() should register new acronym expansions."""
-        adapter.add_synonyms("JSTARS", ["Joint STARS", "Joint Surveillance Target Attack Radar System"])
+        adapter.add_synonyms(
+            "JSTARS", ["Joint STARS", "Joint Surveillance Target Attack Radar System"]
+        )
         assert "JSTARS" in adapter._synonyms
         assert "Joint STARS" in adapter._synonyms["JSTARS"]
 
@@ -208,7 +221,9 @@ class TestBenchmark:
 
     def test_benchmark_result_dataclass(self):
         """BenchmarkResult should have all expected fields."""
-        br = BenchmarkResult(avg_precision=0.8, avg_recall=0.7, avg_mrr=0.75, queries_tested=10)
+        br = BenchmarkResult(
+            avg_precision=0.8, avg_recall=0.7, avg_mrr=0.75, queries_tested=10
+        )
         assert br.avg_precision == 0.8
         assert br.avg_recall == 0.7
         assert br.avg_mrr == 0.75
@@ -236,7 +251,11 @@ class TestTraining:
 
     def test_training_pair_dataclass(self):
         """TrainingPair should have anchor, positive, negative fields."""
-        pair = TrainingPair(anchor="DCGS analyst", positive="ground system engineer", negative="cooking recipe")
+        pair = TrainingPair(
+            anchor="DCGS analyst",
+            positive="ground system engineer",
+            negative="cooking recipe",
+        )
         assert pair.anchor == "DCGS analyst"
         assert pair.positive == "ground system engineer"
         assert pair.negative == "cooking recipe"
@@ -275,6 +294,7 @@ class TestSingleton:
     def test_get_domain_adapter_v2_returns_instance(self):
         """get_domain_adapter_v2() should return a DomainAdapterV2 instance."""
         import Engine8_Knowledge.ml.domain_adapter_v2 as mod
+
         mod._adapter = None
         instance = get_domain_adapter_v2()
         assert isinstance(instance, DomainAdapterV2)
@@ -282,6 +302,7 @@ class TestSingleton:
     def test_get_domain_adapter_v2_is_singleton(self):
         """Calling get_domain_adapter_v2() twice should return the same instance."""
         import Engine8_Knowledge.ml.domain_adapter_v2 as mod
+
         mod._adapter = None
         a = get_domain_adapter_v2()
         b = get_domain_adapter_v2()

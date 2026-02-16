@@ -21,8 +21,11 @@ load_dotenv()
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
-        Distance, VectorParams,
-        PayloadSchemaType, TextIndexParams, TokenizerType
+        Distance,
+        VectorParams,
+        PayloadSchemaType,
+        TextIndexParams,
+        TokenizerType,
     )
 except ImportError:
     print("Error: qdrant-client not installed. Run: pip install qdrant-client")
@@ -33,51 +36,83 @@ except ImportError:
 COLLECTIONS = {
     "contacts_unified": {
         "description": "All contacts from BD-Engine, N8N-Builder, ZoomInfo",
-        "payload_indexes": ["program", "hierarchy_tier", "bd_priority", "location_hub", "company", "source_project"]
+        "payload_indexes": [
+            "program",
+            "hierarchy_tier",
+            "bd_priority",
+            "location_hub",
+            "company",
+            "source_project",
+        ],
     },
     "programs_unified": {
         "description": "Federal programs from all sources",
-        "payload_indexes": ["agency_owner", "prime_contractor", "pts_involvement", "priority_level", "status"]
+        "payload_indexes": [
+            "agency_owner",
+            "prime_contractor",
+            "pts_involvement",
+            "priority_level",
+            "status",
+        ],
     },
     "jobs_unified": {
         "description": "All scraped and tracked jobs",
-        "payload_indexes": ["company", "detected_clearance", "location", "mapped_program", "status", "source_project"]
+        "payload_indexes": [
+            "company",
+            "detected_clearance",
+            "location",
+            "mapped_program",
+            "status",
+            "source_project",
+        ],
     },
     "contracts_federal": {
         "description": "USASpending + FPDS federal contract data",
-        "payload_indexes": ["agency", "contractor", "naics", "contract_type", "fiscal_year"]
+        "payload_indexes": [
+            "agency",
+            "contractor",
+            "naics",
+            "contract_type",
+            "fiscal_year",
+        ],
     },
     "activities_log": {
         "description": "All BD engagement activities",
-        "payload_indexes": ["contact_name", "activity_type", "program", "author", "date"]
+        "payload_indexes": [
+            "contact_name",
+            "activity_type",
+            "program",
+            "author",
+            "date",
+        ],
     },
     "documents_kb": {
         "description": "Playbooks, reports, briefings",
-        "payload_indexes": ["doc_type", "program", "author", "date"]
+        "payload_indexes": ["doc_type", "program", "author", "date"],
     },
     "bullhorn_history": {
         "description": "38K Bullhorn CRM records",
-        "payload_indexes": ["candidate", "client", "role_type", "date", "outcome"]
+        "payload_indexes": ["candidate", "client", "role_type", "date", "outcome"],
     },
     "knowledge_graph": {
         "description": "LightRAG entity extractions",
-        "payload_indexes": ["entity_type", "source", "relationship_type"]
+        "payload_indexes": ["entity_type", "source", "relationship_type"],
     },
     "intelligence_briefs": {
         "description": "HUMINT reports and weekly updates",
-        "payload_indexes": ["source_tier", "confidence", "program", "date"]
+        "payload_indexes": ["source_tier", "confidence", "program", "date"],
     },
     "email_templates": {
         "description": "Generated outreach content",
-        "payload_indexes": ["contact_tier", "program", "template_type"]
+        "payload_indexes": ["contact_tier", "program", "template_type"],
     },
     "competitor_intel": {
         "description": "Competitor analysis data",
-        "payload_indexes": ["competitor", "program", "location", "role_type"]
+        "payload_indexes": ["competitor", "program", "location", "role_type"],
     },
     "pipeline_tracking": {
         "description": "Active BD opportunities",
-        "payload_indexes": ["stage", "contact", "program", "probability"]
+        "payload_indexes": ["stage", "contact", "program", "probability"],
     },
 }
 
@@ -145,16 +180,18 @@ def create_all_collections(qdrant_url: str = None, vector_size: int = 1536):
             except Exception as e:
                 print(f"    Warning: Could not create full-text index: {e}")
 
-            print(f"  [OK] Created collection '{name}' with {len(config['payload_indexes'])} indexes + full-text")
+            print(
+                f"  [OK] Created collection '{name}' with {len(config['payload_indexes'])} indexes + full-text"
+            )
             created_count += 1
 
         except Exception as e:
             print(f"  [ERROR] Failed to create '{name}': {e}")
 
     # Summary
-    print(f"\n{'='*50}")
+    print(f"\n{'=' * 50}")
     print(f"Summary: Created {created_count}, Skipped {skipped_count}")
-    print(f"{'='*50}")
+    print(f"{'=' * 50}")
 
     # Verify all collections
     print("\nVerifying collections:")
@@ -170,8 +207,17 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Create unified Qdrant collections")
-    parser.add_argument("--url", default=None, help="Qdrant URL (default: QDRANT_URL env or localhost:6333)")
-    parser.add_argument("--vector-size", type=int, default=1536, help="Embedding dimension (default: 1536)")
+    parser.add_argument(
+        "--url",
+        default=None,
+        help="Qdrant URL (default: QDRANT_URL env or localhost:6333)",
+    )
+    parser.add_argument(
+        "--vector-size",
+        type=int,
+        default=1536,
+        help="Embedding dimension (default: 1536)",
+    )
 
     args = parser.parse_args()
 

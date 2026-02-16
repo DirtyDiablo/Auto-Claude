@@ -25,6 +25,7 @@ logger = logging.getLogger(__name__)
 # REQUEST MODELS
 # =========================================
 
+
 class GeocodeRequest(BaseModel):
     location: str
 
@@ -55,6 +56,7 @@ class CommuteRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_geo_router(app: FastAPI) -> None:
     """Register all geographic intelligence endpoints on the FastAPI app."""
@@ -121,7 +123,8 @@ def include_geo_router(app: FastAPI) -> None:
     async def geo_radius(req: RadiusRequest):
         """Find all entities within radius of a point."""
         result = spatial.find_within_radius(
-            center_lat=req.lat, center_lng=req.lng,
+            center_lat=req.lat,
+            center_lng=req.lng,
             radius_miles=req.radius_miles,
             entity_types=req.entity_types,
         )
@@ -146,8 +149,10 @@ def include_geo_router(app: FastAPI) -> None:
             "entity_type": entity_type,
             "clusters": [
                 {
-                    "id": c.id, "region": c.region,
-                    "center_lat": c.center_lat, "center_lng": c.center_lng,
+                    "id": c.id,
+                    "region": c.region,
+                    "center_lat": c.center_lat,
+                    "center_lng": c.center_lng,
                     "total": c.total,
                     "dominant_programs": c.dominant_programs,
                     "dominant_companies": c.dominant_companies,
@@ -165,7 +170,9 @@ def include_geo_router(app: FastAPI) -> None:
     async def geo_overlap(req: OverlapRequest):
         """Analyze geographic overlap between two programs."""
         result = spatial.overlap_analysis(
-            req.program_a, req.program_b, req.proximity_threshold_miles,
+            req.program_a,
+            req.program_b,
+            req.proximity_threshold_miles,
         )
         return {
             "program_a": result.program_a,
@@ -182,7 +189,9 @@ def include_geo_router(app: FastAPI) -> None:
     async def geo_commute(req: CommuteRequest):
         """Find jobs within commute distance."""
         result = spatial.commute_analysis(
-            req.lat, req.lng, req.max_commute_miles,
+            req.lat,
+            req.lng,
+            req.max_commute_miles,
         )
         return {
             "origin": result.origin,
@@ -233,7 +242,9 @@ def include_geo_router(app: FastAPI) -> None:
     ):
         """Get all defense facilities with coordinates."""
         facilities = geocoder.get_facilities(
-            region=region, facility_type=facility_type, state=state,
+            region=region,
+            facility_type=facility_type,
+            state=state,
         )
         return {
             "facilities": [f.to_dict() for f in facilities],

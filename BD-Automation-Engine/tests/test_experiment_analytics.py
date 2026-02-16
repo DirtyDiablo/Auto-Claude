@@ -18,6 +18,7 @@ def analytics():
 # TRACK EVENTS
 # =========================================
 
+
 def test_track_event(analytics):
     event = analytics.track_event("exp1", "var_a", "user1", "view")
     assert isinstance(event, AnalyticsEvent)
@@ -40,6 +41,7 @@ def test_track_multiple(analytics):
 # =========================================
 # FUNNEL
 # =========================================
+
 
 def test_funnel(analytics):
     for i in range(100):
@@ -76,6 +78,7 @@ def test_funnel_step_to_dict(analytics):
 # TIME SERIES
 # =========================================
 
+
 def test_time_series(analytics):
     analytics.track_event("exp1", "var_a", "user1", "conversion", value=10.0)
     analytics.track_event("exp1", "var_a", "user2", "conversion", value=20.0)
@@ -92,6 +95,7 @@ def test_time_series_empty(analytics):
 # =========================================
 # SEGMENT ANALYSIS
 # =========================================
+
 
 def test_segment_by_variant(analytics):
     for i in range(20):
@@ -118,6 +122,7 @@ def test_segment_empty(analytics):
 # SAMPLE SIZE CALCULATOR
 # =========================================
 
+
 def test_sample_size(analytics):
     n = analytics.compute_sample_size_needed(0.10, 0.02)
     assert n > 0
@@ -139,6 +144,7 @@ def test_sample_size_invalid_rates(analytics):
 # EVENT TO_DICT
 # =========================================
 
+
 def test_event_to_dict(analytics):
     event = analytics.track_event("exp1", "var_a", "user1", "view")
     d = event.to_dict()
@@ -151,6 +157,7 @@ def test_event_to_dict(analytics):
 # STATS & SINGLETON
 # =========================================
 
+
 def test_stats(analytics):
     analytics.track_event("exp1", "var_a", "user1", "view")
     stats = analytics.get_stats()
@@ -160,6 +167,7 @@ def test_stats(analytics):
 
 def test_singleton():
     import src.experimentation.experiment_analytics as mod
+
     mod._instance = None
     a1 = get_experiment_analytics()
     a2 = get_experiment_analytics()

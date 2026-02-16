@@ -64,16 +64,21 @@ def register_contact_tools(mcp, hub) -> int:
         name: str, title: str, location: str = ""
     ) -> Dict[str, Any]:
         """Classify a new contact: tier, program, BD priority, location hub, functional area."""
-        data = await hub.post("/api/v2/contacts/classify", json={
-            "name": name,
-            "title": title,
-            "location": location,
-        })
+        data = await hub.post(
+            "/api/v2/contacts/classify",
+            json={
+                "name": name,
+                "title": title,
+                "location": location,
+            },
+        )
         if not data:
             # Fallback basic classification
             tier = 5
             title_lower = title.lower()
-            if any(kw in title_lower for kw in ["ceo", "cto", "cio", "president", "vp"]):
+            if any(
+                kw in title_lower for kw in ["ceo", "cto", "cio", "president", "vp"]
+            ):
                 tier = 1
             elif any(kw in title_lower for kw in ["director", "svp"]):
                 tier = 2
@@ -97,9 +102,7 @@ def register_contact_tools(mcp, hub) -> int:
         from_contact: str, to_contact: str
     ) -> Dict[str, Any]:
         """Find the shortest warm introduction path between two contacts using Neo4j."""
-        data = await hub.get(
-            f"/bdgraph/introduction-path/{from_contact}/{to_contact}"
-        )
+        data = await hub.get(f"/bdgraph/introduction-path/{from_contact}/{to_contact}")
         if not data:
             data = await hub.get(f"/bdgraph/teaming/{from_contact}/{to_contact}")
         return data or {"from": from_contact, "to": to_contact, "path": [], "hops": -1}
@@ -107,16 +110,21 @@ def register_contact_tools(mcp, hub) -> int:
     count += 1
 
     @mcp.tool()
-    async def get_org_chart(
-        program: str, format: str = "text"
-    ) -> Dict[str, Any]:
+    async def get_org_chart(program: str, format: str = "text") -> Dict[str, Any]:
         """Get org chart for a program. format: text (ASCII tree), json, or mermaid."""
-        data = await hub.post("/org-chart/generate", json={
-            "program": program,
-            "mode": "tree",
-        })
+        data = await hub.post(
+            "/org-chart/generate",
+            json={
+                "program": program,
+                "mode": "tree",
+            },
+        )
         if not data:
-            return {"program": program, "format": format, "chart": "No org chart data available"}
+            return {
+                "program": program,
+                "format": format,
+                "chart": "No org chart data available",
+            }
 
         if format == "mermaid":
             # Convert to mermaid

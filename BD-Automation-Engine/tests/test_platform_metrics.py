@@ -20,7 +20,12 @@ class TestMetricValueDataclass:
 
     def test_metric_value_fields(self):
         """MetricValue should have name, value, labels, and metric_type fields."""
-        mv = MetricValue(name="test_counter", value=42.0, labels={"env": "dev"}, metric_type="counter")
+        mv = MetricValue(
+            name="test_counter",
+            value=42.0,
+            labels={"env": "dev"},
+            metric_type="counter",
+        )
         assert mv.name == "test_counter"
         assert mv.value == 42.0
         assert mv.labels == {"env": "dev"}
@@ -174,7 +179,9 @@ class TestFallbackBehavior:
         """inc_counter should still update internal dict even without prometheus_client."""
         pm = PlatformMetrics()
         pm._prom_available = False
-        pm.inc_counter("requests", {"method": "GET", "endpoint": "/test", "status_code": "200"})
+        pm.inc_counter(
+            "requests", {"method": "GET", "endpoint": "/test", "status_code": "200"}
+        )
         assert len(pm._counters) == 1
 
 
@@ -184,6 +191,7 @@ class TestGetPlatformMetricsSingleton:
     def test_returns_platform_metrics_instance(self):
         """get_platform_metrics should return a PlatformMetrics instance."""
         import Engine8_Knowledge.monitoring.metrics as mod
+
         # Reset singleton for isolated test
         mod._metrics = None
         m = get_platform_metrics()
@@ -192,6 +200,7 @@ class TestGetPlatformMetricsSingleton:
     def test_returns_same_instance(self):
         """get_platform_metrics should return the same instance on subsequent calls."""
         import Engine8_Knowledge.monitoring.metrics as mod
+
         mod._metrics = None
         m1 = get_platform_metrics()
         m2 = get_platform_metrics()
@@ -206,6 +215,7 @@ def _import_side_effect(name, *args, **kwargs):
 
 
 import builtins
+
 original_import = builtins.__import__
 
 

@@ -64,7 +64,10 @@ class TestInit:
 
 class TestClassifyLayer:
     def test_classify_layer_episodic(self, store):
-        assert store._classify_layer("general content", {"type": "interaction"}) == "episodic"
+        assert (
+            store._classify_layer("general content", {"type": "interaction"})
+            == "episodic"
+        )
 
     def test_classify_layer_procedural(self, store):
         assert store._classify_layer("content", {"type": "pattern"}) == "procedural"
@@ -76,7 +79,10 @@ class TestClassifyLayer:
         """Content-based classification when no type metadata."""
         assert store._classify_layer("called Alice about DCGS", {}) == "episodic"
         assert store._classify_layer("Alice reports to Bob", {}) == "graph"
-        assert store._classify_layer("strategy worked because of timing", {}) == "procedural"
+        assert (
+            store._classify_layer("strategy worked because of timing", {})
+            == "procedural"
+        )
 
     def test_classify_short_term(self, store):
         assert store._classify_layer("content", {"type": "short_term"}) == "short_term"

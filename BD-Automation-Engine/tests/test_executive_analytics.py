@@ -15,35 +15,46 @@ from src.revenue.executive_analytics import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def analytics():
     ea = ExecutiveAnalytics()
-    ea.set_revenue_data({
-        "2025-01": 85000,
-        "2025-02": 92000,
-        "2025-03": 78000,
-        "2024-12": 70000,
-    })
-    ea.set_targets({
-        "2025-01": 100000,
-        "2025-02": 100000,
-        "2025-03": 100000,
-    })
-    ea.set_rep_data([
-        {"rep": "Rep-A", "revenue": 55000, "quota": 50000, "placements": 5},
-        {"rep": "Rep-B", "revenue": 30000, "quota": 50000, "placements": 2},
-    ])
-    ea.set_program_revenue({
-        "DCGS": 120000,
-        "NGEN": 40000,
-        "GBSD": 30000,
-        "PACAF": 10000,
-    })
-    ea.set_pipeline_data([
-        {"value": 200000, "stage": "interview"},
-        {"value": 150000, "stage": "offer"},
-        {"value": 80000, "stage": "discovery"},
-    ])
+    ea.set_revenue_data(
+        {
+            "2025-01": 85000,
+            "2025-02": 92000,
+            "2025-03": 78000,
+            "2024-12": 70000,
+        }
+    )
+    ea.set_targets(
+        {
+            "2025-01": 100000,
+            "2025-02": 100000,
+            "2025-03": 100000,
+        }
+    )
+    ea.set_rep_data(
+        [
+            {"rep": "Rep-A", "revenue": 55000, "quota": 50000, "placements": 5},
+            {"rep": "Rep-B", "revenue": 30000, "quota": 50000, "placements": 2},
+        ]
+    )
+    ea.set_program_revenue(
+        {
+            "DCGS": 120000,
+            "NGEN": 40000,
+            "GBSD": 30000,
+            "PACAF": 10000,
+        }
+    )
+    ea.set_pipeline_data(
+        [
+            {"value": 200000, "stage": "interview"},
+            {"value": 150000, "stage": "offer"},
+            {"value": 80000, "stage": "discovery"},
+        ]
+    )
     ea.set_placement_metrics(active=15, new=3, avg_margin=35.0)
     return ea
 
@@ -56,6 +67,7 @@ def empty_analytics():
 # =========================================
 # QUOTA ATTAINMENT
 # =========================================
+
 
 class TestQuotaAttainment:
     def test_returns_list(self, analytics):
@@ -78,6 +90,7 @@ class TestQuotaAttainment:
 # DIVERSIFICATION SCORE
 # =========================================
 
+
 class TestDiversificationScore:
     def test_returns_score(self, analytics):
         score = analytics.get_diversification_score()
@@ -90,7 +103,12 @@ class TestDiversificationScore:
 
     def test_assessment_valid(self, analytics):
         score = analytics.get_diversification_score()
-        assert score.assessment in ("concentrated", "moderate", "balanced", "diversified")
+        assert score.assessment in (
+            "concentrated",
+            "moderate",
+            "balanced",
+            "diversified",
+        )
 
     def test_empty_is_balanced(self, empty_analytics):
         score = empty_analytics.get_diversification_score()
@@ -101,6 +119,7 @@ class TestDiversificationScore:
 # =========================================
 # PERIOD COMPARISON
 # =========================================
+
 
 class TestPeriodComparison:
     def test_comparison(self, analytics):
@@ -124,6 +143,7 @@ class TestPeriodComparison:
 # WEIGHTED PIPELINE
 # =========================================
 
+
 class TestWeightedPipeline:
     def test_pipeline_value(self, analytics):
         pipeline = analytics.get_weighted_pipeline()
@@ -144,6 +164,7 @@ class TestWeightedPipeline:
 # TOP ACCOUNTS
 # =========================================
 
+
 class TestTopAccounts:
     def test_returns_list(self, analytics):
         accounts = analytics.get_top_accounts(5)
@@ -159,6 +180,7 @@ class TestTopAccounts:
 # =========================================
 # EXECUTIVE SUMMARY
 # =========================================
+
 
 class TestExecutiveSummary:
     def test_generates_summary(self, analytics):
@@ -197,6 +219,7 @@ class TestExecutiveSummary:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_analytics_returns_instance(self):

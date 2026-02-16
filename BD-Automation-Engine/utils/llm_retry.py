@@ -26,12 +26,18 @@ logger = structlog.get_logger(__name__)
 # Try to import API exception classes
 try:
     from anthropic import APIError, APIConnectionError, RateLimitError
+
     ANTHROPIC_EXCEPTIONS = (APIError, APIConnectionError, RateLimitError)
 except ImportError:
     ANTHROPIC_EXCEPTIONS = (ConnectionError, TimeoutError)
 
 try:
-    from openai import OpenAIError, APIError as OpenAIAPIError, RateLimitError as OpenAIRateLimitError
+    from openai import (
+        OpenAIError,
+        APIError as OpenAIAPIError,
+        RateLimitError as OpenAIRateLimitError,
+    )
+
     OPENAI_EXCEPTIONS = (OpenAIError, OpenAIAPIError, OpenAIRateLimitError)
 except ImportError:
     OPENAI_EXCEPTIONS = (ConnectionError, TimeoutError)

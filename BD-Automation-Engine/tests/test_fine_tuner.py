@@ -29,6 +29,7 @@ def triplets():
 # BASELINE MODEL
 # =========================================
 
+
 def test_baseline_model_registered(tuner):
     models = tuner.list_models()
     assert len(models) >= 1
@@ -53,6 +54,7 @@ def test_baseline_has_metrics(tuner):
 # =========================================
 # FINE-TUNING
 # =========================================
+
 
 def test_start_fine_tuning(tuner, triplets):
     job = tuner.start_fine_tuning(triplets)
@@ -139,6 +141,7 @@ def test_get_job_not_found(tuner):
 # EVALUATION
 # =========================================
 
+
 def test_evaluate_baseline(tuner, triplets):
     baseline = tuner.get_deployed_model()
     metrics = tuner.evaluate_model(baseline.id, triplets)
@@ -167,6 +170,7 @@ def test_eval_metrics_to_dict(tuner, triplets):
 # =========================================
 # COMPARISON
 # =========================================
+
 
 def test_compare_models(tuner, triplets):
     tuner.start_fine_tuning(triplets)
@@ -199,6 +203,7 @@ def test_compare_not_found(tuner, triplets):
 # DEPLOYMENT
 # =========================================
 
+
 def test_deploy_model(tuner, triplets):
     tuner.start_fine_tuning(triplets)
     models = tuner.list_models()
@@ -227,6 +232,7 @@ def test_deploy_changes_status(tuner, triplets):
 # =========================================
 # A/B TESTING
 # =========================================
+
 
 def test_start_ab_test(tuner, triplets):
     tuner.start_fine_tuning(triplets)
@@ -273,6 +279,7 @@ def test_ab_results(tuner, triplets):
 # QUALITY HISTORY
 # =========================================
 
+
 def test_quality_history(tuner, triplets):
     tuner.start_fine_tuning(triplets)
     history = tuner.get_quality_history()
@@ -292,6 +299,7 @@ def test_quality_history_accumulates(tuner, triplets):
 # STATS
 # =========================================
 
+
 def test_stats(tuner, triplets):
     tuner.start_fine_tuning(triplets)
     stats = tuner.get_stats()
@@ -302,6 +310,7 @@ def test_stats(tuner, triplets):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     t1 = get_fine_tuner()

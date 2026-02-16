@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class InfluenceScore:
     contact_id: str
@@ -57,11 +58,11 @@ class KeyConnector:
 
 TIER_WEIGHTS = {
     1: 10.0,  # C-suite / VP
-    2: 7.0,   # Director / Senior PM
-    3: 5.0,   # Manager / PM
-    4: 3.0,   # Senior Individual
-    5: 2.0,   # Individual
-    6: 1.0,   # Entry / Unknown
+    2: 7.0,  # Director / Senior PM
+    3: 5.0,  # Manager / PM
+    4: 3.0,  # Senior Individual
+    5: 2.0,  # Individual
+    6: 1.0,  # Entry / Unknown
 }
 
 DAMPING_FACTOR = 0.85
@@ -116,8 +117,7 @@ class BDPageRank:
 
         # Tier-weighted personalization vector
         tier_total = sum(
-            TIER_WEIGHTS.get(node_map[nid].get("tier", 6), 1.0)
-            for nid in node_ids
+            TIER_WEIGHTS.get(node_map[nid].get("tier", 6), 1.0) for nid in node_ids
         )
         personalization = {
             nid: TIER_WEIGHTS.get(node_map[nid].get("tier", 6), 1.0) / tier_total
@@ -137,10 +137,9 @@ class BDPageRank:
                     out_total = sum(outgoing[src].values()) or 1.0
                     incoming_sum += scores[src] * weight / out_total
 
-                new_scores[nid] = (
-                    (1 - DAMPING_FACTOR) * personalization[nid]
-                    + DAMPING_FACTOR * incoming_sum
-                )
+                new_scores[nid] = (1 - DAMPING_FACTOR) * personalization[
+                    nid
+                ] + DAMPING_FACTOR * incoming_sum
 
             # Check convergence
             diff = sum(abs(new_scores[nid] - scores[nid]) for nid in node_ids)
@@ -164,24 +163,28 @@ class BDPageRank:
         self._scores = scores
 
         # Save history snapshot
-        self._history.append({
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "scores": dict(scores),
-        })
+        self._history.append(
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "scores": dict(scores),
+            }
+        )
 
         results = []
         for nid in node_ids:
             node = node_map[nid]
             normalized = (scores[nid] / max_score) * 100
-            results.append(InfluenceScore(
-                contact_id=nid,
-                name=node.get("name", nid),
-                score=round(normalized, 2),
-                raw_score=round(scores[nid], 6),
-                tier=node.get("tier", 6),
-                programs=node.get("programs", []),
-                connections=len(outgoing.get(nid, {})) + len(incoming.get(nid, {})),
-            ))
+            results.append(
+                InfluenceScore(
+                    contact_id=nid,
+                    name=node.get("name", nid),
+                    score=round(normalized, 2),
+                    raw_score=round(scores[nid], 6),
+                    tier=node.get("tier", 6),
+                    programs=node.get("programs", []),
+                    connections=len(outgoing.get(nid, {})) + len(incoming.get(nid, {})),
+                )
+            )
 
         results.sort(key=lambda r: r.score, reverse=True)
         for i, r in enumerate(results):
@@ -202,7 +205,8 @@ class BDPageRank:
         # Filter to program participants
         program_lower = program.lower()
         program_nodes = [
-            n for n in nodes
+            n
+            for n in nodes
             if program_lower in str(n.get("programs", [])).lower()
             or program_lower in str(n.get("program", "")).lower()
         ]
@@ -212,12 +216,17 @@ class BDPageRank:
 
         program_ids = {n.get("id", str(i)) for i, n in enumerate(program_nodes)}
         program_edges = [
-            e for e in edges
-            if (e.get("source", e.get("from", "")) in program_ids
-                or e.get("target", e.get("to", "")) in program_ids)
+            e
+            for e in edges
+            if (
+                e.get("source", e.get("from", "")) in program_ids
+                or e.get("target", e.get("to", "")) in program_ids
+            )
         ]
 
-        return await self.compute_influence_scores(program_nodes, program_edges, scope=program)
+        return await self.compute_influence_scores(
+            program_nodes, program_edges, scope=program
+        )
 
     async def get_key_connectors(
         self,
@@ -266,29 +275,35 @@ class BDPageRank:
             influence = self._scores.get(nid, 0)
             betweenness = len(programs) * conns  # Simplified betweenness
 
-            connectors.append(KeyConnector(
-                contact_id=nid,
-                name=node.get("name", nid),
-                influence_score=round(influence * 100, 2) if influence else 0,
-                programs_bridged=programs,
-                communities_linked=len(programs),
-                betweenness=round(betweenness, 2),
-            ))
+            connectors.append(
+                KeyConnector(
+                    contact_id=nid,
+                    name=node.get("name", nid),
+                    influence_score=round(influence * 100, 2) if influence else 0,
+                    programs_bridged=programs,
+                    communities_linked=len(programs),
+                    betweenness=round(betweenness, 2),
+                )
+            )
 
         connectors.sort(key=lambda c: c.betweenness, reverse=True)
         return connectors[:top_n]
 
     async def get_influence_trajectory(
-        self, contact_id: str, days: int = 90,
+        self,
+        contact_id: str,
+        days: int = 90,
     ) -> InfluenceTrajectory:
         """Track how a contact's influence has changed over time."""
         scores_over_time = []
         for snapshot in self._history:
             score = snapshot.get("scores", {}).get(contact_id, 0)
-            scores_over_time.append({
-                "timestamp": snapshot.get("timestamp", ""),
-                "score": score,
-            })
+            scores_over_time.append(
+                {
+                    "timestamp": snapshot.get("timestamp", ""),
+                    "score": score,
+                }
+            )
 
         current = self._scores.get(contact_id, 0)
 
@@ -300,7 +315,13 @@ class BDPageRank:
                 change_pct = ((last - first) / first) * 100
             else:
                 change_pct = 0
-            trend = "increasing" if change_pct > 5 else "decreasing" if change_pct < -5 else "stable"
+            trend = (
+                "increasing"
+                if change_pct > 5
+                else "decreasing"
+                if change_pct < -5
+                else "stable"
+            )
         else:
             change_pct = 0
             trend = "stable"

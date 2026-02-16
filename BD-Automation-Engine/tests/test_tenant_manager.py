@@ -24,6 +24,7 @@ from src.tenants.tenant_manager import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def mgr():
     return TenantManager()
@@ -41,6 +42,7 @@ def tenant(mgr):
 # =========================================
 # ISOLATION HELPERS
 # =========================================
+
 
 class TestIsolationHelpers:
     def test_qdrant_collection_name(self):
@@ -60,6 +62,7 @@ class TestIsolationHelpers:
 # =========================================
 # TENANT CRUD
 # =========================================
+
 
 class TestTenantCRUD:
     def test_create_tenant(self, mgr):
@@ -144,6 +147,7 @@ class TestTenantCRUD:
 # HEALTH & USAGE
 # =========================================
 
+
 class TestTenantHealth:
     def test_get_health(self, mgr, tenant):
         health = mgr.get_tenant_health(tenant.id)
@@ -168,6 +172,7 @@ class TestTenantHealth:
 # COLLECTIONS
 # =========================================
 
+
 class TestTenantCollections:
     def test_get_collections(self, mgr, tenant):
         collections = mgr.get_tenant_collections(tenant.id)
@@ -186,6 +191,7 @@ class TestTenantCollections:
 # =========================================
 # DATA CLASSES
 # =========================================
+
 
 class TestDataClasses:
     def test_branding_defaults(self):
@@ -211,6 +217,7 @@ class TestDataClasses:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_manager(self):

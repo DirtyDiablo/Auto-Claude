@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class LayerType(Enum):
     L1_MEMORY = "l1_memory"
     L2_REDIS = "l2_redis"
@@ -89,6 +90,7 @@ class CacheLayer:
 # CACHE LAYER MANAGER
 # =========================================
 
+
 class CacheLayerManager:
     """Multi-tier cache with L1→L2→L3→CDN cascade lookups,
     eviction, invalidation, and bulk warming.
@@ -102,10 +104,30 @@ class CacheLayerManager:
 
     def _register_defaults(self) -> None:
         defaults = [
-            CacheLayer(name="l1_hot", layer_type=LayerType.L1_MEMORY, max_entries=1000, eviction_policy=EvictionPolicy.LRU),
-            CacheLayer(name="l2_warm", layer_type=LayerType.L2_REDIS, max_entries=10000, eviction_policy=EvictionPolicy.LFU),
-            CacheLayer(name="l3_cold", layer_type=LayerType.L3_DISK, max_entries=100000, eviction_policy=EvictionPolicy.TTL),
-            CacheLayer(name="cdn_static", layer_type=LayerType.CDN, max_entries=5000, eviction_policy=EvictionPolicy.FIFO),
+            CacheLayer(
+                name="l1_hot",
+                layer_type=LayerType.L1_MEMORY,
+                max_entries=1000,
+                eviction_policy=EvictionPolicy.LRU,
+            ),
+            CacheLayer(
+                name="l2_warm",
+                layer_type=LayerType.L2_REDIS,
+                max_entries=10000,
+                eviction_policy=EvictionPolicy.LFU,
+            ),
+            CacheLayer(
+                name="l3_cold",
+                layer_type=LayerType.L3_DISK,
+                max_entries=100000,
+                eviction_policy=EvictionPolicy.TTL,
+            ),
+            CacheLayer(
+                name="cdn_static",
+                layer_type=LayerType.CDN,
+                max_entries=5000,
+                eviction_policy=EvictionPolicy.FIFO,
+            ),
         ]
         for layer in defaults:
             self._layers[layer.name] = layer
@@ -151,7 +173,9 @@ class CacheLayerManager:
 
     # ----- put -----
 
-    def put(self, key: str, value: Any, ttl: int = 300, layer_name: Optional[str] = None) -> None:
+    def put(
+        self, key: str, value: Any, ttl: int = 300, layer_name: Optional[str] = None
+    ) -> None:
         """Store a key-value pair. Default layer is L1."""
         target = layer_name or "l1_hot"
         layer = self._layers.get(target)
@@ -162,7 +186,12 @@ class CacheLayerManager:
         if layer.current_entries >= layer.max_entries and key not in layer._entries:
             self._evict(layer)
 
-        entry = CacheEntry(key=key, value=value, ttl_seconds=ttl, size_bytes=max(64, len(str(value)) * 2))
+        entry = CacheEntry(
+            key=key,
+            value=value,
+            ttl_seconds=ttl,
+            size_bytes=max(64, len(str(value)) * 2),
+        )
         layer._entries[key] = entry
         layer.current_entries = len(layer._entries)
 
@@ -177,7 +206,12 @@ class CacheLayerManager:
         elif layer.eviction_policy == EvictionPolicy.FIFO:
             oldest_key = next(iter(layer._entries))
         else:  # TTL — evict the one closest to expiry
-            oldest_key = min(layer._entries, key=lambda k: layer._entries[k].created_at + layer._entries[k].ttl_seconds)
+            oldest_key = min(
+                layer._entries,
+                key=lambda k: (
+                    layer._entries[k].created_at + layer._entries[k].ttl_seconds
+                ),
+            )
         del layer._entries[oldest_key]
         layer.current_entries = len(layer._entries)
 
@@ -223,7 +257,11 @@ class CacheLayerManager:
         total_entries = sum(l.current_entries for l in self._layers.values())
         total_hits = sum(l.total_hits for l in self._layers.values())
         total_misses = sum(l.total_misses for l in self._layers.values())
-        overall_rate = total_hits / (total_hits + total_misses) if (total_hits + total_misses) > 0 else 0.0
+        overall_rate = (
+            total_hits / (total_hits + total_misses)
+            if (total_hits + total_misses) > 0
+            else 0.0
+        )
         return {
             "total_layers": len(self._layers),
             "total_entries": total_entries,

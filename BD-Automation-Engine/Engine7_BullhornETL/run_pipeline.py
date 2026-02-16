@@ -29,9 +29,9 @@ sys.path.insert(0, str(SCRIPTS_DIR))
 def run_step(step_name: str, module_name: str, function_name: str = None):
     """Run a pipeline step."""
     print()
-    print("="*80)
+    print("=" * 80)
     print(f"STEP: {step_name}")
-    print("="*80)
+    print("=" * 80)
 
     try:
         module = __import__(module_name)
@@ -40,9 +40,9 @@ def run_step(step_name: str, module_name: str, function_name: str = None):
             result = func()
         else:
             # Module has __main__ execution
-            if hasattr(module, 'run'):
+            if hasattr(module, "run"):
                 result = module.run()
-            elif hasattr(module, 'main'):
+            elif hasattr(module, "main"):
                 result = module.main()
             else:
                 result = None
@@ -51,6 +51,7 @@ def run_step(step_name: str, module_name: str, function_name: str = None):
     except Exception as e:
         print(f"[ERROR] {step_name} failed: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return False, None
 
@@ -58,10 +59,10 @@ def run_step(step_name: str, module_name: str, function_name: str = None):
 def run_full_pipeline():
     """Run the complete ETL pipeline."""
     print()
-    print("="*80)
+    print("=" * 80)
     print("ENGINE 7: BULLHORN ETL PIPELINE")
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*80)
+    print("=" * 80)
 
     results = {}
     success_count = 0
@@ -69,26 +70,23 @@ def run_full_pipeline():
 
     # Step 1: ETL
     success, result = run_step(
-        "1. ETL - Extract & Load Bullhorn Data",
-        "bullhorn_etl_v2",
-        "BullhornETLv2"
+        "1. ETL - Extract & Load Bullhorn Data", "bullhorn_etl_v2", "BullhornETLv2"
     )
     if success:
         # Need to run the ETL
         from bullhorn_etl_v2 import BullhornETLv2
+
         etl = BullhornETLv2()
-        results['etl'] = etl.run()
+        results["etl"] = etl.run()
         success_count += 1
     else:
         fail_count += 1
 
     # Step 2: Data Cleanup
     success, result = run_step(
-        "2. Data Cleanup - Normalize Company Names",
-        "data_cleanup",
-        "run_cleanup"
+        "2. Data Cleanup - Normalize Company Names", "data_cleanup", "run_cleanup"
     )
-    results['cleanup'] = result
+    results["cleanup"] = result
     success_count += 1 if success else 0
     fail_count += 0 if success else 1
 
@@ -96,9 +94,9 @@ def run_full_pipeline():
     success, result = run_step(
         "3. Financial Analysis - Calculate Revenue Metrics",
         "financial_analysis",
-        "run_financial_analysis"
+        "run_financial_analysis",
     )
-    results['financials'] = result
+    results["financials"] = result
     success_count += 1 if success else 0
     fail_count += 0 if success else 1
 
@@ -106,9 +104,9 @@ def run_full_pipeline():
     success, result = run_step(
         "4. Federal Programs - Link Placements to Programs",
         "link_to_federal_programs",
-        "run_linking"
+        "run_linking",
     )
-    results['programs'] = result
+    results["programs"] = result
     success_count += 1 if success else 0
     fail_count += 0 if success else 1
 
@@ -116,9 +114,9 @@ def run_full_pipeline():
     success, result = run_step(
         "5. Contact Scoring - Calculate Engagement Scores",
         "contact_scoring",
-        "run_contact_scoring"
+        "run_contact_scoring",
     )
-    results['contacts'] = result
+    results["contacts"] = result
     success_count += 1 if success else 0
     fail_count += 0 if success else 1
 
@@ -126,27 +124,25 @@ def run_full_pipeline():
     success, result = run_step(
         "6. Past Performance Report - Generate Analytics",
         "past_performance_report",
-        "generate_past_performance_report"
+        "generate_past_performance_report",
     )
-    results['past_performance'] = result
+    results["past_performance"] = result
     success_count += 1 if success else 0
     fail_count += 0 if success else 1
 
     # Step 7: Notion Export
     success, result = run_step(
-        "7. Export - Generate Notion-Compatible CSVs",
-        "export_to_notion",
-        "run_export"
+        "7. Export - Generate Notion-Compatible CSVs", "export_to_notion", "run_export"
     )
-    results['export'] = result
+    results["export"] = result
     success_count += 1 if success else 0
     fail_count += 0 if success else 1
 
     # Final summary
     print()
-    print("="*80)
+    print("=" * 80)
     print("PIPELINE COMPLETE")
-    print("="*80)
+    print("=" * 80)
     print(f"Finished: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print(f"Steps completed: {success_count}")
     print(f"Steps failed: {fail_count}")
@@ -160,57 +156,47 @@ def run_full_pipeline():
 def run_reports_only():
     """Run only the reporting steps (skip ETL)."""
     print()
-    print("="*80)
+    print("=" * 80)
     print("ENGINE 7: REPORTS ONLY MODE")
     print(f"Started: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
-    print("="*80)
+    print("=" * 80)
 
     results = {}
 
     # Financial Analysis
     success, result = run_step(
-        "Financial Analysis",
-        "financial_analysis",
-        "run_financial_analysis"
+        "Financial Analysis", "financial_analysis", "run_financial_analysis"
     )
-    results['financials'] = result
+    results["financials"] = result
 
     # Federal Programs Linking
     success, result = run_step(
-        "Federal Programs Linking",
-        "link_to_federal_programs",
-        "run_linking"
+        "Federal Programs Linking", "link_to_federal_programs", "run_linking"
     )
-    results['programs'] = result
+    results["programs"] = result
 
     # Contact Scoring
     success, result = run_step(
-        "Contact Scoring",
-        "contact_scoring",
-        "run_contact_scoring"
+        "Contact Scoring", "contact_scoring", "run_contact_scoring"
     )
-    results['contacts'] = result
+    results["contacts"] = result
 
     # Past Performance Report
     success, result = run_step(
         "Past Performance Report",
         "past_performance_report",
-        "generate_past_performance_report"
+        "generate_past_performance_report",
     )
-    results['past_performance'] = result
+    results["past_performance"] = result
 
     # Notion Export
-    success, result = run_step(
-        "Notion Export",
-        "export_to_notion",
-        "run_export"
-    )
-    results['export'] = result
+    success, result = run_step("Notion Export", "export_to_notion", "run_export")
+    results["export"] = result
 
     print()
-    print("="*80)
+    print("=" * 80)
     print("REPORTS COMPLETE")
-    print("="*80)
+    print("=" * 80)
 
     return results
 
@@ -233,19 +219,18 @@ Steps in full pipeline:
   5. Contacts - Score contact engagement
   6. Reports - Generate comprehensive reports
   7. Export - Create Notion-compatible CSVs
-        """
+        """,
     )
 
     parser.add_argument(
-        '--reports', '--reports-only',
-        action='store_true',
-        help='Run only reporting steps (skip ETL)'
+        "--reports",
+        "--reports-only",
+        action="store_true",
+        help="Run only reporting steps (skip ETL)",
     )
 
     parser.add_argument(
-        '--full',
-        action='store_true',
-        help='Run full pipeline including ETL'
+        "--full", action="store_true", help="Run full pipeline including ETL"
     )
 
     args = parser.parse_args()

@@ -15,18 +15,22 @@ from dataclasses import dataclass
 # Add parent to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from Engine8_Knowledge.scripts.document_processor import BDDocumentProcessor, ProcessedDocument
+from Engine8_Knowledge.scripts.document_processor import (
+    BDDocumentProcessor,
+    ProcessedDocument,
+)
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
 from Engine8_Knowledge.scripts.indexer import BDIndexer
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDFileWatcher')
+logger = logging.getLogger("BDFileWatcher")
 
 # Check for watchdog
 try:
     from watchdog.observers import Observer
     from watchdog.events import FileSystemEventHandler
+
     WATCHDOG_AVAILABLE = True
 except ImportError:
     WATCHDOG_AVAILABLE = False
@@ -40,26 +44,26 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 
 # Default directories to watch
 WATCH_DIRECTORIES = {
-    'bullhorn_exports': {
-        'path': PROJECT_ROOT / "docs" / "Bullhorn Exports",
-        'extensions': ['.xls', '.xlsx', '.csv', '.txt'],
-        'collection': 'documents'
+    "bullhorn_exports": {
+        "path": PROJECT_ROOT / "docs" / "Bullhorn Exports",
+        "extensions": [".xls", ".xlsx", ".csv", ".txt"],
+        "collection": "documents",
     },
-    'outputs': {
-        'path': PROJECT_ROOT / "outputs",
-        'extensions': ['.md', '.txt', '.json'],
-        'collection': 'documents'
+    "outputs": {
+        "path": PROJECT_ROOT / "outputs",
+        "extensions": [".md", ".txt", ".json"],
+        "collection": "documents",
     },
-    'prime_contacts': {
-        'path': PROJECT_ROOT / "Engine3_OrgChart" / "data" / "Prime_Contacts",
-        'extensions': ['.csv', '.json'],
-        'collection': 'contacts'
+    "prime_contacts": {
+        "path": PROJECT_ROOT / "Engine3_OrgChart" / "data" / "Prime_Contacts",
+        "extensions": [".csv", ".json"],
+        "collection": "contacts",
     },
-    'dashboard_data': {
-        'path': PROJECT_ROOT / "dashboard" / "public" / "data",
-        'extensions': ['.json'],
-        'collection': 'all'  # Trigger full re-index
-    }
+    "dashboard_data": {
+        "path": PROJECT_ROOT / "dashboard" / "public" / "data",
+        "extensions": [".json"],
+        "collection": "all",  # Trigger full re-index
+    },
 }
 
 # Debounce delay (seconds) to avoid processing same file multiple times
@@ -69,6 +73,7 @@ DEBOUNCE_DELAY = 2.0
 @dataclass
 class WatchEvent:
     """Represents a file system event."""
+
     event_type: str  # 'created', 'modified', 'deleted'
     file_path: Path
     timestamp: datetime
@@ -79,6 +84,7 @@ class WatchEvent:
 @dataclass
 class WatcherStats:
     """Statistics for the file watcher."""
+
     start_time: datetime
     events_received: int = 0
     files_processed: int = 0
@@ -88,19 +94,22 @@ class WatcherStats:
 
     def to_dict(self) -> Dict:
         return {
-            'start_time': self.start_time.isoformat(),
-            'uptime_seconds': (datetime.now() - self.start_time).total_seconds(),
-            'events_received': self.events_received,
-            'files_processed': self.files_processed,
-            'files_indexed': self.files_indexed,
-            'errors': self.errors,
-            'last_event_time': self.last_event_time.isoformat() if self.last_event_time else None
+            "start_time": self.start_time.isoformat(),
+            "uptime_seconds": (datetime.now() - self.start_time).total_seconds(),
+            "events_received": self.events_received,
+            "files_processed": self.files_processed,
+            "files_indexed": self.files_indexed,
+            "errors": self.errors,
+            "last_event_time": self.last_event_time.isoformat()
+            if self.last_event_time
+            else None,
         }
 
 
 # =========================================
 # FILE WATCHER CLASS
 # =========================================
+
 
 class BDFileWatcher:
     """
@@ -110,11 +119,7 @@ class BDFileWatcher:
     automatic indexing of new content.
     """
 
-    def __init__(
-        self,
-        auto_index: bool = True,
-        debounce_delay: float = DEBOUNCE_DELAY
-    ):
+    def __init__(self, auto_index: bool = True, debounce_delay: float = DEBOUNCE_DELAY):
         """
         Initialize the file watcher.
 
@@ -142,9 +147,7 @@ class BDFileWatcher:
         self.on_error: Optional[Callable[[str, Exception], None]] = None
 
     def start(
-        self,
-        directories: Optional[Dict[str, Dict]] = None,
-        blocking: bool = True
+        self, directories: Optional[Dict[str, Dict]] = None, blocking: bool = True
     ):
         """
         Start watching directories.
@@ -166,7 +169,7 @@ class BDFileWatcher:
 
         # Create observers for each directory
         for name, config in directories.items():
-            path = config['path']
+            path = config["path"]
             if not path.exists():
                 logger.warning(f"Watch directory not found: {path}")
                 continue
@@ -174,8 +177,8 @@ class BDFileWatcher:
             # Create event handler
             handler = _BDEventHandler(
                 watcher=self,
-                extensions=config.get('extensions', []),
-                collection=config.get('collection', 'documents')
+                extensions=config.get("extensions", []),
+                collection=config.get("collection", "documents"),
             )
 
             # Create and start observer
@@ -261,16 +264,16 @@ class BDFileWatcher:
 
     def _index_document(self, doc: ProcessedDocument, collection: str):
         """Index a processed document."""
-        if collection == 'all':
+        if collection == "all":
             # Trigger full re-index (for dashboard data changes)
             logger.info("Dashboard data changed - scheduling full re-index")
             # Don't do full re-index on every change, just log
             return
 
         try:
-            if collection == 'documents':
+            if collection == "documents":
                 indexed, errors = self.store.index_documents([doc.to_dict()])
-            elif collection == 'contacts':
+            elif collection == "contacts":
                 indexed, errors = self.store.index_contacts([doc.to_dict()])
             else:
                 indexed, errors = self.store.index_documents([doc.to_dict()])
@@ -303,14 +306,12 @@ class BDFileWatcher:
 # =========================================
 
 if WATCHDOG_AVAILABLE:
+
     class _BDEventHandler(FileSystemEventHandler):
         """Watchdog event handler for BD file watcher."""
 
         def __init__(
-            self,
-            watcher: BDFileWatcher,
-            extensions: List[str],
-            collection: str
+            self, watcher: BDFileWatcher, extensions: List[str], collection: str
         ):
             self.watcher = watcher
             self.extensions = [e.lower() for e in extensions]
@@ -329,14 +330,14 @@ if WATCHDOG_AVAILABLE:
 
             if self._should_process(event.src_path):
                 watch_event = WatchEvent(
-                    event_type='created',
+                    event_type="created",
                     file_path=Path(event.src_path),
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
                 # Process in thread to avoid blocking
                 threading.Thread(
                     target=self.watcher.process_event,
-                    args=(watch_event, self.collection)
+                    args=(watch_event, self.collection),
                 ).start()
 
         def on_modified(self, event):
@@ -346,19 +347,20 @@ if WATCHDOG_AVAILABLE:
 
             if self._should_process(event.src_path):
                 watch_event = WatchEvent(
-                    event_type='modified',
+                    event_type="modified",
                     file_path=Path(event.src_path),
-                    timestamp=datetime.now()
+                    timestamp=datetime.now(),
                 )
                 threading.Thread(
                     target=self.watcher.process_event,
-                    args=(watch_event, self.collection)
+                    args=(watch_event, self.collection),
                 ).start()
 
 
 # =========================================
 # SIMPLE POLLING WATCHER (FALLBACK)
 # =========================================
+
 
 class SimpleFileWatcher:
     """
@@ -367,11 +369,7 @@ class SimpleFileWatcher:
     Less efficient but works everywhere.
     """
 
-    def __init__(
-        self,
-        auto_index: bool = True,
-        poll_interval: float = 10.0
-    ):
+    def __init__(self, auto_index: bool = True, poll_interval: float = 10.0):
         self.auto_index = auto_index
         self.poll_interval = poll_interval
 
@@ -382,9 +380,7 @@ class SimpleFileWatcher:
         self._known_files: Dict[str, float] = {}  # path -> mtime
 
     def start(
-        self,
-        directories: Optional[Dict[str, Dict]] = None,
-        blocking: bool = True
+        self, directories: Optional[Dict[str, Dict]] = None, blocking: bool = True
     ):
         """Start polling directories for changes."""
         directories = directories or WATCH_DIRECTORIES
@@ -395,9 +391,9 @@ class SimpleFileWatcher:
 
         # Initial scan
         for name, config in directories.items():
-            path = config['path']
+            path = config["path"]
             if path.exists():
-                self._scan_directory(path, config.get('extensions', []))
+                self._scan_directory(path, config.get("extensions", []))
 
         logger.info(f"Simple watcher started ({len(directories)} directories)")
 
@@ -405,12 +401,12 @@ class SimpleFileWatcher:
             try:
                 while self._running:
                     for name, config in directories.items():
-                        path = config['path']
+                        path = config["path"]
                         if path.exists():
                             self._check_directory(
                                 path,
-                                config.get('extensions', []),
-                                config.get('collection', 'documents')
+                                config.get("extensions", []),
+                                config.get("collection", "documents"),
                             )
                     time.sleep(self.poll_interval)
             except KeyboardInterrupt:
@@ -423,13 +419,13 @@ class SimpleFileWatcher:
 
     def _scan_directory(self, directory: Path, extensions: List[str]):
         """Scan directory and record file mtimes."""
-        for f in directory.rglob('*'):
+        for f in directory.rglob("*"):
             if f.is_file() and f.suffix.lower() in extensions:
                 self._known_files[str(f)] = f.stat().st_mtime
 
     def _check_directory(self, directory: Path, extensions: List[str], collection: str):
         """Check directory for new/modified files."""
-        for f in directory.rglob('*'):
+        for f in directory.rglob("*"):
             if not f.is_file() or f.suffix.lower() not in extensions:
                 continue
 
@@ -461,15 +457,20 @@ class SimpleFileWatcher:
 # CLI INTERFACE
 # =========================================
 
+
 def main():
     """CLI for the BD File Watcher."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD File Watcher')
-    parser.add_argument('--no-index', action='store_true', help='Disable auto-indexing')
-    parser.add_argument('--simple', action='store_true', help='Use simple polling watcher')
-    parser.add_argument('--interval', type=float, default=10.0, help='Poll interval (simple mode)')
-    parser.add_argument('--sync', action='store_true', help='Run manual sync and exit')
+    parser = argparse.ArgumentParser(description="BD File Watcher")
+    parser.add_argument("--no-index", action="store_true", help="Disable auto-indexing")
+    parser.add_argument(
+        "--simple", action="store_true", help="Use simple polling watcher"
+    )
+    parser.add_argument(
+        "--interval", type=float, default=10.0, help="Poll interval (simple mode)"
+    )
+    parser.add_argument("--sync", action="store_true", help="Run manual sync and exit")
 
     args = parser.parse_args()
 
@@ -493,5 +494,5 @@ def main():
     watcher.start(blocking=True)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

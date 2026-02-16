@@ -15,11 +15,18 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('BullhornContactIndexer')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("BullhornContactIndexer")
 
 # Paths
-BULLHORN_DB = Path(__file__).parent.parent.parent / "Engine7_BullhornETL" / "data" / "bullhorn_master.db"
+BULLHORN_DB = (
+    Path(__file__).parent.parent.parent
+    / "Engine7_BullhornETL"
+    / "data"
+    / "bullhorn_master.db"
+)
 BATCH_SIZE = 500  # Process in batches to manage memory
 
 
@@ -30,7 +37,9 @@ def get_candidates_count(conn: sqlite3.Connection) -> int:
     return cursor.fetchone()[0]
 
 
-def get_candidates_batch(conn: sqlite3.Connection, offset: int, limit: int) -> List[Dict]:
+def get_candidates_batch(
+    conn: sqlite3.Connection, offset: int, limit: int
+) -> List[Dict]:
     """Get a batch of candidates."""
     cursor = conn.cursor()
     cursor.row_factory = sqlite3.Row
@@ -48,57 +57,64 @@ def transform_candidate_to_contact(candidate: Dict) -> Dict:
     # Build content string for embedding
     parts = []
 
-    name = candidate.get('full_name') or f"{candidate.get('first_name', '')} {candidate.get('last_name', '')}".strip()
+    name = (
+        candidate.get("full_name")
+        or f"{candidate.get('first_name', '')} {candidate.get('last_name', '')}".strip()
+    )
     if name:
         parts.append(name)
 
-    title = candidate.get('job_title') or candidate.get('occupation', '')
+    title = candidate.get("job_title") or candidate.get("occupation", "")
     if title:
         parts.append(title)
 
-    company = candidate.get('company_name') or candidate.get('current_employer', '')
+    company = candidate.get("company_name") or candidate.get("current_employer", "")
     if company:
         parts.append(f"at {company}")
 
     # Add skills/experience if available
-    skills = candidate.get('skills', '')
+    skills = candidate.get("skills", "")
     if skills:
         parts.append(f"Skills: {skills[:200]}")
 
     # Add clearance if available
-    clearance = candidate.get('clearance', '') or candidate.get('security_clearance', '')
+    clearance = candidate.get("clearance", "") or candidate.get(
+        "security_clearance", ""
+    )
     if clearance:
         parts.append(f"Clearance: {clearance}")
 
     # Add location
-    city = candidate.get('city', '')
-    state = candidate.get('state', '')
+    city = candidate.get("city", "")
+    state = candidate.get("state", "")
     if city or state:
-        location = f"{city}, {state}".strip(', ')
+        location = f"{city}, {state}".strip(", ")
         parts.append(f"Location: {location}")
 
-    content = " | ".join(parts) if parts else f"Candidate {candidate.get('id', 'unknown')}"
+    content = (
+        " | ".join(parts) if parts else f"Candidate {candidate.get('id', 'unknown')}"
+    )
 
     return {
         "id": f"bullhorn_candidate_{candidate.get('bullhorn_candidate_id') or candidate.get('id')}",
         "content": content,
         "name": name or "Unknown",
         "title": title,
-        "first_name": candidate.get('first_name', ''),
-        "last_name": candidate.get('last_name', ''),
+        "first_name": candidate.get("first_name", ""),
+        "last_name": candidate.get("last_name", ""),
         "company": company,
-        "email": candidate.get('email', ''),
-        "phone": candidate.get('phone', '') or candidate.get('mobile', ''),
-        "linkedin": candidate.get('linkedin', ''),
+        "email": candidate.get("email", ""),
+        "phone": candidate.get("phone", "") or candidate.get("mobile", ""),
+        "linkedin": candidate.get("linkedin", ""),
         "clearance": clearance,
         "city": city,
         "state": state,
-        "skills": candidate.get('skills', '')[:500] if candidate.get('skills') else '',
-        "status": candidate.get('status', ''),
+        "skills": candidate.get("skills", "")[:500] if candidate.get("skills") else "",
+        "status": candidate.get("status", ""),
         "source": "bullhorn_candidates",
         "source_db": "bullhorn_master",
-        "bullhorn_id": candidate.get('bullhorn_candidate_id'),
-        "indexed_at": datetime.now().isoformat()
+        "bullhorn_id": candidate.get("bullhorn_candidate_id"),
+        "indexed_at": datetime.now().isoformat(),
     }
 
 
@@ -164,9 +180,9 @@ def index_bullhorn_contacts():
             rate = total_indexed / elapsed if elapsed > 0 else 0
             remaining = (total_candidates - offset) / rate if rate > 0 else 0
             logger.info(
-                f"Progress: {offset:,}/{total_candidates:,} ({100*offset/total_candidates:.1f}%) | "
+                f"Progress: {offset:,}/{total_candidates:,} ({100 * offset / total_candidates:.1f}%) | "
                 f"Indexed: {total_indexed:,} | Errors: {total_errors} | "
-                f"Rate: {rate:.0f}/sec | ETA: {remaining/60:.1f} min"
+                f"Rate: {rate:.0f}/sec | ETA: {remaining / 60:.1f} min"
             )
 
     conn.close()
@@ -177,8 +193,8 @@ def index_bullhorn_contacts():
     logger.info("INDEXING COMPLETE")
     logger.info(f"  Total indexed: {total_indexed:,}")
     logger.info(f"  Total errors: {total_errors}")
-    logger.info(f"  Duration: {duration:.1f} seconds ({duration/60:.1f} minutes)")
-    logger.info(f"  Rate: {total_indexed/duration:.0f} contacts/sec")
+    logger.info(f"  Duration: {duration:.1f} seconds ({duration / 60:.1f} minutes)")
+    logger.info(f"  Rate: {total_indexed / duration:.0f} contacts/sec")
 
     # Verify final count
     try:

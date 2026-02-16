@@ -21,6 +21,7 @@ from src.revenue.deal_lifecycle import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def engine():
     return DealLifecycleEngine()
@@ -31,54 +32,126 @@ def sample_deals():
     now = datetime.now(timezone.utc)
     return [
         Deal(
-            id="d1", title="DCGS Analyst", program="DCGS", channel="referral",
-            rep="Rep-A", role_type="analyst", estimated_value=200000,
-            current_stage=DealStage.REVENUE, outcome="won",
+            id="d1",
+            title="DCGS Analyst",
+            program="DCGS",
+            channel="referral",
+            rep="Rep-A",
+            role_type="analyst",
+            estimated_value=200000,
+            current_stage=DealStage.REVENUE,
+            outcome="won",
             created_at=(now - timedelta(days=90)).isoformat(),
             closed_at=(now - timedelta(days=10)).isoformat(),
             stage_history=[
-                {"stage": "discovery", "entered_at": (now - timedelta(days=90)).isoformat()},
-                {"stage": "qualification", "entered_at": (now - timedelta(days=80)).isoformat()},
-                {"stage": "requirements", "entered_at": (now - timedelta(days=70)).isoformat()},
-                {"stage": "submission", "entered_at": (now - timedelta(days=55)).isoformat()},
-                {"stage": "interview", "entered_at": (now - timedelta(days=45)).isoformat()},
-                {"stage": "offer", "entered_at": (now - timedelta(days=25)).isoformat()},
-                {"stage": "start", "entered_at": (now - timedelta(days=15)).isoformat()},
-                {"stage": "revenue", "entered_at": (now - timedelta(days=10)).isoformat()},
+                {
+                    "stage": "discovery",
+                    "entered_at": (now - timedelta(days=90)).isoformat(),
+                },
+                {
+                    "stage": "qualification",
+                    "entered_at": (now - timedelta(days=80)).isoformat(),
+                },
+                {
+                    "stage": "requirements",
+                    "entered_at": (now - timedelta(days=70)).isoformat(),
+                },
+                {
+                    "stage": "submission",
+                    "entered_at": (now - timedelta(days=55)).isoformat(),
+                },
+                {
+                    "stage": "interview",
+                    "entered_at": (now - timedelta(days=45)).isoformat(),
+                },
+                {
+                    "stage": "offer",
+                    "entered_at": (now - timedelta(days=25)).isoformat(),
+                },
+                {
+                    "stage": "start",
+                    "entered_at": (now - timedelta(days=15)).isoformat(),
+                },
+                {
+                    "stage": "revenue",
+                    "entered_at": (now - timedelta(days=10)).isoformat(),
+                },
             ],
         ),
         Deal(
-            id="d2", title="NGEN Engineer", program="NGEN", channel="cold_outreach",
-            rep="Rep-B", role_type="engineer", estimated_value=180000,
-            current_stage=DealStage.INTERVIEW, outcome="open",
+            id="d2",
+            title="NGEN Engineer",
+            program="NGEN",
+            channel="cold_outreach",
+            rep="Rep-B",
+            role_type="engineer",
+            estimated_value=180000,
+            current_stage=DealStage.INTERVIEW,
+            outcome="open",
             created_at=(now - timedelta(days=60)).isoformat(),
             stage_history=[
-                {"stage": "discovery", "entered_at": (now - timedelta(days=60)).isoformat()},
-                {"stage": "qualification", "entered_at": (now - timedelta(days=50)).isoformat()},
-                {"stage": "requirements", "entered_at": (now - timedelta(days=40)).isoformat()},
-                {"stage": "submission", "entered_at": (now - timedelta(days=30)).isoformat()},
-                {"stage": "interview", "entered_at": (now - timedelta(days=5)).isoformat()},
+                {
+                    "stage": "discovery",
+                    "entered_at": (now - timedelta(days=60)).isoformat(),
+                },
+                {
+                    "stage": "qualification",
+                    "entered_at": (now - timedelta(days=50)).isoformat(),
+                },
+                {
+                    "stage": "requirements",
+                    "entered_at": (now - timedelta(days=40)).isoformat(),
+                },
+                {
+                    "stage": "submission",
+                    "entered_at": (now - timedelta(days=30)).isoformat(),
+                },
+                {
+                    "stage": "interview",
+                    "entered_at": (now - timedelta(days=5)).isoformat(),
+                },
             ],
         ),
         Deal(
-            id="d3", title="GBSD Developer", program="GBSD", channel="referral",
-            rep="Rep-A", role_type="engineer", estimated_value=250000,
-            current_stage=DealStage.QUALIFICATION, outcome="lost",
+            id="d3",
+            title="GBSD Developer",
+            program="GBSD",
+            channel="referral",
+            rep="Rep-A",
+            role_type="engineer",
+            estimated_value=250000,
+            current_stage=DealStage.QUALIFICATION,
+            outcome="lost",
             lost_reason="budget_cut",
             created_at=(now - timedelta(days=45)).isoformat(),
             closed_at=(now - timedelta(days=30)).isoformat(),
             stage_history=[
-                {"stage": "discovery", "entered_at": (now - timedelta(days=45)).isoformat()},
-                {"stage": "qualification", "entered_at": (now - timedelta(days=35)).isoformat()},
+                {
+                    "stage": "discovery",
+                    "entered_at": (now - timedelta(days=45)).isoformat(),
+                },
+                {
+                    "stage": "qualification",
+                    "entered_at": (now - timedelta(days=35)).isoformat(),
+                },
             ],
         ),
         Deal(
-            id="d4", title="DCGS Cyber", program="DCGS", channel="inbound",
-            rep="Rep-A", role_type="cyber", estimated_value=220000,
-            current_stage=DealStage.DISCOVERY, outcome="open",
+            id="d4",
+            title="DCGS Cyber",
+            program="DCGS",
+            channel="inbound",
+            rep="Rep-A",
+            role_type="cyber",
+            estimated_value=220000,
+            current_stage=DealStage.DISCOVERY,
+            outcome="open",
             created_at=(now - timedelta(days=30)).isoformat(),
             stage_history=[
-                {"stage": "discovery", "entered_at": (now - timedelta(days=30)).isoformat()},
+                {
+                    "stage": "discovery",
+                    "entered_at": (now - timedelta(days=30)).isoformat(),
+                },
             ],
         ),
     ]
@@ -94,6 +167,7 @@ def loaded_engine(engine, sample_deals):
 # =========================================
 # DEAL STAGE ENUM
 # =========================================
+
 
 class TestDealStage:
     def test_stage_order(self):
@@ -112,6 +186,7 @@ class TestDealStage:
 # =========================================
 # DEAL MANAGEMENT
 # =========================================
+
 
 class TestDealManagement:
     def test_add_deal(self, engine, sample_deals):
@@ -147,6 +222,7 @@ class TestDealManagement:
 # STAGE VELOCITY
 # =========================================
 
+
 class TestStageVelocity:
     def test_velocity_returns_list(self, loaded_engine):
         velocity = loaded_engine.get_stage_velocity()
@@ -172,6 +248,7 @@ class TestStageVelocity:
 # DROP-OFF ANALYSIS
 # =========================================
 
+
 class TestDropOffAnalysis:
     def test_drop_off_returns_list(self, loaded_engine):
         analysis = loaded_engine.get_drop_off_analysis()
@@ -194,6 +271,7 @@ class TestDropOffAnalysis:
 # WIN RATES
 # =========================================
 
+
 class TestWinRates:
     def test_win_rate_by_program(self, loaded_engine):
         wr = loaded_engine.get_win_rates("program")
@@ -212,6 +290,7 @@ class TestWinRates:
 # =========================================
 # STALE DEAL DETECTION
 # =========================================
+
 
 class TestStaleDealDetection:
     def test_detects_stale(self, loaded_engine):
@@ -236,6 +315,7 @@ class TestStaleDealDetection:
 # DEAL VALUE PREDICTION
 # =========================================
 
+
 class TestDealValuePrediction:
     def test_predicts_value(self, loaded_engine):
         pred = loaded_engine.predict_deal_value("d2")
@@ -255,6 +335,7 @@ class TestDealValuePrediction:
 # LIFECYCLE SUMMARY
 # =========================================
 
+
 class TestLifecycleSummary:
     def test_summary(self, loaded_engine):
         summary = loaded_engine.get_lifecycle_summary()
@@ -273,6 +354,7 @@ class TestLifecycleSummary:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_engine_returns_instance(self):

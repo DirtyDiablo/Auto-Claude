@@ -16,14 +16,16 @@ logger = logging.getLogger(__name__)
 
 # ─── Signal Types ────────────────────────────────────────────────────────────
 
+
 @dataclass
 class HiringSignal:
     """A detected hiring anomaly signal."""
-    signal_type: str           # hiring_surge | new_capability | clearance_escalation
-    program: str               # affected program name
-    location: str              # affected location
-    confidence: float          # 0.0 to 1.0
-    detected_at: str           # ISO timestamp
+
+    signal_type: str  # hiring_surge | new_capability | clearance_escalation
+    program: str  # affected program name
+    location: str  # affected location
+    confidence: float  # 0.0 to 1.0
+    detected_at: str  # ISO timestamp
     details: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -31,6 +33,7 @@ class HiringSignal:
 
 
 # ─── Signal Detector ─────────────────────────────────────────────────────────
+
 
 class HiringSignalDetector:
     """
@@ -110,7 +113,9 @@ class HiringSignalDetector:
 
     # ─── Hiring Surge Detection ──────────────────────────────────────────
 
-    def _detect_hiring_surges(self, jobs_data: List[Dict[str, Any]]) -> List[HiringSignal]:
+    def _detect_hiring_surges(
+        self, jobs_data: List[Dict[str, Any]]
+    ) -> List[HiringSignal]:
         """Detect programs/locations with posting frequency > 2x rolling average."""
         signals = []
 
@@ -156,26 +161,30 @@ class HiringSignalDetector:
                     confidence = min(0.95, 0.5 + (ratio - 2.0) * 0.15)
                     locations = list(program_locations.get(program, {"Unknown"}))
 
-                    signals.append(HiringSignal(
-                        signal_type="hiring_surge",
-                        program=program,
-                        location=locations[0] if locations else "Unknown",
-                        confidence=round(confidence, 2),
-                        detected_at=datetime.now().isoformat(),
-                        details={
-                            "latest_week_count": latest,
-                            "rolling_average": round(rolling_avg, 1),
-                            "surge_ratio": round(ratio, 1),
-                            "total_weeks_analyzed": len(counts),
-                            "all_locations": locations[:5],
-                        },
-                    ))
+                    signals.append(
+                        HiringSignal(
+                            signal_type="hiring_surge",
+                            program=program,
+                            location=locations[0] if locations else "Unknown",
+                            confidence=round(confidence, 2),
+                            detected_at=datetime.now().isoformat(),
+                            details={
+                                "latest_week_count": latest,
+                                "rolling_average": round(rolling_avg, 1),
+                                "surge_ratio": round(ratio, 1),
+                                "total_weeks_analyzed": len(counts),
+                                "all_locations": locations[:5],
+                            },
+                        )
+                    )
 
         return signals
 
     # ─── New Capability Detection ────────────────────────────────────────
 
-    def _detect_new_capabilities(self, jobs_data: List[Dict[str, Any]]) -> List[HiringSignal]:
+    def _detect_new_capabilities(
+        self, jobs_data: List[Dict[str, Any]]
+    ) -> List[HiringSignal]:
         """Detect new role types never posted before for a program."""
         signals = []
 
@@ -193,7 +202,11 @@ class HiringSignalDetector:
             for job in jobs:
                 date_str = job.get("scraped_at") or job.get("created_at") or ""
                 try:
-                    dt = datetime.fromisoformat(date_str.replace("Z", "+00:00")) if date_str else datetime.now()
+                    dt = (
+                        datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                        if date_str
+                        else datetime.now()
+                    )
                 except (ValueError, TypeError):
                     dt = datetime.now()
                 dated_jobs.append((dt, job))
@@ -211,37 +224,49 @@ class HiringSignalDetector:
             # Extract functional areas / role categories
             historical_areas = set()
             for _, job in historical:
-                area = (job.get("functional_area") or job.get("title", "")).lower().strip()
+                area = (
+                    (job.get("functional_area") or job.get("title", "")).lower().strip()
+                )
                 if area:
                     historical_areas.add(area)
                 self._known_roles[program].add(area)
 
             for _, job in recent:
-                area = (job.get("functional_area") or job.get("title", "")).lower().strip()
-                if area and area not in historical_areas and area not in self._known_roles[program]:
+                area = (
+                    (job.get("functional_area") or job.get("title", "")).lower().strip()
+                )
+                if (
+                    area
+                    and area not in historical_areas
+                    and area not in self._known_roles[program]
+                ):
                     confidence = 0.7 if len(historical_areas) >= 5 else 0.5
                     location = job.get("location", "Unknown")
 
-                    signals.append(HiringSignal(
-                        signal_type="new_capability",
-                        program=program,
-                        location=location,
-                        confidence=round(confidence, 2),
-                        detected_at=datetime.now().isoformat(),
-                        details={
-                            "new_role": job.get("title", area),
-                            "functional_area": job.get("functional_area", ""),
-                            "company": job.get("company", ""),
-                            "historical_role_count": len(historical_areas),
-                        },
-                    ))
+                    signals.append(
+                        HiringSignal(
+                            signal_type="new_capability",
+                            program=program,
+                            location=location,
+                            confidence=round(confidence, 2),
+                            detected_at=datetime.now().isoformat(),
+                            details={
+                                "new_role": job.get("title", area),
+                                "functional_area": job.get("functional_area", ""),
+                                "company": job.get("company", ""),
+                                "historical_role_count": len(historical_areas),
+                            },
+                        )
+                    )
                     self._known_roles[program].add(area)
 
         return signals
 
     # ─── Clearance Escalation Detection ──────────────────────────────────
 
-    def _detect_clearance_escalations(self, jobs_data: List[Dict[str, Any]]) -> List[HiringSignal]:
+    def _detect_clearance_escalations(
+        self, jobs_data: List[Dict[str, Any]]
+    ) -> List[HiringSignal]:
         """Detect higher clearance requirements appearing for a program."""
         signals = []
 
@@ -259,7 +284,11 @@ class HiringSignalDetector:
             for job in jobs:
                 date_str = job.get("scraped_at") or job.get("created_at") or ""
                 try:
-                    dt = datetime.fromisoformat(date_str.replace("Z", "+00:00")) if date_str else datetime.now()
+                    dt = (
+                        datetime.fromisoformat(date_str.replace("Z", "+00:00"))
+                        if date_str
+                        else datetime.now()
+                    )
                 except (ValueError, TypeError):
                     dt = datetime.now()
                 dated_jobs.append((dt, job))
@@ -294,24 +323,28 @@ class HiringSignalDetector:
                     confidence = min(0.95, 0.6 + escalation * 0.1)
                     location = job.get("location", "Unknown")
 
-                    signals.append(HiringSignal(
-                        signal_type="clearance_escalation",
-                        program=program,
-                        location=location,
-                        confidence=round(confidence, 2),
-                        detected_at=datetime.now().isoformat(),
-                        details={
-                            "new_clearance": clearance,
-                            "new_level": level,
-                            "previous_max_level": max(max_historical, prev_max),
-                            "escalation_steps": escalation,
-                            "job_title": job.get("title", ""),
-                            "company": job.get("company", ""),
-                        },
-                    ))
+                    signals.append(
+                        HiringSignal(
+                            signal_type="clearance_escalation",
+                            program=program,
+                            location=location,
+                            confidence=round(confidence, 2),
+                            detected_at=datetime.now().isoformat(),
+                            details={
+                                "new_clearance": clearance,
+                                "new_level": level,
+                                "previous_max_level": max(max_historical, prev_max),
+                                "escalation_steps": escalation,
+                                "job_title": job.get("title", ""),
+                                "company": job.get("company", ""),
+                            },
+                        )
+                    )
 
                     # Update tracked max
-                    self._known_clearances[program] = max(self._known_clearances[program], level)
+                    self._known_clearances[program] = max(
+                        self._known_clearances[program], level
+                    )
 
         return signals
 

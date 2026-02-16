@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 try:
     from crewai import Agent
+
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
@@ -21,6 +22,7 @@ from .program_intel_agent import ProgramIntelAgent
 from .company_research_agent import CompanyResearchAgent
 from .contact_finder_agent import ContactFinderAgent
 from .bd_strategy_agent import BDStrategyAgent
+
 # New Phase 4 agents
 from .contact_classifier_agent import ContactClassifierAgent
 from .scraper_monitor_agent import ScraperMonitorAgent
@@ -63,11 +65,15 @@ class FallbackOrchestrator:
             agents_used.append("program_intel")
 
             company_result = await self.company_agent.process(query)
-            results.append({"agent": "company_research", "output": company_result.content})
+            results.append(
+                {"agent": "company_research", "output": company_result.content}
+            )
             agents_used.append("company_research")
 
             contact_result = await self.contact_agent.process(query)
-            results.append({"agent": "contact_finder", "output": contact_result.content})
+            results.append(
+                {"agent": "contact_finder", "output": contact_result.content}
+            )
             agents_used.append("contact_finder")
 
             # Final strategy synthesis
@@ -85,19 +91,23 @@ class FallbackOrchestrator:
                 workflow=workflow,
                 results=results,
                 final_output=strategy_result.content,
-                agents_used=agents_used
+                agents_used=agents_used,
             )
 
         elif workflow == "competitor_analysis":
-            company_result = await self.company_agent.process(f"Competitor analysis: {query}")
-            results.append({"agent": "company_research", "output": company_result.content})
+            company_result = await self.company_agent.process(
+                f"Competitor analysis: {query}"
+            )
+            results.append(
+                {"agent": "company_research", "output": company_result.content}
+            )
 
             return OrchestrationResult(
                 success=True,
                 workflow=workflow,
                 results=results,
                 final_output=company_result.content,
-                agents_used=["company_research"]
+                agents_used=["company_research"],
             )
 
         else:
@@ -108,7 +118,7 @@ class FallbackOrchestrator:
                 workflow="default",
                 results=[{"agent": "bd_strategy", "output": strategy_result.content}],
                 final_output=strategy_result.content,
-                agents_used=["bd_strategy"]
+                agents_used=["bd_strategy"],
             )
 
 
@@ -133,28 +143,28 @@ class BDCrewOrchestrator:
             role="Program Intelligence Analyst",
             goal="Analyze federal programs and identify opportunities",
             backstory="Expert in DCGS portfolio, DoD contracts, and federal procurement",
-            verbose=True
+            verbose=True,
         )
 
         self.company_agent = Agent(
             role="Company Research Analyst",
             goal="Research competitors and identify teaming partners",
             backstory="Expert in federal contractor intelligence and competitive analysis",
-            verbose=True
+            verbose=True,
         )
 
         self.contact_agent = Agent(
             role="Contact Intelligence Analyst",
             goal="Identify key decision makers and stakeholders",
             backstory="Expert in federal organization structures and personnel",
-            verbose=True
+            verbose=True,
         )
 
         self.strategy_agent = Agent(
             role="BD Strategy Lead",
             goal="Develop winning capture strategies",
             backstory="Senior BD executive with proven win record",
-            verbose=True
+            verbose=True,
         )
 
         # Store our custom agents for processing
@@ -176,7 +186,9 @@ class BDCrewOrchestrator:
     async def capture_strategy_workflow(self, opportunity: str) -> OrchestrationResult:
         """Run capture strategy workflow."""
         if self.backend == "fallback":
-            return await self._orchestrator.run_workflow("capture_strategy", opportunity)
+            return await self._orchestrator.run_workflow(
+                "capture_strategy", opportunity
+            )
 
         results = []
         agents_used = []
@@ -210,7 +222,7 @@ class BDCrewOrchestrator:
         """
         strategy_result = await self._strategy_agent.process(
             f"Create capture strategy for {opportunity} based on the research",
-            context={"research": context}
+            context={"research": context},
         )
         results.append({"agent": "bd_strategy", "output": strategy_result.content})
         agents_used.append("bd_strategy")
@@ -220,7 +232,7 @@ class BDCrewOrchestrator:
             workflow="capture_strategy",
             results=results,
             final_output=strategy_result.content,
-            agents_used=agents_used
+            agents_used=agents_used,
         )
 
     async def competitor_analysis_workflow(self, company: str) -> OrchestrationResult:
@@ -250,10 +262,12 @@ class BDCrewOrchestrator:
             workflow="competitor_analysis",
             results=results,
             final_output=company_result.content,
-            agents_used=agents_used
+            agents_used=agents_used,
         )
 
-    async def teaming_partner_workflow(self, capability_gaps: List[str]) -> OrchestrationResult:
+    async def teaming_partner_workflow(
+        self, capability_gaps: List[str]
+    ) -> OrchestrationResult:
         """Run teaming partner identification workflow."""
         if self.backend == "fallback":
             return await self._orchestrator.run_workflow(
@@ -262,7 +276,9 @@ class BDCrewOrchestrator:
 
         results = []
 
-        partner_result = await self._company_agent.find_teaming_partners(capability_gaps)
+        partner_result = await self._company_agent.find_teaming_partners(
+            capability_gaps
+        )
         results.append({"agent": "company_research", "output": partner_result.content})
 
         return OrchestrationResult(
@@ -270,7 +286,7 @@ class BDCrewOrchestrator:
             workflow="teaming_partner",
             results=results,
             final_output=partner_result.content,
-            agents_used=["company_research"]
+            agents_used=["company_research"],
         )
 
     async def quick_intel_workflow(self, query: str) -> OrchestrationResult:
@@ -281,13 +297,21 @@ class BDCrewOrchestrator:
         # Determine best agent for query
         query_lower = query.lower()
 
-        if any(word in query_lower for word in ["program", "contract", "dcgs", "recompete"]):
+        if any(
+            word in query_lower for word in ["program", "contract", "dcgs", "recompete"]
+        ):
             result = await self._program_agent.process(query)
             agent = "program_intel"
-        elif any(word in query_lower for word in ["company", "competitor", "partner", "leidos", "gdit"]):
+        elif any(
+            word in query_lower
+            for word in ["company", "competitor", "partner", "leidos", "gdit"]
+        ):
             result = await self._company_agent.process(query)
             agent = "company_research"
-        elif any(word in query_lower for word in ["contact", "person", "decision maker", "clearance"]):
+        elif any(
+            word in query_lower
+            for word in ["contact", "person", "decision maker", "clearance"]
+        ):
             result = await self._contact_agent.process(query)
             agent = "contact_finder"
         else:
@@ -299,16 +323,17 @@ class BDCrewOrchestrator:
             workflow="quick_intel",
             results=[{"agent": agent, "output": result.content}],
             final_output=result.content,
-            agents_used=[agent]
+            agents_used=[agent],
         )
 
     # ===== NEW PHASE 4 WORKFLOWS =====
 
-    async def classify_contacts_workflow(self, contacts: List[Dict]) -> OrchestrationResult:
+    async def classify_contacts_workflow(
+        self, contacts: List[Dict]
+    ) -> OrchestrationResult:
         """Classify a batch of contacts."""
         result = await self._classifier_agent.process(
-            "Classify contacts",
-            context={"contacts": contacts}
+            "Classify contacts", context={"contacts": contacts}
         )
 
         return OrchestrationResult(
@@ -316,18 +341,15 @@ class BDCrewOrchestrator:
             workflow="classify_contacts",
             results=[{"agent": "contact_classifier", "output": result.content}],
             final_output=result.content,
-            agents_used=["contact_classifier"]
+            agents_used=["contact_classifier"],
         )
 
     async def analyze_scrape_workflow(
-        self,
-        jobs: List[Dict],
-        scraper_name: str = "unknown"
+        self, jobs: List[Dict], scraper_name: str = "unknown"
     ) -> OrchestrationResult:
         """Analyze job scraper results."""
         result = await self._scraper_agent.process(
-            "Analyze scrape",
-            context={"jobs": jobs, "scraper_name": scraper_name}
+            "Analyze scrape", context={"jobs": jobs, "scraper_name": scraper_name}
         )
 
         return OrchestrationResult(
@@ -335,18 +357,16 @@ class BDCrewOrchestrator:
             workflow="analyze_scrape",
             results=[{"agent": "scraper_monitor", "output": result.content}],
             final_output=result.content,
-            agents_used=["scraper_monitor"]
+            agents_used=["scraper_monitor"],
         )
 
     async def quality_check_workflow(
-        self,
-        records: List[Dict],
-        collection_type: str = "contacts"
+        self, records: List[Dict], collection_type: str = "contacts"
     ) -> OrchestrationResult:
         """Run quality assurance on data."""
         result = await self._qa_agent.process(
             "Check quality",
-            context={"records": records, "collection_type": collection_type}
+            context={"records": records, "collection_type": collection_type},
         )
 
         return OrchestrationResult(
@@ -354,7 +374,7 @@ class BDCrewOrchestrator:
             workflow="quality_check",
             results=[{"agent": "quality_assurance", "output": result.content}],
             final_output=result.content,
-            agents_used=["quality_assurance"]
+            agents_used=["quality_assurance"],
         )
 
     async def generate_analytics_workflow(
@@ -362,7 +382,7 @@ class BDCrewOrchestrator:
         jobs: List[Dict] = None,
         programs: List[Dict] = None,
         contacts: List[Dict] = None,
-        period: str = "weekly"
+        period: str = "weekly",
     ) -> OrchestrationResult:
         """Generate analytics report."""
         result = await self._analytics_agent.process(
@@ -372,7 +392,7 @@ class BDCrewOrchestrator:
                 "programs": programs or [],
                 "contacts": contacts or [],
                 "period": period,
-            }
+            },
         )
 
         return OrchestrationResult(
@@ -380,14 +400,11 @@ class BDCrewOrchestrator:
             workflow="analytics",
             results=[{"agent": "analytics", "output": result.content}],
             final_output=result.content,
-            agents_used=["analytics"]
+            agents_used=["analytics"],
         )
 
     async def full_intelligence_workflow(
-        self,
-        query: str,
-        jobs: List[Dict] = None,
-        contacts: List[Dict] = None
+        self, query: str, jobs: List[Dict] = None, contacts: List[Dict] = None
     ) -> OrchestrationResult:
         """
         Full intelligence workflow using all 8 agents.
@@ -406,7 +423,9 @@ class BDCrewOrchestrator:
             classify_result = await self._classifier_agent.process(
                 "Classify", context={"contacts": contacts}
             )
-            results.append({"agent": "contact_classifier", "output": classify_result.content})
+            results.append(
+                {"agent": "contact_classifier", "output": classify_result.content}
+            )
             agents_used.append("contact_classifier")
 
         # Step 2: Analyze jobs if provided
@@ -414,7 +433,9 @@ class BDCrewOrchestrator:
             scrape_result = await self._scraper_agent.process(
                 "Analyze", context={"jobs": jobs}
             )
-            results.append({"agent": "scraper_monitor", "output": scrape_result.content})
+            results.append(
+                {"agent": "scraper_monitor", "output": scrape_result.content}
+            )
             agents_used.append("scraper_monitor")
 
         # Step 3: Run capture strategy
@@ -424,8 +445,7 @@ class BDCrewOrchestrator:
 
         # Step 4: Generate analytics
         analytics_result = await self._analytics_agent.process(
-            "Generate report",
-            context={"jobs": jobs or [], "contacts": contacts or []}
+            "Generate report", context={"jobs": jobs or [], "contacts": contacts or []}
         )
         results.append({"agent": "analytics", "output": analytics_result.content})
         agents_used.append("analytics")
@@ -435,11 +455,12 @@ class BDCrewOrchestrator:
             workflow="full_intelligence",
             results=results,
             final_output=analytics_result.content,
-            agents_used=list(set(agents_used))
+            agents_used=list(set(agents_used)),
         )
 
 
 _orchestrator_instance = None
+
 
 def get_orchestrator() -> BDCrewOrchestrator:
     global _orchestrator_instance

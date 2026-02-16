@@ -21,32 +21,32 @@ except ImportError:
 # Classification patterns
 TIER_PATTERNS = {
     1: [  # C-Suite / Flag Officers
-        r'\b(ceo|cto|cio|cfo|coo|president|chairman|vice president|vp|svp|evp)\b',
-        r'\b(general|admiral|lieutenant general|major general|rear admiral)\b',
-        r'\b(chief .* officer|executive director|managing director)\b',
+        r"\b(ceo|cto|cio|cfo|coo|president|chairman|vice president|vp|svp|evp)\b",
+        r"\b(general|admiral|lieutenant general|major general|rear admiral)\b",
+        r"\b(chief .* officer|executive director|managing director)\b",
     ],
     2: [  # Directors / Senior Leaders
-        r'\b(director|senior director|associate director|deputy director)\b',
-        r'\b(colonel|captain|commander|lieutenant colonel)\b',
-        r'\b(program manager|portfolio manager|division chief)\b',
+        r"\b(director|senior director|associate director|deputy director)\b",
+        r"\b(colonel|captain|commander|lieutenant colonel)\b",
+        r"\b(program manager|portfolio manager|division chief)\b",
     ],
     3: [  # Managers / Program Leadership
-        r'\b(manager|senior manager|program lead)\b',
-        r'\b(major|lieutenant commander)\b',
-        r'\b(team lead|branch chief|section chief)\b',
+        r"\b(manager|senior manager|program lead)\b",
+        r"\b(major|lieutenant commander)\b",
+        r"\b(team lead|branch chief|section chief)\b",
     ],
     4: [  # Senior Individual Contributors
-        r'\b(senior engineer|senior analyst|principal|lead architect)\b',
-        r'\b(technical lead|subject matter expert|sme)\b',
-        r'\b(senior consultant|senior specialist)\b',
+        r"\b(senior engineer|senior analyst|principal|lead architect)\b",
+        r"\b(technical lead|subject matter expert|sme)\b",
+        r"\b(senior consultant|senior specialist)\b",
     ],
     5: [  # Individual Contributors
-        r'\b(engineer|analyst|developer|consultant)\b',
-        r'\b(contractor|specialist|coordinator)\b',
+        r"\b(engineer|analyst|developer|consultant)\b",
+        r"\b(contractor|specialist|coordinator)\b",
     ],
     6: [  # Support / Entry Level
-        r'\b(assistant|associate|intern|trainee|junior)\b',
-        r'\b(support|administrative|clerk|technician)\b',
+        r"\b(assistant|associate|intern|trainee|junior)\b",
+        r"\b(support|administrative|clerk|technician)\b",
     ],
 }
 
@@ -61,7 +61,13 @@ PROGRAM_KEYWORDS = {
 }
 
 LOCATION_HUB_MAP = {
-    "Hampton Roads": ["langley", "norfolk", "virginia beach", "hampton", "newport news"],
+    "Hampton Roads": [
+        "langley",
+        "norfolk",
+        "virginia beach",
+        "hampton",
+        "newport news",
+    ],
     "San Diego Metro": ["san diego", "coronado", "point loma"],
     "DC Metro": ["washington", "arlington", "bethesda", "mclean", "reston", "tysons"],
     "Dayton/Wright-Patt": ["dayton", "wright-patt", "fairborn"],
@@ -72,6 +78,7 @@ LOCATION_HUB_MAP = {
 @dataclass
 class ClassificationResult:
     """Result of contact classification."""
+
     hierarchy_tier: int
     tier_label: str
     program: str
@@ -96,7 +103,7 @@ class ContactClassifierAgent(BDAgent):
         super().__init__(
             name="Contact Classifier Agent",
             description="Classify contacts by tier, program, priority, and location for BD targeting. "
-                       "Expert in organizational hierarchy and federal personnel structures."
+            "Expert in organizational hierarchy and federal personnel structures.",
         )
 
     def classify_tier(self, title: str) -> tuple[int, str, List[str]]:
@@ -118,9 +125,15 @@ class ContactClassifierAgent(BDAgent):
                     signals.append(f"Title pattern match: {pattern}")
                     return tier, tier_labels[tier], signals
 
-        return 6, "Tier 6 - Individual Contributor", ["No pattern match, defaulting to Tier 6"]
+        return (
+            6,
+            "Tier 6 - Individual Contributor",
+            ["No pattern match, defaulting to Tier 6"],
+        )
 
-    def classify_program(self, title: str, company: str, location: str) -> tuple[str, List[str]]:
+    def classify_program(
+        self, title: str, company: str, location: str
+    ) -> tuple[str, List[str]]:
         """Classify which DCGS program the contact is associated with."""
         text = f"{title} {company} {location}".lower()
         signals = []
@@ -197,7 +210,9 @@ class ContactClassifierAgent(BDAgent):
         all_signals.extend(tier_signals)
 
         # Program classification
-        program, program_signals = self.classify_program(job_title, company, f"{city} {state}")
+        program, program_signals = self.classify_program(
+            job_title, company, f"{city} {state}"
+        )
         all_signals.extend(program_signals)
 
         # Location hub
@@ -257,7 +272,9 @@ class ContactClassifierAgent(BDAgent):
         logger.info("contacts_classified", count=len(results))
         return results
 
-    async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def process(
+        self, query: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         """Process a classification request."""
         # Check if we have contacts in context
         if context and "contacts" in context:
@@ -298,10 +315,12 @@ if __name__ == "__main__":
         state="VA",
     )
 
-    logger.info("classification_result",
-               tier=result.tier_label,
-               program=result.program,
-               priority=result.bd_priority,
-               location_hub=result.location_hub,
-               confidence=round(result.confidence, 2),
-               signals=result.signals)
+    logger.info(
+        "classification_result",
+        tier=result.tier_label,
+        program=result.program,
+        priority=result.bd_priority,
+        location_hub=result.location_hub,
+        confidence=round(result.confidence, 2),
+        signals=result.signals,
+    )

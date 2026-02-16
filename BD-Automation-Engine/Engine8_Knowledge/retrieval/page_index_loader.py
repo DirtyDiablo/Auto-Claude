@@ -1,6 +1,7 @@
 """
 Utilities for loading documents into PageIndex.
 """
+
 from pathlib import Path
 from typing import List, Dict
 import fitz  # PyMuPDF
@@ -20,10 +21,7 @@ def extract_pdf_pages(pdf_path: str) -> List[Dict]:
         text = page.get_text()
 
         if text.strip():  # Only add non-empty pages
-            pages.append({
-                "page_number": page_num + 1,
-                "content": text
-            })
+            pages.append({"page_number": page_num + 1, "content": text})
 
     doc.close()
     return pages
@@ -32,7 +30,7 @@ def extract_pdf_pages(pdf_path: str) -> List[Dict]:
 def generate_document_id(file_path: str) -> str:
     """Generate a unique document ID from file path and content hash."""
     path = Path(file_path)
-    with open(path, 'rb') as f:
+    with open(path, "rb") as f:
         content_hash = hashlib.md5(f.read()).hexdigest()[:8]
     return f"{path.stem}_{content_hash}"
 
@@ -53,12 +51,14 @@ def index_pdf_folder(page_index, folder_path: str, recursive: bool = True) -> Di
                 document_id=doc_id,
                 document_name=pdf_path.name,
                 pages=pages,
-                metadata={"source_path": str(pdf_path)}
+                metadata={"source_path": str(pdf_path)},
             )
 
             stats["indexed"] += 1
             stats["pages"] += num_indexed
-            logger.info("pdf_indexed", filename=pdf_path.name, pages_indexed=num_indexed)
+            logger.info(
+                "pdf_indexed", filename=pdf_path.name, pages_indexed=num_indexed
+            )
 
         except Exception as e:
             stats["errors"].append({"file": str(pdf_path), "error": str(e)})
@@ -85,8 +85,7 @@ def index_from_docling(page_index, processed_doc: Dict, metadata: Dict = None) -
 
     # Convert page format
     formatted_pages = [
-        {"page_number": p["page_number"], "content": p["content"]}
-        for p in pages
+        {"page_number": p["page_number"], "content": p["content"]} for p in pages
     ]
 
     # Merge metadata
@@ -98,5 +97,5 @@ def index_from_docling(page_index, processed_doc: Dict, metadata: Dict = None) -
         document_id=doc_id,
         document_name=doc_name,
         pages=formatted_pages,
-        metadata=full_metadata
+        metadata=full_metadata,
     )

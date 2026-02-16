@@ -51,7 +51,9 @@ class SupermemoryClient:
         """
         self.api_key = api_key or os.getenv("SUPERMEMORY_API_KEY")
         if not self.api_key:
-            logger.warning("No Supermemory API key provided. Set SUPERMEMORY_API_KEY env var.")
+            logger.warning(
+                "No Supermemory API key provided. Set SUPERMEMORY_API_KEY env var."
+            )
 
         self.base_url = base_url.rstrip("/")
         self.timeout = timeout
@@ -98,7 +100,10 @@ class SupermemoryClient:
             ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation",
         }
-        return mime_types.get(extension.lower(), mimetypes.guess_type(f"file{extension}")[0] or "application/octet-stream")
+        return mime_types.get(
+            extension.lower(),
+            mimetypes.guess_type(f"file{extension}")[0] or "application/octet-stream",
+        )
 
     # =========================================================================
     # MEMORY MANAGEMENT
@@ -656,11 +661,11 @@ class BDMemoryManager:
         # Add metadata as a linked text memory
         metadata_text = f"""
 RFP: {title}
-Solicitation Number: {solicitation_number or 'N/A'}
-Agency: {agency or 'Unknown'}
-Program: {program or 'N/A'}
-Response Deadline: {deadline or 'Unknown'}
-Document ID: {result.get('id', 'N/A')}
+Solicitation Number: {solicitation_number or "N/A"}
+Agency: {agency or "Unknown"}
+Program: {program or "N/A"}
+Response Deadline: {deadline or "Unknown"}
+Document ID: {result.get("id", "N/A")}
 """
         await self.supermemory.add_memory(
             metadata_text,
@@ -743,12 +748,12 @@ Document ID: {result.get('id', 'N/A')}
         # Add metadata
         metadata_text = f"""
 Contract: {contract_number}
-Contractor: {contractor or 'Unknown'}
-Agency: {agency or 'Unknown'}
-Program: {program or 'N/A'}
-Value: {value or 'Unknown'}
-POP End: {pop_end or 'Unknown'}
-Document ID: {result.get('id', 'N/A')}
+Contractor: {contractor or "Unknown"}
+Agency: {agency or "Unknown"}
+Program: {program or "N/A"}
+Value: {value or "Unknown"}
+POP End: {pop_end or "Unknown"}
+Document ID: {result.get("id", "N/A")}
 """
         await self.supermemory.add_memory(
             metadata_text,
@@ -801,7 +806,10 @@ Document ID: {result.get('id', 'N/A')}
         capabilities: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
         """Store a capability statement."""
-        tags = [self.DOC_TAGS["capability"], f"company:{company.lower().replace(' ', '_')}"]
+        tags = [
+            self.DOC_TAGS["capability"],
+            f"company:{company.lower().replace(' ', '_')}",
+        ]
         title = f"{company} Capability Statement"
         return await self.supermemory.add_document(file_path, title, tags)
 

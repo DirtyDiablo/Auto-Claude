@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class FieldType(str, Enum):
     STRING = "string"
     INTEGER = "integer"
@@ -32,10 +33,10 @@ class FieldType(str, Enum):
 
 
 class CompatibilityMode(str, Enum):
-    NONE = "none"               # No compatibility check
-    BACKWARD = "backward"       # New schema can read old data
-    FORWARD = "forward"         # Old schema can read new data
-    FULL = "full"               # Both directions
+    NONE = "none"  # No compatibility check
+    BACKWARD = "backward"  # New schema can read old data
+    FORWARD = "forward"  # Old schema can read new data
+    FULL = "full"  # Both directions
 
 
 class EvolutionType(str, Enum):
@@ -51,9 +52,11 @@ class EvolutionType(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class SchemaField:
     """A field definition within a schema."""
+
     name: str = ""
     field_type: str = FieldType.STRING.value
     required: bool = False
@@ -65,6 +68,7 @@ class SchemaField:
 @dataclass
 class DataSchema:
     """A versioned schema for a data type."""
+
     id: str = ""
     name: str = ""
     version: int = 1
@@ -81,6 +85,7 @@ class DataSchema:
 @dataclass
 class ValidationResult:
     """Result of validating data against a schema."""
+
     valid: bool = True
     errors: List[str] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
@@ -91,6 +96,7 @@ class ValidationResult:
 @dataclass
 class EvolutionChange:
     """A single change in schema evolution."""
+
     change_type: str = ""
     field_name: str = ""
     old_value: Any = None
@@ -101,6 +107,7 @@ class EvolutionChange:
 @dataclass
 class CompatibilityReport:
     """Report from a compatibility check between two schema versions."""
+
     compatible: bool = True
     mode: str = CompatibilityMode.BACKWARD.value
     changes: List[EvolutionChange] = field(default_factory=list)
@@ -114,9 +121,13 @@ class CompatibilityReport:
 _TYPE_VALIDATORS = {
     FieldType.STRING.value: lambda v: isinstance(v, str),
     FieldType.INTEGER.value: lambda v: isinstance(v, int) and not isinstance(v, bool),
-    FieldType.FLOAT.value: lambda v: isinstance(v, (int, float)) and not isinstance(v, bool),
+    FieldType.FLOAT.value: lambda v: (
+        isinstance(v, (int, float)) and not isinstance(v, bool)
+    ),
     FieldType.BOOLEAN.value: lambda v: isinstance(v, bool),
-    FieldType.DATE.value: lambda v: isinstance(v, str) and bool(re.match(r'\d{4}-\d{2}-\d{2}$', v)),
+    FieldType.DATE.value: lambda v: (
+        isinstance(v, str) and bool(re.match(r"\d{4}-\d{2}-\d{2}$", v))
+    ),
     FieldType.DATETIME.value: lambda v: isinstance(v, str) and len(v) >= 19,
     FieldType.LIST.value: lambda v: isinstance(v, list),
     FieldType.DICT.value: lambda v: isinstance(v, dict),
@@ -137,9 +148,9 @@ def _infer_type(value: Any) -> str:
     if isinstance(value, dict):
         return FieldType.DICT.value
     if isinstance(value, str):
-        if re.match(r'\d{4}-\d{2}-\d{2}T', value):
+        if re.match(r"\d{4}-\d{2}-\d{2}T", value):
             return FieldType.DATETIME.value
-        if re.match(r'\d{4}-\d{2}-\d{2}$', value):
+        if re.match(r"\d{4}-\d{2}-\d{2}$", value):
             return FieldType.DATE.value
         return FieldType.STRING.value
     return FieldType.ANY.value
@@ -148,6 +159,7 @@ def _infer_type(value: Any) -> str:
 # =========================================
 # SCHEMA REGISTRY
 # =========================================
+
 
 class SchemaRegistry:
     """Versioned schema registry with validation and evolution."""
@@ -159,52 +171,100 @@ class SchemaRegistry:
 
     def _seed_defaults(self) -> None:
         """Seed registry with known platform schemas."""
-        self.register(DataSchema(
-            name="contact", domain="contacts", version=1,
-            description="CRM contact record",
-            fields=[
-                SchemaField(name="name", field_type="string", required=True, description="Full name"),
-                SchemaField(name="email", field_type="string", required=False, description="Email address"),
-                SchemaField(name="phone", field_type="string", required=False),
-                SchemaField(name="title", field_type="string", required=False, description="Job title"),
-                SchemaField(name="company", field_type="string", required=False),
-                SchemaField(name="tier", field_type="integer", required=False, description="1-6 tier classification",
-                            constraints={"min": 1, "max": 6}),
-                SchemaField(name="location", field_type="string", required=False),
-                SchemaField(name="source", field_type="string", required=False),
-            ],
-            compatibility="backward",
-        ))
-        self.register(DataSchema(
-            name="job_posting", domain="jobs", version=1,
-            description="Scraped job posting record",
-            fields=[
-                SchemaField(name="title", field_type="string", required=True),
-                SchemaField(name="company", field_type="string", required=True),
-                SchemaField(name="location", field_type="string", required=False),
-                SchemaField(name="description", field_type="string", required=False),
-                SchemaField(name="clearance_required", field_type="string", required=False),
-                SchemaField(name="mapped_program", field_type="string", required=False),
-                SchemaField(name="bd_priority_score", field_type="float", required=False,
-                            constraints={"min": 0, "max": 100}),
-                SchemaField(name="date_posted", field_type="string", required=False),
-                SchemaField(name="source_url", field_type="string", required=False),
-            ],
-            compatibility="backward",
-        ))
-        self.register(DataSchema(
-            name="program", domain="programs", version=1,
-            description="Federal program record",
-            fields=[
-                SchemaField(name="name", field_type="string", required=True),
-                SchemaField(name="agency", field_type="string", required=False),
-                SchemaField(name="prime_contractor", field_type="string", required=False),
-                SchemaField(name="value", field_type="string", required=False),
-                SchemaField(name="status", field_type="string", required=False),
-                SchemaField(name="description", field_type="string", required=False),
-            ],
-            compatibility="backward",
-        ))
+        self.register(
+            DataSchema(
+                name="contact",
+                domain="contacts",
+                version=1,
+                description="CRM contact record",
+                fields=[
+                    SchemaField(
+                        name="name",
+                        field_type="string",
+                        required=True,
+                        description="Full name",
+                    ),
+                    SchemaField(
+                        name="email",
+                        field_type="string",
+                        required=False,
+                        description="Email address",
+                    ),
+                    SchemaField(name="phone", field_type="string", required=False),
+                    SchemaField(
+                        name="title",
+                        field_type="string",
+                        required=False,
+                        description="Job title",
+                    ),
+                    SchemaField(name="company", field_type="string", required=False),
+                    SchemaField(
+                        name="tier",
+                        field_type="integer",
+                        required=False,
+                        description="1-6 tier classification",
+                        constraints={"min": 1, "max": 6},
+                    ),
+                    SchemaField(name="location", field_type="string", required=False),
+                    SchemaField(name="source", field_type="string", required=False),
+                ],
+                compatibility="backward",
+            )
+        )
+        self.register(
+            DataSchema(
+                name="job_posting",
+                domain="jobs",
+                version=1,
+                description="Scraped job posting record",
+                fields=[
+                    SchemaField(name="title", field_type="string", required=True),
+                    SchemaField(name="company", field_type="string", required=True),
+                    SchemaField(name="location", field_type="string", required=False),
+                    SchemaField(
+                        name="description", field_type="string", required=False
+                    ),
+                    SchemaField(
+                        name="clearance_required", field_type="string", required=False
+                    ),
+                    SchemaField(
+                        name="mapped_program", field_type="string", required=False
+                    ),
+                    SchemaField(
+                        name="bd_priority_score",
+                        field_type="float",
+                        required=False,
+                        constraints={"min": 0, "max": 100},
+                    ),
+                    SchemaField(
+                        name="date_posted", field_type="string", required=False
+                    ),
+                    SchemaField(name="source_url", field_type="string", required=False),
+                ],
+                compatibility="backward",
+            )
+        )
+        self.register(
+            DataSchema(
+                name="program",
+                domain="programs",
+                version=1,
+                description="Federal program record",
+                fields=[
+                    SchemaField(name="name", field_type="string", required=True),
+                    SchemaField(name="agency", field_type="string", required=False),
+                    SchemaField(
+                        name="prime_contractor", field_type="string", required=False
+                    ),
+                    SchemaField(name="value", field_type="string", required=False),
+                    SchemaField(name="status", field_type="string", required=False),
+                    SchemaField(
+                        name="description", field_type="string", required=False
+                    ),
+                ],
+                compatibility="backward",
+            )
+        )
 
     # -----------------------------------------
     # REGISTER & RETRIEVE
@@ -259,7 +319,9 @@ class SchemaRegistry:
     # VALIDATION
     # -----------------------------------------
 
-    def validate(self, name: str, data: Dict[str, Any], version: Optional[int] = None) -> ValidationResult:
+    def validate(
+        self, name: str, data: Dict[str, Any], version: Optional[int] = None
+    ) -> ValidationResult:
         """Validate a data record against a schema."""
         schema = self.get(name, version)
         if not schema:
@@ -302,7 +364,9 @@ class SchemaRegistry:
 
         return result
 
-    def _check_constraints(self, sf: SchemaField, value: Any, result: ValidationResult) -> None:
+    def _check_constraints(
+        self, sf: SchemaField, value: Any, result: ValidationResult
+    ) -> None:
         """Check field constraints (min, max, pattern, enum)."""
         constraints = sf.constraints
         if not constraints:
@@ -349,14 +413,19 @@ class SchemaRegistry:
 
         report = self.check_compatibility(current, new_schema)
 
-        if report.compatible or new_schema.compatibility == CompatibilityMode.NONE.value:
+        if (
+            report.compatible
+            or new_schema.compatibility == CompatibilityMode.NONE.value
+        ):
             new_schema.version = current.version + 1
             new_schema.id = f"{name}_v{new_schema.version}"
             self.register(new_schema)
 
         return report
 
-    def check_compatibility(self, old: DataSchema, new: DataSchema) -> CompatibilityReport:
+    def check_compatibility(
+        self, old: DataSchema, new: DataSchema
+    ) -> CompatibilityReport:
         """Check backward compatibility between two schema versions."""
         changes: List[EvolutionChange] = []
         old_fields = {f.name: f for f in old.fields}
@@ -366,23 +435,29 @@ class SchemaRegistry:
         for name, of in old_fields.items():
             if name not in new_fields:
                 breaking = of.required  # removing required field is breaking
-                changes.append(EvolutionChange(
-                    change_type=EvolutionType.FIELD_REMOVED.value,
-                    field_name=name,
-                    old_value=of.field_type,
-                    breaking=breaking,
-                ))
+                changes.append(
+                    EvolutionChange(
+                        change_type=EvolutionType.FIELD_REMOVED.value,
+                        field_name=name,
+                        old_value=of.field_type,
+                        breaking=breaking,
+                    )
+                )
 
         # Fields added in new version
         for name, nf in new_fields.items():
             if name not in old_fields:
-                breaking = nf.required and nf.default is None  # required without default
-                changes.append(EvolutionChange(
-                    change_type=EvolutionType.FIELD_ADDED.value,
-                    field_name=name,
-                    new_value=nf.field_type,
-                    breaking=breaking,
-                ))
+                breaking = (
+                    nf.required and nf.default is None
+                )  # required without default
+                changes.append(
+                    EvolutionChange(
+                        change_type=EvolutionType.FIELD_ADDED.value,
+                        field_name=name,
+                        new_value=nf.field_type,
+                        breaking=breaking,
+                    )
+                )
 
         # Fields modified
         for name in old_fields:
@@ -391,27 +466,33 @@ class SchemaRegistry:
                 nf = new_fields[name]
 
                 if of.field_type != nf.field_type:
-                    changes.append(EvolutionChange(
-                        change_type=EvolutionType.FIELD_TYPE_CHANGED.value,
-                        field_name=name,
-                        old_value=of.field_type,
-                        new_value=nf.field_type,
-                        breaking=True,
-                    ))
+                    changes.append(
+                        EvolutionChange(
+                            change_type=EvolutionType.FIELD_TYPE_CHANGED.value,
+                            field_name=name,
+                            old_value=of.field_type,
+                            new_value=nf.field_type,
+                            breaking=True,
+                        )
+                    )
 
                 if not of.required and nf.required:
-                    changes.append(EvolutionChange(
-                        change_type=EvolutionType.FIELD_MADE_REQUIRED.value,
-                        field_name=name,
-                        breaking=True,
-                    ))
+                    changes.append(
+                        EvolutionChange(
+                            change_type=EvolutionType.FIELD_MADE_REQUIRED.value,
+                            field_name=name,
+                            breaking=True,
+                        )
+                    )
 
                 if of.required and not nf.required:
-                    changes.append(EvolutionChange(
-                        change_type=EvolutionType.FIELD_MADE_OPTIONAL.value,
-                        field_name=name,
-                        breaking=False,
-                    ))
+                    changes.append(
+                        EvolutionChange(
+                            change_type=EvolutionType.FIELD_MADE_OPTIONAL.value,
+                            field_name=name,
+                            breaking=False,
+                        )
+                    )
 
         breaking_count = sum(1 for c in changes if c.breaking)
         mode = old.compatibility
@@ -433,7 +514,9 @@ class SchemaRegistry:
     # AUTO-GENERATE
     # -----------------------------------------
 
-    def generate_from_data(self, name: str, records: List[Dict[str, Any]], domain: str = "") -> DataSchema:
+    def generate_from_data(
+        self, name: str, records: List[Dict[str, Any]], domain: str = ""
+    ) -> DataSchema:
         """Auto-generate a schema from sample data records."""
         if not records:
             return DataSchema(name=name, domain=domain)
@@ -450,7 +533,9 @@ class SchemaRegistry:
                 if value is not None:
                     field_info[key]["non_null"] += 1
                     inferred = _infer_type(value)
-                    field_info[key]["types"][inferred] = field_info[key]["types"].get(inferred, 0) + 1
+                    field_info[key]["types"][inferred] = (
+                        field_info[key]["types"].get(inferred, 0) + 1
+                    )
 
         # Build schema fields
         fields: List[SchemaField] = []
@@ -462,13 +547,17 @@ class SchemaRegistry:
                 ftype = FieldType.ANY.value
 
             # Required if present in >90% of records
-            required = (info["count"] / total) > 0.9 and (info["non_null"] / max(info["count"], 1)) > 0.8
+            required = (info["count"] / total) > 0.9 and (
+                info["non_null"] / max(info["count"], 1)
+            ) > 0.8
 
-            fields.append(SchemaField(
-                name=fname,
-                field_type=ftype,
-                required=required,
-            ))
+            fields.append(
+                SchemaField(
+                    name=fname,
+                    field_type=ftype,
+                    required=required,
+                )
+            )
 
         return DataSchema(
             name=name,

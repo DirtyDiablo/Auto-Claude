@@ -27,8 +27,10 @@ logger = logging.getLogger(__name__)
 # SCHEMA DEFINITIONS
 # =============================================================================
 
+
 class SAMOpportunitySchema(pw.Schema):
     """Schema for SAM.gov opportunity data."""
+
     notice_id: str
     title: str
     agency: str
@@ -43,6 +45,7 @@ class SAMOpportunitySchema(pw.Schema):
 
 class FPDSContractSchema(pw.Schema):
     """Schema for FPDS contract data."""
+
     contract_id: str
     vendor_name: str
     agency: str
@@ -57,6 +60,7 @@ class FPDSContractSchema(pw.Schema):
 
 class BullhornActivitySchema(pw.Schema):
     """Schema for Bullhorn CRM activity data."""
+
     activity_id: str
     contact_id: str
     activity_type: str
@@ -67,6 +71,7 @@ class BullhornActivitySchema(pw.Schema):
 
 class AlertSchema(pw.Schema):
     """Schema for unified alerts."""
+
     alert_id: str
     alert_type: str
     title: str
@@ -80,6 +85,7 @@ class AlertSchema(pw.Schema):
 # =============================================================================
 # BD STREAMING PIPELINE
 # =============================================================================
+
 
 class BDStreamingPipeline:
     """
@@ -202,7 +208,9 @@ class BDStreamingPipeline:
         @pw.udf
         def is_relevant(naics: str, agency: str, title: str, description: str) -> bool:
             # NAICS match (check prefix for broader matching)
-            naics_match = any(naics.startswith(n[:4]) for n in naics_set) if naics else False
+            naics_match = (
+                any(naics.startswith(n[:4]) for n in naics_set) if naics else False
+            )
 
             # Agency match
             agency_match = agency.lower() in agency_set if agency else False
@@ -216,7 +224,13 @@ class BDStreamingPipeline:
             return signals >= 2
 
         @pw.udf
-        def calculate_relevance_score(naics: str, agency: str, title: str, description: str, estimated_value: float) -> float:
+        def calculate_relevance_score(
+            naics: str,
+            agency: str,
+            title: str,
+            description: str,
+            estimated_value: float,
+        ) -> float:
             score = 0.0
 
             # NAICS match bonus
@@ -279,6 +293,7 @@ class BDStreamingPipeline:
         Returns:
             Table of contracts flagged for recompete
         """
+
         @pw.udf
         def calculate_days_to_pop_end(pop_end_date: str) -> int:
             try:
@@ -294,7 +309,9 @@ class BDStreamingPipeline:
                 end_date = datetime.strptime(pop_end_date, "%Y-%m-%d")
                 days_remaining = (end_date - datetime.now()).days
                 # Flag if within threshold and significant value
-                return 0 < days_remaining <= days_threshold and award_amount >= 1_000_000
+                return (
+                    0 < days_remaining <= days_threshold and award_amount >= 1_000_000
+                )
             except (ValueError, TypeError):
                 return False
 
@@ -356,9 +373,7 @@ class BDStreamingPipeline:
                     return comp.title()
             return ""
 
-        return contracts.filter(
-            is_competitor_win(pw.this.vendor_name)
-        ).select(
+        return contracts.filter(is_competitor_win(pw.this.vendor_name)).select(
             *contracts.columns(),
             matched_competitor=get_matched_competitor(pw.this.vendor_name),
         )
@@ -459,6 +474,7 @@ class BDStreamingPipeline:
         Returns:
             Unified alert stream
         """
+
         @pw.udf
         def create_opp_alert(
             notice_id: str,
@@ -467,7 +483,13 @@ class BDStreamingPipeline:
             estimated_value: float,
             relevance_score: float,
         ) -> Dict[str, str]:
-            priority = "HIGH" if relevance_score >= 70 else "MEDIUM" if relevance_score >= 50 else "LOW"
+            priority = (
+                "HIGH"
+                if relevance_score >= 70
+                else "MEDIUM"
+                if relevance_score >= 50
+                else "LOW"
+            )
             return {
                 "alert_id": f"OPP-{notice_id}",
                 "alert_type": "NEW_OPPORTUNITY",
@@ -507,7 +529,13 @@ class BDStreamingPipeline:
             award_amount: float,
             matched_competitor: str,
         ) -> Dict[str, str]:
-            priority = "HIGH" if award_amount >= 50_000_000 else "MEDIUM" if award_amount >= 10_000_000 else "LOW"
+            priority = (
+                "HIGH"
+                if award_amount >= 50_000_000
+                else "MEDIUM"
+                if award_amount >= 10_000_000
+                else "LOW"
+            )
             return {
                 "alert_id": f"COMP-{contract_id}",
                 "alert_type": "COMPETITOR_WIN",
@@ -710,16 +738,28 @@ class BDStreamingPipeline:
             "Defense Intelligence Agency",
         ]
         keywords = [
-            "dcgs", "distributed common ground system",
-            "isr", "intelligence surveillance reconnaissance",
-            "sigint", "geoint", "elint",
-            "sensor data", "mission systems",
-            "ground station", "exploitation",
+            "dcgs",
+            "distributed common ground system",
+            "isr",
+            "intelligence surveillance reconnaissance",
+            "sigint",
+            "geoint",
+            "elint",
+            "sensor data",
+            "mission systems",
+            "ground station",
+            "exploitation",
         ]
         competitors = [
-            "leidos", "northrop grumman", "raytheon",
-            "l3harris", "saic", "general dynamics",
-            "bae systems", "lockheed martin", "boeing",
+            "leidos",
+            "northrop grumman",
+            "raytheon",
+            "l3harris",
+            "saic",
+            "general dynamics",
+            "bae systems",
+            "lockheed martin",
+            "boeing",
         ]
 
         # Create data streams
@@ -735,7 +775,9 @@ class BDStreamingPipeline:
         competitor_wins = self.track_competitor_activity(contracts, competitors)
 
         # Create unified alert stream
-        alerts = self.create_alert_stream(relevant_opps, recompete_signals, competitor_wins)
+        alerts = self.create_alert_stream(
+            relevant_opps, recompete_signals, competitor_wins
+        )
 
         # Configure outputs
         if output_postgres:

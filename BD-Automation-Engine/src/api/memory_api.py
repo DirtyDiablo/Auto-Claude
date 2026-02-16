@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # REQUEST / RESPONSE MODELS
 # =========================================
 
+
 class StoreRequest(BaseModel):
     content: str = Field(..., min_length=3)
     memory_type: str = "episodic"
@@ -65,6 +66,7 @@ class ForgetRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_memory_router(app: FastAPI) -> None:
     """Register all memory endpoints on the FastAPI app."""
@@ -294,6 +296,7 @@ def include_memory_router(app: FastAPI) -> None:
 # =========================================
 # SERIALIZATION HELPERS
 # =========================================
+
 
 def _serialize_memory(mem: Memory) -> Dict[str, Any]:
     """Serialize a Memory to a JSON-safe dict."""

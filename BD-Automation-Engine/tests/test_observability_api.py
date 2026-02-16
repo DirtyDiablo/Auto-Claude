@@ -39,6 +39,7 @@ def client(app):
 # TRACING
 # =========================================
 
+
 def test_list_traces_empty(client):
     resp = client.get("/api/observability/traces")
     assert resp.status_code == 200
@@ -60,6 +61,7 @@ def test_search_spans_empty(client):
 # METRICS
 # =========================================
 
+
 def test_list_metrics(client):
     resp = client.get("/api/observability/metrics")
     assert resp.status_code == 200
@@ -68,28 +70,38 @@ def test_list_metrics(client):
 
 
 def test_record_metric(client):
-    resp = client.post("/api/observability/metrics/record", json={
-        "metric_name": "api_requests_total",
-        "value": 1.0,
-    })
+    resp = client.post(
+        "/api/observability/metrics/record",
+        json={
+            "metric_name": "api_requests_total",
+            "value": 1.0,
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["recorded"] is True
 
 
 def test_record_and_list_metric(client):
-    client.post("/api/observability/metrics/record", json={
-        "metric_name": "api_requests_total",
-        "value": 1.0,
-    })
+    client.post(
+        "/api/observability/metrics/record",
+        json={
+            "metric_name": "api_requests_total",
+            "value": 1.0,
+        },
+    )
     resp = client.get("/api/observability/metrics")
     assert resp.status_code == 200
     assert resp.json()["total"] >= 1
 
 
 def test_export_json(client):
-    client.post("/api/observability/metrics/record", json={
-        "metric_name": "api_requests_total", "value": 1.0,
-    })
+    client.post(
+        "/api/observability/metrics/record",
+        json={
+            "metric_name": "api_requests_total",
+            "value": 1.0,
+        },
+    )
     resp = client.get("/api/observability/metrics/export?fmt=json")
     assert resp.status_code == 200
     data = resp.json()
@@ -98,9 +110,13 @@ def test_export_json(client):
 
 
 def test_export_prometheus(client):
-    client.post("/api/observability/metrics/record", json={
-        "metric_name": "api_requests_total", "value": 1.0,
-    })
+    client.post(
+        "/api/observability/metrics/record",
+        json={
+            "metric_name": "api_requests_total",
+            "value": 1.0,
+        },
+    )
     resp = client.get("/api/observability/metrics/export?fmt=prometheus")
     assert resp.status_code == 200
     assert "api_requests_total" in resp.text
@@ -110,13 +126,17 @@ def test_export_prometheus(client):
 # ALERTS
 # =========================================
 
+
 def test_create_alert_rule(client):
-    resp = client.post("/api/observability/alerts/rules", json={
-        "metric_name": "api_request_duration_ms",
-        "condition": "gt",
-        "threshold": 1000.0,
-        "severity": "critical",
-    })
+    resp = client.post(
+        "/api/observability/alerts/rules",
+        json={
+            "metric_name": "api_request_duration_ms",
+            "condition": "gt",
+            "threshold": 1000.0,
+            "severity": "critical",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["rule_id"].startswith("rule_")
 
@@ -128,14 +148,21 @@ def test_list_alerts_empty(client):
 
 
 def test_alert_triggers_via_api(client):
-    client.post("/api/observability/alerts/rules", json={
-        "metric_name": "api_request_duration_ms",
-        "condition": "gt",
-        "threshold": 100.0,
-    })
-    client.post("/api/observability/metrics/record", json={
-        "metric_name": "api_request_duration_ms", "value": 500.0,
-    })
+    client.post(
+        "/api/observability/alerts/rules",
+        json={
+            "metric_name": "api_request_duration_ms",
+            "condition": "gt",
+            "threshold": 100.0,
+        },
+    )
+    client.post(
+        "/api/observability/metrics/record",
+        json={
+            "metric_name": "api_request_duration_ms",
+            "value": 500.0,
+        },
+    )
     resp = client.get("/api/observability/alerts")
     assert resp.status_code == 200
     assert resp.json()["total"] >= 1
@@ -144,6 +171,7 @@ def test_alert_triggers_via_api(client):
 # =========================================
 # SLOS
 # =========================================
+
 
 def test_list_slos(client):
     resp = client.get("/api/observability/slos")
@@ -164,24 +192,32 @@ def test_get_slo_not_found(client):
 
 
 def test_record_slo_event(client):
-    resp = client.post("/api/observability/slos/record", json={
-        "slo_id": "slo_api_availability",
-        "good": True,
-    })
+    resp = client.post(
+        "/api/observability/slos/record",
+        json={
+            "slo_id": "slo_api_availability",
+            "good": True,
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["recorded"] is True
 
 
 def test_record_slo_not_found(client):
-    resp = client.post("/api/observability/slos/record", json={
-        "slo_id": "slo_fake", "good": True,
-    })
+    resp = client.post(
+        "/api/observability/slos/record",
+        json={
+            "slo_id": "slo_fake",
+            "good": True,
+        },
+    )
     assert resp.status_code == 404
 
 
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_health(client):
     resp = client.get("/api/observability/health")

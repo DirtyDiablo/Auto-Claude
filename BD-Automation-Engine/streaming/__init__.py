@@ -39,6 +39,7 @@ run_pipeline = None
 
 try:
     from .bd_streaming_pipeline import BDStreamingPipeline, run_pipeline
+
     PATHWAY_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
     pass

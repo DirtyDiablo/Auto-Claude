@@ -39,6 +39,7 @@ def client(app):
 # LIST WORKFLOWS
 # =========================================
 
+
 def test_list_workflows(client):
     resp = client.get("/api/workflows")
     assert resp.status_code == 200
@@ -52,12 +53,16 @@ def test_list_workflows(client):
 # START / EXECUTE WORKFLOW
 # =========================================
 
+
 def test_start_and_execute(client):
-    resp = client.post("/api/workflows/start", json={
-        "workflow_id": "wf_contact_enrichment",
-        "params": {"contact_id": "c001"},
-        "execute": True,
-    })
+    resp = client.post(
+        "/api/workflows/start",
+        json={
+            "workflow_id": "wf_contact_enrichment",
+            "params": {"contact_id": "c001"},
+            "execute": True,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "completed"
@@ -66,25 +71,32 @@ def test_start_and_execute(client):
 
 
 def test_start_without_execute(client):
-    resp = client.post("/api/workflows/start", json={
-        "workflow_id": "wf_full_bd_campaign",
-        "execute": False,
-    })
+    resp = client.post(
+        "/api/workflows/start",
+        json={
+            "workflow_id": "wf_full_bd_campaign",
+            "execute": False,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "pending"
 
 
 def test_start_unknown_workflow(client):
-    resp = client.post("/api/workflows/start", json={
-        "workflow_id": "wf_nonexistent",
-    })
+    resp = client.post(
+        "/api/workflows/start",
+        json={
+            "workflow_id": "wf_nonexistent",
+        },
+    )
     assert resp.status_code == 400
 
 
 # =========================================
 # LIST RUNS
 # =========================================
+
 
 def test_list_runs(client):
     client.post("/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"})
@@ -95,7 +107,10 @@ def test_list_runs(client):
 
 
 def test_list_runs_filter_status(client):
-    client.post("/api/workflows/start", json={"workflow_id": "wf_contact_enrichment", "execute": True})
+    client.post(
+        "/api/workflows/start",
+        json={"workflow_id": "wf_contact_enrichment", "execute": True},
+    )
     resp = client.get("/api/workflows/runs?status=completed")
     assert resp.status_code == 200
     assert resp.json()["total"] >= 1
@@ -105,8 +120,11 @@ def test_list_runs_filter_status(client):
 # GET RUN DETAILS
 # =========================================
 
+
 def test_get_run(client):
-    start = client.post("/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"})
+    start = client.post(
+        "/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"}
+    )
     run_id = start.json()["run_id"]
     resp = client.get(f"/api/workflows/runs/{run_id}")
     assert resp.status_code == 200
@@ -122,8 +140,11 @@ def test_get_run_not_found(client):
 # TIMELINE / TIME-TRAVEL
 # =========================================
 
+
 def test_timeline(client):
-    start = client.post("/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"})
+    start = client.post(
+        "/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"}
+    )
     run_id = start.json()["run_id"]
     resp = client.get(f"/api/workflows/runs/{run_id}/timeline")
     assert resp.status_code == 200
@@ -135,8 +156,11 @@ def test_timeline(client):
 # REPLAY
 # =========================================
 
+
 def test_replay(client):
-    start = client.post("/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"})
+    start = client.post(
+        "/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"}
+    )
     run_id = start.json()["run_id"]
     resp = client.post(f"/api/workflows/runs/{run_id}/replay")
     assert resp.status_code == 200
@@ -154,12 +178,16 @@ def test_replay_not_found(client):
 # ORCHESTRATOR TASKS
 # =========================================
 
+
 def test_submit_task(client):
-    resp = client.post("/api/workflows/tasks", json={
-        "name": "scrape_jobs",
-        "payload": {"source": "usajobs"},
-        "priority": 1,
-    })
+    resp = client.post(
+        "/api/workflows/tasks",
+        json={
+            "name": "scrape_jobs",
+            "payload": {"source": "usajobs"},
+            "priority": 1,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["name"] == "scrape_jobs"
@@ -167,25 +195,32 @@ def test_submit_task(client):
 
 
 def test_submit_task_explicit_queue(client):
-    resp = client.post("/api/workflows/tasks", json={
-        "name": "custom_task",
-        "queue": "n8n_tasks",
-    })
+    resp = client.post(
+        "/api/workflows/tasks",
+        json={
+            "name": "custom_task",
+            "queue": "n8n_tasks",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["queue"] == "n8n_tasks"
 
 
 def test_submit_task_invalid_queue(client):
-    resp = client.post("/api/workflows/tasks", json={
-        "name": "custom_task",
-        "queue": "invalid_queue",
-    })
+    resp = client.post(
+        "/api/workflows/tasks",
+        json={
+            "name": "custom_task",
+            "queue": "invalid_queue",
+        },
+    )
     assert resp.status_code == 400
 
 
 # =========================================
 # QUEUES
 # =========================================
+
 
 def test_get_queues(client):
     resp = client.get("/api/workflows/queues")
@@ -199,10 +234,14 @@ def test_get_queues(client):
 # FAN-OUT
 # =========================================
 
+
 def test_fan_out(client):
-    resp = client.post("/api/workflows/fan-out", json={
-        "task_names": ["scrape_jobs", "map_programs", "score_opportunities"],
-    })
+    resp = client.post(
+        "/api/workflows/fan-out",
+        json={
+            "task_names": ["scrape_jobs", "map_programs", "score_opportunities"],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] == 3
@@ -213,10 +252,14 @@ def test_fan_out(client):
 # NL EXECUTE
 # =========================================
 
+
 def test_nl_execute(client):
-    resp = client.post("/api/workflows/nl/execute", json={
-        "text": "Run full BD campaign for DCGS-A",
-    })
+    resp = client.post(
+        "/api/workflows/nl/execute",
+        json={
+            "text": "Run full BD campaign for DCGS-A",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["intent"]["intent"] == "create_campaign"
@@ -224,9 +267,12 @@ def test_nl_execute(client):
 
 
 def test_nl_execute_unknown(client):
-    resp = client.post("/api/workflows/nl/execute", json={
-        "text": "What is the meaning of life?",
-    })
+    resp = client.post(
+        "/api/workflows/nl/execute",
+        json={
+            "text": "What is the meaning of life?",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] in ("invalid", "ambiguous")
@@ -236,10 +282,14 @@ def test_nl_execute_unknown(client):
 # NL AUTOCOMPLETE
 # =========================================
 
+
 def test_nl_autocomplete(client):
-    resp = client.post("/api/workflows/nl/autocomplete", json={
-        "partial": "campaign",
-    })
+    resp = client.post(
+        "/api/workflows/nl/autocomplete",
+        json={
+            "partial": "campaign",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total"] >= 1
@@ -248,6 +298,7 @@ def test_nl_autocomplete(client):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(client):
     client.post("/api/workflows/start", json={"workflow_id": "wf_contact_enrichment"})

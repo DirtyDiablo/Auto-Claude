@@ -21,9 +21,11 @@ BRIEFINGS_DIR = DATA_DIR / "briefings"
 
 # ─── Data Models ─────────────────────────────────────────────────────────────
 
+
 @dataclass
 class DailyBrief:
     """Complete daily intelligence briefing."""
+
     date: str
     generated_at: str
     executive_summary: str = ""
@@ -39,6 +41,7 @@ class DailyBrief:
 
 
 # ─── Morning Briefing Agent ─────────────────────────────────────────────────
+
 
 class MorningBriefingAgent:
     """
@@ -83,9 +86,11 @@ class MorningBriefingAgent:
         # Send to Slack if configured
         self._send_to_slack(brief)
 
-        logger.info(f"Morning briefing generated: {len(brief.hiring_signals)} signals, "
-                     f"{len(brief.new_opportunities)} opportunities, "
-                     f"{len(brief.priority_contacts)} priority contacts")
+        logger.info(
+            f"Morning briefing generated: {len(brief.hiring_signals)} signals, "
+            f"{len(brief.new_opportunities)} opportunities, "
+            f"{len(brief.priority_contacts)} priority contacts"
+        )
 
         return brief
 
@@ -95,7 +100,10 @@ class MorningBriefingAgent:
         """Fetch active hiring signals from ML model (Phase 13A)."""
         try:
             import httpx
-            resp = httpx.get(f"{self.api_base}/ml/hiring-signals?refresh=true", timeout=10.0)
+
+            resp = httpx.get(
+                f"{self.api_base}/ml/hiring-signals?refresh=true", timeout=10.0
+            )
             if resp.status_code == 200:
                 return resp.json().get("signals", [])
         except Exception as e:
@@ -113,13 +121,18 @@ class MorningBriefingAgent:
         }
         try:
             import httpx
+
             # Get collection stats
             resp = httpx.get(f"{self.api_base}/stats", timeout=10.0)
             if resp.status_code == 200:
                 stats = resp.json()
                 collections = stats.get("collections", {})
-                snapshot["total_programs"] = collections.get("programs", {}).get("count", 0)
-                snapshot["total_contacts"] = collections.get("contacts", {}).get("count", 0)
+                snapshot["total_programs"] = collections.get("programs", {}).get(
+                    "count", 0
+                )
+                snapshot["total_contacts"] = collections.get("contacts", {}).get(
+                    "count", 0
+                )
                 snapshot["total_jobs"] = collections.get("jobs", {}).get("count", 0)
 
             # Get graph stats
@@ -138,18 +151,26 @@ class MorningBriefingAgent:
         actions = []
         try:
             import httpx
-            resp = httpx.get(f"{self.api_base}/integrations/crm/log?limit=20", timeout=10.0)
+
+            resp = httpx.get(
+                f"{self.api_base}/integrations/crm/log?limit=20", timeout=10.0
+            )
             if resp.status_code == 200:
                 log = resp.json().get("log", [])
                 today = datetime.now().strftime("%Y-%m-%d")
                 for entry in log:
                     if entry.get("timestamp", "").startswith(today):
-                        actions.append({
-                            "action": entry.get("action", ""),
-                            "timestamp": entry.get("timestamp", ""),
-                            "details": {k: v for k, v in entry.items()
-                                        if k not in ("timestamp", "action")},
-                        })
+                        actions.append(
+                            {
+                                "action": entry.get("action", ""),
+                                "timestamp": entry.get("timestamp", ""),
+                                "details": {
+                                    k: v
+                                    for k, v in entry.items()
+                                    if k not in ("timestamp", "action")
+                                },
+                            }
+                        )
         except Exception as e:
             logger.warning(f"Could not fetch due actions: {e}")
         return actions
@@ -159,6 +180,7 @@ class MorningBriefingAgent:
         opportunities = []
         try:
             import httpx
+
             resp = httpx.get(
                 f"{self.api_base}/api/v2/jobs",
                 params={"limit": 50},
@@ -170,15 +192,17 @@ class MorningBriefingAgent:
                 for job in jobs:
                     scraped = job.get("scraped_at") or job.get("created_at", "")
                     if scraped >= cutoff:
-                        opportunities.append({
-                            "title": job.get("title", ""),
-                            "program": job.get("program", ""),
-                            "company": job.get("company", ""),
-                            "location": job.get("location", ""),
-                            "clearance": job.get("clearance", ""),
-                            "bd_priority": job.get("bd_priority"),
-                            "scraped_at": scraped,
-                        })
+                        opportunities.append(
+                            {
+                                "title": job.get("title", ""),
+                                "program": job.get("program", ""),
+                                "company": job.get("company", ""),
+                                "location": job.get("location", ""),
+                                "clearance": job.get("clearance", ""),
+                                "bd_priority": job.get("bd_priority"),
+                                "scraped_at": scraped,
+                            }
+                        )
         except Exception as e:
             logger.warning(f"Could not fetch new opportunities: {e}")
         return opportunities
@@ -188,6 +212,7 @@ class MorningBriefingAgent:
         updates = []
         try:
             import httpx
+
             # Try competitive intel endpoint
             resp = httpx.get(f"{self.api_base}/competitive/summary", timeout=10.0)
             if resp.status_code == 200:
@@ -200,6 +225,7 @@ class MorningBriefingAgent:
 
         try:
             import httpx
+
             resp = httpx.get(f"{self.api_base}/contracts/expiring", timeout=10.0)
             if resp.status_code == 200:
                 data = resp.json()
@@ -215,6 +241,7 @@ class MorningBriefingAgent:
         contacts = []
         try:
             import httpx
+
             resp = httpx.get(
                 f"{self.api_base}/api/v2/contacts",
                 params={"limit": 100},
@@ -239,8 +266,14 @@ class MorningBriefingAgent:
 
         signals_count = len(brief.hiring_signals)
         if signals_count > 0:
-            surge_count = sum(1 for s in brief.hiring_signals if s.get("signal_type") == "hiring_surge")
-            parts.append(f"{signals_count} hiring signals detected ({surge_count} surges)")
+            surge_count = sum(
+                1
+                for s in brief.hiring_signals
+                if s.get("signal_type") == "hiring_surge"
+            )
+            parts.append(
+                f"{signals_count} hiring signals detected ({surge_count} surges)"
+            )
 
         opps = len(brief.new_opportunities)
         if opps > 0:
@@ -278,7 +311,10 @@ class MorningBriefingAgent:
             {"type": "divider"},
             {
                 "type": "section",
-                "text": {"type": "mrkdwn", "text": f"*Executive Summary*\n{brief.executive_summary}"},
+                "text": {
+                    "type": "mrkdwn",
+                    "text": f"*Executive Summary*\n{brief.executive_summary}",
+                },
             },
         ]
 
@@ -289,10 +325,15 @@ class MorningBriefingAgent:
                 for s in brief.hiring_signals[:5]
             )
             blocks.append({"type": "divider"})
-            blocks.append({
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"*Hiring Signals ({len(brief.hiring_signals)})*\n{signal_text}"},
-            })
+            blocks.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Hiring Signals ({len(brief.hiring_signals)})*\n{signal_text}",
+                    },
+                }
+            )
 
         if brief.new_opportunities:
             opp_text = "\n".join(
@@ -300,10 +341,15 @@ class MorningBriefingAgent:
                 for o in brief.new_opportunities[:5]
             )
             blocks.append({"type": "divider"})
-            blocks.append({
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"*New Opportunities ({len(brief.new_opportunities)})*\n{opp_text}"},
-            })
+            blocks.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*New Opportunities ({len(brief.new_opportunities)})*\n{opp_text}",
+                    },
+                }
+            )
 
         if brief.priority_contacts:
             contact_text = "\n".join(
@@ -311,15 +357,24 @@ class MorningBriefingAgent:
                 for c in brief.priority_contacts[:5]
             )
             blocks.append({"type": "divider"})
-            blocks.append({
-                "type": "section",
-                "text": {"type": "mrkdwn", "text": f"*Priority Contacts*\n{contact_text}"},
-            })
+            blocks.append(
+                {
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": f"*Priority Contacts*\n{contact_text}",
+                    },
+                }
+            )
 
-        blocks.append({
-            "type": "context",
-            "elements": [{"type": "mrkdwn", "text": f"Generated at {brief.generated_at}"}],
-        })
+        blocks.append(
+            {
+                "type": "context",
+                "elements": [
+                    {"type": "mrkdwn", "text": f"Generated at {brief.generated_at}"}
+                ],
+            }
+        )
 
         return blocks
 
@@ -350,17 +405,23 @@ class MorningBriefingAgent:
         if brief.new_opportunities:
             lines.append(f"\n## New Opportunities ({len(brief.new_opportunities)})")
             for o in brief.new_opportunities:
-                lines.append(f"- {o.get('title', '')} — {o.get('company', '')} ({o.get('location', '')})")
+                lines.append(
+                    f"- {o.get('title', '')} — {o.get('company', '')} ({o.get('location', '')})"
+                )
 
         if brief.priority_contacts:
             lines.append(f"\n## Priority Contacts ({len(brief.priority_contacts)})")
             for c in brief.priority_contacts:
-                lines.append(f"- **{c.get('name', '')}** — {c.get('title', '')} at {c.get('company', '')} (Tier {c.get('tier', '?')})")
+                lines.append(
+                    f"- **{c.get('name', '')}** — {c.get('title', '')} at {c.get('company', '')} (Tier {c.get('tier', '?')})"
+                )
 
         if brief.contract_updates:
             lines.append(f"\n## Contract Updates ({len(brief.contract_updates)})")
             for u in brief.contract_updates:
-                lines.append(f"- [{u.get('type', '')}] {u.get('name', u.get('program', ''))}")
+                lines.append(
+                    f"- [{u.get('type', '')}] {u.get('name', u.get('program', ''))}"
+                )
 
         lines.append(f"\n---\n*Generated at {brief.generated_at}*")
         return "\n".join(lines)
@@ -406,6 +467,7 @@ class MorningBriefingAgent:
         """Send briefing to Slack if configured."""
         try:
             from Engine8_Knowledge.integrations.slack_integration import get_slack_bot
+
             bot = get_slack_bot()
             blocks = self.format_slack_blocks(brief)
             bot.send_notification(

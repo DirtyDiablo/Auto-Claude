@@ -14,6 +14,7 @@ from typing import Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore, SearchResult
@@ -21,7 +22,7 @@ from utils.llm_retry import anthropic_retry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDRAGEngine')
+logger = logging.getLogger("BDRAGEngine")
 
 # Check for optional dependencies
 LLAMAINDEX_AVAILABLE = False
@@ -33,6 +34,7 @@ except ImportError:
 ANTHROPIC_AVAILABLE = False
 try:
     import anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     logger.warning("anthropic not installed. LLM features disabled.")
@@ -50,6 +52,7 @@ MAX_RESPONSE_TOKENS = 1000
 # RESPONSE TYPES
 # =========================================
 
+
 class RAGResponse:
     """Response from a RAG query with sources."""
 
@@ -60,7 +63,7 @@ class RAGResponse:
         query: str,
         confidence: float = 0.0,
         collection_searched: Optional[str] = None,
-        metadata: Optional[Dict] = None
+        metadata: Optional[Dict] = None,
     ):
         self.answer = answer
         self.sources = sources
@@ -72,13 +75,13 @@ class RAGResponse:
 
     def to_dict(self) -> Dict:
         return {
-            'answer': self.answer,
-            'sources': [s.to_dict() for s in self.sources],
-            'query': self.query,
-            'confidence': self.confidence,
-            'collection_searched': self.collection_searched,
-            'metadata': self.metadata,
-            'timestamp': self.timestamp
+            "answer": self.answer,
+            "sources": [s.to_dict() for s in self.sources],
+            "query": self.query,
+            "confidence": self.confidence,
+            "collection_searched": self.collection_searched,
+            "metadata": self.metadata,
+            "timestamp": self.timestamp,
         }
 
     def format_with_sources(self) -> str:
@@ -87,16 +90,17 @@ class RAGResponse:
 
         for i, source in enumerate(self.sources, 1):
             payload = source.payload
-            title = payload.get('title', payload.get('name', f'Source {i}'))
+            title = payload.get("title", payload.get("name", f"Source {i}"))
             score = source.score
             output.append(f"  [{i}] {title} (relevance: {score:.2f})")
 
-        return '\n'.join(output)
+        return "\n".join(output)
 
 
 # =========================================
 # RAG ENGINE CLASS
 # =========================================
+
 
 class BDRAGEngine:
     """
@@ -110,7 +114,7 @@ class BDRAGEngine:
         self,
         vector_store: Optional[BDKnowledgeStore] = None,
         model: str = DEFAULT_MODEL,
-        api_key: Optional[str] = None
+        api_key: Optional[str] = None,
     ):
         """
         Initialize the RAG engine.
@@ -122,7 +126,7 @@ class BDRAGEngine:
         """
         self.store = vector_store or BDKnowledgeStore()
         self.model = model
-        self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
+        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
 
         if ANTHROPIC_AVAILABLE and self.api_key:
             self.client = anthropic.Anthropic(api_key=self.api_key)
@@ -136,7 +140,7 @@ class BDRAGEngine:
         question: str,
         collection: Optional[str] = None,
         limit: int = 5,
-        score_threshold: float = 0.3
+        score_threshold: float = 0.3,
     ) -> RAGResponse:
         """
         Answer a question using RAG.
@@ -156,7 +160,7 @@ class BDRAGEngine:
                 query=question,
                 collection=collection,
                 limit=limit,
-                score_threshold=score_threshold
+                score_threshold=score_threshold,
             )
             collection_searched = collection
         else:
@@ -164,7 +168,7 @@ class BDRAGEngine:
             all_results = self.store.search_all(
                 query=question,
                 limit_per_collection=limit,
-                score_threshold=score_threshold
+                score_threshold=score_threshold,
             )
             # Flatten and sort by score
             sources = []
@@ -174,7 +178,7 @@ class BDRAGEngine:
                     sources.append(r)
             sources.sort(key=lambda x: x.score, reverse=True)
             sources = sources[:limit]
-            collection_searched = 'all'
+            collection_searched = "all"
 
         # If no client, return retrieval results only
         if not self.client:
@@ -191,7 +195,7 @@ class BDRAGEngine:
             sources=sources,
             query=question,
             confidence=confidence,
-            collection_searched=collection_searched
+            collection_searched=collection_searched,
         )
 
     def ask_about_program(self, program_name: str) -> RAGResponse:
@@ -207,19 +211,15 @@ class BDRAGEngine:
     def find_experts(self, topic: str) -> RAGResponse:
         """Find contacts who are experts in a topic."""
         question = f"Find contacts who have experience or expertise in {topic}"
-        return self.ask(question, collection='contacts', limit=10)
+        return self.ask(question, collection="contacts", limit=10)
 
     def summarize_jobs(self, criteria: str) -> RAGResponse:
         """Summarize jobs matching criteria."""
         question = f"Summarize job opportunities that match: {criteria}"
-        return self.ask(question, collection='jobs', limit=15)
+        return self.ask(question, collection="jobs", limit=15)
 
     @anthropic_retry
-    def _generate_response(
-        self,
-        question: str,
-        sources: List[SearchResult]
-    ) -> str:
+    def _generate_response(self, question: str, sources: List[SearchResult]) -> str:
         """Generate response using Claude with retrieved context."""
         # Build context from sources
         context_parts = []
@@ -228,16 +228,16 @@ class BDRAGEngine:
             collection = source.collection
 
             # Format based on collection type
-            if collection == 'jobs':
+            if collection == "jobs":
                 context_parts.append(self._format_job_context(i, payload))
-            elif collection == 'contacts':
+            elif collection == "contacts":
                 context_parts.append(self._format_contact_context(i, payload))
-            elif collection == 'programs':
+            elif collection == "programs":
                 context_parts.append(self._format_program_context(i, payload))
             else:
                 context_parts.append(self._format_generic_context(i, payload))
 
-        context = '\n\n'.join(context_parts)
+        context = "\n\n".join(context_parts)
 
         # Build prompt
         system_prompt = """You are a BD (Business Development) intelligence assistant for federal defense contractors.
@@ -261,10 +261,8 @@ Answer based on the context above. Cite sources using [1], [2], etc."""
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=MAX_RESPONSE_TOKENS,
-                messages=[
-                    {"role": "user", "content": user_prompt}
-                ],
-                system=system_prompt
+                messages=[{"role": "user", "content": user_prompt}],
+                system=system_prompt,
             )
 
             return response.content[0].text
@@ -274,10 +272,7 @@ Answer based on the context above. Cite sources using [1], [2], etc."""
             return f"Error generating response: {e}"
 
     def _retrieval_only_response(
-        self,
-        question: str,
-        sources: List[SearchResult],
-        collection: str
+        self, question: str, sources: List[SearchResult], collection: str
     ) -> RAGResponse:
         """Generate response without LLM (retrieval only)."""
         if not sources:
@@ -286,9 +281,9 @@ Answer based on the context above. Cite sources using [1], [2], etc."""
             answer_parts = [f"Found {len(sources)} relevant items:\n"]
             for i, source in enumerate(sources, 1):
                 payload = source.payload
-                name = payload.get('name', payload.get('title', 'Unknown'))
+                name = payload.get("name", payload.get("title", "Unknown"))
                 answer_parts.append(f"[{i}] {name} (score: {source.score:.2f})")
-            answer = '\n'.join(answer_parts)
+            answer = "\n".join(answer_parts)
 
         return RAGResponse(
             answer=answer,
@@ -296,42 +291,42 @@ Answer based on the context above. Cite sources using [1], [2], etc."""
             query=question,
             confidence=0.5 if sources else 0.0,
             collection_searched=collection,
-            metadata={'mode': 'retrieval_only'}
+            metadata={"mode": "retrieval_only"},
         )
 
     def _format_job_context(self, num: int, payload: Dict) -> str:
         """Format job data as context."""
-        return f"""[{num}] JOB: {payload.get('title', 'Unknown Position')}
-Company: {payload.get('company', 'N/A')}
-Location: {payload.get('location', 'N/A')}
-Program: {payload.get('program_name', 'N/A')}
-Clearance: {payload.get('clearance', 'N/A')}
-BD Score: {payload.get('bd_score', 'N/A')}
-Priority: {payload.get('bd_priority', 'N/A')}"""
+        return f"""[{num}] JOB: {payload.get("title", "Unknown Position")}
+Company: {payload.get("company", "N/A")}
+Location: {payload.get("location", "N/A")}
+Program: {payload.get("program_name", "N/A")}
+Clearance: {payload.get("clearance", "N/A")}
+BD Score: {payload.get("bd_score", "N/A")}
+Priority: {payload.get("bd_priority", "N/A")}"""
 
     def _format_contact_context(self, num: int, payload: Dict) -> str:
         """Format contact data as context."""
         name = f"{payload.get('first_name', '')} {payload.get('last_name', '')}".strip()
-        name = name or payload.get('name', 'Unknown')
+        name = name or payload.get("name", "Unknown")
         return f"""[{num}] CONTACT: {name}
-Title: {payload.get('title', 'N/A')}
-Company: {payload.get('company', 'N/A')}
-Program: {payload.get('program', 'N/A')}
-Tier: {payload.get('tier', 'N/A')}
-Email: {payload.get('email', 'N/A')}"""
+Title: {payload.get("title", "N/A")}
+Company: {payload.get("company", "N/A")}
+Program: {payload.get("program", "N/A")}
+Tier: {payload.get("tier", "N/A")}
+Email: {payload.get("email", "N/A")}"""
 
     def _format_program_context(self, num: int, payload: Dict) -> str:
         """Format program data as context."""
-        return f"""[{num}] PROGRAM: {payload.get('name', 'Unknown Program')}
-Prime Contractor: {payload.get('prime_contractor', 'N/A')}
-Contract Value: {payload.get('contract_value', 'N/A')}
-Status: {payload.get('status', 'N/A')}
-Location: {payload.get('location', 'N/A')}"""
+        return f"""[{num}] PROGRAM: {payload.get("name", "Unknown Program")}
+Prime Contractor: {payload.get("prime_contractor", "N/A")}
+Contract Value: {payload.get("contract_value", "N/A")}
+Status: {payload.get("status", "N/A")}
+Location: {payload.get("location", "N/A")}"""
 
     def _format_generic_context(self, num: int, payload: Dict) -> str:
         """Format generic data as context."""
-        title = payload.get('title', payload.get('name', 'Document'))
-        content = payload.get('content', payload.get('summary', ''))[:500]
+        title = payload.get("title", payload.get("name", "Document"))
+        content = payload.get("content", payload.get("summary", ""))[:500]
         return f"""[{num}] {title}
 {content}..."""
 
@@ -341,13 +336,13 @@ Location: {payload.get('location', 'N/A')}"""
 # =========================================
 
 QUERY_TEMPLATES = {
-    'program_intel': "What intelligence do we have about the {program} program?",
-    'company_contacts': "Who are our contacts at {company}?",
-    'clearance_jobs': "Find {clearance} cleared positions",
-    'location_jobs': "What jobs are available in {location}?",
-    'contractor_past_perf': "What past performance do we have with {contractor}?",
-    'hot_leads': "What are the highest priority BD opportunities?",
-    'dcgs_overview': "Provide an overview of DCGS-related opportunities and contacts",
+    "program_intel": "What intelligence do we have about the {program} program?",
+    "company_contacts": "Who are our contacts at {company}?",
+    "clearance_jobs": "Find {clearance} cleared positions",
+    "location_jobs": "What jobs are available in {location}?",
+    "contractor_past_perf": "What past performance do we have with {contractor}?",
+    "hot_leads": "What are the highest priority BD opportunities?",
+    "dcgs_overview": "Provide an overview of DCGS-related opportunities and contacts",
 }
 
 
@@ -355,18 +350,21 @@ QUERY_TEMPLATES = {
 # CLI INTERFACE
 # =========================================
 
+
 def main():
     """CLI for the BD RAG Engine."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD RAG Engine')
-    parser.add_argument('query', nargs='?', help='Question to ask')
-    parser.add_argument('--collection', '-c', help='Collection to search')
-    parser.add_argument('--limit', '-l', type=int, default=5, help='Max sources')
-    parser.add_argument('--template', '-t', help='Use query template')
-    parser.add_argument('--program', help='Program name (for template)')
-    parser.add_argument('--company', help='Company name (for template)')
-    parser.add_argument('--interactive', '-i', action='store_true', help='Interactive mode')
+    parser = argparse.ArgumentParser(description="BD RAG Engine")
+    parser.add_argument("query", nargs="?", help="Question to ask")
+    parser.add_argument("--collection", "-c", help="Collection to search")
+    parser.add_argument("--limit", "-l", type=int, default=5, help="Max sources")
+    parser.add_argument("--template", "-t", help="Use query template")
+    parser.add_argument("--program", help="Program name (for template)")
+    parser.add_argument("--company", help="Company name (for template)")
+    parser.add_argument(
+        "--interactive", "-i", action="store_true", help="Interactive mode"
+    )
 
     args = parser.parse_args()
 
@@ -377,11 +375,11 @@ def main():
     if args.template and args.template in QUERY_TEMPLATES:
         template = QUERY_TEMPLATES[args.template]
         query = template.format(
-            program=args.program or 'DCGS',
-            company=args.company or 'Leidos',
-            clearance='TS/SCI',
-            location='Arlington, VA',
-            contractor=args.company or 'GDIT'
+            program=args.program or "DCGS",
+            company=args.company or "Leidos",
+            clearance="TS/SCI",
+            location="Arlington, VA",
+            contractor=args.company or "GDIT",
         )
     elif args.query:
         query = args.query
@@ -398,12 +396,14 @@ def main():
         while True:
             try:
                 query = input("Question: ").strip()
-                if query.lower() in ['quit', 'exit', 'q']:
+                if query.lower() in ["quit", "exit", "q"]:
                     break
                 if not query:
                     continue
 
-                response = engine.ask(query, collection=args.collection, limit=args.limit)
+                response = engine.ask(
+                    query, collection=args.collection, limit=args.limit
+                )
                 print(f"\n{response.format_with_sources()}\n")
 
             except KeyboardInterrupt:
@@ -414,5 +414,5 @@ def main():
         print(f"\n{response.format_with_sources()}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

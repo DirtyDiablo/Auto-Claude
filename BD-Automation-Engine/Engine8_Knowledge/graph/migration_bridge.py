@@ -24,10 +24,13 @@ USE_NEO4J = os.getenv("USE_NEO4J", "false").lower() in ("true", "1", "yes")
 # GraphInterface — shared interface for both backends
 # ---------------------------------------------------------------------------
 
+
 class GraphInterface:
     """Common interface for graph operations, backed by either NetworkX or Neo4j."""
 
-    def search_entities(self, query: str, entity_type: Optional[str] = None, limit: int = 20) -> list[dict]:
+    def search_entities(
+        self, query: str, entity_type: Optional[str] = None, limit: int = 20
+    ) -> list[dict]:
         raise NotImplementedError
 
     def find_path(self, from_name: str, to_name: str, max_depth: int = 6) -> list[dict]:
@@ -44,6 +47,7 @@ class GraphInterface:
 # SQLite/NetworkX backend (existing)
 # ---------------------------------------------------------------------------
 
+
 class SQLiteGraphBackend(GraphInterface):
     """Wraps existing BDKnowledgeGraph from bd_knowledge_graph.py."""
 
@@ -53,13 +57,18 @@ class SQLiteGraphBackend(GraphInterface):
     def _get_graph(self) -> Any:
         if self._graph is None:
             try:
-                from Engine8_Knowledge.graph.bd_knowledge_graph import get_bd_knowledge_graph
+                from Engine8_Knowledge.graph.bd_knowledge_graph import (
+                    get_bd_knowledge_graph,
+                )
+
                 self._graph = get_bd_knowledge_graph()
             except Exception:
                 pass
         return self._graph
 
-    def search_entities(self, query: str, entity_type: Optional[str] = None, limit: int = 20) -> list[dict]:
+    def search_entities(
+        self, query: str, entity_type: Optional[str] = None, limit: int = 20
+    ) -> list[dict]:
         g = self._get_graph()
         if not g:
             return []
@@ -95,6 +104,7 @@ class SQLiteGraphBackend(GraphInterface):
 # Neo4j backend
 # ---------------------------------------------------------------------------
 
+
 class Neo4jGraphBackend(GraphInterface):
     """Neo4j-backed implementation using Cypher queries."""
 
@@ -105,13 +115,17 @@ class Neo4jGraphBackend(GraphInterface):
         if self._queries is None:
             try:
                 from Engine8_Knowledge.graph.queries import get_graph_queries
+
                 self._queries = get_graph_queries()
             except Exception:
                 pass
         return self._queries
 
-    def search_entities(self, query: str, entity_type: Optional[str] = None, limit: int = 20) -> list[dict]:
+    def search_entities(
+        self, query: str, entity_type: Optional[str] = None, limit: int = 20
+    ) -> list[dict]:
         from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
         mgr = get_neo4j_manager()
         label_filter = f":`{entity_type}`" if entity_type else ""
         results = mgr.run_query(
@@ -134,6 +148,7 @@ class Neo4jGraphBackend(GraphInterface):
 
     def get_neighbors(self, entity_name: str, depth: int = 1) -> dict:
         from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
         mgr = get_neo4j_manager()
         results = mgr.run_query(
             """
@@ -159,6 +174,7 @@ class Neo4jGraphBackend(GraphInterface):
 # ---------------------------------------------------------------------------
 # Migration functions
 # ---------------------------------------------------------------------------
+
 
 def export_sqlite_to_neo4j() -> dict:
     """Export the existing SQLite knowledge graph to Neo4j.
@@ -190,12 +206,14 @@ def export_sqlite_to_neo4j() -> dict:
             props = __import__("json").loads(props_json) if props_json else {}
         except Exception:
             pass
-        batch.append({
-            "id": entity_id,
-            "type": entity_type,
-            "name": name,
-            **props,
-        })
+        batch.append(
+            {
+                "id": entity_id,
+                "type": entity_type,
+                "name": name,
+                **props,
+            }
+        )
         if len(batch) >= 500:
             _write_entity_batch(mgr, batch)
             entity_count += len(batch)
@@ -206,7 +224,9 @@ def export_sqlite_to_neo4j() -> dict:
 
     # Export relationships
     rel_count = 0
-    cursor = bg.conn.execute("SELECT from_entity_id, to_entity_id, type FROM relationships")
+    cursor = bg.conn.execute(
+        "SELECT from_entity_id, to_entity_id, type FROM relationships"
+    )
     rel_batch = []
     for row in cursor:
         rel_batch.append({"from_id": row[0], "to_id": row[1], "type": row[2]})
@@ -218,7 +238,9 @@ def export_sqlite_to_neo4j() -> dict:
         _write_rel_batch(mgr, rel_batch)
         rel_count += len(rel_batch)
 
-    logger.info("sqlite_to_neo4j_export", entities=entity_count, relationships=rel_count)
+    logger.info(
+        "sqlite_to_neo4j_export", entities=entity_count, relationships=rel_count
+    )
     return {"entities_exported": entity_count, "relationships_exported": rel_count}
 
 
@@ -249,7 +271,9 @@ def _write_rel_batch(mgr: Any, batch: list[dict]) -> None:
             mgr.write_query(
                 """
                 MATCH (a {name: $from_name}), (b {name: $to_name})
-                MERGE (a)-[r:`""" + rel["type"].replace(" ", "_") + """`]->(b)
+                MERGE (a)-[r:`"""
+                + rel["type"].replace(" ", "_")
+                + """`]->(b)
                 """,
                 {"from_name": rel["from_id"], "to_name": rel["to_id"]},
             )
@@ -257,7 +281,9 @@ def _write_rel_batch(mgr: Any, batch: list[dict]) -> None:
             pass
 
 
-def import_neo4j_subgraph_to_networkx(_cypher_filter: str = "MATCH (n) RETURN n LIMIT 1000") -> Any:
+def import_neo4j_subgraph_to_networkx(
+    _cypher_filter: str = "MATCH (n) RETURN n LIMIT 1000",
+) -> Any:
     """Import a Neo4j subgraph into a NetworkX graph."""
     try:
         import networkx as nx
@@ -265,6 +291,7 @@ def import_neo4j_subgraph_to_networkx(_cypher_filter: str = "MATCH (n) RETURN n 
         return None
 
     from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
     mgr = get_neo4j_manager()
 
     G = nx.Graph()
@@ -289,6 +316,7 @@ def import_neo4j_subgraph_to_networkx(_cypher_filter: str = "MATCH (n) RETURN n 
 # ---------------------------------------------------------------------------
 # Factory — get the active backend based on USE_NEO4J flag
 # ---------------------------------------------------------------------------
+
 
 def get_graph_backend() -> GraphInterface:
     """Get the active graph backend based on USE_NEO4J environment flag."""

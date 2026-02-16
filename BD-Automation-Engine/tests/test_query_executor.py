@@ -10,6 +10,7 @@ from src.nlq.query_executor import QueryExecutor
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def executor():
     """Executor without external clients — uses synthetic data."""
@@ -25,12 +26,14 @@ def sample_plan():
             confidence=0.8,
             original_query="test query",
         )
+
     return _make
 
 
 # =========================================
 # SEARCH EXECUTION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestSearchExecution:
@@ -61,6 +64,7 @@ class TestSearchExecution:
 # ANALYTICS EXECUTION
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestAnalyticsExecution:
     async def test_analytics(self, executor, sample_plan):
@@ -78,6 +82,7 @@ class TestAnalyticsExecution:
 # =========================================
 # PREDICTION EXECUTION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestPredictionExecution:
@@ -98,6 +103,7 @@ class TestPredictionExecution:
 # GRAPH EXECUTION
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestGraphExecution:
     async def test_graph_query(self, executor, sample_plan):
@@ -111,6 +117,7 @@ class TestGraphExecution:
 # GENERATION EXECUTION
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestGenerationExecution:
     async def test_generate_email(self, executor, sample_plan):
@@ -121,7 +128,9 @@ class TestGenerationExecution:
         assert result.data.get("type") == "email"
 
     async def test_generate_call_script(self, executor, sample_plan):
-        plan = sample_plan(QueryIntent.GENERATE.value, search_query="call script for PM")
+        plan = sample_plan(
+            QueryIntent.GENERATE.value, search_query="call script for PM"
+        )
         result = await executor.execute(plan)
         assert result.data.get("type") == "call_script"
 
@@ -130,12 +139,14 @@ class TestGenerationExecution:
 # COMPARISON EXECUTION
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestComparisonExecution:
     async def test_compare(self, executor, sample_plan):
         plan = sample_plan(
             QueryIntent.COMPARE.value,
-            entity_a="GDIT", entity_b="Leidos",
+            entity_a="GDIT",
+            entity_b="Leidos",
         )
         result = await executor.execute(plan)
         assert isinstance(result, QueryResult)
@@ -146,6 +157,7 @@ class TestComparisonExecution:
 # =========================================
 # OTHER EXECUTORS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestOtherExecutors:
@@ -175,6 +187,7 @@ class TestOtherExecutors:
 # MULTI-STEP EXECUTION
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestMultiStepExecution:
     async def test_multi_step(self, executor):
@@ -198,6 +211,7 @@ class TestMultiStepExecution:
 # =========================================
 # SUGGESTIONS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestSuggestions:

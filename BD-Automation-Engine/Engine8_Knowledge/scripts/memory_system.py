@@ -22,8 +22,7 @@ class MemoryDatabase:
     def __init__(self, db_path: str = None):
         if db_path is None:
             db_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "data", "memories.db"
+                os.path.dirname(os.path.dirname(__file__)), "data", "memories.db"
             )
 
         self.db_path = db_path
@@ -65,27 +64,36 @@ class MemoryDatabase:
                     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """)
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_user ON memories(user_id)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(memory_type)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_interactions_contact ON interactions(contact_name)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_insights_entity ON insights(entity_type, entity_name)")
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_user ON memories(user_id)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_memories_type ON memories(memory_type)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_interactions_contact ON interactions(contact_name)"
+            )
+            conn.execute(
+                "CREATE INDEX IF NOT EXISTS idx_insights_entity ON insights(entity_type, entity_name)"
+            )
 
     def add_memory(
         self,
         content: str,
         memory_type: str = "general",
         user_id: str = "default",
-        metadata: Dict = None
+        metadata: Dict = None,
     ) -> str:
         """Add a memory to the database."""
         import uuid
+
         memory_id = str(uuid.uuid4())
 
         with sqlite3.connect(self.db_path) as conn:
             conn.execute(
                 """INSERT INTO memories (id, user_id, memory_type, content, metadata)
                    VALUES (?, ?, ?, ?, ?)""",
-                (memory_id, user_id, memory_type, content, json.dumps(metadata or {}))
+                (memory_id, user_id, memory_type, content, json.dumps(metadata or {})),
             )
 
         return memory_id
@@ -95,7 +103,7 @@ class MemoryDatabase:
         query: str = None,
         memory_type: str = None,
         user_id: str = "default",
-        limit: int = 10
+        limit: int = 10,
     ) -> List[Dict]:
         """Search memories with optional filters."""
         sql = "SELECT * FROM memories WHERE user_id = ?"
@@ -118,18 +126,14 @@ class MemoryDatabase:
             return [dict(row) for row in cursor.fetchall()]
 
     def add_interaction(
-        self,
-        contact_name: str,
-        interaction_type: str,
-        notes: str,
-        outcome: str = None
+        self, contact_name: str, interaction_type: str, notes: str, outcome: str = None
     ) -> int:
         """Record a contact interaction."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(
                 """INSERT INTO interactions (contact_name, interaction_type, notes, outcome)
                    VALUES (?, ?, ?, ?)""",
-                (contact_name, interaction_type, notes, outcome)
+                (contact_name, interaction_type, notes, outcome),
             )
             return cursor.lastrowid
 
@@ -139,7 +143,7 @@ class MemoryDatabase:
             conn.row_factory = sqlite3.Row
             cursor = conn.execute(
                 "SELECT * FROM interactions WHERE contact_name = ? ORDER BY timestamp DESC",
-                (contact_name,)
+                (contact_name,),
             )
             return [dict(row) for row in cursor.fetchall()]
 
@@ -149,14 +153,14 @@ class MemoryDatabase:
         entity_name: str,
         insight: str,
         source: str = None,
-        confidence: float = 0.8
+        confidence: float = 0.8,
     ) -> int:
         """Add an insight about an entity."""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.execute(
                 """INSERT INTO insights (entity_type, entity_name, insight, source, confidence)
                    VALUES (?, ?, ?, ?, ?)""",
-                (entity_type, entity_name, insight, source, confidence)
+                (entity_type, entity_name, insight, source, confidence),
             )
             return cursor.lastrowid
 
@@ -168,7 +172,7 @@ class MemoryDatabase:
                 """SELECT * FROM insights
                    WHERE entity_type = ? AND entity_name = ?
                    ORDER BY confidence DESC, timestamp DESC""",
-                (entity_type, entity_name)
+                (entity_type, entity_name),
             )
             return [dict(row) for row in cursor.fetchall()]
 
@@ -176,13 +180,15 @@ class MemoryDatabase:
         """Get database statistics."""
         with sqlite3.connect(self.db_path) as conn:
             memories = conn.execute("SELECT COUNT(*) FROM memories").fetchone()[0]
-            interactions = conn.execute("SELECT COUNT(*) FROM interactions").fetchone()[0]
+            interactions = conn.execute("SELECT COUNT(*) FROM interactions").fetchone()[
+                0
+            ]
             insights = conn.execute("SELECT COUNT(*) FROM insights").fetchone()[0]
 
             return {
                 "memories": memories,
                 "interactions": interactions,
-                "insights": insights
+                "insights": insights,
             }
 
 
@@ -191,10 +197,7 @@ class EnhancedMemorySystem:
 
     def __init__(self, data_path: str = None):
         if data_path is None:
-            data_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "data"
-            )
+            data_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
         self.data_path = data_path
         self.db = MemoryDatabase(os.path.join(data_path, "memories.db"))
@@ -207,18 +210,19 @@ class EnhancedMemorySystem:
         # Mem0 for semantic memory
         try:
             from mem0 import Memory
+
             config = {
                 "vector_store": {
                     "provider": "qdrant",
-                    "config": {"path": os.path.join(self.data_path, "qdrant")}
+                    "config": {"path": os.path.join(self.data_path, "qdrant")},
                 },
                 "llm": {
                     "provider": "anthropic",
                     "config": {
                         "model": "claude-sonnet-4-20250514",
-                        "api_key": os.getenv("ANTHROPIC_API_KEY")
-                    }
-                }
+                        "api_key": os.getenv("ANTHROPIC_API_KEY"),
+                    },
+                },
             }
             self.mem0 = Memory.from_config(config)
             logger.info("Mem0 initialized with Qdrant backend")
@@ -228,6 +232,7 @@ class EnhancedMemorySystem:
         # Redis-VL for caching (optional)
         try:
             from redisvl.extensions.llmcache import SemanticCache
+
             redis_url = os.getenv("REDIS_URL", "redis://localhost:6379")
             self.redis_cache = SemanticCache(name="bd_cache", redis_url=redis_url)
             logger.info("Redis-VL cache initialized")
@@ -239,10 +244,7 @@ class EnhancedMemorySystem:
     # ========================================================================
 
     def remember(
-        self,
-        content: str,
-        memory_type: str = "general",
-        metadata: Dict = None
+        self, content: str, memory_type: str = "general", metadata: Dict = None
     ) -> str:
         """Add memory to all backends."""
         # Always add to SQLite (reliable)
@@ -251,17 +253,16 @@ class EnhancedMemorySystem:
         # Also add to Mem0 for semantic search
         if self.mem0:
             try:
-                self.mem0.add(content, metadata={"type": memory_type, **(metadata or {})})
+                self.mem0.add(
+                    content, metadata={"type": memory_type, **(metadata or {})}
+                )
             except Exception as e:
                 logger.warning(f"Mem0 add failed: {e}")
 
         return memory_id
 
     def recall(
-        self,
-        query: str,
-        memory_type: str = None,
-        limit: int = 10
+        self, query: str, memory_type: str = None, limit: int = 10
     ) -> List[Dict]:
         """Recall memories matching query."""
         # Try Mem0 first (semantic)
@@ -302,46 +303,37 @@ class EnhancedMemorySystem:
     # ========================================================================
 
     def log_contact_interaction(
-        self,
-        contact: str,
-        type: str,
-        notes: str,
-        outcome: str = None
+        self, contact: str, type: str, notes: str, outcome: str = None
     ):
         """Log interaction with BD contact."""
         self.db.add_interaction(contact, type, notes, outcome)
         self.remember(
             f"Interaction with {contact}: {type} - {notes}",
             memory_type="interaction",
-            metadata={"contact": contact, "type": type, "outcome": outcome}
+            metadata={"contact": contact, "type": type, "outcome": outcome},
         )
 
-    def log_program_insight(
-        self,
-        program: str,
-        insight: str,
-        source: str = None
-    ):
+    def log_program_insight(self, program: str, insight: str, source: str = None):
         """Log insight about a program."""
         self.db.add_insight("program", program, insight, source)
         self.remember(
             f"Program insight for {program}: {insight}",
             memory_type="insight",
-            metadata={"program": program, "source": source}
+            metadata={"program": program, "source": source},
         )
 
     def get_program_context(self, program: str) -> Dict:
         """Get all context about a program."""
         return {
             "insights": self.db.get_entity_insights("program", program),
-            "memories": self.recall(program, memory_type="insight", limit=5)
+            "memories": self.recall(program, memory_type="insight", limit=5),
         }
 
     def get_contact_context(self, contact: str) -> Dict:
         """Get all context about a contact."""
         return {
             "interactions": self.db.get_contact_history(contact),
-            "memories": self.recall(contact, memory_type="interaction", limit=5)
+            "memories": self.recall(contact, memory_type="interaction", limit=5),
         }
 
     def get_stats(self) -> Dict:
@@ -350,7 +342,7 @@ class EnhancedMemorySystem:
         stats["backends"] = {
             "sqlite": True,
             "mem0": self.mem0 is not None,
-            "redis": self.redis_cache is not None
+            "redis": self.redis_cache is not None,
         }
         return stats
 

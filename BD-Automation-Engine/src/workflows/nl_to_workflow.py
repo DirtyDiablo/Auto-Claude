@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class IntentType(str, Enum):
     RUN_WORKFLOW = "run_workflow"
     ENRICH_CONTACT = "enrich_contact"
@@ -46,6 +47,7 @@ class ValidationStatus(str, Enum):
 @dataclass
 class ParsedIntent:
     """Result of NL intent parsing."""
+
     intent: IntentType
     confidence: float  # 0.0 – 1.0
     raw_text: str
@@ -69,6 +71,7 @@ class ParsedIntent:
 @dataclass
 class ValidationResult:
     """Result of workflow validation before execution."""
+
     status: ValidationStatus
     workflow_id: Optional[str] = None
     missing_params: List[str] = field(default_factory=list)
@@ -88,6 +91,7 @@ class ValidationResult:
 @dataclass
 class NLExecutionResult:
     """Result of NL-triggered workflow execution."""
+
     execution_id: str
     intent: ParsedIntent
     validation: ValidationResult
@@ -118,7 +122,11 @@ class NLExecutionResult:
 
 _INTENT_PATTERNS: List[Tuple[str, IntentType, float]] = [
     # Campaign
-    (r"(run|start|launch|execute)\s+(full\s+)?bd\s+campaign", IntentType.CREATE_CAMPAIGN, 0.95),
+    (
+        r"(run|start|launch|execute)\s+(full\s+)?bd\s+campaign",
+        IntentType.CREATE_CAMPAIGN,
+        0.95,
+    ),
     (r"(create|build|set\s+up)\s+(a\s+)?campaign", IntentType.CREATE_CAMPAIGN, 0.90),
     (r"campaign\s+for\s+\w+", IntentType.CREATE_CAMPAIGN, 0.85),
     # Contact enrichment
@@ -169,7 +177,10 @@ _INTENT_TO_WORKFLOW: Dict[IntentType, str] = {
 _ENTITY_PATTERNS = [
     (r"\b(DCGS[-\s]?[A-Z]?)\b", "program"),
     (r"\b(JADC2|GBSD|MQ-25|F-35|ABMS|TITAN|IBCS)\b", "program"),
-    (r"\b(Leidos|Northrop\s*Grumman|Raytheon|GDIT|BAE|L3Harris|Booz\s*Allen)\b", "company"),
+    (
+        r"\b(Leidos|Northrop\s*Grumman|Raytheon|GDIT|BAE|L3Harris|Booz\s*Allen)\b",
+        "company",
+    ),
     (r"\b(NCR|southeast|west|midwest|southwest)\b", "region"),
     (r"\b([A-Z][a-z]+\s+[A-Z][a-z]+)\b", "person_name"),
 ]
@@ -178,6 +189,7 @@ _ENTITY_PATTERNS = [
 # =========================================
 # NL-TO-WORKFLOW ENGINE
 # =========================================
+
 
 class NLToWorkflowEngine:
     """Converts natural language instructions into executable workflows.
@@ -267,26 +279,33 @@ class NLToWorkflowEngine:
         params: Dict[str, Any] = {}
 
         # Extract program names
-        programs = re.findall(r"\b(DCGS[-\s]?[A-Z]?|JADC2|GBSD|MQ-25|F-35|ABMS|TITAN|IBCS)\b", text)
+        programs = re.findall(
+            r"\b(DCGS[-\s]?[A-Z]?|JADC2|GBSD|MQ-25|F-35|ABMS|TITAN|IBCS)\b", text
+        )
         if programs:
             params["programs"] = programs
 
         # Extract company names
         companies = re.findall(
             r"\b(Leidos|Northrop\s*Grumman|Raytheon|GDIT|BAE|L3Harris|Booz\s*Allen)\b",
-            text, re.IGNORECASE,
+            text,
+            re.IGNORECASE,
         )
         if companies:
             params["companies"] = companies
 
         # Extract region
-        region_match = re.search(r"\b(NCR|southeast|west|midwest|southwest)\b", text, re.IGNORECASE)
+        region_match = re.search(
+            r"\b(NCR|southeast|west|midwest|southwest)\b", text, re.IGNORECASE
+        )
         if region_match:
             params["region"] = region_match.group(1)
 
         # Extract contact name for enrichment
         if intent == IntentType.ENRICH_CONTACT:
-            name_match = re.search(r"(?:contact|person|enrich)\s+([A-Z][a-z]+\s+[A-Z][a-z]+)", text)
+            name_match = re.search(
+                r"(?:contact|person|enrich)\s+([A-Z][a-z]+\s+[A-Z][a-z]+)", text
+            )
             if name_match:
                 params["contact_name"] = name_match.group(1)
 
@@ -347,7 +366,11 @@ class NLToWorkflowEngine:
         intent = self.parse_intent(text)
         validation = self.validate(intent)
 
-        status = "ready" if validation.status == ValidationStatus.VALID else validation.status.value
+        status = (
+            "ready"
+            if validation.status == ValidationStatus.VALID
+            else validation.status.value
+        )
 
         result = NLExecutionResult(
             execution_id=exec_id,
@@ -364,7 +387,9 @@ class NLToWorkflowEngine:
         return self._executions.get(exec_id)
 
     def list_executions(self, limit: int = 50) -> List[NLExecutionResult]:
-        execs = sorted(self._executions.values(), key=lambda e: e.created_at, reverse=True)
+        execs = sorted(
+            self._executions.values(), key=lambda e: e.created_at, reverse=True
+        )
         return execs[:limit]
 
     # ----- autocomplete -----
@@ -391,11 +416,13 @@ class NLToWorkflowEngine:
 
         for template, description in templates:
             if any(word in template.lower() for word in lower.split()):
-                suggestions.append({
-                    "template": template,
-                    "description": description,
-                    "confidence": 0.8,
-                })
+                suggestions.append(
+                    {
+                        "template": template,
+                        "description": description,
+                        "confidence": 0.8,
+                    }
+                )
 
         return suggestions[:5]
 

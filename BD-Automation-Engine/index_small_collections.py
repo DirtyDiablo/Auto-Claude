@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
 load_dotenv()
 
@@ -29,7 +29,7 @@ OPENAI_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
 
 client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-NAMESPACE = uuid.UUID('fedcba98-7654-3210-fedc-ba9876543210')
+NAMESPACE = uuid.UUID("fedcba98-7654-3210-fedc-ba9876543210")
 
 
 def get_embeddings(texts: list[str]) -> list[list[float]]:
@@ -60,7 +60,7 @@ def index_jobs(qdrant, conn):
         logger.debug("collection_delete_skipped for jobs: %s", e)
     qdrant.create_collection(
         collection_name="jobs",
-        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
     )
 
     cursor = conn.execute("""
@@ -75,19 +75,19 @@ def index_jobs(qdrant, conn):
     for row in cursor:
         text = f"{row[1] or ''} {row[2] or ''} {row[3] or ''} {row[4] or ''} {row[5] or ''} {row[9] or ''}"
         payload = {
-            'id': str(row[0]),
-            'title': row[1] or '',
-            'description': row[2] or '',
-            'location': row[3] or '',
-            'client': row[4] or '',
-            'prime_contractor': row[5] or '',
-            'salary': row[6],
-            'status': row[7] or '',
-            'date_added': row[8] or '',
-            'skills': row[9] or '',
-            'clearance': row[10] or '',
-            '_embedding_model': OPENAI_MODEL,
-            '_indexed_at': datetime.now().isoformat()
+            "id": str(row[0]),
+            "title": row[1] or "",
+            "description": row[2] or "",
+            "location": row[3] or "",
+            "client": row[4] or "",
+            "prime_contractor": row[5] or "",
+            "salary": row[6],
+            "status": row[7] or "",
+            "date_added": row[8] or "",
+            "skills": row[9] or "",
+            "clearance": row[10] or "",
+            "_embedding_model": OPENAI_MODEL,
+            "_indexed_at": datetime.now().isoformat(),
         }
         texts.append(text)
         payloads.append(payload)
@@ -95,7 +95,13 @@ def index_jobs(qdrant, conn):
     if texts:
         embeddings = get_embeddings(texts)
         for emb, payload in zip(embeddings, payloads):
-            points.append(PointStruct(id=string_to_uuid(f"job_{payload['id']}"), vector=emb, payload=payload))
+            points.append(
+                PointStruct(
+                    id=string_to_uuid(f"job_{payload['id']}"),
+                    vector=emb,
+                    payload=payload,
+                )
+            )
         qdrant.upsert(collection_name="jobs", points=points)
     print(f"  Indexed: {len(points)} jobs")
 
@@ -112,7 +118,7 @@ def index_programs(qdrant, conn):
         logger.debug("collection_delete_skipped for programs: %s", e)
     qdrant.create_collection(
         collection_name="programs",
-        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
     )
 
     cursor = conn.execute("""
@@ -127,17 +133,17 @@ def index_programs(qdrant, conn):
     for row in cursor:
         text = f"{row[1] or ''} {row[2] or ''} {row[3] or ''} {row[4] or ''} {row[5] or ''} {row[7] or ''}"
         payload = {
-            'id': str(row[0]),
-            'name': row[1] or '',
-            'acronym': row[2] or '',
-            'description': row[3] or '',
-            'agency': row[4] or '',
-            'sub_agency': row[5] or '',
-            'contract_value': row[6],
-            'prime_contractor': row[7] or '',
-            'location': row[8] or '',
-            '_embedding_model': OPENAI_MODEL,
-            '_indexed_at': datetime.now().isoformat()
+            "id": str(row[0]),
+            "name": row[1] or "",
+            "acronym": row[2] or "",
+            "description": row[3] or "",
+            "agency": row[4] or "",
+            "sub_agency": row[5] or "",
+            "contract_value": row[6],
+            "prime_contractor": row[7] or "",
+            "location": row[8] or "",
+            "_embedding_model": OPENAI_MODEL,
+            "_indexed_at": datetime.now().isoformat(),
         }
         texts.append(text)
         payloads.append(payload)
@@ -145,7 +151,13 @@ def index_programs(qdrant, conn):
     if texts:
         embeddings = get_embeddings(texts)
         for emb, payload in zip(embeddings, payloads):
-            points.append(PointStruct(id=string_to_uuid(f"program_{payload['id']}"), vector=emb, payload=payload))
+            points.append(
+                PointStruct(
+                    id=string_to_uuid(f"program_{payload['id']}"),
+                    vector=emb,
+                    payload=payload,
+                )
+            )
         qdrant.upsert(collection_name="programs", points=points)
     print(f"  Indexed: {len(points)} programs")
 
@@ -162,7 +174,7 @@ def index_documents(qdrant, conn):
         logger.debug("collection_delete_skipped for documents: %s", e)
     qdrant.create_collection(
         collection_name="documents",
-        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
     )
 
     cursor = conn.execute("""
@@ -178,18 +190,18 @@ def index_documents(qdrant, conn):
     for row in cursor:
         text = f"{row[1] or ''} {row[2] or ''} {row[8] or ''}"
         payload = {
-            'id': str(row[0]),
-            'prime_contractor': row[1] or '',
-            'program': row[2] or '',
-            'total_jobs': row[3],
-            'total_placements': row[4],
-            'total_revenue': row[5],
-            'fill_rate': row[6],
-            'performance_score': row[7],
-            'notes': row[8] or '',
-            'type': 'past_performance',
-            '_embedding_model': OPENAI_MODEL,
-            '_indexed_at': datetime.now().isoformat()
+            "id": str(row[0]),
+            "prime_contractor": row[1] or "",
+            "program": row[2] or "",
+            "total_jobs": row[3],
+            "total_placements": row[4],
+            "total_revenue": row[5],
+            "fill_rate": row[6],
+            "performance_score": row[7],
+            "notes": row[8] or "",
+            "type": "past_performance",
+            "_embedding_model": OPENAI_MODEL,
+            "_indexed_at": datetime.now().isoformat(),
         }
         texts.append(text)
         payloads.append(payload)
@@ -198,11 +210,13 @@ def index_documents(qdrant, conn):
     if texts:
         embeddings = get_embeddings(texts)
         for emb, payload in zip(embeddings, payloads):
-            points.append(PointStruct(
-                id=string_to_uuid(f"doc_{payload['id']}"),
-                vector=emb,
-                payload=payload
-            ))
+            points.append(
+                PointStruct(
+                    id=string_to_uuid(f"doc_{payload['id']}"),
+                    vector=emb,
+                    payload=payload,
+                )
+            )
         qdrant.upsert(collection_name="documents", points=points)
     print(f"  Indexed: {len(points)} documents")
 
@@ -219,7 +233,7 @@ def index_primes(qdrant, conn):
         logger.debug("collection_delete_skipped for primes: %s", e)
     qdrant.create_collection(
         collection_name="primes",
-        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+        vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
     )
 
     cursor = conn.execute("""
@@ -235,19 +249,19 @@ def index_primes(qdrant, conn):
     for row in cursor:
         text = f"{row[1] or ''} {row[2] or ''} {row[3] or ''} {row[4] or ''} {row[5] or ''} {row[9] or ''}"
         payload = {
-            'id': str(row[0]),
-            'name': row[1] or '',
-            'aliases': row[2] or '',
-            'headquarters': row[3] or '',
-            'naics_codes': row[4] or '',
-            'contract_vehicles': row[5] or '',
-            'total_jobs': row[6],
-            'total_placements': row[7],
-            'total_revenue': row[8],
-            'notes': row[9] or '',
-            'category': row[10] or '',
-            '_embedding_model': OPENAI_MODEL,
-            '_indexed_at': datetime.now().isoformat()
+            "id": str(row[0]),
+            "name": row[1] or "",
+            "aliases": row[2] or "",
+            "headquarters": row[3] or "",
+            "naics_codes": row[4] or "",
+            "contract_vehicles": row[5] or "",
+            "total_jobs": row[6],
+            "total_placements": row[7],
+            "total_revenue": row[8],
+            "notes": row[9] or "",
+            "category": row[10] or "",
+            "_embedding_model": OPENAI_MODEL,
+            "_indexed_at": datetime.now().isoformat(),
         }
         texts.append(text)
         payloads.append(payload)
@@ -255,11 +269,13 @@ def index_primes(qdrant, conn):
     if texts:
         embeddings = get_embeddings(texts)
         for emb, payload in zip(embeddings, payloads):
-            points.append(PointStruct(
-                id=string_to_uuid(f"prime_{payload['id']}"),
-                vector=emb,
-                payload=payload
-            ))
+            points.append(
+                PointStruct(
+                    id=string_to_uuid(f"prime_{payload['id']}"),
+                    vector=emb,
+                    payload=payload,
+                )
+            )
         qdrant.upsert(collection_name="primes", points=points)
     print(f"  Indexed: {len(points)} prime contractors")
 
@@ -285,7 +301,7 @@ def main():
     print("=" * 50)
 
     # Show final counts
-    for coll in ['jobs', 'programs', 'documents', 'primes']:
+    for coll in ["jobs", "programs", "documents", "primes"]:
         try:
             info = qdrant.get_collection(coll)
             print(f"  {coll}: {info.points_count} points ({EMBEDDING_DIM} dims)")

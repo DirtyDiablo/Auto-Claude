@@ -16,6 +16,7 @@ logger = logging.getLogger("BD-DoclingProcessor")
 try:
     from docling.document_converter import DocumentConverter, PdfFormatOption
     from docling.datamodel.pipeline_options import PdfPipelineOptions, TableFormerMode
+
     DOCLING_AVAILABLE = True
 except ImportError:
     DOCLING_AVAILABLE = False
@@ -23,6 +24,7 @@ except ImportError:
 
 try:
     from docling_core.transforms.chunker import HybridChunker
+
     CHUNKER_AVAILABLE = True
 except (ImportError, RuntimeError):
     CHUNKER_AVAILABLE = False
@@ -115,15 +117,19 @@ def process_document(
 
     chunks = []
     for i, text in enumerate(texts):
-        chunk_id = str(uuid.uuid5(
-            uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
-            f"{path.name}:chunk:{i}",
-        ))
-        chunks.append({
-            "id": chunk_id,
-            "text": text,
-            "metadata": {**base_meta, "chunk_index": i},
-        })
+        chunk_id = str(
+            uuid.uuid5(
+                uuid.UUID("6ba7b810-9dad-11d1-80b4-00c04fd430c8"),
+                f"{path.name}:chunk:{i}",
+            )
+        )
+        chunks.append(
+            {
+                "id": chunk_id,
+                "text": text,
+                "metadata": {**base_meta, "chunk_index": i},
+            }
+        )
 
     return {
         "file": path.name,
@@ -179,11 +185,13 @@ def ingest_document_to_qdrant(
         points = []
         for chunk, embedding in zip(batch_chunks, embeddings):
             payload = {**chunk["metadata"], "text": chunk["text"][:2000]}
-            points.append(PointStruct(
-                id=chunk["id"],
-                vector=embedding,
-                payload=payload,
-            ))
+            points.append(
+                PointStruct(
+                    id=chunk["id"],
+                    vector=embedding,
+                    payload=payload,
+                )
+            )
 
         try:
             client.upsert(collection_name=collection, points=points)

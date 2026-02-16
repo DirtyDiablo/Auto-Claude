@@ -23,58 +23,47 @@ class TestRootCauseAnalysis:
     def low_confidence_job(self):
         """Job with low mapping confidence."""
         return {
-            'Job Title/Position': 'Software Developer',
-            'Prime Contractor': 'Unknown Corp',
-            '_mapping': {
-                'program_name': 'Generic Program',
-                'match_confidence': 0.35
-            }
+            "Job Title/Position": "Software Developer",
+            "Prime Contractor": "Unknown Corp",
+            "_mapping": {"program_name": "Generic Program", "match_confidence": 0.35},
         }
 
     @pytest.fixture
     def missing_data_job(self):
         """Job with missing required fields."""
         return {
-            'Job Title/Position': 'Intelligence Analyst',
-            'Security Clearance': '',  # Missing
-            'Location': '',  # Missing
-            '_mapping': {
-                'program_name': 'DCGS',
-                'match_confidence': 0.80
-            }
+            "Job Title/Position": "Intelligence Analyst",
+            "Security Clearance": "",  # Missing
+            "Location": "",  # Missing
+            "_mapping": {"program_name": "DCGS", "match_confidence": 0.80},
         }
 
     @pytest.fixture
     def invalid_mapping_job(self):
         """Job with invalid program mapping."""
         return {
-            'Job Title/Position': 'Systems Engineer',
-            'Security Clearance': 'Secret',
-            'Location': 'Washington, DC',
-            '_mapping': {
-                'program_name': 'Unmatched',
-                'match_confidence': 0.0
-            }
+            "Job Title/Position": "Systems Engineer",
+            "Security Clearance": "Secret",
+            "Location": "Washington, DC",
+            "_mapping": {"program_name": "Unmatched", "match_confidence": 0.0},
         }
 
     @pytest.fixture
     def good_job(self):
         """Job that should pass QA."""
         return {
-            'Job Title/Position': 'Senior Analyst - DCGS',
-            'Security Clearance': 'TS/SCI',
-            'Location': 'San Diego, CA',
-            'Prime Contractor': 'Leidos',
-            '_mapping': {
-                'program_name': 'AF DCGS - PACAF',
-                'match_confidence': 0.92
-            }
+            "Job Title/Position": "Senior Analyst - DCGS",
+            "Security Clearance": "TS/SCI",
+            "Location": "San Diego, CA",
+            "Prime Contractor": "Leidos",
+            "_mapping": {"program_name": "AF DCGS - PACAF", "match_confidence": 0.92},
         }
 
     def test_analyze_root_cause_exists(self):
         """Test analyze_root_cause function exists."""
         try:
             from Engine6_QA.scripts.qa_feedback import analyze_root_cause
+
             assert analyze_root_cause is not None
         except ImportError:
             pytest.skip("analyze_root_cause not available")
@@ -87,8 +76,8 @@ class TestRootCauseAnalysis:
             result = analyze_root_cause(low_confidence_job)
 
             assert result is not None
-            assert result.issue_type == 'low_confidence'
-            assert result.severity == 'high'
+            assert result.issue_type == "low_confidence"
+            assert result.severity == "high"
             assert not result.auto_fixable
         except ImportError:
             pytest.skip("analyze_root_cause not available")
@@ -101,8 +90,8 @@ class TestRootCauseAnalysis:
             result = analyze_root_cause(missing_data_job)
 
             assert result is not None
-            assert result.issue_type == 'missing_data'
-            assert result.severity == 'medium'
+            assert result.issue_type == "missing_data"
+            assert result.severity == "medium"
             assert result.auto_fixable  # Can be re-scraped
         except ImportError:
             pytest.skip("analyze_root_cause not available")
@@ -115,8 +104,8 @@ class TestRootCauseAnalysis:
             result = analyze_root_cause(invalid_mapping_job)
 
             assert result is not None
-            assert result.issue_type == 'invalid_mapping'
-            assert result.severity == 'critical'
+            assert result.issue_type == "invalid_mapping"
+            assert result.severity == "critical"
             assert result.auto_fixable  # Can re-run mapper
         except ImportError:
             pytest.skip("analyze_root_cause not available")
@@ -140,6 +129,7 @@ class TestRootCauseDataclass:
         """Test RootCause dataclass exists."""
         try:
             from Engine6_QA.scripts.qa_feedback import RootCause
+
             assert RootCause is not None
         except ImportError:
             pytest.skip("RootCause not available")
@@ -150,19 +140,19 @@ class TestRootCauseDataclass:
             from Engine6_QA.scripts.qa_feedback import RootCause
 
             rc = RootCause(
-                issue_type='test_type',
-                severity='medium',
-                description='Test description',
-                affected_fields=['field1'],
-                recommended_fix='Test fix',
-                auto_fixable=True
+                issue_type="test_type",
+                severity="medium",
+                description="Test description",
+                affected_fields=["field1"],
+                recommended_fix="Test fix",
+                auto_fixable=True,
             )
 
-            assert rc.issue_type == 'test_type'
-            assert rc.severity == 'medium'
-            assert rc.description == 'Test description'
-            assert rc.affected_fields == ['field1']
-            assert rc.recommended_fix == 'Test fix'
+            assert rc.issue_type == "test_type"
+            assert rc.severity == "medium"
+            assert rc.description == "Test description"
+            assert rc.affected_fields == ["field1"]
+            assert rc.recommended_fix == "Test fix"
             assert rc.auto_fixable is True
         except ImportError:
             pytest.skip("RootCause not available")
@@ -175,18 +165,16 @@ class TestDebugQAFailure:
     def failing_job(self):
         """Job that fails QA."""
         return {
-            'Job Title/Position': 'Test Job',
-            'Source URL': 'https://example.com/job/123',
-            '_mapping': {
-                'program_name': 'Unknown',
-                'match_confidence': 0.30
-            }
+            "Job Title/Position": "Test Job",
+            "Source URL": "https://example.com/job/123",
+            "_mapping": {"program_name": "Unknown", "match_confidence": 0.30},
         }
 
     def test_debug_qa_failure_exists(self):
         """Test debug_qa_failure function exists."""
         try:
             from Engine6_QA.scripts.qa_feedback import debug_qa_failure
+
             assert debug_qa_failure is not None
         except ImportError:
             pytest.skip("debug_qa_failure not available")
@@ -198,11 +186,11 @@ class TestDebugQAFailure:
 
             report = debug_qa_failure(failing_job)
 
-            assert 'job_id' in report
-            assert 'failure_reason' in report
-            assert 'data_quality_check' in report
-            assert 'suggested_actions' in report
-            assert 'root_cause' in report
+            assert "job_id" in report
+            assert "failure_reason" in report
+            assert "data_quality_check" in report
+            assert "suggested_actions" in report
+            assert "root_cause" in report
         except ImportError:
             pytest.skip("debug_qa_failure not available")
 
@@ -213,10 +201,10 @@ class TestDebugQAFailure:
 
             report = debug_qa_failure(failing_job)
 
-            dq = report['data_quality_check']
-            assert 'has_mapping' in dq
-            assert 'confidence' in dq
-            assert 'required_fields_present' in dq
+            dq = report["data_quality_check"]
+            assert "has_mapping" in dq
+            assert "confidence" in dq
+            assert "required_fields_present" in dq
         except ImportError:
             pytest.skip("debug_qa_failure not available")
 
@@ -230,23 +218,23 @@ class TestQAEvaluationWithRootCause:
         return [
             # Low confidence
             {
-                'Job Title/Position': 'Developer',
-                '_mapping': {'program_name': 'Unknown', 'match_confidence': 0.40}
+                "Job Title/Position": "Developer",
+                "_mapping": {"program_name": "Unknown", "match_confidence": 0.40},
             },
             # Missing clearance
             {
-                'Job Title/Position': 'Analyst',
-                'Security Clearance': '',
-                '_mapping': {'program_name': 'DCGS', 'match_confidence': 0.75}
+                "Job Title/Position": "Analyst",
+                "Security Clearance": "",
+                "_mapping": {"program_name": "DCGS", "match_confidence": 0.75},
             },
             # Good job
             {
-                'Job Title/Position': 'Engineer',
-                'Security Clearance': 'Secret',
-                'Location': 'DC',
-                'Prime Contractor': 'Leidos',
-                '_mapping': {'program_name': 'AF DCGS', 'match_confidence': 0.90}
-            }
+                "Job Title/Position": "Engineer",
+                "Security Clearance": "Secret",
+                "Location": "DC",
+                "Prime Contractor": "Leidos",
+                "_mapping": {"program_name": "AF DCGS", "match_confidence": 0.90},
+            },
         ]
 
     def test_evaluate_item_includes_root_cause(self, sample_jobs_with_issues):
@@ -273,7 +261,7 @@ class TestQAEvaluationWithRootCause:
             assert report.auto_approved >= 1  # Good job should pass
 
             # Check that review items have root cause
-            review_items = [i for i in report.items if i.status.value == 'needs_review']
+            review_items = [i for i in report.items if i.status.value == "needs_review"]
             for item in review_items:
                 # Root cause should be populated for review items
                 assert item.root_cause is not None or len(item.review_reasons) > 0
@@ -288,6 +276,7 @@ class TestQASummaryReport:
         """Test generate_qa_summary_report function exists."""
         try:
             from Engine6_QA.scripts.qa_feedback import generate_qa_summary_report
+
             assert generate_qa_summary_report is not None
         except ImportError:
             pytest.skip("generate_qa_summary_report not available")
@@ -296,19 +285,20 @@ class TestQASummaryReport:
         """Test summary report creates markdown file."""
         try:
             from Engine6_QA.scripts.qa_feedback import (
-                evaluate_batch, generate_qa_summary_report
+                evaluate_batch,
+                generate_qa_summary_report,
             )
 
             jobs = [
-                {'_mapping': {'match_confidence': 0.40}},
-                {'_mapping': {'match_confidence': 0.90}}
+                {"_mapping": {"match_confidence": 0.40}},
+                {"_mapping": {"match_confidence": 0.90}},
             ]
 
             report = evaluate_batch(jobs)
             report_path = generate_qa_summary_report(report, output_dir=str(tmp_path))
 
             assert Path(report_path).exists()
-            assert report_path.endswith('.md')
+            assert report_path.endswith(".md")
         except ImportError:
             pytest.skip("QA report generation not available")
 
@@ -320,7 +310,9 @@ class TestReviewQueueWithRootCause:
         """Test review queue items include root cause."""
         try:
             from Engine6_QA.scripts.qa_feedback import (
-                ReviewQueue, evaluate_item, QAStatus
+                ReviewQueue,
+                evaluate_item,
+                QAStatus,
             )
 
             # Create queue in temp directory
@@ -328,10 +320,7 @@ class TestReviewQueueWithRootCause:
             queue = ReviewQueue(queue_file=queue_file)
 
             # Add a job that needs review
-            job = {
-                'Job Title/Position': 'Test',
-                '_mapping': {'match_confidence': 0.30}
-            }
+            job = {"Job Title/Position": "Test", "_mapping": {"match_confidence": 0.30}}
             result = evaluate_item(job)
 
             if result.status == QAStatus.NEEDS_REVIEW:
@@ -341,7 +330,7 @@ class TestReviewQueueWithRootCause:
                 pending = queue.get_pending()
                 if pending:
                     item = pending[0]
-                    assert 'root_cause' in item
+                    assert "root_cause" in item
         except ImportError:
             pytest.skip("ReviewQueue not available")
 
@@ -356,21 +345,18 @@ class TestQAIntegration:
 
             jobs = [
                 # Should fail - low confidence
-                {
-                    'Job Title/Position': 'Dev',
-                    '_mapping': {'match_confidence': 0.25}
-                },
+                {"Job Title/Position": "Dev", "_mapping": {"match_confidence": 0.25}},
                 # Should fail - unmatched
                 {
-                    'Job Title/Position': 'Analyst',
-                    '_mapping': {'program_name': 'Unmatched', 'match_confidence': 0.5}
+                    "Job Title/Position": "Analyst",
+                    "_mapping": {"program_name": "Unmatched", "match_confidence": 0.5},
                 },
                 # Should pass
                 {
-                    'Job Title/Position': 'Engineer',
-                    'Security Clearance': 'Secret',
-                    '_mapping': {'program_name': 'DCGS', 'match_confidence': 0.85}
-                }
+                    "Job Title/Position": "Engineer",
+                    "Security Clearance": "Secret",
+                    "_mapping": {"program_name": "DCGS", "match_confidence": 0.85},
+                },
             ]
 
             report, approved, review = run_qa_workflow(jobs, auto_queue=False)
@@ -381,7 +367,7 @@ class TestQAIntegration:
 
             # Verify root cause on review items
             for item in report.items:
-                if item.status.value == 'needs_review':
+                if item.status.value == "needs_review":
                     assert item.root_cause is not None
         except ImportError:
             pytest.skip("run_qa_workflow not available")

@@ -13,9 +13,17 @@ from datetime import datetime, timezone
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from src.agents.swarm.decomposer import TaskDecomposer, TaskDAG, CostEstimate, get_task_decomposer
+from src.agents.swarm.decomposer import (
+    TaskDecomposer,
+    TaskDAG,
+    CostEstimate,
+    get_task_decomposer,
+)
 from src.agents.swarm.workers import (
-    WorkerRegistry, WorkerHandle, WorkerStatus, SubTask,
+    WorkerRegistry,
+    WorkerHandle,
+    WorkerStatus,
+    SubTask,
     get_worker_registry,
 )
 
@@ -25,6 +33,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # ENUMS
 # =========================================
+
 
 class CoordinationMode(str, Enum):
     PARALLEL = "parallel"
@@ -49,9 +58,11 @@ class SwarmStatus(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class SwarmTask:
     """High-level task submitted to the swarm."""
+
     description: str = ""
     task_type: str = ""  # campaign_build, contact_enrichment, etc.
     parameters: Dict[str, Any] = field(default_factory=dict)
@@ -65,6 +76,7 @@ class SwarmTask:
 @dataclass
 class WorkerResult:
     """Result from a single worker execution."""
+
     worker_id: str = ""
     worker_type: str = ""
     task_id: str = ""
@@ -79,6 +91,7 @@ class WorkerResult:
 @dataclass
 class SwarmResult:
     """Final result from a swarm execution."""
+
     swarm_id: str = ""
     task_description: str = ""
     status: str = SwarmStatus.COMPLETED.value
@@ -97,6 +110,7 @@ class SwarmResult:
 @dataclass
 class SwarmState:
     """Live state of a running swarm."""
+
     swarm_id: str = ""
     status: str = SwarmStatus.PENDING.value
     task: Optional[SwarmTask] = None
@@ -113,6 +127,7 @@ class SwarmState:
 # =========================================
 # SWARM COORDINATOR
 # =========================================
+
 
 class SwarmCoordinator:
     """Queen agent that orchestrates worker swarm execution.
@@ -162,7 +177,9 @@ class SwarmCoordinator:
             if cost.total_tokens > task.budget_tokens:
                 logger.warning(
                     "Swarm %s exceeds budget: %d > %d tokens",
-                    swarm_id, cost.total_tokens, task.budget_tokens,
+                    swarm_id,
+                    cost.total_tokens,
+                    task.budget_tokens,
                 )
                 # Continue anyway but log warning
 
@@ -171,7 +188,9 @@ class SwarmCoordinator:
             state.updated_at = datetime.now(timezone.utc).isoformat()
 
             worker_results = await self._execute_by_mode(
-                task.coordination_mode, dag, task,
+                task.coordination_mode,
+                dag,
+                task,
             )
 
             # Step 8: Aggregate results
@@ -291,7 +310,9 @@ class SwarmCoordinator:
             return await self._execute_parallel(dag, task)
 
     async def _execute_parallel(
-        self, dag: TaskDAG, task: SwarmTask,
+        self,
+        dag: TaskDAG,
+        task: SwarmTask,
     ) -> List[WorkerResult]:
         """Execute DAG layers in parallel."""
         all_results: List[WorkerResult] = []
@@ -313,17 +334,21 @@ class SwarmCoordinator:
 
             for res in layer_results:
                 if isinstance(res, Exception):
-                    all_results.append(WorkerResult(
-                        status=WorkerStatus.FAILED.value,
-                        error=str(res),
-                    ))
+                    all_results.append(
+                        WorkerResult(
+                            status=WorkerStatus.FAILED.value,
+                            error=str(res),
+                        )
+                    )
                 else:
                     all_results.append(res)
 
         return all_results
 
     async def _execute_sequential(
-        self, dag: TaskDAG, task: SwarmTask,
+        self,
+        dag: TaskDAG,
+        task: SwarmTask,
     ) -> List[WorkerResult]:
         """Execute all nodes sequentially, one at a time."""
         results: List[WorkerResult] = []
@@ -333,7 +358,9 @@ class SwarmCoordinator:
         return results
 
     async def _execute_pipeline(
-        self, dag: TaskDAG, task: SwarmTask,
+        self,
+        dag: TaskDAG,
+        task: SwarmTask,
     ) -> List[WorkerResult]:
         """Pipeline: each worker passes output to the next."""
         results: List[WorkerResult] = []
@@ -349,7 +376,9 @@ class SwarmCoordinator:
         return results
 
     async def _execute_consensus(
-        self, dag: TaskDAG, task: SwarmTask,
+        self,
+        dag: TaskDAG,
+        task: SwarmTask,
     ) -> List[WorkerResult]:
         """Consensus: run same task on multiple workers, pick majority."""
         # Execute all in parallel first
@@ -363,7 +392,9 @@ class SwarmCoordinator:
         return results
 
     async def _execute_map_reduce(
-        self, dag: TaskDAG, task: SwarmTask,
+        self,
+        dag: TaskDAG,
+        task: SwarmTask,
     ) -> List[WorkerResult]:
         """Map-reduce: parallel map phase, then reduce/aggregate."""
         # Map phase: all except last node in parallel
@@ -376,10 +407,12 @@ class SwarmCoordinator:
         results: List[WorkerResult] = []
         for res in map_results:
             if isinstance(res, Exception):
-                results.append(WorkerResult(
-                    status=WorkerStatus.FAILED.value,
-                    error=str(res),
-                ))
+                results.append(
+                    WorkerResult(
+                        status=WorkerStatus.FAILED.value,
+                        error=str(res),
+                    )
+                )
             else:
                 results.append(res)
 
@@ -398,7 +431,9 @@ class SwarmCoordinator:
     # -----------------------------------------
 
     async def _spawn_worker(
-        self, subtask: SubTask, swarm_task: SwarmTask,
+        self,
+        subtask: SubTask,
+        swarm_task: SwarmTask,
     ) -> WorkerResult:
         """Spawn a single worker to execute a sub-task."""
         worker_type = self._registry.get_best_worker(subtask)
@@ -464,7 +499,9 @@ class SwarmCoordinator:
     # -----------------------------------------
 
     def _aggregate_results(
-        self, results: List[WorkerResult], dag: TaskDAG,
+        self,
+        results: List[WorkerResult],
+        dag: TaskDAG,
     ) -> Dict[str, Any]:
         """Aggregate worker results into a unified output."""
         aggregated: Dict[str, Any] = {
@@ -481,12 +518,14 @@ class SwarmCoordinator:
                 continue
 
             output = r.output
-            aggregated["details"].append({
-                "worker_type": r.worker_type,
-                "task_id": r.task_id,
-                "description": output.get("description", ""),
-                "status": output.get("status", ""),
-            })
+            aggregated["details"].append(
+                {
+                    "worker_type": r.worker_type,
+                    "task_id": r.task_id,
+                    "description": output.get("description", ""),
+                    "status": output.get("status", ""),
+                }
+            )
 
             # Merge type-specific outputs
             if "contacts" in output:
@@ -505,7 +544,9 @@ class SwarmCoordinator:
         # Build summary
         aggregated["summary"] = {
             "total_workers": len(results),
-            "completed": sum(1 for r in results if r.status == WorkerStatus.COMPLETED.value),
+            "completed": sum(
+                1 for r in results if r.status == WorkerStatus.COMPLETED.value
+            ),
             "failed": sum(1 for r in results if r.status == WorkerStatus.FAILED.value),
             "contacts_found": len(aggregated["contacts"]),
             "jobs_found": len(aggregated["jobs"]),

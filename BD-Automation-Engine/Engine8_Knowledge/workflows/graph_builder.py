@@ -15,7 +15,10 @@ from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 import structlog
 
-from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, get_checkpoint_store
+from Engine8_Knowledge.workflows.checkpoint_store import (
+    CheckpointStore,
+    get_checkpoint_store,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -24,9 +27,11 @@ logger = structlog.get_logger(__name__)
 # Configuration data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class RetryConfig:
     """Per-node retry settings."""
+
     max_attempts: int = 3
     backoff_seconds: float = 2.0
     retry_on: List[Type[Exception]] = field(default_factory=lambda: [Exception])
@@ -35,6 +40,7 @@ class RetryConfig:
 @dataclass
 class NodeSpec:
     """Specification for a single workflow node."""
+
     name: str
     function: Callable
     description: str = ""
@@ -46,6 +52,7 @@ class NodeSpec:
 @dataclass
 class EdgeSpec:
     """Specification for a graph edge (direct or conditional)."""
+
     source: str
     target: Union[str, List[str]]
     condition: Optional[Callable] = None
@@ -54,6 +61,7 @@ class EdgeSpec:
 @dataclass
 class WorkflowDefinition:
     """Declarative workflow spec consumed by the builder."""
+
     name: str
     description: str
     state_schema: Dict[str, Any]  # field_name -> default_value
@@ -69,6 +77,7 @@ class WorkflowDefinition:
 @dataclass
 class WorkflowInfo:
     """Summary info about a registered workflow."""
+
     name: str
     description: str
     node_count: int
@@ -81,6 +90,7 @@ class WorkflowInfo:
 # ---------------------------------------------------------------------------
 # Production Graph Builder
 # ---------------------------------------------------------------------------
+
 
 class ProductionGraphBuilder:
     """Builds StateGraphs with production features baked in."""
@@ -102,15 +112,21 @@ class ProductionGraphBuilder:
         - Streaming support for real-time visibility
         - Performance tracking per node
         """
-        logger.info("graph_builder.building", workflow=workflow_def.name,
-                     nodes=len(workflow_def.nodes), edges=len(workflow_def.edges))
+        logger.info(
+            "graph_builder.building",
+            workflow=workflow_def.name,
+            nodes=len(workflow_def.nodes),
+            edges=len(workflow_def.edges),
+        )
 
         # Try to build a real LangGraph StateGraph
         try:
             graph = self._build_langgraph(workflow_def)
             logger.info("graph_builder.langgraph_compiled", workflow=workflow_def.name)
         except ImportError:
-            logger.warning("graph_builder.langgraph_unavailable, using production wrapper")
+            logger.warning(
+                "graph_builder.langgraph_unavailable, using production wrapper"
+            )
             graph = None
 
         compiled = CompiledProductionGraph(
@@ -171,7 +187,9 @@ class ProductionGraphBuilder:
 
         return builder.compile(**compile_kwargs)
 
-    def _wrap_node_with_retry(self, node_spec: NodeSpec, retry_config: RetryConfig) -> Callable:
+    def _wrap_node_with_retry(
+        self, node_spec: NodeSpec, retry_config: RetryConfig
+    ) -> Callable:
         """Wrap a node function with retry logic and timing."""
 
         async def wrapped(state: Dict[str, Any]) -> Dict[str, Any]:
@@ -183,8 +201,7 @@ class ProductionGraphBuilder:
                     start = time.time()
                     if asyncio.iscoroutinefunction(node_spec.function):
                         result = await asyncio.wait_for(
-                            node_spec.function(state),
-                            timeout=node_spec.timeout_seconds
+                            node_spec.function(state), timeout=node_spec.timeout_seconds
                         )
                     else:
                         result = node_spec.function(state)
@@ -193,34 +210,50 @@ class ProductionGraphBuilder:
 
                     # Track timing in state
                     if isinstance(result, dict):
-                        timings = result.get("step_timings", state.get("step_timings", {}))
+                        timings = result.get(
+                            "step_timings", state.get("step_timings", {})
+                        )
                         timings[node_spec.name] = round(duration, 3)
                         result["step_timings"] = timings
 
-                    logger.info("graph_builder.node_completed",
-                                node=node_spec.name, attempt=attempt, duration=round(duration, 3))
+                    logger.info(
+                        "graph_builder.node_completed",
+                        node=node_spec.name,
+                        attempt=attempt,
+                        duration=round(duration, 3),
+                    )
                     return result
 
                 except asyncio.TimeoutError:
                     last_error = f"Timeout after {node_spec.timeout_seconds}s"
-                    logger.warning("graph_builder.node_timeout",
-                                   node=node_spec.name, attempt=attempt, timeout=node_spec.timeout_seconds)
+                    logger.warning(
+                        "graph_builder.node_timeout",
+                        node=node_spec.name,
+                        attempt=attempt,
+                        timeout=node_spec.timeout_seconds,
+                    )
                 except Exception as e:
                     last_error = str(e)
-                    logger.warning("graph_builder.node_error",
-                                   node=node_spec.name, attempt=attempt, error=str(e))
+                    logger.warning(
+                        "graph_builder.node_error",
+                        node=node_spec.name,
+                        attempt=attempt,
+                        error=str(e),
+                    )
 
                 if attempt < attempts:
                     await asyncio.sleep(retry_config.backoff_seconds * attempt)
 
             # All retries exhausted
             errors = state.get("errors", [])
-            errors.append({
-                "node": node_spec.name,
-                "error": last_error,
-                "attempts": attempts,
-                "traceback": traceback.format_exc(),
-            })
+            errors.append(
+                {
+                    "node": node_spec.name,
+                    "error": last_error,
+                    "attempts": attempts,
+                    "traceback": traceback.format_exc(),
+                }
+            )
             return {**state, "errors": errors}
 
         return wrapped
@@ -234,13 +267,17 @@ class ProductionGraphBuilder:
         results = []
         for name, graph in self._compiled_graphs.items():
             wf = graph.workflow_def
-            results.append(WorkflowInfo(
-                name=wf.name, description=wf.description,
-                node_count=len(wf.nodes), edge_count=len(wf.edges),
-                interrupt_nodes=wf.interrupt_nodes,
-                parallel_groups=wf.parallel_groups,
-                entry_point=wf.entry_point,
-            ))
+            results.append(
+                WorkflowInfo(
+                    name=wf.name,
+                    description=wf.description,
+                    node_count=len(wf.nodes),
+                    edge_count=len(wf.edges),
+                    interrupt_nodes=wf.interrupt_nodes,
+                    parallel_groups=wf.parallel_groups,
+                    entry_point=wf.entry_point,
+                )
+            )
         return results
 
 
@@ -248,19 +285,24 @@ class ProductionGraphBuilder:
 # Compiled Production Graph
 # ---------------------------------------------------------------------------
 
+
 class CompiledProductionGraph:
     """A compiled production graph that wraps LangGraph with additional features."""
 
-    def __init__(self, workflow_def: WorkflowDefinition,
-                 checkpoint_store: CheckpointStore,
-                 langgraph: Any = None):
+    def __init__(
+        self,
+        workflow_def: WorkflowDefinition,
+        checkpoint_store: CheckpointStore,
+        langgraph: Any = None,
+    ):
         self.workflow_def = workflow_def
         self.checkpoint_store = checkpoint_store
         self.langgraph = langgraph
         self._running: Dict[str, bool] = {}
 
-    async def invoke(self, input_state: Dict[str, Any],
-                     thread_id: Optional[str] = None) -> Dict[str, Any]:
+    async def invoke(
+        self, input_state: Dict[str, Any], thread_id: Optional[str] = None
+    ) -> Dict[str, Any]:
         """Execute the workflow synchronously (wait for completion)."""
         tid = thread_id or f"thread_{uuid.uuid4().hex[:12]}"
 
@@ -279,27 +321,35 @@ class CompiledProductionGraph:
 
         # Create thread
         await self.checkpoint_store.create_thread(
-            workflow_name=self.workflow_def.name, thread_id=tid,
-            metadata={"input_keys": list(input_state.keys())}
+            workflow_name=self.workflow_def.name,
+            thread_id=tid,
+            metadata={"input_keys": list(input_state.keys())},
         )
 
         # If LangGraph is available, use it
         if self.langgraph is not None:
             try:
                 checkpointer = await self.checkpoint_store.get_checkpointer()
-                config = {"configurable": {"thread_id": tid}, "checkpointer": checkpointer}
+                config = {
+                    "configurable": {"thread_id": tid},
+                    "checkpointer": checkpointer,
+                }
                 result = await self.langgraph.ainvoke(state, config=config)
                 await self.checkpoint_store.update_thread_status(tid, "completed")
                 return result
             except Exception as e:
-                logger.warning("graph_builder.langgraph_invoke_failed, using manual execution",
-                               error=str(e))
+                logger.warning(
+                    "graph_builder.langgraph_invoke_failed, using manual execution",
+                    error=str(e),
+                )
 
         # Manual execution fallback
         result = await self._execute_manually(state, tid)
         return result
 
-    async def _execute_manually(self, state: Dict[str, Any], thread_id: str) -> Dict[str, Any]:
+    async def _execute_manually(
+        self, state: Dict[str, Any], thread_id: str
+    ) -> Dict[str, Any]:
         """Execute workflow manually following edges."""
         current_node = self.workflow_def.entry_point
         step = 0
@@ -308,7 +358,11 @@ class CompiledProductionGraph:
         self._running[thread_id] = True
 
         try:
-            while current_node and current_node != "__end__" and self._running.get(thread_id, False):
+            while (
+                current_node
+                and current_node != "__end__"
+                and self._running.get(thread_id, False)
+            ):
                 if current_node in visited and step > len(self.workflow_def.nodes) * 2:
                     break  # Prevent infinite loops
                 visited.add(current_node)
@@ -322,11 +376,17 @@ class CompiledProductionGraph:
                 # Check for interrupt
                 if current_node in self.workflow_def.interrupt_nodes:
                     await self.checkpoint_store.save_snapshot(
-                        thread_id, step, current_node, state,
-                        metadata={"interrupted": True}
+                        thread_id,
+                        step,
+                        current_node,
+                        state,
+                        metadata={"interrupted": True},
                     )
                     await self.checkpoint_store.update_thread_status(
-                        thread_id, "interrupted", current_node=current_node, step_count=step
+                        thread_id,
+                        "interrupted",
+                        current_node=current_node,
+                        step_count=step,
                     )
                     state["_interrupted_at"] = current_node
                     state["_thread_id"] = thread_id
@@ -339,16 +399,22 @@ class CompiledProductionGraph:
                         parallel_group = group
                         break
 
-                if parallel_group and all(n in self.workflow_def.nodes for n in parallel_group):
+                if parallel_group and all(
+                    n in self.workflow_def.nodes for n in parallel_group
+                ):
                     # Execute parallel nodes
-                    state = await self._execute_parallel(parallel_group, state, thread_id, step)
+                    state = await self._execute_parallel(
+                        parallel_group, state, thread_id, step
+                    )
                     step += len(parallel_group) - 1  # Account for parallel steps
                     # Skip to the edge target of the last parallel node
                     last_parallel = parallel_group[-1]
                     current_node = self._find_next_node(last_parallel, state)
                 else:
                     # Execute single node
-                    retry_cfg = self.workflow_def.retry_config.get(current_node, RetryConfig())
+                    retry_cfg = self.workflow_def.retry_config.get(
+                        current_node, RetryConfig()
+                    )
                     wrapped = self._wrap_node(node_spec, retry_cfg)
                     state = await wrapped(state)
 
@@ -367,11 +433,16 @@ class CompiledProductionGraph:
             state["_completed"] = True
 
         except Exception as e:
-            logger.error("graph_builder.execution_error", error=str(e), node=current_node)
-            state["errors"] = state.get("errors", []) + [{
-                "node": current_node, "error": str(e),
-                "traceback": traceback.format_exc()
-            }]
+            logger.error(
+                "graph_builder.execution_error", error=str(e), node=current_node
+            )
+            state["errors"] = state.get("errors", []) + [
+                {
+                    "node": current_node,
+                    "error": str(e),
+                    "traceback": traceback.format_exc(),
+                }
+            ]
             await self.checkpoint_store.update_thread_status(
                 thread_id, "failed", current_node=current_node, step_count=step
             )
@@ -380,8 +451,9 @@ class CompiledProductionGraph:
 
         return state
 
-    async def _execute_parallel(self, group: List[str], state: Dict[str, Any],
-                                 thread_id: str, base_step: int) -> Dict[str, Any]:
+    async def _execute_parallel(
+        self, group: List[str], state: Dict[str, Any], thread_id: str, base_step: int
+    ) -> Dict[str, Any]:
         """Execute a group of nodes in parallel."""
 
         async def run_node(node_name: str) -> Dict[str, Any]:
@@ -397,9 +469,9 @@ class CompiledProductionGraph:
         merged = dict(state)
         for i, result in enumerate(results):
             if isinstance(result, Exception):
-                merged.setdefault("errors", []).append({
-                    "node": group[i], "error": str(result)
-                })
+                merged.setdefault("errors", []).append(
+                    {"node": group[i], "error": str(result)}
+                )
             elif isinstance(result, dict):
                 for key, val in result.items():
                     if key in ("errors", "step_timings"):
@@ -413,8 +485,11 @@ class CompiledProductionGraph:
 
         # Save parallel checkpoint
         await self.checkpoint_store.save_snapshot(
-            thread_id, base_step, f"parallel:{'|'.join(group)}", merged,
-            metadata={"parallel": True, "nodes": group}
+            thread_id,
+            base_step,
+            f"parallel:{'|'.join(group)}",
+            merged,
+            metadata={"parallel": True, "nodes": group},
         )
 
         return merged
@@ -431,15 +506,16 @@ class CompiledProductionGraph:
                     start = time.time()
                     if asyncio.iscoroutinefunction(node_spec.function):
                         result = await asyncio.wait_for(
-                            node_spec.function(state),
-                            timeout=node_spec.timeout_seconds
+                            node_spec.function(state), timeout=node_spec.timeout_seconds
                         )
                     else:
                         result = node_spec.function(state)
 
                     duration = time.time() - start
                     if isinstance(result, dict):
-                        timings = result.get("step_timings", state.get("step_timings", {}))
+                        timings = result.get(
+                            "step_timings", state.get("step_timings", {})
+                        )
                         timings[node_spec.name] = round(duration, 3)
                         result["step_timings"] = timings
                     return result
@@ -453,7 +529,9 @@ class CompiledProductionGraph:
                     await asyncio.sleep(retry_config.backoff_seconds * attempt)
 
             errors = state.get("errors", [])
-            errors.append({"node": node_spec.name, "error": last_error, "attempts": attempts})
+            errors.append(
+                {"node": node_spec.name, "error": last_error, "attempts": attempts}
+            )
             return {**state, "errors": errors}
 
         return wrapped
@@ -467,7 +545,9 @@ class CompiledProductionGraph:
                 return edge.target if isinstance(edge.target, str) else edge.target[0]
         return "__end__"
 
-    async def resume(self, thread_id: str, updated_state: Optional[Dict] = None) -> Dict[str, Any]:
+    async def resume(
+        self, thread_id: str, updated_state: Optional[Dict] = None
+    ) -> Dict[str, Any]:
         """Resume an interrupted workflow."""
         history = await self.checkpoint_store.get_thread_history(thread_id)
         if not history:

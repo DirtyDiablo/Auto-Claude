@@ -11,14 +11,21 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from src.intelligence.meta_learner import (
-    MetaInsight, OutreachInsight, ProgramInsight, ContactInsight,
+    MetaInsight,
+    OutreachInsight,
+    ProgramInsight,
+    ContactInsight,
     get_meta_learner,
 )
 from src.intelligence.pattern_engine import (
-    StrategicPattern, get_pattern_engine,
+    StrategicPattern,
+    get_pattern_engine,
 )
 from src.intelligence.insight_compiler import (
-    WeeklyBrief, MonthlyAssessment, FlashReport, get_insight_compiler,
+    WeeklyBrief,
+    MonthlyAssessment,
+    FlashReport,
+    get_insight_compiler,
 )
 
 logger = logging.getLogger(__name__)
@@ -27,6 +34,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class FlashReportRequest(BaseModel):
     pattern_id: str
@@ -39,6 +47,7 @@ class CampaignReviewRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_intelligence_router(app: FastAPI) -> None:
     """Register all intelligence endpoints on the FastAPI app."""
@@ -219,12 +228,18 @@ def include_intelligence_router(app: FastAPI) -> None:
 # SERIALIZATION HELPERS
 # =========================================
 
+
 def _serialize_insight(i: MetaInsight) -> Dict[str, Any]:
     base = {
-        "id": i.id, "domain": i.domain, "title": i.title,
-        "description": i.description, "severity": i.severity,
-        "confidence": i.confidence, "recommendations": i.recommendations,
-        "created_at": i.created_at, "tags": i.tags,
+        "id": i.id,
+        "domain": i.domain,
+        "title": i.title,
+        "description": i.description,
+        "severity": i.severity,
+        "confidence": i.confidence,
+        "recommendations": i.recommendations,
+        "created_at": i.created_at,
+        "tags": i.tags,
     }
     if isinstance(i, OutreachInsight):
         base["channel"] = i.channel
@@ -244,17 +259,24 @@ def _serialize_insight(i: MetaInsight) -> Dict[str, Any]:
 
 def _serialize_pattern(p: StrategicPattern) -> Dict[str, Any]:
     return {
-        "id": p.id, "pattern_type": p.pattern_type, "title": p.title,
-        "description": p.description, "program": p.program,
-        "confidence": p.confidence, "detected_at": p.detected_at,
-        "expires_at": p.expires_at, "tags": p.tags,
+        "id": p.id,
+        "pattern_type": p.pattern_type,
+        "title": p.title,
+        "description": p.description,
+        "program": p.program,
+        "confidence": p.confidence,
+        "detected_at": p.detected_at,
+        "expires_at": p.expires_at,
+        "tags": p.tags,
     }
 
 
 def _serialize_weekly_brief(b: WeeklyBrief) -> Dict[str, Any]:
     return {
-        "id": b.id, "title": b.title,
-        "period_start": b.period_start, "period_end": b.period_end,
+        "id": b.id,
+        "title": b.title,
+        "period_start": b.period_start,
+        "period_end": b.period_end,
         "executive_summary": b.executive_summary,
         "sections": [
             {"heading": s.heading, "content": s.content, "priority": s.priority}
@@ -269,7 +291,9 @@ def _serialize_weekly_brief(b: WeeklyBrief) -> Dict[str, Any]:
 
 def _serialize_monthly_assessment(a: MonthlyAssessment) -> Dict[str, Any]:
     return {
-        "id": a.id, "title": a.title, "period": a.period,
+        "id": a.id,
+        "title": a.title,
+        "period": a.period,
         "executive_summary": a.executive_summary,
         "sections": [
             {"heading": s.heading, "content": s.content, "priority": s.priority}
@@ -284,8 +308,11 @@ def _serialize_monthly_assessment(a: MonthlyAssessment) -> Dict[str, Any]:
 
 def _serialize_flash_report(r: FlashReport) -> Dict[str, Any]:
     return {
-        "id": r.id, "title": r.title, "pattern_id": r.pattern_id,
-        "urgency": r.urgency, "summary": r.summary,
+        "id": r.id,
+        "title": r.title,
+        "pattern_id": r.pattern_id,
+        "urgency": r.urgency,
+        "summary": r.summary,
         "impact_assessment": r.impact_assessment,
         "recommended_response": r.recommended_response,
         "time_sensitivity": r.time_sensitivity,

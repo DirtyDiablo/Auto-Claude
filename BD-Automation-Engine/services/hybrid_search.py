@@ -21,22 +21,27 @@ load_dotenv()
 # Logging
 try:
     from utils.logging_config import get_logger
+
     logger = get_logger(__name__)
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
 
 # Retry utilities
 try:
     from utils.llm_retry import openai_retry
 except ImportError:
+
     def openai_retry(func):
         return func
+
 
 # Qdrant
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import Filter, FieldCondition, MatchText
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -44,6 +49,7 @@ except ImportError:
 # OpenAI
 try:
     from openai import OpenAI
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
@@ -52,6 +58,7 @@ except ImportError:
 @dataclass
 class SearchResult:
     """Unified search result."""
+
     id: str
     collection: str
     payload: Dict[str, Any]
@@ -78,7 +85,9 @@ class HybridSearch:
         graph_weight: float = 0.2,
         rrf_k: int = 60,
     ):
-        self.qdrant_url = qdrant_url or os.environ.get("QDRANT_URL", "http://localhost:6333")
+        self.qdrant_url = qdrant_url or os.environ.get(
+            "QDRANT_URL", "http://localhost:6333"
+        )
         self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
 
         self.dense_weight = dense_weight
@@ -105,8 +114,7 @@ class HybridSearch:
             raise ValueError("OpenAI client not configured")
 
         response = self.openai.embeddings.create(
-            input=text,
-            model="text-embedding-3-small"
+            input=text, model="text-embedding-3-small"
         )
         return response.data[0].embedding
 
@@ -132,15 +140,19 @@ class HybridSearch:
                     with_payload=True,
                 )
                 for hit in hits:
-                    results.append(SearchResult(
-                        id=str(hit.id),
-                        collection=collection,
-                        payload=hit.payload,
-                        score=hit.score,
-                        search_type="dense",
-                    ))
+                    results.append(
+                        SearchResult(
+                            id=str(hit.id),
+                            collection=collection,
+                            payload=hit.payload,
+                            score=hit.score,
+                            search_type="dense",
+                        )
+                    )
             except Exception as e:
-                logger.warning("dense_search_failed", collection=collection, error=str(e))
+                logger.warning(
+                    "dense_search_failed", collection=collection, error=str(e)
+                )
 
         return results
 
@@ -177,15 +189,19 @@ class HybridSearch:
                 for i, hit in enumerate(hits):
                     # Simulate BM25-like score decay
                     score = 1.0 / (1 + i * 0.1)
-                    results.append(SearchResult(
-                        id=str(hit.id),
-                        collection=collection,
-                        payload=hit.payload,
-                        score=score,
-                        search_type="sparse",
-                    ))
+                    results.append(
+                        SearchResult(
+                            id=str(hit.id),
+                            collection=collection,
+                            payload=hit.payload,
+                            score=score,
+                            search_type="sparse",
+                        )
+                    )
             except Exception as e:
-                logger.warning("sparse_search_failed", collection=collection, error=str(e))
+                logger.warning(
+                    "sparse_search_failed", collection=collection, error=str(e)
+                )
 
         return results
 
@@ -238,13 +254,15 @@ class HybridSearch:
                             with_payload=True,
                         )
                         for point in points:
-                            results.append(SearchResult(
-                                id=str(point.id),
-                                collection=collection,
-                                payload=point.payload,
-                                score=0.5,  # Base score for graph results
-                                search_type="graph",
-                            ))
+                            results.append(
+                                SearchResult(
+                                    id=str(point.id),
+                                    collection=collection,
+                                    payload=point.payload,
+                                    score=0.5,  # Base score for graph results
+                                    search_type="graph",
+                                )
+                            )
                     except Exception:
                         pass
 
@@ -333,7 +351,9 @@ class HybridSearch:
             results_by_type["dense"] = self.dense_search(query, collections, limit * 3)
 
         if search_mode in ["sparse", "hybrid"]:
-            results_by_type["sparse"] = self.sparse_search(query, collections, limit * 3)
+            results_by_type["sparse"] = self.sparse_search(
+                query, collections, limit * 3
+            )
 
         if search_mode in ["graph", "hybrid"]:
             results_by_type["graph"] = self.graph_search(query, collections, limit * 3)
@@ -374,13 +394,13 @@ if __name__ == "__main__":
     ]
 
     for query in test_queries:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Query: {query}")
-        print("="*60)
+        print("=" * 60)
 
         results = search.search(query, limit=5)
         for r in results:
             print(f"  [{r['search_type']}] {r['collection']} - Score: {r['score']:.4f}")
             print(f"    ID: {r['id']}")
-            if r['payload'].get('content'):
+            if r["payload"].get("content"):
                 print(f"    Content: {r['payload']['content'][:100]}...")

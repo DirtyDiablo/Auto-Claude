@@ -39,6 +39,7 @@ def client(app):
 # CAUSAL GRAPH
 # =========================================
 
+
 def test_build_graph(client):
     resp = client.post("/api/causal/graph")
     assert resp.status_code == 200
@@ -58,11 +59,15 @@ def test_get_graph(client):
 # CAUSAL EFFECT
 # =========================================
 
+
 def test_estimate_effect(client):
-    resp = client.post("/api/causal/effect", json={
-        "treatment": "outreach_volume",
-        "outcome": "contacts_engaged",
-    })
+    resp = client.post(
+        "/api/causal/effect",
+        json={
+            "treatment": "outreach_volume",
+            "outcome": "contacts_engaged",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["ate"] > 0
@@ -70,10 +75,13 @@ def test_estimate_effect(client):
 
 
 def test_estimate_negative_effect(client):
-    resp = client.post("/api/causal/effect", json={
-        "treatment": "competitor_activity",
-        "outcome": "contracts_won",
-    })
+    resp = client.post(
+        "/api/causal/effect",
+        json={
+            "treatment": "competitor_activity",
+            "outcome": "contracts_won",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["ate"] < 0
 
@@ -82,11 +90,15 @@ def test_estimate_negative_effect(client):
 # COUNTERFACTUAL
 # =========================================
 
+
 def test_counterfactual(client):
-    resp = client.post("/api/causal/counterfactual", json={
-        "scenario": "What if we doubled outreach?",
-        "conditions": {"outreach_volume": 2.0},
-    })
+    resp = client.post(
+        "/api/causal/counterfactual",
+        json={
+            "scenario": "What if we doubled outreach?",
+            "conditions": {"outreach_volume": 2.0},
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "predicted_outcome" in data
@@ -96,6 +108,7 @@ def test_counterfactual(client):
 # =========================================
 # DIGITAL TWIN
 # =========================================
+
 
 def test_create_twin(client):
     resp = client.post("/api/twin/create", json={})
@@ -107,11 +120,14 @@ def test_create_twin(client):
 
 def test_simulate(client):
     twin = client.post("/api/twin/create", json={}).json()
-    resp = client.post("/api/twin/simulate", json={
-        "twin_id": twin["twin_id"],
-        "days": 90,
-        "monte_carlo_runs": 100,
-    })
+    resp = client.post(
+        "/api/twin/simulate",
+        json={
+            "twin_id": twin["twin_id"],
+            "days": 90,
+            "monte_carlo_runs": 100,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["expected_pipeline_value_m"] > 0
@@ -120,24 +136,30 @@ def test_simulate(client):
 
 def test_simulate_with_interventions(client):
     twin = client.post("/api/twin/create", json={}).json()
-    resp = client.post("/api/twin/simulate", json={
-        "twin_id": twin["twin_id"],
-        "days": 90,
-        "interventions": [
-            {"variable": "team_size", "action": "increase", "value": 3},
-        ],
-        "monte_carlo_runs": 100,
-    })
+    resp = client.post(
+        "/api/twin/simulate",
+        json={
+            "twin_id": twin["twin_id"],
+            "days": 90,
+            "interventions": [
+                {"variable": "team_size", "action": "increase", "value": 3},
+            ],
+            "monte_carlo_runs": 100,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert len(data["interventions"]) == 1
 
 
 def test_simulate_unknown_twin(client):
-    resp = client.post("/api/twin/simulate", json={
-        "twin_id": "twin_fake",
-        "days": 90,
-    })
+    resp = client.post(
+        "/api/twin/simulate",
+        json={
+            "twin_id": "twin_fake",
+            "days": 90,
+        },
+    )
     assert resp.status_code == 404
 
 
@@ -145,18 +167,25 @@ def test_simulate_unknown_twin(client):
 # SCENARIO COMPARISON
 # =========================================
 
+
 def test_compare(client):
     twin = client.post("/api/twin/create", json={}).json()
-    resp = client.post("/api/twin/compare", json={
-        "twin_id": twin["twin_id"],
-        "scenarios": [
-            {"name": "Status Quo", "interventions": []},
-            {"name": "Hire 2", "interventions": [
-                {"variable": "team_size", "action": "increase", "value": 2}
-            ]},
-        ],
-        "monte_carlo_runs": 50,
-    })
+    resp = client.post(
+        "/api/twin/compare",
+        json={
+            "twin_id": twin["twin_id"],
+            "scenarios": [
+                {"name": "Status Quo", "interventions": []},
+                {
+                    "name": "Hire 2",
+                    "interventions": [
+                        {"variable": "team_size", "action": "increase", "value": 2}
+                    ],
+                },
+            ],
+            "monte_carlo_runs": 50,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total_scenarios"] == 2
@@ -167,11 +196,15 @@ def test_compare(client):
 # CALIBRATION
 # =========================================
 
+
 def test_calibrate(client):
     twin = client.post("/api/twin/create", json={}).json()
-    resp = client.post("/api/twin/calibrate", json={
-        "twin_id": twin["twin_id"],
-    })
+    resp = client.post(
+        "/api/twin/calibrate",
+        json={
+            "twin_id": twin["twin_id"],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["overall_accuracy"] > 0
@@ -193,10 +226,14 @@ def test_get_calibration_not_found(client):
 # SCENARIO ANALYSIS
 # =========================================
 
+
 def test_analyze_scenario(client):
-    resp = client.post("/api/scenario/analyze", json={
-        "question": "What if we hire 2 more BD reps?",
-    })
+    resp = client.post(
+        "/api/scenario/analyze",
+        json={
+            "question": "What if we hire 2 more BD reps?",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["method"] == "simulation"
@@ -204,10 +241,13 @@ def test_analyze_scenario(client):
 
 
 def test_sensitivity(client):
-    resp = client.post("/api/scenario/sensitivity", json={
-        "variable": "team_size",
-        "range_pct": 30.0,
-    })
+    resp = client.post(
+        "/api/scenario/sensitivity",
+        json={
+            "variable": "team_size",
+            "range_pct": 30.0,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["variable"] == "team_size"
@@ -217,6 +257,7 @@ def test_sensitivity(client):
 # =========================================
 # PRESETS
 # =========================================
+
 
 def test_presets(client):
     resp = client.get("/api/scenario/presets")
@@ -235,11 +276,16 @@ def test_presets_filter(client):
 # SIMULATION HISTORY
 # =========================================
 
+
 def test_simulation_history(client):
     twin = client.post("/api/twin/create", json={}).json()
-    client.post("/api/twin/simulate", json={
-        "twin_id": twin["twin_id"], "monte_carlo_runs": 50,
-    })
+    client.post(
+        "/api/twin/simulate",
+        json={
+            "twin_id": twin["twin_id"],
+            "monte_carlo_runs": 50,
+        },
+    )
     resp = client.get("/api/simulation/history")
     assert resp.status_code == 200
     assert resp.json()["total"] >= 1
@@ -248,6 +294,7 @@ def test_simulation_history(client):
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_health(client):
     resp = client.get("/api/simulation/health")

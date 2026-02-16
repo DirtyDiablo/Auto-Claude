@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class SpanKind(str, Enum):
     SERVER = "server"
     CLIENT = "client"
@@ -40,6 +41,7 @@ class SpanStatus(str, Enum):
 @dataclass
 class SpanEvent:
     """An event within a span (e.g., exception, log)."""
+
     name: str
     timestamp: str
     attributes: Dict[str, Any] = field(default_factory=dict)
@@ -55,6 +57,7 @@ class SpanEvent:
 @dataclass
 class Span:
     """A single unit of work in a distributed trace."""
+
     trace_id: str
     span_id: str
     parent_span_id: Optional[str] = None
@@ -83,11 +86,13 @@ class Span:
             self.attributes["status.message"] = message
 
     def add_event(self, name: str, attributes: Optional[Dict[str, Any]] = None) -> None:
-        self.events.append(SpanEvent(
-            name=name,
-            timestamp=datetime.utcnow().isoformat(),
-            attributes=attributes or {},
-        ))
+        self.events.append(
+            SpanEvent(
+                name=name,
+                timestamp=datetime.utcnow().isoformat(),
+                attributes=attributes or {},
+            )
+        )
 
     def set_attribute(self, key: str, value: Any) -> None:
         self.attributes[key] = value
@@ -112,6 +117,7 @@ class Span:
 @dataclass
 class Trace:
     """A distributed trace — a tree of spans."""
+
     trace_id: str
     root_span_id: str = ""
     service_name: str = "bd-engine"
@@ -137,6 +143,7 @@ class Trace:
 @dataclass
 class SamplingConfig:
     """Trace sampling configuration."""
+
     strategy: str = "probabilistic"  # always | never | probabilistic | rate_limiting
     sample_rate: float = 1.0  # 0.0-1.0 for probabilistic
     rate_limit_per_sec: float = 100.0  # for rate_limiting strategy
@@ -152,6 +159,7 @@ class SamplingConfig:
 # =========================================
 # DISTRIBUTED TRACER
 # =========================================
+
 
 class DistributedTracer:
     """OpenTelemetry-compatible distributed tracing engine.
@@ -350,7 +358,9 @@ class DistributedTracer:
 
     # ----- export -----
 
-    def export_traces(self, trace_ids: Optional[List[str]] = None) -> List[Dict[str, Any]]:
+    def export_traces(
+        self, trace_ids: Optional[List[str]] = None
+    ) -> List[Dict[str, Any]]:
         """Export traces in OTLP-compatible format."""
         ids = trace_ids or list(self._traces.keys())
         result = []
@@ -358,10 +368,12 @@ class DistributedTracer:
             trace = self.get_trace(tid)
             if trace:
                 spans = self.get_trace_spans(tid)
-                result.append({
-                    "trace": trace.to_dict(),
-                    "spans": [s.to_dict() for s in spans],
-                })
+                result.append(
+                    {
+                        "trace": trace.to_dict(),
+                        "spans": [s.to_dict() for s in spans],
+                    }
+                )
                 if tid not in self._exported_traces:
                     self._exported_traces.append(tid)
         return result

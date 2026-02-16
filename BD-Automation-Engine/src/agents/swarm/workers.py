@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class WorkerType(str, Enum):
     RESEARCH = "research"
     CONTACT_DISCOVERY = "contact_discovery"
@@ -40,9 +41,11 @@ class WorkerStatus(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class WorkerCapability:
     """Describes what a worker type can do."""
+
     worker_type: str
     description: str
     tools: List[str] = field(default_factory=list)
@@ -55,6 +58,7 @@ class WorkerCapability:
 @dataclass
 class WorkerStats:
     """Performance statistics for a worker type."""
+
     worker_type: str
     total_executions: int = 0
     successful: int = 0
@@ -67,6 +71,7 @@ class WorkerStats:
 @dataclass
 class WorkerHandle:
     """Handle to a running worker instance."""
+
     worker_id: str
     worker_type: str
     status: str = WorkerStatus.IDLE.value
@@ -82,6 +87,7 @@ class WorkerHandle:
 @dataclass
 class SubTask:
     """A sub-task assigned to a worker."""
+
     id: str = ""
     description: str = ""
     worker_type: str = ""
@@ -95,6 +101,7 @@ class SubTask:
 # =========================================
 # WORKER AGENT
 # =========================================
+
 
 class WorkerAgent:
     """Base worker agent that executes sub-tasks."""
@@ -126,51 +133,67 @@ class WorkerAgent:
         }
 
         if self.worker_type == WorkerType.RESEARCH.value:
-            base.update({
-                "program_name": subtask.parameters.get("program", ""),
-                "findings": [],
-                "contracts": [],
-                "competitors": [],
-            })
+            base.update(
+                {
+                    "program_name": subtask.parameters.get("program", ""),
+                    "findings": [],
+                    "contracts": [],
+                    "competitors": [],
+                }
+            )
         elif self.worker_type == WorkerType.CONTACT_DISCOVERY.value:
-            base.update({
-                "contacts_found": 0,
-                "contacts": [],
-                "sources_checked": self.capability.tools,
-            })
+            base.update(
+                {
+                    "contacts_found": 0,
+                    "contacts": [],
+                    "sources_checked": self.capability.tools,
+                }
+            )
         elif self.worker_type == WorkerType.JOB_INTEL.value:
-            base.update({
-                "jobs_found": 0,
-                "jobs": [],
-                "trends": [],
-            })
+            base.update(
+                {
+                    "jobs_found": 0,
+                    "jobs": [],
+                    "trends": [],
+                }
+            )
         elif self.worker_type == WorkerType.OUTREACH_CRAFTER.value:
-            base.update({
-                "messages_crafted": 0,
-                "outreach": [],
-            })
+            base.update(
+                {
+                    "messages_crafted": 0,
+                    "outreach": [],
+                }
+            )
         elif self.worker_type == WorkerType.DOCUMENT_GENERATOR.value:
-            base.update({
-                "documents_generated": 0,
-                "documents": [],
-            })
+            base.update(
+                {
+                    "documents_generated": 0,
+                    "documents": [],
+                }
+            )
         elif self.worker_type == WorkerType.ANALYTICS.value:
-            base.update({
-                "metrics": {},
-                "trends": [],
-                "insights": [],
-            })
+            base.update(
+                {
+                    "metrics": {},
+                    "trends": [],
+                    "insights": [],
+                }
+            )
         elif self.worker_type == WorkerType.PAST_PERFORMANCE.value:
-            base.update({
-                "matches_found": 0,
-                "past_performance": [],
-            })
+            base.update(
+                {
+                    "matches_found": 0,
+                    "past_performance": [],
+                }
+            )
         elif self.worker_type == WorkerType.KNOWLEDGE.value:
-            base.update({
-                "facts_found": 0,
-                "entities": [],
-                "relationships": [],
-            })
+            base.update(
+                {
+                    "facts_found": 0,
+                    "entities": [],
+                    "relationships": [],
+                }
+            )
 
         return base
 
@@ -188,7 +211,14 @@ DEFAULT_CAPABILITIES: Dict[str, WorkerCapability] = {
         output_fields=["program_name", "findings", "contracts", "competitors"],
         avg_tokens=2000,
         avg_time_seconds=30.0,
-        keywords=["research", "program", "contract", "company", "investigation", "analysis"],
+        keywords=[
+            "research",
+            "program",
+            "contract",
+            "company",
+            "investigation",
+            "analysis",
+        ],
     ),
     WorkerType.CONTACT_DISCOVERY.value: WorkerCapability(
         worker_type=WorkerType.CONTACT_DISCOVERY.value,
@@ -224,7 +254,14 @@ DEFAULT_CAPABILITIES: Dict[str, WorkerCapability] = {
         output_fields=["documents_generated", "documents"],
         avg_tokens=5000,
         avg_time_seconds=90.0,
-        keywords=["document", "report", "playbook", "call sheet", "briefing", "generate"],
+        keywords=[
+            "document",
+            "report",
+            "playbook",
+            "call sheet",
+            "briefing",
+            "generate",
+        ],
     ),
     WorkerType.ANALYTICS.value: WorkerCapability(
         worker_type=WorkerType.ANALYTICS.value,
@@ -242,12 +279,23 @@ DEFAULT_CAPABILITIES: Dict[str, WorkerCapability] = {
         output_fields=["matches_found", "past_performance"],
         avg_tokens=2000,
         avg_time_seconds=25.0,
-        keywords=["past performance", "capability", "experience", "win", "contract history"],
+        keywords=[
+            "past performance",
+            "capability",
+            "experience",
+            "win",
+            "contract history",
+        ],
     ),
     WorkerType.KNOWLEDGE.value: WorkerCapability(
         worker_type=WorkerType.KNOWLEDGE.value,
         description="Knowledge graph queries, entity resolution, fact compilation",
-        tools=["temporal_query", "graph_traverse", "entity_resolution", "knowledge_compiler"],
+        tools=[
+            "temporal_query",
+            "graph_traverse",
+            "entity_resolution",
+            "knowledge_compiler",
+        ],
         output_fields=["facts_found", "entities", "relationships"],
         avg_tokens=1500,
         avg_time_seconds=20.0,
@@ -321,8 +369,12 @@ class WorkerRegistry:
         return dict(self._stats)
 
     def record_execution(
-        self, worker_type: str, success: bool,
-        latency_seconds: float, tokens_used: int, quality_score: float = 0.8,
+        self,
+        worker_type: str,
+        success: bool,
+        latency_seconds: float,
+        tokens_used: int,
+        quality_score: float = 0.8,
     ) -> None:
         """Record a worker execution for statistics."""
         stats = self._stats.get(worker_type)
@@ -341,9 +393,15 @@ class WorkerRegistry:
             stats.avg_tokens_used = tokens_used
             stats.avg_quality_score = quality_score
         else:
-            stats.avg_latency_seconds = (stats.avg_latency_seconds * n + latency_seconds) / (n + 1)
-            stats.avg_tokens_used = int((stats.avg_tokens_used * n + tokens_used) / (n + 1))
-            stats.avg_quality_score = (stats.avg_quality_score * n + quality_score) / (n + 1)
+            stats.avg_latency_seconds = (
+                stats.avg_latency_seconds * n + latency_seconds
+            ) / (n + 1)
+            stats.avg_tokens_used = int(
+                (stats.avg_tokens_used * n + tokens_used) / (n + 1)
+            )
+            stats.avg_quality_score = (stats.avg_quality_score * n + quality_score) / (
+                n + 1
+            )
 
 
 # =========================================

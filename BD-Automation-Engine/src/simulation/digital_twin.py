@@ -25,9 +25,11 @@ random.seed(42)
 # DATA MODELS
 # =========================================
 
+
 @dataclass
 class Intervention:
     """A change to apply to the twin before simulation."""
+
     variable: str
     action: str  # set | increase | decrease | multiply
     value: float
@@ -45,6 +47,7 @@ class Intervention:
 @dataclass
 class DigitalTwinState:
     """Snapshot of the BD pipeline state for simulation."""
+
     twin_id: str
     snapshot_date: str
     # Pipeline state
@@ -100,6 +103,7 @@ class DigitalTwinState:
 @dataclass
 class SimulationResult:
     """Result of a digital twin simulation."""
+
     sim_id: str
     twin_id: str
     days_simulated: int
@@ -131,11 +135,20 @@ class SimulationResult:
             "monte_carlo_runs": self.monte_carlo_runs,
             "interventions": [i.to_dict() for i in self.interventions],
             "expected_pipeline_value_m": round(self.expected_pipeline_value_m, 2),
-            "pipeline_ci": [round(self.pipeline_ci_lower, 2), round(self.pipeline_ci_upper, 2)],
+            "pipeline_ci": [
+                round(self.pipeline_ci_lower, 2),
+                round(self.pipeline_ci_upper, 2),
+            ],
             "expected_placements": round(self.expected_placements, 1),
-            "placements_ci": [round(self.placements_ci_lower, 1), round(self.placements_ci_upper, 1)],
+            "placements_ci": [
+                round(self.placements_ci_lower, 1),
+                round(self.placements_ci_upper, 1),
+            ],
             "expected_revenue_m": round(self.expected_revenue_m, 2),
-            "revenue_ci": [round(self.revenue_ci_lower, 2), round(self.revenue_ci_upper, 2)],
+            "revenue_ci": [
+                round(self.revenue_ci_lower, 2),
+                round(self.revenue_ci_upper, 2),
+            ],
             "convergence_score": round(self.convergence_score, 3),
             "created_at": self.created_at,
         }
@@ -144,6 +157,7 @@ class SimulationResult:
 @dataclass
 class ScenarioComparison:
     """Side-by-side comparison of multiple simulation scenarios."""
+
     comparison_id: str
     scenarios: List[Dict[str, Any]] = field(default_factory=list)
     winner: Optional[str] = None
@@ -168,6 +182,7 @@ class ScenarioComparison:
 @dataclass
 class CalibrationReport:
     """Report comparing twin predictions against actuals."""
+
     report_id: str
     twin_id: str
     metric_errors: Dict[str, float] = field(default_factory=dict)
@@ -193,6 +208,7 @@ class CalibrationReport:
 # =========================================
 # BD DIGITAL TWIN
 # =========================================
+
 
 class BDDigitalTwin:
     """A complete simulated copy of the BD pipeline.
@@ -283,7 +299,9 @@ class BDDigitalTwin:
         return result
 
     def _apply_interventions(
-        self, twin: DigitalTwinState, interventions: List[Intervention],
+        self,
+        twin: DigitalTwinState,
+        interventions: List[Intervention],
     ) -> Dict[str, float]:
         """Apply interventions to a copy of the twin state."""
         state = {
@@ -313,7 +331,9 @@ class BDDigitalTwin:
 
         return state
 
-    def _simulate_one_run(self, state: Dict[str, float], days: int) -> Tuple[float, float, float]:
+    def _simulate_one_run(
+        self, state: Dict[str, float], days: int
+    ) -> Tuple[float, float, float]:
         """Simulate one Monte Carlo run of the pipeline."""
         team = state["team_size"]
         calls_per_rep = state["avg_calls_per_rep"]
@@ -378,15 +398,20 @@ class BDDigitalTwin:
                 for i in raw_interventions
             ]
             sim = self.simulate(twin_id, days, interventions, monte_carlo_runs)
-            results.append({
-                "name": name,
-                "sim_id": sim.sim_id,
-                "expected_pipeline_m": round(sim.expected_pipeline_value_m, 2),
-                "expected_placements": round(sim.expected_placements, 1),
-                "expected_revenue_m": round(sim.expected_revenue_m, 2),
-                "pipeline_ci": [round(sim.pipeline_ci_lower, 2), round(sim.pipeline_ci_upper, 2)],
-                "interventions": [i.to_dict() for i in interventions],
-            })
+            results.append(
+                {
+                    "name": name,
+                    "sim_id": sim.sim_id,
+                    "expected_pipeline_m": round(sim.expected_pipeline_value_m, 2),
+                    "expected_placements": round(sim.expected_placements, 1),
+                    "expected_revenue_m": round(sim.expected_revenue_m, 2),
+                    "pipeline_ci": [
+                        round(sim.pipeline_ci_lower, 2),
+                        round(sim.pipeline_ci_upper, 2),
+                    ],
+                    "interventions": [i.to_dict() for i in interventions],
+                }
+            )
 
         # Determine winner by expected revenue
         if results:
@@ -490,7 +515,9 @@ class BDDigitalTwin:
         }
 
     def get_simulation_history(self, limit: int = 50) -> List[Dict[str, Any]]:
-        sims = sorted(self._simulations.values(), key=lambda s: s.created_at, reverse=True)
+        sims = sorted(
+            self._simulations.values(), key=lambda s: s.created_at, reverse=True
+        )
         return [s.to_dict() for s in sims[:limit]]
 
 

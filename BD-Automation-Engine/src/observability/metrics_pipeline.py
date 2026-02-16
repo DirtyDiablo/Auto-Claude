@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class MetricType(str, Enum):
     COUNTER = "counter"
     GAUGE = "gauge"
@@ -32,6 +33,7 @@ class MetricType(str, Enum):
 @dataclass
 class MetricPoint:
     """A single metric data point."""
+
     timestamp: float
     value: float
     labels: Dict[str, str] = field(default_factory=dict)
@@ -40,6 +42,7 @@ class MetricPoint:
 @dataclass
 class Metric:
     """A named metric with type and data points."""
+
     name: str
     metric_type: MetricType
     description: str = ""
@@ -124,6 +127,7 @@ class Metric:
 @dataclass
 class Alert:
     """A metric alert when a threshold is breached."""
+
     alert_id: str
     metric_name: str
     condition: str  # gt | lt | gte | lte
@@ -153,6 +157,7 @@ class Alert:
 @dataclass
 class AlertRule:
     """Rule for triggering metric alerts."""
+
     rule_id: str
     metric_name: str
     condition: str  # gt | lt | gte | lte
@@ -178,24 +183,67 @@ class AlertRule:
 # =========================================
 
 _BUILTIN_METRICS = [
-    ("api_request_duration_ms", MetricType.HISTOGRAM, "API request latency", "ms",
-     [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000]),
+    (
+        "api_request_duration_ms",
+        MetricType.HISTOGRAM,
+        "API request latency",
+        "ms",
+        [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
+    ),
     ("api_requests_total", MetricType.COUNTER, "Total API requests", "requests", []),
     ("api_errors_total", MetricType.COUNTER, "Total API errors", "errors", []),
-    ("search_latency_ms", MetricType.HISTOGRAM, "Search query latency", "ms",
-     [10, 25, 50, 100, 250, 500, 1000]),
-    ("search_results_count", MetricType.HISTOGRAM, "Search result count", "results",
-     [0, 1, 5, 10, 25, 50, 100]),
+    (
+        "search_latency_ms",
+        MetricType.HISTOGRAM,
+        "Search query latency",
+        "ms",
+        [10, 25, 50, 100, 250, 500, 1000],
+    ),
+    (
+        "search_results_count",
+        MetricType.HISTOGRAM,
+        "Search result count",
+        "results",
+        [0, 1, 5, 10, 25, 50, 100],
+    ),
     ("pipeline_jobs_active", MetricType.GAUGE, "Active pipeline jobs", "jobs", []),
-    ("pipeline_throughput", MetricType.COUNTER, "Pipeline records processed", "records", []),
-    ("agent_invocations_total", MetricType.COUNTER, "Total agent invocations", "invocations", []),
-    ("agent_duration_ms", MetricType.HISTOGRAM, "Agent execution time", "ms",
-     [100, 500, 1000, 5000, 10000, 30000]),
+    (
+        "pipeline_throughput",
+        MetricType.COUNTER,
+        "Pipeline records processed",
+        "records",
+        [],
+    ),
+    (
+        "agent_invocations_total",
+        MetricType.COUNTER,
+        "Total agent invocations",
+        "invocations",
+        [],
+    ),
+    (
+        "agent_duration_ms",
+        MetricType.HISTOGRAM,
+        "Agent execution time",
+        "ms",
+        [100, 500, 1000, 5000, 10000, 30000],
+    ),
     ("contacts_indexed", MetricType.GAUGE, "Contacts in vector store", "contacts", []),
-    ("qdrant_query_ms", MetricType.HISTOGRAM, "Qdrant query latency", "ms",
-     [1, 5, 10, 25, 50, 100, 250]),
+    (
+        "qdrant_query_ms",
+        MetricType.HISTOGRAM,
+        "Qdrant query latency",
+        "ms",
+        [1, 5, 10, 25, 50, 100, 250],
+    ),
     ("cache_hit_ratio", MetricType.GAUGE, "Cache hit ratio", "ratio", []),
-    ("encryption_operations_total", MetricType.COUNTER, "Encryption operations", "ops", []),
+    (
+        "encryption_operations_total",
+        MetricType.COUNTER,
+        "Encryption operations",
+        "ops",
+        [],
+    ),
     ("audit_events_total", MetricType.COUNTER, "Audit events logged", "events", []),
 ]
 
@@ -203,6 +251,7 @@ _BUILTIN_METRICS = [
 # =========================================
 # METRICS PIPELINE
 # =========================================
+
 
 class MetricsPipeline:
     """Prometheus-compatible metrics collection and alerting.
@@ -226,12 +275,15 @@ class MetricsPipeline:
                 unit=unit,
                 bucket_boundaries=buckets,
             )
-        logger.info("MetricsPipeline initialized with %d built-in metrics",
-                     len(self._metrics))
+        logger.info(
+            "MetricsPipeline initialized with %d built-in metrics", len(self._metrics)
+        )
 
     # ----- metric operations -----
 
-    def record(self, metric_name: str, value: float, labels: Optional[Dict[str, str]] = None) -> None:
+    def record(
+        self, metric_name: str, value: float, labels: Optional[Dict[str, str]] = None
+    ) -> None:
         """Record a value for a metric."""
         metric = self._metrics.get(metric_name)
         if not metric:

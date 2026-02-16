@@ -17,6 +17,7 @@ from contextlib import asynccontextmanager
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 try:
@@ -26,6 +27,7 @@ try:
     from pydantic import BaseModel, Field
     import uvicorn
     import asyncio
+
     FASTAPI_AVAILABLE = True
 except ImportError:
     FASTAPI_AVAILABLE = False
@@ -55,18 +57,25 @@ from Engine8_Knowledge.agents.crewai_orchestrator import get_orchestrator
 
 # Configure structlog early so imports can use logger
 try:
-    from config.logging_config import setup_logging, get_logger as _get_structlog, generate_request_id, request_id_var
+    from config.logging_config import (
+        setup_logging,
+        get_logger as _get_structlog,
+        generate_request_id,
+        request_id_var,
+    )
+
     setup_logging(log_level="INFO")
     logger = _get_structlog("BDKnowledgeAPI")
     STRUCTLOG_AVAILABLE = True
 except Exception:
     logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger('BDKnowledgeAPI')
+    logger = logging.getLogger("BDKnowledgeAPI")
     STRUCTLOG_AVAILABLE = False
 
 # Import new module routers
 try:
     from Engine8_Knowledge.processors.routes import router as document_router
+
     DOCUMENT_PROCESSOR_AVAILABLE = True
 except ImportError as e:
     DOCUMENT_PROCESSOR_AVAILABLE = False
@@ -75,6 +84,7 @@ except ImportError as e:
 try:
     from Engine8_Knowledge.retrieval.routes import router as pageindex_router
     from Engine8_Knowledge.retrieval.ultra_rag_routes import router as ultrarag_router
+
     RETRIEVAL_ROUTERS_AVAILABLE = True
 except ImportError as e:
     RETRIEVAL_ROUTERS_AVAILABLE = False
@@ -82,6 +92,7 @@ except ImportError as e:
 
 try:
     from Engine8_Knowledge.bd_lightrag.routes import router as lightrag_router
+
     LIGHTRAG_AVAILABLE = True
 except ImportError as e:
     LIGHTRAG_AVAILABLE = False
@@ -89,6 +100,7 @@ except ImportError as e:
 
 try:
     from streaming.streaming_api import router as streaming_router
+
     STREAMING_AVAILABLE = True
 except ImportError as e:
     STREAMING_AVAILABLE = False
@@ -104,6 +116,7 @@ try:
     from dify_integration.dify_qdrant_bridge import create_dify_knowledge_router
     from dify_integration.dify_crewai_bridge import create_dify_agents_router
     from dify_integration.dify_n8n_bridge import create_dify_n8n_router
+
     DIFY_INTEGRATION_AVAILABLE = True
 except ImportError as e:
     DIFY_INTEGRATION_AVAILABLE = False
@@ -111,6 +124,7 @@ except ImportError as e:
 
 try:
     from Engine8_Knowledge.ragflow.routes import router as ragflow_router
+
     RAGFLOW_AVAILABLE = True
 except ImportError as e:
     RAGFLOW_AVAILABLE = False
@@ -119,6 +133,7 @@ except ImportError as e:
 # Import unified API endpoints
 try:
     from api.unified_endpoints import router as unified_router
+
     UNIFIED_API_AVAILABLE = True
 except ImportError as e:
     UNIFIED_API_AVAILABLE = False
@@ -130,18 +145,21 @@ except ImportError as e:
 # CONFIGURATION
 # =========================================
 
-API_HOST = os.getenv('KNOWLEDGE_API_HOST', '127.0.0.1')
-API_PORT = int(os.getenv('KNOWLEDGE_API_PORT', '8100'))
+API_HOST = os.getenv("KNOWLEDGE_API_HOST", "127.0.0.1")
+API_PORT = int(os.getenv("KNOWLEDGE_API_PORT", "8100"))
 
 # =========================================
 # PYDANTIC MODELS
 # =========================================
 
+
 class SearchRequest(BaseModel):
     query: str = Field(..., description="Search query")
     collection: Optional[str] = Field(None, description="Collection to search")
     limit: int = Field(10, ge=1, le=50, description="Max results")
-    score_threshold: float = Field(0.3, ge=0.0, le=1.0, description="Min relevance score")
+    score_threshold: float = Field(
+        0.3, ge=0.0, le=1.0, description="Min relevance score"
+    )
     filters: Optional[Dict[str, Any]] = Field(None, description="Filter conditions")
     rerank: bool = Field(False, description="Apply cross-encoder reranking")
 
@@ -282,7 +300,7 @@ async def lifespan(app: FastAPI):
 
     # Initialize existing components
     # Use Qdrant server if URL is set, otherwise use local storage
-    qdrant_url = os.getenv('QDRANT_URL')
+    qdrant_url = os.getenv("QDRANT_URL")
     store = BDKnowledgeStore(url=qdrant_url)
     store.initialize_collections()
     rag_engine = BDRAGEngine(vector_store=store)
@@ -317,7 +335,10 @@ async def lifespan(app: FastAPI):
     staleness_task = None
     try:
         from Engine8_Knowledge.api_routers.phase8a_pipeline import staleness_auto_alerts
-        staleness_task = asyncio.create_task(staleness_auto_alerts(interval_seconds=3600))
+
+        staleness_task = asyncio.create_task(
+            staleness_auto_alerts(interval_seconds=3600)
+        )
         logger.info("Background staleness auto-alerts started (1h interval)")
     except ImportError:
         logger.warning("Phase 8A staleness checker not available")
@@ -339,7 +360,7 @@ app = FastAPI(
     title="BD Intelligence Hub API",
     description="Comprehensive API for BD Intelligence operations: search, memory, graph, agents, and more",
     version="2.0.0",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 app.add_middleware(
@@ -406,13 +427,17 @@ if UNIFIED_API_AVAILABLE:
 
 try:
     from Engine8_Knowledge.api_routers.hybrid_endpoints import router as hybrid_router
+
     app.include_router(hybrid_router)
-    logger.info("Hybrid search routes enabled: /search/hybrid/v2, /collections/*, /sync/*, /index/bullhorn-notes")
+    logger.info(
+        "Hybrid search routes enabled: /search/hybrid/v2, /collections/*, /sync/*, /index/bullhorn-notes"
+    )
 except ImportError as e:
     logger.warning(f"Hybrid endpoints not available: {e}")
 
 try:
     from Engine8_Knowledge.agents.api_routes import router as crewai_router
+
     app.include_router(crewai_router)
     logger.info("CrewAI agent routes enabled: /agents/*")
 except ImportError as e:
@@ -420,27 +445,39 @@ except ImportError as e:
 
 try:
     from Engine8_Knowledge.api_routers.phase7_endpoints import router as phase7_router
+
     app.include_router(phase7_router)
-    logger.info("Phase 7 routes enabled: /data/freshness, /notifications, /webhooks/*, /ai/memories, /ai/costs")
+    logger.info(
+        "Phase 7 routes enabled: /data/freshness, /notifications, /webhooks/*, /ai/memories, /ai/costs"
+    )
 except ImportError as e:
     logger.warning(f"Phase 7 endpoints not available: {e}")
 
 try:
     from Engine8_Knowledge.api_routers.phase8a_pipeline import router as phase8a_router
+
     app.include_router(phase8a_router)
-    logger.info("Phase 8A routes enabled: /pipeline/run, /pipeline/status, /pipeline/history")
+    logger.info(
+        "Phase 8A routes enabled: /pipeline/run, /pipeline/status, /pipeline/history"
+    )
 except ImportError as e:
     logger.warning(f"Phase 8A pipeline routes not available: {e}")
 
 try:
-    from Engine8_Knowledge.api_routers.phase9a_competitive import router as phase9a_router
+    from Engine8_Knowledge.api_routers.phase9a_competitive import (
+        router as phase9a_router,
+    )
+
     app.include_router(phase9a_router)
-    logger.info("Phase 9A routes enabled: /contracts/awards, /contracts/expiring, /competitive/summary")
+    logger.info(
+        "Phase 9A routes enabled: /contracts/awards, /contracts/expiring, /competitive/summary"
+    )
 except ImportError as e:
     logger.warning(f"Phase 9A competitive routes not available: {e}")
 
 try:
     from Engine8_Knowledge.api_routers.phase10a_reports import router as phase10a_router
+
     app.include_router(phase10a_router)
     logger.info("Phase 10A routes enabled: /reports/weekly")
 except ImportError as e:
@@ -448,34 +485,47 @@ except ImportError as e:
 
 try:
     from Engine8_Knowledge.ml.routes import router as ml_router
+
     app.include_router(ml_router)
-    logger.info("Phase 13A ML routes enabled: /ml/predict-response, /ml/hiring-signals, /ml/model-status")
+    logger.info(
+        "Phase 13A ML routes enabled: /ml/predict-response, /ml/hiring-signals, /ml/model-status"
+    )
 except ImportError as e:
     logger.warning(f"Phase 13A ML routes not available: {e}")
 
 try:
     from Engine8_Knowledge.integrations.routes import router as integrations_router
+
     app.include_router(integrations_router)
-    logger.info("Phase 14A integration routes enabled: /integrations/slack/*, /integrations/crm/*")
+    logger.info(
+        "Phase 14A integration routes enabled: /integrations/slack/*, /integrations/crm/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 14A integration routes not available: {e}")
 
 try:
     from Engine8_Knowledge.agents.autonomous.routes import router as autonomous_router
+
     app.include_router(autonomous_router)
     logger.info("Phase 15A autonomous agent routes enabled: /agents/autonomous/*")
 except ImportError as e:
     logger.warning(f"Phase 15A autonomous agent routes not available: {e}")
 
 try:
-    from Engine8_Knowledge.graph.analytics_routes import router as graph_analytics_router
+    from Engine8_Knowledge.graph.analytics_routes import (
+        router as graph_analytics_router,
+    )
+
     app.include_router(graph_analytics_router)
-    logger.info("Phase 16A graph analytics routes enabled: /graph/influence/*, /graph/communities/*, /graph/rag-query")
+    logger.info(
+        "Phase 16A graph analytics routes enabled: /graph/influence/*, /graph/communities/*, /graph/rag-query"
+    )
 except ImportError as e:
     logger.warning(f"Phase 16A graph analytics routes not available: {e}")
 
 try:
     from Engine8_Knowledge.realtime.routes import router as realtime_router
+
     app.include_router(realtime_router)
     logger.info("Phase 17A realtime routes enabled: /ws/dashboard, /sse/*, /realtime/*")
 except ImportError as e:
@@ -483,49 +533,68 @@ except ImportError as e:
 
 try:
     from Engine8_Knowledge.embeddings.routes import router as embeddings_router
+
     app.include_router(embeddings_router)
-    logger.info("Phase 18A embeddings routes enabled: /embeddings/embed, /embeddings/benchmark, /embeddings/status")
+    logger.info(
+        "Phase 18A embeddings routes enabled: /embeddings/embed, /embeddings/benchmark, /embeddings/status"
+    )
 except ImportError as e:
     logger.warning(f"Phase 18A embeddings routes not available: {e}")
 
 try:
     from Engine8_Knowledge.automation.routes import router as automation_router
+
     app.include_router(automation_router)
-    logger.info("Phase 19A automation routes enabled: /automation/schedule, /automation/workflows/*, /automation/claude/*")
+    logger.info(
+        "Phase 19A automation routes enabled: /automation/schedule, /automation/workflows/*, /automation/claude/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 19A automation routes not available: {e}")
 
 try:
     from Engine8_Knowledge.platform.stats_api import router as platform_router
+
     app.include_router(platform_router)
-    logger.info("Phase 20A platform routes enabled: /platform/stats, /platform/services")
+    logger.info(
+        "Phase 20A platform routes enabled: /platform/stats, /platform/services"
+    )
 except ImportError as e:
     logger.warning(f"Phase 20A platform routes not available: {e}")
 
 try:
     from Engine8_Knowledge.graph.neo4j_routes import router as neo4j_router
+
     app.include_router(neo4j_router)
-    logger.info("Phase 21A Neo4j graph routes enabled: /neo4j/health, /neo4j/stats, /neo4j/ingest/*, /neo4j/contacts/*, /neo4j/path/*")
+    logger.info(
+        "Phase 21A Neo4j graph routes enabled: /neo4j/health, /neo4j/stats, /neo4j/ingest/*, /neo4j/contacts/*, /neo4j/path/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 21A Neo4j graph routes not available: {e}")
 
 try:
     from Engine8_Knowledge.search.search_routes import router as search_v2_router
+
     app.include_router(search_v2_router)
-    logger.info("Phase 22A search routes enabled: /search/v2, /search/v2/hybrid, /search/v2/graph, /search/v2/graphrag, /search/v2/benchmark")
+    logger.info(
+        "Phase 22A search routes enabled: /search/v2, /search/v2/hybrid, /search/v2/graph, /search/v2/graphrag, /search/v2/benchmark"
+    )
 except ImportError as e:
     logger.warning(f"Phase 22A search routes not available: {e}")
 
 try:
     from Engine8_Knowledge.workflows.workflow_routes import router as workflow_v2_router
+
     app.include_router(workflow_v2_router)
-    logger.info("Phase 23A workflow routes enabled: /workflows/start, /workflows/active, /workflows/approvals, /workflows/stats")
+    logger.info(
+        "Phase 23A workflow routes enabled: /workflows/start, /workflows/active, /workflows/approvals, /workflows/stats"
+    )
 except ImportError as e:
     logger.warning(f"Phase 23A workflow routes not available: {e}")
 
 # Phase 24A: Scrape API v2 (Crawl4AI, SAM.gov, federal docs)
 try:
     from Engine8_Knowledge.api_routers.scrape_api_v2 import router as scrape_v2_router
+
     app.include_router(scrape_v2_router)
     logger.info("Phase 24A scrape routes enabled: /scrape/*, /sam/*, /federal-docs/*")
 except ImportError as e:
@@ -534,14 +603,18 @@ except ImportError as e:
 # Phase 25A: Memory API (Mem0, 5-layer memory, lifecycle)
 try:
     from Engine8_Knowledge.api_routers.memory_api import router as memory_v2_router
+
     app.include_router(memory_v2_router)
-    logger.info("Phase 25A memory routes enabled: /memory/add, /memory/search, /memory/lifecycle/*")
+    logger.info(
+        "Phase 25A memory routes enabled: /memory/add, /memory/search, /memory/lifecycle/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 25A memory routes not available: {e}")
 
 # Phase 26A: MCP Server API (FastMCP tools, config generator)
 try:
     from Engine8_Knowledge.api_routers.mcp_api import router as mcp_router
+
     app.include_router(mcp_router)
     logger.info("Phase 26A MCP routes enabled: /mcp/health, /mcp/tools, /mcp/config")
 except ImportError as e:
@@ -550,46 +623,62 @@ except ImportError as e:
 # Phase 27A: Org Chart API (generation, inference, export)
 try:
     from Engine8_Knowledge.api_routers.org_chart_api import router as org_chart_router
+
     app.include_router(org_chart_router)
-    logger.info("Phase 27A org chart routes enabled: /org-chart/generate, /org-chart/export/*")
+    logger.info(
+        "Phase 27A org chart routes enabled: /org-chart/generate, /org-chart/export/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 27A org chart routes not available: {e}")
 
 # Phase 28A: ML API v2 (Defense NER, topic modeling, placement prediction, embeddings)
 try:
     from Engine8_Knowledge.api_routers.ml_api import router as ml_v2_router
+
     app.include_router(ml_v2_router)
-    logger.info("Phase 28A ML routes enabled: /ml/ner/*, /ml/topics/*, /ml/predict/*, /ml/embeddings/*")
+    logger.info(
+        "Phase 28A ML routes enabled: /ml/ner/*, /ml/topics/*, /ml/predict/*, /ml/embeddings/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 28A ML routes not available: {e}")
 
 # Phase 29A: Optimizer API (self-assessment, auto-optimizer, regression detector, retrain)
 try:
     from Engine8_Knowledge.api_routers.optimizer_api import router as optimizer_router
+
     app.include_router(optimizer_router)
-    logger.info("Phase 29A optimizer routes enabled: /optimizer/assess, /optimizer/recommendations, /optimizer/retrain/*")
+    logger.info(
+        "Phase 29A optimizer routes enabled: /optimizer/assess, /optimizer/recommendations, /optimizer/retrain/*"
+    )
 except ImportError as e:
     logger.warning(f"Phase 29A optimizer routes not available: {e}")
 
 # Phase 30A: Monitoring API (health probes, resource usage, Prometheus metrics)
 try:
     from Engine8_Knowledge.api_routers.monitoring_api import router as monitoring_router
+
     app.include_router(monitoring_router)
-    logger.info("Phase 30A monitoring routes enabled: /monitoring/health, /monitoring/ready, /monitoring/live, /metrics")
+    logger.info(
+        "Phase 30A monitoring routes enabled: /monitoring/health, /monitoring/ready, /monitoring/live, /metrics"
+    )
 except ImportError as e:
     logger.warning(f"Phase 30A monitoring routes not available: {e}")
 
 # Phase 31A: Real-Time Event Streaming (event bus, processors, WebSocket, orchestrator)
 try:
     from src.api.streaming_api import include_streaming_v2_router
+
     include_streaming_v2_router(app)
-    logger.info("Phase 31A streaming routes enabled: /streaming/* (14 REST + 4 WebSocket)")
+    logger.info(
+        "Phase 31A streaming routes enabled: /streaming/* (14 REST + 4 WebSocket)"
+    )
 except ImportError as e:
     logger.warning(f"Phase 31A streaming routes not available: {e}")
 
 # Phase 32A: Predictive Intelligence (win probability, opportunity scorer, forecaster, budget)
 try:
     from src.api.predictive_api import include_predictive_router
+
     include_predictive_router(app)
     logger.info("Phase 32A predictive routes enabled: /predict/* (14 endpoints)")
 except ImportError as e:
@@ -598,6 +687,7 @@ except ImportError as e:
 # Phase 33A: Natural Language Query Engine (conversational BI, autocomplete)
 try:
     from src.api.nlq_api import include_nlq_router
+
     include_nlq_router(app)
     logger.info("Phase 33A NLQ routes enabled: /nlq/* (9 endpoints)")
 except ImportError as e:
@@ -606,14 +696,18 @@ except ImportError as e:
 # Phase 34A: Relationship Intelligence (strength scoring, PageRank, path routing, network analysis)
 try:
     from src.api.relationship_api import include_relationship_router
+
     include_relationship_router(app)
-    logger.info("Phase 34A relationship routes enabled: /relationships/* (14 endpoints)")
+    logger.info(
+        "Phase 34A relationship routes enabled: /relationships/* (14 endpoints)"
+    )
 except ImportError as e:
     logger.warning(f"Phase 34A relationship routes not available: {e}")
 
 # Phase 35A: Proposal & Capture Automation (capability statements, past performance, compliance, pricing)
 try:
     from src.api.proposal_api import include_proposal_router
+
     include_proposal_router(app)
     logger.info("Phase 35A proposal routes enabled: /proposals/* (10 endpoints)")
 except ImportError as e:
@@ -622,6 +716,7 @@ except ImportError as e:
 # Phase 36A: Revenue Intelligence (revenue tracking, deal lifecycle, ROI, executive analytics)
 try:
     from src.api.revenue_api import include_revenue_router
+
     include_revenue_router(app)
     logger.info("Phase 36A revenue routes enabled: /revenue/* (16 endpoints)")
 except ImportError as e:
@@ -630,6 +725,7 @@ except ImportError as e:
 # Phase 37A: Multi-Tenant SaaS + RBAC (tenant management, auth, RBAC, middleware)
 try:
     from src.api.tenant_api import include_tenant_router
+
     include_tenant_router(app)
     logger.info("Phase 37A tenant routes enabled: /tenants/* + /auth/* (21 endpoints)")
 except ImportError as e:
@@ -638,6 +734,7 @@ except ImportError as e:
 # Phase 38A: Autonomous Data Quality Engine (quality monitoring, self-healing, lineage, rules DSL)
 try:
     from src.api.data_quality_api import include_data_quality_router
+
     include_data_quality_router(app)
     logger.info("Phase 38A data quality routes enabled: /data-quality/* (17 endpoints)")
 except ImportError as e:
@@ -646,6 +743,7 @@ except ImportError as e:
 # Phase 39A: Temporal Knowledge Graph + Entity Resolution + Knowledge Compiler
 try:
     from src.api.knowledge_api import include_knowledge_router
+
     include_knowledge_router(app)
     logger.info("Phase 39A knowledge routes enabled: /knowledge/* (15 endpoints)")
 except ImportError as e:
@@ -654,6 +752,7 @@ except ImportError as e:
 # Phase 40A: Agentic RAG + Self-RAG + ColBERT Reranker + Query Decomposition
 try:
     from src.api.rag_api import include_rag_router
+
     include_rag_router(app)
     logger.info("Phase 40A RAG routes enabled: /rag/* (10 endpoints)")
 except ImportError as e:
@@ -662,6 +761,7 @@ except ImportError as e:
 # Phase 41A: Agent Swarm Coordinator + Task Decomposition + Workers
 try:
     from src.api.swarm_api import include_swarm_router
+
     include_swarm_router(app)
     logger.info("Phase 41A swarm routes enabled: /swarm/* (10 endpoints)")
 except ImportError as e:
@@ -670,6 +770,7 @@ except ImportError as e:
 # Phase 42A: Unified Memory Cortex — episodic/semantic/procedural
 try:
     from src.api.memory_api import include_memory_router
+
     include_memory_router(app)
     logger.info("Phase 42A memory routes enabled: /memory/* (12 endpoints)")
 except ImportError as e:
@@ -678,6 +779,7 @@ except ImportError as e:
 # Phase 43A: Data Governance — catalog, schema registry, contracts, SLAs
 try:
     from src.api.governance_api import include_governance_router
+
     include_governance_router(app)
     logger.info("Phase 43A governance routes enabled: /governance/* (12 endpoints)")
 except ImportError as e:
@@ -686,14 +788,18 @@ except ImportError as e:
 # Phase 44A: Meta-Learning, Strategic Patterns, Insight Compiler
 try:
     from src.api.intelligence_api import include_intelligence_router
+
     include_intelligence_router(app)
-    logger.info("Phase 44A intelligence routes enabled: /api/intelligence/* (13 endpoints)")
+    logger.info(
+        "Phase 44A intelligence routes enabled: /api/intelligence/* (13 endpoints)"
+    )
 except ImportError as e:
     logger.warning(f"Phase 44A intelligence routes not available: {e}")
 
 # Phase 45A: MCP Ecosystem — tool registry, apps renderer, orchestrator
 try:
     from src.api.mcp_api import include_mcp_router
+
     include_mcp_router(app)
     logger.info("Phase 45A MCP routes enabled: /api/mcp/* (10 endpoints)")
 except ImportError as e:
@@ -702,6 +808,7 @@ except ImportError as e:
 # Phase 46A: Voice Intelligence — call briefings, transcript analysis
 try:
     from src.api.voice_api import include_voice_router
+
     include_voice_router(app)
     logger.info("Phase 46A voice routes enabled: /api/voice/* (12 endpoints)")
 except ImportError as e:
@@ -710,6 +817,7 @@ except ImportError as e:
 # Phase 47A: Domain Embedding Fine-Tuner — synthetic data, fine-tuning, benchmarks
 try:
     from src.api.embeddings_api import include_embeddings_router
+
     include_embeddings_router(app)
     logger.info("Phase 47A embeddings routes enabled: /api/embeddings/* (12 endpoints)")
 except ImportError as e:
@@ -718,6 +826,7 @@ except ImportError as e:
 # Phase 48A: Geographic Intelligence — geocoding, spatial queries, proximity analytics
 try:
     from src.api.geo_api import include_geo_router
+
     include_geo_router(app)
     logger.info("Phase 48A geo routes enabled: /api/geo/* (10 endpoints)")
 except ImportError as e:
@@ -726,6 +835,7 @@ except ImportError as e:
 # Phase 49A: Workflow Intelligence — Temporal durable workflows, cross-project orchestrator, NL-to-workflow
 try:
     from src.api.workflows_api import include_workflows_router
+
     include_workflows_router(app)
     logger.info("Phase 49A workflow routes enabled: /api/workflows/* (12 endpoints)")
 except ImportError as e:
@@ -734,6 +844,7 @@ except ImportError as e:
 # Phase 50A: Real-Time Collaboration — Yjs rooms, contact claiming, shared intel feed
 try:
     from src.api.collaboration_api import include_collaboration_router
+
     include_collaboration_router(app)
     logger.info("Phase 50A collaboration routes enabled: /api/collab/* (12 endpoints)")
 except ImportError as e:
@@ -742,14 +853,18 @@ except ImportError as e:
 # Phase 51A: Simulation & Causal Intelligence — causal inference, digital twin, scenario analysis
 try:
     from src.api.simulation_api import include_simulation_router
+
     include_simulation_router(app)
-    logger.info("Phase 51A simulation routes enabled: /api/causal/*, /api/twin/*, /api/scenario/*, /api/simulation/* (14 endpoints)")
+    logger.info(
+        "Phase 51A simulation routes enabled: /api/causal/*, /api/twin/*, /api/scenario/*, /api/simulation/* (14 endpoints)"
+    )
 except ImportError as e:
     logger.warning(f"Phase 51A simulation routes not available: {e}")
 
 # Phase 52A: Zero-Trust Security — ABAC policy enforcement, audit trail, encryption at rest
 try:
     from src.api.security_api import include_security_router
+
     include_security_router(app)
     logger.info("Phase 52A security routes enabled: /api/security/* (14 endpoints)")
 except ImportError as e:
@@ -758,14 +873,18 @@ except ImportError as e:
 # Phase 53A: Observability — distributed tracing, metrics pipeline, SLO engine
 try:
     from src.api.observability_api import include_observability_router
+
     include_observability_router(app)
-    logger.info("Phase 53A observability routes enabled: /api/observability/* (12 endpoints)")
+    logger.info(
+        "Phase 53A observability routes enabled: /api/observability/* (12 endpoints)"
+    )
 except ImportError as e:
     logger.warning(f"Phase 53A observability routes not available: {e}")
 
 # Phase 54A: Resilience — circuit breakers, chaos engineering, bulkheads, graceful degradation
 try:
     from src.api.resilience_api import include_resilience_router
+
     include_resilience_router(app)
     logger.info("Phase 54A resilience routes enabled: /api/resilience/* (12 endpoints)")
 except ImportError as e:
@@ -774,14 +893,18 @@ except ImportError as e:
 # Phase 55A: Experimentation — feature flags, A/B testing, experiment analytics
 try:
     from src.api.experimentation_api import include_experimentation_router
+
     include_experimentation_router(app)
-    logger.info("Phase 55A experimentation routes enabled: /api/experimentation/* (12 endpoints)")
+    logger.info(
+        "Phase 55A experimentation routes enabled: /api/experimentation/* (12 endpoints)"
+    )
 except ImportError as e:
     logger.warning(f"Phase 55A experimentation routes not available: {e}")
 
 # Phase 57A: Scaling — connection pools, read replicas, cache layers, auto-scaling
 try:
     from src.api.scaling_api import include_scaling_router
+
     include_scaling_router(app)
     logger.info("Phase 57A scaling routes enabled: /api/scaling/* (12 endpoints)")
 except ImportError as e:
@@ -790,6 +913,7 @@ except ImportError as e:
 # Phase 58A: PWA — progressive web app, push notifications, responsive API
 try:
     from src.api.pwa_api import include_pwa_router
+
     include_pwa_router(app)
     logger.info("Phase 58A PWA routes enabled: /api/pwa/* (10 endpoints)")
 except ImportError as e:
@@ -799,6 +923,7 @@ except ImportError as e:
 # =========================================
 # HEALTH & STATUS ENDPOINTS
 # =========================================
+
 
 @app.get("/health")
 async def health_check():
@@ -815,7 +940,7 @@ async def get_stats():
         "graph": graph.get_stats() if graph else {},
         "pageindex": pageindex.get_stats() if pageindex else {},
         "cache": cache.get_stats() if cache else {},
-        "timestamp": datetime.now().isoformat()
+        "timestamp": datetime.now().isoformat(),
     }
     return stats
 
@@ -823,6 +948,7 @@ async def get_stats():
 # =========================================
 # DASHBOARD ENDPOINTS
 # =========================================
+
 
 class FilterRequest(BaseModel):
     query: Optional[str] = Field(None, description="Optional text search query")
@@ -837,7 +963,9 @@ class FilterRequest(BaseModel):
     location: Optional[str] = Field(None, description="Filter by location")
 
 
-def _build_qdrant_filter(request: FilterRequest, field_map: Dict[str, str], text_match_fields: set = None) -> Optional[Filter]:
+def _build_qdrant_filter(
+    request: FilterRequest, field_map: Dict[str, str], text_match_fields: set = None
+) -> Optional[Filter]:
     """Build Qdrant Filter from FilterRequest using a field mapping.
     Fields listed in text_match_fields use MatchText (substring) instead of MatchValue (exact).
     """
@@ -847,15 +975,13 @@ def _build_qdrant_filter(request: FilterRequest, field_map: Dict[str, str], text
         value = getattr(request, param_name, None)
         if value:
             if payload_field in text_match_fields:
-                conditions.append(FieldCondition(
-                    key=payload_field,
-                    match=MatchText(text=value)
-                ))
+                conditions.append(
+                    FieldCondition(key=payload_field, match=MatchText(text=value))
+                )
             else:
-                conditions.append(FieldCondition(
-                    key=payload_field,
-                    match=MatchValue(value=value)
-                ))
+                conditions.append(
+                    FieldCondition(key=payload_field, match=MatchValue(value=value))
+                )
     return Filter(must=conditions) if conditions else None
 
 
@@ -875,7 +1001,11 @@ async def filter_contacts(request: FilterRequest):
 
     try:
         if request.query:
-            qdrant_filter = _build_qdrant_filter(request, field_map, text_match_fields={"Programs", "Primes", "Clearances"})
+            qdrant_filter = _build_qdrant_filter(
+                request,
+                field_map,
+                text_match_fields={"Programs", "Primes", "Clearances"},
+            )
             query_embedding = store._generate_embedding(request.query)
             search_result = store.client.query_points(
                 collection_name="contacts",
@@ -885,13 +1015,20 @@ async def filter_contacts(request: FilterRequest):
                 with_payload=True,
             )
             return {
-                "contacts": [{"id": str(p.id), "score": p.score, **p.payload} for p in search_result.points],
+                "contacts": [
+                    {"id": str(p.id), "score": p.score, **p.payload}
+                    for p in search_result.points
+                ],
                 "count": len(search_result.points),
                 "query": request.query,
                 "timestamp": datetime.now().isoformat(),
             }
         else:
-            qdrant_filter = _build_qdrant_filter(request, field_map, text_match_fields={"Programs", "Primes", "Clearances"})
+            qdrant_filter = _build_qdrant_filter(
+                request,
+                field_map,
+                text_match_fields={"Programs", "Primes", "Clearances"},
+            )
             results, _next = store.client.scroll(
                 collection_name="contacts",
                 scroll_filter=qdrant_filter,
@@ -938,7 +1075,9 @@ async def filter_programs(request: FilterRequest):
                 filters=filters if filters else None,
             )
             return {
-                "programs": [{"id": r.id, "score": r.score, **r.payload} for r in results],
+                "programs": [
+                    {"id": r.id, "score": r.score, **r.payload} for r in results
+                ],
                 "count": len(results),
                 "query": request.query,
                 "timestamp": datetime.now().isoformat(),
@@ -973,7 +1112,9 @@ async def dashboard_stats():
         collection_stats = store.get_collection_stats()
 
         total_vectors = sum(
-            s.get("points_count", 0) for s in collection_stats.values() if isinstance(s, dict) and "points_count" in s
+            s.get("points_count", 0)
+            for s in collection_stats.values()
+            if isinstance(s, dict) and "points_count" in s
         )
 
         all_green = all(
@@ -998,10 +1139,14 @@ async def dashboard_stats():
                         if isinstance(value, str) and 0 < len(value) < 100:
                             if key not in distributions:
                                 distributions[key] = {}
-                            distributions[key][value] = distributions[key].get(value, 0) + 1
+                            distributions[key][value] = (
+                                distributions[key].get(value, 0) + 1
+                            )
                 # Keep only top 20 values per field
                 for key in distributions:
-                    sorted_vals = sorted(distributions[key].items(), key=lambda x: -x[1])[:20]
+                    sorted_vals = sorted(
+                        distributions[key].items(), key=lambda x: -x[1]
+                    )[:20]
                     distributions[key] = dict(sorted_vals)
                 field_distributions[coll_name] = distributions
             except Exception:
@@ -1026,10 +1171,11 @@ async def dashboard_stats():
 # SMART QUERY ENDPOINTS
 # =========================================
 
+
 @app.get("/ask/smart")
 async def smart_ask(
     q: str = Query(..., description="Your BD question"),
-    use_cache: bool = Query(True, description="Use semantic cache")
+    use_cache: bool = Query(True, description="Use semantic cache"),
 ):
     """Intelligent query that routes to optimal system(s)."""
     if use_cache and cache:
@@ -1042,23 +1188,25 @@ async def smart_ask(
                 "query_type": result_data.get("query_type", "factual"),
                 "systems_used": result_data.get("systems_used", []),
                 "sources": result_data.get("sources", [])[:5],
-                "cache_hit": True
+                "cache_hit": True,
             }
 
     result = await router.smart_query(q)
 
-    logger.info("smart_query_result",
-                answer_len=len(result.answer),
-                sources_count=len(result.sources),
-                systems=result.systems_used,
-                query_type=result.query_type.value)
+    logger.info(
+        "smart_query_result",
+        answer_len=len(result.answer),
+        sources_count=len(result.sources),
+        systems=result.systems_used,
+        query_type=result.query_type.value,
+    )
 
     response = {
         "answer": result.answer,
         "query_type": result.query_type.value,
         "systems_used": result.systems_used,
         "sources": result.sources[:5],
-        "cache_hit": False
+        "cache_hit": False,
     }
 
     if cache:
@@ -1070,6 +1218,7 @@ async def smart_ask(
 # =========================================
 # COLLECTION LIST ENDPOINTS
 # =========================================
+
 
 @app.get("/programs")
 async def list_programs(
@@ -1117,6 +1266,7 @@ async def list_contacts(
 # SEARCH ENDPOINTS
 # =========================================
 
+
 @app.post("/search", response_model=SearchResponse)
 async def search(request: SearchRequest):
     """Semantic search across knowledge base. Set rerank=true for cross-encoder reranking."""
@@ -1130,13 +1280,13 @@ async def search(request: SearchRequest):
                 collection=request.collection,
                 limit=request.limit,
                 score_threshold=request.score_threshold,
-                filters=request.filters
+                filters=request.filters,
             )
         else:
             all_results = store.search_all(
                 query=request.query,
                 limit_per_collection=request.limit,
-                score_threshold=request.score_threshold
+                score_threshold=request.score_threshold,
             )
             results = []
             for coll, items in all_results.items():
@@ -1144,21 +1294,34 @@ async def search(request: SearchRequest):
                     item.collection = coll
                     results.append(item)
             results.sort(key=lambda x: x.score, reverse=True)
-            results = results[:request.limit]
+            results = results[: request.limit]
 
         # Optional cross-encoder reranking
-        if request.rerank and results and retriever and getattr(retriever, 'reranker', None):
-            pairs = [[request.query, r.payload.get("text", "") or str(r.payload)] for r in results]
+        if (
+            request.rerank
+            and results
+            and retriever
+            and getattr(retriever, "reranker", None)
+        ):
+            pairs = [
+                [request.query, r.payload.get("text", "") or str(r.payload)]
+                for r in results
+            ]
             scores = retriever.reranker.predict(pairs)
             ranked = sorted(zip(results, scores), key=lambda x: x[1], reverse=True)
-            results = [r for r, _ in ranked[:request.limit]]
+            results = [r for r, _ in ranked[: request.limit]]
 
         return SearchResponse(
             query=request.query,
             collection=request.collection,
-            results=[SearchResultModel(id=r.id, score=r.score, payload=r.payload, collection=r.collection) for r in results],
+            results=[
+                SearchResultModel(
+                    id=r.id, score=r.score, payload=r.payload, collection=r.collection
+                )
+                for r in results
+            ],
             count=len(results),
-            timestamp=datetime.now().isoformat()
+            timestamp=datetime.now().isoformat(),
         )
     except Exception as e:
         logger.error(f"Search error: {e}")
@@ -1169,7 +1332,7 @@ async def search(request: SearchRequest):
 async def search_get(
     q: str = Query(..., description="Search query"),
     collection: Optional[str] = Query(None, description="Collection to search"),
-    limit: int = Query(10, ge=1, le=50, description="Max results")
+    limit: int = Query(10, ge=1, le=50, description="Max results"),
 ):
     """GET endpoint for search."""
     request = SearchRequest(query=q, collection=collection, limit=limit)
@@ -1180,22 +1343,26 @@ async def search_get(
 async def semantic_search(
     q: str = Query(..., description="Search query"),
     collection: str = Query("bd_knowledge", description="Collection"),
-    limit: int = Query(10, description="Max results")
+    limit: int = Query(10, description="Max results"),
 ):
     """Semantic-only search."""
     results = retriever._semantic_search(q, collection, limit)
-    return {"results": [{"id": r.id, "text": r.text, "score": r.score} for r in results]}
+    return {
+        "results": [{"id": r.id, "text": r.text, "score": r.score} for r in results]
+    }
 
 
 @app.get("/search/keyword")
 async def keyword_search(
     q: str = Query(..., description="Search query"),
     collection: str = Query("bd_knowledge", description="Collection"),
-    limit: int = Query(10, description="Max results")
+    limit: int = Query(10, description="Max results"),
 ):
     """BM25 keyword search."""
     results = retriever._keyword_search(q, collection, limit)
-    return {"results": [{"id": r.id, "text": r.text, "score": r.score} for r in results]}
+    return {
+        "results": [{"id": r.id, "text": r.text, "score": r.score} for r in results]
+    }
 
 
 @app.get("/search/hybrid")
@@ -1203,16 +1370,22 @@ async def hybrid_search(
     q: str = Query(..., description="Search query"),
     collection: str = Query("bd_knowledge", description="Collection"),
     limit: int = Query(10, description="Max results"),
-    use_rerank: bool = Query(True, description="Apply reranking")
+    use_rerank: bool = Query(True, description="Apply reranking"),
 ):
     """Hybrid semantic + keyword search with reranking."""
     results = retriever.search(q, collection, limit, True, use_rerank)
-    return {"results": [{"id": r.id, "text": r.text, "score": r.score, "source": r.source} for r in results]}
+    return {
+        "results": [
+            {"id": r.id, "text": r.text, "score": r.score, "source": r.source}
+            for r in results
+        ]
+    }
 
 
 # =========================================
 # RAG ENDPOINTS
 # =========================================
+
 
 @app.post("/ask", response_model=AskResponse)
 async def ask_question(request: AskRequest):
@@ -1224,12 +1397,17 @@ async def ask_question(request: AskRequest):
         response = rag_engine.ask(
             question=request.question,
             collection=request.collection,
-            limit=request.limit
+            limit=request.limit,
         )
 
         sources = []
         if request.include_sources:
-            sources = [SearchResultModel(id=s.id, score=s.score, payload=s.payload, collection=s.collection) for s in response.sources]
+            sources = [
+                SearchResultModel(
+                    id=s.id, score=s.score, payload=s.payload, collection=s.collection
+                )
+                for s in response.sources
+            ]
 
         return AskResponse(
             answer=response.answer,
@@ -1237,7 +1415,7 @@ async def ask_question(request: AskRequest):
             query=response.query,
             confidence=response.confidence,
             collection_searched=response.collection_searched,
-            timestamp=response.timestamp
+            timestamp=response.timestamp,
         )
     except Exception as e:
         logger.error(f"RAG error: {e}")
@@ -1248,7 +1426,7 @@ async def ask_question(request: AskRequest):
 async def ask_get(
     q: str = Query(..., description="Question to ask"),
     collection: Optional[str] = Query(None, description="Collection to search"),
-    limit: int = Query(5, ge=1, le=20, description="Max sources")
+    limit: int = Query(5, ge=1, le=20, description="Max sources"),
 ):
     """GET endpoint for ask."""
     request = AskRequest(question=q, collection=collection, limit=limit)
@@ -1259,10 +1437,11 @@ async def ask_get(
 # GRAPH ENDPOINTS
 # =========================================
 
+
 @app.get("/graph/query")
 async def query_graph(
     q: str = Query(..., description="Query"),
-    mode: str = Query("hybrid", description="Query mode: naive, local, global, hybrid")
+    mode: str = Query("hybrid", description="Query mode: naive, local, global, hybrid"),
 ):
     """Query knowledge graph."""
     result = await graph.query(q, mode)
@@ -1292,8 +1471,9 @@ try:
     from Engine8_Knowledge.graph.bd_knowledge_graph import (
         get_knowledge_graph as get_bd_graph,
         ENTITY_TYPES,
-        RELATIONSHIP_TYPES
+        RELATIONSHIP_TYPES,
     )
+
     BD_GRAPH_AVAILABLE = True
 except ImportError as e:
     BD_GRAPH_AVAILABLE = False
@@ -1301,6 +1481,7 @@ except ImportError as e:
 
 # Initialize BD Graph (lazy)
 _bd_graph = None
+
 
 def get_bd_knowledge_graph():
     global _bd_graph
@@ -1344,7 +1525,9 @@ async def bdgraph_contact_network(contact_name: str):
 
 
 @app.get("/bdgraph/teaming/{from_contractor}/{to_program}")
-async def bdgraph_teaming_path(from_contractor: str, to_program: str, max_depth: int = 4):
+async def bdgraph_teaming_path(
+    from_contractor: str, to_program: str, max_depth: int = 4
+):
     """
     Find teaming path from a contractor to a program.
     Uses BFS to find shortest relationship path.
@@ -1378,7 +1561,7 @@ async def bdgraph_query(q: str = Query(..., description="Natural language query"
 async def bdgraph_search(
     q: str = Query(..., description="Search query"),
     entity_type: Optional[str] = Query(None, description="Filter by entity type"),
-    limit: int = Query(20, description="Max results")
+    limit: int = Query(20, description="Max results"),
 ):
     """Search entities in the BD knowledge graph."""
     bg = get_bd_knowledge_graph()
@@ -1386,14 +1569,21 @@ async def bdgraph_search(
         raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
 
     results = bg.search_entities(q, entity_type, limit)
-    return {"query": q, "entity_type": entity_type, "results": [e.to_dict() for e in results]}
+    return {
+        "query": q,
+        "entity_type": entity_type,
+        "results": [e.to_dict() for e in results],
+    }
 
 
 @app.post("/bdgraph/entity")
 async def bdgraph_add_entity(
-    entity_type: str = Query(..., description=f"Entity type: {list(ENTITY_TYPES.keys()) if BD_GRAPH_AVAILABLE else []}"),
+    entity_type: str = Query(
+        ...,
+        description=f"Entity type: {list(ENTITY_TYPES.keys()) if BD_GRAPH_AVAILABLE else []}",
+    ),
     name: str = Query(..., description="Entity name"),
-    properties: Optional[str] = Query(None, description="JSON properties")
+    properties: Optional[str] = Query(None, description="JSON properties"),
 ):
     """Add an entity to the BD knowledge graph."""
     bg = get_bd_knowledge_graph()
@@ -1410,7 +1600,7 @@ async def bdgraph_add_relationship(
     from_entity: str = Query(..., description="Source entity (ID or name)"),
     rel_type: str = Query(..., description=f"Relationship type"),
     to_entity: str = Query(..., description="Target entity (ID or name)"),
-    confidence: float = Query(1.0, description="Confidence score 0-1")
+    confidence: float = Query(1.0, description="Confidence score 0-1"),
 ):
     """Add a relationship between entities."""
     bg = get_bd_knowledge_graph()
@@ -1418,7 +1608,9 @@ async def bdgraph_add_relationship(
         raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
 
     try:
-        rel = bg.add_relationship(from_entity, rel_type, to_entity, confidence=confidence)
+        rel = bg.add_relationship(
+            from_entity, rel_type, to_entity, confidence=confidence
+        )
         return {"success": True, "relationship": rel.to_dict()}
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
@@ -1454,7 +1646,9 @@ async def bdgraph_populate_from_store():
 
 
 @app.get("/bdgraph/graph")
-async def bdgraph_full_graph(limit: int = Query(500, description="Max entities to return")):
+async def bdgraph_full_graph(
+    limit: int = Query(500, description="Max entities to return"),
+):
     """Return full graph as nodes + edges for visualization."""
     bg = get_bd_knowledge_graph()
     if not bg:
@@ -1465,12 +1659,14 @@ async def bdgraph_full_graph(limit: int = Query(500, description="Max entities t
     nodes = []
     entity_ids = set()
     for e in all_entities:
-        nodes.append({
-            "id": e.id,
-            "type": e.type.lower(),
-            "name": e.name,
-            **e.properties,
-        })
+        nodes.append(
+            {
+                "id": e.id,
+                "type": e.type.lower(),
+                "name": e.name,
+                **e.properties,
+            }
+        )
         entity_ids.add(e.id)
 
     # Export relationships as edges (only between included nodes)
@@ -1480,17 +1676,21 @@ async def bdgraph_full_graph(limit: int = Query(500, description="Max entities t
     )
     for row in cursor:
         if row[0] in entity_ids and row[1] in entity_ids:
-            edges.append({
-                "source": row[0],
-                "target": row[1],
-                "type": row[2],
-            })
+            edges.append(
+                {
+                    "source": row[0],
+                    "target": row[1],
+                    "type": row[2],
+                }
+            )
 
     return {
         "nodes": nodes,
         "edges": edges,
         "total_nodes": len(bg._entity_cache),
-        "total_edges": sum(1 for _ in bg.conn.execute("SELECT COUNT(*) FROM relationships").fetchone()),
+        "total_edges": sum(
+            1 for _ in bg.conn.execute("SELECT COUNT(*) FROM relationships").fetchone()
+        ),
     }
 
 
@@ -1509,9 +1709,20 @@ async def bdgraph_introduction_path(
 
     # Check if path contains an error
     if path and isinstance(path[0], dict) and "error" in path[0]:
-        return {"from": from_contact, "to": to_contact, "path": [], "hops": 0, "error": path[0]["error"]}
+        return {
+            "from": from_contact,
+            "to": to_contact,
+            "path": [],
+            "hops": 0,
+            "error": path[0]["error"],
+        }
 
-    return {"from": from_contact, "to": to_contact, "path": path, "hops": max(0, len(path) - 1)}
+    return {
+        "from": from_contact,
+        "to": to_contact,
+        "path": path,
+        "hops": max(0, len(path) - 1),
+    }
 
 
 @app.get("/bdgraph/types")
@@ -1522,13 +1733,16 @@ async def bdgraph_list_types():
 
     return {
         "entity_types": ENTITY_TYPES,
-        "relationship_types": {k: {"from": v[0], "to": v[1]} for k, v in RELATIONSHIP_TYPES.items()}
+        "relationship_types": {
+            k: {"from": v[0], "to": v[1]} for k, v in RELATIONSHIP_TYPES.items()
+        },
     }
 
 
 # =========================================
 # MEMORY ENDPOINTS
 # =========================================
+
 
 @app.post("/memory/add")
 async def add_memory(data: MemoryInput):
@@ -1539,9 +1753,7 @@ async def add_memory(data: MemoryInput):
 
 @app.post("/memory/entity")
 async def add_entity_fact(
-    entity_name: str = Query(...),
-    entity_type: str = Query(...),
-    fact: str = Query(...)
+    entity_name: str = Query(...), entity_type: str = Query(...), fact: str = Query(...)
 ):
     """Add entity fact."""
     result = memory.add_entity_fact(entity_name, entity_type, fact)
@@ -1551,7 +1763,9 @@ async def add_entity_fact(
 @app.post("/memory/insight")
 async def add_insight(data: InsightInput):
     """Add BD insight."""
-    result = memory.add_bd_insight(data.insight_type, data.insight, data.source, data.confidence)
+    result = memory.add_bd_insight(
+        data.insight_type, data.insight, data.source, data.confidence
+    )
     return {"success": True, "result": result}
 
 
@@ -1570,7 +1784,9 @@ async def get_entity_facts(entity_name: str, limit: int = Query(20)):
 
 
 @app.get("/memory/insights")
-async def get_insights(insight_type: Optional[str] = Query(None), limit: int = Query(10)):
+async def get_insights(
+    insight_type: Optional[str] = Query(None), limit: int = Query(10)
+):
     """Get BD insights."""
     results = memory.get_recent_insights(insight_type, limit)
     return {"insights": results}
@@ -1587,13 +1803,14 @@ async def get_contact_context(contact_name: str):
     """Get full context for a contact (interactions + memories)."""
     try:
         from Engine8_Knowledge.scripts.memory_system import get_memory_system
+
         system = get_memory_system()
         return system.get_contact_context(contact_name)
-    except Exception as e:
+    except Exception:
         # Fallback to existing memory layer
         return {
             "interactions": [],
-            "memories": memory.get_context(f"contact {contact_name}", 10)
+            "memories": memory.get_context(f"contact {contact_name}", 10),
         }
 
 
@@ -1602,13 +1819,14 @@ async def get_program_context(program_name: str):
     """Get full context for a program (insights + memories)."""
     try:
         from Engine8_Knowledge.scripts.memory_system import get_memory_system
+
         system = get_memory_system()
         return system.get_program_context(program_name)
-    except Exception as e:
+    except Exception:
         # Fallback to existing memory layer
         return {
             "insights": [],
-            "memories": memory.get_context(f"program {program_name}", 10)
+            "memories": memory.get_context(f"program {program_name}", 10),
         }
 
 
@@ -1616,24 +1834,31 @@ async def get_program_context(program_name: str):
 # RAG ROUTER ENDPOINTS
 # =========================================
 
+
 @app.get("/rag/router")
 async def rag_router_query(
     q: str = Query(..., description="Query"),
     strategy: str = Query("auto", description="Strategy: auto, lightrag, bm25, hybrid"),
     limit: int = Query(10, description="Max results"),
-    collection: str = Query("bd_knowledge", description="Collection")
+    collection: str = Query("bd_knowledge", description="Collection"),
 ):
     """RAG query with strategy selection."""
     try:
-        from Engine8_Knowledge.scripts.rag_router import get_rag_router, RetrievalStrategy
+        from Engine8_Knowledge.scripts.rag_router import (
+            get_rag_router,
+            RetrievalStrategy,
+        )
+
         rag_router = get_rag_router()
-        result = await rag_router.retrieve(q, RetrievalStrategy(strategy), limit, collection)
+        result = await rag_router.retrieve(
+            q, RetrievalStrategy(strategy), limit, collection
+        )
         return {
             "strategy": result.strategy,
             "query": result.query,
             "results": result.results,
             "count": result.count,
-            "strategies_used": result.strategies_used
+            "strategies_used": result.strategies_used,
         }
     except Exception as e:
         logger.error(f"RAG router error: {e}")
@@ -1645,12 +1870,13 @@ async def analyze_query_strategy(q: str = Query(..., description="Query to analy
     """Analyze query to recommend optimal strategy."""
     try:
         from Engine8_Knowledge.scripts.rag_router import get_rag_router
+
         rag_router = get_rag_router()
         strategy = rag_router.analyze_query(q)
         return {
             "query": q,
             "recommended_strategy": strategy.value,
-            "available_strategies": rag_router.get_available_strategies()
+            "available_strategies": rag_router.get_available_strategies(),
         }
     except Exception as e:
         return {"error": str(e), "query": q}
@@ -1659,6 +1885,7 @@ async def analyze_query_strategy(q: str = Query(..., description="Query to analy
 # =========================================
 # INGEST ENDPOINTS
 # =========================================
+
 
 @app.post("/ingest/document")
 def ingest_document(data: DocumentInput):
@@ -1694,7 +1921,12 @@ def ingest_program(data: ProgramInput):
             "_source": "api_ingest",
         }
         indexed, errors = store.index_programs([program_dict])
-        return {"success": True, "program": data.name, "indexed": indexed, "errors": errors}
+        return {
+            "success": True,
+            "program": data.name,
+            "indexed": indexed,
+            "errors": errors,
+        }
     except Exception as e:
         logger.error(f"Ingest program error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1706,19 +1938,27 @@ def ingest_programs_batch(programs: List[ProgramInput]):
     try:
         program_dicts = []
         for p in programs:
-            program_dicts.append({
-                "Program Name": p.name,
-                "description": p.description,
-                "Agency": p.agency,
-                "Prime Contractor": ", ".join(p.primes) if p.primes else "",
-                "Contract Value": p.value,
-                "clearance": p.clearance,
-                "technologies": ", ".join(p.technologies) if p.technologies else "",
-                "indexed_at": datetime.now().isoformat(),
-                "_source": "api_ingest_batch",
-            })
+            program_dicts.append(
+                {
+                    "Program Name": p.name,
+                    "description": p.description,
+                    "Agency": p.agency,
+                    "Prime Contractor": ", ".join(p.primes) if p.primes else "",
+                    "Contract Value": p.value,
+                    "clearance": p.clearance,
+                    "technologies": ", ".join(p.technologies) if p.technologies else "",
+                    "indexed_at": datetime.now().isoformat(),
+                    "_source": "api_ingest_batch",
+                }
+            )
         indexed, errors = store.index_programs(program_dicts)
-        return {"success": True, "inserted": indexed, "updated": 0, "errors": errors, "total_submitted": len(programs)}
+        return {
+            "success": True,
+            "inserted": indexed,
+            "updated": 0,
+            "errors": errors,
+            "total_submitted": len(programs),
+        }
     except Exception as e:
         logger.error(f"Batch ingest programs error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1740,7 +1980,12 @@ def ingest_company(data: CompanyInput):
             "_source": "api_ingest",
         }
         indexed, errors = store.index_documents([doc])
-        return {"success": True, "company": data.name, "indexed": indexed, "errors": errors}
+        return {
+            "success": True,
+            "company": data.name,
+            "indexed": indexed,
+            "errors": errors,
+        }
     except Exception as e:
         logger.error(f"Ingest company error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1760,7 +2005,12 @@ def ingest_contact(data: ContactInput):
             "_source": "api_ingest",
         }
         indexed, errors = store.index_contacts([contact_dict])
-        return {"success": True, "contact": data.name, "indexed": indexed, "errors": errors}
+        return {
+            "success": True,
+            "contact": data.name,
+            "indexed": indexed,
+            "errors": errors,
+        }
     except Exception as e:
         logger.error(f"Ingest contact error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1772,17 +2022,25 @@ def ingest_contacts_batch(contacts: List[ContactInput]):
     try:
         contact_dicts = []
         for c in contacts:
-            contact_dicts.append({
-                "name": c.name,
-                "company": c.company,
-                "title": c.title,
-                "programs": ", ".join(c.programs) if c.programs else "",
-                "clearance": c.clearance,
-                "indexed_at": datetime.now().isoformat(),
-                "_source": "api_ingest_batch",
-            })
+            contact_dicts.append(
+                {
+                    "name": c.name,
+                    "company": c.company,
+                    "title": c.title,
+                    "programs": ", ".join(c.programs) if c.programs else "",
+                    "clearance": c.clearance,
+                    "indexed_at": datetime.now().isoformat(),
+                    "_source": "api_ingest_batch",
+                }
+            )
         indexed, errors = store.index_contacts(contact_dicts)
-        return {"success": True, "inserted": indexed, "updated": 0, "errors": errors, "total_submitted": len(contacts)}
+        return {
+            "success": True,
+            "inserted": indexed,
+            "updated": 0,
+            "errors": errors,
+            "total_submitted": len(contacts),
+        }
     except Exception as e:
         logger.error(f"Batch ingest contacts error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1794,15 +2052,17 @@ def ingest_jobs(jobs: List[JobInput]):
     try:
         job_dicts = []
         for job in jobs:
-            job_dicts.append({
-                "title": job.title,
-                "company": job.company,
-                "location": job.location,
-                "clearance": job.clearance,
-                "description": job.description[:2000] if job.description else "",
-                "indexed_at": datetime.now().isoformat(),
-                "_source": "api_ingest",
-            })
+            job_dicts.append(
+                {
+                    "title": job.title,
+                    "company": job.company,
+                    "location": job.location,
+                    "clearance": job.clearance,
+                    "description": job.description[:2000] if job.description else "",
+                    "indexed_at": datetime.now().isoformat(),
+                    "_source": "api_ingest",
+                }
+            )
         indexed, errors = store.index_jobs(job_dicts)
         return {"success": True, "count": indexed, "errors": errors}
     except Exception as e:
@@ -1813,8 +2073,10 @@ def ingest_jobs(jobs: List[JobInput]):
 @app.post("/ingest/scraper-batch")
 async def ingest_scraper_batch(
     jobs_json: UploadFile = File(None, description="standardized_jobs JSON file"),
-    intel_report: UploadFile = File(None, description="BD Intelligence Report .md file"),
-    excel_file: UploadFile = File(None, description="BD Job Openings .xlsx file")
+    intel_report: UploadFile = File(
+        None, description="BD Intelligence Report .md file"
+    ),
+    excel_file: UploadFile = File(None, description="BD Job Openings .xlsx file"),
 ):
     """
     Batch ingest from Data-Scraper.
@@ -1829,30 +2091,32 @@ async def ingest_scraper_batch(
     if jobs_json:
         try:
             content = await jobs_json.read()
-            jobs = json.loads(content.decode('utf-8'))
+            jobs = json.loads(content.decode("utf-8"))
             # Convert to job dicts with all enriched fields
             job_dicts = []
             for job in jobs:
-                job_dicts.append({
-                    "job_id": job.get('job_id', ''),
-                    "title": job.get('title', ''),
-                    "company": job.get('company', ''),
-                    "location": job.get('location', ''),
-                    "location_normalized": job.get('location_normalized', ''),
-                    "clearance": job.get('clearance_required', ''),
-                    "clearance_level": job.get('clearance_level', ''),
-                    "bd_priority_score": job.get('bd_priority_score', 0),
-                    "bd_priority_tier": job.get('bd_priority_tier', ''),
-                    "mapped_program": job.get('mapped_program', ''),
-                    "program_confidence": job.get('program_confidence', 0),
-                    "likely_prime": job.get('likely_prime', ''),
-                    "likely_agency": job.get('likely_agency', ''),
-                    "source_url": job.get('source_url', ''),
-                    "date_posted": job.get('date_posted', ''),
-                    "date_scraped": job.get('date_scraped', ''),
-                    "description": job.get('description', '')[:2000],
-                    "indexed_at": datetime.now().isoformat()
-                })
+                job_dicts.append(
+                    {
+                        "job_id": job.get("job_id", ""),
+                        "title": job.get("title", ""),
+                        "company": job.get("company", ""),
+                        "location": job.get("location", ""),
+                        "location_normalized": job.get("location_normalized", ""),
+                        "clearance": job.get("clearance_required", ""),
+                        "clearance_level": job.get("clearance_level", ""),
+                        "bd_priority_score": job.get("bd_priority_score", 0),
+                        "bd_priority_tier": job.get("bd_priority_tier", ""),
+                        "mapped_program": job.get("mapped_program", ""),
+                        "program_confidence": job.get("program_confidence", 0),
+                        "likely_prime": job.get("likely_prime", ""),
+                        "likely_agency": job.get("likely_agency", ""),
+                        "source_url": job.get("source_url", ""),
+                        "date_posted": job.get("date_posted", ""),
+                        "date_scraped": job.get("date_scraped", ""),
+                        "description": job.get("description", "")[:2000],
+                        "indexed_at": datetime.now().isoformat(),
+                    }
+                )
             # Use vector store's index_jobs method
             indexed, errors = store.index_jobs(job_dicts)
             results["ingested"]["jobs"] = indexed
@@ -1860,7 +2124,9 @@ async def ingest_scraper_batch(
                 results["ingested"]["job_errors"] = errors
             logger.info(f"Ingested {indexed} jobs from JSON")
             try:
-                memory.add_scrape_result("jobs", f"Batch ingested {indexed} jobs", indexed)
+                memory.add_scrape_result(
+                    "jobs", f"Batch ingested {indexed} jobs", indexed
+                )
             except Exception as me:
                 logger.warning(f"Memory logging failed: {me}")
         except Exception as e:
@@ -1871,13 +2137,17 @@ async def ingest_scraper_batch(
     if intel_report:
         try:
             content = await intel_report.read()
-            report_text = content.decode('utf-8')
-            indexed, errors = store.index_documents([{
-                "title": intel_report.filename,
-                "type": "intel_report",
-                "content": report_text[:10000],
-                "indexed_at": datetime.now().isoformat()
-            }])
+            report_text = content.decode("utf-8")
+            indexed, errors = store.index_documents(
+                [
+                    {
+                        "title": intel_report.filename,
+                        "type": "intel_report",
+                        "content": report_text[:10000],
+                        "indexed_at": datetime.now().isoformat(),
+                    }
+                ]
+            )
             results["ingested"]["intel_report"] = intel_report.filename
             logger.info(f"Ingested intel report: {intel_report.filename}")
         except Exception as e:
@@ -1889,21 +2159,29 @@ async def ingest_scraper_batch(
         try:
             import pandas as pd
             import io
+
             content = await excel_file.read()
             df = pd.read_excel(io.BytesIO(content))
             # Store as document with summary
             summary = f"Excel workbook: {excel_file.filename}\n"
             summary += f"Rows: {len(df)}, Columns: {len(df.columns)}\n"
             summary += f"Columns: {', '.join(df.columns.tolist())}\n"
-            indexed, errors = store.index_documents([{
-                "title": excel_file.filename,
-                "type": "excel_workbook",
-                "content": summary,
-                "row_count": len(df),
-                "column_count": len(df.columns),
-                "indexed_at": datetime.now().isoformat()
-            }])
-            results["ingested"]["excel"] = {"filename": excel_file.filename, "rows": len(df)}
+            indexed, errors = store.index_documents(
+                [
+                    {
+                        "title": excel_file.filename,
+                        "type": "excel_workbook",
+                        "content": summary,
+                        "row_count": len(df),
+                        "column_count": len(df.columns),
+                        "indexed_at": datetime.now().isoformat(),
+                    }
+                ]
+            )
+            results["ingested"]["excel"] = {
+                "filename": excel_file.filename,
+                "rows": len(df),
+            }
             logger.info(f"Ingested Excel: {excel_file.filename} ({len(df)} rows)")
         except Exception as e:
             results["ingested"]["excel_error"] = str(e)
@@ -1964,6 +2242,7 @@ def _get_recompete_predictor():
     global _recompete_predictor
     if _recompete_predictor is None:
         from scripts.recompete_predictor import RecompetePredictor
+
         _recompete_predictor = RecompetePredictor(store, memory)
     return _recompete_predictor
 
@@ -1972,6 +2251,7 @@ def _get_daily_engine():
     global _daily_engine
     if _daily_engine is None:
         from scripts.daily_action_engine import DailyActionEngine
+
         _daily_engine = DailyActionEngine(store, memory)
     return _daily_engine
 
@@ -1980,6 +2260,7 @@ def _get_call_prep():
     global _call_prep
     if _call_prep is None:
         from scripts.call_prep_generator import CallPrepGenerator
+
         _call_prep = CallPrepGenerator(store, memory)
     return _call_prep
 
@@ -1988,6 +2269,7 @@ def _get_claim_tracker():
     global _claim_tracker
     if _claim_tracker is None:
         from scripts.claim_tracker import ClaimTracker
+
         _claim_tracker = ClaimTracker(store, memory)
     return _claim_tracker
 
@@ -2009,7 +2291,8 @@ async def get_daily_playbook(
         try:
             predictor = _get_recompete_predictor()
             recompete_tasks = predictor.get_recompete_alerts_for_playbook(
-                months=12, max_alerts=5,
+                months=12,
+                max_alerts=5,
             )
             if recompete_tasks:
                 playbook["tasks"].extend(recompete_tasks)
@@ -2097,7 +2380,9 @@ async def log_outreach_activity(request: Request):
     Accepts: {contact_name, activity_type, notes, channel, program, outcome, ...}
     """
     try:
-        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import (
+            BullhornActivityLogger,
+        )
 
         body = await request.json()
         bh_logger = BullhornActivityLogger()
@@ -2125,9 +2410,14 @@ async def get_outreach_activity_log(
 ):
     """Get outreach activity log."""
     try:
-        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import (
+            BullhornActivityLogger,
+        )
+
         bh_logger = BullhornActivityLogger()
-        return {"activities": bh_logger.get_activity_log(contact_name=contact, limit=limit)}
+        return {
+            "activities": bh_logger.get_activity_log(contact_name=contact, limit=limit)
+        }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -2136,7 +2426,10 @@ async def get_outreach_activity_log(
 async def get_outreach_stats():
     """Get outreach activity statistics."""
     try:
-        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+        from Engine7_BullhornETL.scripts.bullhorn_activity_logger import (
+            BullhornActivityLogger,
+        )
+
         bh_logger = BullhornActivityLogger()
         return bh_logger.get_stats()
     except Exception as e:
@@ -2160,59 +2453,81 @@ async def get_claim_velocity(
 # AGENT ENDPOINTS
 # =========================================
 
+
 @app.get("/agent/program")
 async def agent_program_intel(q: str = Query(..., description="Query")):
     """Program intelligence agent."""
     result = await program_agent.process(q)
-    return {"agent": result.agent_name, "response": result.content, "confidence": result.confidence}
+    return {
+        "agent": result.agent_name,
+        "response": result.content,
+        "confidence": result.confidence,
+    }
 
 
 @app.get("/agent/company")
 async def agent_company_research(q: str = Query(..., description="Query")):
     """Company research agent."""
     result = await company_agent.process(q)
-    return {"agent": result.agent_name, "response": result.content, "confidence": result.confidence}
+    return {
+        "agent": result.agent_name,
+        "response": result.content,
+        "confidence": result.confidence,
+    }
 
 
 @app.get("/agent/contact")
 async def agent_contact_finder(q: str = Query(..., description="Query")):
     """Contact finder agent."""
     result = await contact_agent.process(q)
-    return {"agent": result.agent_name, "response": result.content, "confidence": result.confidence}
+    return {
+        "agent": result.agent_name,
+        "response": result.content,
+        "confidence": result.confidence,
+    }
 
 
 @app.get("/agent/strategy")
 async def agent_bd_strategy(q: str = Query(..., description="Query")):
     """BD strategy agent."""
     result = await strategy_agent.process(q)
-    return {"agent": result.agent_name, "response": result.content, "confidence": result.confidence}
+    return {
+        "agent": result.agent_name,
+        "response": result.content,
+        "confidence": result.confidence,
+    }
 
 
 # =========================================
 # ORCHESTRATION ENDPOINTS
 # =========================================
 
+
 @app.get("/workflow/capture")
-async def workflow_capture_strategy(opportunity: str = Query(..., description="Opportunity name")):
+async def workflow_capture_strategy(
+    opportunity: str = Query(..., description="Opportunity name"),
+):
     """Run capture strategy workflow."""
     result = await orchestrator.capture_strategy_workflow(opportunity)
     return {
         "workflow": result.workflow,
         "success": result.success,
         "agents_used": result.agents_used,
-        "output": result.final_output
+        "output": result.final_output,
     }
 
 
 @app.get("/workflow/competitor")
-async def workflow_competitor_analysis(company: str = Query(..., description="Company name")):
+async def workflow_competitor_analysis(
+    company: str = Query(..., description="Company name"),
+):
     """Run competitor analysis workflow."""
     result = await orchestrator.competitor_analysis_workflow(company)
     return {
         "workflow": result.workflow,
         "success": result.success,
         "agents_used": result.agents_used,
-        "output": result.final_output
+        "output": result.final_output,
     }
 
 
@@ -2224,13 +2539,14 @@ async def workflow_quick_intel(q: str = Query(..., description="Query")):
         "workflow": result.workflow,
         "success": result.success,
         "agents_used": result.agents_used,
-        "output": result.final_output
+        "output": result.final_output,
     }
 
 
 # =========================================
 # PAGEINDEX ENDPOINTS
 # =========================================
+
 
 @app.post("/pageindex/index")
 async def index_for_audit(doc_id: str = Query(...), content: str = Query(...)):
@@ -2245,7 +2561,11 @@ async def query_with_audit(q: str = Query(...), doc_ids: Optional[str] = Query(N
     docs = doc_ids.split(",") if doc_ids else None
     result = pageindex.query(q, docs)
     trail = pageindex.get_audit_trail(result)
-    return {"answer": result.final_answer, "confidence": result.confidence, "audit_trail": trail}
+    return {
+        "answer": result.final_answer,
+        "confidence": result.confidence,
+        "audit_trail": trail,
+    }
 
 
 @app.get("/pageindex/stats")
@@ -2257,6 +2577,7 @@ async def pageindex_stats():
 # =========================================
 # CACHE ENDPOINTS
 # =========================================
+
 
 @app.get("/cache/stats")
 async def cache_stats():
@@ -2274,6 +2595,7 @@ async def clear_cache():
 # =========================================
 # SPECIALIZED ENDPOINTS (EXISTING)
 # =========================================
+
 
 @app.get("/program/{program_name}")
 async def get_program_intel(program_name: str):
@@ -2299,7 +2621,11 @@ async def get_contacts_at_company(company_name: str, limit: int = 20):
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
     results = store.find_contacts_at_company(company_name, limit=limit)
-    return {"company": company_name, "contacts": [r.to_dict() for r in results], "count": len(results)}
+    return {
+        "company": company_name,
+        "contacts": [r.to_dict() for r in results],
+        "count": len(results),
+    }
 
 
 @app.get("/jobs/for/{program_name}")
@@ -2308,12 +2634,17 @@ async def get_jobs_for_program(program_name: str, limit: int = 20):
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
     results = store.find_jobs_for_program(program_name, limit=limit)
-    return {"program": program_name, "jobs": [r.to_dict() for r in results], "count": len(results)}
+    return {
+        "program": program_name,
+        "jobs": [r.to_dict() for r in results],
+        "count": len(results),
+    }
 
 
 # =========================================
 # INDEXING ENDPOINTS
 # =========================================
+
 
 @app.post("/index/all", response_model=IndexResponse)
 async def index_all():
@@ -2332,7 +2663,7 @@ async def index_all():
             message=f"Indexed {total_indexed} items across {len(results)} collections",
             indexed=total_indexed,
             errors=total_errors,
-            duration_seconds=total_duration
+            duration_seconds=total_duration,
         )
     except Exception as e:
         logger.error(f"Indexing error: {e}")
@@ -2346,25 +2677,27 @@ async def index_collection(collection: str):
         raise HTTPException(status_code=503, detail="Indexer not initialized")
 
     try:
-        if collection == 'jobs':
+        if collection == "jobs":
             result = indexer.index_jobs()
-        elif collection == 'contacts':
+        elif collection == "contacts":
             result = indexer.index_contacts()
-        elif collection == 'programs':
+        elif collection == "programs":
             result = indexer.index_programs()
-        elif collection == 'documents':
+        elif collection == "documents":
             result = indexer.index_documents()
-        elif collection == 'activities':
+        elif collection == "activities":
             result = indexer.index_activities()
         else:
-            raise HTTPException(status_code=400, detail=f"Unknown collection: {collection}")
+            raise HTTPException(
+                status_code=400, detail=f"Unknown collection: {collection}"
+            )
 
         return IndexResponse(
             success=result.errors == 0,
             message=f"Indexed {result.indexed} items to {collection}",
             indexed=result.indexed,
             errors=result.errors,
-            duration_seconds=result.duration_seconds
+            duration_seconds=result.duration_seconds,
         )
     except HTTPException:
         raise
@@ -2382,9 +2715,10 @@ try:
     from Engine8_Knowledge.agents.workflows import (
         analyze_program as run_analyze_program,
         prepare_outreach as run_prepare_outreach,
-        generate_weekly_intel as run_weekly_intel
+        generate_weekly_intel as run_weekly_intel,
     )
     from Engine8_Knowledge.agents.bd_agents import get_bd_agent_team, CREWAI_AVAILABLE
+
     CREWAI_WORKFLOWS_AVAILABLE = True
 except ImportError as e:
     CREWAI_WORKFLOWS_AVAILABLE = False
@@ -2415,7 +2749,7 @@ async def get_agent_status():
             crewai_available=False,
             langchain_anthropic_available=False,
             agents_initialized=False,
-            agent_count=0
+            agent_count=0,
         )
 
     team = get_bd_agent_team()
@@ -2423,14 +2757,14 @@ async def get_agent_status():
         crewai_available=CREWAI_AVAILABLE,
         langchain_anthropic_available=True,  # If we got here, it's available
         agents_initialized=team.available,
-        agent_count=4 if team.available else 0
+        agent_count=4 if team.available else 0,
     )
 
 
 @app.post("/agents/analyze-program")
 async def api_analyze_program(
     request: ProgramAnalysisRequest = None,
-    program_name: str = Query(None, description="Program name (alternative to body)")
+    program_name: str = Query(None, description="Program name (alternative to body)"),
 ):
     """
     Analyze a federal program and generate a BD playbook.
@@ -2446,7 +2780,7 @@ async def api_analyze_program(
     if not CREWAI_WORKFLOWS_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic"
+            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic",
         )
 
     # Get program name from body or query param
@@ -2458,7 +2792,9 @@ async def api_analyze_program(
         result = await run_analyze_program(name)
 
         if not result.get("success"):
-            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
+            raise HTTPException(
+                status_code=500, detail=result.get("error", "Unknown error")
+            )
 
         return {
             "success": True,
@@ -2466,7 +2802,7 @@ async def api_analyze_program(
             "playbook": result.get("playbook"),
             "talking_points": result.get("talking_points", []),
             "opportunity_score": result.get("opportunity_score", 0),
-            "priority_contacts": result.get("priority_contacts", [])
+            "priority_contacts": result.get("priority_contacts", []),
         }
     except HTTPException:
         raise
@@ -2478,7 +2814,7 @@ async def api_analyze_program(
 @app.post("/agents/prepare-outreach")
 async def api_prepare_outreach(
     request: OutreachPrepRequest = None,
-    contact_name: str = Query(None, description="Contact name (alternative to body)")
+    contact_name: str = Query(None, description="Contact name (alternative to body)"),
 ):
     """
     Prepare outreach materials for a contact.
@@ -2494,7 +2830,7 @@ async def api_prepare_outreach(
     if not CREWAI_WORKFLOWS_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic"
+            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic",
         )
 
     # Get contact name from body or query param
@@ -2506,14 +2842,16 @@ async def api_prepare_outreach(
         result = await run_prepare_outreach(name)
 
         if not result.get("success"):
-            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
+            raise HTTPException(
+                status_code=500, detail=result.get("error", "Unknown error")
+            )
 
         return {
             "success": True,
             "contact": name,
             "call_script": result.get("call_script"),
             "email_template": result.get("email_template"),
-            "linkedin_message": result.get("linkedin_message")
+            "linkedin_message": result.get("linkedin_message"),
         }
     except HTTPException:
         raise
@@ -2538,21 +2876,23 @@ async def api_weekly_intel():
     if not CREWAI_WORKFLOWS_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic"
+            detail="CrewAI workflows not available. Install: pip install crewai langchain-anthropic",
         )
 
     try:
         result = await run_weekly_intel()
 
         if not result.get("success"):
-            raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
+            raise HTTPException(
+                status_code=500, detail=result.get("error", "Unknown error")
+            )
 
         return {
             "success": True,
             "executive_summary": result.get("executive_summary"),
             "hot_programs": result.get("hot_programs", []),
             "new_opportunities": result.get("new_opportunities", []),
-            "action_items": result.get("action_items", [])
+            "action_items": result.get("action_items", []),
         }
     except HTTPException:
         raise
@@ -2565,12 +2905,14 @@ async def api_weekly_intel():
 # QA & PIPELINE STATUS
 # =========================================
 
+
 @app.get("/qa/stats")
 async def get_qa_stats():
     """Get QA review queue statistics."""
     try:
         sys.path.insert(0, str(Path(__file__).parent.parent))
         from Engine6_QA.scripts.qa_feedback import ReviewQueue
+
         queue = ReviewQueue()
         stats = queue.get_stats()
         return {
@@ -2593,10 +2935,11 @@ async def get_qa_review_queue(
     """Get paginated QA review queue items."""
     try:
         from Engine6_QA.scripts.qa_feedback import ReviewQueue
+
         queue = ReviewQueue()
         items = queue.get_pending() if status == "pending" else queue.items
         return {
-            "items": items[offset:offset + limit],
+            "items": items[offset : offset + limit],
             "total": len(items),
             "limit": limit,
             "offset": offset,
@@ -2616,6 +2959,7 @@ async def resolve_qa_item(item_id: str, request: ResolveRequest):
     """Approve, reject, or fix a QA review queue item."""
     try:
         from Engine6_QA.scripts.qa_feedback import ReviewQueue
+
         queue = ReviewQueue()
         item = next((i for i in queue.items if i.get("job_id") == item_id), None)
         if not item:
@@ -2637,6 +2981,7 @@ async def resolve_qa_item(item_id: str, request: ResolveRequest):
 # DOCLING DOCUMENT INGESTION
 # =========================================
 
+
 @app.post("/ingest/document")
 def ingest_document(
     file: UploadFile = File(...),
@@ -2646,10 +2991,15 @@ def ingest_document(
 ):
     """Ingest a PDF/DOCX via Docling: convert, chunk, embed, upsert to Qdrant."""
     import tempfile
+
     try:
-        from Engine8_Knowledge.processors.docling_processor import ingest_document_to_qdrant
+        from Engine8_Knowledge.processors.docling_processor import (
+            ingest_document_to_qdrant,
+        )
     except ImportError as e:
-        raise HTTPException(status_code=503, detail=f"Docling processor not available: {e}")
+        raise HTTPException(
+            status_code=503, detail=f"Docling processor not available: {e}"
+        )
 
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
@@ -2685,6 +3035,7 @@ def ingest_document(
 # GRAPHITI KNOWLEDGE GRAPH ENDPOINTS
 # =========================================
 
+
 @app.post("/graphiti/ingest")
 async def graphiti_ingest(
     name: str = Query(..., description="Episode name"),
@@ -2694,6 +3045,7 @@ async def graphiti_ingest(
     """Add a BD intelligence episode to the Graphiti knowledge graph."""
     try:
         from services.graphiti_service import add_bd_episode
+
         result = await add_bd_episode(name=name, body=body, source=source)
         return result
     except Exception as e:
@@ -2709,6 +3061,7 @@ async def graphiti_search(
     """Search the Graphiti knowledge graph for facts and relationships."""
     try:
         from services.graphiti_service import search_graph
+
         results = await search_graph(query=q, limit=limit)
         return {"query": q, "results": results, "count": len(results)}
     except Exception as e:
@@ -2722,6 +3075,7 @@ def get_qa_report():
     try:
         sys.path.insert(0, str(Path(__file__).parent.parent))
         from Engine6_QA.quality_monitor import QualityMonitor
+
         qdrant_client = store.client if store else None
         monitor = QualityMonitor(client=qdrant_client)
         report = monitor.generate_report()
@@ -2743,6 +3097,7 @@ def check_alerts_now():
     try:
         sys.path.insert(0, str(Path(__file__).parent.parent))
         from Engine6_QA.scripts.alerts import AlertEngine
+
         engine = AlertEngine()
         alerts = engine.check_all_rules()
         engine.deliver_all(alerts)
@@ -2773,6 +3128,7 @@ def get_dashboard_summary():
     # QA queue stats
     try:
         from Engine6_QA.scripts.qa_feedback import ReviewQueue
+
         queue = ReviewQueue()
         result["qa"] = queue.get_stats()
     except Exception:
@@ -2790,13 +3146,18 @@ def get_dashboard_summary():
                 "total_runs": len(state.get("history", [])),
             }
         else:
-            result["pipeline"] = {"is_running": False, "last_run": None, "total_runs": 0}
+            result["pipeline"] = {
+                "is_running": False,
+                "last_run": None,
+                "total_runs": 0,
+            }
     except Exception:
         result["pipeline"] = {"is_running": False, "last_run": None, "total_runs": 0}
 
     # Recent alerts
     try:
         from Engine6_QA.scripts.alerts import AlertEngine
+
         engine = AlertEngine()
         result["alerts"] = engine.get_recent_alerts(5)
     except Exception:
@@ -2853,9 +3214,16 @@ async def get_pipeline_status():
                 stage = _determine_job_stage(payload)
                 if stage in stages:
                     stages[stage]["count"] += 1
-                    date_val = payload.get("indexed_at") or payload.get("date_scraped") or payload.get("date_posted")
+                    date_val = (
+                        payload.get("indexed_at")
+                        or payload.get("date_scraped")
+                        or payload.get("date_posted")
+                    )
                     if date_val:
-                        if not stages[stage]["latest"] or date_val > stages[stage]["latest"]:
+                        if (
+                            not stages[stage]["latest"]
+                            or date_val > stages[stage]["latest"]
+                        ):
                             stages[stage]["latest"] = date_val
                         if not last_scrape or date_val > last_scrape:
                             last_scrape = date_val
@@ -2881,7 +3249,14 @@ class StageUpdateRequest(BaseModel):
     stage: str = Field(..., description="Pipeline stage")
 
 
-VALID_STAGES = {"scraped", "mapped", "contacts_found", "outreach_active", "meeting_set", "req_obtained"}
+VALID_STAGES = {
+    "scraped",
+    "mapped",
+    "contacts_found",
+    "outreach_active",
+    "meeting_set",
+    "req_obtained",
+}
 
 
 @app.patch("/jobs/{point_id}/stage")
@@ -2890,14 +3265,20 @@ async def update_job_stage(point_id: str, request: StageUpdateRequest):
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
     if request.stage not in VALID_STAGES:
-        raise HTTPException(status_code=400, detail=f"Invalid stage. Must be one of: {sorted(VALID_STAGES)}")
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid stage. Must be one of: {sorted(VALID_STAGES)}",
+        )
 
     try:
         # Handle both int and UUID point IDs
         pid = int(point_id) if point_id.isdigit() else point_id
         store.client.set_payload(
             collection_name="jobs",
-            payload={"pipeline_stage": request.stage, "stage_updated_at": datetime.now().isoformat()},
+            payload={
+                "pipeline_stage": request.stage,
+                "stage_updated_at": datetime.now().isoformat(),
+            },
             points=[pid],
         )
         return {"success": True, "point_id": point_id, "stage": request.stage}
@@ -2940,7 +3321,11 @@ async def trigger_pipeline(request: TriggerRequest):
                 state = json.load(f)
         except (json.JSONDecodeError, OSError):
             state = {}
-    state["current_run"] = {"run_id": run_id, "started_at": datetime.now().isoformat(), "config": request.dict()}
+    state["current_run"] = {
+        "run_id": run_id,
+        "started_at": datetime.now().isoformat(),
+        "config": request.dict(),
+    }
     with open(state_file, "w") as f:
         json.dump(state, f, indent=2, default=str)
 
@@ -2955,8 +3340,12 @@ async def get_alerts(limit: int = Query(20, ge=1, le=100)):
     """Get recent alert history."""
     try:
         from Engine6_QA.scripts.alerts import AlertEngine
+
         engine = AlertEngine()
-        return {"alerts": engine.get_recent_alerts(limit), "count": len(engine.get_recent_alerts(limit))}
+        return {
+            "alerts": engine.get_recent_alerts(limit),
+            "count": len(engine.get_recent_alerts(limit)),
+        }
     except Exception as e:
         logger.error(f"Alerts error: {e}")
         return {"alerts": [], "count": 0, "error": str(e)}
@@ -2998,7 +3387,11 @@ async def analytics_summary():
             for point in results:
                 payload = point.payload or {}
                 programs_str = payload.get("Programs", "")
-                progs = [p.strip() for p in programs_str.split(",") if p.strip()] if programs_str else []
+                progs = (
+                    [p.strip() for p in programs_str.split(",") if p.strip()]
+                    if programs_str
+                    else []
+                )
 
                 for prog in progs:
                     contacts_by_program[prog] = contacts_by_program.get(prog, 0) + 1
@@ -3010,7 +3403,9 @@ async def analytics_summary():
                 for prog in progs:
                     if prog not in priority_distribution:
                         priority_distribution[prog] = {}
-                    priority_distribution[prog][priority] = priority_distribution[prog].get(priority, 0) + 1
+                    priority_distribution[prog][priority] = (
+                        priority_distribution[prog].get(priority, 0) + 1
+                    )
 
             if next_offset is None:
                 break
@@ -3040,17 +3435,27 @@ async def analytics_summary():
             coll_stats = store.get_collection_stats()
             for name, stats in coll_stats.items():
                 if isinstance(stats, dict):
-                    collection_health.append({
-                        "name": name,
-                        "vectors": stats.get("points_count", 0),
-                        "status": stats.get("status", "unknown").lower(),
-                    })
+                    collection_health.append(
+                        {
+                            "name": name,
+                            "vectors": stats.get("points_count", 0),
+                            "status": stats.get("status", "unknown").lower(),
+                        }
+                    )
         except Exception:
             pass
 
         # Limit and sort
-        contacts_by_program = dict(sorted(contacts_by_program.items(), key=lambda x: x[1], reverse=True)[:50])
-        priority_distribution = dict(sorted(priority_distribution.items(), key=lambda x: sum(x[1].values()), reverse=True)[:20])
+        contacts_by_program = dict(
+            sorted(contacts_by_program.items(), key=lambda x: x[1], reverse=True)[:50]
+        )
+        priority_distribution = dict(
+            sorted(
+                priority_distribution.items(),
+                key=lambda x: sum(x[1].values()),
+                reverse=True,
+            )[:20]
+        )
 
         result = {
             "contacts_by_program": contacts_by_program,
@@ -3104,7 +3509,10 @@ async def analytics_funnel():
 
         # Count meetings (from activity log)
         try:
-            from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+            from Engine7_BullhornETL.scripts.bullhorn_activity_logger import (
+                BullhornActivityLogger,
+            )
+
             bh_logger = BullhornActivityLogger()
             stats = bh_logger.get_stats()
             funnel["meeting"] = stats.get("by_type", {}).get("meeting", 0)
@@ -3194,7 +3602,11 @@ async def cross_repo_health():
 
     return {
         "services": services,
-        "overall": "healthy" if online_count >= 3 else "degraded" if online_count >= 2 else "critical",
+        "overall": "healthy"
+        if online_count >= 3
+        else "degraded"
+        if online_count >= 2
+        else "critical",
         "online": online_count,
         "total": total,
         "timestamp": datetime.now().isoformat(),
@@ -3202,7 +3614,9 @@ async def cross_repo_health():
 
 
 @app.get("/predictions/recompetes")
-async def get_recompete_predictions(months: int = Query(12, description="Months ahead")):
+async def get_recompete_predictions(
+    months: int = Query(12, description="Months ahead"),
+):
     """Predict upcoming contract recompetes using the RecompetePredictor.
 
     Scans Qdrant programs, N8N-Builder federal_programs.db, and Bullhorn
@@ -3234,19 +3648,26 @@ async def get_best_channels():
         logger.warning(f"Predictor best-channels failed, falling back: {e}")
         # Fallback to Bullhorn activity logger
         try:
-            from Engine7_BullhornETL.scripts.bullhorn_activity_logger import BullhornActivityLogger
+            from Engine7_BullhornETL.scripts.bullhorn_activity_logger import (
+                BullhornActivityLogger,
+            )
+
             bh_logger = BullhornActivityLogger()
             stats = bh_logger.get_stats()
             by_type = stats.get("by_type", {})
 
             channels = []
-            for channel, count in sorted(by_type.items(), key=lambda x: x[1], reverse=True):
-                channels.append({
-                    "channel": channel,
-                    "total": count,
-                    "success_rate": 0.0,
-                    "avg_response_days": 0.0,
-                })
+            for channel, count in sorted(
+                by_type.items(), key=lambda x: x[1], reverse=True
+            ):
+                channels.append(
+                    {
+                        "channel": channel,
+                        "total": count,
+                        "success_rate": 0.0,
+                        "avg_response_days": 0.0,
+                    }
+                )
 
             return {
                 "channels": channels,
@@ -3265,6 +3686,7 @@ async def recalibrate_scoring(request: Request):
     """
     try:
         from Engine5_Scoring.scripts.bd_scoring import recalibrate
+
         body = await request.json()
         conversion_data = body.get("conversion_data", [])
         learning_rate = body.get("learning_rate", 0.1)
@@ -3321,7 +3743,9 @@ async def get_agent_task_stats():
             "by_type": by_type,
             "by_status": by_status,
             "by_date": dict(sorted(by_date.items(), reverse=True)[:30]),
-            "avg_duration_seconds": round(sum(durations) / len(durations), 1) if durations else 0,
+            "avg_duration_seconds": round(sum(durations) / len(durations), 1)
+            if durations
+            else 0,
             "timestamp": datetime.now().isoformat(),
         }
     except Exception as e:
@@ -3344,10 +3768,17 @@ async def create_agent_task(request: Request):
     query = body.get("query", "")
     task_id = f"task_{int(_time.time() * 1000)}"
 
-    _task_events[task_id] = [{
-        "event": "created",
-        "data": {"task_id": task_id, "type": task_type, "query": query, "status": "pending"}
-    }]
+    _task_events[task_id] = [
+        {
+            "event": "created",
+            "data": {
+                "task_id": task_id,
+                "type": task_type,
+                "query": query,
+                "status": "pending",
+            },
+        }
+    ]
 
     return {"task_id": task_id, "status": "created"}
 
@@ -3365,6 +3796,7 @@ async def push_task_event(task_id: str, request: Request):
 @app.get("/agents/tasks/{task_id}/stream")
 async def stream_task(task_id: str):
     """SSE endpoint - frontend connects for real-time agent updates."""
+
     async def event_generator():
         sent = 0
         timeout = 300
@@ -3408,6 +3840,7 @@ def _get_openai():
     global _openai_client
     if _openai_client is None:
         from openai import OpenAI
+
         _openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
     return _openai_client
 
@@ -3450,8 +3883,13 @@ def _rag_retrieve(user_msg: str, collection: str = "contacts", limit: int = 5) -
                     use_rerank=False,
                 )
                 for r in results:
-                    name = r.metadata.get("Name", r.metadata.get("name",
-                           r.metadata.get("Program Name", r.metadata.get("title", ""))))
+                    name = r.metadata.get(
+                        "Name",
+                        r.metadata.get(
+                            "name",
+                            r.metadata.get("Program Name", r.metadata.get("title", "")),
+                        ),
+                    )
                     text = r.text[:300] if r.text else ""
                     chunks.append(f"[{name}] ({r.source}): {text}")
                 return "\n".join(chunks)
@@ -3468,7 +3906,9 @@ def _rag_retrieve(user_msg: str, collection: str = "contacts", limit: int = 5) -
         )
         for pt in search_result.points:
             p = pt.payload or {}
-            name = p.get("Name", p.get("name", p.get("Program Name", p.get("title", ""))))
+            name = p.get(
+                "Name", p.get("name", p.get("Program Name", p.get("title", "")))
+            )
             text = p.get("text", p.get("content", str(p)[:500]))
             chunks.append(f"[{name}]: {text[:300]}")
         return "\n".join(chunks)
@@ -3484,7 +3924,9 @@ async def ai_chat(request: Request):
     collection = body.get("collection", "contacts")
     use_rag = body.get("use_rag", True)
 
-    user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+    user_msg = next(
+        (m["content"] for m in reversed(messages) if m["role"] == "user"), ""
+    )
 
     rag_context = _rag_retrieve(user_msg, collection) if use_rag else ""
 
@@ -3503,7 +3945,9 @@ async def ai_chat_stream(request: Request):
     body = await request.json()
     messages = body.get("messages", [])
     collection = body.get("collection", "contacts")
-    user_msg = next((m["content"] for m in reversed(messages) if m["role"] == "user"), "")
+    user_msg = next(
+        (m["content"] for m in reversed(messages) if m["role"] == "user"), ""
+    )
 
     rag_context = _rag_retrieve(user_msg, collection)
 
@@ -3538,6 +3982,7 @@ async def ai_chat_stream(request: Request):
 # GRAPH DATA ENDPOINT
 # =========================================
 
+
 @app.get("/graph/data")
 async def get_graph_data(limit: int = 500):
     """Return graph-ready nodes and edges for the frontend Graph Explorer."""
@@ -3558,20 +4003,22 @@ async def get_graph_data(limit: int = 500):
             p = c.payload or {}
             name = p.get("\ufeffContact Name", p.get("Contact Name", p.get("name", "")))
             node_id = f"contact_{c.id}"
-            nodes.append({
-                "id": node_id,
-                "type": "contact",
-                "name": name,
-                "title": p.get("Job Title", p.get("title", "")),
-                "tier": p.get("Hierarchy Tier", p.get("tier", "")),
-                "priority": p.get("BD Priority", ""),
-                "program": p.get("Programs", p.get("program", "")),
-                "company": p.get("Company", p.get("company", "")),
-                "location": p.get("Location Hub", p.get("location", "")),
-                "email": p.get("email", ""),
-                "phone": p.get("phone", ""),
-                "linkedin": p.get("linkedin", ""),
-            })
+            nodes.append(
+                {
+                    "id": node_id,
+                    "type": "contact",
+                    "name": name,
+                    "title": p.get("Job Title", p.get("title", "")),
+                    "tier": p.get("Hierarchy Tier", p.get("tier", "")),
+                    "priority": p.get("BD Priority", ""),
+                    "program": p.get("Programs", p.get("program", "")),
+                    "company": p.get("Company", p.get("company", "")),
+                    "location": p.get("Location Hub", p.get("location", "")),
+                    "email": p.get("email", ""),
+                    "phone": p.get("phone", ""),
+                    "linkedin": p.get("linkedin", ""),
+                }
+            )
             # Create edges to programs
             programs_str = p.get("Programs", p.get("program", ""))
             if programs_str:
@@ -3591,29 +4038,33 @@ async def get_graph_data(limit: int = 500):
             p = pr.payload or {}
             name = p.get("Program Name", p.get("name", ""))
             prime = p.get("Prime Contractor", p.get("prime", ""))
-            nodes.append({
-                "id": f"program_{name}",
-                "type": "program",
-                "name": name,
-                "prime": prime,
-                "value": p.get("Contract Value", ""),
-                "agency": p.get("Agency Owner", p.get("agency", "")),
-                "acronym": p.get("Acronym", ""),
-            })
+            nodes.append(
+                {
+                    "id": f"program_{name}",
+                    "type": "program",
+                    "name": name,
+                    "prime": prime,
+                    "value": p.get("Contract Value", ""),
+                    "agency": p.get("Agency Owner", p.get("agency", "")),
+                    "acronym": p.get("Acronym", ""),
+                }
+            )
             # Remove from missing set
             program_ids.discard(name)
 
         # Create placeholder program nodes for any referenced but not in collection
         for prog_name in program_ids:
-            nodes.append({
-                "id": f"program_{prog_name}",
-                "type": "program",
-                "name": prog_name,
-                "prime": "",
-                "value": "",
-                "agency": "",
-                "acronym": "",
-            })
+            nodes.append(
+                {
+                    "id": f"program_{prog_name}",
+                    "type": "program",
+                    "name": prog_name,
+                    "prime": "",
+                    "value": "",
+                    "agency": "",
+                    "acronym": "",
+                }
+            )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error building graph: {str(e)}")
@@ -3630,39 +4081,37 @@ async def get_graph_data(limit: int = 500):
 # MAIN
 # =========================================
 
+
 def main():
     """Run the API server."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD Intelligence Hub API Server')
-    parser.add_argument('--host', default=API_HOST, help='Host to bind')
-    parser.add_argument('--port', type=int, default=API_PORT, help='Port to bind')
-    parser.add_argument('--reload', action='store_true', help='Enable auto-reload')
-    parser.add_argument('--workers', type=int, default=4, help='Number of uvicorn workers (default: 4)')
+    parser = argparse.ArgumentParser(description="BD Intelligence Hub API Server")
+    parser.add_argument("--host", default=API_HOST, help="Host to bind")
+    parser.add_argument("--port", type=int, default=API_PORT, help="Port to bind")
+    parser.add_argument("--reload", action="store_true", help="Enable auto-reload")
+    parser.add_argument(
+        "--workers", type=int, default=4, help="Number of uvicorn workers (default: 4)"
+    )
 
     args = parser.parse_args()
 
-    logger.info("server_startup",
-               version="2.0",
-               host=args.host,
-               port=args.port,
-               docs_url=f"http://{args.host}:{args.port}/docs",
-               endpoints="50+")
+    logger.info(
+        "server_startup",
+        version="2.0",
+        host=args.host,
+        port=args.port,
+        docs_url=f"http://{args.host}:{args.port}/docs",
+        endpoints="50+",
+    )
 
     if args.reload:
         uvicorn.run(
-            "Engine8_Knowledge.api:app",
-            host=args.host,
-            port=args.port,
-            reload=True
+            "Engine8_Knowledge.api:app", host=args.host, port=args.port, reload=True
         )
     else:
-        uvicorn.run(
-            app,
-            host=args.host,
-            port=args.port
-        )
+        uvicorn.run(app, host=args.host, port=args.port)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class ClaimStatus(str, Enum):
     ACTIVE = "active"
     EXPIRED = "expired"
@@ -32,6 +33,7 @@ class ClaimStatus(str, Enum):
 @dataclass
 class ContactClaim:
     """An exclusive claim on a contact by a BD rep."""
+
     claim_id: str
     contact_id: str
     contact_name: str
@@ -87,6 +89,7 @@ class ContactClaim:
 @dataclass
 class ClaimContest:
     """A dispute when two reps want the same contact."""
+
     contest_id: str
     claim_id: str
     contact_id: str
@@ -247,7 +250,10 @@ class ContactClaimingSystem:
         return True
 
     def transfer_claim(
-        self, claim_id: str, new_owner_id: str, new_owner_name: str,
+        self,
+        claim_id: str,
+        new_owner_id: str,
+        new_owner_name: str,
     ) -> bool:
         """Transfer a claim to another BD rep."""
         claim = self._claims.get(claim_id)
@@ -300,7 +306,9 @@ class ContactClaimingSystem:
         return contest
 
     def resolve_contest(
-        self, contest_id: str, resolution: str,
+        self,
+        contest_id: str,
+        resolution: str,
     ) -> Optional[ClaimContest]:
         """Resolve a claim contest: 'approved', 'denied', or 'split'."""
         contest = self._contests.get(contest_id)
@@ -388,7 +396,9 @@ class ContactClaimingSystem:
             "total_claims": len(self._claims),
             "claims_by_status": by_status,
             "total_contests": len(self._contests),
-            "pending_contests": sum(1 for c in self._contests.values() if c.resolution is None),
+            "pending_contests": sum(
+                1 for c in self._contests.values() if c.resolution is None
+            ),
             "available_contacts": len(self.get_available_contacts()),
             "total_contacts": len(_CLAIMABLE_CONTACTS),
             "total_reps": len(_BD_REPS),

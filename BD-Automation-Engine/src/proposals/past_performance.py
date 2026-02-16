@@ -20,9 +20,11 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class RelevanceScore:
     """How well a past performance entry matches solicitation requirements."""
+
     overall: float = 0.0  # 0-100
     naics_match: float = 0.0
     labor_match: float = 0.0
@@ -34,20 +36,36 @@ class RelevanceScore:
 @dataclass
 class CPARSMetrics:
     """CPARS-style performance ratings."""
-    quality: str = "Satisfactory"       # Exceptional, Very Good, Satisfactory, Marginal, Unsatisfactory
+
+    quality: str = (
+        "Satisfactory"  # Exceptional, Very Good, Satisfactory, Marginal, Unsatisfactory
+    )
     schedule: str = "Satisfactory"
     cost: str = "Satisfactory"
     management: str = "Satisfactory"
     overall: str = "Satisfactory"
 
 
-CPARS_RATINGS = ["Exceptional", "Very Good", "Satisfactory", "Marginal", "Unsatisfactory"]
-CPARS_SCORES = {"Exceptional": 5, "Very Good": 4, "Satisfactory": 3, "Marginal": 2, "Unsatisfactory": 1}
+CPARS_RATINGS = [
+    "Exceptional",
+    "Very Good",
+    "Satisfactory",
+    "Marginal",
+    "Unsatisfactory",
+]
+CPARS_SCORES = {
+    "Exceptional": 5,
+    "Very Good": 4,
+    "Satisfactory": 3,
+    "Marginal": 2,
+    "Unsatisfactory": 1,
+}
 
 
 @dataclass
 class PastPerformanceEntry:
     """Single past performance record."""
+
     id: str
     contract_name: str
     contract_number: str = ""
@@ -69,6 +87,7 @@ class PastPerformanceEntry:
 @dataclass
 class PerformanceMatrix:
     """Complete past performance matrix for a solicitation."""
+
     id: str
     solicitation: str
     entries: List[PastPerformanceEntry] = field(default_factory=list)
@@ -115,10 +134,7 @@ def _score_labor_match(entry_labcats: List[str], required_labcats: List[str]) ->
     overlap = len(entry_lower & req_lower)
     if overlap == 0:
         # Fuzzy: check partial matches
-        partial = sum(
-            1 for e in entry_lower for r in req_lower
-            if e in r or r in e
-        )
+        partial = sum(1 for e in entry_lower for r in req_lower if e in r or r in e)
         return min(60.0, partial * 20.0)
     return min(100.0, (overlap / max(len(req_lower), 1)) * 100)
 
@@ -155,10 +171,23 @@ def _score_agency_match(entry_agency: str, required_agency: str) -> float:
     if entry_agency.lower().strip() == required_agency.lower().strip():
         return 100.0
     # Same parent organization heuristic
-    dod_agencies = {"army", "navy", "air force", "usaf", "marines", "disa", "dla", "nsa", "nga", "dia"}
+    dod_agencies = {
+        "army",
+        "navy",
+        "air force",
+        "usaf",
+        "marines",
+        "disa",
+        "dla",
+        "nsa",
+        "nga",
+        "dia",
+    }
     entry_low = entry_agency.lower()
     req_low = required_agency.lower()
-    if any(a in entry_low for a in dod_agencies) and any(a in req_low for a in dod_agencies):
+    if any(a in entry_low for a in dod_agencies) and any(
+        a in req_low for a in dod_agencies
+    ):
         return 65.0
     return 25.0
 
@@ -176,21 +205,15 @@ def compute_relevance(
     requirements: Dict[str, Any],
 ) -> RelevanceScore:
     """Compute relevance score for a past performance entry against requirements."""
-    naics_score = _score_naics_match(
-        entry.naics, requirements.get("naics_codes", [])
-    )
+    naics_score = _score_naics_match(entry.naics, requirements.get("naics_codes", []))
     labor_score = _score_labor_match(
         entry.labor_categories, requirements.get("labor_categories", [])
     )
     clearance_score = _score_clearance_match(
         entry.clearance_level, requirements.get("clearance", "")
     )
-    agency_score = _score_agency_match(
-        entry.agency, requirements.get("agency", "")
-    )
-    scope_score = _score_scope_match(
-        entry.value, requirements.get("contract_value", 0)
-    )
+    agency_score = _score_agency_match(entry.agency, requirements.get("agency", ""))
+    scope_score = _score_scope_match(entry.value, requirements.get("contract_value", 0))
 
     overall = (
         naics_score * RELEVANCE_WEIGHTS["naics_match"]
@@ -214,6 +237,7 @@ def compute_relevance(
 # NARRATIVE GENERATOR
 # =========================================
 
+
 def generate_narrative(entry: PastPerformanceEntry) -> str:
     """Auto-generate a relevance narrative for a past performance entry."""
     parts = [f"Under the {entry.contract_name} contract"]
@@ -232,7 +256,9 @@ def generate_narrative(entry: PastPerformanceEntry) -> str:
     if entry.value > 0:
         parts.append(f" Contract value: ${entry.value:,.0f}.")
     if entry.period_start and entry.period_end:
-        parts.append(f" Period of performance: {entry.period_start} to {entry.period_end}.")
+        parts.append(
+            f" Period of performance: {entry.period_start} to {entry.period_end}."
+        )
 
     cpars_score = CPARS_SCORES.get(entry.cpars.overall, 3)
     if cpars_score >= 4:
@@ -244,6 +270,7 @@ def generate_narrative(entry: PastPerformanceEntry) -> str:
 # =========================================
 # BUILDER
 # =========================================
+
 
 class PastPerformanceBuilder:
     """Build past performance matrices for solicitations."""
@@ -300,7 +327,11 @@ class PastPerformanceBuilder:
         scored = sorted(self._entries, key=lambda e: e.relevance.overall, reverse=True)
         top_entries = scored[:top_n]
 
-        avg_rel = sum(e.relevance.overall for e in top_entries) / len(top_entries) if top_entries else 0
+        avg_rel = (
+            sum(e.relevance.overall for e in top_entries) / len(top_entries)
+            if top_entries
+            else 0
+        )
 
         matrix = PerformanceMatrix(
             id=f"pp-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}",
@@ -363,14 +394,16 @@ class PastPerformanceBuilder:
                     solicitation, collection="programs", limit=10
                 )
                 entries = []
-                for r in (results if isinstance(results, list) else []):
-                    entries.append(PastPerformanceEntry(
-                        id=r.get("id", ""),
-                        contract_name=r.get("name", r.get("contract_name", "")),
-                        agency=r.get("agency", ""),
-                        program=r.get("program", ""),
-                        value=r.get("value", 0),
-                    ))
+                for r in results if isinstance(results, list) else []:
+                    entries.append(
+                        PastPerformanceEntry(
+                            id=r.get("id", ""),
+                            contract_name=r.get("name", r.get("contract_name", "")),
+                            agency=r.get("agency", ""),
+                            program=r.get("program", ""),
+                            value=r.get("value", 0),
+                        )
+                    )
                 return entries
             except Exception as e:
                 logger.warning(f"Could not fetch entries for {solicitation}: {e}")

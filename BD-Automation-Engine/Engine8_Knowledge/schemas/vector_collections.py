@@ -13,9 +13,14 @@ logger = logging.getLogger(__name__)
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
-        Distance, VectorParams, PointStruct,
-        Filter, FieldCondition, MatchValue
+        Distance,
+        VectorParams,
+        PointStruct,
+        Filter,
+        FieldCondition,
+        MatchValue,
     )
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -28,53 +33,80 @@ COLLECTIONS = {
         "distance": "Cosine",
         "description": "Job postings with BD scores and program mappings",
         "payload_fields": [
-            "job_id", "title", "company", "location", "clearance",
-            "program", "bd_score", "scraped_at", "source"
-        ]
+            "job_id",
+            "title",
+            "company",
+            "location",
+            "clearance",
+            "program",
+            "bd_score",
+            "scraped_at",
+            "source",
+        ],
     },
     "contacts": {
         "size": 1536,
         "distance": "Cosine",
         "description": "BD contacts with tier classification",
         "payload_fields": [
-            "contact_id", "name", "title", "company", "program",
-            "tier", "priority", "location", "email"
-        ]
+            "contact_id",
+            "name",
+            "title",
+            "company",
+            "program",
+            "tier",
+            "priority",
+            "location",
+            "email",
+        ],
     },
     "programs": {
         "size": 1536,
         "distance": "Cosine",
         "description": "Federal programs and contracts",
         "payload_fields": [
-            "program_id", "name", "acronym", "agency", "prime",
-            "contract_value", "clearance", "locations"
-        ]
+            "program_id",
+            "name",
+            "acronym",
+            "agency",
+            "prime",
+            "contract_value",
+            "clearance",
+            "locations",
+        ],
     },
     "documents": {
         "size": 1536,
         "distance": "Cosine",
         "description": "Processed documents and reports",
         "payload_fields": [
-            "doc_id", "title", "doc_type", "source",
-            "chunk_index", "total_chunks", "content"
-        ]
+            "doc_id",
+            "title",
+            "doc_type",
+            "source",
+            "chunk_index",
+            "total_chunks",
+            "content",
+        ],
     },
     "memories": {
         "size": 1536,
         "distance": "Cosine",
         "description": "Long-term memory entries from Mem0",
         "payload_fields": [
-            "memory_id", "user_id", "memory_type", "content", "created_at"
-        ]
+            "memory_id",
+            "user_id",
+            "memory_type",
+            "content",
+            "created_at",
+        ],
     },
     "knowledge_graph": {
         "size": 1536,
         "distance": "Cosine",
         "description": "Knowledge graph entities and relationships",
-        "payload_fields": [
-            "entity_id", "entity_type", "entity_name", "relationships"
-        ]
-    }
+        "payload_fields": ["entity_id", "entity_type", "entity_name", "relationships"],
+    },
 }
 
 
@@ -84,8 +116,7 @@ class EnhancedQdrantStore:
     def __init__(self, path: str = None):
         if path is None:
             path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "data", "qdrant"
+                os.path.dirname(os.path.dirname(__file__)), "data", "qdrant"
             )
 
         self.path = path
@@ -113,13 +144,16 @@ class EnhancedQdrantStore:
         for name, config in COLLECTIONS.items():
             if name not in existing:
                 try:
-                    distance = Distance.COSINE if config["distance"] == "Cosine" else Distance.DOT
+                    distance = (
+                        Distance.COSINE
+                        if config["distance"] == "Cosine"
+                        else Distance.DOT
+                    )
                     self.client.create_collection(
                         collection_name=name,
                         vectors_config=VectorParams(
-                            size=config["size"],
-                            distance=distance
-                        )
+                            size=config["size"], distance=distance
+                        ),
                     )
                     logger.info(f"Created collection: {name}")
                 except Exception as e:
@@ -130,7 +164,7 @@ class EnhancedQdrantStore:
         collection: str,
         vectors: List[List[float]],
         payloads: List[Dict],
-        ids: Optional[List[str]] = None
+        ids: Optional[List[str]] = None,
     ) -> int:
         """Upsert vectors with payloads."""
         if not self.client:
@@ -138,6 +172,7 @@ class EnhancedQdrantStore:
 
         if ids is None:
             import uuid
+
             ids = [str(uuid.uuid4()) for _ in vectors]
 
         points = [
@@ -157,7 +192,7 @@ class EnhancedQdrantStore:
         collection: str,
         query_vector: List[float],
         limit: int = 10,
-        filters: Dict = None
+        filters: Dict = None,
     ) -> List[Dict]:
         """Search with optional filters."""
         if not self.client:
@@ -176,15 +211,11 @@ class EnhancedQdrantStore:
                 collection_name=collection,
                 query_vector=query_vector,
                 limit=limit,
-                query_filter=query_filter
+                query_filter=query_filter,
             )
 
             return [
-                {
-                    "id": str(r.id),
-                    "score": r.score,
-                    "payload": r.payload
-                }
+                {"id": str(r.id), "score": r.score, "payload": r.payload}
                 for r in results
             ]
         except Exception as e:
@@ -205,13 +236,10 @@ class EnhancedQdrantStore:
                     collection_name=collection,
                     limit=limit,
                     offset=offset,
-                    with_payload=True
+                    with_payload=True,
                 )
                 for r in results:
-                    docs.append({
-                        "id": str(r.id),
-                        "payload": r.payload
-                    })
+                    docs.append({"id": str(r.id), "payload": r.payload})
                 if offset is None:
                     break
         except Exception as e:
@@ -230,7 +258,7 @@ class EnhancedQdrantStore:
                 info = self.client.get_collection(name)
                 stats[name] = {
                     "vectors": info.vectors_count,
-                    "points": info.points_count
+                    "points": info.points_count,
                 }
             except Exception as e:
                 logger.warning("collection_stats_failed for %s: %s", name, e)

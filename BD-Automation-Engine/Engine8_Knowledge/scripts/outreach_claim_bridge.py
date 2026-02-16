@@ -26,7 +26,13 @@ class OutreachClaimBridge:
     """Bridges outreach activities to claim status updates."""
 
     # Outcomes that mark a program as claimed
-    CLAIM_OUTCOMES = {"meeting_booked", "meeting_scheduled", "placement", "hired", "won"}
+    CLAIM_OUTCOMES = {
+        "meeting_booked",
+        "meeting_scheduled",
+        "placement",
+        "hired",
+        "won",
+    }
 
     # Outcomes that indicate partial progress
     PROGRESS_OUTCOMES = {"replied", "interested", "callback_scheduled", "referral"}
@@ -81,7 +87,9 @@ class OutreachClaimBridge:
             claim_status = "claimed"
             result["claim_updated"] = True
             result["claim_status"] = "claimed"
-            logger.info(f"Program '{program}' marked as CLAIMED via {outcome} with {contact_name}")
+            logger.info(
+                f"Program '{program}' marked as CLAIMED via {outcome} with {contact_name}"
+            )
         elif outcome in self.PROGRESS_OUTCOMES:
             claim_status = "in_progress"
             result["claim_updated"] = True
@@ -169,7 +177,11 @@ class OutreachClaimBridge:
                 score_threshold=0.4,
             )
             if results:
-                payload = results[0].payload if hasattr(results[0], "payload") else results[0].get("payload", {})
+                payload = (
+                    results[0].payload
+                    if hasattr(results[0], "payload")
+                    else results[0].get("payload", {})
+                )
                 return payload.get("name", payload.get("program_name", ""))
         except Exception:
             pass

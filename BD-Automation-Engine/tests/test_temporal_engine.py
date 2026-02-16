@@ -21,6 +21,7 @@ def engine():
 # WORKFLOW REGISTRY
 # =========================================
 
+
 def test_builtin_workflows_loaded(engine):
     assert len(engine.list_workflows()) == 4
 
@@ -49,7 +50,15 @@ def test_register_custom_workflow(engine):
         workflow_id="wf_custom",
         name="CustomWorkflow",
         description="A test workflow",
-        steps=[{"name": "step1", "task_queue": "hub_tasks", "description": "Test", "timeout_sec": 30, "retries": 1}],
+        steps=[
+            {
+                "name": "step1",
+                "task_queue": "hub_tasks",
+                "description": "Test",
+                "timeout_sec": 30,
+                "retries": 1,
+            }
+        ],
     )
     engine.register_workflow(custom)
     assert engine.get_workflow("wf_custom") is not None
@@ -59,6 +68,7 @@ def test_register_custom_workflow(engine):
 # =========================================
 # WORKFLOW EXECUTION
 # =========================================
+
 
 def test_start_workflow(engine):
     run = engine.start_workflow("wf_contact_enrichment", {"contact_id": "c001"})
@@ -130,6 +140,7 @@ def test_run_id_unique(engine):
 # STEP HANDLERS AND COMPENSATION
 # =========================================
 
+
 def test_custom_step_handler(engine):
     called = []
 
@@ -183,6 +194,7 @@ def test_step_retries(engine):
 # RUN MANAGEMENT
 # =========================================
 
+
 def test_list_runs(engine):
     engine.start_workflow("wf_contact_enrichment")
     engine.start_workflow("wf_full_bd_campaign")
@@ -232,6 +244,7 @@ def test_cancel_completed_run_fails(engine):
 # REPLAY / TIME-TRAVEL
 # =========================================
 
+
 def test_replay_run(engine):
     run = engine.start_workflow("wf_contact_enrichment", {"key": "val"})
     engine.execute_workflow(run.run_id)
@@ -270,6 +283,7 @@ def test_get_checkpoint(engine):
 # TO DICT
 # =========================================
 
+
 def test_workflow_run_to_dict(engine):
     run = engine.start_workflow("wf_contact_enrichment")
     engine.execute_workflow(run.run_id)
@@ -291,6 +305,7 @@ def test_workflow_definition_to_dict(engine):
 # STATS
 # =========================================
 
+
 def test_stats(engine):
     run = engine.start_workflow("wf_contact_enrichment")
     engine.execute_workflow(run.run_id)
@@ -304,8 +319,10 @@ def test_stats(engine):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.workflows.temporal_engine as mod
+
     mod._instance = None
     s1 = get_temporal_engine()
     s2 = get_temporal_engine()

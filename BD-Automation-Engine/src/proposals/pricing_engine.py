@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 class PricingModel(str, Enum):
     TIME_AND_MATERIALS = "T&M"
     FIRM_FIXED_PRICE = "FFP"
@@ -31,29 +32,31 @@ class PricingModel(str, Enum):
 @dataclass
 class LaborCategory:
     """Single labor category definition."""
+
     id: str
     title: str
     description: str = ""
-    min_education: str = ""             # BS, MS, PhD
+    min_education: str = ""  # BS, MS, PhD
     min_experience_years: int = 0
     clearance_required: str = ""
     certifications: List[str] = field(default_factory=list)
-    gsa_rate: float = 0.0              # GSA schedule hourly rate
-    market_rate: float = 0.0           # Market average hourly rate
-    proposed_rate: float = 0.0         # Our proposed rate
+    gsa_rate: float = 0.0  # GSA schedule hourly rate
+    market_rate: float = 0.0  # Market average hourly rate
+    proposed_rate: float = 0.0  # Our proposed rate
     salary_range_low: float = 0.0
     salary_range_high: float = 0.0
-    functional_area: str = ""           # e.g., "Engineering", "Analysis", "PM"
+    functional_area: str = ""  # e.g., "Engineering", "Analysis", "PM"
 
 
 @dataclass
 class RateCard:
     """Complete rate card for a pricing proposal."""
+
     id: str
     title: str
     categories: List[LaborCategory] = field(default_factory=list)
     pricing_model: PricingModel = PricingModel.TIME_AND_MATERIALS
-    escalation_rate: float = 3.0       # Annual escalation %
+    escalation_rate: float = 3.0  # Annual escalation %
     base_year: int = 0
     option_years: int = 4
     generated_at: str = ""
@@ -63,6 +66,7 @@ class RateCard:
 @dataclass
 class PricingTemplate:
     """Pricing template for a proposal."""
+
     id: str
     model: PricingModel
     rate_card: RateCard = field(default_factory=lambda: RateCard(id="", title=""))
@@ -76,11 +80,12 @@ class PricingTemplate:
 @dataclass
 class PricingAnalysis:
     """Competitive pricing analysis."""
+
     id: str
     program: str
     avg_market_rate: float = 0.0
     our_rate: float = 0.0
-    competitive_position: str = ""     # below_market, at_market, above_market
+    competitive_position: str = ""  # below_market, at_market, above_market
     rate_comparison: List[Dict[str, Any]] = field(default_factory=list)
     recommendations: List[str] = field(default_factory=list)
     generated_at: str = ""
@@ -96,7 +101,11 @@ GSA_SCHEDULE_RATES = {
     "Systems Engineer": {"rate": 145.00, "education": "BS", "experience": 8},
     "Senior Software Engineer": {"rate": 170.00, "education": "BS", "experience": 10},
     "Software Engineer": {"rate": 140.00, "education": "BS", "experience": 5},
-    "Senior Intelligence Analyst": {"rate": 155.00, "education": "BS", "experience": 10},
+    "Senior Intelligence Analyst": {
+        "rate": 155.00,
+        "education": "BS",
+        "experience": 10,
+    },
     "Intelligence Analyst": {"rate": 120.00, "education": "BS", "experience": 5},
     "Junior Intelligence Analyst": {"rate": 85.00, "education": "BS", "experience": 2},
     "Cybersecurity Engineer": {"rate": 160.00, "education": "BS", "experience": 8},
@@ -128,6 +137,7 @@ MARKET_RATE_FACTOR = 0.92  # Market typically 8% below GSA ceiling
 # =========================================
 # ENGINE
 # =========================================
+
 
 class PricingEngine:
     """Labor category builder and pricing engine."""
@@ -247,20 +257,24 @@ class PricingEngine:
                 escalated_rate = round(cat.proposed_rate * escalation, 2)
                 line_total = round(escalated_rate * hours_per_fte * fte_count, 2)
                 year_total += line_total
-                year_detail.append({
-                    "category": cat.title,
-                    "fte": fte_count,
-                    "rate": escalated_rate,
-                    "hours": hours_per_fte * fte_count,
-                    "total": line_total,
-                })
+                year_detail.append(
+                    {
+                        "category": cat.title,
+                        "fte": fte_count,
+                        "rate": escalated_rate,
+                        "hours": hours_per_fte * fte_count,
+                        "total": line_total,
+                    }
+                )
 
-            year_values.append({
-                "year": year_label,
-                "year_number": year_idx,
-                "total": round(year_total, 2),
-                "detail": year_detail,
-            })
+            year_values.append(
+                {
+                    "year": year_label,
+                    "year_number": year_idx,
+                    "total": round(year_total, 2),
+                    "detail": year_detail,
+                }
+            )
             total_value += year_total
 
         base_value = year_values[0]["total"] if year_values else 0
@@ -302,24 +316,35 @@ class PricingEngine:
             # Check for scraped market data
             if market_data:
                 matching = [
-                    m for m in market_data
+                    m
+                    for m in market_data
                     if cat.title.lower() in m.get("title", "").lower()
                 ]
                 if matching:
-                    salaries = [m.get("salary", 0) for m in matching if m.get("salary", 0) > 0]
+                    salaries = [
+                        m.get("salary", 0) for m in matching if m.get("salary", 0) > 0
+                    ]
                     if salaries:
                         avg_salary = sum(salaries) / len(salaries)
-                        market_avg = round(avg_salary / 2080 / 0.55, 2)  # Convert salary to bill rate
+                        market_avg = round(
+                            avg_salary / 2080 / 0.55, 2
+                        )  # Convert salary to bill rate
 
-            diff_pct = ((cat.proposed_rate - market_avg) / market_avg * 100) if market_avg > 0 else 0
+            diff_pct = (
+                ((cat.proposed_rate - market_avg) / market_avg * 100)
+                if market_avg > 0
+                else 0
+            )
 
-            rate_comparisons.append({
-                "category": cat.title,
-                "our_rate": cat.proposed_rate,
-                "market_rate": round(market_avg, 2),
-                "gsa_ceiling": cat.gsa_rate,
-                "difference_pct": round(diff_pct, 1),
-            })
+            rate_comparisons.append(
+                {
+                    "category": cat.title,
+                    "our_rate": cat.proposed_rate,
+                    "market_rate": round(market_avg, 2),
+                    "gsa_ceiling": cat.gsa_rate,
+                    "difference_pct": round(diff_pct, 1),
+                }
+            )
 
             total_our += cat.proposed_rate
             total_market += market_avg
@@ -348,7 +373,9 @@ class PricingEngine:
         )
 
         self._history_analyses.append(analysis)
-        logger.info(f"Competitive analysis for {program}: {position} (avg ${avg_our:.2f} vs market ${avg_market:.2f})")
+        logger.info(
+            f"Competitive analysis for {program}: {position} (avg ${avg_our:.2f} vs market ${avg_market:.2f})"
+        )
         return analysis
 
     def get_rate_card_history(self) -> List[RateCard]:
@@ -389,6 +416,7 @@ class PricingEngine:
 # HELPERS
 # =========================================
 
+
 def _categorize_functional_area(title: str) -> str:
     """Map title to functional area."""
     title_lower = title.lower()
@@ -406,26 +434,41 @@ def _categorize_functional_area(title: str) -> str:
 
 
 def _generate_pricing_recommendations(
-    position: str, comparisons: List[Dict[str, Any]],
+    position: str,
+    comparisons: List[Dict[str, Any]],
 ) -> List[str]:
     """Generate pricing recommendations based on analysis."""
     recs = []
     if position == "above_market":
-        recs.append("Consider reducing rates on high-volume categories to improve competitiveness.")
-        recs.append("Emphasize value-added services and SDVOSB set-aside advantages to justify premium.")
+        recs.append(
+            "Consider reducing rates on high-volume categories to improve competitiveness."
+        )
+        recs.append(
+            "Emphasize value-added services and SDVOSB set-aside advantages to justify premium."
+        )
     elif position == "below_market":
-        recs.append("Strong price competitiveness — ensure rates still cover costs and margins.")
-        recs.append("Consider raising rates on senior categories where PTS has clear differentiation.")
+        recs.append(
+            "Strong price competitiveness — ensure rates still cover costs and margins."
+        )
+        recs.append(
+            "Consider raising rates on senior categories where PTS has clear differentiation."
+        )
     else:
-        recs.append("Rates are market-competitive. Focus proposal win strategy on technical approach and past performance.")
+        recs.append(
+            "Rates are market-competitive. Focus proposal win strategy on technical approach and past performance."
+        )
 
     # Category-specific recommendations
     for comp in comparisons:
         diff = comp.get("difference_pct", 0)
         if diff > 15:
-            recs.append(f"'{comp['category']}' is {diff:.0f}% above market — consider adjusting.")
+            recs.append(
+                f"'{comp['category']}' is {diff:.0f}% above market — consider adjusting."
+            )
         elif diff < -15:
-            recs.append(f"'{comp['category']}' is {abs(diff):.0f}% below market — strong competitive position.")
+            recs.append(
+                f"'{comp['category']}' is {abs(diff):.0f}% below market — strong competitive position."
+            )
 
     return recs[:6]  # Limit recommendations
 

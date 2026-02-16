@@ -121,7 +121,9 @@ class CallPrepGenerator:
                         "company": payload.get("company", ""),
                         "email": payload.get("email", ""),
                         "phone": payload.get("phone", ""),
-                        "program": payload.get("program", payload.get("program_name", "")),
+                        "program": payload.get(
+                            "program", payload.get("program_name", "")
+                        ),
                         "tier": payload.get("tier", ""),
                         "clearance": payload.get("clearance", ""),
                         "bd_priority": payload.get("bd_priority", ""),
@@ -140,7 +142,11 @@ class CallPrepGenerator:
                     score_threshold=0.5,
                 )
                 if results:
-                    payload = results[0].payload if hasattr(results[0], "payload") else results[0].get("payload", {})
+                    payload = (
+                        results[0].payload
+                        if hasattr(results[0], "payload")
+                        else results[0].get("payload", {})
+                    )
                     return {
                         "id": str(results[0].id) if hasattr(results[0], "id") else "",
                         "name": payload.get("name", contact_name),
@@ -148,7 +154,9 @@ class CallPrepGenerator:
                         "company": payload.get("company", ""),
                         "email": payload.get("email", ""),
                         "phone": payload.get("phone", ""),
-                        "program": payload.get("program", payload.get("program_name", "")),
+                        "program": payload.get(
+                            "program", payload.get("program_name", "")
+                        ),
                         "tier": payload.get("tier", ""),
                         "clearance": payload.get("clearance", ""),
                         "bd_priority": payload.get("bd_priority", ""),
@@ -171,7 +179,11 @@ class CallPrepGenerator:
             if not results:
                 return {"name": program_name, "found": False}
 
-            payload = results[0].payload if hasattr(results[0], "payload") else results[0].get("payload", {})
+            payload = (
+                results[0].payload
+                if hasattr(results[0], "payload")
+                else results[0].get("payload", {})
+            )
             return {
                 "name": payload.get("name", program_name),
                 "agency": payload.get("agency", ""),
@@ -180,7 +192,9 @@ class CallPrepGenerator:
                 "status": payload.get("status", ""),
                 "locations": payload.get("locations", ""),
                 "clearance": payload.get("clearance", payload.get("clearances", "")),
-                "description": payload.get("description", payload.get("content", ""))[:500],
+                "description": payload.get("description", payload.get("content", ""))[
+                    :500
+                ],
                 "found": True,
             }
         except Exception as e:
@@ -204,13 +218,19 @@ class CallPrepGenerator:
                     score_threshold=0.3,
                 )
                 for r in results:
-                    payload = r.payload if hasattr(r, "payload") else r.get("payload", {})
-                    results_list.append({
-                        "title": payload.get("title", ""),
-                        "summary": payload.get("content", "")[:300],
-                        "type": payload.get("doc_type", payload.get("type", "")),
-                        "score": round(r.score if hasattr(r, "score") else r.get("score", 0), 3),
-                    })
+                    payload = (
+                        r.payload if hasattr(r, "payload") else r.get("payload", {})
+                    )
+                    results_list.append(
+                        {
+                            "title": payload.get("title", ""),
+                            "summary": payload.get("content", "")[:300],
+                            "type": payload.get("doc_type", payload.get("type", "")),
+                            "score": round(
+                                r.score if hasattr(r, "score") else r.get("score", 0), 3
+                            ),
+                        }
+                    )
             except Exception:
                 pass
 
@@ -230,11 +250,13 @@ class CallPrepGenerator:
                 payload = r.payload if hasattr(r, "payload") else r.get("payload", {})
                 prime = payload.get("prime_contractor", payload.get("primes", ""))
                 if prime:
-                    competitors.append({
-                        "company": prime,
-                        "program": payload.get("name", ""),
-                        "relationship": "prime",
-                    })
+                    competitors.append(
+                        {
+                            "company": prime,
+                            "program": payload.get("name", ""),
+                            "relationship": "prime",
+                        }
+                    )
         except Exception:
             pass
 
@@ -255,16 +277,20 @@ class CallPrepGenerator:
                     score_threshold=0.4,
                 )
                 for r in results:
-                    payload = r.payload if hasattr(r, "payload") else r.get("payload", {})
+                    payload = (
+                        r.payload if hasattr(r, "payload") else r.get("payload", {})
+                    )
                     name = payload.get("name", "")
                     if name and name != contact_name:
-                        related.append({
-                            "name": name,
-                            "title": payload.get("title", ""),
-                            "company": payload.get("company", ""),
-                            "tier": payload.get("tier", ""),
-                            "relationship": "same_company",
-                        })
+                        related.append(
+                            {
+                                "name": name,
+                                "title": payload.get("title", ""),
+                                "company": payload.get("company", ""),
+                                "tier": payload.get("tier", ""),
+                                "relationship": "same_company",
+                            }
+                        )
             except Exception:
                 pass
 
@@ -285,13 +311,19 @@ class CallPrepGenerator:
                     score_threshold=0.3,
                 )
                 for r in results:
-                    payload = r.payload if hasattr(r, "payload") else r.get("payload", {})
-                    activities.append({
-                        "subject": payload.get("subject", ""),
-                        "type": payload.get("activity_type", ""),
-                        "date": payload.get("date", payload.get("activity_date", "")),
-                        "summary": payload.get("content", "")[:200],
-                    })
+                    payload = (
+                        r.payload if hasattr(r, "payload") else r.get("payload", {})
+                    )
+                    activities.append(
+                        {
+                            "subject": payload.get("subject", ""),
+                            "type": payload.get("activity_type", ""),
+                            "date": payload.get(
+                                "date", payload.get("activity_date", "")
+                            ),
+                            "summary": payload.get("content", "")[:200],
+                        }
+                    )
             except Exception:
                 pass
 
@@ -320,7 +352,9 @@ class CallPrepGenerator:
         # Tier-specific approach
         tier = contact.get("tier", "")
         if isinstance(tier, (int, float)) and tier <= 2:
-            points.append("Focus on strategic partnership and executive-level value proposition")
+            points.append(
+                "Focus on strategic partnership and executive-level value proposition"
+            )
         elif isinstance(tier, (int, float)) and tier <= 3:
             points.append("Discuss technical capabilities and team qualifications")
 
@@ -329,7 +363,9 @@ class CallPrepGenerator:
         if competitors:
             primes = [c["company"] for c in competitors[:3] if c.get("company")]
             if primes:
-                points.append(f"Competitive awareness: {', '.join(primes)} also active in this space")
+                points.append(
+                    f"Competitive awareness: {', '.join(primes)} also active in this space"
+                )
 
         # Network leverage
         related = brief.get("related_contacts", [])
@@ -340,6 +376,8 @@ class CallPrepGenerator:
 
         # Default point
         if not points:
-            points.append("Introduce PTS capabilities and explore potential collaboration")
+            points.append(
+                "Introduce PTS capabilities and explore potential collaboration"
+            )
 
         return points

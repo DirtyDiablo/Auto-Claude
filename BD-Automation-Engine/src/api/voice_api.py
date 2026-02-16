@@ -11,10 +11,13 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.voice.briefing_generator import (
-    CallBriefing, AudioBriefing, get_briefing_generator,
+    CallBriefing,
+    AudioBriefing,
+    get_briefing_generator,
 )
 from src.voice.transcript_analyzer import (
-    TranscriptIntel, get_transcript_analyzer,
+    TranscriptIntel,
+    get_transcript_analyzer,
 )
 
 logger = logging.getLogger(__name__)
@@ -23,6 +26,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class BatchBriefingRequest(BaseModel):
     contact_ids: List[str]
@@ -52,6 +56,7 @@ class CoachingRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_voice_router(app: FastAPI) -> None:
     """Register all voice intelligence endpoints on the FastAPI app."""
@@ -200,7 +205,11 @@ def include_voice_router(app: FastAPI) -> None:
         pps = analyzer.get_all_pain_points()
         return {
             "pain_points": [
-                {"content": pp.content, "confidence": pp.confidence, "context": pp.context}
+                {
+                    "content": pp.content,
+                    "confidence": pp.confidence,
+                    "context": pp.context,
+                }
                 for pp in pps
             ],
             "total": len(pps),
@@ -247,36 +256,59 @@ def include_voice_router(app: FastAPI) -> None:
 # SERIALIZATION HELPERS
 # =========================================
 
-def _serialize_briefing(b: CallBriefing, audio: Optional[AudioBriefing] = None) -> Dict[str, Any]:
+
+def _serialize_briefing(
+    b: CallBriefing, audio: Optional[AudioBriefing] = None
+) -> Dict[str, Any]:
     result: Dict[str, Any] = {
         "id": b.id,
         "contact_id": b.contact_id,
         "contact": {
-            "name": b.contact.name, "title": b.contact.title,
-            "company": b.contact.company, "program": b.contact.program,
-            "tier": b.contact.tier, "priority_score": b.contact.priority_score,
-            "location": b.contact.location, "clearance": b.contact.clearance,
+            "name": b.contact.name,
+            "title": b.contact.title,
+            "company": b.contact.company,
+            "program": b.contact.program,
+            "tier": b.contact.tier,
+            "priority_score": b.contact.priority_score,
+            "location": b.contact.location,
+            "clearance": b.contact.clearance,
         },
         "pain_points": [
-            {"description": pp.description, "source": pp.source, "severity": pp.severity}
+            {
+                "description": pp.description,
+                "source": pp.source,
+                "severity": pp.severity,
+            }
             for pp in b.pain_points
         ],
         "recent_interactions": [
-            {"type": ix.interaction_type, "date": ix.date,
-             "outcome": ix.outcome, "follow_up": ix.follow_up}
+            {
+                "type": ix.interaction_type,
+                "date": ix.date,
+                "outcome": ix.outcome,
+                "follow_up": ix.follow_up,
+            }
             for ix in b.recent_interactions
         ],
         "open_jobs": b.open_jobs,
         "past_performance": b.past_performance,
         "recent_news": b.recent_news,
         "talking_points": [
-            {"topic": tp.topic, "context": tp.context,
-             "suggested_opener": tp.suggested_opener, "priority": tp.priority}
+            {
+                "topic": tp.topic,
+                "context": tp.context,
+                "suggested_opener": tp.suggested_opener,
+                "priority": tp.priority,
+            }
             for tp in b.talking_points
         ],
         "relationship_map": [
-            {"contact_name": rl.contact_name, "relationship": rl.relationship,
-             "program": rl.program, "contacted": rl.contacted}
+            {
+                "contact_name": rl.contact_name,
+                "relationship": rl.relationship,
+                "program": rl.program,
+                "contacted": rl.contacted,
+            }
             for rl in b.relationship_map
         ],
         "priority": b.priority,
@@ -286,7 +318,8 @@ def _serialize_briefing(b: CallBriefing, audio: Optional[AudioBriefing] = None) 
     }
     if audio:
         result["audio"] = {
-            "id": audio.id, "format": audio.format,
+            "id": audio.id,
+            "format": audio.format,
             "duration_sec": audio.duration_sec,
             "text_script": audio.text_script,
             "audio_url": audio.audio_url,
@@ -303,14 +336,34 @@ def _serialize_intel(i: TranscriptIntel) -> Dict[str, Any]:
         "duration_sec": i.duration_sec,
         "sentiment": i.sentiment,
         "sentiment_score": i.sentiment_score,
-        "pain_points": [{"content": p.content, "confidence": p.confidence} for p in i.pain_points],
-        "job_openings": [{"content": p.content, "confidence": p.confidence} for p in i.job_openings],
-        "contact_mentions": [{"content": p.content, "confidence": p.confidence} for p in i.contact_mentions],
-        "budget_signals": [{"content": p.content, "confidence": p.confidence} for p in i.budget_signals],
-        "competitor_mentions": [{"content": p.content, "confidence": p.confidence, "context": p.context} for p in i.competitor_mentions],
-        "contract_signals": [{"content": p.content, "confidence": p.confidence} for p in i.contract_signals],
+        "pain_points": [
+            {"content": p.content, "confidence": p.confidence} for p in i.pain_points
+        ],
+        "job_openings": [
+            {"content": p.content, "confidence": p.confidence} for p in i.job_openings
+        ],
+        "contact_mentions": [
+            {"content": p.content, "confidence": p.confidence}
+            for p in i.contact_mentions
+        ],
+        "budget_signals": [
+            {"content": p.content, "confidence": p.confidence} for p in i.budget_signals
+        ],
+        "competitor_mentions": [
+            {"content": p.content, "confidence": p.confidence, "context": p.context}
+            for p in i.competitor_mentions
+        ],
+        "contract_signals": [
+            {"content": p.content, "confidence": p.confidence}
+            for p in i.contract_signals
+        ],
         "action_items": [
-            {"description": a.description, "owner": a.owner, "due_date": a.due_date, "priority": a.priority}
+            {
+                "description": a.description,
+                "owner": a.owner,
+                "due_date": a.due_date,
+                "priority": a.priority,
+            }
             for a in i.action_items
         ],
         "key_topics": i.key_topics,

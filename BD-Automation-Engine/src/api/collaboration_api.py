@@ -11,13 +11,15 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from src.collaboration.yjs_engine import (
-    get_yjs_engine, RoomType,
+    get_yjs_engine,
+    RoomType,
 )
 from src.collaboration.contact_claiming import (
     get_claiming_system,
 )
 from src.collaboration.shared_intel_feed import (
-    get_intel_feed, IntelType,
+    get_intel_feed,
+    IntelType,
     IntelPriority,
 )
 
@@ -27,6 +29,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class CreateRoomRequest(BaseModel):
     room_type: str  # call_sheet | pipeline | war_room | briefing
@@ -97,6 +100,7 @@ class CommentRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_collaboration_router(app: FastAPI) -> None:
     """Register all collaboration endpoints on the FastAPI app."""
@@ -258,10 +262,15 @@ def include_collaboration_router(app: FastAPI) -> None:
             raise HTTPException(400, f"Invalid priority: {req.priority}")
 
         item = feed.post_intel(
-            intel_type=itype, priority=prio,
-            title=req.title, body=req.body,
-            author_id=req.author_id, author_name=req.author_name,
-            program=req.program, tags=req.tags, mentions=req.mentions,
+            intel_type=itype,
+            priority=prio,
+            title=req.title,
+            body=req.body,
+            author_id=req.author_id,
+            author_name=req.author_name,
+            program=req.program,
+            tags=req.tags,
+            mentions=req.mentions,
         )
         return item.to_dict()
 
@@ -290,8 +299,10 @@ def include_collaboration_router(app: FastAPI) -> None:
                 raise HTTPException(400, f"Invalid priority: {priority}")
 
         items = feed.get_feed(
-            intel_type=itype, priority=prio,
-            program=program or None, limit=limit,
+            intel_type=itype,
+            priority=prio,
+            program=program or None,
+            limit=limit,
         )
         return {
             "items": [i.to_dict() for i in items],

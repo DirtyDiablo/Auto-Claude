@@ -1,4 +1,5 @@
 """Tests for Phase 29A - Regression Detector."""
+
 import sys
 import pytest
 from pathlib import Path
@@ -20,6 +21,7 @@ from Engine8_Knowledge.optimization.regression_detector import (
 # Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def detector(tmp_path):
     """Create RegressionDetector with temp storage."""
@@ -39,6 +41,7 @@ def detector_with_baselines(tmp_path):
 # =============================================================================
 # Dataclass Tests
 # =============================================================================
+
 
 class TestRegressionDataclasses:
     """Tests for regression-related dataclasses."""
@@ -83,6 +86,7 @@ class TestRegressionDataclasses:
 # RegressionDetector Core Tests
 # =============================================================================
 
+
 class TestRegressionDetector:
     """Tests for RegressionDetector engine."""
 
@@ -113,7 +117,7 @@ class TestRegressionDetector:
         current = {
             "search_relevance": 0.84,  # only ~1% drop, below warning threshold
             "api_latency_p95": 118.0,  # slight improvement
-            "model_f1": 0.77,          # ~1.3% drop, below warning threshold
+            "model_f1": 0.77,  # ~1.3% drop, below warning threshold
         }
         regressions = await detector_with_baselines.check_regressions(current)
         assert regressions == []
@@ -224,12 +228,14 @@ class TestRegressionDetector:
 # Singleton Tests
 # =============================================================================
 
+
 class TestGetRegressionDetector:
     """Tests for the get_regression_detector singleton factory."""
 
     def test_get_regression_detector_returns_instance(self):
         """Test get_regression_detector returns a RegressionDetector instance."""
         import Engine8_Knowledge.optimization.regression_detector as mod
+
         original = mod._detector
         try:
             mod._detector = None
@@ -241,6 +247,7 @@ class TestGetRegressionDetector:
     def test_get_regression_detector_returns_same_instance(self):
         """Test get_regression_detector returns the same singleton."""
         import Engine8_Knowledge.optimization.regression_detector as mod
+
         original = mod._detector
         try:
             mod._detector = None

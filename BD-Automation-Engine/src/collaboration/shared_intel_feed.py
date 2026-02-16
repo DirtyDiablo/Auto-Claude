@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class IntelType(str, Enum):
     WIN_INTEL = "win_intel"
     COMPETITOR_MOVE = "competitor_move"
@@ -40,6 +41,7 @@ class IntelPriority(str, Enum):
 @dataclass
 class IntelReaction:
     """A reaction (emoji) on an intel item."""
+
     user_id: str
     user_name: str
     emoji: str  # e.g., "thumbsup", "fire", "eyes", "warning"
@@ -61,6 +63,7 @@ class IntelReaction:
 @dataclass
 class IntelComment:
     """A comment on an intel item."""
+
     comment_id: str
     user_id: str
     user_name: str
@@ -84,6 +87,7 @@ class IntelComment:
 @dataclass
 class IntelItem:
     """A single intelligence feed entry."""
+
     item_id: str
     intel_type: IntelType
     priority: IntelPriority
@@ -133,6 +137,7 @@ class IntelItem:
 # SHARED INTELLIGENCE FEED
 # =========================================
 
+
 class SharedIntelligenceFeed:
     """Real-time shared intelligence feed for BD teams.
 
@@ -150,36 +155,68 @@ class SharedIntelligenceFeed:
         self._item_counter = 0
         self._comment_counter = 0
         self._seed_intel()
-        logger.info("SharedIntelligenceFeed initialized with %d seed items", len(self._items))
+        logger.info(
+            "SharedIntelligenceFeed initialized with %d seed items", len(self._items)
+        )
 
     def _seed_intel(self):
         """Pre-populate with realistic intelligence items."""
         seeds = [
-            (IntelType.WIN_INTEL, IntelPriority.HIGH,
-             "DCGS-A Task Order 3 win confirmed",
-             "We secured TO3 for DCGS-A sustainment at Fort Meade. "
-             "$12M ceiling over 3 years. Key differentiator was our cleared workforce pool.",
-             "rep_01", "Sarah Mitchell", "DCGS-A", ["win", "army"]),
-            (IntelType.COMPETITOR_MOVE, IntelPriority.CRITICAL,
-             "Leidos ramping up JADC2 hiring in NCR",
-             "Multiple job postings spotted for Leidos JADC2 positions in Arlington and Ft. Belvoir. "
-             "Suggests they may be bidding on the upcoming JADC2 IDIQ.",
-             "rep_02", "James Chen", "JADC2", ["competitor", "leidos"]),
-            (IntelType.MARKET_SHIFT, IntelPriority.NORMAL,
-             "DoD FY26 budget increases ISR funding",
-             "ISR/SIGINT line items show 15% increase in FY26 PB. "
-             "DCGS modernization specifically called out. Good news for our pipeline.",
-             "rep_03", "Patricia Okafor", "DCGS-A", ["budget", "isr"]),
-            (IntelType.CONTACT_UPDATE, IntelPriority.HIGH,
-             "Key decision maker retiring from Navy PEO IWS",
-             "CAPT Williams retiring in 90 days. His replacement (CAPT Rodriguez) "
-             "comes from PEO C4I — could shift Navy DCGS-N priorities.",
-             "rep_04", "David Reyes", "DCGS-N", ["navy", "leadership"]),
-            (IntelType.OPPORTUNITY_ALERT, IntelPriority.CRITICAL,
-             "New RFI for AF DCGS Block 5 modernization",
-             "Air Force released RFI for DCGS Block 5 mod. "
-             "Responses due in 30 days. Our TITAN experience is directly relevant.",
-             "rep_05", "Laura Kim", "AF DCGS", ["rfi", "air-force"]),
+            (
+                IntelType.WIN_INTEL,
+                IntelPriority.HIGH,
+                "DCGS-A Task Order 3 win confirmed",
+                "We secured TO3 for DCGS-A sustainment at Fort Meade. "
+                "$12M ceiling over 3 years. Key differentiator was our cleared workforce pool.",
+                "rep_01",
+                "Sarah Mitchell",
+                "DCGS-A",
+                ["win", "army"],
+            ),
+            (
+                IntelType.COMPETITOR_MOVE,
+                IntelPriority.CRITICAL,
+                "Leidos ramping up JADC2 hiring in NCR",
+                "Multiple job postings spotted for Leidos JADC2 positions in Arlington and Ft. Belvoir. "
+                "Suggests they may be bidding on the upcoming JADC2 IDIQ.",
+                "rep_02",
+                "James Chen",
+                "JADC2",
+                ["competitor", "leidos"],
+            ),
+            (
+                IntelType.MARKET_SHIFT,
+                IntelPriority.NORMAL,
+                "DoD FY26 budget increases ISR funding",
+                "ISR/SIGINT line items show 15% increase in FY26 PB. "
+                "DCGS modernization specifically called out. Good news for our pipeline.",
+                "rep_03",
+                "Patricia Okafor",
+                "DCGS-A",
+                ["budget", "isr"],
+            ),
+            (
+                IntelType.CONTACT_UPDATE,
+                IntelPriority.HIGH,
+                "Key decision maker retiring from Navy PEO IWS",
+                "CAPT Williams retiring in 90 days. His replacement (CAPT Rodriguez) "
+                "comes from PEO C4I — could shift Navy DCGS-N priorities.",
+                "rep_04",
+                "David Reyes",
+                "DCGS-N",
+                ["navy", "leadership"],
+            ),
+            (
+                IntelType.OPPORTUNITY_ALERT,
+                IntelPriority.CRITICAL,
+                "New RFI for AF DCGS Block 5 modernization",
+                "Air Force released RFI for DCGS Block 5 mod. "
+                "Responses due in 30 days. Our TITAN experience is directly relevant.",
+                "rep_05",
+                "Laura Kim",
+                "AF DCGS",
+                ["rfi", "air-force"],
+            ),
         ]
 
         for itype, prio, title, body, aid, aname, prog, tags in seeds:
@@ -256,24 +293,38 @@ class SharedIntelligenceFeed:
     # ----- reactions -----
 
     def add_reaction(
-        self, item_id: str, user_id: str, user_name: str, emoji: str,
+        self,
+        item_id: str,
+        user_id: str,
+        user_name: str,
+        emoji: str,
     ) -> bool:
         item = self._items.get(item_id)
         if not item:
             return False
         # Prevent duplicate reactions from same user with same emoji
-        existing = [r for r in item.reactions if r.user_id == user_id and r.emoji == emoji]
+        existing = [
+            r for r in item.reactions if r.user_id == user_id and r.emoji == emoji
+        ]
         if existing:
             return False
-        item.reactions.append(IntelReaction(
-            user_id=user_id, user_name=user_name, emoji=emoji,
-        ))
+        item.reactions.append(
+            IntelReaction(
+                user_id=user_id,
+                user_name=user_name,
+                emoji=emoji,
+            )
+        )
         return True
 
     # ----- comments -----
 
     def add_comment(
-        self, item_id: str, user_id: str, user_name: str, text: str,
+        self,
+        item_id: str,
+        user_id: str,
+        user_name: str,
+        text: str,
     ) -> Optional[IntelComment]:
         item = self._items.get(item_id)
         if not item:
@@ -345,7 +396,9 @@ class SharedIntelligenceFeed:
         by_priority: Dict[str, int] = {}
         for item in self._items.values():
             by_type[item.intel_type.value] = by_type.get(item.intel_type.value, 0) + 1
-            by_priority[item.priority.value] = by_priority.get(item.priority.value, 0) + 1
+            by_priority[item.priority.value] = (
+                by_priority.get(item.priority.value, 0) + 1
+            )
 
         return {
             "total_items": len(self._items),

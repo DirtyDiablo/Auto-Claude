@@ -18,14 +18,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 try:
     from crewai import Task, Crew, Process
+
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
     logger.warning("CrewAI not available")
 
-from .bd_agents import (
-    get_bd_agent_team
-)
+from .bd_agents import get_bd_agent_team
 from Engine8_Knowledge.scripts.memory_system import get_memory_system
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
 
@@ -34,9 +33,11 @@ from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
 # WORKFLOW RESULT CLASSES
 # =========================================
 
+
 @dataclass
 class WorkflowResult:
     """Result from a workflow execution."""
+
     workflow_name: str
     success: bool
     output: Dict[str, Any]
@@ -49,6 +50,7 @@ class WorkflowResult:
 @dataclass
 class ProgramAnalysisResult(WorkflowResult):
     """Result from program analysis workflow."""
+
     playbook: str = ""
     priority_contacts: List[Dict] = field(default_factory=list)
     talking_points: List[str] = field(default_factory=list)
@@ -58,6 +60,7 @@ class ProgramAnalysisResult(WorkflowResult):
 @dataclass
 class OutreachPrepResult(WorkflowResult):
     """Result from contact outreach prep workflow."""
+
     call_script: str = ""
     email_template: str = ""
     linkedin_message: str = ""
@@ -67,6 +70,7 @@ class OutreachPrepResult(WorkflowResult):
 @dataclass
 class WeeklyIntelResult(WorkflowResult):
     """Result from weekly intelligence report workflow."""
+
     hot_programs: List[Dict] = field(default_factory=list)
     new_opportunities: List[Dict] = field(default_factory=list)
     action_items: List[str] = field(default_factory=list)
@@ -76,6 +80,7 @@ class WeeklyIntelResult(WorkflowResult):
 # =========================================
 # WORKFLOW IMPLEMENTATIONS
 # =========================================
+
 
 class BDWorkflows:
     """
@@ -89,20 +94,18 @@ class BDWorkflows:
         self.store = BDKnowledgeStore()
 
     def _create_fallback_result(
-        self,
-        workflow_name: str,
-        error_msg: str,
-        start_time: float
+        self, workflow_name: str, error_msg: str, start_time: float
     ) -> WorkflowResult:
         """Create a fallback result when CrewAI is unavailable."""
         import time
+
         return WorkflowResult(
             workflow_name=workflow_name,
             success=False,
             output={"error": error_msg},
             agents_used=[],
             execution_time=time.time() - start_time,
-            error=error_msg
+            error=error_msg,
         )
 
     async def analyze_program(self, program_name: str) -> ProgramAnalysisResult:
@@ -113,6 +116,7 @@ class BDWorkflows:
         Returns a complete BD playbook for the specified program.
         """
         import time
+
         start_time = time.time()
 
         if not self.agent_team.available:
@@ -122,7 +126,7 @@ class BDWorkflows:
                 output={"error": "CrewAI not available"},
                 agents_used=[],
                 execution_time=time.time() - start_time,
-                error="CrewAI not available"
+                error="CrewAI not available",
             )
 
         agents_used = []
@@ -141,7 +145,7 @@ class BDWorkflows:
 
                 Be thorough and cite all sources.""",
                 expected_output="Comprehensive program intelligence report with sources",
-                agent=self.agent_team.research_agent
+                agent=self.agent_team.research_agent,
             )
             agents_used.append("research")
 
@@ -159,7 +163,7 @@ class BDWorkflows:
                 Store any significant insights found.""",
                 expected_output="Opportunity analysis with scoring and risk assessment",
                 agent=self.agent_team.analyst_agent,
-                context=[research_task]
+                context=[research_task],
             )
             agents_used.append("analyst")
 
@@ -177,7 +181,7 @@ class BDWorkflows:
                 Check contact context for any prior relationships.""",
                 expected_output="Strategic approach plan with priority contacts and action items",
                 agent=self.agent_team.strategy_agent,
-                context=[research_task, analyst_task]
+                context=[research_task, analyst_task],
             )
             agents_used.append("strategy")
 
@@ -196,7 +200,7 @@ class BDWorkflows:
                 Format as a professional BD playbook.""",
                 expected_output="Complete BD playbook document",
                 agent=self.agent_team.writer_agent,
-                context=[research_task, analyst_task, strategy_task]
+                context=[research_task, analyst_task, strategy_task],
             )
             agents_used.append("writer")
 
@@ -206,17 +210,15 @@ class BDWorkflows:
                     self.agent_team.research_agent,
                     self.agent_team.analyst_agent,
                     self.agent_team.strategy_agent,
-                    self.agent_team.writer_agent
+                    self.agent_team.writer_agent,
                 ],
                 tasks=[research_task, analyst_task, strategy_task, writer_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=True,
             )
 
             # Run the crew (CrewAI is sync, wrap in asyncio)
-            result = await asyncio.get_event_loop().run_in_executor(
-                None, crew.kickoff
-            )
+            result = await asyncio.get_event_loop().run_in_executor(None, crew.kickoff)
 
             # Parse the output
             playbook = str(result)
@@ -233,7 +235,7 @@ class BDWorkflows:
             self.memory.remember(
                 f"Program Analysis for {program_name}: {playbook[:500]}",
                 memory_type="analysis",
-                metadata={"program": program_name, "workflow": "program_analysis"}
+                metadata={"program": program_name, "workflow": "program_analysis"},
             )
 
             return ProgramAnalysisResult(
@@ -242,13 +244,13 @@ class BDWorkflows:
                 output={
                     "program": program_name,
                     "playbook": playbook,
-                    "talking_points": talking_points
+                    "talking_points": talking_points,
                 },
                 agents_used=agents_used,
                 execution_time=time.time() - start_time,
                 playbook=playbook,
                 talking_points=talking_points,
-                opportunity_score=75.0  # Would be extracted from analyst output
+                opportunity_score=75.0,  # Would be extracted from analyst output
             )
 
         except Exception as e:
@@ -259,7 +261,7 @@ class BDWorkflows:
                 output={"error": str(e)},
                 agents_used=agents_used,
                 execution_time=time.time() - start_time,
-                error=str(e)
+                error=str(e),
             )
 
     async def prepare_outreach(self, contact_name: str) -> OutreachPrepResult:
@@ -270,6 +272,7 @@ class BDWorkflows:
         Returns personalized outreach materials for the contact.
         """
         import time
+
         start_time = time.time()
 
         if not self.agent_team.available:
@@ -279,7 +282,7 @@ class BDWorkflows:
                 output={"error": "CrewAI not available"},
                 agents_used=[],
                 execution_time=time.time() - start_time,
-                error="CrewAI not available"
+                error="CrewAI not available",
             )
 
         agents_used = []
@@ -299,7 +302,7 @@ class BDWorkflows:
 
                 Search contacts and check memory for any context.""",
                 expected_output="Comprehensive contact profile with background",
-                agent=self.agent_team.research_agent
+                agent=self.agent_team.research_agent,
             )
             agents_used.append("research")
 
@@ -317,7 +320,7 @@ class BDWorkflows:
                 This helps determine what to discuss with them.""",
                 expected_output="Analysis of opportunities and talking points for this contact",
                 agent=self.agent_team.analyst_agent,
-                context=[research_task]
+                context=[research_task],
             )
             agents_used.append("analyst")
 
@@ -335,7 +338,7 @@ class BDWorkflows:
                 Consider any past relationship context.""",
                 expected_output="Detailed outreach strategy with approach recommendations",
                 agent=self.agent_team.strategy_agent,
-                context=[research_task, analyst_task]
+                context=[research_task, analyst_task],
             )
             agents_used.append("strategy")
 
@@ -367,7 +370,7 @@ class BDWorkflows:
                 Make all materials feel personal, not templated.""",
                 expected_output="Three personalized outreach pieces: call script, email, LinkedIn",
                 agent=self.agent_team.writer_agent,
-                context=[research_task, analyst_task, strategy_task]
+                context=[research_task, analyst_task, strategy_task],
             )
             agents_used.append("writer")
 
@@ -377,16 +380,14 @@ class BDWorkflows:
                     self.agent_team.research_agent,
                     self.agent_team.analyst_agent,
                     self.agent_team.strategy_agent,
-                    self.agent_team.writer_agent
+                    self.agent_team.writer_agent,
                 ],
                 tasks=[research_task, analyst_task, strategy_task, writer_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=True,
             )
 
-            result = await asyncio.get_event_loop().run_in_executor(
-                None, crew.kickoff
-            )
+            result = await asyncio.get_event_loop().run_in_executor(None, crew.kickoff)
 
             # Parse the output (simple parsing)
             output_str = str(result)
@@ -415,21 +416,18 @@ class BDWorkflows:
             self.memory.remember(
                 f"Outreach prep for {contact_name}: Created call script, email, LinkedIn",
                 memory_type="outreach",
-                metadata={"contact": contact_name, "workflow": "outreach_prep"}
+                metadata={"contact": contact_name, "workflow": "outreach_prep"},
             )
 
             return OutreachPrepResult(
                 workflow_name="outreach_prep",
                 success=True,
-                output={
-                    "contact": contact_name,
-                    "materials_generated": True
-                },
+                output={"contact": contact_name, "materials_generated": True},
                 agents_used=agents_used,
                 execution_time=time.time() - start_time,
                 call_script=call_script or output_str,
                 email_template=email_template,
-                linkedin_message=linkedin_message
+                linkedin_message=linkedin_message,
             )
 
         except Exception as e:
@@ -440,7 +438,7 @@ class BDWorkflows:
                 output={"error": str(e)},
                 agents_used=agents_used,
                 execution_time=time.time() - start_time,
-                error=str(e)
+                error=str(e),
             )
 
     async def generate_weekly_intel(self) -> WeeklyIntelResult:
@@ -451,6 +449,7 @@ class BDWorkflows:
         Returns a weekly BD intelligence briefing.
         """
         import time
+
         start_time = time.time()
 
         if not self.agent_team.available:
@@ -460,7 +459,7 @@ class BDWorkflows:
                 output={"error": "CrewAI not available"},
                 agents_used=[],
                 execution_time=time.time() - start_time,
-                error="CrewAI not available"
+                error="CrewAI not available",
             )
 
         agents_used = []
@@ -479,7 +478,7 @@ class BDWorkflows:
 
                 Focus on actionable intelligence, not noise.""",
                 expected_output="Summary of new intelligence with sources",
-                agent=self.agent_team.research_agent
+                agent=self.agent_team.research_agent,
             )
             agents_used.append("research")
 
@@ -497,7 +496,7 @@ class BDWorkflows:
                 Store significant insights for tracking.""",
                 expected_output="Ranked list of hot programs with scores and signals",
                 agent=self.agent_team.analyst_agent,
-                context=[research_task]
+                context=[research_task],
             )
             agents_used.append("analyst")
 
@@ -515,7 +514,7 @@ class BDWorkflows:
                 Be specific and actionable.""",
                 expected_output="Prioritized action plan for the week",
                 agent=self.agent_team.strategy_agent,
-                context=[research_task, analyst_task]
+                context=[research_task, analyst_task],
             )
             agents_used.append("strategy")
 
@@ -546,7 +545,7 @@ class BDWorkflows:
                 Keep it concise but comprehensive.""",
                 expected_output="Complete weekly intelligence briefing document",
                 agent=self.agent_team.writer_agent,
-                context=[research_task, analyst_task, strategy_task]
+                context=[research_task, analyst_task, strategy_task],
             )
             agents_used.append("writer")
 
@@ -556,16 +555,14 @@ class BDWorkflows:
                     self.agent_team.research_agent,
                     self.agent_team.analyst_agent,
                     self.agent_team.strategy_agent,
-                    self.agent_team.writer_agent
+                    self.agent_team.writer_agent,
                 ],
                 tasks=[research_task, analyst_task, strategy_task, writer_task],
                 process=Process.sequential,
-                verbose=True
+                verbose=True,
             )
 
-            result = await asyncio.get_event_loop().run_in_executor(
-                None, crew.kickoff
-            )
+            result = await asyncio.get_event_loop().run_in_executor(None, crew.kickoff)
 
             output_str = str(result)
 
@@ -575,10 +572,9 @@ class BDWorkflows:
                 hp_section = output_str.split("HOT PROGRAMS")[1].split("##")[0]
                 for i, line in enumerate(hp_section.split("\n")):
                     if line.strip() and line.strip()[0].isdigit():
-                        hot_programs.append({
-                            "rank": i + 1,
-                            "description": line.strip()
-                        })
+                        hot_programs.append(
+                            {"rank": i + 1, "description": line.strip()}
+                        )
 
             # Parse action items
             action_items = []
@@ -598,7 +594,10 @@ class BDWorkflows:
             self.memory.remember(
                 f"Weekly Intel Report generated: {len(hot_programs)} hot programs, {len(action_items)} action items",
                 memory_type="report",
-                metadata={"workflow": "weekly_intel", "date": datetime.now().isoformat()}
+                metadata={
+                    "workflow": "weekly_intel",
+                    "date": datetime.now().isoformat(),
+                },
             )
 
             return WeeklyIntelResult(
@@ -607,13 +606,13 @@ class BDWorkflows:
                 output={
                     "report": output_str,
                     "hot_programs_count": len(hot_programs),
-                    "action_items_count": len(action_items)
+                    "action_items_count": len(action_items),
                 },
                 agents_used=agents_used,
                 execution_time=time.time() - start_time,
                 hot_programs=hot_programs,
                 action_items=action_items,
-                executive_summary=executive_summary
+                executive_summary=executive_summary,
             )
 
         except Exception as e:
@@ -624,7 +623,7 @@ class BDWorkflows:
                 output={"error": str(e)},
                 agents_used=agents_used,
                 execution_time=time.time() - start_time,
-                error=str(e)
+                error=str(e),
             )
 
 
@@ -653,7 +652,7 @@ async def analyze_program(program_name: str) -> Dict:
         "talking_points": result.talking_points,
         "opportunity_score": result.opportunity_score,
         "success": result.success,
-        "error": result.error
+        "error": result.error,
     }
 
 
@@ -666,7 +665,7 @@ async def prepare_outreach(contact_name: str) -> Dict:
         "email_template": result.email_template,
         "linkedin_message": result.linkedin_message,
         "success": result.success,
-        "error": result.error
+        "error": result.error,
     }
 
 
@@ -680,5 +679,5 @@ async def generate_weekly_intel() -> Dict:
         "action_items": result.action_items,
         "executive_summary": result.executive_summary,
         "success": result.success,
-        "error": result.error
+        "error": result.error,
     }

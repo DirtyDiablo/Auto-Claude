@@ -15,11 +15,14 @@ from dataclasses import dataclass
 logger = logging.getLogger(__name__)
 
 from Engine8_Knowledge.search.hybrid_engine import (
-    HybridSearchEngine, SearchResponse, SearchResult,
+    HybridSearchEngine,
+    SearchResponse,
+    SearchResult,
     get_hybrid_search_engine,
 )
 from Engine8_Knowledge.search.graph_retriever import (
-    GraphRetriever, get_graph_retriever,
+    GraphRetriever,
+    get_graph_retriever,
 )
 
 
@@ -28,37 +31,79 @@ from Engine8_Knowledge.search.graph_retriever import (
 # ---------------------------------------------------------------------------
 
 GRAPH_KEYWORDS = {
-    "connected", "connection", "path", "relationship", "introduction",
-    "introduce", "knows", "works with", "reports to", "team",
-    "org chart", "network", "link", "between",
+    "connected",
+    "connection",
+    "path",
+    "relationship",
+    "introduction",
+    "introduce",
+    "knows",
+    "works with",
+    "reports to",
+    "team",
+    "org chart",
+    "network",
+    "link",
+    "between",
 }
 
 ENTITY_KEYWORDS = {
-    "who is", "who are", "what company", "where does", "what programs",
-    "tell me about", "profile", "contact",
+    "who is",
+    "who are",
+    "what company",
+    "where does",
+    "what programs",
+    "tell me about",
+    "profile",
+    "contact",
 }
 
 KEYWORD_SIGNALS = {
-    "ts/sci", "ci poly", "secret", "top secret", "clearance",
-    "engineer", "analyst", "manager", "director", "developer",
-    "san diego", "fort meade", "herndon", "reston", "mclean",
+    "ts/sci",
+    "ci poly",
+    "secret",
+    "top secret",
+    "clearance",
+    "engineer",
+    "analyst",
+    "manager",
+    "director",
+    "developer",
+    "san diego",
+    "fort meade",
+    "herndon",
+    "reston",
+    "mclean",
 }
 
 PROGRAM_NAMES = {
-    "dcgs", "af dcgs", "dcgs-a", "dcgs-n", "jstars", "gbsd",
-    "sentinel", "sbirs", "opir", "jadc2", "abms", "cjadc2",
+    "dcgs",
+    "af dcgs",
+    "dcgs-a",
+    "dcgs-n",
+    "jstars",
+    "gbsd",
+    "sentinel",
+    "sbirs",
+    "opir",
+    "jadc2",
+    "abms",
+    "cjadc2",
 }
 
 
 @dataclass
 class SearchMode:
     """Search mode with description."""
+
     name: str
     description: str
 
 
 SEARCH_MODES = {
-    "auto": SearchMode("auto", "Automatically classify query and route to optimal channel"),
+    "auto": SearchMode(
+        "auto", "Automatically classify query and route to optimal channel"
+    ),
     "hybrid": SearchMode("hybrid", "Dense + Sparse BM25 with RRF fusion"),
     "graph": SearchMode("graph", "Neo4j graph-first with vector fallback"),
     "graphrag": SearchMode("graphrag", "Triple-channel: dense + sparse + graph"),
@@ -96,7 +141,10 @@ class UnifiedSearch:
     def expander(self) -> Any:
         if self._expander is None:
             try:
-                from Engine8_Knowledge.embeddings.query_expander import get_query_expander
+                from Engine8_Knowledge.embeddings.query_expander import (
+                    get_query_expander,
+                )
+
                 self._expander = get_query_expander()
             except Exception:
                 pass
@@ -142,15 +190,20 @@ class UnifiedSearch:
         if mode == "graph":
             response = self._graph_search(expanded, top_k, filters)
         elif mode == "graphrag":
-            response = self._graphrag_search(expanded, collections, top_k, use_rerank, filters)
+            response = self._graphrag_search(
+                expanded, collections, top_k, use_rerank, filters
+            )
         elif mode == "keyword":
             response = self._keyword_search(expanded, collections, top_k, filters)
         elif mode == "vector":
             response = self._vector_search(expanded, collections, top_k, filters)
         else:  # hybrid (default)
             response = self.hybrid.search(
-                expanded, collections, top_k,
-                use_rerank=use_rerank, filters=filters,
+                expanded,
+                collections,
+                top_k,
+                use_rerank=use_rerank,
+                filters=filters,
             )
 
         response.mode_used = mode
@@ -159,7 +212,8 @@ class UnifiedSearch:
 
         logger.info(
             "unified_search_complete",
-            query=query[:50], mode=mode,
+            query=query[:50],
+            mode=mode,
             results=len(response.results),
             latency_ms=response.search_latency_ms,
         )
@@ -181,7 +235,10 @@ class UnifiedSearch:
 
     def get_modes(self) -> dict[str, dict]:
         """Return available search modes."""
-        return {k: {"name": v.name, "description": v.description} for k, v in SEARCH_MODES.items()}
+        return {
+            k: {"name": v.name, "description": v.description}
+            for k, v in SEARCH_MODES.items()
+        }
 
     # -- Query classification --
 
@@ -265,14 +322,20 @@ class UnifiedSearch:
         try:
             graph_results = self.graph.retrieve(query, limit=20)
             graph_dicts = [
-                {"id": gr.id, "name": gr.name, "context_text": gr.context_text, **gr.properties}
+                {
+                    "id": gr.id,
+                    "name": gr.name,
+                    "context_text": gr.context_text,
+                    **gr.properties,
+                }
                 for gr in graph_results
             ]
         except Exception:
             graph_dicts = []
 
         return self.hybrid.search_with_graph(
-            query, collections,
+            query,
+            collections,
             graph_results=graph_dicts,
             top_k=top_k,
             filters=filters,
@@ -287,7 +350,9 @@ class UnifiedSearch:
     ) -> SearchResponse:
         """BM25 keyword-heavy search (sparse weight = 0.8)."""
         return self.hybrid.search(
-            query, collections, top_k,
+            query,
+            collections,
+            top_k,
             use_rerank=False,
             dense_weight=0.2,
             sparse_weight=0.8,
@@ -303,7 +368,9 @@ class UnifiedSearch:
     ) -> SearchResponse:
         """Dense vector-only search (legacy behavior)."""
         return self.hybrid.search(
-            query, collections, top_k,
+            query,
+            collections,
+            top_k,
             use_rerank=False,
             dense_weight=1.0,
             sparse_weight=0.0,

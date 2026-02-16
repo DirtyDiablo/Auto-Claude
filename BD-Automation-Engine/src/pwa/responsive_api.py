@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class DeviceType(Enum):
     DESKTOP = "desktop"
     TABLET = "tablet"
@@ -30,9 +31,9 @@ class DeviceType(Enum):
 
 class NetworkQuality(Enum):
     EXCELLENT = "excellent"  # 4G+ / WiFi
-    GOOD = "good"           # 4G
-    FAIR = "fair"            # 3G
-    POOR = "poor"            # 2G / slow
+    GOOD = "good"  # 4G
+    FAIR = "fair"  # 3G
+    POOR = "poor"  # 2G / slow
     OFFLINE = "offline"
 
 
@@ -46,6 +47,7 @@ class ResponseFormat(Enum):
 @dataclass
 class ClientProfile:
     """Detected client capabilities and preferences."""
+
     profile_id: str
     device_type: DeviceType = DeviceType.DESKTOP
     network_quality: NetworkQuality = NetworkQuality.EXCELLENT
@@ -72,6 +74,7 @@ class ClientProfile:
 @dataclass
 class AdaptiveResponse:
     """Metadata about an adapted API response."""
+
     original_size_bytes: int = 0
     adapted_size_bytes: int = 0
     format_used: ResponseFormat = ResponseFormat.FULL
@@ -113,24 +116,48 @@ _FORMAT_BY_NETWORK = {
 }
 
 _FULL_FIELDS = [
-    "id", "name", "title", "description", "status", "score",
-    "company", "email", "phone", "program", "tier",
-    "created_at", "updated_at", "metadata", "tags", "notes",
+    "id",
+    "name",
+    "title",
+    "description",
+    "status",
+    "score",
+    "company",
+    "email",
+    "phone",
+    "program",
+    "tier",
+    "created_at",
+    "updated_at",
+    "metadata",
+    "tags",
+    "notes",
 ]
 
 _COMPACT_FIELDS = [
-    "id", "name", "title", "status", "score",
-    "company", "program", "tier", "created_at",
+    "id",
+    "name",
+    "title",
+    "status",
+    "score",
+    "company",
+    "program",
+    "tier",
+    "created_at",
 ]
 
 _MINIMAL_FIELDS = [
-    "id", "name", "status", "score",
+    "id",
+    "name",
+    "status",
+    "score",
 ]
 
 
 # =========================================
 # RESPONSIVE API LAYER
 # =========================================
+
 
 class ResponsiveAPILayer:
     """Adapts API responses based on client device type,
@@ -145,10 +172,12 @@ class ResponsiveAPILayer:
 
     # ----- client profiles -----
 
-    def detect_client(self, user_agent: str = "", screen_width: int = 0,
-                      network_hint: str = "") -> ClientProfile:
+    def detect_client(
+        self, user_agent: str = "", screen_width: int = 0, network_hint: str = ""
+    ) -> ClientProfile:
         """Detect client capabilities from hints."""
         import hashlib
+
         pid = f"client_{hashlib.md5(f'{user_agent}:{screen_width}:{time.time()}'.encode()).hexdigest()[:12]}"
 
         device = self._detect_device(user_agent, screen_width)
@@ -158,7 +187,10 @@ class ResponsiveAPILayer:
         # Override format for small devices
         if device == DeviceType.WATCH:
             fmt = ResponseFormat.MINIMAL
-        elif device == DeviceType.MOBILE and network in (NetworkQuality.FAIR, NetworkQuality.POOR):
+        elif device == DeviceType.MOBILE and network in (
+            NetworkQuality.FAIR,
+            NetworkQuality.POOR,
+        ):
             fmt = ResponseFormat.MINIMAL
 
         max_payload = {
@@ -185,7 +217,9 @@ class ResponsiveAPILayer:
 
     # ----- response adaptation -----
 
-    def adapt_response(self, data: List[Dict[str, Any]], profile: Optional[ClientProfile] = None) -> Dict[str, Any]:
+    def adapt_response(
+        self, data: List[Dict[str, Any]], profile: Optional[ClientProfile] = None
+    ) -> Dict[str, Any]:
         """Adapt a list of records based on client profile."""
         self._request_count += 1
 

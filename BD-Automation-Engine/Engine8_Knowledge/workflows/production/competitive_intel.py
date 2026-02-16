@@ -15,7 +15,10 @@ from typing import Any, Dict
 import structlog
 
 from Engine8_Knowledge.workflows.graph_builder import (
-    EdgeSpec, NodeSpec, RetryConfig, WorkflowDefinition,
+    EdgeSpec,
+    NodeSpec,
+    RetryConfig,
+    WorkflowDefinition,
 )
 
 logger = structlog.get_logger(__name__)
@@ -47,6 +50,7 @@ COMPETITIVE_INTEL_STATE = {
 # Node functions
 # ---------------------------------------------------------------------------
 
+
 async def plan_collection(state: Dict[str, Any]) -> Dict[str, Any]:
     """Determine which sources to scrape based on schedule and focus areas."""
     plan = state.get("collection_plan", {})
@@ -57,17 +61,25 @@ async def plan_collection(state: Dict[str, Any]) -> Dict[str, Any]:
             "sources": ["job_boards", "sam_gov", "linkedin", "news"],
             "focus_areas": ["DCGS", "JSTARS", "GBSD", "Next-Gen ISR"],
             "competitors": [
-                "Raytheon", "Northrop Grumman", "L3Harris",
-                "General Dynamics", "Leidos", "BAE Systems",
-                "Booz Allen Hamilton", "SAIC", "ManTech",
+                "Raytheon",
+                "Northrop Grumman",
+                "L3Harris",
+                "General Dynamics",
+                "Leidos",
+                "BAE Systems",
+                "Booz Allen Hamilton",
+                "SAIC",
+                "ManTech",
             ],
             "date_range_days": 7,
         }
 
     state["collection_plan"] = plan
-    logger.info("competitive_intel.plan_collection",
-                sources=len(plan["sources"]),
-                focus_areas=len(plan["focus_areas"]))
+    logger.info(
+        "competitive_intel.plan_collection",
+        sources=len(plan["sources"]),
+        focus_areas=len(plan["focus_areas"]),
+    )
     return state
 
 
@@ -81,25 +93,30 @@ async def scrape_job_boards(state: Dict[str, Any]) -> Dict[str, Any]:
     try:
         # Query Qdrant for recent jobs from competitors
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         for competitor in competitors[:10]:
             try:
                 hits = client.scroll(
                     collection_name="jobs",
-                    scroll_filter={"must": [{"key": "company", "match": {"value": competitor}}]},
+                    scroll_filter={
+                        "must": [{"key": "company", "match": {"value": competitor}}]
+                    },
                     limit=20,
                 )
                 if hits and hits[0]:
                     for point in hits[0]:
-                        results.append({
-                            "source": "job_board",
-                            "company": competitor,
-                            "title": point.payload.get("title", ""),
-                            "location": point.payload.get("location", ""),
-                            "clearance": point.payload.get("clearance", ""),
-                            "program": point.payload.get("program", ""),
-                        })
+                        results.append(
+                            {
+                                "source": "job_board",
+                                "company": competitor,
+                                "title": point.payload.get("title", ""),
+                                "location": point.payload.get("location", ""),
+                                "clearance": point.payload.get("clearance", ""),
+                                "program": point.payload.get("program", ""),
+                            }
+                        )
             except Exception:
                 pass
 
@@ -119,27 +136,35 @@ async def scrape_sam_gov(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         import os
+
         sam_api_key = os.getenv("SAM_GOV_API_KEY")
         if sam_api_key:
             import httpx
+
             focus = state.get("collection_plan", {}).get("focus_areas", [])
             async with httpx.AsyncClient() as client:
                 for keyword in focus[:5]:
                     try:
                         resp = await client.get(
                             "https://api.sam.gov/opportunities/v2/search",
-                            params={"api_key": sam_api_key, "keyword": keyword, "limit": 10},
+                            params={
+                                "api_key": sam_api_key,
+                                "keyword": keyword,
+                                "limit": 10,
+                            },
                             timeout=30.0,
                         )
                         if resp.status_code == 200:
                             for opp in resp.json().get("opportunitiesData", []):
-                                results.append({
-                                    "source": "sam_gov",
-                                    "title": opp.get("title", ""),
-                                    "agency": opp.get("department", ""),
-                                    "type": opp.get("type", ""),
-                                    "posted_date": opp.get("postedDate", ""),
-                                })
+                                results.append(
+                                    {
+                                        "source": "sam_gov",
+                                        "title": opp.get("title", ""),
+                                        "agency": opp.get("department", ""),
+                                        "type": opp.get("type", ""),
+                                        "posted_date": opp.get("postedDate", ""),
+                                    }
+                                )
                     except Exception:
                         pass
         else:
@@ -164,12 +189,14 @@ async def scrape_linkedin(state: Dict[str, Any]) -> Dict[str, Any]:
     try:
         competitors = state.get("collection_plan", {}).get("competitors", [])
         for competitor in competitors:
-            results.append({
-                "source": "linkedin",
-                "company": competitor,
-                "signal_type": "hiring_trend",
-                "details": f"Monitoring {competitor} LinkedIn activity",
-            })
+            results.append(
+                {
+                    "source": "linkedin",
+                    "company": competitor,
+                    "signal_type": "hiring_trend",
+                    "details": f"Monitoring {competitor} LinkedIn activity",
+                }
+            )
     except Exception as e:
         logger.warning("competitive_intel.linkedin_error", error=str(e))
 
@@ -188,23 +215,28 @@ async def scrape_news(state: Dict[str, Any]) -> Dict[str, Any]:
 
         # Search Qdrant documents collection for recent intel
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         for keyword in (focus + competitors)[:10]:
             try:
                 hits = client.scroll(
                     collection_name="documents",
-                    scroll_filter={"must": [{"key": "type", "match": {"value": "news"}}]},
+                    scroll_filter={
+                        "must": [{"key": "type", "match": {"value": "news"}}]
+                    },
                     limit=5,
                 )
                 if hits and hits[0]:
                     for point in hits[0]:
-                        results.append({
-                            "source": "news",
-                            "title": point.payload.get("title", ""),
-                            "company": point.payload.get("company", ""),
-                            "date": point.payload.get("date", ""),
-                        })
+                        results.append(
+                            {
+                                "source": "news",
+                                "title": point.payload.get("title", ""),
+                                "company": point.payload.get("company", ""),
+                                "date": point.payload.get("date", ""),
+                            }
+                        )
             except Exception:
                 pass
 
@@ -242,8 +274,9 @@ async def merge_raw_intel(state: Dict[str, Any]) -> Dict[str, Any]:
         "linkedin": len(state.get("raw_linkedin", [])),
         "news": len(state.get("raw_news", [])),
     }
-    logger.info("competitive_intel.merged", total=len(merged),
-                sources=state["raw_intel"])
+    logger.info(
+        "competitive_intel.merged", total=len(merged), sources=state["raw_intel"]
+    )
     return state
 
 
@@ -274,18 +307,22 @@ async def analyze_with_llm(state: Dict[str, Any]) -> Dict[str, Any]:
     # Identify high-confidence alerts
     for company, jobs in analysis["hiring_trends"].items():
         if len(jobs) >= 5:
-            analysis["high_confidence_alerts"].append({
-                "type": "hiring_surge",
-                "company": company,
-                "count": len(jobs),
-                "confidence": min(0.9, 0.5 + len(jobs) * 0.1),
-                "description": f"{company} posting {len(jobs)} new positions — potential program ramp-up",
-            })
+            analysis["high_confidence_alerts"].append(
+                {
+                    "type": "hiring_surge",
+                    "company": company,
+                    "count": len(jobs),
+                    "confidence": min(0.9, 0.5 + len(jobs) * 0.1),
+                    "description": f"{company} posting {len(jobs)} new positions — potential program ramp-up",
+                }
+            )
 
     state["analysis"] = analysis
-    logger.info("competitive_intel.analyzed",
-                alerts=len(analysis["high_confidence_alerts"]),
-                signals=analysis["total_signals"])
+    logger.info(
+        "competitive_intel.analyzed",
+        alerts=len(analysis["high_confidence_alerts"]),
+        signals=analysis["total_signals"],
+    )
     return state
 
 
@@ -293,8 +330,9 @@ async def validate_findings(state: Dict[str, Any]) -> Dict[str, Any]:
     """Human approval gate for high-confidence competitive alerts.
     Interrupt node — workflow pauses for human review."""
     state["human_validated"] = state.get("human_validated", False)
-    logger.info("competitive_intel.validate_findings",
-                validated=state["human_validated"])
+    logger.info(
+        "competitive_intel.validate_findings", validated=state["human_validated"]
+    )
     return state
 
 
@@ -305,6 +343,7 @@ async def cross_reference_neo4j(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
         mgr = get_neo4j_manager()
 
         companies_seen = set()
@@ -323,11 +362,13 @@ async def cross_reference_neo4j(state: Dict[str, Any]) -> Dict[str, Any]:
                     """
                     records = await mgr.execute_query(query, {"name": company})
                     for rec in records:
-                        graph_links.append({
-                            "company": rec["company"],
-                            "known_contacts": rec["contacts"],
-                            "programs": rec["programs"],
-                        })
+                        graph_links.append(
+                            {
+                                "company": rec["company"],
+                                "known_contacts": rec["contacts"],
+                                "programs": rec["programs"],
+                            }
+                        )
                 except Exception:
                     pass
 
@@ -384,11 +425,16 @@ async def generate_briefing(state: Dict[str, Any]) -> Dict[str, Any]:
             f"Key: {', '.join(a['description'][:80] for a in alerts[:3])}."
         )
     else:
-        briefing["executive_summary"] = "No high-confidence alerts detected in this collection cycle."
+        briefing["executive_summary"] = (
+            "No high-confidence alerts detected in this collection cycle."
+        )
 
     state["briefing"] = briefing
-    logger.info("competitive_intel.briefing_generated",
-                alerts=len(alerts), signals=briefing["total_signals"])
+    logger.info(
+        "competitive_intel.briefing_generated",
+        alerts=len(alerts),
+        signals=briefing["total_signals"],
+    )
     return state
 
 
@@ -410,6 +456,7 @@ async def distribute_briefing(state: Dict[str, Any]) -> Dict[str, Any]:
 # Workflow Definition
 # ---------------------------------------------------------------------------
 
+
 def get_competitive_intel_definition() -> WorkflowDefinition:
     """Return the production competitive intelligence workflow definition."""
     return WorkflowDefinition(
@@ -418,62 +465,75 @@ def get_competitive_intel_definition() -> WorkflowDefinition:
         state_schema=COMPETITIVE_INTEL_STATE,
         nodes={
             "plan_collection": NodeSpec(
-                name="plan_collection", function=plan_collection,
+                name="plan_collection",
+                function=plan_collection,
                 description="Plan source collection strategy",
                 timeout_seconds=30,
             ),
             "scrape_job_boards": NodeSpec(
-                name="scrape_job_boards", function=scrape_job_boards,
+                name="scrape_job_boards",
+                function=scrape_job_boards,
                 description="Scrape job boards for hiring signals",
                 timeout_seconds=180,
             ),
             "scrape_sam_gov": NodeSpec(
-                name="scrape_sam_gov", function=scrape_sam_gov,
+                name="scrape_sam_gov",
+                function=scrape_sam_gov,
                 description="Scrape SAM.gov for contract opportunities",
                 timeout_seconds=180,
             ),
             "scrape_linkedin": NodeSpec(
-                name="scrape_linkedin", function=scrape_linkedin,
+                name="scrape_linkedin",
+                function=scrape_linkedin,
                 description="Gather LinkedIn intelligence",
                 timeout_seconds=180,
             ),
             "scrape_news": NodeSpec(
-                name="scrape_news", function=scrape_news,
+                name="scrape_news",
+                function=scrape_news,
                 description="Scrape news sources",
                 timeout_seconds=180,
             ),
             "merge_raw_intel": NodeSpec(
-                name="merge_raw_intel", function=merge_raw_intel,
+                name="merge_raw_intel",
+                function=merge_raw_intel,
                 description="Merge and deduplicate raw intel",
                 timeout_seconds=60,
             ),
             "analyze_with_llm": NodeSpec(
-                name="analyze_with_llm", function=analyze_with_llm,
+                name="analyze_with_llm",
+                function=analyze_with_llm,
                 description="LLM analysis of merged intel",
                 timeout_seconds=300,
             ),
             "validate_findings": NodeSpec(
-                name="validate_findings", function=validate_findings,
+                name="validate_findings",
+                function=validate_findings,
                 description="Human review of high-confidence alerts",
-                timeout_seconds=3600, retry_on_error=False,
+                timeout_seconds=3600,
+                retry_on_error=False,
             ),
             "cross_reference_neo4j": NodeSpec(
-                name="cross_reference_neo4j", function=cross_reference_neo4j,
+                name="cross_reference_neo4j",
+                function=cross_reference_neo4j,
                 description="Link findings to Neo4j graph entities",
                 timeout_seconds=120,
             ),
             "update_intel_database": NodeSpec(
-                name="update_intel_database", function=update_intel_database,
+                name="update_intel_database",
+                function=update_intel_database,
                 description="Store intel in Qdrant + Neo4j",
                 timeout_seconds=120,
             ),
             "generate_briefing": NodeSpec(
-                name="generate_briefing", function=generate_briefing,
+                name="generate_briefing",
+                function=generate_briefing,
                 description="Generate competitive intelligence briefing",
                 timeout_seconds=120,
             ),
             "distribute_briefing": NodeSpec(
-                name="distribute_briefing", function=distribute_briefing,
+                name="distribute_briefing",
+                function=distribute_briefing,
                 description="Distribute briefing to channels",
                 timeout_seconds=60,
             ),

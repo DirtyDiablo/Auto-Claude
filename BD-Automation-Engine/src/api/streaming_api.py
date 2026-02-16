@@ -45,8 +45,10 @@ router = APIRouter(prefix="/streaming", tags=["streaming-v2"])
 # REQUEST/RESPONSE MODELS
 # =========================================
 
+
 class PublishRequest(BaseModel):
     """Request to publish an event to a stream."""
+
     stream: str = Field(..., description="Target stream name")
     event_type: str = Field(..., description="Event type identifier")
     source: str = Field(default="admin", description="Event source")
@@ -57,6 +59,7 @@ class PublishRequest(BaseModel):
 
 class ReplayRequest(BaseModel):
     """Request to replay events from a stream."""
+
     start_id: str = Field(default="0", description="Start message ID or timestamp")
     end_id: str = Field(default="+", description="End message ID or timestamp")
     count: int = Field(default=100, ge=1, le=1000, description="Max events to return")
@@ -64,6 +67,7 @@ class ReplayRequest(BaseModel):
 
 class TriggerWorkflowRequest(BaseModel):
     """Request to manually trigger a workflow."""
+
     event_type: str = Field(default="manual.trigger", description="Trigger event type")
     payload: dict = Field(default_factory=dict, description="Trigger event payload")
     priority: str = Field(default="medium", description="Trigger priority")
@@ -71,6 +75,7 @@ class TriggerWorkflowRequest(BaseModel):
 
 class StreamInfoResponse(BaseModel):
     """Response for stream list."""
+
     name: str
     max_len: int
     consumer_groups: List[str]
@@ -79,6 +84,7 @@ class StreamInfoResponse(BaseModel):
 
 class EventResponse(BaseModel):
     """Serialized event for API responses."""
+
     event_id: str
     event_type: str
     source: str
@@ -90,6 +96,7 @@ class EventResponse(BaseModel):
 
 class HealthResponse(BaseModel):
     """Streaming system health."""
+
     status: str
     redis_connected: bool
     streams_active: int
@@ -164,15 +171,14 @@ def _event_to_response(event: Event) -> dict:
 # REST ENDPOINTS (14)
 # =========================================
 
+
 @router.get("/stats")
 async def get_stream_stats() -> Dict[str, Any]:
     """Get statistics for all streams."""
     bus = _get_bus()
     stats = await bus.get_stream_stats()
     return {
-        "streams": {
-            name: s.model_dump() for name, s in stats.items()
-        },
+        "streams": {name: s.model_dump() for name, s in stats.items()},
         "total_streams": len(stats),
         "timestamp": datetime.now(timezone.utc).isoformat(),
     }
@@ -184,19 +190,23 @@ async def list_streams() -> Dict[str, Any]:
     bus = _get_bus()
     streams = []
     for name, config in bus.STREAM_DEFINITIONS.items():
-        streams.append({
-            "name": config.name,
-            "max_len": config.max_len,
-            "consumer_groups": config.consumer_groups,
-            "retention_hours": config.retention_hours,
-        })
+        streams.append(
+            {
+                "name": config.name,
+                "max_len": config.max_len,
+                "consumer_groups": config.consumer_groups,
+                "retention_hours": config.retention_hours,
+            }
+        )
     return {"streams": streams, "total": len(streams)}
 
 
 @router.get("/streams/{name}/peek")
 async def peek_stream(
     name: str,
-    count: int = Query(default=10, ge=1, le=100, description="Number of events to peek"),
+    count: int = Query(
+        default=10, ge=1, le=100, description="Number of events to peek"
+    ),
 ) -> Dict[str, Any]:
     """Peek at the latest N events in a stream."""
     bus = _get_bus()
@@ -246,7 +256,9 @@ async def restart_processor(processor_id: str) -> Dict[str, Any]:
     registry = _get_registry()
     success = await registry.restart_processor(processor_id)
     if not success:
-        raise HTTPException(status_code=404, detail=f"Processor not found: {processor_id}")
+        raise HTTPException(
+            status_code=404, detail=f"Processor not found: {processor_id}"
+        )
     return {"status": "restarted", "processor": processor_id}
 
 
@@ -265,7 +277,9 @@ async def trigger_workflow(
     """Manually trigger a workflow."""
     orchestrator = _get_orchestrator()
     if workflow_id not in orchestrator.workflows:
-        raise HTTPException(status_code=404, detail=f"Workflow not found: {workflow_id}")
+        raise HTTPException(
+            status_code=404, detail=f"Workflow not found: {workflow_id}"
+        )
 
     trigger_event = Event(
         event_type=request.event_type,
@@ -301,7 +315,9 @@ async def get_execution(execution_id: str) -> Dict[str, Any]:
     orchestrator = _get_orchestrator()
     execution = await orchestrator.get_execution_status(execution_id)
     if not execution:
-        raise HTTPException(status_code=404, detail=f"Execution not found: {execution_id}")
+        raise HTTPException(
+            status_code=404, detail=f"Execution not found: {execution_id}"
+        )
     return execution.model_dump()
 
 
@@ -408,6 +424,7 @@ async def streaming_health() -> Dict[str, Any]:
 # WEBSOCKET ENDPOINTS (4)
 # =========================================
 
+
 @router.websocket("/ws/dashboard")
 async def ws_dashboard(websocket: WebSocket):
     """WebSocket: live dashboard feed."""
@@ -440,7 +457,10 @@ async def ws_system(websocket: WebSocket):
 # ROUTER INTEGRATION HELPER
 # =========================================
 
-def include_streaming_v2_router(app, event_bus=None, redis_url="redis://localhost:6379"):
+
+def include_streaming_v2_router(
+    app, event_bus=None, redis_url="redis://localhost:6379"
+):
     """
     Include the Phase 31A streaming router in the main FastAPI app.
 

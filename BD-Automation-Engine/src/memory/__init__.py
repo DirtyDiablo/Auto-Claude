@@ -15,8 +15,15 @@ from src.memory.cortex import (
 from src.memory.agent_mixin_v2 import MemoryAwareAgentV2
 
 __all__ = [
-    "MemoryCortex", "Memory", "MemoryResult", "MemoryType",
-    "ContextMemory", "AgentContext", "ConsolidationReport",
-    "ProceduralInsight", "ForgetReport", "get_memory_cortex",
+    "MemoryCortex",
+    "Memory",
+    "MemoryResult",
+    "MemoryType",
+    "ContextMemory",
+    "AgentContext",
+    "ConsolidationReport",
+    "ProceduralInsight",
+    "ForgetReport",
+    "get_memory_cortex",
     "MemoryAwareAgentV2",
 ]

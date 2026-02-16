@@ -30,18 +30,21 @@ logger = logging.getLogger(__name__)
 # Optional dependencies
 try:
     from transformers import pipeline as hf_pipeline
+
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
 
 try:
     import instructor
+
     INSTRUCTOR_AVAILABLE = True
 except ImportError:
     INSTRUCTOR_AVAILABLE = False
 
 try:
     from pydantic import BaseModel, Field
+
     PYDANTIC_AVAILABLE = True
 except ImportError:
     PYDANTIC_AVAILABLE = False
@@ -100,9 +103,11 @@ CLEARANCE_LEVELS = [
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ClassificationResult:
     """Result from classification pipeline."""
+
     text: str
     category: str
     confidence: float
@@ -114,6 +119,7 @@ class ClassificationResult:
 @dataclass
 class ContactClassification:
     """Classification result for a BD contact."""
+
     name: str
     tier: int  # 1-6
     tier_name: str
@@ -128,6 +134,7 @@ class ContactClassification:
 # ---------------------------------------------------------------------------
 # Tier 1: Rule-based classification
 # ---------------------------------------------------------------------------
+
 
 class RuleClassifier:
     """Pattern matching classifier — instant, free, ~60-70% coverage."""
@@ -231,35 +238,73 @@ class RuleClassifier:
 
     # File extension → category
     FILE_EXT_MAP = {
-        ".py": "source_code", ".js": "source_code", ".ts": "source_code",
-        ".tsx": "source_code", ".jsx": "source_code", ".rs": "source_code",
-        ".go": "source_code", ".java": "source_code", ".c": "source_code",
-        ".cpp": "source_code", ".cs": "source_code", ".rb": "source_code",
-        ".php": "source_code", ".swift": "source_code", ".kt": "source_code",
-        ".sql": "source_code", ".sh": "source_code", ".bash": "source_code",
-        ".json": "configuration", ".yaml": "configuration", ".yml": "configuration",
-        ".toml": "configuration", ".ini": "configuration", ".cfg": "configuration",
-        ".env": "configuration", ".xml": "configuration",
-        ".md": "documentation", ".rst": "documentation", ".txt": "documentation",
-        ".pdf": "documentation", ".docx": "documentation",
-        ".csv": "data_file", ".xlsx": "data_file", ".xls": "data_file",
-        ".db": "data_file", ".sqlite": "data_file", ".parquet": "data_file",
-        ".png": "media", ".jpg": "media", ".jpeg": "media", ".gif": "media",
-        ".svg": "media", ".mp4": "media", ".mp3": "media",
+        ".py": "source_code",
+        ".js": "source_code",
+        ".ts": "source_code",
+        ".tsx": "source_code",
+        ".jsx": "source_code",
+        ".rs": "source_code",
+        ".go": "source_code",
+        ".java": "source_code",
+        ".c": "source_code",
+        ".cpp": "source_code",
+        ".cs": "source_code",
+        ".rb": "source_code",
+        ".php": "source_code",
+        ".swift": "source_code",
+        ".kt": "source_code",
+        ".sql": "source_code",
+        ".sh": "source_code",
+        ".bash": "source_code",
+        ".json": "configuration",
+        ".yaml": "configuration",
+        ".yml": "configuration",
+        ".toml": "configuration",
+        ".ini": "configuration",
+        ".cfg": "configuration",
+        ".env": "configuration",
+        ".xml": "configuration",
+        ".md": "documentation",
+        ".rst": "documentation",
+        ".txt": "documentation",
+        ".pdf": "documentation",
+        ".docx": "documentation",
+        ".csv": "data_file",
+        ".xlsx": "data_file",
+        ".xls": "data_file",
+        ".db": "data_file",
+        ".sqlite": "data_file",
+        ".parquet": "data_file",
+        ".png": "media",
+        ".jpg": "media",
+        ".jpeg": "media",
+        ".gif": "media",
+        ".svg": "media",
+        ".mp4": "media",
+        ".mp3": "media",
     }
 
     # Directory name → category
     DIR_CATEGORY_MAP = {
-        "test": "test_file", "tests": "test_file", "__tests__": "test_file",
-        "spec": "test_file", "specs": "test_file",
-        "docs": "documentation", "doc": "documentation",
-        "data": "data_file", "datasets": "data_file",
-        "dist": "build_artifact", "build": "build_artifact",
-        "node_modules": "build_artifact", "__pycache__": "build_artifact",
+        "test": "test_file",
+        "tests": "test_file",
+        "__tests__": "test_file",
+        "spec": "test_file",
+        "specs": "test_file",
+        "docs": "documentation",
+        "doc": "documentation",
+        "data": "data_file",
+        "datasets": "data_file",
+        "dist": "build_artifact",
+        "build": "build_artifact",
+        "node_modules": "build_artifact",
+        "__pycache__": "build_artifact",
         ".git": "build_artifact",
     }
 
-    def classify_contact(self, title: str, name: str = "") -> Optional[ContactClassification]:
+    def classify_contact(
+        self, title: str, name: str = ""
+    ) -> Optional[ContactClassification]:
         """Classify a contact by job title using rule patterns."""
         if not title:
             return None
@@ -278,7 +323,9 @@ class RuleClassifier:
                     break
 
         # Check hiring signals
-        is_hiring = any(re.search(p, title_upper, re.IGNORECASE) for p in self.HIRING_SIGNALS)
+        is_hiring = any(
+            re.search(p, title_upper, re.IGNORECASE) for p in self.HIRING_SIGNALS
+        )
 
         # Check decision maker signals
         is_decision = best_tier <= 2 or any(
@@ -335,7 +382,9 @@ class RuleClassifier:
                     break
 
         # Check for test files by name pattern
-        if category == "source_code" and re.search(r"test_|_test\.|\.test\.|\.spec\.", path.name, re.IGNORECASE):
+        if category == "source_code" and re.search(
+            r"test_|_test\.|\.test\.|\.spec\.", path.name, re.IGNORECASE
+        ):
             category = "test_file"
             confidence = 0.95
 
@@ -351,22 +400,40 @@ class RuleClassifier:
         text_lower = text.lower()
 
         # Person patterns
-        if re.search(r"\b(mr|mrs|ms|dr)\.?\s", text_lower) or re.search(r"\b\w+\s+\w+\s+(at|from|with)\s", text_lower):
-            return ClassificationResult(text=text, category="person", confidence=0.8, tier_used=1)
+        if re.search(r"\b(mr|mrs|ms|dr)\.?\s", text_lower) or re.search(
+            r"\b\w+\s+\w+\s+(at|from|with)\s", text_lower
+        ):
+            return ClassificationResult(
+                text=text, category="person", confidence=0.8, tier_used=1
+            )
 
         # Company patterns
-        if re.search(r"\b(inc|llc|corp|ltd|gdit|leidos|bah|raytheon|northrop|lockheed|saic|caci|peraton)\b", text_lower):
-            return ClassificationResult(text=text, category="company", confidence=0.85, tier_used=1)
+        if re.search(
+            r"\b(inc|llc|corp|ltd|gdit|leidos|bah|raytheon|northrop|lockheed|saic|caci|peraton)\b",
+            text_lower,
+        ):
+            return ClassificationResult(
+                text=text, category="company", confidence=0.85, tier_used=1
+            )
 
         # Program patterns
         if re.search(r"\b(dcgs|gbsd|aegis|abms|jadc2|ngj|peo|program)\b", text_lower):
-            return ClassificationResult(text=text, category="program", confidence=0.8, tier_used=1)
+            return ClassificationResult(
+                text=text, category="program", confidence=0.8, tier_used=1
+            )
 
         # Job patterns
-        if re.search(r"\b(engineer|developer|analyst|manager|opening|position|posting)\b", text_lower):
-            return ClassificationResult(text=text, category="job", confidence=0.6, tier_used=1)
+        if re.search(
+            r"\b(engineer|developer|analyst|manager|opening|position|posting)\b",
+            text_lower,
+        ):
+            return ClassificationResult(
+                text=text, category="job", confidence=0.6, tier_used=1
+            )
 
-        return ClassificationResult(text=text, category="unknown", confidence=0.0, tier_used=1)
+        return ClassificationResult(
+            text=text, category="unknown", confidence=0.0, tier_used=1
+        )
 
     def _detect_functional_area(self, title: str) -> str:
         """Detect functional area from title."""
@@ -391,12 +458,18 @@ class RuleClassifier:
 # Tier 2: Zero-shot classification
 # ---------------------------------------------------------------------------
 
+
 class ZeroShotClassifier:
     """DeBERTa-v3-large zero-shot classifier — no API costs, ~50-100 texts/sec."""
 
-    def __init__(self, model_name: str = "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli"):
+    def __init__(
+        self,
+        model_name: str = "MoritzLaurer/DeBERTa-v3-large-mnli-fever-anli-ling-wanli",
+    ):
         if not TRANSFORMERS_AVAILABLE:
-            raise ImportError("transformers is required. Install with: pip install transformers torch")
+            raise ImportError(
+                "transformers is required. Install with: pip install transformers torch"
+            )
         self._classifier = None
         self.model_name = model_name
 
@@ -452,14 +525,19 @@ class ZeroShotClassifier:
 # Tier 3: LLM-based classification via Instructor
 # ---------------------------------------------------------------------------
 
+
 class LLMClassifier:
     """Structured LLM classifier using Instructor — highest accuracy, API costs."""
 
     def __init__(self, provider: str = "anthropic/claude-3-5-haiku-latest"):
         if not INSTRUCTOR_AVAILABLE:
-            raise ImportError("instructor is required. Install with: pip install instructor")
+            raise ImportError(
+                "instructor is required. Install with: pip install instructor"
+            )
         if not PYDANTIC_AVAILABLE:
-            raise ImportError("pydantic is required. Install with: pip install pydantic")
+            raise ImportError(
+                "pydantic is required. Install with: pip install pydantic"
+            )
         self.provider = provider
         self._client = None
 
@@ -470,17 +548,24 @@ class LLMClassifier:
             self._client = instructor.from_provider(self.provider)
         return self._client
 
-    def classify_contact(self, name: str, title: str, company: str = "") -> ClassificationResult:
+    def classify_contact(
+        self, name: str, title: str, company: str = ""
+    ) -> ClassificationResult:
         """Classify a contact using structured LLM output."""
+
         # Define response model inline to avoid import issues
         class ContactClassificationResponse(BaseModel):
-            tier: int = Field(ge=1, le=6, description="Contact tier (1=Executive, 6=IC)")
+            tier: int = Field(
+                ge=1, le=6, description="Contact tier (1=Executive, 6=IC)"
+            )
             tier_name: str = Field(description="Tier label")
             bd_priority: str = Field(description="BD priority level")
             is_hiring_manager: bool = Field(default=False)
             is_decision_maker: bool = Field(default=False)
             functional_area: str = Field(description="Primary functional area")
-            confidence: float = Field(ge=0, le=1, description="Classification confidence")
+            confidence: float = Field(
+                ge=0, le=1, description="Classification confidence"
+            )
             reasoning: str = Field(description="Brief reasoning")
 
         context = f"Name: {name}\nTitle: {title}"
@@ -488,7 +573,9 @@ class LLMClassifier:
             context += f"\nCompany: {company}"
 
         response = self.client.chat.completions.create(
-            model=self.provider.split("/")[-1] if "/" in self.provider else self.provider,
+            model=self.provider.split("/")[-1]
+            if "/" in self.provider
+            else self.provider,
             response_model=ContactClassificationResponse,
             messages=[
                 {
@@ -521,7 +608,9 @@ class LLMClassifier:
             },
         )
 
-    def classify_entity(self, text: str, categories: List[str] = None) -> ClassificationResult:
+    def classify_entity(
+        self, text: str, categories: List[str] = None
+    ) -> ClassificationResult:
         """Classify text into an entity category using LLM."""
         cats = categories or ENTITY_CATEGORIES
 
@@ -531,7 +620,9 @@ class LLMClassifier:
             reasoning: str = Field(description="Brief reasoning")
 
         response = self.client.chat.completions.create(
-            model=self.provider.split("/")[-1] if "/" in self.provider else self.provider,
+            model=self.provider.split("/")[-1]
+            if "/" in self.provider
+            else self.provider,
             response_model=EntityClassificationResponse,
             messages=[
                 {
@@ -555,16 +646,20 @@ class LLMClassifier:
 # BERTopic category discovery (optional)
 # ---------------------------------------------------------------------------
 
+
 class TopicDiscovery:
     """BERTopic-based automatic category discovery from embeddings."""
 
     def __init__(self):
         try:
             from bertopic import BERTopic
+
             self.BERTopic = BERTopic
             self._model = None
         except ImportError:
-            raise ImportError("bertopic is required. Install with: pip install bertopic")
+            raise ImportError(
+                "bertopic is required. Install with: pip install bertopic"
+            )
 
     def discover_topics(
         self,
@@ -605,7 +700,11 @@ class TopicDiscovery:
         return {
             "num_topics": len(topic_labels),
             "topic_labels": topic_labels,
-            "topic_sizes": {tid: int(count) for tid, count in zip(topic_info["Topic"], topic_info["Count"]) if tid != -1},
+            "topic_sizes": {
+                tid: int(count)
+                for tid, count in zip(topic_info["Topic"], topic_info["Count"])
+                if tid != -1
+            },
             "document_topics": topics,
             "outliers": sum(1 for t in topics if t == -1),
         }
@@ -614,6 +713,7 @@ class TopicDiscovery:
 # ---------------------------------------------------------------------------
 # Pipeline orchestrator
 # ---------------------------------------------------------------------------
+
 
 class ClassifierPipeline:
     """Three-tier classification pipeline.
@@ -688,7 +788,9 @@ class ClassifierPipeline:
                     metadata={"contact": contact.__dict__},
                 )
             else:
-                result = ClassificationResult(text=text, category="unknown", confidence=0.0, tier_used=1)
+                result = ClassificationResult(
+                    text=text, category="unknown", confidence=0.0, tier_used=1
+                )
         else:
             result = self.rule_classifier.classify_entity(text)
 
@@ -747,6 +849,7 @@ def _check_bertopic() -> bool:
 
 if __name__ == "__main__":
     import json
+
     logging.basicConfig(level=logging.INFO)
 
     pipeline = ClassifierPipeline(enable_tier2=False, enable_tier3=False)
@@ -763,7 +866,9 @@ if __name__ == "__main__":
     print("\n--- Contact Classification (Tier 1 Rules) ---")
     for title in test_titles:
         result = pipeline.classify(title, classification_type="contact")
-        print(f"  {title}: {result.category} (conf={result.confidence:.2f}, tier={result.tier_used})")
+        print(
+            f"  {title}: {result.category} (conf={result.confidence:.2f}, tier={result.tier_used})"
+        )
 
     # Test entity classification
     test_entities = [
@@ -775,7 +880,9 @@ if __name__ == "__main__":
     print("\n--- Entity Classification (Tier 1 Rules) ---")
     for entity in test_entities:
         result = pipeline.classify(entity, classification_type="entity")
-        print(f"  {entity}: {result.category} (conf={result.confidence:.2f}, tier={result.tier_used})")
+        print(
+            f"  {entity}: {result.category} (conf={result.confidence:.2f}, tier={result.tier_used})"
+        )
 
     # Test file classification
     test_files = [
@@ -787,4 +894,6 @@ if __name__ == "__main__":
     print("\n--- File Classification (Tier 1 Rules) ---")
     for fp in test_files:
         result = pipeline.classify(fp, classification_type="file")
-        print(f"  {fp}: {result.category} (conf={result.confidence:.2f}, tier={result.tier_used})")
+        print(
+            f"  {fp}: {result.category} (conf={result.confidence:.2f}, tier={result.tier_used})"
+        )

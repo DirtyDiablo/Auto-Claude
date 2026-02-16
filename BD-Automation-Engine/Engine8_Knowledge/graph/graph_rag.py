@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GraphRAGResult:
     """Result from Graph RAG query."""
+
     query: str
     answer: str
     graph_entities: List[Dict] = field(default_factory=list)
@@ -122,12 +123,14 @@ class GraphRAGEngine:
                         else rel.from_entity_id
                     )
                     # Record relationship
-                    relationships_found.append({
-                        "from": rel.from_entity_id,
-                        "to": rel.to_entity_id,
-                        "type": rel.type,
-                        "confidence": rel.confidence,
-                    })
+                    relationships_found.append(
+                        {
+                            "from": rel.from_entity_id,
+                            "to": rel.to_entity_id,
+                            "type": rel.type,
+                            "confidence": rel.confidence,
+                        }
+                    )
 
                     if other_id not in visited_entities:
                         other = self.graph.get_entity(other_id)
@@ -163,9 +166,15 @@ class GraphRAGEngine:
         for etype, ents in by_type.items():
             lines.append(f"\n=== {etype}s ({len(ents)}) ===")
             for e in ents[:15]:
-                props = {k: v for k, v in e.items() if k not in ("id", "type", "name", "hop") and v}
+                props = {
+                    k: v
+                    for k, v in e.items()
+                    if k not in ("id", "type", "name", "hop") and v
+                }
                 prop_str = ", ".join(f"{k}={v}" for k, v in props.items())
-                lines.append(f"  - {e['name']}" + (f" ({prop_str})" if prop_str else ""))
+                lines.append(
+                    f"  - {e['name']}" + (f" ({prop_str})" if prop_str else "")
+                )
 
         if relationships:
             # Deduplicate relationships
@@ -196,15 +205,32 @@ class GraphRAGEngine:
         try:
             for collection in ["contacts", "programs", "jobs", "documents"]:
                 try:
-                    hits = self.vector_store.search(query, collection=collection, limit=max(3, limit // 4))
+                    hits = self.vector_store.search(
+                        query, collection=collection, limit=max(3, limit // 4)
+                    )
                     for h in hits:
-                        payload = h.payload if hasattr(h, "payload") else (h if isinstance(h, dict) else {})
-                        results.append({
-                            "collection": collection,
-                            "score": getattr(h, "score", 0.0) if hasattr(h, "score") else payload.get("score", 0),
-                            "text": payload.get("text", payload.get("content", payload.get("name", ""))),
-                            "metadata": {k: v for k, v in payload.items() if k not in ("text", "content", "vector")},
-                        })
+                        payload = (
+                            h.payload
+                            if hasattr(h, "payload")
+                            else (h if isinstance(h, dict) else {})
+                        )
+                        results.append(
+                            {
+                                "collection": collection,
+                                "score": getattr(h, "score", 0.0)
+                                if hasattr(h, "score")
+                                else payload.get("score", 0),
+                                "text": payload.get(
+                                    "text",
+                                    payload.get("content", payload.get("name", "")),
+                                ),
+                                "metadata": {
+                                    k: v
+                                    for k, v in payload.items()
+                                    if k not in ("text", "content", "vector")
+                                },
+                            }
+                        )
                 except Exception:
                     continue
 
@@ -232,6 +258,7 @@ class GraphRAGEngine:
         5. Return combined result
         """
         import time
+
         start = time.time()
 
         # Step 1: Entity extraction
@@ -258,7 +285,9 @@ class GraphRAGEngine:
                 text = str(vr.get("text", ""))[:200]
                 vector_context += f"  [{vr['collection']}] {text}\n"
 
-        merged = graph_context + "\n" + vector_context if vector_context else graph_context
+        merged = (
+            graph_context + "\n" + vector_context if vector_context else graph_context
+        )
 
         # Step 5: Build answer summary
         if seed_entities:
@@ -269,7 +298,10 @@ class GraphRAGEngine:
                 f"around: {', '.join(entity_names)}. "
                 f"Also retrieved {len(vector_results)} vector search results."
             )
-            confidence = min(0.95, 0.5 + 0.1 * len(seed_entities) + 0.05 * min(len(graph_entities), 10))
+            confidence = min(
+                0.95,
+                0.5 + 0.1 * len(seed_entities) + 0.05 * min(len(graph_entities), 10),
+            )
         else:
             answer = (
                 f"No known entities detected in query. "
@@ -302,7 +334,9 @@ class GraphRAGEngine:
         if not entity:
             return {"error": f"Entity not found: {entity_name}"}
 
-        entities, rels = self.get_graph_neighborhood([entity], max_hops=1, max_neighbors=30)
+        entities, rels = self.get_graph_neighborhood(
+            [entity], max_hops=1, max_neighbors=30
+        )
         vector_hits = self._get_vector_results(entity_name, limit=5)
 
         return {

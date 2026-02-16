@@ -26,7 +26,9 @@ class BaseProcessor:
     name: str = "base"
     listen_streams: List[str] = []
 
-    def __init__(self, event_bus: EventBus, hub_services: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, event_bus: EventBus, hub_services: Optional[Dict[str, Any]] = None
+    ):
         self.event_bus = event_bus
         self.services = hub_services or {}
         self._running = False
@@ -38,7 +40,9 @@ class BaseProcessor:
         """Start processing events from configured streams."""
         self._running = True
         self._started_at = datetime.now(timezone.utc)
-        logger.info(f"{self.name} processor started", extra={"streams": self.listen_streams})
+        logger.info(
+            f"{self.name} processor started", extra={"streams": self.listen_streams}
+        )
         await self.event_bus.subscribe(
             streams=self.listen_streams,
             handler=self._handle_wrapper,
@@ -109,7 +113,11 @@ class JobIntelProcessor(BaseProcessor):
 
         logger.info(
             "Processing job event",
-            extra={"title": job_title, "company": company, "event_type": event.event_type},
+            extra={
+                "title": job_title,
+                "company": company,
+                "event_type": event.event_type,
+            },
         )
 
         # Step 1: Dedup check
@@ -118,7 +126,9 @@ class JobIntelProcessor(BaseProcessor):
             try:
                 existing = await self._check_duplicate(content_hash)
                 if existing:
-                    logger.info("Duplicate job detected, skipping", extra={"hash": content_hash})
+                    logger.info(
+                        "Duplicate job detected, skipping", extra={"hash": content_hash}
+                    )
                     return
             except Exception as e:
                 logger.warning("Dedup check failed", extra={"error": str(e)})
@@ -154,7 +164,9 @@ class JobIntelProcessor(BaseProcessor):
                     "matched_contacts": len(matched_contacts),
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high",
@@ -173,7 +185,9 @@ class JobIntelProcessor(BaseProcessor):
                     "enriched_at": datetime.now(timezone.utc).isoformat(),
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
             )
@@ -218,8 +232,17 @@ class ContractIntelProcessor(BaseProcessor):
     listen_streams = ["contracts:awards", "contracts:opps"]
 
     PTS_CAPABILITIES = {
-        "ISR", "SIGINT", "GEOINT", "C4ISR", "intelligence", "reconnaissance",
-        "surveillance", "data fusion", "analytics", "cyber", "mission systems",
+        "ISR",
+        "SIGINT",
+        "GEOINT",
+        "C4ISR",
+        "intelligence",
+        "reconnaissance",
+        "surveillance",
+        "data fusion",
+        "analytics",
+        "cyber",
+        "mission systems",
     }
 
     async def handle(self, event: Event) -> None:
@@ -247,7 +270,14 @@ class ContractIntelProcessor(BaseProcessor):
                 logger.warning("Graph update failed", extra={"error": str(e)})
 
         # Step 4: Competitive intelligence
-        competitors = {"Leidos", "Raytheon", "Northrop Grumman", "L3Harris", "BAE Systems", "Booz Allen"}
+        competitors = {
+            "Leidos",
+            "Raytheon",
+            "Northrop Grumman",
+            "L3Harris",
+            "BAE Systems",
+            "Booz Allen",
+        }
         if awardee and any(comp.lower() in awardee.lower() for comp in competitors):
             alert_event = Event(
                 event_type="contract.competitor_win",
@@ -260,7 +290,9 @@ class ContractIntelProcessor(BaseProcessor):
                     "program": matched_program,
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high",
@@ -270,7 +302,10 @@ class ContractIntelProcessor(BaseProcessor):
         # Step 5: PTS capability match → critical alert
         description = payload.get("description", "").lower()
         title_lower = contract_title.lower()
-        if any(cap.lower() in description or cap.lower() in title_lower for cap in self.PTS_CAPABILITIES):
+        if any(
+            cap.lower() in description or cap.lower() in title_lower
+            for cap in self.PTS_CAPABILITIES
+        ):
             if award_amount and award_amount > 10_000_000:
                 signal = Event(
                     event_type="contract.pts_opportunity",
@@ -280,13 +315,16 @@ class ContractIntelProcessor(BaseProcessor):
                         "agency": agency,
                         "amount": award_amount,
                         "capabilities_matched": [
-                            c for c in self.PTS_CAPABILITIES
+                            c
+                            for c in self.PTS_CAPABILITIES
                             if c.lower() in description or c.lower() in title_lower
                         ],
                         "program": matched_program,
                     },
                     metadata={
-                        "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                        "correlation_id": event.metadata.get(
+                            "correlation_id", event.event_id
+                        ),
                         "causation_id": event.event_id,
                     },
                     priority="critical",
@@ -380,12 +418,14 @@ class ContactChangeProcessor(BaseProcessor):
             try:
                 graph = self.services["graph"]
                 if hasattr(graph, "upsert_contact"):
-                    await graph.upsert_contact({
-                        **payload,
-                        "tier": tier,
-                        "program": program,
-                        "bd_priority": bd_priority,
-                    })
+                    await graph.upsert_contact(
+                        {
+                            **payload,
+                            "tier": tier,
+                            "program": program,
+                            "bd_priority": bd_priority,
+                        }
+                    )
             except Exception as e:
                 logger.warning("Graph update failed", extra={"error": str(e)})
 
@@ -394,17 +434,22 @@ class ContactChangeProcessor(BaseProcessor):
             try:
                 search = self.services["search"]
                 if hasattr(search, "index_contact"):
-                    await search.index_contact({
-                        **payload,
-                        "tier": tier,
-                        "program": program,
-                        "bd_priority": bd_priority,
-                    })
+                    await search.index_contact(
+                        {
+                            **payload,
+                            "tier": tier,
+                            "program": program,
+                            "bd_priority": bd_priority,
+                        }
+                    )
             except Exception as e:
                 logger.warning("Qdrant indexing failed", extra={"error": str(e)})
 
         # Step 6: High-tier discovery alert
-        if tier <= 2 and event.event_type in ("contact.discovered", "contact_discovered"):
+        if tier <= 2 and event.event_type in (
+            "contact.discovered",
+            "contact_discovered",
+        ):
             alert = Event(
                 event_type="contact.high_tier_discovered",
                 source=self.name,
@@ -417,7 +462,9 @@ class ContactChangeProcessor(BaseProcessor):
                     "bd_priority": bd_priority,
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="critical",
@@ -438,7 +485,9 @@ class ContactChangeProcessor(BaseProcessor):
                     "tier": tier,
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high",
@@ -531,7 +580,13 @@ class CampaignEventProcessor(BaseProcessor):
     name = "campaign_event"
     listen_streams = ["campaigns:events", "campaigns:responses"]
 
-    POSITIVE_OUTCOMES = {"replied", "meeting_booked", "interested", "accepted", "engaged"}
+    POSITIVE_OUTCOMES = {
+        "replied",
+        "meeting_booked",
+        "interested",
+        "accepted",
+        "engaged",
+    }
     NEGATIVE_OUTCOMES = {"rejected", "unsubscribed", "bounced", "no_response"}
 
     async def handle(self, event: Event) -> None:
@@ -543,7 +598,11 @@ class CampaignEventProcessor(BaseProcessor):
 
         logger.info(
             "Processing campaign event",
-            extra={"campaign": campaign_id, "outcome": outcome, "type": event.event_type},
+            extra={
+                "campaign": campaign_id,
+                "outcome": outcome,
+                "type": event.event_type,
+            },
         )
 
         # Step 1: Bandit update
@@ -580,7 +639,9 @@ class CampaignEventProcessor(BaseProcessor):
                     "channel": channel,
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high",
@@ -598,7 +659,9 @@ class CampaignEventProcessor(BaseProcessor):
                     "meeting_date": payload.get("meeting_date"),
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high",
@@ -618,7 +681,9 @@ class CampaignEventProcessor(BaseProcessor):
                     "recommendation": "try_alternate_channel",
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="medium",
@@ -673,7 +738,9 @@ class AnomalyProcessor(BaseProcessor):
                     "details": payload,
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high" if severity != "critical" else "critical",
@@ -691,7 +758,9 @@ class AnomalyProcessor(BaseProcessor):
                     "recommendation": "increase_frequency",
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
             )
@@ -724,7 +793,9 @@ class AnomalyProcessor(BaseProcessor):
                     ],
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="critical",
@@ -747,7 +818,9 @@ class SystemHealthProcessor(BaseProcessor):
     name = "system_health"
     listen_streams = ["system:health"]
 
-    def __init__(self, event_bus: EventBus, hub_services: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, event_bus: EventBus, hub_services: Optional[Dict[str, Any]] = None
+    ):
         super().__init__(event_bus, hub_services)
         self._failure_counts: Dict[str, int] = {}
         self._service_status: Dict[str, str] = {}
@@ -769,7 +842,9 @@ class SystemHealthProcessor(BaseProcessor):
 
         # Step 2: Consecutive failure tracking
         if status in ("error", "failed", "down"):
-            self._failure_counts[service_name] = self._failure_counts.get(service_name, 0) + 1
+            self._failure_counts[service_name] = (
+                self._failure_counts.get(service_name, 0) + 1
+            )
 
             if self._failure_counts[service_name] >= self.consecutive_failure_threshold:
                 alert = Event(
@@ -781,7 +856,9 @@ class SystemHealthProcessor(BaseProcessor):
                         "last_error": error_msg,
                     },
                     metadata={
-                        "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                        "correlation_id": event.metadata.get(
+                            "correlation_id", event.event_id
+                        ),
                         "causation_id": event.event_id,
                     },
                     priority="critical",
@@ -794,7 +871,8 @@ class SystemHealthProcessor(BaseProcessor):
         # Step 3: Auto-pause failing scrapers
         if (
             "scrape" in service_name.lower()
-            and self._failure_counts.get(service_name, 0) >= self.consecutive_failure_threshold
+            and self._failure_counts.get(service_name, 0)
+            >= self.consecutive_failure_threshold
         ):
             pause_event = Event(
                 event_type="system.scraper_paused",
@@ -805,7 +883,9 @@ class SystemHealthProcessor(BaseProcessor):
                     "action": "auto_paused",
                 },
                 metadata={
-                    "correlation_id": event.metadata.get("correlation_id", event.event_id),
+                    "correlation_id": event.metadata.get(
+                        "correlation_id", event.event_id
+                    ),
                     "causation_id": event.event_id,
                 },
                 priority="high",
@@ -820,7 +900,9 @@ class SystemHealthProcessor(BaseProcessor):
 class EventProcessorRegistry:
     """Manages all real-time event processors."""
 
-    def __init__(self, event_bus: EventBus, hub_services: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, event_bus: EventBus, hub_services: Optional[Dict[str, Any]] = None
+    ):
         self.event_bus = event_bus
         self.hub_services = hub_services or {}
         self.processors: Dict[str, BaseProcessor] = {}

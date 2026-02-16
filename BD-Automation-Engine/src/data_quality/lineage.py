@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class NodeType(str, Enum):
     SOURCE = "source"
     RAW_RECORD = "raw_record"
@@ -55,9 +56,11 @@ class TransformType(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class DataSource:
     """Origin of data."""
+
     id: str
     source_type: str
     url: str = ""
@@ -69,6 +72,7 @@ class DataSource:
 @dataclass
 class TransformProcess:
     """A data transformation step."""
+
     name: str
     version: str = "1.0"
     model: str = ""
@@ -79,6 +83,7 @@ class TransformProcess:
 @dataclass
 class LineageNode:
     """A node in the lineage DAG."""
+
     id: str
     node_type: str  # source, raw_record, process, enriched_record, insight
     data_hash: str = ""
@@ -92,6 +97,7 @@ class LineageNode:
 @dataclass
 class LineageEdge:
     """An edge in the lineage DAG."""
+
     id: str
     source_node_id: str
     target_node_id: str
@@ -103,6 +109,7 @@ class LineageEdge:
 @dataclass
 class LineageGraph:
     """Full lineage trace result."""
+
     root: LineageNode
     nodes: List[LineageNode] = field(default_factory=list)
     edges: List[LineageEdge] = field(default_factory=list)
@@ -115,6 +122,7 @@ class LineageGraph:
 @dataclass
 class ImpactAnalysis:
     """Forward impact analysis — what depends on this record."""
+
     record_id: str
     downstream_records: List[LineageNode] = field(default_factory=list)
     affected_reports: List[str] = field(default_factory=list)
@@ -126,6 +134,7 @@ class ImpactAnalysis:
 @dataclass
 class FreshnessEntry:
     """Freshness data for a domain."""
+
     domain: str
     total_records: int = 0
     avg_age_days: float = 0.0
@@ -140,6 +149,7 @@ class FreshnessEntry:
 @dataclass
 class FreshnessReport:
     """Platform-wide freshness report."""
+
     entries: List[FreshnessEntry] = field(default_factory=list)
     overall_freshness_score: float = 100.0
     generated_at: str = ""
@@ -148,6 +158,7 @@ class FreshnessReport:
 # =========================================
 # DATA LINEAGE TRACKER
 # =========================================
+
 
 class DataLineageTracker:
     """Records the complete provenance chain for every data point."""
@@ -158,7 +169,7 @@ class DataLineageTracker:
         self._sources: Dict[str, DataSource] = {}
         self._record_to_nodes: Dict[str, List[str]] = {}  # record_id -> [node_ids]
         self._node_children: Dict[str, List[str]] = {}  # node_id -> [child_node_ids]
-        self._node_parents: Dict[str, List[str]] = {}   # node_id -> [parent_node_ids]
+        self._node_parents: Dict[str, List[str]] = {}  # node_id -> [parent_node_ids]
 
         # Data for freshness reports
         self._domain_records: Dict[str, List[Dict]] = {}
@@ -172,7 +183,9 @@ class DataLineageTracker:
     # -----------------------------------------
 
     def record_ingestion(
-        self, source: DataSource, records: List[Dict[str, Any]],
+        self,
+        source: DataSource,
+        records: List[Dict[str, Any]],
     ) -> List[LineageNode]:
         """Record raw data ingestion from a source."""
         now = datetime.now(timezone.utc).isoformat()
@@ -181,11 +194,16 @@ class DataLineageTracker:
         source_node = LineageNode(
             id=f"src_{source.id}",
             node_type=NodeType.SOURCE.value,
-            data_hash=self._hash_data({"source": source.url, "type": source.source_type}),
+            data_hash=self._hash_data(
+                {"source": source.url, "type": source.source_type}
+            ),
             confidence=1.0,
             created_at=source.timestamp or now,
-            metadata={"source_type": source.source_type, "url": source.url,
-                       "actor_id": source.actor_id},
+            metadata={
+                "source_type": source.source_type,
+                "url": source.url,
+                "actor_id": source.actor_id,
+            },
         )
         self._nodes[source_node.id] = source_node
         self._sources[source.id] = source
@@ -242,10 +260,13 @@ class DataLineageTracker:
         process_node = LineageNode(
             id=f"proc_{uuid.uuid4().hex[:8]}",
             node_type=NodeType.PROCESS.value,
-            data_hash=self._hash_data({
-                "name": process.name, "version": process.version,
-                "model": process.model,
-            }),
+            data_hash=self._hash_data(
+                {
+                    "name": process.name,
+                    "version": process.version,
+                    "model": process.model,
+                }
+            ),
             confidence=1.0,
             created_at=now,
             metadata={
@@ -366,7 +387,10 @@ class DataLineageTracker:
 
                     # Find the edge
                     for edge in self._edges:
-                        if edge.source_node_id == parent_id and edge.target_node_id == node_id:
+                        if (
+                            edge.source_node_id == parent_id
+                            and edge.target_node_id == node_id
+                        ):
                             if edge not in visited_edges:
                                 visited_edges.append(edge)
 
@@ -408,7 +432,10 @@ class DataLineageTracker:
             for child_id in children:
                 child = self._nodes.get(child_id)
                 if child and child_id not in visited:
-                    if child.node_type in (NodeType.ENRICHED_RECORD.value, NodeType.INSIGHT.value):
+                    if child.node_type in (
+                        NodeType.ENRICHED_RECORD.value,
+                        NodeType.INSIGHT.value,
+                    ):
                         downstream.append(child)
                     queue.append(child_id)
 
@@ -484,17 +511,19 @@ class DataLineageTracker:
             fresh_pct = updated_90 / len(records) * 100 if records else 100
             scores.append(fresh_pct)
 
-            entries.append(FreshnessEntry(
-                domain=domain,
-                total_records=len(records),
-                avg_age_days=round(avg_age, 1),
-                updated_last_30=updated_30,
-                updated_last_60=updated_60,
-                updated_last_90=updated_90,
-                stale_count=stale,
-                oldest_record_date=oldest.isoformat() if oldest else "",
-                freshest_record_date=freshest.isoformat() if freshest else "",
-            ))
+            entries.append(
+                FreshnessEntry(
+                    domain=domain,
+                    total_records=len(records),
+                    avg_age_days=round(avg_age, 1),
+                    updated_last_30=updated_30,
+                    updated_last_60=updated_60,
+                    updated_last_90=updated_90,
+                    stale_count=stale,
+                    oldest_record_date=oldest.isoformat() if oldest else "",
+                    freshest_record_date=freshest.isoformat() if freshest else "",
+                )
+            )
 
         overall = round(sum(scores) / len(scores), 1) if scores else 100.0
 

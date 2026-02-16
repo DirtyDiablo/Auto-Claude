@@ -15,6 +15,7 @@ from src.proposals.capability_generator import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def generator():
     return CapabilityStatementGenerator()
@@ -23,6 +24,7 @@ def generator():
 # =========================================
 # TEMPLATE VARIANTS
 # =========================================
+
 
 class TestTemplateVariants:
     def test_one_page_variant(self):
@@ -38,6 +40,7 @@ class TestTemplateVariants:
 # =========================================
 # COMPANY PROFILE
 # =========================================
+
 
 class TestCompanyProfile:
     def test_has_certifications(self):
@@ -57,6 +60,7 @@ class TestCompanyProfile:
 # =========================================
 # GENERATION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestGeneration:
@@ -124,6 +128,7 @@ class TestGeneration:
 # BATCH & HISTORY
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestBatchAndHistory:
     async def test_batch_generation(self, generator):
@@ -140,6 +145,7 @@ class TestBatchAndHistory:
 # EXPORT
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestExport:
     async def test_export_to_dict(self, generator):
@@ -155,6 +161,7 @@ class TestExport:
 # TEMPLATES
 # =========================================
 
+
 class TestTemplates:
     def test_get_templates(self, generator):
         templates = generator.get_templates()
@@ -168,6 +175,7 @@ class TestTemplates:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_generator_returns_instance(self):

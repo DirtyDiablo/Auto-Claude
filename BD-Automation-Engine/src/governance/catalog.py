@@ -19,14 +19,15 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class AssetType(str, Enum):
-    COLLECTION = "collection"       # Qdrant collection
-    TABLE = "table"                 # SQLite/DB table
-    FILE = "file"                   # CSV, JSON, etc.
-    API_ENDPOINT = "api_endpoint"   # REST endpoint
-    PIPELINE = "pipeline"           # Data pipeline
-    MODEL = "model"                 # ML model
-    GRAPH = "graph"                 # Knowledge graph
+    COLLECTION = "collection"  # Qdrant collection
+    TABLE = "table"  # SQLite/DB table
+    FILE = "file"  # CSV, JSON, etc.
+    API_ENDPOINT = "api_endpoint"  # REST endpoint
+    PIPELINE = "pipeline"  # Data pipeline
+    MODEL = "model"  # ML model
+    GRAPH = "graph"  # Knowledge graph
 
 
 class AssetStatus(str, Enum):
@@ -40,10 +41,12 @@ class AssetStatus(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class DataLineage:
     """Tracks where data comes from and where it goes."""
-    upstream: List[str] = field(default_factory=list)    # source asset IDs
+
+    upstream: List[str] = field(default_factory=list)  # source asset IDs
     downstream: List[str] = field(default_factory=list)  # consumer asset IDs
     transformations: List[str] = field(default_factory=list)  # pipeline steps
 
@@ -51,6 +54,7 @@ class DataLineage:
 @dataclass
 class UsageStats:
     """Usage statistics for a data asset."""
+
     total_reads: int = 0
     total_writes: int = 0
     unique_consumers: int = 0
@@ -63,24 +67,26 @@ class UsageStats:
 @dataclass
 class QualityMetrics:
     """Quality metrics for a data asset."""
-    completeness: float = 0.0    # % of non-null fields
-    accuracy: float = 0.0        # validated accuracy score
-    freshness_hours: float = 0.0 # hours since last update
-    consistency: float = 0.0     # cross-source consistency
-    overall_score: float = 0.0   # weighted composite
+
+    completeness: float = 0.0  # % of non-null fields
+    accuracy: float = 0.0  # validated accuracy score
+    freshness_hours: float = 0.0  # hours since last update
+    consistency: float = 0.0  # cross-source consistency
+    overall_score: float = 0.0  # weighted composite
 
 
 @dataclass
 class DataAsset:
     """A data asset registered in the catalog."""
+
     id: str = ""
     name: str = ""
     description: str = ""
     asset_type: str = AssetType.COLLECTION.value
     status: str = AssetStatus.ACTIVE.value
     owner: str = ""
-    domain: str = ""          # contacts, jobs, programs, documents, etc.
-    schema_id: str = ""       # reference to schema registry
+    domain: str = ""  # contacts, jobs, programs, documents, etc.
+    schema_id: str = ""  # reference to schema registry
     tags: List[str] = field(default_factory=list)
     record_count: int = 0
     size_bytes: int = 0
@@ -96,6 +102,7 @@ class DataAsset:
 # DATA CATALOG
 # =========================================
 
+
 class DataCatalog:
     """Central catalog of all data assets in the platform."""
 
@@ -107,9 +114,12 @@ class DataCatalog:
         """Seed catalog with known platform data assets."""
         defaults = [
             DataAsset(
-                id="contacts", name="Contacts", domain="contacts",
+                id="contacts",
+                name="Contacts",
+                domain="contacts",
                 description="CRM contacts with tier classification and org chart data",
-                asset_type=AssetType.COLLECTION.value, owner="Engine7_BullhornETL",
+                asset_type=AssetType.COLLECTION.value,
+                owner="Engine7_BullhornETL",
                 tags=["crm", "contacts", "tier", "org_chart"],
                 record_count=7337,
                 lineage=DataLineage(
@@ -118,9 +128,12 @@ class DataCatalog:
                 ),
             ),
             DataAsset(
-                id="programs", name="Federal Programs", domain="programs",
+                id="programs",
+                name="Federal Programs",
+                domain="programs",
                 description="388 federal programs and contracts with mapping data",
-                asset_type=AssetType.COLLECTION.value, owner="Engine2_ProgramMapping",
+                asset_type=AssetType.COLLECTION.value,
+                owner="Engine2_ProgramMapping",
                 tags=["programs", "contracts", "federal", "defense"],
                 record_count=401,
                 lineage=DataLineage(
@@ -129,9 +142,12 @@ class DataCatalog:
                 ),
             ),
             DataAsset(
-                id="jobs", name="Job Postings", domain="jobs",
+                id="jobs",
+                name="Job Postings",
+                domain="jobs",
                 description="Scraped job postings with BD scores and program mapping",
-                asset_type=AssetType.COLLECTION.value, owner="Engine1_Scraper",
+                asset_type=AssetType.COLLECTION.value,
+                owner="Engine1_Scraper",
                 tags=["jobs", "hiring", "scraping", "bd_score"],
                 record_count=4,
                 lineage=DataLineage(
@@ -140,16 +156,22 @@ class DataCatalog:
                 ),
             ),
             DataAsset(
-                id="documents", name="Documents", domain="documents",
+                id="documents",
+                name="Documents",
+                domain="documents",
                 description="Past performance, briefings, intel reports",
-                asset_type=AssetType.COLLECTION.value, owner="Engine8_Knowledge",
+                asset_type=AssetType.COLLECTION.value,
+                owner="Engine8_Knowledge",
                 tags=["documents", "past_performance", "briefings"],
                 record_count=205,
             ),
             DataAsset(
-                id="activities", name="Activities", domain="activities",
+                id="activities",
+                name="Activities",
+                domain="activities",
                 description="Call notes, meeting records, interaction logs",
-                asset_type=AssetType.COLLECTION.value, owner="Engine8_Knowledge",
+                asset_type=AssetType.COLLECTION.value,
+                owner="Engine8_Knowledge",
                 tags=["activities", "calls", "meetings", "interactions"],
                 record_count=500,
             ),
@@ -257,7 +279,9 @@ class DataCatalog:
         for uid in asset.lineage.upstream:
             up = self._assets.get(uid)
             if up:
-                upstream_assets.append({"id": up.id, "name": up.name, "type": up.asset_type})
+                upstream_assets.append(
+                    {"id": up.id, "name": up.name, "type": up.asset_type}
+                )
             else:
                 upstream_assets.append({"id": uid, "name": uid, "type": "external"})
 
@@ -265,7 +289,9 @@ class DataCatalog:
         for did in asset.lineage.downstream:
             down = self._assets.get(did)
             if down:
-                downstream_assets.append({"id": down.id, "name": down.name, "type": down.asset_type})
+                downstream_assets.append(
+                    {"id": down.id, "name": down.name, "type": down.asset_type}
+                )
             else:
                 downstream_assets.append({"id": did, "name": did, "type": "external"})
 
@@ -304,13 +330,16 @@ class DataCatalog:
         reads = asset.usage.total_reads
         # Logarithmic scale, capped at 1.0
         import math
+
         asset.usage.popularity_score = min(math.log1p(reads) / 10, 1.0)
 
     # -----------------------------------------
     # QUALITY UPDATES
     # -----------------------------------------
 
-    def update_quality(self, asset_id: str, metrics: Dict[str, float]) -> Optional[QualityMetrics]:
+    def update_quality(
+        self, asset_id: str, metrics: Dict[str, float]
+    ) -> Optional[QualityMetrics]:
         """Update quality metrics for an asset."""
         asset = self._assets.get(asset_id)
         if not asset:
@@ -322,10 +351,12 @@ class DataCatalog:
 
         # Recompute overall score
         asset.quality.overall_score = round(
-            (asset.quality.completeness * 0.3
-             + asset.quality.accuracy * 0.3
-             + asset.quality.consistency * 0.2
-             + max(0, 1.0 - asset.quality.freshness_hours / 168) * 0.2),  # 168h = 1 week
+            (
+                asset.quality.completeness * 0.3
+                + asset.quality.accuracy * 0.3
+                + asset.quality.consistency * 0.2
+                + max(0, 1.0 - asset.quality.freshness_hours / 168) * 0.2
+            ),  # 168h = 1 week
             4,
         )
         asset.updated_at = datetime.now(timezone.utc).isoformat()
@@ -342,8 +373,14 @@ class DataCatalog:
         return {
             "total_assets": len(assets),
             "domains": list(domains),
-            "by_type": {t.value: sum(1 for a in assets if a.asset_type == t.value) for t in AssetType},
-            "by_status": {s.value: sum(1 for a in assets if a.status == s.value) for s in AssetStatus},
+            "by_type": {
+                t.value: sum(1 for a in assets if a.asset_type == t.value)
+                for t in AssetType
+            },
+            "by_status": {
+                s.value: sum(1 for a in assets if a.status == s.value)
+                for s in AssetStatus
+            },
             "total_records": sum(a.record_count for a in assets),
         }
 

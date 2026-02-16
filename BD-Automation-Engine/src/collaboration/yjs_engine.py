@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class RoomType(str, Enum):
     CALL_SHEET = "call_sheet"
     PIPELINE = "pipeline"
@@ -38,6 +39,7 @@ class PresenceStatus(str, Enum):
 @dataclass
 class UserPresence:
     """Tracks a user's presence in a collaboration room."""
+
     user_id: str
     display_name: str
     status: PresenceStatus = PresenceStatus.ONLINE
@@ -68,9 +70,10 @@ class UserPresence:
 @dataclass
 class CRDTOperation:
     """A single CRDT operation (insert, delete, update) for conflict-free merging."""
+
     op_id: str
     op_type: str  # insert | delete | update
-    path: str     # JSON path in the document (e.g., "contacts.0.notes")
+    path: str  # JSON path in the document (e.g., "contacts.0.notes")
     value: Any = None
     user_id: str = ""
     timestamp: str = ""
@@ -95,6 +98,7 @@ class CRDTOperation:
 @dataclass
 class CollaborationRoom:
     """A real-time collaboration room backed by CRDT state."""
+
     room_id: str
     room_type: RoomType
     name: str
@@ -119,8 +123,9 @@ class CollaborationRoom:
             "room_type": self.room_type.value,
             "name": self.name,
             "version": self.version,
-            "active_users": len([u for u in self.users.values()
-                                 if u.status != PresenceStatus.OFFLINE]),
+            "active_users": len(
+                [u for u in self.users.values() if u.status != PresenceStatus.OFFLINE]
+            ),
             "total_operations": len(self.operations),
             "created_at": self.created_at,
             "updated_at": self.updated_at,
@@ -173,6 +178,7 @@ _ROOM_TEMPLATES: Dict[RoomType, Dict[str, Any]] = {
 # YJS COLLABORATION ENGINE
 # =========================================
 
+
 class YjsCollaborationEngine:
     """CRDT-based real-time collaboration engine.
 
@@ -183,9 +189,18 @@ class YjsCollaborationEngine:
 
     # Pre-defined user colors for presence cursors
     _USER_COLORS = [
-        "#4A90D9", "#E74C3C", "#2ECC71", "#F39C12",
-        "#9B59B6", "#1ABC9C", "#E67E22", "#3498DB",
-        "#E91E63", "#00BCD4", "#FF5722", "#8BC34A",
+        "#4A90D9",
+        "#E74C3C",
+        "#2ECC71",
+        "#F39C12",
+        "#9B59B6",
+        "#1ABC9C",
+        "#E67E22",
+        "#3498DB",
+        "#E91E63",
+        "#00BCD4",
+        "#FF5722",
+        "#8BC34A",
     ]
 
     def __init__(self):
@@ -240,7 +255,9 @@ class YjsCollaborationEngine:
 
     # ----- presence -----
 
-    def join_room(self, room_id: str, user_id: str, display_name: str) -> Optional[UserPresence]:
+    def join_room(
+        self, room_id: str, user_id: str, display_name: str
+    ) -> Optional[UserPresence]:
         """Add a user to a room's presence list."""
         room = self._rooms.get(room_id)
         if not room:

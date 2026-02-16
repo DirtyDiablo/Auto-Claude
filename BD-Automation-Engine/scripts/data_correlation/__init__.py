@@ -15,7 +15,7 @@ from .correlation_engine import (
     DataCorrelator,
     BDScoreCalculator,
     ExportGenerator,
-    run_full_correlation
+    run_full_correlation,
 )
 
 __all__ = [
@@ -23,5 +23,5 @@ __all__ = [
     "DataCorrelator",
     "BDScoreCalculator",
     "ExportGenerator",
-    "run_full_correlation"
+    "run_full_correlation",
 ]

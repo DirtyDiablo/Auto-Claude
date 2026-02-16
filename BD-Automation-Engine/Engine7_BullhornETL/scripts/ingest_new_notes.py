@@ -2,6 +2,7 @@
 Ingest new Bullhorn Notes Activity Report and merge into existing analysis files.
 Usage: python ingest_new_notes.py <path_to_xls>
 """
+
 import sys
 import os
 import re
@@ -20,66 +21,217 @@ DEEP_DIVE_DIR = os.path.join(ANALYSIS_DIR, "ANALYSIS", "NOTES_DEEP_DIVE")
 
 # Known prime contractors for extraction
 PRIME_CONTRACTORS = [
-    "Boeing", "General Dynamics", "GDIT", "Northrop Grumman", "Lockheed Martin",
-    "Leidos", "SAIC", "Raytheon", "RTX", "BAE Systems", "Booz Allen", "CACI",
-    "Peraton", "L3Harris", "L3 Harris", "Deloitte", "Accenture Federal",
-    "ManTech", "Parsons", "KBR", "CSRA", "DXC", "Unisys", "Amentum",
-    "Jacobs", "Maximus", "ICF", "Serco", "CGI", "Cisco", "Vision Technologies",
-    "Modern Technology Solutions", "Harris Corporation"
+    "Boeing",
+    "General Dynamics",
+    "GDIT",
+    "Northrop Grumman",
+    "Lockheed Martin",
+    "Leidos",
+    "SAIC",
+    "Raytheon",
+    "RTX",
+    "BAE Systems",
+    "Booz Allen",
+    "CACI",
+    "Peraton",
+    "L3Harris",
+    "L3 Harris",
+    "Deloitte",
+    "Accenture Federal",
+    "ManTech",
+    "Parsons",
+    "KBR",
+    "CSRA",
+    "DXC",
+    "Unisys",
+    "Amentum",
+    "Jacobs",
+    "Maximus",
+    "ICF",
+    "Serco",
+    "CGI",
+    "Cisco",
+    "Vision Technologies",
+    "Modern Technology Solutions",
+    "Harris Corporation",
 ]
 
 # Known programs/acronyms for extraction
 PROGRAM_KEYWORDS = [
-    "IBCS", "DCGS", "GBSD", "Sentinel", "Aegis", "THAAD", "Patriot", "AMRAAM",
-    "F-35", "F-22", "F-15", "F-16", "F-18", "F-47", "B-52", "B-21", "B-2",
-    "SLS", "Artemis", "ARTEMUS", "NASA", "MDA", "SDA", "DARPA", "NGA", "NSA",
-    "NRO", "Space Force", "PMS", "OPIR", "BOA", "IDIQ", "OASIS", "JDAM",
-    "SDB", "VC-25", "VC25", "T7", "MQ-25", "Stingray", "LEOS", "COPV", "EUS",
-    "PAC-3", "GBU", "Harpoon", "JWICS", "SIPR", "NIPR", "DDG", "BICES",
-    "WGS", "SBIRS", "GPS", "AEHF", "Minuteman", "ICBM", "PEO",
-    "787", "777", "767", "747", "737", "Starliner"
+    "IBCS",
+    "DCGS",
+    "GBSD",
+    "Sentinel",
+    "Aegis",
+    "THAAD",
+    "Patriot",
+    "AMRAAM",
+    "F-35",
+    "F-22",
+    "F-15",
+    "F-16",
+    "F-18",
+    "F-47",
+    "B-52",
+    "B-21",
+    "B-2",
+    "SLS",
+    "Artemis",
+    "ARTEMUS",
+    "NASA",
+    "MDA",
+    "SDA",
+    "DARPA",
+    "NGA",
+    "NSA",
+    "NRO",
+    "Space Force",
+    "PMS",
+    "OPIR",
+    "BOA",
+    "IDIQ",
+    "OASIS",
+    "JDAM",
+    "SDB",
+    "VC-25",
+    "VC25",
+    "T7",
+    "MQ-25",
+    "Stingray",
+    "LEOS",
+    "COPV",
+    "EUS",
+    "PAC-3",
+    "GBU",
+    "Harpoon",
+    "JWICS",
+    "SIPR",
+    "NIPR",
+    "DDG",
+    "BICES",
+    "WGS",
+    "SBIRS",
+    "GPS",
+    "AEHF",
+    "Minuteman",
+    "ICBM",
+    "PEO",
+    "787",
+    "777",
+    "767",
+    "747",
+    "737",
+    "Starliner",
 ]
 
 # Locations for extraction
 LOCATION_KEYWORDS = [
-    "Huntsville", "Colorado Springs", "St. Louis", "San Diego", "El Segundo",
-    "Redondo Beach", "Dallas", "Fort Worth", "Houston", "Titusville",
-    "Kennedy Space Center", "KSC", "Cape Canaveral", "Charleston", "Seattle",
-    "Denver", "Arlington", "McLean", "Fairfax", "Chantilly", "Springfield",
-    "Hill AFB", "Tinker", "Wright-Patterson", "Eglin", "Luke",
-    "San Antonio", "Fort Bragg", "Fort Liberty", "Michoud", "New Orleans",
-    "Oklahoma City", "Omaha", "Offutt", "Norfolk", "Dahlgren",
-    "Aberdeen", "Annapolis Junction", "Maryland", "Virginia", "Alabama",
-    "Georgia", "Florida", "Texas", "Missouri", "California", "Ohio",
-    "DC", "Washington"
+    "Huntsville",
+    "Colorado Springs",
+    "St. Louis",
+    "San Diego",
+    "El Segundo",
+    "Redondo Beach",
+    "Dallas",
+    "Fort Worth",
+    "Houston",
+    "Titusville",
+    "Kennedy Space Center",
+    "KSC",
+    "Cape Canaveral",
+    "Charleston",
+    "Seattle",
+    "Denver",
+    "Arlington",
+    "McLean",
+    "Fairfax",
+    "Chantilly",
+    "Springfield",
+    "Hill AFB",
+    "Tinker",
+    "Wright-Patterson",
+    "Eglin",
+    "Luke",
+    "San Antonio",
+    "Fort Bragg",
+    "Fort Liberty",
+    "Michoud",
+    "New Orleans",
+    "Oklahoma City",
+    "Omaha",
+    "Offutt",
+    "Norfolk",
+    "Dahlgren",
+    "Aberdeen",
+    "Annapolis Junction",
+    "Maryland",
+    "Virginia",
+    "Alabama",
+    "Georgia",
+    "Florida",
+    "Texas",
+    "Missouri",
+    "California",
+    "Ohio",
+    "DC",
+    "Washington",
 ]
 
 ROLE_KEYWORDS = [
-    "Systems Engineer", "Software Engineer", "Program Manager", "Project Manager",
-    "Engineering Manager", "Electrical Engineer", "Mechanical Engineer",
-    "Manufacturing Engineer", "Design Engineer", "Test Engineer", "Quality Engineer",
-    "DevOps", "ISSO", "Cybersecurity", "Analyst", "Field Service", "FSE", "FSR",
-    "Integration", "Requirements", "MBSE", "Site Lead", "Technical Lead",
-    "Data Scientist", "Avionics", "Propulsion", "Structures",
-    "Network Engineer", "System Administrator", "Help Desk", "DBA"
+    "Systems Engineer",
+    "Software Engineer",
+    "Program Manager",
+    "Project Manager",
+    "Engineering Manager",
+    "Electrical Engineer",
+    "Mechanical Engineer",
+    "Manufacturing Engineer",
+    "Design Engineer",
+    "Test Engineer",
+    "Quality Engineer",
+    "DevOps",
+    "ISSO",
+    "Cybersecurity",
+    "Analyst",
+    "Field Service",
+    "FSE",
+    "FSR",
+    "Integration",
+    "Requirements",
+    "MBSE",
+    "Site Lead",
+    "Technical Lead",
+    "Data Scientist",
+    "Avionics",
+    "Propulsion",
+    "Structures",
+    "Network Engineer",
+    "System Administrator",
+    "Help Desk",
+    "DBA",
 ]
 
 
 class HTMLStripper(HTMLParser):
     """Strip HTML tags and decode entities."""
+
     def __init__(self):
         super().__init__()
         self.result = []
         self.skip = False
+
     def handle_starttag(self, tag, attrs):
-        if tag in ('br', 'p', 'li'):
-            self.result.append('\n')
+        if tag in ("br", "p", "li"):
+            self.result.append("\n")
+
     def handle_data(self, data):
         self.result.append(data)
+
     def handle_entityref(self, name):
-        self.result.append(f'&{name};')
+        self.result.append(f"&{name};")
+
     def get_text(self):
-        return ''.join(self.result).strip()
+        return "".join(self.result).strip()
 
 
 def strip_html(text):
@@ -88,18 +240,18 @@ def strip_html(text):
         return ""
     text = str(text)
     # Replace common HTML entities
-    text = text.replace('&nbsp;', ' ').replace('&amp;', '&')
-    text = text.replace('&lt;', '<').replace('&gt;', '>')
-    text = text.replace('\xa0', ' ').replace('�', "'")
+    text = text.replace("&nbsp;", " ").replace("&amp;", "&")
+    text = text.replace("&lt;", "<").replace("&gt;", ">")
+    text = text.replace("\xa0", " ").replace("�", "'")
     try:
         stripper = HTMLStripper()
         stripper.feed(text)
         result = stripper.get_text()
     except Exception:
-        result = re.sub(r'<[^>]+>', ' ', text)
+        result = re.sub(r"<[^>]+>", " ", text)
     # Normalize whitespace
-    result = re.sub(r'\n{3,}', '\n\n', result)
-    result = re.sub(r' {2,}', ' ', result)
+    result = re.sub(r"\n{3,}", "\n\n", result)
+    result = re.sub(r" {2,}", " ", result)
     return result.strip()
 
 
@@ -129,7 +281,7 @@ def extract_programs(text):
     for prog in PROGRAM_KEYWORDS:
         # Use word boundary matching for short acronyms
         if len(prog) <= 4:
-            if re.search(r'\b' + re.escape(prog) + r'\b', text, re.IGNORECASE):
+            if re.search(r"\b" + re.escape(prog) + r"\b", text, re.IGNORECASE):
                 found.append(prog)
         else:
             if prog.lower() in text.lower():
@@ -165,8 +317,8 @@ def extract_headcount(text):
     if not text:
         return []
     patterns = [
-        r'(?:need|needs|hiring|looking for|in need of|team of|headcount[: ]*)\s*(\d+)',
-        r'(\d+)\s*(?:engineers?|positions?|openings?|roles?|contractors?|people|staff)',
+        r"(?:need|needs|hiring|looking for|in need of|team of|headcount[: ]*)\s*(\d+)",
+        r"(\d+)\s*(?:engineers?|positions?|openings?|roles?|contractors?|people|staff)",
     ]
     counts = []
     for pat in patterns:
@@ -180,8 +332,8 @@ def extract_bill_rates(text):
     if not text:
         return []
     patterns = [
-        r'\$[\d,]+(?:\.\d{2})?(?:/hr)?',
-        r'[\d,]+k(?:\s*(?:a year|annually|salary))?',
+        r"\$[\d,]+(?:\.\d{2})?(?:/hr)?",
+        r"[\d,]+k(?:\s*(?:a year|annually|salary))?",
     ]
     rates = []
     for pat in patterns:
@@ -194,14 +346,14 @@ def extract_emails(text):
     """Extract email addresses from note text."""
     if not text:
         return []
-    return list(set(re.findall(r'[\w.+-]+@[\w.-]+\.\w+', text)))
+    return list(set(re.findall(r"[\w.+-]+@[\w.-]+\.\w+", text)))
 
 
 def extract_phones(text):
     """Extract phone numbers from note text."""
     if not text:
         return []
-    return list(set(re.findall(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', text)))
+    return list(set(re.findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", text)))
 
 
 def parse_xls(filepath):
@@ -213,7 +365,16 @@ def parse_xls(filepath):
     # Columns: Department, Note Author, Date Note Added, Type, Note Action, About, Status, Note Body
 
     # Rename columns based on the actual header row
-    col_names = ["department", "note_author", "date_added", "type", "action", "about", "status", "note_body"]
+    col_names = [
+        "department",
+        "note_author",
+        "date_added",
+        "type",
+        "action",
+        "about",
+        "status",
+        "note_body",
+    ]
     # Find the header row - look for "Department" or "Note Author"
     header_idx = None
     for i in range(min(5, len(df))):
@@ -224,7 +385,7 @@ def parse_xls(filepath):
 
     if header_idx is not None:
         # Skip rows up to and including header
-        df = df.iloc[header_idx + 1:].reset_index(drop=True)
+        df = df.iloc[header_idx + 1 :].reset_index(drop=True)
 
     df.columns = col_names
     # Drop rows where essential fields are missing
@@ -233,7 +394,9 @@ def parse_xls(filepath):
     df["date_added"] = pd.to_datetime(df["date_added"], errors="coerce")
     df = df.dropna(subset=["date_added"]).reset_index(drop=True)
 
-    print(f"Parsed {len(df)} notes from {df['date_added'].min()} to {df['date_added'].max()}")
+    print(
+        f"Parsed {len(df)} notes from {df['date_added'].min()} to {df['date_added'].max()}"
+    )
     return df
 
 
@@ -241,20 +404,36 @@ def process_notes(df):
     """Process all notes: clean HTML, extract entities."""
     records = []
     for _, row in df.iterrows():
-        raw_body = str(row.get("note_body", "")) if pd.notna(row.get("note_body")) else ""
+        raw_body = (
+            str(row.get("note_body", "")) if pd.notna(row.get("note_body")) else ""
+        )
         clean_body = strip_html(raw_body)
-        contact = str(row.get("about", "")).strip() if pd.notna(row.get("about")) else ""
+        contact = (
+            str(row.get("about", "")).strip() if pd.notna(row.get("about")) else ""
+        )
 
         rec = {
             "source_sheet": "NotesActivityReport_Jan22_Feb16_2026",
-            "department": str(row.get("department", "")).strip() if pd.notna(row.get("department")) else "",
-            "note_author": str(row.get("note_author", "")).strip() if pd.notna(row.get("note_author")) else "",
-            "date_added": row["date_added"].strftime("%m/%d/%Y") if pd.notna(row["date_added"]) else "",
+            "department": str(row.get("department", "")).strip()
+            if pd.notna(row.get("department"))
+            else "",
+            "note_author": str(row.get("note_author", "")).strip()
+            if pd.notna(row.get("note_author"))
+            else "",
+            "date_added": row["date_added"].strftime("%m/%d/%Y")
+            if pd.notna(row["date_added"])
+            else "",
             "date_obj": row["date_added"],
-            "type": str(row.get("type", "")).strip() if pd.notna(row.get("type")) else "",
-            "action": str(row.get("action", "")).strip() if pd.notna(row.get("action")) else "",
+            "type": str(row.get("type", "")).strip()
+            if pd.notna(row.get("type"))
+            else "",
+            "action": str(row.get("action", "")).strip()
+            if pd.notna(row.get("action"))
+            else "",
             "about": contact,
-            "status": str(row.get("status", "")).strip() if pd.notna(row.get("status")) else "",
+            "status": str(row.get("status", "")).strip()
+            if pd.notna(row.get("status"))
+            else "",
             "note_body_raw": raw_body,
             "note_body_clean": clean_body,
             "extracted_primes": extract_companies(clean_body),
@@ -275,20 +454,37 @@ def update_master_notes_csv(records):
     filepath = os.path.join(ANALYSIS_DIR, "master_notes.csv")
     existing = []
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             existing_fields = reader.fieldnames
             existing = list(reader)
         print(f"Existing master_notes.csv: {len(existing)} rows")
 
     fieldnames = [
-        "source_sheet", "department", "note_author", "date_added", "type", "action",
-        "about", "status", "note_body_raw", "note_body_clean",
-        "extracted_primes", "extracted_programs", "extracted_contracts",
-        "extracted_roles", "extracted_locations", "extracted_headcount",
-        "extracted_bill_rates", "extracted_dates_mentioned",
-        "extracted_experience_levels", "extracted_skills", "extracted_acronyms",
-        "extracted_emails", "extracted_phone_numbers", "Column1"
+        "source_sheet",
+        "department",
+        "note_author",
+        "date_added",
+        "type",
+        "action",
+        "about",
+        "status",
+        "note_body_raw",
+        "note_body_clean",
+        "extracted_primes",
+        "extracted_programs",
+        "extracted_contracts",
+        "extracted_roles",
+        "extracted_locations",
+        "extracted_headcount",
+        "extracted_bill_rates",
+        "extracted_dates_mentioned",
+        "extracted_experience_levels",
+        "extracted_skills",
+        "extracted_acronyms",
+        "extracted_emails",
+        "extracted_phone_numbers",
+        "Column1",
     ]
 
     new_rows = []
@@ -322,11 +518,13 @@ def update_master_notes_csv(records):
         new_rows.append(row)
 
     all_rows = existing + new_rows
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(all_rows)
-    print(f"Updated master_notes.csv: {len(all_rows)} total rows (+{len(new_rows)} new)")
+    print(
+        f"Updated master_notes.csv: {len(all_rows)} total rows (+{len(new_rows)} new)"
+    )
 
 
 def update_contacts_csv(records):
@@ -334,18 +532,25 @@ def update_contacts_csv(records):
     filepath = os.path.join(ANALYSIS_DIR, "contacts.csv")
     existing = {}
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             fieldnames = reader.fieldnames
             for row in reader:
                 existing[row.get("name", "").strip()] = row
 
     # Build contact data from new notes
-    contact_data = defaultdict(lambda: {
-        "dates": [], "authors": set(), "departments": set(),
-        "companies": set(), "programs": set(), "roles": set(),
-        "statuses": set(), "interactions": 0
-    })
+    contact_data = defaultdict(
+        lambda: {
+            "dates": [],
+            "authors": set(),
+            "departments": set(),
+            "companies": set(),
+            "programs": set(),
+            "roles": set(),
+            "statuses": set(),
+            "interactions": 0,
+        }
+    )
 
     for rec in records:
         name = rec["about"]
@@ -371,8 +576,12 @@ def update_contacts_csv(records):
             row["interactions"] = str(old_interactions + cd["interactions"])
             row["last_interaction"] = max(cd["dates"]).strftime("%m/%d/%Y")
             # Merge companies and programs
-            old_companies = eval(row.get("companies", "[]") or "[]") if row.get("companies") else []
-            old_programs = eval(row.get("programs", "[]") or "[]") if row.get("programs") else []
+            old_companies = (
+                eval(row.get("companies", "[]") or "[]") if row.get("companies") else []
+            )
+            old_programs = (
+                eval(row.get("programs", "[]") or "[]") if row.get("programs") else []
+            )
             merged_companies = list(set(old_companies) | cd["companies"])
             merged_programs = list(set(old_programs) | cd["programs"])
             row["companies"] = str(merged_companies)
@@ -395,14 +604,26 @@ def update_contacts_csv(records):
             }
             new_contacts += 1
 
-    fieldnames = ["name", "status", "date_first_contact", "salesperson", "department",
-                  "companies", "programs", "roles", "interactions", "last_interaction"]
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+    fieldnames = [
+        "name",
+        "status",
+        "date_first_contact",
+        "salesperson",
+        "department",
+        "companies",
+        "programs",
+        "roles",
+        "interactions",
+        "last_interaction",
+    ]
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         for row in existing.values():
             writer.writerow(row)
-    print(f"Updated contacts.csv: {new_contacts} new, {updated_contacts} updated, {len(existing)} total")
+    print(
+        f"Updated contacts.csv: {new_contacts} new, {updated_contacts} updated, {len(existing)} total"
+    )
     return new_contacts, updated_contacts, len(existing)
 
 
@@ -411,16 +632,22 @@ def update_companies_csv(records):
     filepath = os.path.join(ANALYSIS_DIR, "companies.csv")
     existing = {}
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 existing[row.get("company_name", "").strip()] = row
 
     # Aggregate company data from new notes
-    company_data = defaultdict(lambda: {
-        "mentions": 0, "contacts": set(), "programs": set(),
-        "locations": set(), "roles": set(), "headcount": []
-    })
+    company_data = defaultdict(
+        lambda: {
+            "mentions": 0,
+            "contacts": set(),
+            "programs": set(),
+            "locations": set(),
+            "roles": set(),
+            "headcount": [],
+        }
+    )
 
     for rec in records:
         for company in rec["extracted_primes"]:
@@ -439,20 +666,32 @@ def update_companies_csv(records):
             old_mentions = int(row.get("total_mentions", 0) or 0)
             row["total_mentions"] = str(old_mentions + cd["mentions"])
             # Merge contacts
-            old_contacts = eval(row.get("contacts_list", "[]") or "[]") if row.get("contacts_list") else []
+            old_contacts = (
+                eval(row.get("contacts_list", "[]") or "[]")
+                if row.get("contacts_list")
+                else []
+            )
             merged_contacts = list(set(old_contacts) | cd["contacts"])
             row["contacts_list"] = str(merged_contacts)
             row["unique_contacts"] = str(len(merged_contacts))
             # Merge programs
-            old_programs = eval(row.get("programs", "[]") or "[]") if row.get("programs") else []
+            old_programs = (
+                eval(row.get("programs", "[]") or "[]") if row.get("programs") else []
+            )
             merged_programs = list(set(old_programs) | cd["programs"])
             row["programs"] = str(merged_programs)
             # Merge locations
-            old_locations = eval(row.get("locations", "[]") or "[]") if row.get("locations") else []
+            old_locations = (
+                eval(row.get("locations", "[]") or "[]") if row.get("locations") else []
+            )
             merged_locations = list(set(old_locations) | cd["locations"])
             row["locations"] = str(merged_locations)
             # Merge roles
-            old_roles = eval(row.get("roles_needed", "[]") or "[]") if row.get("roles_needed") else []
+            old_roles = (
+                eval(row.get("roles_needed", "[]") or "[]")
+                if row.get("roles_needed")
+                else []
+            )
             merged_roles = list(set(old_roles) | cd["roles"])
             row["roles_needed"] = str(merged_roles)
         else:
@@ -465,15 +704,30 @@ def update_companies_csv(records):
                 "locations": str(list(cd["locations"])),
                 "roles_needed": str(list(cd["roles"])),
                 "contract_types": "[]",
-                "total_headcount_mentioned": str(sum(int(h) for h in cd["headcount"] if h.isdigit())),
+                "total_headcount_mentioned": str(
+                    sum(int(h) for h in cd["headcount"] if h.isdigit())
+                ),
             }
 
-    fieldnames = ["company_name", "total_mentions", "unique_contacts", "contacts_list",
-                  "programs", "locations", "roles_needed", "contract_types", "total_headcount_mentioned"]
+    fieldnames = [
+        "company_name",
+        "total_mentions",
+        "unique_contacts",
+        "contacts_list",
+        "programs",
+        "locations",
+        "roles_needed",
+        "contract_types",
+        "total_headcount_mentioned",
+    ]
     # Sort by total mentions descending
-    sorted_companies = sorted(existing.values(), key=lambda x: int(x.get("total_mentions", 0) or 0), reverse=True)
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+    sorted_companies = sorted(
+        existing.values(),
+        key=lambda x: int(x.get("total_mentions", 0) or 0),
+        reverse=True,
+    )
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(sorted_companies)
     print(f"Updated companies.csv: {len(existing)} companies")
@@ -484,16 +738,21 @@ def update_programs_csv(records):
     filepath = os.path.join(ANALYSIS_DIR, "programs.csv")
     existing = {}
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             for row in reader:
                 existing[row.get("program_name", "").strip()] = row
 
     # Aggregate program data
-    program_data = defaultdict(lambda: {
-        "mentions": 0, "companies": set(), "contacts": set(),
-        "locations": set(), "roles": set()
-    })
+    program_data = defaultdict(
+        lambda: {
+            "mentions": 0,
+            "companies": set(),
+            "contacts": set(),
+            "locations": set(),
+            "roles": set(),
+        }
+    )
 
     for rec in records:
         for prog in rec["extracted_programs"]:
@@ -511,15 +770,27 @@ def update_programs_csv(records):
             old_mentions = int(row.get("total_mentions", 0) or 0)
             row["total_mentions"] = str(old_mentions + pd_["mentions"])
             # Merge
-            old_companies = eval(row.get("companies", "[]") or "[]") if row.get("companies") else []
+            old_companies = (
+                eval(row.get("companies", "[]") or "[]") if row.get("companies") else []
+            )
             row["companies"] = str(list(set(old_companies) | pd_["companies"]))
-            old_contacts = eval(row.get("contacts_list", "[]") or "[]") if row.get("contacts_list") else []
+            old_contacts = (
+                eval(row.get("contacts_list", "[]") or "[]")
+                if row.get("contacts_list")
+                else []
+            )
             merged_contacts = list(set(old_contacts) | pd_["contacts"])
             row["contacts_list"] = str(merged_contacts)
             row["unique_contacts"] = str(len(merged_contacts))
-            old_locations = eval(row.get("locations", "[]") or "[]") if row.get("locations") else []
+            old_locations = (
+                eval(row.get("locations", "[]") or "[]") if row.get("locations") else []
+            )
             row["locations"] = str(list(set(old_locations) | pd_["locations"]))
-            old_roles = eval(row.get("roles_mentioned", "[]") or "[]") if row.get("roles_mentioned") else []
+            old_roles = (
+                eval(row.get("roles_mentioned", "[]") or "[]")
+                if row.get("roles_mentioned")
+                else []
+            )
             row["roles_mentioned"] = str(list(set(old_roles) | pd_["roles"]))
         else:
             existing[prog] = {
@@ -532,11 +803,22 @@ def update_programs_csv(records):
                 "roles_mentioned": str(list(pd_["roles"])),
             }
 
-    fieldnames = ["program_name", "total_mentions", "companies", "unique_contacts",
-                  "contacts_list", "locations", "roles_mentioned"]
-    sorted_programs = sorted(existing.values(), key=lambda x: int(x.get("total_mentions", 0) or 0), reverse=True)
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+    fieldnames = [
+        "program_name",
+        "total_mentions",
+        "companies",
+        "unique_contacts",
+        "contacts_list",
+        "locations",
+        "roles_mentioned",
+    ]
+    sorted_programs = sorted(
+        existing.values(),
+        key=lambda x: int(x.get("total_mentions", 0) or 0),
+        reverse=True,
+    )
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(sorted_programs)
     print(f"Updated programs.csv: {len(existing)} programs")
@@ -547,7 +829,7 @@ def update_timeline_csv(records):
     filepath = os.path.join(ANALYSIS_DIR, "timeline.csv")
     existing = []
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             existing = list(reader)
 
@@ -555,22 +837,34 @@ def update_timeline_csv(records):
     for rec in records:
         clean = rec["note_body_clean"]
         summary = clean[:200] if len(clean) > 200 else clean
-        new_rows.append({
-            "date": rec["date_obj"].strftime("%Y-%m-%d"),
-            "author": rec["note_author"],
-            "contact": rec["about"],
-            "action": rec["action"],
-            "type": rec["type"],
-            "companies": str(rec["extracted_primes"]),
-            "programs": str(rec["extracted_programs"]),
-            "status": rec["status"],
-            "summary": summary.replace('\n', ' '),
-        })
+        new_rows.append(
+            {
+                "date": rec["date_obj"].strftime("%Y-%m-%d"),
+                "author": rec["note_author"],
+                "contact": rec["about"],
+                "action": rec["action"],
+                "type": rec["type"],
+                "companies": str(rec["extracted_primes"]),
+                "programs": str(rec["extracted_programs"]),
+                "status": rec["status"],
+                "summary": summary.replace("\n", " "),
+            }
+        )
 
     all_rows = existing + new_rows
-    fieldnames = ["date", "author", "contact", "action", "type", "companies", "programs", "status", "summary"]
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+    fieldnames = [
+        "date",
+        "author",
+        "contact",
+        "action",
+        "type",
+        "companies",
+        "programs",
+        "status",
+        "summary",
+    ]
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(all_rows)
     print(f"Updated timeline.csv: {len(all_rows)} total entries (+{len(new_rows)} new)")
@@ -578,7 +872,7 @@ def update_timeline_csv(records):
 
 def update_stats_json(records, existing_stats_path):
     """Update the analysis stats JSON."""
-    with open(existing_stats_path, 'r') as f:
+    with open(existing_stats_path, "r") as f:
         stats = json.load(f)
 
     old_total = stats["total_notes"]
@@ -599,12 +893,18 @@ def update_stats_json(records, existing_stats_path):
             company_counter[c] += 1
 
     # Update top_companies
-    old_company_counts = {c["company_name"]: c["total_mentions"] for c in stats["top_companies"]}
+    old_company_counts = {
+        c["company_name"]: c["total_mentions"] for c in stats["top_companies"]
+    }
     for company, count in company_counter.items():
         old_company_counts[company] = old_company_counts.get(company, 0) + count
     stats["top_companies"] = sorted(
-        [{"company_name": k, "total_mentions": v} for k, v in old_company_counts.items()],
-        key=lambda x: x["total_mentions"], reverse=True
+        [
+            {"company_name": k, "total_mentions": v}
+            for k, v in old_company_counts.items()
+        ],
+        key=lambda x: x["total_mentions"],
+        reverse=True,
     )
 
     # Count programs in new notes
@@ -613,18 +913,26 @@ def update_stats_json(records, existing_stats_path):
         for p in rec["extracted_programs"]:
             program_counter[p] += 1
 
-    old_program_counts = {p["program_name"]: p["total_mentions"] for p in stats["top_programs"]}
+    old_program_counts = {
+        p["program_name"]: p["total_mentions"] for p in stats["top_programs"]
+    }
     for prog, count in program_counter.items():
         old_program_counts[prog] = old_program_counts.get(prog, 0) + count
     stats["top_programs"] = sorted(
-        [{"program_name": k, "total_mentions": v} for k, v in old_program_counts.items()],
-        key=lambda x: x["total_mentions"], reverse=True
+        [
+            {"program_name": k, "total_mentions": v}
+            for k, v in old_program_counts.items()
+        ],
+        key=lambda x: x["total_mentions"],
+        reverse=True,
     )[:15]
 
     # Update status distribution
     status_counter = Counter(r["status"] for r in records if r["status"])
     for status, count in status_counter.items():
-        stats["status_distribution"][status] = stats["status_distribution"].get(status, 0) + count
+        stats["status_distribution"][status] = (
+            stats["status_distribution"].get(status, 0) + count
+        )
 
     # Update action types
     action_counter = Counter(r["action"] for r in records if r["action"])
@@ -638,10 +946,12 @@ def update_stats_json(records, existing_stats_path):
 
     # Update totals
     stats["total_notes"] = new_total
-    stats["unique_contacts"] = all_unique + len(new_contacts)  # Approximate - may overcount
+    stats["unique_contacts"] = all_unique + len(
+        new_contacts
+    )  # Approximate - may overcount
     stats["date_range"]["latest"] = latest_new
 
-    with open(existing_stats_path, 'w') as f:
+    with open(existing_stats_path, "w") as f:
         json.dump(stats, f, indent=2)
     print(f"Updated stats: {old_total} -> {new_total} notes, latest date: {latest_new}")
     return stats
@@ -653,17 +963,32 @@ def update_master_data_aggregation(records):
     existing = []
     fieldnames = None
     if os.path.exists(filepath):
-        with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+        with open(filepath, "r", encoding="utf-8", errors="replace") as f:
             reader = csv.DictReader(f)
             fieldnames = reader.fieldnames
             existing = list(reader)
 
     if not fieldnames:
         fieldnames = [
-            "Sheet", "Date", "Contact", "Author", "Type", "Action", "Category",
-            "Status", "Department", "Companies", "Programs", "Locations",
-            "Dollar_Amounts", "Headcounts", "Titles", "Emails", "Phones",
-            "Note_Preview", "Full_Note"
+            "Sheet",
+            "Date",
+            "Contact",
+            "Author",
+            "Type",
+            "Action",
+            "Category",
+            "Status",
+            "Department",
+            "Companies",
+            "Programs",
+            "Locations",
+            "Dollar_Amounts",
+            "Headcounts",
+            "Titles",
+            "Emails",
+            "Phones",
+            "Note_Preview",
+            "Full_Note",
         ]
 
     new_rows = []
@@ -673,53 +998,67 @@ def update_master_data_aggregation(records):
         # Determine category
         category = "General"
         clean_lower = clean.lower()
-        if any(w in clean_lower for w in ["hiring", "headcount", "openings", "positions", "need"]):
+        if any(
+            w in clean_lower
+            for w in ["hiring", "headcount", "openings", "positions", "need"]
+        ):
             category = "Hiring"
         elif any(w in clean_lower for w in ["interview", "prescreen", "submitted"]):
             category = "Interview"
         elif any(w in clean_lower for w in ["visit", "onsite", "on-site", "met with"]):
             category = "Site Visit"
-        elif any(w in clean_lower for w in ["follow up", "follow-up", "touch point", "check in"]):
+        elif any(
+            w in clean_lower
+            for w in ["follow up", "follow-up", "touch point", "check in"]
+        ):
             category = "Follow-up"
-        elif any(w in clean_lower for w in ["placed", "started", "start date", "onboard"]):
+        elif any(
+            w in clean_lower for w in ["placed", "started", "start date", "onboard"]
+        ):
             category = "Placement"
         elif any(w in clean_lower for w in ["proposal", "capture", "bid", "teaming"]):
             category = "Business Discussion"
 
-        new_rows.append({
-            "Sheet": rec["source_sheet"],
-            "Date": rec["date_obj"].strftime("%Y-%m-%d %H:%M:%S"),
-            "Contact": rec["about"],
-            "Author": rec["note_author"],
-            "Type": rec["type"],
-            "Action": rec["action"],
-            "Category": category,
-            "Status": rec["status"],
-            "Department": rec["department"],
-            "Companies": "|".join(rec["extracted_primes"]),
-            "Programs": "|".join(rec["extracted_programs"]),
-            "Locations": "|".join(rec["extracted_locations"]),
-            "Dollar_Amounts": "|".join(rec["extracted_bill_rates"]),
-            "Headcounts": "|".join(rec["extracted_headcount"]),
-            "Titles": "|".join(rec["extracted_roles"]),
-            "Emails": "|".join(rec["extracted_emails"]),
-            "Phones": "|".join(rec["extracted_phones"]),
-            "Note_Preview": preview.replace('\n', ' '),
-            "Full_Note": clean.replace('\n', ' '),
-        })
+        new_rows.append(
+            {
+                "Sheet": rec["source_sheet"],
+                "Date": rec["date_obj"].strftime("%Y-%m-%d %H:%M:%S"),
+                "Contact": rec["about"],
+                "Author": rec["note_author"],
+                "Type": rec["type"],
+                "Action": rec["action"],
+                "Category": category,
+                "Status": rec["status"],
+                "Department": rec["department"],
+                "Companies": "|".join(rec["extracted_primes"]),
+                "Programs": "|".join(rec["extracted_programs"]),
+                "Locations": "|".join(rec["extracted_locations"]),
+                "Dollar_Amounts": "|".join(rec["extracted_bill_rates"]),
+                "Headcounts": "|".join(rec["extracted_headcount"]),
+                "Titles": "|".join(rec["extracted_roles"]),
+                "Emails": "|".join(rec["extracted_emails"]),
+                "Phones": "|".join(rec["extracted_phones"]),
+                "Note_Preview": preview.replace("\n", " "),
+                "Full_Note": clean.replace("\n", " "),
+            }
+        )
 
     all_rows = existing + new_rows
-    with open(filepath, 'w', encoding='utf-8', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
+    with open(filepath, "w", encoding="utf-8", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(all_rows)
-    print(f"Updated MASTER_DATA_AGGREGATION.csv: {len(all_rows)} total (+{len(new_rows)} new)")
+    print(
+        f"Updated MASTER_DATA_AGGREGATION.csv: {len(all_rows)} total (+{len(new_rows)} new)"
+    )
     return new_rows
 
 
 def generate_new_notes_intelligence_report(records, stats):
     """Generate intelligence report for the new notes period."""
-    filepath = os.path.join(DEEP_DIVE_DIR, "NOTES_INTELLIGENCE_EXTRACT_UPDATE_JAN22_FEB16.md")
+    filepath = os.path.join(
+        DEEP_DIVE_DIR, "NOTES_INTELLIGENCE_EXTRACT_UPDATE_JAN22_FEB16.md"
+    )
 
     # Identify high-value BD notes (hiring, programs, headcount)
     bd_notes = []
@@ -729,11 +1068,24 @@ def generate_new_notes_intelligence_report(records, stats):
             continue
         clean_lower = clean.lower()
         is_bd = (
-            rec["extracted_primes"] or
-            rec["extracted_programs"] or
-            rec["extracted_headcount"] or
-            any(w in clean_lower for w in ["hiring", "headcount", "openings", "need", "positions",
-                                           "program", "contract", "award", "capture", "bid"])
+            rec["extracted_primes"]
+            or rec["extracted_programs"]
+            or rec["extracted_headcount"]
+            or any(
+                w in clean_lower
+                for w in [
+                    "hiring",
+                    "headcount",
+                    "openings",
+                    "need",
+                    "positions",
+                    "program",
+                    "contract",
+                    "award",
+                    "capture",
+                    "bid",
+                ]
+            )
         )
         if is_bd and rec["type"] == "Contact":
             bd_notes.append(rec)
@@ -778,99 +1130,123 @@ def generate_new_notes_intelligence_report(records, stats):
     for dept, count in dept_counter.most_common():
         lines.append(f"| {dept} | {count} |")
 
-    lines.extend([
-        "",
-        "### Top Authors This Period",
-        "",
-        "| Author | Notes |",
-        "|--------|-------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "### Top Authors This Period",
+            "",
+            "| Author | Notes |",
+            "|--------|-------|",
+        ]
+    )
     for author, count in author_counter.most_common(20):
         lines.append(f"| {author} | {count} |")
 
-    lines.extend([
-        "",
-        "### Companies Mentioned",
-        "",
-        "| Company | Mentions |",
-        "|---------|----------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "### Companies Mentioned",
+            "",
+            "| Company | Mentions |",
+            "|---------|----------|",
+        ]
+    )
     for company, count in company_counter.most_common():
         lines.append(f"| {company} | {count} |")
 
-    lines.extend([
-        "",
-        "### Programs Referenced",
-        "",
-        "| Program | Mentions |",
-        "|---------|----------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "### Programs Referenced",
+            "",
+            "| Program | Mentions |",
+            "|---------|----------|",
+        ]
+    )
     for prog, count in program_counter.most_common():
         lines.append(f"| {prog} | {count} |")
 
-    lines.extend([
-        "",
-        "### Note Actions",
-        "",
-        "| Action | Count |",
-        "|--------|-------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "### Note Actions",
+            "",
+            "| Action | Count |",
+            "|--------|-------|",
+        ]
+    )
     for action, count in action_counter.most_common():
         lines.append(f"| {action} | {count} |")
 
-    lines.extend([
-        "",
-        "### Contact Status Distribution",
-        "",
-        "| Status | Count |",
-        "|--------|-------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "### Contact Status Distribution",
+            "",
+            "| Status | Count |",
+            "|--------|-------|",
+        ]
+    )
     for status, count in status_counter.most_common():
         lines.append(f"| {status} | {count} |")
 
     # Key BD intelligence notes
-    lines.extend([
-        "",
-        "---",
-        "",
-        "## Key BD Intelligence Notes",
-        "",
-        f"**Total BD-Relevant Notes:** {len(bd_notes)}",
-        "",
-    ])
+    lines.extend(
+        [
+            "",
+            "---",
+            "",
+            "## Key BD Intelligence Notes",
+            "",
+            f"**Total BD-Relevant Notes:** {len(bd_notes)}",
+            "",
+        ]
+    )
 
     for rec in bd_notes[:100]:  # Cap at 100 most relevant
         clean = rec["note_body_clean"]
         # Truncate very long notes
         display = clean[:500] + "..." if len(clean) > 500 else clean
-        programs_str = ", ".join(rec["extracted_programs"]) if rec["extracted_programs"] else "N/A"
-        companies_str = ", ".join(rec["extracted_primes"]) if rec["extracted_primes"] else "Company TBD"
+        programs_str = (
+            ", ".join(rec["extracted_programs"]) if rec["extracted_programs"] else "N/A"
+        )
+        companies_str = (
+            ", ".join(rec["extracted_primes"])
+            if rec["extracted_primes"]
+            else "Company TBD"
+        )
 
-        lines.extend([
-            f"### {rec['about']} - {companies_str}",
-            f"**Date:** {rec['date_obj'].strftime('%Y-%m-%d')}",
-            f"**Author:** {rec['note_author']}",
-            f"**Programs:** {programs_str}",
-        ])
+        lines.extend(
+            [
+                f"### {rec['about']} - {companies_str}",
+                f"**Date:** {rec['date_obj'].strftime('%Y-%m-%d')}",
+                f"**Author:** {rec['note_author']}",
+                f"**Programs:** {programs_str}",
+            ]
+        )
         if rec["extracted_headcount"]:
             lines.append(f"**Headcount:** {', '.join(rec['extracted_headcount'])}")
         if rec["extracted_bill_rates"]:
             lines.append(f"**Rates/Budget:** {', '.join(rec['extracted_bill_rates'])}")
-        lines.extend([
-            f"**Details:**",
-            display,
-            "",
-        ])
+        lines.extend(
+            [
+                f"**Details:**",
+                display,
+                "",
+            ]
+        )
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
     print(f"Generated intelligence report: {len(bd_notes)} BD notes documented")
     return bd_notes
 
 
 def generate_updated_executive_summary(stats, records, contact_counts):
     """Generate an updated executive summary addendum."""
-    filepath = os.path.join(ANALYSIS_DIR, "ANALYSIS", "01_EXECUTIVE_SUMMARY_UPDATE_JAN22_FEB16.md")
+    filepath = os.path.join(
+        ANALYSIS_DIR, "ANALYSIS", "01_EXECUTIVE_SUMMARY_UPDATE_JAN22_FEB16.md"
+    )
 
     new_contacts_count, updated_contacts, total_contacts = contact_counts
 
@@ -923,44 +1299,52 @@ def generate_updated_executive_summary(stats, records, contact_counts):
     for i, (author, count) in enumerate(authors.most_common(20), 1):
         lines.append(f"| {author} | {count} | #{i} |")
 
-    lines.extend([
-        "",
-        "## Company Activity This Period",
-        "",
-        "| Company | New Mentions |",
-        "|---------|-------------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Company Activity This Period",
+            "",
+            "| Company | New Mentions |",
+            "|---------|-------------|",
+        ]
+    )
     for company, count in company_counter.most_common():
         lines.append(f"| {company} | {count} |")
 
-    lines.extend([
-        "",
-        "## Updated Top Companies (All Time)",
-        "",
-        "| Company | Total Mentions |",
-        "|---------|---------------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Updated Top Companies (All Time)",
+            "",
+            "| Company | Total Mentions |",
+            "|---------|---------------|",
+        ]
+    )
     for c in stats["top_companies"][:15]:
         lines.append(f"| {c['company_name']} | {c['total_mentions']} |")
 
-    lines.extend([
-        "",
-        "## Updated Top Programs (All Time)",
-        "",
-        "| Program | Total Mentions |",
-        "|---------|---------------|",
-    ])
+    lines.extend(
+        [
+            "",
+            "## Updated Top Programs (All Time)",
+            "",
+            "| Program | Total Mentions |",
+            "|---------|---------------|",
+        ]
+    )
     for p in stats["top_programs"][:15]:
         lines.append(f"| {p['program_name']} | {p['total_mentions']} |")
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
     print(f"Generated executive summary update")
 
 
 def generate_contact_program_matrix_update(records):
     """Generate an updated contact-program matrix for the new period."""
-    filepath = os.path.join(DEEP_DIVE_DIR, "CONTACT_PROGRAM_MATRIX_UPDATE_JAN22_FEB16.md")
+    filepath = os.path.join(
+        DEEP_DIVE_DIR, "CONTACT_PROGRAM_MATRIX_UPDATE_JAN22_FEB16.md"
+    )
 
     # Build contact -> company -> programs mapping
     matrix = defaultdict(lambda: defaultdict(set))
@@ -993,21 +1377,25 @@ def generate_contact_program_matrix_update(records):
 
     for company in sorted(company_contacts.keys()):
         contacts = company_contacts[company]
-        lines.extend([
-            f"## {company}",
-            "",
-            "| Contact | Programs | Authors | Last Activity |",
-            "|---------|----------|---------|---------------|",
-        ])
+        lines.extend(
+            [
+                f"## {company}",
+                "",
+                "| Contact | Programs | Authors | Last Activity |",
+                "|---------|----------|---------|---------------|",
+            ]
+        )
         for contact, programs in sorted(contacts, key=lambda x: x[0]):
             progs = ", ".join(sorted(programs)) if programs else "-"
             authors = ", ".join(contact_authors.get(contact, set()))
-            last_date = max(contact_dates.get(contact, [datetime.now()])).strftime("%Y-%m-%d")
+            last_date = max(contact_dates.get(contact, [datetime.now()])).strftime(
+                "%Y-%m-%d"
+            )
             lines.append(f"| {contact} | {progs} | {authors} | {last_date} |")
         lines.append("")
 
-    with open(filepath, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(lines))
+    with open(filepath, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines))
     print(f"Generated contact-program matrix update: {len(matrix)} contacts")
 
 
@@ -1015,8 +1403,10 @@ def main():
     if len(sys.argv) < 2:
         # Default path
         xls_path = os.path.join(
-            os.path.dirname(BASE_DIR), "docs", "Bullhorn Exports",
-            "Notes Activity Report - Jan22-Feb16-2026.XLS"
+            os.path.dirname(BASE_DIR),
+            "docs",
+            "Bullhorn Exports",
+            "Notes Activity Report - Jan22-Feb16-2026.XLS",
         )
     else:
         xls_path = sys.argv[1]

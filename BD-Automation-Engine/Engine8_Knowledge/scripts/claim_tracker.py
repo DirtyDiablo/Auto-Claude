@@ -20,8 +20,8 @@ Usage:
 """
 
 import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from datetime import datetime
+from typing import Dict, List, Any
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
@@ -56,7 +56,9 @@ class ClaimTracker:
         for program in programs:
             name = program.get("name", "")
             has_contacts = name in contacts_by_program and contacts_by_program[name] > 0
-            has_outreach = name in activities_by_program and activities_by_program[name] > 0
+            has_outreach = (
+                name in activities_by_program and activities_by_program[name] > 0
+            )
 
             status = {
                 "program": name,
@@ -82,7 +84,9 @@ class ClaimTracker:
                 "claim_rate": round(len(claimed) / max(len(programs), 1), 3),
             },
             "claimed": sorted(claimed, key=lambda x: x["outreach_count"], reverse=True),
-            "unclaimed": sorted(unclaimed, key=lambda x: x["contacts_count"], reverse=True),
+            "unclaimed": sorted(
+                unclaimed, key=lambda x: x["contacts_count"], reverse=True
+            ),
         }
 
     def get_unclaimed_priority(self, limit: int = 20) -> List[Dict]:
@@ -111,7 +115,12 @@ class ClaimTracker:
             # Value parsing
             value_str = str(item.get("value", ""))
             try:
-                value = float(value_str.replace("$", "").replace(",", "").replace("M", "000000").replace("B", "000000000"))
+                value = float(
+                    value_str.replace("$", "")
+                    .replace(",", "")
+                    .replace("M", "000000")
+                    .replace("B", "000000000")
+                )
                 if value > 100_000_000:
                     score += 20
                 elif value > 10_000_000:
@@ -186,12 +195,16 @@ class ClaimTracker:
             )
             for r in results:
                 payload = r.payload if hasattr(r, "payload") else r.get("payload", {})
-                programs.append({
-                    "name": payload.get("name", payload.get("program_name", "")),
-                    "agency": payload.get("agency", ""),
-                    "prime_contractor": payload.get("prime_contractor", ""),
-                    "value": payload.get("value", payload.get("contract_value", "")),
-                })
+                programs.append(
+                    {
+                        "name": payload.get("name", payload.get("program_name", "")),
+                        "agency": payload.get("agency", ""),
+                        "prime_contractor": payload.get("prime_contractor", ""),
+                        "value": payload.get(
+                            "value", payload.get("contract_value", "")
+                        ),
+                    }
+                )
         except Exception as e:
             logger.warning(f"Program fetch failed: {e}")
 

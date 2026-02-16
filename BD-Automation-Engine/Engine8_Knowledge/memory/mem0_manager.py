@@ -23,6 +23,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class Memory:
     """A single memory entry."""
+
     memory_id: str = ""
     content: str = ""
     user_id: str = ""
@@ -36,6 +37,7 @@ class Memory:
 @dataclass
 class MemoryVersion:
     """Version history entry for a memory."""
+
     version: int = 0
     content: str = ""
     updated_at: str = ""
@@ -45,6 +47,7 @@ class MemoryVersion:
 @dataclass
 class MemoryStats:
     """Aggregate memory statistics."""
+
     total_memories: int = 0
     by_user: Dict[str, int] = field(default_factory=dict)
     by_agent: Dict[str, int] = field(default_factory=dict)
@@ -160,7 +163,9 @@ class Mem0Manager:
             updated_at=now,
         )
         self._history.setdefault(memory_id, []).append(
-            MemoryVersion(version=1, content=content, updated_at=now, change_type="created")
+            MemoryVersion(
+                version=1, content=content, updated_at=now, change_type="created"
+            )
         )
 
         logger.info("memory_added", id=memory_id, user=user_id, agent=agent_id)
@@ -235,7 +240,8 @@ class Mem0Manager:
                 logger.warning("mem0_get_all_error", error=str(exc))
 
         return [
-            m for m in self._memories.values()
+            m
+            for m in self._memories.values()
             if m.user_id == user_id and (not agent_id or m.agent_id == agent_id)
         ]
 

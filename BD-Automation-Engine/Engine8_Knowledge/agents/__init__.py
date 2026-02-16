@@ -51,7 +51,7 @@ try:
         create_strategy_agent,
         create_writer_agent,
         BDAgentTeam,
-        CREWAI_AVAILABLE
+        CREWAI_AVAILABLE,
     )
     from .workflows import (
         get_workflows,
@@ -62,8 +62,9 @@ try:
         WorkflowResult,
         ProgramAnalysisResult,
         OutreachPrepResult,
-        WeeklyIntelResult
+        WeeklyIntelResult,
     )
+
     CREWAI_AGENTS_AVAILABLE = True
 except ImportError:
     CREWAI_AGENTS_AVAILABLE = False
@@ -71,47 +72,41 @@ except ImportError:
 
 __all__ = [
     # Base
-    'BDAgent',
-    'AgentResponse',
-
+    "BDAgent",
+    "AgentResponse",
     # Core Agents (Original 4)
-    'ProgramIntelAgent',
-    'CompanyResearchAgent',
-    'ContactFinderAgent',
-    'BDStrategyAgent',
-
+    "ProgramIntelAgent",
+    "CompanyResearchAgent",
+    "ContactFinderAgent",
+    "BDStrategyAgent",
     # Phase 4 Enhancement Agents (New 4)
-    'ContactClassifierAgent',
-    'ScraperMonitorAgent',
-    'QualityAssuranceAgent',
-    'AnalyticsAgent',
-
+    "ContactClassifierAgent",
+    "ScraperMonitorAgent",
+    "QualityAssuranceAgent",
+    "AnalyticsAgent",
     # Orchestrator
-    'BDCrewOrchestrator',
-    'FallbackOrchestrator',
-    'OrchestrationResult',
-    'get_orchestrator',
-
+    "BDCrewOrchestrator",
+    "FallbackOrchestrator",
+    "OrchestrationResult",
+    "get_orchestrator",
     # CrewAI agents (legacy)
-    'get_bd_agent_team',
-    'create_research_agent',
-    'create_analyst_agent',
-    'create_strategy_agent',
-    'create_writer_agent',
-    'BDAgentTeam',
-    'CREWAI_AVAILABLE',
-
+    "get_bd_agent_team",
+    "create_research_agent",
+    "create_analyst_agent",
+    "create_strategy_agent",
+    "create_writer_agent",
+    "BDAgentTeam",
+    "CREWAI_AVAILABLE",
     # Workflows
-    'get_workflows',
-    'BDWorkflows',
-    'analyze_program',
-    'prepare_outreach',
-    'generate_weekly_intel',
-    'WorkflowResult',
-    'ProgramAnalysisResult',
-    'OutreachPrepResult',
-    'WeeklyIntelResult',
-
+    "get_workflows",
+    "BDWorkflows",
+    "analyze_program",
+    "prepare_outreach",
+    "generate_weekly_intel",
+    "WorkflowResult",
+    "ProgramAnalysisResult",
+    "OutreachPrepResult",
+    "WeeklyIntelResult",
     # Flags
-    'CREWAI_AGENTS_AVAILABLE',
+    "CREWAI_AGENTS_AVAILABLE",
 ]

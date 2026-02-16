@@ -140,18 +140,55 @@ _MOCK_EXPIRING = [
 ]
 
 _HIRING_BY_LOCATION = {
-    "GDIT": {"Springfield, VA": 12, "San Antonio, TX": 8, "Augusta, GA": 5, "Honolulu, HI": 3, "Tampa, FL": 6},
-    "Leidos": {"Reston, VA": 15, "San Antonio, TX": 6, "Augusta, GA": 7, "Tampa, FL": 4, "Colorado Springs, CO": 3},
-    "SAIC": {"Reston, VA": 9, "San Antonio, TX": 11, "Augusta, GA": 3, "Honolulu, HI": 5, "Tampa, FL": 2},
-    "CACI": {"Arlington, VA": 7, "San Antonio, TX": 4, "Augusta, GA": 6, "Tampa, FL": 8, "Colorado Springs, CO": 2},
-    "Peraton": {"Herndon, VA": 8, "San Antonio, TX": 3, "Augusta, GA": 4, "Tampa, FL": 5, "Honolulu, HI": 2},
-    "BAE Systems": {"McLean, VA": 6, "San Antonio, TX": 2, "Augusta, GA": 3, "Tampa, FL": 3, "Colorado Springs, CO": 4},
+    "GDIT": {
+        "Springfield, VA": 12,
+        "San Antonio, TX": 8,
+        "Augusta, GA": 5,
+        "Honolulu, HI": 3,
+        "Tampa, FL": 6,
+    },
+    "Leidos": {
+        "Reston, VA": 15,
+        "San Antonio, TX": 6,
+        "Augusta, GA": 7,
+        "Tampa, FL": 4,
+        "Colorado Springs, CO": 3,
+    },
+    "SAIC": {
+        "Reston, VA": 9,
+        "San Antonio, TX": 11,
+        "Augusta, GA": 3,
+        "Honolulu, HI": 5,
+        "Tampa, FL": 2,
+    },
+    "CACI": {
+        "Arlington, VA": 7,
+        "San Antonio, TX": 4,
+        "Augusta, GA": 6,
+        "Tampa, FL": 8,
+        "Colorado Springs, CO": 2,
+    },
+    "Peraton": {
+        "Herndon, VA": 8,
+        "San Antonio, TX": 3,
+        "Augusta, GA": 4,
+        "Tampa, FL": 5,
+        "Honolulu, HI": 2,
+    },
+    "BAE Systems": {
+        "McLean, VA": 6,
+        "San Antonio, TX": 2,
+        "Augusta, GA": 3,
+        "Tampa, FL": 3,
+        "Colorado Springs, CO": 4,
+    },
 }
 
 
 # =========================================
 # ENDPOINTS
 # =========================================
+
 
 @router.get("/contracts/awards")
 async def get_contract_awards(
@@ -208,14 +245,16 @@ async def get_competitive_summary():
         total_jobs = sum(hiring.values())
         total_value = sum(a["value_usd"] for a in awards)
 
-        competitors.append({
-            "name": prime,
-            "recent_awards": len(awards),
-            "total_value_usd": total_value,
-            "hiring_activity": total_jobs,
-            "top_locations": sorted(hiring.items(), key=lambda x: -x[1])[:3],
-            "latest_award": awards[0]["title"] if awards else None,
-        })
+        competitors.append(
+            {
+                "name": prime,
+                "recent_awards": len(awards),
+                "total_value_usd": total_value,
+                "hiring_activity": total_jobs,
+                "top_locations": sorted(hiring.items(), key=lambda x: -x[1])[:3],
+                "latest_award": awards[0]["title"] if awards else None,
+            }
+        )
 
     # Sort by total value descending
     competitors.sort(key=lambda x: -x["total_value_usd"])

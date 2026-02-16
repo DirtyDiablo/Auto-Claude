@@ -22,12 +22,12 @@ from Engine8_Knowledge.agents.bd_agents import (
     SearchProgramsTool,
     StoreInsightTool,
     CREWAI_AVAILABLE,
-    LANGCHAIN_ANTHROPIC_AVAILABLE
+    LANGCHAIN_ANTHROPIC_AVAILABLE,
 )
 from Engine8_Knowledge.agents.workflows import (
     analyze_program,
     prepare_outreach,
-    generate_weekly_intel
+    generate_weekly_intel,
 )
 
 
@@ -41,7 +41,9 @@ def test_environment():
     if not CREWAI_AVAILABLE:
         print("WARNING: CrewAI not installed. Run: pip install crewai")
     if not LANGCHAIN_ANTHROPIC_AVAILABLE:
-        print("WARNING: langchain-anthropic not installed. Run: pip install langchain-anthropic")
+        print(
+            "WARNING: langchain-anthropic not installed. Run: pip install langchain-anthropic"
+        )
 
     return CREWAI_AVAILABLE and LANGCHAIN_ANTHROPIC_AVAILABLE
 
@@ -164,18 +166,19 @@ async def test_program_analysis_workflow(program_name: str = "AF DCGS"):
 
         print(f"\nSuccess: {result.get('success')}")
 
-        if result.get('success'):
+        if result.get("success"):
             print(f"\nPlaybook preview:")
-            print(result.get('playbook', '')[:500])
+            print(result.get("playbook", "")[:500])
 
             print(f"\nTalking Points: {len(result.get('talking_points', []))}")
-            for tp in result.get('talking_points', [])[:3]:
+            for tp in result.get("talking_points", [])[:3]:
                 print(f"  - {tp}")
 
             print(f"\nOpportunity Score: {result.get('opportunity_score')}")
 
             # Verify output saved to memory
             from Engine8_Knowledge.scripts.memory_system import get_memory_system
+
             memory = get_memory_system()
             recent = memory.recall(program_name, limit=1)
             if recent:
@@ -206,15 +209,15 @@ async def test_outreach_prep_workflow(contact_name: str = "John Smith"):
 
         print(f"\nSuccess: {result.get('success')}")
 
-        if result.get('success'):
+        if result.get("success"):
             print(f"\nCall Script preview:")
-            print(result.get('call_script', '')[:300])
+            print(result.get("call_script", "")[:300])
 
             print(f"\nEmail Template preview:")
-            print(result.get('email_template', '')[:300])
+            print(result.get("email_template", "")[:300])
 
             print(f"\nLinkedIn Message preview:")
-            print(result.get('linkedin_message', '')[:200])
+            print(result.get("linkedin_message", "")[:200])
 
         else:
             print(f"Error: {result.get('error')}")
@@ -239,16 +242,16 @@ async def test_weekly_intel_workflow():
 
         print(f"\nSuccess: {result.get('success')}")
 
-        if result.get('success'):
+        if result.get("success"):
             print(f"\nExecutive Summary:")
-            print(result.get('executive_summary', '')[:500])
+            print(result.get("executive_summary", "")[:500])
 
             print(f"\nHot Programs: {len(result.get('hot_programs', []))}")
-            for hp in result.get('hot_programs', [])[:3]:
+            for hp in result.get("hot_programs", [])[:3]:
                 print(f"  {hp}")
 
             print(f"\nAction Items: {len(result.get('action_items', []))}")
-            for ai in result.get('action_items', [])[:3]:
+            for ai in result.get("action_items", [])[:3]:
                 print(f"  - {ai}")
 
         else:
@@ -301,9 +304,15 @@ def main():
 
     parser = argparse.ArgumentParser(description="Test BD Intelligence Agents")
     parser.add_argument("--tools-only", action="store_true", help="Only test tools")
-    parser.add_argument("--program", type=str, help="Test program analysis for specific program")
-    parser.add_argument("--contact", type=str, help="Test outreach prep for specific contact")
-    parser.add_argument("--weekly", action="store_true", help="Test weekly intel report")
+    parser.add_argument(
+        "--program", type=str, help="Test program analysis for specific program"
+    )
+    parser.add_argument(
+        "--contact", type=str, help="Test outreach prep for specific contact"
+    )
+    parser.add_argument(
+        "--weekly", action="store_true", help="Test weekly intel report"
+    )
 
     args = parser.parse_args()
 

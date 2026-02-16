@@ -95,24 +95,26 @@ def test_memory_system():
             contact="Test Contact",
             type="email",
             notes="Verification test",
-            outcome="success"
+            outcome="success",
         )
         print("  [OK] Logged contact interaction")
 
         # Test program insight
         system.log_program_insight(
-            program="Test Program",
-            insight="Verification test insight",
-            source="test"
+            program="Test Program", insight="Verification test insight", source="test"
         )
         print("  [OK] Logged program insight")
 
         # Test context retrieval
         contact_ctx = system.get_contact_context("Test Contact")
-        print(f"  [OK] Contact context: {len(contact_ctx.get('interactions', []))} interactions")
+        print(
+            f"  [OK] Contact context: {len(contact_ctx.get('interactions', []))} interactions"
+        )
 
         program_ctx = system.get_program_context("Test Program")
-        print(f"  [OK] Program context: {len(program_ctx.get('insights', []))} insights")
+        print(
+            f"  [OK] Program context: {len(program_ctx.get('insights', []))} insights"
+        )
 
         # Test stats
         stats = system.get_stats()
@@ -132,7 +134,10 @@ def test_rag_router():
     print("=" * 60 + "\n")
 
     try:
-        from Engine8_Knowledge.scripts.rag_router import get_rag_router, RetrievalStrategy
+        from Engine8_Knowledge.scripts.rag_router import (
+            get_rag_router,
+            RetrievalStrategy,
+        )
 
         router = get_rag_router()
 
@@ -169,7 +174,14 @@ def test_vector_schema():
         from Engine8_Knowledge.schemas.vector_collections import COLLECTIONS
 
         # Test collections definition
-        expected_collections = ["jobs", "contacts", "programs", "documents", "memories", "knowledge_graph"]
+        expected_collections = [
+            "jobs",
+            "contacts",
+            "programs",
+            "documents",
+            "memories",
+            "knowledge_graph",
+        ]
         for coll in expected_collections:
             if coll in COLLECTIONS:
                 print(f"  [OK] Collection defined: {coll}")
@@ -212,7 +224,11 @@ def run_all_tests():
                 all_ok = False
             else:
                 # Check individual results
-                errors = [k for k, v in result.items() if isinstance(v, dict) and v.get("status") != "OK"]
+                errors = [
+                    k
+                    for k, v in result.items()
+                    if isinstance(v, dict) and v.get("status") != "OK"
+                ]
                 if errors:
                     print(f"  [PARTIAL] {category}: {len(errors)} issues")
                 else:

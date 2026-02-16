@@ -29,6 +29,7 @@ RUNS_FILE = DATA_DIR / "workflow_runs.jsonl"
 # Step types
 # ---------------------------------------------------------------------------
 
+
 class StepType(str, Enum):
     SEQUENTIAL = "sequential"
     PARALLEL = "parallel"
@@ -48,6 +49,7 @@ class RunStatus(str, Enum):
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class WorkflowStep:
@@ -101,6 +103,7 @@ class WorkflowRun:
 # Step handlers (wrapping existing subsystems)
 # ---------------------------------------------------------------------------
 
+
 async def _step_scrape_jobs(params: dict) -> dict:
     """Trigger job scraping for specified primes."""
     primes = params.get("primes", ["GDIT", "Leidos", "Northrop Grumman"])
@@ -122,10 +125,16 @@ async def _step_find_contacts(params: dict) -> dict:
     """Find contacts associated with new programs."""
     try:
         import httpx
+
         async with httpx.AsyncClient(timeout=10) as client:
-            r = await client.get("http://127.0.0.1:8100/api/v2/contacts", params={"limit": 50})
+            r = await client.get(
+                "http://127.0.0.1:8100/api/v2/contacts", params={"limit": 50}
+            )
             data = r.json()
-            return {"contacts_found": data.get("total", 0), "sample": data.get("contacts", [])[:5]}
+            return {
+                "contacts_found": data.get("total", 0),
+                "sample": data.get("contacts", [])[:5],
+            }
     except Exception:
         return {"contacts_found": 0, "note": "API not available"}
 
@@ -133,18 +142,29 @@ async def _step_find_contacts(params: dict) -> dict:
 async def _step_classify_contacts(params: dict) -> dict:
     """Classify contacts by tier."""
     contacts = params.get("contacts_found", 0)
-    return {"classified": contacts, "tier_distribution": {"T1": 2, "T2": 5, "T3": contacts - 7}}
+    return {
+        "classified": contacts,
+        "tier_distribution": {"T1": 2, "T2": 5, "T3": contacts - 7},
+    }
 
 
 async def _step_create_outreach(params: dict) -> dict:
     """Create outreach sequences for prioritized contacts."""
-    return {"sequences_created": min(params.get("classified", 0), 10), "channel": "email"}
+    return {
+        "sequences_created": min(params.get("classified", 0), 10),
+        "channel": "email",
+    }
 
 
 async def _step_pull_incumbent_analysis(params: dict) -> dict:
     """Pull incumbent contractor analysis for recompete."""
     program = params.get("program", "unknown")
-    return {"program": program, "incumbent": "TBD", "contract_value": "$0", "analyzed": True}
+    return {
+        "program": program,
+        "incumbent": "TBD",
+        "contract_value": "$0",
+        "analyzed": True,
+    }
 
 
 async def _step_generate_past_performance(params: dict) -> dict:
@@ -154,7 +174,10 @@ async def _step_generate_past_performance(params: dict) -> dict:
 
 async def _step_create_proposal_brief(params: dict) -> dict:
     """Create proposal brief from analysis."""
-    return {"brief_generated": True, "sections": ["executive_summary", "technical_approach", "past_performance"]}
+    return {
+        "brief_generated": True,
+        "sections": ["executive_summary", "technical_approach", "past_performance"],
+    }
 
 
 async def _step_alert_bd_team(params: dict) -> dict:
@@ -165,23 +188,36 @@ async def _step_alert_bd_team(params: dict) -> dict:
 async def _step_generate_personalized_message(params: dict) -> dict:
     """Generate personalized outreach message for hot lead."""
     contact = params.get("contact_name", "Unknown")
-    return {"contact": contact, "message_draft": f"Personalized message for {contact}", "tone": "professional"}
+    return {
+        "contact": contact,
+        "message_draft": f"Personalized message for {contact}",
+        "tone": "professional",
+    }
 
 
 async def _step_schedule_outreach(params: dict) -> dict:
     """Schedule outreach in the queue."""
-    return {"scheduled": True, "send_date": (datetime.now()).isoformat(), "priority": "high"}
+    return {
+        "scheduled": True,
+        "send_date": (datetime.now()).isoformat(),
+        "priority": "high",
+    }
 
 
 async def _step_analyze_outcomes(params: dict) -> dict:
     """Analyze recent outcomes for optimization."""
-    return {"analyzed_period": "7d", "response_rate": 0.12, "top_performing_template": "intro_v3"}
+    return {
+        "analyzed_period": "7d",
+        "response_rate": 0.12,
+        "top_performing_template": "intro_v3",
+    }
 
 
 async def _step_retrain_models(params: dict) -> dict:
     """Retrain ML models with new data."""
     try:
         from Engine8_Knowledge.ml.response_predictor import get_response_predictor
+
         predictor = get_response_predictor()
         info = predictor.get_model_info()
         return {"model": info.get("model_type", "unknown"), "status": "retrained"}
@@ -239,23 +275,69 @@ WORKFLOW_DEFINITIONS: dict[str, WorkflowDefinition] = {
         name="new_program_discovery",
         description="Scrape jobs → detect new programs → create entries → find contacts → classify → create outreach",
         steps=[
-            WorkflowStep("scrape_jobs", "Trigger job scrapers", "sequential", "scrape_jobs"),
-            WorkflowStep("detect_programs", "Detect new programs from jobs", "sequential", "detect_new_programs"),
-            WorkflowStep("create_entries", "Create Federal Programs entries", "sequential", "create_program_entries"),
-            WorkflowStep("find_contacts", "Find contacts for programs", "sequential", "find_contacts"),
-            WorkflowStep("classify", "Classify contacts by tier", "sequential", "classify_contacts"),
-            WorkflowStep("review_gate", "BD manager reviews before outreach", "human_gate", ""),
-            WorkflowStep("create_outreach", "Create outreach sequences", "sequential", "create_outreach"),
+            WorkflowStep(
+                "scrape_jobs", "Trigger job scrapers", "sequential", "scrape_jobs"
+            ),
+            WorkflowStep(
+                "detect_programs",
+                "Detect new programs from jobs",
+                "sequential",
+                "detect_new_programs",
+            ),
+            WorkflowStep(
+                "create_entries",
+                "Create Federal Programs entries",
+                "sequential",
+                "create_program_entries",
+            ),
+            WorkflowStep(
+                "find_contacts",
+                "Find contacts for programs",
+                "sequential",
+                "find_contacts",
+            ),
+            WorkflowStep(
+                "classify",
+                "Classify contacts by tier",
+                "sequential",
+                "classify_contacts",
+            ),
+            WorkflowStep(
+                "review_gate", "BD manager reviews before outreach", "human_gate", ""
+            ),
+            WorkflowStep(
+                "create_outreach",
+                "Create outreach sequences",
+                "sequential",
+                "create_outreach",
+            ),
         ],
     ),
     "recompete_response": WorkflowDefinition(
         name="recompete_response",
         description="Detect recompete → incumbent analysis → past performance → proposal brief → alert team",
         steps=[
-            WorkflowStep("incumbent_analysis", "Pull incumbent contractor analysis", "sequential", "pull_incumbent_analysis"),
-            WorkflowStep("past_performance", "Generate past performance narrative", "sequential", "generate_past_performance"),
-            WorkflowStep("proposal_brief", "Create proposal brief", "sequential", "create_proposal_brief"),
-            WorkflowStep("approval_gate", "VP approval before distribution", "human_gate", ""),
+            WorkflowStep(
+                "incumbent_analysis",
+                "Pull incumbent contractor analysis",
+                "sequential",
+                "pull_incumbent_analysis",
+            ),
+            WorkflowStep(
+                "past_performance",
+                "Generate past performance narrative",
+                "sequential",
+                "generate_past_performance",
+            ),
+            WorkflowStep(
+                "proposal_brief",
+                "Create proposal brief",
+                "sequential",
+                "create_proposal_brief",
+            ),
+            WorkflowStep(
+                "approval_gate", "VP approval before distribution", "human_gate", ""
+            ),
             WorkflowStep("alert_team", "Alert BD team", "sequential", "alert_bd_team"),
         ],
     ),
@@ -263,8 +345,18 @@ WORKFLOW_DEFINITIONS: dict[str, WorkflowDefinition] = {
         name="hot_lead_pipeline",
         description="High-probability contact → personalized message → sequence → schedule → notify",
         steps=[
-            WorkflowStep("personalize", "Generate personalized message", "sequential", "generate_personalized_message"),
-            WorkflowStep("schedule", "Schedule in outreach queue", "sequential", "schedule_outreach"),
+            WorkflowStep(
+                "personalize",
+                "Generate personalized message",
+                "sequential",
+                "generate_personalized_message",
+            ),
+            WorkflowStep(
+                "schedule",
+                "Schedule in outreach queue",
+                "sequential",
+                "schedule_outreach",
+            ),
             WorkflowStep("notify", "Notify BD manager", "sequential", "alert_bd_team"),
         ],
     ),
@@ -272,11 +364,30 @@ WORKFLOW_DEFINITIONS: dict[str, WorkflowDefinition] = {
         name="weekly_optimization",
         description="Analyze outcomes → retrain models → update templates → adjust scrapers → report",
         steps=[
-            WorkflowStep("analyze", "Analyze recent outcomes", "sequential", "analyze_outcomes"),
-            WorkflowStep("retrain", "Retrain ML models", "sequential", "retrain_models"),
-            WorkflowStep("update_templates", "Update outreach templates", "sequential", "update_templates"),
-            WorkflowStep("adjust_scrapers", "Adjust scraper priorities", "sequential", "adjust_scrapers"),
-            WorkflowStep("report", "Generate optimization report", "sequential", "generate_optimization_report"),
+            WorkflowStep(
+                "analyze", "Analyze recent outcomes", "sequential", "analyze_outcomes"
+            ),
+            WorkflowStep(
+                "retrain", "Retrain ML models", "sequential", "retrain_models"
+            ),
+            WorkflowStep(
+                "update_templates",
+                "Update outreach templates",
+                "sequential",
+                "update_templates",
+            ),
+            WorkflowStep(
+                "adjust_scrapers",
+                "Adjust scraper priorities",
+                "sequential",
+                "adjust_scrapers",
+            ),
+            WorkflowStep(
+                "report",
+                "Generate optimization report",
+                "sequential",
+                "generate_optimization_report",
+            ),
         ],
     ),
 }
@@ -285,6 +396,7 @@ WORKFLOW_DEFINITIONS: dict[str, WorkflowDefinition] = {
 # ---------------------------------------------------------------------------
 # AgentCoordinator
 # ---------------------------------------------------------------------------
+
 
 class AgentCoordinator:
     """Manages complex multi-step workflows by chaining existing agents."""
@@ -302,7 +414,11 @@ class AgentCoordinator:
                 try:
                     data = json.loads(line)
                     run = WorkflowRun(**data)
-                    if run.status in (RunStatus.COMPLETED.value, RunStatus.FAILED.value, RunStatus.CANCELLED.value):
+                    if run.status in (
+                        RunStatus.COMPLETED.value,
+                        RunStatus.FAILED.value,
+                        RunStatus.CANCELLED.value,
+                    ):
                         self._completed_runs.append(run)
                     else:
                         self._active_runs[run.run_id] = run
@@ -346,7 +462,12 @@ class AgentCoordinator:
                 run.human_gate_pending = True
                 run.human_gate_step = step.name
                 self._persist_run(run)
-                logger.info("workflow_paused_at_gate", workflow=name, step=step.name, run_id=run.run_id)
+                logger.info(
+                    "workflow_paused_at_gate",
+                    workflow=name,
+                    step=step.name,
+                    run_id=run.run_id,
+                )
                 return run.to_dict()
 
             # Execute handler
@@ -423,7 +544,7 @@ class AgentCoordinator:
         accumulated_params = dict(run.params)
         accumulated_params.update(run.step_results)
 
-        remaining_steps = workflow.steps[gate_step_idx + 1:]
+        remaining_steps = workflow.steps[gate_step_idx + 1 :]
         for i, step in enumerate(remaining_steps):
             run.current_step = step.name
             run.steps_completed = gate_step_idx + 1 + i

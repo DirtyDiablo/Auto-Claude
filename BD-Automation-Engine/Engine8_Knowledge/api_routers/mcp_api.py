@@ -34,6 +34,7 @@ class TestToolRequest(BaseModel):
 def _get_mcp_server():
     try:
         from Engine8_Knowledge.mcp.mcp_server import get_mcp_server
+
         return get_mcp_server()
     except Exception as exc:
         logger.warning("mcp_server_unavailable", error=str(exc))
@@ -96,7 +97,9 @@ async def test_tool(req: TestToolRequest):
     tools = server.get_tools()
     tool_names = [t["name"] for t in tools]
     if req.tool_name not in tool_names:
-        raise HTTPException(404, f"Tool not found: {req.tool_name}. Available: {tool_names}")
+        raise HTTPException(
+            404, f"Tool not found: {req.tool_name}. Available: {tool_names}"
+        )
 
     try:
         if hasattr(mcp, "_tools") and req.tool_name in mcp._tools:

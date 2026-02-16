@@ -17,6 +17,7 @@ from src.graph.relationship_engine import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def model():
     return RelationshipStrengthModel()
@@ -26,10 +27,26 @@ def model():
 def recent_interactions():
     now = datetime.now(timezone.utc)
     return [
-        {"date": (now - timedelta(days=1)).isoformat(), "type": "meeting", "initiator": "A"},
-        {"date": (now - timedelta(days=5)).isoformat(), "type": "call", "initiator": "B"},
-        {"date": (now - timedelta(days=10)).isoformat(), "type": "email", "initiator": "A"},
-        {"date": (now - timedelta(days=15)).isoformat(), "type": "email", "initiator": "B"},
+        {
+            "date": (now - timedelta(days=1)).isoformat(),
+            "type": "meeting",
+            "initiator": "A",
+        },
+        {
+            "date": (now - timedelta(days=5)).isoformat(),
+            "type": "call",
+            "initiator": "B",
+        },
+        {
+            "date": (now - timedelta(days=10)).isoformat(),
+            "type": "email",
+            "initiator": "A",
+        },
+        {
+            "date": (now - timedelta(days=15)).isoformat(),
+            "type": "email",
+            "initiator": "B",
+        },
     ]
 
 
@@ -37,7 +54,11 @@ def recent_interactions():
 def stale_interactions():
     now = datetime.now(timezone.utc)
     return [
-        {"date": (now - timedelta(days=60)).isoformat(), "type": "email", "initiator": "A"},
+        {
+            "date": (now - timedelta(days=60)).isoformat(),
+            "type": "email",
+            "initiator": "A",
+        },
     ]
 
 
@@ -56,6 +77,7 @@ def shared_data():
 # DIMENSION WEIGHTS
 # =========================================
 
+
 class TestDimensionWeights:
     def test_weights_sum_to_one(self):
         total = sum(DIMENSION_WEIGHTS.values())
@@ -72,18 +94,27 @@ class TestDimensionWeights:
 # SINGLE SCORING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestRelationshipScoring:
-    async def test_score_returns_relationship_score(self, model, recent_interactions, shared_data):
-        score = await model.score_relationship("A", "B", recent_interactions, shared_data)
+    async def test_score_returns_relationship_score(
+        self, model, recent_interactions, shared_data
+    ):
+        score = await model.score_relationship(
+            "A", "B", recent_interactions, shared_data
+        )
         assert isinstance(score, RelationshipScore)
 
     async def test_score_range(self, model, recent_interactions, shared_data):
-        score = await model.score_relationship("A", "B", recent_interactions, shared_data)
+        score = await model.score_relationship(
+            "A", "B", recent_interactions, shared_data
+        )
         assert 0 <= score.total_score <= 100
 
     async def test_all_dimensions_scored(self, model, recent_interactions, shared_data):
-        score = await model.score_relationship("A", "B", recent_interactions, shared_data)
+        score = await model.score_relationship(
+            "A", "B", recent_interactions, shared_data
+        )
         assert score.recency_score >= 0
         assert score.frequency_score >= 0
         assert score.quality_score >= 0
@@ -91,7 +122,9 @@ class TestRelationshipScoring:
         assert score.depth_score >= 0
         assert score.outcome_score >= 0
 
-    async def test_recent_scores_higher_than_stale(self, model, recent_interactions, stale_interactions):
+    async def test_recent_scores_higher_than_stale(
+        self, model, recent_interactions, stale_interactions
+    ):
         recent = await model.score_relationship("A", "B", recent_interactions)
         stale = await model.score_relationship("C", "D", stale_interactions)
         assert recent.total_score > stale.total_score
@@ -100,13 +133,19 @@ class TestRelationshipScoring:
         score = await model.score_relationship("A", "B", [])
         assert score.total_score == 0
 
-    async def test_shared_data_increases_score(self, model, recent_interactions, shared_data):
+    async def test_shared_data_increases_score(
+        self, model, recent_interactions, shared_data
+    ):
         without = await model.score_relationship("A", "B", recent_interactions)
-        with_shared = await model.score_relationship("C", "D", recent_interactions, shared_data)
+        with_shared = await model.score_relationship(
+            "C", "D", recent_interactions, shared_data
+        )
         assert with_shared.total_score > without.total_score
 
     async def test_factors_tracked(self, model, recent_interactions, shared_data):
-        score = await model.score_relationship("A", "B", recent_interactions, shared_data)
+        score = await model.score_relationship(
+            "A", "B", recent_interactions, shared_data
+        )
         assert score.factors["interaction_count"] == 4
         assert score.factors["shared_programs"] == 2
 
@@ -119,11 +158,16 @@ class TestRelationshipScoring:
 # BATCH SCORING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestBatchScoring:
     async def test_batch_returns_list(self, model):
         rels = [
-            {"contact_a": "A", "contact_b": "B", "interactions": [{"type": "call", "date": "2025-01-01"}]},
+            {
+                "contact_a": "A",
+                "contact_b": "B",
+                "interactions": [{"type": "call", "date": "2025-01-01"}],
+            },
             {"contact_a": "C", "contact_b": "D", "interactions": []},
         ]
         scores = await model.score_all_relationships(rels)
@@ -134,9 +178,13 @@ class TestBatchScoring:
         now = datetime.now(timezone.utc)
         rels = [
             {"contact_a": "A", "contact_b": "B", "interactions": []},
-            {"contact_a": "C", "contact_b": "D", "interactions": [
-                {"type": "meeting", "date": (now - timedelta(days=1)).isoformat()},
-            ]},
+            {
+                "contact_a": "C",
+                "contact_b": "D",
+                "interactions": [
+                    {"type": "meeting", "date": (now - timedelta(days=1)).isoformat()},
+                ],
+            },
         ]
         scores = await model.score_all_relationships(rels)
         assert scores[0].total_score >= scores[1].total_score
@@ -145,6 +193,7 @@ class TestBatchScoring:
 # =========================================
 # DECAYING RELATIONSHIPS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestDecayingRelationships:
@@ -164,6 +213,7 @@ class TestDecayingRelationships:
 # =========================================
 # STRONGEST PATHS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestStrongestPaths:
@@ -203,6 +253,7 @@ class TestStrongestPaths:
 # INTERACTION QUALITY
 # =========================================
 
+
 class TestInteractionQuality:
     def test_meeting_highest(self):
         assert INTERACTION_QUALITY["meeting"] == 1.0
@@ -219,6 +270,7 @@ class TestInteractionQuality:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_model_returns_instance(self):

@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class PatternType(str, Enum):
     HIRING_SURGE = "hiring_surge"
     LEADERSHIP_CHANGE = "leadership_change"
@@ -111,53 +112,129 @@ _HIRING_DATA: List[Dict[str, Any]] = [
 ]
 
 _LEADERSHIP_EVENTS: List[Dict[str, Any]] = [
-    {"program": "DCGS-N", "event": "departure", "role": "Site Lead",
-     "person": "John Smith", "date": "2025-03-01", "replacement": None},
-    {"program": "DCGS-A", "event": "promotion", "role": "PM",
-     "person": "Jane Doe", "date": "2025-02-15", "replacement": "Mike Johnson"},
+    {
+        "program": "DCGS-N",
+        "event": "departure",
+        "role": "Site Lead",
+        "person": "John Smith",
+        "date": "2025-03-01",
+        "replacement": None,
+    },
+    {
+        "program": "DCGS-A",
+        "event": "promotion",
+        "role": "PM",
+        "person": "Jane Doe",
+        "date": "2025-02-15",
+        "replacement": "Mike Johnson",
+    },
 ]
 
 _CONTRACT_MILESTONES: List[Dict[str, Any]] = [
-    {"program": "DCGS-A", "milestone": "Option Year 3", "date": "2026-06-01",
-     "action": "option_exercise", "prime": "Leidos"},
-    {"program": "DCGS-N", "milestone": "Re-compete", "date": "2026-09-01",
-     "action": "recompete", "prime": "Raytheon"},
-    {"program": "GBSD", "milestone": "CDR", "date": "2027-01-01",
-     "action": "design_review", "prime": "Northrop"},
+    {
+        "program": "DCGS-A",
+        "milestone": "Option Year 3",
+        "date": "2026-06-01",
+        "action": "option_exercise",
+        "prime": "Leidos",
+    },
+    {
+        "program": "DCGS-N",
+        "milestone": "Re-compete",
+        "date": "2026-09-01",
+        "action": "recompete",
+        "prime": "Raytheon",
+    },
+    {
+        "program": "GBSD",
+        "milestone": "CDR",
+        "date": "2027-01-01",
+        "action": "design_review",
+        "prime": "Northrop",
+    },
 ]
 
 _BUDGET_SIGNALS: List[Dict[str, Any]] = [
-    {"program": "DCGS-A", "signal": "FY26 budget increase 12%",
-     "source": "congressional_markup", "amount_delta_m": 45.0},
-    {"program": "DCGS-N", "signal": "FY26 budget flat",
-     "source": "pbd", "amount_delta_m": 0.0},
+    {
+        "program": "DCGS-A",
+        "signal": "FY26 budget increase 12%",
+        "source": "congressional_markup",
+        "amount_delta_m": 45.0,
+    },
+    {
+        "program": "DCGS-N",
+        "signal": "FY26 budget flat",
+        "source": "pbd",
+        "amount_delta_m": 0.0,
+    },
 ]
 
 _GEO_ACTIVITY: List[Dict[str, Any]] = [
-    {"program": "DCGS-A", "location": "Langley", "new_postings": 8, "is_new_site": False},
-    {"program": "DCGS-A", "location": "Fort Meade", "new_postings": 5, "is_new_site": True},
+    {
+        "program": "DCGS-A",
+        "location": "Langley",
+        "new_postings": 8,
+        "is_new_site": False,
+    },
+    {
+        "program": "DCGS-A",
+        "location": "Fort Meade",
+        "new_postings": 5,
+        "is_new_site": True,
+    },
 ]
 
 _SKILL_DEMANDS: List[Dict[str, Any]] = [
     {"program": "DCGS-A", "skill": "AI/ML", "postings_prev": 2, "postings_curr": 8},
-    {"program": "DCGS-A", "skill": "Cloud Migration", "postings_prev": 1, "postings_curr": 6},
-    {"program": "GBSD", "skill": "Cybersecurity", "postings_prev": 3, "postings_curr": 4},
-    {"program": "DCGS-N", "skill": "Data Engineering", "postings_prev": 4, "postings_curr": 3},
+    {
+        "program": "DCGS-A",
+        "skill": "Cloud Migration",
+        "postings_prev": 1,
+        "postings_curr": 6,
+    },
+    {
+        "program": "GBSD",
+        "skill": "Cybersecurity",
+        "postings_prev": 3,
+        "postings_curr": 4,
+    },
+    {
+        "program": "DCGS-N",
+        "skill": "Data Engineering",
+        "postings_prev": 4,
+        "postings_curr": 3,
+    },
 ]
 
 _COMPETITOR_SHIFTS: List[Dict[str, Any]] = [
-    {"competitor": "BAE", "program": "DCGS-N", "prev_postings": 6, "curr_postings": 0,
-     "direction": "exit"},
-    {"competitor": "Leidos", "program": "DCGS-A", "prev_postings": 5, "curr_postings": 8,
-     "direction": "ramp_up"},
-    {"competitor": "Northrop", "program": "GBSD", "prev_postings": 12, "curr_postings": 15,
-     "direction": "ramp_up"},
+    {
+        "competitor": "BAE",
+        "program": "DCGS-N",
+        "prev_postings": 6,
+        "curr_postings": 0,
+        "direction": "exit",
+    },
+    {
+        "competitor": "Leidos",
+        "program": "DCGS-A",
+        "prev_postings": 5,
+        "curr_postings": 8,
+        "direction": "ramp_up",
+    },
+    {
+        "competitor": "Northrop",
+        "program": "GBSD",
+        "prev_postings": 12,
+        "curr_postings": 15,
+        "direction": "ramp_up",
+    },
 ]
 
 
 # =========================================
 # STRATEGIC PATTERN ENGINE
 # =========================================
+
 
 class StrategicPatternEngine:
     """Advanced pattern recognition that surfaces BD opportunities."""
@@ -197,36 +274,46 @@ class StrategicPatternEngine:
                 curr = months_sorted[-1]["postings"]
                 pct_change = (curr - prev) / max(prev, 1)
                 if pct_change > 0.3:  # 30% increase
-                    patterns.append(StrategicPattern(
-                        pattern_type=PatternType.HIRING_SURGE.value,
-                        title=f"Hiring surge: {program}",
-                        description=(
-                            f"{program} postings jumped {pct_change:.0%} "
-                            f"({prev}→{curr}) at {months_sorted[-1]['location']}"
-                        ),
-                        program=program,
-                        confidence=min(0.6 + pct_change * 0.3, 0.95),
-                        evidence=[{"prev": prev, "curr": curr, "pct_change": round(pct_change, 2)}],
-                        tags=["hiring_surge", program.lower()],
-                    ))
+                    patterns.append(
+                        StrategicPattern(
+                            pattern_type=PatternType.HIRING_SURGE.value,
+                            title=f"Hiring surge: {program}",
+                            description=(
+                                f"{program} postings jumped {pct_change:.0%} "
+                                f"({prev}→{curr}) at {months_sorted[-1]['location']}"
+                            ),
+                            program=program,
+                            confidence=min(0.6 + pct_change * 0.3, 0.95),
+                            evidence=[
+                                {
+                                    "prev": prev,
+                                    "curr": curr,
+                                    "pct_change": round(pct_change, 2),
+                                }
+                            ],
+                            tags=["hiring_surge", program.lower()],
+                        )
+                    )
         return patterns
 
     def _scan_leadership_changes(self) -> List[StrategicPattern]:
         patterns: List[StrategicPattern] = []
         for event in _LEADERSHIP_EVENTS:
             if event["event"] == "departure" and event.get("replacement") is None:
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.LEADERSHIP_CHANGE.value,
-                    title=f"Leadership gap: {event['program']} {event['role']}",
-                    description=(
-                        f"{event['person']} departed as {event['role']} on {event['program']} "
-                        f"with no replacement — 4-6 month engagement window"
-                    ),
-                    program=event["program"],
-                    confidence=0.90,
-                    evidence=[event],
-                    tags=["leadership_change", event["program"].lower()],
-                ))
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.LEADERSHIP_CHANGE.value,
+                        title=f"Leadership gap: {event['program']} {event['role']}",
+                        description=(
+                            f"{event['person']} departed as {event['role']} on {event['program']} "
+                            f"with no replacement — 4-6 month engagement window"
+                        ),
+                        program=event["program"],
+                        confidence=0.90,
+                        evidence=[event],
+                        tags=["leadership_change", event["program"].lower()],
+                    )
+                )
         return patterns
 
     def _scan_contract_milestones(self) -> List[StrategicPattern]:
@@ -236,105 +323,135 @@ class StrategicPatternEngine:
             ms_date = datetime.strptime(ms["date"], "%Y-%m-%d")
             months_away = (ms_date - now).days / 30.0
             if 0 < months_away <= 12:
-                urgency = "high" if months_away <= 3 else ("medium" if months_away <= 6 else "low")
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.CONTRACT_MILESTONE.value,
-                    title=f"{ms['milestone']}: {ms['program']}",
-                    description=(
-                        f"{ms['program']} {ms['milestone']} ({ms['action']}) in "
-                        f"{months_away:.0f} months — prime: {ms['prime']}"
-                    ),
-                    program=ms["program"],
-                    confidence=0.95,
-                    evidence=[{**ms, "months_away": round(months_away, 1)}],
-                    tags=["contract_milestone", ms["program"].lower(), ms["action"]],
-                ))
+                urgency = (
+                    "high"
+                    if months_away <= 3
+                    else ("medium" if months_away <= 6 else "low")
+                )
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.CONTRACT_MILESTONE.value,
+                        title=f"{ms['milestone']}: {ms['program']}",
+                        description=(
+                            f"{ms['program']} {ms['milestone']} ({ms['action']}) in "
+                            f"{months_away:.0f} months — prime: {ms['prime']}"
+                        ),
+                        program=ms["program"],
+                        confidence=0.95,
+                        evidence=[{**ms, "months_away": round(months_away, 1)}],
+                        tags=[
+                            "contract_milestone",
+                            ms["program"].lower(),
+                            ms["action"],
+                        ],
+                    )
+                )
         return patterns
 
     def _scan_competitive_shifts(self) -> List[StrategicPattern]:
         patterns: List[StrategicPattern] = []
         for shift in _COMPETITOR_SHIFTS:
             if shift["direction"] == "exit":
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.COMPETITIVE_SHIFT.value,
-                    title=f"{shift['competitor']} exiting {shift['program']}",
-                    description=(
-                        f"{shift['competitor']} dropped from {shift['prev_postings']} to "
-                        f"{shift['curr_postings']} postings — market gap opportunity"
-                    ),
-                    program=shift["program"],
-                    confidence=0.80,
-                    evidence=[shift],
-                    tags=["competitive_shift", "exit", shift["competitor"].lower()],
-                ))
-            elif shift["direction"] == "ramp_up" and shift["curr_postings"] > shift["prev_postings"] * 1.3:
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.COMPETITIVE_SHIFT.value,
-                    title=f"{shift['competitor']} ramping on {shift['program']}",
-                    description=(
-                        f"{shift['competitor']} increased from {shift['prev_postings']} to "
-                        f"{shift['curr_postings']} postings on {shift['program']}"
-                    ),
-                    program=shift["program"],
-                    confidence=0.70,
-                    evidence=[shift],
-                    tags=["competitive_shift", "ramp_up", shift["competitor"].lower()],
-                ))
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.COMPETITIVE_SHIFT.value,
+                        title=f"{shift['competitor']} exiting {shift['program']}",
+                        description=(
+                            f"{shift['competitor']} dropped from {shift['prev_postings']} to "
+                            f"{shift['curr_postings']} postings — market gap opportunity"
+                        ),
+                        program=shift["program"],
+                        confidence=0.80,
+                        evidence=[shift],
+                        tags=["competitive_shift", "exit", shift["competitor"].lower()],
+                    )
+                )
+            elif (
+                shift["direction"] == "ramp_up"
+                and shift["curr_postings"] > shift["prev_postings"] * 1.3
+            ):
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.COMPETITIVE_SHIFT.value,
+                        title=f"{shift['competitor']} ramping on {shift['program']}",
+                        description=(
+                            f"{shift['competitor']} increased from {shift['prev_postings']} to "
+                            f"{shift['curr_postings']} postings on {shift['program']}"
+                        ),
+                        program=shift["program"],
+                        confidence=0.70,
+                        evidence=[shift],
+                        tags=[
+                            "competitive_shift",
+                            "ramp_up",
+                            shift["competitor"].lower(),
+                        ],
+                    )
+                )
         return patterns
 
     def _scan_budget_signals(self) -> List[StrategicPattern]:
         patterns: List[StrategicPattern] = []
         for sig in _BUDGET_SIGNALS:
             if sig["amount_delta_m"] > 10.0:
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.BUDGET_SIGNAL.value,
-                    title=f"Budget increase: {sig['program']}",
-                    description=(
-                        f"{sig['program']}: {sig['signal']} (+${sig['amount_delta_m']:.0f}M) "
-                        f"from {sig['source']}"
-                    ),
-                    program=sig["program"],
-                    confidence=0.85,
-                    evidence=[sig],
-                    tags=["budget_signal", sig["program"].lower()],
-                ))
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.BUDGET_SIGNAL.value,
+                        title=f"Budget increase: {sig['program']}",
+                        description=(
+                            f"{sig['program']}: {sig['signal']} (+${sig['amount_delta_m']:.0f}M) "
+                            f"from {sig['source']}"
+                        ),
+                        program=sig["program"],
+                        confidence=0.85,
+                        evidence=[sig],
+                        tags=["budget_signal", sig["program"].lower()],
+                    )
+                )
         return patterns
 
     def _scan_geographic_shifts(self) -> List[StrategicPattern]:
         patterns: List[StrategicPattern] = []
         for geo in _GEO_ACTIVITY:
             if geo["is_new_site"]:
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.GEOGRAPHIC_SHIFT.value,
-                    title=f"New site: {geo['program']} at {geo['location']}",
-                    description=(
-                        f"{geo['program']} expanding to {geo['location']} "
-                        f"({geo['new_postings']} new postings)"
-                    ),
-                    program=geo["program"],
-                    confidence=0.80,
-                    evidence=[geo],
-                    tags=["geographic_shift", geo["location"].lower().replace(" ", "_")],
-                ))
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.GEOGRAPHIC_SHIFT.value,
+                        title=f"New site: {geo['program']} at {geo['location']}",
+                        description=(
+                            f"{geo['program']} expanding to {geo['location']} "
+                            f"({geo['new_postings']} new postings)"
+                        ),
+                        program=geo["program"],
+                        confidence=0.80,
+                        evidence=[geo],
+                        tags=[
+                            "geographic_shift",
+                            geo["location"].lower().replace(" ", "_"),
+                        ],
+                    )
+                )
         return patterns
 
     def _scan_skill_demands(self) -> List[StrategicPattern]:
         patterns: List[StrategicPattern] = []
         for sk in _SKILL_DEMANDS:
             if sk["postings_curr"] > sk["postings_prev"] * 2:  # 2x increase
-                patterns.append(StrategicPattern(
-                    pattern_type=PatternType.SKILL_DEMAND.value,
-                    title=f"Skill demand surge: {sk['skill']} on {sk['program']}",
-                    description=(
-                        f"{sk['program']} demand for {sk['skill']} jumped "
-                        f"{sk['postings_prev']}→{sk['postings_curr']} — "
-                        f"capability gap = BD angle"
-                    ),
-                    program=sk["program"],
-                    confidence=0.75,
-                    evidence=[sk],
-                    tags=["skill_demand", sk["skill"].lower().replace("/", "_")],
-                ))
+                patterns.append(
+                    StrategicPattern(
+                        pattern_type=PatternType.SKILL_DEMAND.value,
+                        title=f"Skill demand surge: {sk['skill']} on {sk['program']}",
+                        description=(
+                            f"{sk['program']} demand for {sk['skill']} jumped "
+                            f"{sk['postings_prev']}→{sk['postings_curr']} — "
+                            f"capability gap = BD angle"
+                        ),
+                        program=sk["program"],
+                        confidence=0.75,
+                        evidence=[sk],
+                        tags=["skill_demand", sk["skill"].lower().replace("/", "_")],
+                    )
+                )
         return patterns
 
     # --------------------------------------------------
@@ -408,7 +525,9 @@ class StrategicPatternEngine:
         prog = pattern.program
 
         if pt == PatternType.HIRING_SURGE.value:
-            actions.append(f"Identify key hires needed for {prog} and position GDIT candidates")
+            actions.append(
+                f"Identify key hires needed for {prog} and position GDIT candidates"
+            )
             actions.append(f"Prepare staffing proposal for {prog} expansion")
         elif pt == PatternType.LEADERSHIP_CHANGE.value:
             actions.append(f"Engage {prog} during leadership transition window")
@@ -426,7 +545,9 @@ class StrategicPatternEngine:
         elif pt == PatternType.GEOGRAPHIC_SHIFT.value:
             actions.append(f"Assess local talent pool for new {prog} site")
         elif pt == PatternType.SKILL_DEMAND.value:
-            actions.append(f"Highlight GDIT {pattern.tags[-1] if pattern.tags else ''} capability for {prog}")
+            actions.append(
+                f"Highlight GDIT {pattern.tags[-1] if pattern.tags else ''} capability for {prog}"
+            )
 
         return actions
 
@@ -444,8 +565,10 @@ class StrategicPatternEngine:
 
             if score.score >= 50:
                 priority = (
-                    AlertPriority.URGENT.value if score.score >= 80
-                    else AlertPriority.HIGH.value if score.score >= 65
+                    AlertPriority.URGENT.value
+                    if score.score >= 80
+                    else AlertPriority.HIGH.value
+                    if score.score >= 65
                     else AlertPriority.MEDIUM.value
                 )
                 alert = StrategicAlert(
@@ -478,16 +601,18 @@ class StrategicPatternEngine:
         for pattern in self._patterns:
             score = self._scores.get(pattern.id)
             if score and score.score >= min_score:
-                opps.append({
-                    "pattern_id": pattern.id,
-                    "title": pattern.title,
-                    "program": pattern.program,
-                    "pattern_type": pattern.pattern_type,
-                    "score": score.score,
-                    "urgency": score.urgency,
-                    "win_probability": score.win_probability,
-                    "actions": score.recommended_actions,
-                })
+                opps.append(
+                    {
+                        "pattern_id": pattern.id,
+                        "title": pattern.title,
+                        "program": pattern.program,
+                        "pattern_type": pattern.pattern_type,
+                        "score": score.score,
+                        "urgency": score.urgency,
+                        "win_probability": score.win_probability,
+                        "actions": score.recommended_actions,
+                    }
+                )
         opps.sort(key=lambda o: o["score"], reverse=True)
         return opps
 
@@ -519,7 +644,9 @@ class StrategicPatternEngine:
             "total_alerts": len(self._alerts),
             "avg_score": round(
                 statistics.mean(s.score for s in self._scores.values()), 1
-            ) if self._scores else 0,
+            )
+            if self._scores
+            else 0,
         }
 
 

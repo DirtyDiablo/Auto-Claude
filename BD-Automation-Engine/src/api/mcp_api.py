@@ -10,13 +10,21 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from src.mcp.tool_registry import (
-    MCPServerConfig, MCPServerEntry, MCPTool, get_tool_registry,
+    MCPServerConfig,
+    MCPServerEntry,
+    MCPTool,
+    get_tool_registry,
 )
 from src.mcp.apps_renderer import (
-    MCPAppResponse, MCPAppAction, RenderedApp, get_apps_renderer,
+    MCPAppResponse,
+    MCPAppAction,
+    RenderedApp,
+    get_apps_renderer,
 )
 from src.mcp.orchestrator import (
-    MCPExecutionStep, MCPExecutionResult, get_orchestrator,
+    MCPExecutionStep,
+    MCPExecutionResult,
+    get_orchestrator,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,6 +33,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class RegisterServerRequest(BaseModel):
     name: str
@@ -70,6 +79,7 @@ class OrchestrateExecuteRequest(BaseModel):
 # ROUTE SETUP
 # =========================================
 
+
 def include_mcp_router(app: FastAPI) -> None:
     """Register all MCP ecosystem endpoints on the FastAPI app."""
 
@@ -110,7 +120,9 @@ def include_mcp_router(app: FastAPI) -> None:
         healthy_only: bool = False,
     ):
         """List all registered MCP servers with health."""
-        servers = registry.list_servers(capability=capability, healthy_only=healthy_only)
+        servers = registry.list_servers(
+            capability=capability, healthy_only=healthy_only
+        )
         return {
             "servers": [_serialize_server(e) for e in servers],
             "total": len(servers),
@@ -258,6 +270,7 @@ def include_mcp_router(app: FastAPI) -> None:
 # SERIALIZATION HELPERS
 # =========================================
 
+
 def _serialize_server(e: MCPServerEntry) -> Dict[str, Any]:
     return {
         "server_id": e.config.server_id,
@@ -297,8 +310,12 @@ def _serialize_rendered(r: RenderedApp) -> Dict[str, Any]:
         "html": r.html,
         "data": r.data,
         "actions": [
-            {"action_id": a.action_id, "tool_call": a.tool_call,
-             "status": a.status, "requires_approval": a.requires_approval}
+            {
+                "action_id": a.action_id,
+                "tool_call": a.tool_call,
+                "status": a.status,
+                "requires_approval": a.requires_approval,
+            }
             for a in r.actions
         ],
         "sandbox_config": r.sandbox_config,

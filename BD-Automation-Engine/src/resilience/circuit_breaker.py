@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class CircuitState(str, Enum):
     CLOSED = "closed"
     OPEN = "open"
@@ -31,6 +32,7 @@ class CircuitState(str, Enum):
 @dataclass
 class CircuitBreaker:
     """A single circuit breaker protecting a service call."""
+
     name: str
     state: CircuitState = CircuitState.CLOSED
     failure_count: int = 0
@@ -68,7 +70,11 @@ class CircuitBreaker:
 _DEFAULT_BREAKERS = [
     {"name": "qdrant_search", "failure_threshold": 5, "recovery_timeout_sec": 30},
     {"name": "api_gateway", "failure_threshold": 5, "recovery_timeout_sec": 30},
-    {"name": "notification_service", "failure_threshold": 5, "recovery_timeout_sec": 30},
+    {
+        "name": "notification_service",
+        "failure_threshold": 5,
+        "recovery_timeout_sec": 30,
+    },
     {"name": "n8n_workflow", "failure_threshold": 5, "recovery_timeout_sec": 30},
     {"name": "agent_executor", "failure_threshold": 5, "recovery_timeout_sec": 30},
     {"name": "bullhorn_etl", "failure_threshold": 5, "recovery_timeout_sec": 30},
@@ -78,6 +84,7 @@ _DEFAULT_BREAKERS = [
 # =========================================
 # CIRCUIT BREAKER REGISTRY
 # =========================================
+
 
 class CircuitBreakerRegistry:
     """Central registry that manages named circuit breakers.
@@ -121,7 +128,9 @@ class CircuitBreakerRegistry:
         self._breakers[name] = breaker
         logger.info(
             "Registered circuit breaker '%s' (threshold=%d, timeout=%.1fs)",
-            name, failure_threshold, recovery_timeout_sec,
+            name,
+            failure_threshold,
+            recovery_timeout_sec,
         )
         return breaker
 
@@ -181,7 +190,8 @@ class CircuitBreakerRegistry:
                 breaker.success_count = 0
                 breaker.last_state_change = datetime.utcnow().isoformat()
                 logger.info(
-                    "Circuit breaker '%s' timeout elapsed -> HALF_OPEN", name,
+                    "Circuit breaker '%s' timeout elapsed -> HALF_OPEN",
+                    name,
                 )
                 return True
             return False
@@ -245,7 +255,8 @@ class CircuitBreakerRegistry:
         breaker.last_state_change = datetime.utcnow().isoformat()
         logger.warning(
             "Circuit breaker '%s' TRIPPED -> OPEN (total trips: %d)",
-            breaker.name, breaker.total_trips,
+            breaker.name,
+            breaker.total_trips,
         )
 
 

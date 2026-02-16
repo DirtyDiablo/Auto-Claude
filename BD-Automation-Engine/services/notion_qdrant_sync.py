@@ -22,19 +22,25 @@ load_dotenv()
 try:
     from utils.llm_retry import openai_retry, api_retry
     from utils.logging_config import get_logger
+
     logger = get_logger(__name__)
 except ImportError:
     import logging
+
     logger = logging.getLogger(__name__)
+
     def openai_retry(func):
         return func
+
     def api_retry(func):
         return func
+
 
 # Qdrant
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import PointStruct
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -43,6 +49,7 @@ except ImportError:
 # OpenAI for embeddings
 try:
     from openai import OpenAI
+
     OPENAI_AVAILABLE = True
 except ImportError:
     OPENAI_AVAILABLE = False
@@ -79,7 +86,9 @@ class NotionQdrantSync:
         openai_api_key: str = None,
         notion_token: str = None,
     ):
-        self.qdrant_url = qdrant_url or os.environ.get("QDRANT_URL", "http://localhost:6333")
+        self.qdrant_url = qdrant_url or os.environ.get(
+            "QDRANT_URL", "http://localhost:6333"
+        )
         self.openai_api_key = openai_api_key or os.environ.get("OPENAI_API_KEY")
         self.notion_token = notion_token or os.environ.get("NOTION_TOKEN")
 
@@ -100,8 +109,7 @@ class NotionQdrantSync:
             raise ValueError("OpenAI client not configured")
 
         response = self.openai.embeddings.create(
-            input=text,
-            model="text-embedding-3-small"
+            input=text, model="text-embedding-3-small"
         )
         return response.data[0].embedding
 
@@ -117,45 +125,45 @@ class NotionQdrantSync:
         name = f"{props.get('first_name', '')} {props.get('last_name', '')}".strip()
         if name:
             parts.append(f"Name: {name}")
-        if props.get('job_title'):
+        if props.get("job_title"):
             parts.append(f"Title: {props['job_title']}")
-        if props.get('company'):
+        if props.get("company"):
             parts.append(f"Company: {props['company']}")
-        if props.get('program'):
+        if props.get("program"):
             parts.append(f"Program: {props['program']}")
-        if props.get('city'):
+        if props.get("city"):
             parts.append(f"Location: {props['city']}, {props.get('state', '')}")
-        if props.get('hierarchy_tier'):
+        if props.get("hierarchy_tier"):
             parts.append(f"Tier: {props['hierarchy_tier']}")
         return ". ".join(parts)
 
     def build_program_text(self, props: dict) -> str:
         """Build searchable text from program properties."""
         parts = []
-        if props.get('program_name'):
+        if props.get("program_name"):
             parts.append(f"Program: {props['program_name']}")
-        if props.get('acronym'):
+        if props.get("acronym"):
             parts.append(f"Acronym: {props['acronym']}")
-        if props.get('agency_owner'):
+        if props.get("agency_owner"):
             parts.append(f"Agency: {props['agency_owner']}")
-        if props.get('prime_contractor'):
+        if props.get("prime_contractor"):
             parts.append(f"Prime: {props['prime_contractor']}")
-        if props.get('keywords'):
+        if props.get("keywords"):
             parts.append(f"Keywords: {', '.join(props['keywords'])}")
         return ". ".join(parts)
 
     def build_job_text(self, props: dict) -> str:
         """Build searchable text from job properties."""
         parts = []
-        if props.get('title'):
+        if props.get("title"):
             parts.append(f"Job: {props['title']}")
-        if props.get('company'):
+        if props.get("company"):
             parts.append(f"Company: {props['company']}")
-        if props.get('location'):
+        if props.get("location"):
             parts.append(f"Location: {props['location']}")
-        if props.get('detected_clearance'):
+        if props.get("detected_clearance"):
             parts.append(f"Clearance: {props['detected_clearance']}")
-        if props.get('mapped_program'):
+        if props.get("mapped_program"):
             parts.append(f"Program: {props['mapped_program']}")
         return ". ".join(parts)
 
@@ -213,13 +221,19 @@ class NotionQdrantSync:
                     "synced_at": datetime.utcnow().isoformat(),
                 }
 
-                point_id = record.get("notion_page_id") or record.get("id") or self.content_hash(record)
+                point_id = (
+                    record.get("notion_page_id")
+                    or record.get("id")
+                    or self.content_hash(record)
+                )
 
-                batch.append(PointStruct(
-                    id=point_id,
-                    vector=embedding,
-                    payload=payload,
-                ))
+                batch.append(
+                    PointStruct(
+                        id=point_id,
+                        vector=embedding,
+                        payload=payload,
+                    )
+                )
 
                 if len(batch) >= batch_size:
                     self.qdrant.upsert(collection_name=collection, points=batch)

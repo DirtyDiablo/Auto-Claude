@@ -1,5 +1,6 @@
 """Scraped job data models."""
-from pydantic import BaseModel, Field
+
+from pydantic import Field
 from typing import Optional, List
 from enum import Enum
 from .base import BaseDocument
@@ -7,6 +8,7 @@ from .base import BaseDocument
 
 class JobStatus(str, Enum):
     """Job processing status."""
+
     RAW_IMPORT = "raw_import"
     PENDING_ENRICHMENT = "pending_enrichment"
     ENRICHING = "enriching"
@@ -21,6 +23,7 @@ class ScrapedJob(BaseDocument):
 
     Tracks job postings through the enrichment pipeline.
     """
+
     title: str
     company: Optional[str] = None
     location: Optional[str] = None
@@ -48,6 +51,8 @@ class ScrapedJob(BaseDocument):
             f"Location: {self.location}" if self.location else "",
             f"Clearance: {self.detected_clearance}" if self.detected_clearance else "",
             f"Program: {self.mapped_program}" if self.mapped_program else "",
-            f"Technologies: {', '.join(self.technologies)}" if self.technologies else "",
+            f"Technologies: {', '.join(self.technologies)}"
+            if self.technologies
+            else "",
         ]
         return ". ".join(p for p in parts if p)

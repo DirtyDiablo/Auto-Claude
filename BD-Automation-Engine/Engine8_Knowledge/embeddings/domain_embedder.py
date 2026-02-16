@@ -35,6 +35,7 @@ try:
     import torch
     import torch.nn as nn
     import torch.nn.functional as F
+
     TORCH_AVAILABLE = True
 except ImportError:
     TORCH_AVAILABLE = False
@@ -44,6 +45,7 @@ except ImportError:
 @dataclass
 class TrainingResult:
     """Result of adapter training."""
+
     epochs: int = 0
     final_loss: float = 0.0
     training_pairs: int = 0
@@ -55,6 +57,7 @@ class TrainingResult:
 @dataclass
 class AdapterConfig:
     """Configuration for the domain adapter."""
+
     input_dim: int = 1536
     hidden_dim: int = 1024
     output_dim: int = 1536
@@ -67,7 +70,9 @@ class AdapterConfig:
 class DomainAdapter(nn.Module):
     """2-layer MLP projection network for domain adaptation."""
 
-    def __init__(self, input_dim: int = 1536, hidden_dim: int = 1024, output_dim: int = 1536):
+    def __init__(
+        self, input_dim: int = 1536, hidden_dim: int = 1024, output_dim: int = 1536
+    ):
         super().__init__()
         self.net = nn.Sequential(
             nn.Linear(input_dim, hidden_dim),
@@ -83,9 +88,7 @@ class DomainAdapter(nn.Module):
 def _info_nce_loss(anchor, positive, negatives, temperature=0.07):
     """InfoNCE contrastive loss."""
     pos_sim = F.cosine_similarity(anchor, positive, dim=-1) / temperature
-    neg_sims = F.cosine_similarity(
-        anchor.unsqueeze(1), negatives, dim=-1
-    ) / temperature
+    neg_sims = F.cosine_similarity(anchor.unsqueeze(1), negatives, dim=-1) / temperature
     logits = torch.cat([pos_sim.unsqueeze(1), neg_sims], dim=1)
     labels = torch.zeros(logits.size(0), dtype=torch.long, device=logits.device)
     return F.cross_entropy(logits, labels)
@@ -122,7 +125,9 @@ class DomainEmbedder:
                 self.config.hidden_dim,
                 self.config.output_dim,
             )
-            self.adapter.load_state_dict(torch.load(model_path, map_location="cpu", weights_only=True))
+            self.adapter.load_state_dict(
+                torch.load(model_path, map_location="cpu", weights_only=True)
+            )
             self.adapter.eval()
             logger.info("Domain adapter loaded from disk")
 
@@ -131,6 +136,7 @@ class DomainEmbedder:
         try:
             if self._base_embedder is None:
                 import openai
+
                 self._base_embedder = openai.OpenAI()
 
             response = self._base_embedder.embeddings.create(
@@ -143,7 +149,9 @@ class DomainEmbedder:
             # Return zero vector as fallback
             return [0.0] * self.config.input_dim
 
-    def _generate_training_pairs(self, corpus_path: str, max_pairs: int = 10000) -> List[Tuple[str, str]]:
+    def _generate_training_pairs(
+        self, corpus_path: str, max_pairs: int = 10000
+    ) -> List[Tuple[str, str]]:
         """
         Generate positive training pairs from corpus data.
         Pairs are (anchor_text, positive_text) from the same program/category.
@@ -190,13 +198,16 @@ class DomainEmbedder:
             raise RuntimeError("PyTorch required for training. pip install torch")
 
         import time
+
         start = time.time()
 
         if corpus_path is None:
             corpus_path = str(EMBEDDINGS_DIR / "domain_corpus.jsonl")
 
         if not Path(corpus_path).exists():
-            raise FileNotFoundError(f"Corpus not found at {corpus_path}. Run build_corpus() first.")
+            raise FileNotFoundError(
+                f"Corpus not found at {corpus_path}. Run build_corpus() first."
+            )
 
         logger.info("Generating training pairs...")
         pairs = self._generate_training_pairs(corpus_path)
@@ -212,7 +223,11 @@ class DomainEmbedder:
         # Limit to manageable size for API calls
         if len(unique_texts) > 2000:
             unique_texts = random.sample(unique_texts, 2000)
-            pairs = [(a, b) for a, b in pairs if a in set(unique_texts) and b in set(unique_texts)]
+            pairs = [
+                (a, b)
+                for a, b in pairs
+                if a in set(unique_texts) and b in set(unique_texts)
+            ]
 
         text_to_idx = {t: i for i, t in enumerate(unique_texts)}
 
@@ -242,7 +257,7 @@ class DomainEmbedder:
             n_batches = 0
 
             for i in range(0, len(pairs), batch_size):
-                batch_pairs = pairs[i:i + batch_size]
+                batch_pairs = pairs[i : i + batch_size]
                 if len(batch_pairs) < 2:
                     continue
 
@@ -275,7 +290,7 @@ class DomainEmbedder:
             avg_loss = epoch_loss / max(1, n_batches)
             final_loss = avg_loss
             if epoch % 2 == 0:
-                logger.info(f"  Epoch {epoch+1}/{epochs}: loss={avg_loss:.4f}")
+                logger.info(f"  Epoch {epoch + 1}/{epochs}: loss={avg_loss:.4f}")
 
         # Save model
         MODEL_DIR.mkdir(parents=True, exist_ok=True)
@@ -303,7 +318,9 @@ class DomainEmbedder:
             trained_at=self.config.trained_at,
         )
 
-        logger.info(f"Adapter trained: {result.training_pairs} pairs, loss={result.final_loss:.4f}, {result.training_time_seconds}s")
+        logger.info(
+            f"Adapter trained: {result.training_pairs} pairs, loss={result.final_loss:.4f}, {result.training_time_seconds}s"
+        )
         return result
 
     def embed(self, text: str) -> List[float]:

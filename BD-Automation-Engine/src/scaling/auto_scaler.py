@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class ScalingDirection(Enum):
     SCALE_UP = "scale_up"
     SCALE_DOWN = "scale_down"
@@ -80,6 +81,7 @@ class ScalingEvent:
 # AUTO SCALER
 # =========================================
 
+
 class AutoScaler:
     """Policy-based auto-scaler with cooldown periods,
     scaling history, and optimization recommendations.
@@ -94,31 +96,47 @@ class AutoScaler:
     def _register_defaults(self) -> None:
         defaults = [
             ScalingPolicy(
-                policy_id="api_cpu", name="API CPU Utilization",
+                policy_id="api_cpu",
+                name="API CPU Utilization",
                 metric_name="cpu_utilization",
-                scale_up_threshold=80, scale_down_threshold=30,
-                min_replicas=2, max_replicas=10, current_replicas=3,
+                scale_up_threshold=80,
+                scale_down_threshold=30,
+                min_replicas=2,
+                max_replicas=10,
+                current_replicas=3,
                 cooldown_seconds=300,
             ),
             ScalingPolicy(
-                policy_id="search_latency", name="Search P99 Latency",
+                policy_id="search_latency",
+                name="Search P99 Latency",
                 metric_name="search_p99_ms",
-                scale_up_threshold=500, scale_down_threshold=100,
-                min_replicas=1, max_replicas=8, current_replicas=2,
+                scale_up_threshold=500,
+                scale_down_threshold=100,
+                min_replicas=1,
+                max_replicas=8,
+                current_replicas=2,
                 cooldown_seconds=300,
             ),
             ScalingPolicy(
-                policy_id="agent_queue", name="Agent Queue Depth",
+                policy_id="agent_queue",
+                name="Agent Queue Depth",
                 metric_name="queue_depth",
-                scale_up_threshold=100, scale_down_threshold=10,
-                min_replicas=1, max_replicas=12, current_replicas=2,
+                scale_up_threshold=100,
+                scale_down_threshold=10,
+                min_replicas=1,
+                max_replicas=12,
+                current_replicas=2,
                 cooldown_seconds=300,
             ),
             ScalingPolicy(
-                policy_id="pipeline_throughput", name="Pipeline Throughput",
+                policy_id="pipeline_throughput",
+                name="Pipeline Throughput",
                 metric_name="messages_per_sec",
-                scale_up_threshold=1000, scale_down_threshold=200,
-                min_replicas=1, max_replicas=6, current_replicas=2,
+                scale_up_threshold=1000,
+                scale_down_threshold=200,
+                min_replicas=1,
+                max_replicas=6,
+                current_replicas=2,
                 cooldown_seconds=300,
             ),
         ]
@@ -137,7 +155,10 @@ class AutoScaler:
         from_replicas = policy.current_replicas
 
         # Check cooldown
-        if policy.last_scaled_at > 0 and (now - policy.last_scaled_at) < policy.cooldown_seconds:
+        if (
+            policy.last_scaled_at > 0
+            and (now - policy.last_scaled_at) < policy.cooldown_seconds
+        ):
             event = ScalingEvent(
                 event_id=f"evt_{uuid.uuid4().hex[:12]}",
                 policy_id=policy_id,
@@ -173,7 +194,13 @@ class AutoScaler:
         if direction != ScalingDirection.NO_CHANGE:
             policy.current_replicas = to_replicas
             policy.last_scaled_at = now
-            logger.info("Scaling %s: %d -> %d (%s)", policy_id, from_replicas, to_replicas, reason)
+            logger.info(
+                "Scaling %s: %d -> %d (%s)",
+                policy_id,
+                from_replicas,
+                to_replicas,
+                reason,
+            )
 
         event = ScalingEvent(
             event_id=f"evt_{uuid.uuid4().hex[:12]}",
@@ -203,7 +230,9 @@ class AutoScaler:
                 setattr(policy, key, value)
         return policy
 
-    def get_scaling_history(self, policy_id: Optional[str] = None, limit: int = 50) -> List[ScalingEvent]:
+    def get_scaling_history(
+        self, policy_id: Optional[str] = None, limit: int = 50
+    ) -> List[ScalingEvent]:
         events = self._history
         if policy_id:
             events = [e for e in events if e.policy_id == policy_id]
@@ -217,25 +246,33 @@ class AutoScaler:
         for policy in self._policies.values():
             utilization = policy.current_replicas / policy.max_replicas
             if utilization > 0.8:
-                recs.append({
-                    "policy_id": policy.policy_id,
-                    "type": "increase_max",
-                    "message": f"{policy.name}: running at {utilization:.0%} of max capacity, consider increasing max_replicas",
-                })
+                recs.append(
+                    {
+                        "policy_id": policy.policy_id,
+                        "type": "increase_max",
+                        "message": f"{policy.name}: running at {utilization:.0%} of max capacity, consider increasing max_replicas",
+                    }
+                )
             if policy.current_replicas == policy.min_replicas:
-                recs.append({
-                    "policy_id": policy.policy_id,
-                    "type": "at_minimum",
-                    "message": f"{policy.name}: running at minimum replicas ({policy.min_replicas})",
-                })
+                recs.append(
+                    {
+                        "policy_id": policy.policy_id,
+                        "type": "at_minimum",
+                        "message": f"{policy.name}: running at minimum replicas ({policy.min_replicas})",
+                    }
+                )
         return recs
 
     # ----- stats -----
 
     def get_stats(self) -> Dict[str, Any]:
         total_replicas = sum(p.current_replicas for p in self._policies.values())
-        scale_ups = sum(1 for e in self._history if e.direction == ScalingDirection.SCALE_UP)
-        scale_downs = sum(1 for e in self._history if e.direction == ScalingDirection.SCALE_DOWN)
+        scale_ups = sum(
+            1 for e in self._history if e.direction == ScalingDirection.SCALE_UP
+        )
+        scale_downs = sum(
+            1 for e in self._history if e.direction == ScalingDirection.SCALE_DOWN
+        )
         return {
             "total_policies": len(self._policies),
             "total_replicas": total_replicas,

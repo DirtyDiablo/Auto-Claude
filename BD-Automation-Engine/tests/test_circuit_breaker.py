@@ -18,6 +18,7 @@ def registry():
 # PRE-REGISTERED BREAKERS
 # =========================================
 
+
 def test_default_breakers(registry):
     breakers = registry.list_breakers()
     assert len(breakers) == 6
@@ -37,6 +38,7 @@ def test_agent_breaker(registry):
 # =========================================
 # RECORD SUCCESS / FAILURE
 # =========================================
+
 
 def test_record_success(registry):
     registry.record_success("qdrant_search")
@@ -71,6 +73,7 @@ def test_can_execute_open(registry):
 # TRIP / RESET
 # =========================================
 
+
 def test_manual_trip(registry):
     registry.trip("qdrant_search")
     b = registry.get_breaker("qdrant_search")
@@ -96,6 +99,7 @@ def test_reset_unknown(registry):
 # HALF-OPEN RECOVERY
 # =========================================
 
+
 def test_success_in_half_open_closes(registry):
     registry.trip("qdrant_search")
     b = registry.get_breaker("qdrant_search")
@@ -107,6 +111,7 @@ def test_success_in_half_open_closes(registry):
 # =========================================
 # REGISTER / LIST
 # =========================================
+
 
 def test_register_new_breaker(registry):
     registry.register("custom_service", failure_threshold=3)
@@ -131,6 +136,7 @@ def test_breaker_to_dict(registry):
 # STATS & SINGLETON
 # =========================================
 
+
 def test_stats(registry):
     stats = registry.get_stats()
     assert stats["total_breakers"] == 6
@@ -138,6 +144,7 @@ def test_stats(registry):
 
 def test_singleton():
     import src.resilience.circuit_breaker as mod
+
     mod._instance = None
     r1 = get_circuit_registry()
     r2 = get_circuit_registry()

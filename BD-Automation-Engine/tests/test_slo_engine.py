@@ -21,6 +21,7 @@ def engine():
 # BUILT-IN SLOS
 # =========================================
 
+
 def test_builtin_slos(engine):
     slos = engine.list_slos()
     assert len(slos) == 6
@@ -47,6 +48,7 @@ def test_list_enabled_only(engine):
 # =========================================
 # SLO MANAGEMENT
 # =========================================
+
 
 def test_add_slo(engine):
     custom = SLODefinition(
@@ -77,6 +79,7 @@ def test_get_slo_not_found(engine):
 # RECORDING EVENTS
 # =========================================
 
+
 def test_record_good_event(engine):
     engine.record_event("slo_api_availability", good=True)
     report = engine.get_report("slo_api_availability")
@@ -105,6 +108,7 @@ def test_record_unknown_slo(engine):
 # =========================================
 # REPORTS
 # =========================================
+
 
 def test_report_healthy(engine):
     engine.record_batch("slo_api_availability", good_events=9999, total_events=10000)
@@ -158,6 +162,7 @@ def test_report_to_dict(engine):
 # DASHBOARD
 # =========================================
 
+
 def test_dashboard(engine):
     engine.record_batch("slo_api_availability", good_events=999, total_events=1000)
     dashboard = engine.get_dashboard()
@@ -175,12 +180,15 @@ def test_dashboard_overall_health(engine):
 def test_get_all_reports(engine):
     engine.record_batch("slo_api_availability", good_events=999, total_events=1000)
     reports = engine.get_all_reports()
-    assert len(reports) >= 5  # may be fewer if shared SLO objects were disabled by prior test
+    assert (
+        len(reports) >= 5
+    )  # may be fewer if shared SLO objects were disabled by prior test
 
 
 # =========================================
 # SLO DEFINITION
 # =========================================
+
 
 def test_slo_definition_to_dict(engine):
     slo = engine.get_slo("slo_api_availability")
@@ -194,6 +202,7 @@ def test_slo_definition_to_dict(engine):
 # STATS & SINGLETON
 # =========================================
 
+
 def test_stats(engine):
     engine.record_event("slo_api_availability", good=True)
     stats = engine.get_stats()
@@ -203,6 +212,7 @@ def test_stats(engine):
 
 def test_singleton():
     import src.observability.slo_engine as mod
+
     mod._instance = None
     e1 = get_slo_engine()
     e2 = get_slo_engine()

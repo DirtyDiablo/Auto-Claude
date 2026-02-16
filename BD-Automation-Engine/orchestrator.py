@@ -27,7 +27,7 @@ import smtplib
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -41,31 +41,33 @@ PROJECT_ROOT = Path(__file__).parent
 sys.path.insert(0, str(PROJECT_ROOT))
 
 # Ensure log directory exists
-LOG_DIR = PROJECT_ROOT / 'outputs' / 'Logs'
+LOG_DIR = PROJECT_ROOT / "outputs" / "Logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[
         logging.StreamHandler(),
-        logging.FileHandler(LOG_DIR / 'orchestrator.log', mode='a')
-    ]
+        logging.FileHandler(LOG_DIR / "orchestrator.log", mode="a"),
+    ],
 )
-logger = logging.getLogger('BD-Orchestrator')
+logger = logging.getLogger("BD-Orchestrator")
 
 
 # ============================================
 # CONFIGURATION
 # ============================================
 
+
 @dataclass
 class OrchestratorConfig:
     """Configuration for the BD Automation Orchestrator."""
+
     # Input/Output
     input_path: Optional[str] = None
-    output_dir: str = str(PROJECT_ROOT / 'outputs')
+    output_dir: str = str(PROJECT_ROOT / "outputs")
 
     # Pipeline Stages
     run_scraper: bool = False
@@ -88,13 +90,21 @@ class OrchestratorConfig:
     send_webhook: bool = True
 
     # API Keys (from env)
-    anthropic_api_key: str = field(default_factory=lambda: os.getenv('ANTHROPIC_API_KEY', ''))
-    n8n_webhook_url: str = field(default_factory=lambda: os.getenv('N8N_WEBHOOK_URL', ''))
-    smtp_host: str = field(default_factory=lambda: os.getenv('SMTP_HOST', 'smtp.gmail.com'))
-    smtp_port: int = field(default_factory=lambda: int(os.getenv('SMTP_PORT', '587')))
-    smtp_user: str = field(default_factory=lambda: os.getenv('SMTP_USER', ''))
-    smtp_password: str = field(default_factory=lambda: os.getenv('SMTP_PASSWORD', ''))
-    notification_email: str = field(default_factory=lambda: os.getenv('NOTIFICATION_EMAIL', ''))
+    anthropic_api_key: str = field(
+        default_factory=lambda: os.getenv("ANTHROPIC_API_KEY", "")
+    )
+    n8n_webhook_url: str = field(
+        default_factory=lambda: os.getenv("N8N_WEBHOOK_URL", "")
+    )
+    smtp_host: str = field(
+        default_factory=lambda: os.getenv("SMTP_HOST", "smtp.gmail.com")
+    )
+    smtp_port: int = field(default_factory=lambda: int(os.getenv("SMTP_PORT", "587")))
+    smtp_user: str = field(default_factory=lambda: os.getenv("SMTP_USER", ""))
+    smtp_password: str = field(default_factory=lambda: os.getenv("SMTP_PASSWORD", ""))
+    notification_email: str = field(
+        default_factory=lambda: os.getenv("NOTIFICATION_EMAIL", "")
+    )
 
     # Processing
     test_mode: bool = False
@@ -108,6 +118,7 @@ class OrchestratorConfig:
 @dataclass
 class PipelineResult:
     """Result of a complete pipeline run."""
+
     success: bool
     jobs_processed: int
     hot_leads: int
@@ -126,6 +137,7 @@ class PipelineResult:
 # ENGINE IMPORTS
 # ============================================
 
+
 def import_engines():
     """Import all engine modules with graceful fallbacks."""
     engines = {}
@@ -133,28 +145,35 @@ def import_engines():
     # Engine 2: Program Mapping Pipeline
     try:
         from Engine2_ProgramMapping.scripts.pipeline import (
-            PipelineConfig, load_config, run_pipeline as run_mapping_pipeline
+            PipelineConfig,
+            load_config,
+            run_pipeline as run_mapping_pipeline,
         )
         from Engine2_ProgramMapping.scripts.job_standardizer import (
-            preprocess_job_data, standardize_job_with_llm
+            preprocess_job_data,
+            standardize_job_with_llm,
         )
         from Engine2_ProgramMapping.scripts.program_mapper import (
-            map_job_to_program, process_jobs_batch
+            map_job_to_program,
+            process_jobs_batch,
         )
         from Engine2_ProgramMapping.scripts.exporters import (
-            NotionCSVExporter, N8nWebhookExporter, export_batch
+            NotionCSVExporter,
+            N8nWebhookExporter,
+            export_batch,
         )
-        engines['mapping'] = {
-            'PipelineConfig': PipelineConfig,
-            'load_config': load_config,
-            'run_pipeline': run_mapping_pipeline,
-            'preprocess_job_data': preprocess_job_data,
-            'standardize_job_with_llm': standardize_job_with_llm,
-            'map_job_to_program': map_job_to_program,
-            'process_jobs_batch': process_jobs_batch,
-            'NotionCSVExporter': NotionCSVExporter,
-            'N8nWebhookExporter': N8nWebhookExporter,
-            'export_batch': export_batch,
+
+        engines["mapping"] = {
+            "PipelineConfig": PipelineConfig,
+            "load_config": load_config,
+            "run_pipeline": run_mapping_pipeline,
+            "preprocess_job_data": preprocess_job_data,
+            "standardize_job_with_llm": standardize_job_with_llm,
+            "map_job_to_program": map_job_to_program,
+            "process_jobs_batch": process_jobs_batch,
+            "NotionCSVExporter": NotionCSVExporter,
+            "N8nWebhookExporter": N8nWebhookExporter,
+            "export_batch": export_batch,
         }
         logger.info("Engine2_ProgramMapping loaded successfully")
     except ImportError as e:
@@ -163,12 +182,15 @@ def import_engines():
     # Engine 3: Contact Lookup
     try:
         from Engine3_OrgChart.scripts.contact_lookup import (
-            lookup_contacts, format_contacts_for_briefing, ContactDatabase
+            lookup_contacts,
+            format_contacts_for_briefing,
+            ContactDatabase,
         )
-        engines['contacts'] = {
-            'lookup_contacts': lookup_contacts,
-            'format_contacts_for_briefing': format_contacts_for_briefing,
-            'ContactDatabase': ContactDatabase,
+
+        engines["contacts"] = {
+            "lookup_contacts": lookup_contacts,
+            "format_contacts_for_briefing": format_contacts_for_briefing,
+            "ContactDatabase": ContactDatabase,
         }
         logger.info("Engine3_OrgChart loaded successfully")
     except ImportError as e:
@@ -177,13 +199,17 @@ def import_engines():
     # Engine 4: Playbook Generator (Full BD Playbooks with Email/Call/TalkingPoints)
     try:
         from Engine4_Playbook.scripts.bd_playbook_generator import (
-            generate_playbook, generate_playbooks_batch, PlaybookData, PlaybookOutput
+            generate_playbook,
+            generate_playbooks_batch,
+            PlaybookData,
+            PlaybookOutput,
         )
-        engines['briefings'] = {
-            'generate_briefing': generate_playbook,
-            'generate_briefings_batch': generate_playbooks_batch,
-            'BriefingData': PlaybookData,
-            'PlaybookOutput': PlaybookOutput,
+
+        engines["briefings"] = {
+            "generate_briefing": generate_playbook,
+            "generate_briefings_batch": generate_playbooks_batch,
+            "BriefingData": PlaybookData,
+            "PlaybookOutput": PlaybookOutput,
         }
         logger.info("Engine4_Playbook loaded successfully")
     except ImportError as e:
@@ -192,12 +218,15 @@ def import_engines():
     # Engine 5: BD Scoring
     try:
         from Engine5_Scoring.scripts.bd_scoring import (
-            calculate_bd_score, score_batch, generate_scoring_report
+            calculate_bd_score,
+            score_batch,
+            generate_scoring_report,
         )
-        engines['scoring'] = {
-            'calculate_bd_score': calculate_bd_score,
-            'score_batch': score_batch,
-            'generate_scoring_report': generate_scoring_report,
+
+        engines["scoring"] = {
+            "calculate_bd_score": calculate_bd_score,
+            "score_batch": score_batch,
+            "generate_scoring_report": generate_scoring_report,
         }
         logger.info("Engine5_Scoring loaded successfully")
     except ImportError as e:
@@ -206,13 +235,17 @@ def import_engines():
     # Engine 6: QA Feedback
     try:
         from Engine6_QA.scripts.qa_feedback import (
-            run_qa_workflow, evaluate_batch, ReviewQueue, QAConfig
+            run_qa_workflow,
+            evaluate_batch,
+            ReviewQueue,
+            QAConfig,
         )
-        engines['qa'] = {
-            'run_qa_workflow': run_qa_workflow,
-            'evaluate_batch': evaluate_batch,
-            'ReviewQueue': ReviewQueue,
-            'QAConfig': QAConfig,
+
+        engines["qa"] = {
+            "run_qa_workflow": run_qa_workflow,
+            "evaluate_batch": evaluate_batch,
+            "ReviewQueue": ReviewQueue,
+            "QAConfig": QAConfig,
         }
         logger.info("Engine6_QA loaded successfully")
     except ImportError as e:
@@ -220,11 +253,16 @@ def import_engines():
 
     # Engine 7: Bullhorn ETL & Dashboard Integration
     try:
-        from Engine7_BullhornETL.run_pipeline import run_full_pipeline as run_bullhorn_pipeline
-        from Engine7_BullhornETL.scripts.dashboard_integration import run_integration as run_dashboard_export
-        engines['bullhorn'] = {
-            'run_pipeline': run_bullhorn_pipeline,
-            'run_dashboard_export': run_dashboard_export,
+        from Engine7_BullhornETL.run_pipeline import (
+            run_full_pipeline as run_bullhorn_pipeline,
+        )
+        from Engine7_BullhornETL.scripts.dashboard_integration import (
+            run_integration as run_dashboard_export,
+        )
+
+        engines["bullhorn"] = {
+            "run_pipeline": run_bullhorn_pipeline,
+            "run_dashboard_export": run_dashboard_export,
         }
         logger.info("Engine7_BullhornETL loaded successfully")
     except ImportError as e:
@@ -234,9 +272,10 @@ def import_engines():
     try:
         from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
         from Engine8_Knowledge.scripts.indexer import BDIndexer
-        engines['knowledge'] = {
-            'BDKnowledgeStore': BDKnowledgeStore,
-            'BDIndexer': BDIndexer,
+
+        engines["knowledge"] = {
+            "BDKnowledgeStore": BDKnowledgeStore,
+            "BDIndexer": BDIndexer,
         }
         logger.info("Engine8_Knowledge loaded successfully")
     except ImportError as e:
@@ -248,6 +287,7 @@ def import_engines():
 # ============================================
 # EMAIL NOTIFICATION
 # ============================================
+
 
 class EmailNotifier:
     """Send email notifications for hot leads and alerts."""
@@ -267,17 +307,19 @@ class EmailNotifier:
             return True
 
         try:
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = f"[BD Alert] {len(jobs)} Hot Lead(s) Detected - {datetime.now().strftime('%Y-%m-%d')}"
-            msg['From'] = self.config.smtp_user
-            msg['To'] = self.config.notification_email
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = (
+                f"[BD Alert] {len(jobs)} Hot Lead(s) Detected - {datetime.now().strftime('%Y-%m-%d')}"
+            )
+            msg["From"] = self.config.smtp_user
+            msg["To"] = self.config.notification_email
 
             # Build HTML content
             html_content = self._build_hot_lead_html(jobs, briefings)
             text_content = self._build_hot_lead_text(jobs)
 
-            msg.attach(MIMEText(text_content, 'plain'))
-            msg.attach(MIMEText(html_content, 'html'))
+            msg.attach(MIMEText(text_content, "plain"))
+            msg.attach(MIMEText(html_content, "html"))
 
             # Send email
             with smtplib.SMTP(self.config.smtp_host, self.config.smtp_port) as server:
@@ -296,21 +338,21 @@ class EmailNotifier:
         """Build HTML email content for hot leads."""
         job_rows = ""
         for job in jobs:
-            mapping = job.get('_mapping', {})
-            scoring = job.get('_scoring', {})
+            mapping = job.get("_mapping", {})
+            scoring = job.get("_scoring", {})
             job_rows += f"""
             <tr>
                 <td style="padding: 10px; border-bottom: 1px solid #eee;">
-                    <strong>{job.get('Job Title/Position', job.get('title', 'Unknown'))}</strong><br>
-                    <small>{job.get('Location', job.get('location', 'N/A'))}</small>
+                    <strong>{job.get("Job Title/Position", job.get("title", "Unknown"))}</strong><br>
+                    <small>{job.get("Location", job.get("location", "N/A"))}</small>
                 </td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">{mapping.get('program_name', 'N/A')}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{mapping.get("program_name", "N/A")}</td>
                 <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: center;">
                     <span style="background: #dc3545; color: white; padding: 3px 8px; border-radius: 3px;">
-                        {scoring.get('BD Priority Score', 0)}
+                        {scoring.get("BD Priority Score", 0)}
                     </span>
                 </td>
-                <td style="padding: 10px; border-bottom: 1px solid #eee;">{job.get('Security Clearance', 'N/A')}</td>
+                <td style="padding: 10px; border-bottom: 1px solid #eee;">{job.get("Security Clearance", "N/A")}</td>
             </tr>
             """
 
@@ -342,7 +384,7 @@ class EmailNotifier:
             </ul>
 
             <p style="color: #666; font-size: 12px; margin-top: 30px;">
-                Generated by BD Automation Engine | {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+                Generated by BD Automation Engine | {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
             </p>
         </body>
         </html>
@@ -358,16 +400,18 @@ class EmailNotifier:
         ]
 
         for job in jobs:
-            mapping = job.get('_mapping', {})
-            scoring = job.get('_scoring', {})
-            lines.extend([
-                f"\nPosition: {job.get('Job Title/Position', job.get('title', 'Unknown'))}",
-                f"Location: {job.get('Location', job.get('location', 'N/A'))}",
-                f"Program: {mapping.get('program_name', 'N/A')}",
-                f"BD Score: {scoring.get('BD Priority Score', 0)}",
-                f"Clearance: {job.get('Security Clearance', 'N/A')}",
-                "-" * 40,
-            ])
+            mapping = job.get("_mapping", {})
+            scoring = job.get("_scoring", {})
+            lines.extend(
+                [
+                    f"\nPosition: {job.get('Job Title/Position', job.get('title', 'Unknown'))}",
+                    f"Location: {job.get('Location', job.get('location', 'N/A'))}",
+                    f"Program: {mapping.get('program_name', 'N/A')}",
+                    f"BD Score: {scoring.get('BD Priority Score', 0)}",
+                    f"Clearance: {job.get('Security Clearance', 'N/A')}",
+                    "-" * 40,
+                ]
+            )
 
         return "\n".join(lines)
 
@@ -377,15 +421,17 @@ class EmailNotifier:
             return False
 
         try:
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = f"[BD Summary] Daily Pipeline Report - {datetime.now().strftime('%Y-%m-%d')}"
-            msg['From'] = self.config.smtp_user
-            msg['To'] = self.config.notification_email
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = (
+                f"[BD Summary] Daily Pipeline Report - {datetime.now().strftime('%Y-%m-%d')}"
+            )
+            msg["From"] = self.config.smtp_user
+            msg["To"] = self.config.notification_email
 
             text_content = f"""
 BD Automation Daily Summary
 ===========================
-Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+Date: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
 
 Pipeline Results:
 - Jobs Processed: {result.jobs_processed}
@@ -397,11 +443,11 @@ Pipeline Results:
 - QA Needs Review: {result.qa_needs_review}
 
 Duration: {result.duration_seconds:.1f} seconds
-Status: {'SUCCESS' if result.success else 'FAILED'}
+Status: {"SUCCESS" if result.success else "FAILED"}
 
 Errors: {len(result.errors)}
 """
-            msg.attach(MIMEText(text_content, 'plain'))
+            msg.attach(MIMEText(text_content, "plain"))
 
             with smtplib.SMTP(self.config.smtp_host, self.config.smtp_port) as server:
                 server.starttls()
@@ -420,14 +466,15 @@ Errors: {len(result.errors)}
 # WEBHOOK DELIVERY
 # ============================================
 
+
 class WebhookDelivery:
     """Deliver pipeline results to n8n webhooks."""
 
     def __init__(self, config: OrchestratorConfig):
         self.config = config
         self.webhook_url = config.n8n_webhook_url
-        self.enrichment_url = os.getenv('N8N_ENRICHMENT_WEBHOOK', '')
-        self.scoring_url = os.getenv('N8N_SCORING_WEBHOOK', '')
+        self.enrichment_url = os.getenv("N8N_ENRICHMENT_WEBHOOK", "")
+        self.scoring_url = os.getenv("N8N_SCORING_WEBHOOK", "")
 
     def deliver_jobs(self, jobs: List[Dict], batch_id: str = None) -> bool:
         """Deliver processed jobs to n8n webhook."""
@@ -441,28 +488,30 @@ class WebhookDelivery:
 
         try:
             payload = {
-                'batch_id': batch_id or datetime.now().strftime('BATCH_%Y%m%d_%H%M%S'),
-                'timestamp': datetime.now().isoformat(),
-                'job_count': len(jobs),
-                'jobs': jobs,
-                'metadata': {
-                    'source': 'BD-Automation-Engine',
-                    'version': '2.0',
-                }
+                "batch_id": batch_id or datetime.now().strftime("BATCH_%Y%m%d_%H%M%S"),
+                "timestamp": datetime.now().isoformat(),
+                "job_count": len(jobs),
+                "jobs": jobs,
+                "metadata": {
+                    "source": "BD-Automation-Engine",
+                    "version": "2.0",
+                },
             }
 
             response = requests.post(
                 self.webhook_url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=30
+                headers={"Content-Type": "application/json"},
+                timeout=30,
             )
 
             if response.status_code == 200:
                 logger.info(f"Delivered {len(jobs)} jobs to n8n webhook")
                 return True
             else:
-                logger.error(f"Webhook delivery failed: {response.status_code} - {response.text}")
+                logger.error(
+                    f"Webhook delivery failed: {response.status_code} - {response.text}"
+                )
                 return False
 
         except Exception as e:
@@ -481,18 +530,18 @@ class WebhookDelivery:
 
         try:
             payload = {
-                'alert_type': 'HOT_LEADS',
-                'timestamp': datetime.now().isoformat(),
-                'lead_count': len(hot_leads),
-                'leads': hot_leads,
-                'priority': 'URGENT'
+                "alert_type": "HOT_LEADS",
+                "timestamp": datetime.now().isoformat(),
+                "lead_count": len(hot_leads),
+                "leads": hot_leads,
+                "priority": "URGENT",
             }
 
             response = requests.post(
                 url,
                 json=payload,
-                headers={'Content-Type': 'application/json'},
-                timeout=30
+                headers={"Content-Type": "application/json"},
+                timeout=30,
             )
 
             return response.status_code == 200
@@ -506,6 +555,7 @@ class WebhookDelivery:
 # MAIN ORCHESTRATOR
 # ============================================
 
+
 class BDOrchestrator:
     """Main orchestrator coordinating all BD automation engines."""
 
@@ -517,10 +567,10 @@ class BDOrchestrator:
 
         # Ensure output directories exist
         Path(config.output_dir).mkdir(parents=True, exist_ok=True)
-        (Path(config.output_dir) / 'Logs').mkdir(exist_ok=True)
-        (Path(config.output_dir) / 'BD_Briefings').mkdir(exist_ok=True)
-        (Path(config.output_dir) / 'notion').mkdir(exist_ok=True)
-        (Path(config.output_dir) / 'n8n').mkdir(exist_ok=True)
+        (Path(config.output_dir) / "Logs").mkdir(exist_ok=True)
+        (Path(config.output_dir) / "BD_Briefings").mkdir(exist_ok=True)
+        (Path(config.output_dir) / "notion").mkdir(exist_ok=True)
+        (Path(config.output_dir) / "n8n").mkdir(exist_ok=True)
 
     def run_full_pipeline(self, input_path: str = None) -> PipelineResult:
         """
@@ -542,23 +592,30 @@ class BDOrchestrator:
         input_file = input_path or self.config.input_path
         if not input_file:
             return PipelineResult(
-                success=False, jobs_processed=0, hot_leads=0, warm_leads=0, cold_leads=0,
-                briefings_generated=0, qa_approved=0, qa_needs_review=0,
-                export_files={}, errors=["No input file specified"],
-                duration_seconds=0
+                success=False,
+                jobs_processed=0,
+                hot_leads=0,
+                warm_leads=0,
+                cold_leads=0,
+                briefings_generated=0,
+                qa_approved=0,
+                qa_needs_review=0,
+                export_files={},
+                errors=["No input file specified"],
+                duration_seconds=0,
             )
 
         logger.info(f"Starting full pipeline: {input_file}")
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("BD AUTOMATION ENGINE - Full Pipeline")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Input: {input_file}")
         print(f"Test Mode: {self.config.test_mode}")
 
         # Stage 1: Ingest
         print(f"\n[1/11] INGESTING JOBS...")
         try:
-            with open(input_file, 'r', encoding='utf-8') as f:
+            with open(input_file, "r", encoding="utf-8") as f:
                 jobs = json.load(f)
 
             if self.config.test_mode:
@@ -573,9 +630,9 @@ class BDOrchestrator:
 
         # Stage 2-4: Program Mapping Pipeline
         print(f"\n[2/11] RUNNING PROGRAM MAPPING PIPELINE...")
-        if 'mapping' in self.engines and self.config.run_mapping:
+        if "mapping" in self.engines and self.config.run_mapping:
             try:
-                pipeline_config = self.engines['mapping']['PipelineConfig'](
+                pipeline_config = self.engines["mapping"]["PipelineConfig"](
                     input_path=input_file,
                     output_dir=self.config.output_dir,
                     test_mode=self.config.test_mode,
@@ -583,7 +640,7 @@ class BDOrchestrator:
                 )
 
                 # Process jobs through mapping
-                enriched_jobs = self.engines['mapping']['process_jobs_batch'](jobs)
+                enriched_jobs = self.engines["mapping"]["process_jobs_batch"](jobs)
                 print(f"  Mapped {len(enriched_jobs)} jobs to programs")
                 jobs = enriched_jobs
             except Exception as e:
@@ -594,9 +651,9 @@ class BDOrchestrator:
 
         # Stage 5: BD Scoring
         print(f"\n[3/11] CALCULATING BD SCORES...")
-        if 'scoring' in self.engines and self.config.run_scoring:
+        if "scoring" in self.engines and self.config.run_scoring:
             try:
-                scored_jobs = self.engines['scoring']['score_batch'](jobs)
+                scored_jobs = self.engines["scoring"]["score_batch"](jobs)
                 print(f"  Scored {len(scored_jobs)} jobs")
                 jobs = scored_jobs
             except Exception as e:
@@ -606,19 +663,35 @@ class BDOrchestrator:
             print("  Skipped (engine not available)")
 
         # Categorize by tier
-        hot_leads = [j for j in jobs if 'Hot' in str(j.get('_scoring', {}).get('Priority Tier', ''))]
-        warm_leads = [j for j in jobs if 'Warm' in str(j.get('_scoring', {}).get('Priority Tier', ''))]
-        cold_leads = [j for j in jobs if 'Cold' in str(j.get('_scoring', {}).get('Priority Tier', ''))]
+        hot_leads = [
+            j
+            for j in jobs
+            if "Hot" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+        ]
+        warm_leads = [
+            j
+            for j in jobs
+            if "Warm" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+        ]
+        cold_leads = [
+            j
+            for j in jobs
+            if "Cold" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+        ]
 
-        print(f"  Tiers: Hot={len(hot_leads)}, Warm={len(warm_leads)}, Cold={len(cold_leads)}")
+        print(
+            f"  Tiers: Hot={len(hot_leads)}, Warm={len(warm_leads)}, Cold={len(cold_leads)}"
+        )
 
         # Stage 6: QA Evaluation
         print(f"\n[4/11] RUNNING QA EVALUATION...")
         qa_approved = 0
         qa_needs_review = 0
-        if 'qa' in self.engines and self.config.run_qa:
+        if "qa" in self.engines and self.config.run_qa:
             try:
-                qa_report, approved_jobs, review_jobs = self.engines['qa']['run_qa_workflow'](jobs)
+                qa_report, approved_jobs, review_jobs = self.engines["qa"][
+                    "run_qa_workflow"
+                ](jobs)
                 qa_approved = len(approved_jobs)
                 qa_needs_review = len(review_jobs)
                 print(f"  QA: {qa_approved} approved, {qa_needs_review} need review")
@@ -632,13 +705,17 @@ class BDOrchestrator:
         print(f"\n[5/11] GENERATING BRIEFINGS...")
         briefings = []
         briefings_to_process = hot_leads if self.config.hot_leads_only else jobs
-        if 'briefings' in self.engines and self.config.run_briefings and briefings_to_process:
+        if (
+            "briefings" in self.engines
+            and self.config.run_briefings
+            and briefings_to_process
+        ):
             try:
-                briefings = self.engines['briefings']['generate_briefings_batch'](
+                briefings = self.engines["briefings"]["generate_briefings_batch"](
                     briefings_to_process,
-                    output_dir=str(Path(self.config.output_dir) / 'BD_Briefings'),
+                    output_dir=str(Path(self.config.output_dir) / "BD_Briefings"),
                     min_score=self.config.min_bd_score,
-                    include_contacts=self.config.run_contacts
+                    include_contacts=self.config.run_contacts,
                 )
                 print(f"  Generated {len(briefings)} briefings")
             except Exception as e:
@@ -650,12 +727,10 @@ class BDOrchestrator:
         # Stage 8: Export
         print(f"\n[6/11] EXPORTING RESULTS...")
         export_files = {}
-        if 'mapping' in self.engines:
+        if "mapping" in self.engines:
             try:
-                export_results = self.engines['mapping']['export_batch'](
-                    jobs,
-                    output_dir=self.config.output_dir,
-                    formats=['notion', 'n8n']
+                export_results = self.engines["mapping"]["export_batch"](
+                    jobs, output_dir=self.config.output_dir, formats=["notion", "n8n"]
                 )
                 for fmt, result in export_results.items():
                     if result.success:
@@ -683,9 +758,9 @@ class BDOrchestrator:
 
         # Stage 9: Bullhorn ETL
         print(f"\n[9/11] RUNNING BULLHORN ETL...")
-        if 'bullhorn' in self.engines and self.config.run_bullhorn:
+        if "bullhorn" in self.engines and self.config.run_bullhorn:
             try:
-                self.engines['bullhorn']['run_pipeline']()
+                self.engines["bullhorn"]["run_pipeline"]()
                 print(f"  Bullhorn ETL completed")
             except Exception as e:
                 errors.append(f"Bullhorn ETL error: {e}")
@@ -695,29 +770,33 @@ class BDOrchestrator:
 
         # Stage 10: Dashboard Export with Verification
         print(f"\n[10/11] EXPORTING DASHBOARD DATA...")
-        if 'bullhorn' in self.engines and self.config.export_dashboard:
+        if "bullhorn" in self.engines and self.config.export_dashboard:
             try:
-                self.engines['bullhorn']['run_dashboard_export']()
+                self.engines["bullhorn"]["run_dashboard_export"]()
                 print(f"  Dashboard export completed")
 
                 # VERIFICATION: Check all required files were created
-                dashboard_dir = PROJECT_ROOT / 'dashboard' / 'public' / 'data'
+                dashboard_dir = PROJECT_ROOT / "dashboard" / "public" / "data"
                 required_files = [
-                    'past_performance.json',
-                    'prime_org_chart.json',
-                    'contact_org_chart.json',
-                    'program_org_chart.json',
-                    'placements.json',
-                    'correlation_summary_enriched.json'
+                    "past_performance.json",
+                    "prime_org_chart.json",
+                    "contact_org_chart.json",
+                    "program_org_chart.json",
+                    "placements.json",
+                    "correlation_summary_enriched.json",
                 ]
-                missing_files = [f for f in required_files if not (dashboard_dir / f).exists()]
+                missing_files = [
+                    f for f in required_files if not (dashboard_dir / f).exists()
+                ]
                 if missing_files:
                     error_msg = f"Dashboard export incomplete: missing {missing_files}"
                     errors.append(error_msg)
                     logger.warning(error_msg)
                 else:
                     logger.info("Dashboard data verified: all 6 files present")
-                    print(f"  Verified: all {len(required_files)} dashboard files present")
+                    print(
+                        f"  Verified: all {len(required_files)} dashboard files present"
+                    )
             except Exception as e:
                 errors.append(f"Dashboard export error: {e}")
                 logger.error(f"Dashboard export error: {e}")
@@ -726,9 +805,9 @@ class BDOrchestrator:
 
         # Stage 11: Knowledge Indexing (Engine 8)
         print(f"\n[11/11] INDEXING KNOWLEDGE BASE...")
-        if 'knowledge' in self.engines and self.config.run_knowledge:
+        if "knowledge" in self.engines and self.config.run_knowledge:
             try:
-                indexer = self.engines['knowledge']['BDIndexer']()
+                indexer = self.engines["knowledge"]["BDIndexer"]()
                 indexer.index_all()
                 print(f"  Knowledge base indexed successfully")
                 logger.info("Engine8_Knowledge indexing completed")
@@ -753,13 +832,13 @@ class BDOrchestrator:
             qa_needs_review=qa_needs_review,
             export_files=export_files,
             errors=errors,
-            duration_seconds=duration
+            duration_seconds=duration,
         )
 
         # Print summary
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("PIPELINE COMPLETE")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Duration: {duration:.1f} seconds")
         print(f"Jobs Processed: {result.jobs_processed}")
         print(f"Hot Leads: {result.hot_leads}")
@@ -772,7 +851,9 @@ class BDOrchestrator:
         print(f"Status: {'SUCCESS' if result.success else 'FAILED'}")
 
         # Log result
-        logger.info(f"Pipeline complete: {result.jobs_processed} jobs, {result.hot_leads} hot leads")
+        logger.info(
+            f"Pipeline complete: {result.jobs_processed} jobs, {result.hot_leads} hot leads"
+        )
 
         # Persist state and check alerts
         self._save_pipeline_state(result)
@@ -826,6 +907,7 @@ class BDOrchestrator:
         """Trigger alert engine after pipeline run."""
         try:
             from Engine6_QA.scripts.alerts import AlertEngine
+
             engine = AlertEngine()
             alerts = engine.check_all_rules()
             if alerts:
@@ -840,9 +922,17 @@ class BDOrchestrator:
         """Create an error result."""
         duration = (datetime.now() - start_time).total_seconds()
         return PipelineResult(
-            success=False, jobs_processed=0, hot_leads=0, warm_leads=0, cold_leads=0,
-            briefings_generated=0, qa_approved=0, qa_needs_review=0,
-            export_files={}, errors=errors, duration_seconds=duration
+            success=False,
+            jobs_processed=0,
+            hot_leads=0,
+            warm_leads=0,
+            cold_leads=0,
+            briefings_generated=0,
+            qa_approved=0,
+            qa_needs_review=0,
+            export_files={},
+            errors=errors,
+            duration_seconds=duration,
         )
 
     def run_scheduled(self, interval_hours: int = 6):
@@ -856,8 +946,8 @@ class BDOrchestrator:
         while True:
             try:
                 # Find latest input file
-                input_dir = PROJECT_ROOT / 'Engine1_Scraper' / 'data'
-                json_files = list(input_dir.glob('*.json'))
+                input_dir = PROJECT_ROOT / "Engine1_Scraper" / "data"
+                json_files = list(input_dir.glob("*.json"))
                 if json_files:
                     latest_file = max(json_files, key=lambda f: f.stat().st_mtime)
                     result = self.run_full_pipeline(str(latest_file))
@@ -885,9 +975,10 @@ class BDOrchestrator:
 # CLI INTERFACE
 # ============================================
 
+
 def main():
     parser = argparse.ArgumentParser(
-        description='BD Automation Engine - Master Orchestrator',
+        description="BD Automation Engine - Master Orchestrator",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -905,35 +996,53 @@ Examples:
 
   # Skip specific stages
   python orchestrator.py --input data/jobs.json --no-briefings --no-qa
-        """
+        """,
     )
 
     # Input/Output
-    parser.add_argument('--input', '-i', help='Input JSON file with jobs')
-    parser.add_argument('--output', '-o', default='outputs', help='Output directory')
+    parser.add_argument("--input", "-i", help="Input JSON file with jobs")
+    parser.add_argument("--output", "-o", default="outputs", help="Output directory")
 
     # Pipeline Control
-    parser.add_argument('--test', action='store_true', help='Test mode (first 3 jobs)')
-    parser.add_argument('--hot-leads-only', action='store_true', help='Only process hot leads')
-    parser.add_argument('--min-score', type=int, default=0, help='Minimum BD score to process')
+    parser.add_argument("--test", action="store_true", help="Test mode (first 3 jobs)")
+    parser.add_argument(
+        "--hot-leads-only", action="store_true", help="Only process hot leads"
+    )
+    parser.add_argument(
+        "--min-score", type=int, default=0, help="Minimum BD score to process"
+    )
 
     # Stage Control
-    parser.add_argument('--no-mapping', action='store_true', help='Skip program mapping')
-    parser.add_argument('--no-contacts', action='store_true', help='Skip contact lookup')
-    parser.add_argument('--no-briefings', action='store_true', help='Skip briefing generation')
-    parser.add_argument('--no-scoring', action='store_true', help='Skip BD scoring')
-    parser.add_argument('--no-qa', action='store_true', help='Skip QA evaluation')
-    parser.add_argument('--no-bullhorn', action='store_true', help='Skip Bullhorn ETL')
-    parser.add_argument('--no-dashboard-export', action='store_true', help='Skip dashboard data export')
-    parser.add_argument('--no-knowledge', action='store_true', help='Skip knowledge base indexing')
+    parser.add_argument(
+        "--no-mapping", action="store_true", help="Skip program mapping"
+    )
+    parser.add_argument(
+        "--no-contacts", action="store_true", help="Skip contact lookup"
+    )
+    parser.add_argument(
+        "--no-briefings", action="store_true", help="Skip briefing generation"
+    )
+    parser.add_argument("--no-scoring", action="store_true", help="Skip BD scoring")
+    parser.add_argument("--no-qa", action="store_true", help="Skip QA evaluation")
+    parser.add_argument("--no-bullhorn", action="store_true", help="Skip Bullhorn ETL")
+    parser.add_argument(
+        "--no-dashboard-export", action="store_true", help="Skip dashboard data export"
+    )
+    parser.add_argument(
+        "--no-knowledge", action="store_true", help="Skip knowledge base indexing"
+    )
 
     # Notifications
-    parser.add_argument('--email', action='store_true', help='Send email notifications')
-    parser.add_argument('--no-webhook', action='store_true', help='Disable webhook delivery')
+    parser.add_argument("--email", action="store_true", help="Send email notifications")
+    parser.add_argument(
+        "--no-webhook", action="store_true", help="Disable webhook delivery"
+    )
 
     # Scheduling
-    parser.add_argument('--schedule', action='store_true', help='Run on schedule')
-    parser.add_argument('--interval', type=int, default=6, help='Schedule interval in hours')
+    parser.add_argument("--schedule", action="store_true", help="Run on schedule")
+    parser.add_argument(
+        "--interval", type=int, default=6, help="Schedule interval in hours"
+    )
 
     args = parser.parse_args()
 
@@ -972,5 +1081,5 @@ Examples:
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -23,6 +23,7 @@ from src.rag.agentic_rag import (
 # FIXTURES
 # =========================================
 
+
 class MockTool(RetrievalTool):
     """Mock retrieval tool that returns canned results."""
 
@@ -30,7 +31,9 @@ class MockTool(RetrievalTool):
         super().__init__(name, f"Mock {name}")
         self._results = results or []
 
-    async def search(self, query: str, limit: int = 10, **kwargs) -> RetrievalToolResult:
+    async def search(
+        self, query: str, limit: int = 10, **kwargs
+    ) -> RetrievalToolResult:
         return RetrievalToolResult(
             tool=self.name,
             results=self._results[:limit],
@@ -41,16 +44,37 @@ class MockTool(RetrievalTool):
 @pytest.fixture
 def mock_tools():
     return {
-        "vector_search": MockTool("vector_search", [
-            {"text": "John Smith works at GDIT as a Senior Analyst on DCGS-A.", "score": 0.9},
-            {"text": "GDIT is hiring 5 analysts for the DCGS program in Q2.", "score": 0.85},
-        ]),
-        "keyword_search": MockTool("keyword_search", [
-            {"text": "DCGS-A program manager is Jeff Bartsch at Langley.", "score": 0.8},
-        ]),
-        "graph_traverse": MockTool("graph_traverse", [
-            {"text": "John Smith → WORKS_AT → GDIT → PRIME_ON → DCGS-A", "score": 0.75},
-        ]),
+        "vector_search": MockTool(
+            "vector_search",
+            [
+                {
+                    "text": "John Smith works at GDIT as a Senior Analyst on DCGS-A.",
+                    "score": 0.9,
+                },
+                {
+                    "text": "GDIT is hiring 5 analysts for the DCGS program in Q2.",
+                    "score": 0.85,
+                },
+            ],
+        ),
+        "keyword_search": MockTool(
+            "keyword_search",
+            [
+                {
+                    "text": "DCGS-A program manager is Jeff Bartsch at Langley.",
+                    "score": 0.8,
+                },
+            ],
+        ),
+        "graph_traverse": MockTool(
+            "graph_traverse",
+            [
+                {
+                    "text": "John Smith → WORKS_AT → GDIT → PRIME_ON → DCGS-A",
+                    "score": 0.75,
+                },
+            ],
+        ),
     }
 
 
@@ -68,6 +92,7 @@ def empty_orchestrator():
 # INTENT CLASSIFICATION
 # =========================================
 
+
 def test_classify_intent_person():
     assert classify_intent("Who is the manager of DCGS-A?") == "person_lookup"
 
@@ -77,12 +102,17 @@ def test_classify_intent_hiring():
 
 
 def test_classify_intent_program():
-    assert classify_intent("What is the status of the DCGS contract?") == "program_intel"
+    assert (
+        classify_intent("What is the status of the DCGS contract?") == "program_intel"
+    )
 
 
 def test_classify_intent_trend():
     # This query matches both hiring and trend — verify trend wins with a pure trend query
-    assert classify_intent("What are the growth trends over the last 12 months?") == "trend_analysis"
+    assert (
+        classify_intent("What are the growth trends over the last 12 months?")
+        == "trend_analysis"
+    )
 
 
 def test_classify_intent_relationship():
@@ -97,6 +127,7 @@ def test_classify_intent_general():
 # COMPLEXITY CLASSIFICATION
 # =========================================
 
+
 def test_complexity_simple():
     assert classify_complexity("What is Jeff's email?") == "simple"
 
@@ -107,17 +138,25 @@ def test_complexity_moderate():
 
 
 def test_complexity_analytical():
-    assert classify_complexity("Compare hiring trends across DCGS sites over the last 12 months") == "analytical"
+    assert (
+        classify_complexity(
+            "Compare hiring trends across DCGS sites over the last 12 months"
+        )
+        == "analytical"
+    )
 
 
 def test_complexity_complex():
-    result = classify_complexity("Which contacts at Leidos have connections to Langley that also work on DCGS?")
+    result = classify_complexity(
+        "Which contacts at Leidos have connections to Langley that also work on DCGS?"
+    )
     assert result in ("complex", "moderate")
 
 
 # =========================================
 # ENTITY EXTRACTION
 # =========================================
+
 
 def test_extract_entities_person():
     entities = extract_query_entities("Who is John Smith?")
@@ -142,6 +181,7 @@ def test_extract_entities_empty():
 # =========================================
 # ORCHESTRATOR QUERY
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_query_returns_result(orchestrator):
@@ -188,6 +228,7 @@ async def test_query_measures_latency(orchestrator):
 # SIMPLE QUERY
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_query_simple(orchestrator):
     result = await orchestrator.query_simple("Who is Jeff Bartsch?")
@@ -205,6 +246,7 @@ async def test_query_simple_no_tools(empty_orchestrator):
 # =========================================
 # TRACE & STATS
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_get_trace(orchestrator):
@@ -231,6 +273,7 @@ async def test_get_stats(orchestrator):
 # NO-TOOL ORCHESTRATOR
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_query_no_tools(empty_orchestrator):
     result = await empty_orchestrator.query("Who manages DCGS?")
@@ -241,6 +284,7 @@ async def test_query_no_tools(empty_orchestrator):
 # =========================================
 # BENCHMARK
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_run_benchmark(orchestrator):
@@ -254,6 +298,7 @@ async def test_run_benchmark(orchestrator):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_agentic_rag_singleton():
     r1 = get_agentic_rag()

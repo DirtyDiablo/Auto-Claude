@@ -28,7 +28,7 @@ TIER_DEFINITIONS = {
         ],
         "bd_priority": "Critical",
         "bd_emoji": "red_circle",
-        "outreach_sequence": "D - Strategic Engagement"
+        "outreach_sequence": "D - Strategic Engagement",
     },
     2: {
         "name": "Director",
@@ -41,7 +41,7 @@ TIER_DEFINITIONS = {
         ],
         "bd_priority": "Critical",
         "bd_emoji": "red_circle",
-        "outreach_sequence": "D - Strategic Engagement"
+        "outreach_sequence": "D - Strategic Engagement",
     },
     3: {
         "name": "Program Leadership",
@@ -56,7 +56,7 @@ TIER_DEFINITIONS = {
         ],
         "bd_priority": "High",
         "bd_emoji": "orange_circle",
-        "outreach_sequence": "C - Program Engagement"
+        "outreach_sequence": "C - Program Engagement",
     },
     4: {
         "name": "Management",
@@ -71,7 +71,7 @@ TIER_DEFINITIONS = {
         ],
         "bd_priority": "High",
         "bd_emoji": "orange_circle",
-        "outreach_sequence": "B - Validation Approach"
+        "outreach_sequence": "B - Validation Approach",
     },
     5: {
         "name": "Senior IC",
@@ -86,7 +86,7 @@ TIER_DEFINITIONS = {
         ],
         "bd_priority": "Medium",
         "bd_emoji": "yellow_circle",
-        "outreach_sequence": "A - Discovery Approach"
+        "outreach_sequence": "A - Discovery Approach",
     },
     6: {
         "name": "Individual Contributor",
@@ -101,8 +101,8 @@ TIER_DEFINITIONS = {
         ],
         "bd_priority": "Standard",
         "bd_emoji": "white_circle",
-        "outreach_sequence": "A - Discovery Approach"
-    }
+        "outreach_sequence": "A - Discovery Approach",
+    },
 }
 
 
@@ -115,19 +115,16 @@ LOCATION_PROGRAM_MAP = {
     "San Diego": {"program": "AF DCGS - PACAF", "hub": "San Diego Metro"},
     "La Mesa": {"program": "AF DCGS - PACAF", "hub": "San Diego Metro"},
     "La Jolla": {"program": "Corporate/R&D", "hub": "San Diego Metro"},
-
     # Hampton Roads
     "Hampton": {"program": "AF DCGS - Langley", "hub": "Hampton Roads"},
     "Newport News": {"program": "AF DCGS - Langley", "hub": "Hampton Roads"},
     "Langley": {"program": "AF DCGS - Langley", "hub": "Hampton Roads"},
     "Norfolk": {"program": "Navy DCGS-N", "hub": "Hampton Roads"},
     "Suffolk": {"program": "Navy DCGS-N", "hub": "Hampton Roads"},
-
     # Dayton/Wright-Patt
     "Dayton": {"program": "AF DCGS - Wright-Patt", "hub": "Dayton/Wright-Patt"},
     "Beavercreek": {"program": "AF DCGS - Wright-Patt", "hub": "Dayton/Wright-Patt"},
     "Fairborn": {"program": "AF DCGS - Wright-Patt", "hub": "Dayton/Wright-Patt"},
-
     # DC Metro
     "Herndon": {"program": "Corporate HQ", "hub": "DC Metro"},
     "Falls Church": {"program": "Corporate HQ", "hub": "DC Metro"},
@@ -137,7 +134,6 @@ LOCATION_PROGRAM_MAP = {
     "Springfield": {"program": "NGA Programs", "hub": "DC Metro"},
     "McLean": {"program": "IC Corporate", "hub": "DC Metro"},
     "Chantilly": {"program": "NRO/IC", "hub": "DC Metro"},
-
     # Other
     "Fort Detrick": {"program": "Army DCGS-A", "hub": "Other CONUS"},
     "Aberdeen": {"program": "Army DCGS-A", "hub": "Other CONUS"},
@@ -151,9 +147,11 @@ LOCATION_PROGRAM_MAP = {
 # CLASSIFICATION FUNCTIONS
 # ============================================
 
+
 @dataclass
 class ClassificationResult:
     """Result of classifying a contact."""
+
     tier: int
     tier_name: str
     bd_priority: str
@@ -224,17 +222,17 @@ def classify_contact(contact: Dict) -> ClassificationResult:
         ClassificationResult with tier, priority, program assignment
     """
     # Get title classification
-    title = contact.get('title', '') or contact.get('Job Title', '')
+    title = contact.get("title", "") or contact.get("Job Title", "")
     tier, confidence = classify_by_title(title)
     tier_def = TIER_DEFINITIONS[tier]
 
     # Get location-based program inference
-    location = contact.get('location', '') or contact.get('Location', '')
+    location = contact.get("location", "") or contact.get("Location", "")
     program, location_hub = infer_program_from_location(location)
 
     # Override program if explicitly provided
-    if contact.get('program') or contact.get('Program'):
-        program = contact.get('program') or contact.get('Program')
+    if contact.get("program") or contact.get("Program"):
+        program = contact.get("program") or contact.get("Program")
 
     return ClassificationResult(
         tier=tier,
@@ -244,7 +242,7 @@ def classify_contact(contact: Dict) -> ClassificationResult:
         program=program,
         location_hub=location_hub,
         outreach_sequence=tier_def["outreach_sequence"],
-        confidence=confidence
+        confidence=confidence,
     )
 
 
@@ -264,13 +262,13 @@ def classify_contacts_batch(contacts: List[Dict]) -> List[Dict]:
         classification = classify_contact(contact)
 
         enriched = contact.copy()
-        enriched['_classification'] = {
-            'Hierarchy Tier': f"Tier {classification.tier} - {classification.tier_name}",
-            'BD Priority': f"{classification.bd_emoji} {classification.bd_priority}",
-            'Program': classification.program,
-            'Location Hub': classification.location_hub,
-            'Outreach Sequence': classification.outreach_sequence,
-            'Classification Confidence': classification.confidence,
+        enriched["_classification"] = {
+            "Hierarchy Tier": f"Tier {classification.tier} - {classification.tier_name}",
+            "BD Priority": f"{classification.bd_emoji} {classification.bd_priority}",
+            "Program": classification.program,
+            "Location Hub": classification.location_hub,
+            "Outreach Sequence": classification.outreach_sequence,
+            "Classification Confidence": classification.confidence,
         }
 
         results.append(enriched)
@@ -281,6 +279,7 @@ def classify_contacts_batch(contacts: List[Dict]) -> List[Dict]:
 # ============================================
 # NOTION PROPERTY FORMATTING
 # ============================================
+
 
 def format_for_notion(classification: ClassificationResult) -> Dict:
     """
@@ -294,13 +293,15 @@ def format_for_notion(classification: ClassificationResult) -> Dict:
     """
     # Map emoji names to actual emojis for Notion
     emoji_map = {
-        "red_circle": "\U0001F534",     # red
-        "orange_circle": "\U0001F7E0",  # orange
-        "yellow_circle": "\U0001F7E1",  # yellow
-        "white_circle": "\u26AA",       # white
+        "red_circle": "\U0001f534",  # red
+        "orange_circle": "\U0001f7e0",  # orange
+        "yellow_circle": "\U0001f7e1",  # yellow
+        "white_circle": "\u26aa",  # white
     }
 
-    priority_with_emoji = f"{emoji_map.get(classification.bd_emoji, '')} {classification.bd_priority}"
+    priority_with_emoji = (
+        f"{emoji_map.get(classification.bd_emoji, '')} {classification.bd_priority}"
+    )
 
     return {
         "Hierarchy Tier": f"Tier {classification.tier} - {classification.tier_name}",
@@ -314,48 +315,56 @@ def format_for_notion(classification: ClassificationResult) -> Dict:
 # CLI INTERFACE
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import json
     import argparse
 
-    parser = argparse.ArgumentParser(description='Classify contacts into hierarchy tiers')
-    parser.add_argument('--input', '-i', required=True, help='Input JSON file with contacts')
-    parser.add_argument('--output', '-o', required=True, help='Output JSON file')
-    parser.add_argument('--format', choices=['full', 'notion'], default='full',
-                        help='Output format (full or notion-ready)')
+    parser = argparse.ArgumentParser(
+        description="Classify contacts into hierarchy tiers"
+    )
+    parser.add_argument(
+        "--input", "-i", required=True, help="Input JSON file with contacts"
+    )
+    parser.add_argument("--output", "-o", required=True, help="Output JSON file")
+    parser.add_argument(
+        "--format",
+        choices=["full", "notion"],
+        default="full",
+        help="Output format (full or notion-ready)",
+    )
 
     args = parser.parse_args()
 
     # Load contacts
-    with open(args.input, 'r') as f:
+    with open(args.input, "r") as f:
         contacts = json.load(f)
 
     # Process
     results = classify_contacts_batch(contacts)
 
     # Format for Notion if requested
-    if args.format == 'notion':
+    if args.format == "notion":
         for r in results:
             classification = ClassificationResult(
-                tier=int(r['_classification']['Hierarchy Tier'].split()[1]),
-                tier_name=r['_classification']['Hierarchy Tier'].split(' - ')[1],
-                bd_priority=r['_classification']['BD Priority'].split()[-1],
-                bd_emoji=r['_classification']['BD Priority'].split()[0],
-                program=r['_classification']['Program'],
-                location_hub=r['_classification']['Location Hub'],
-                outreach_sequence=r['_classification']['Outreach Sequence'],
-                confidence=r['_classification']['Classification Confidence']
+                tier=int(r["_classification"]["Hierarchy Tier"].split()[1]),
+                tier_name=r["_classification"]["Hierarchy Tier"].split(" - ")[1],
+                bd_priority=r["_classification"]["BD Priority"].split()[-1],
+                bd_emoji=r["_classification"]["BD Priority"].split()[0],
+                program=r["_classification"]["Program"],
+                location_hub=r["_classification"]["Location Hub"],
+                outreach_sequence=r["_classification"]["Outreach Sequence"],
+                confidence=r["_classification"]["Classification Confidence"],
             )
-            r['notion_properties'] = format_for_notion(classification)
+            r["notion_properties"] = format_for_notion(classification)
 
     # Save results
-    with open(args.output, 'w') as f:
+    with open(args.output, "w") as f:
         json.dump(results, f, indent=2)
 
     # Summary
     tier_counts = {}
     for r in results:
-        tier = r['_classification']['Hierarchy Tier']
+        tier = r["_classification"]["Hierarchy Tier"]
         tier_counts[tier] = tier_counts.get(tier, 0) + 1
 
     print(f"\nClassified {len(results)} contacts:")

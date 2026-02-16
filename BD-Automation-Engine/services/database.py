@@ -14,12 +14,13 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger('BD-Database')
+logger = logging.getLogger("BD-Database")
 
 # Try to import psycopg2
 try:
     import psycopg2
     from psycopg2.extras import RealDictCursor
+
     HAS_POSTGRES = True
 except ImportError:
     HAS_POSTGRES = False
@@ -29,11 +30,12 @@ except ImportError:
 @dataclass
 class DatabaseConfig:
     """PostgreSQL database configuration."""
-    host: str = os.getenv('POSTGRES_HOST', 'localhost')
-    port: int = int(os.getenv('POSTGRES_PORT', '5432'))
-    database: str = os.getenv('POSTGRES_DB', 'bd_automation')
-    user: str = os.getenv('POSTGRES_USER', 'postgres')
-    password: str = os.getenv('POSTGRES_PASSWORD', '')
+
+    host: str = os.getenv("POSTGRES_HOST", "localhost")
+    port: int = int(os.getenv("POSTGRES_PORT", "5432"))
+    database: str = os.getenv("POSTGRES_DB", "bd_automation")
+    user: str = os.getenv("POSTGRES_USER", "postgres")
+    password: str = os.getenv("POSTGRES_PASSWORD", "")
 
     @property
     def connection_string(self) -> str:
@@ -52,7 +54,9 @@ class DatabaseManager:
     def get_connection(self):
         """Get a database connection with automatic cleanup."""
         if not HAS_POSTGRES:
-            raise RuntimeError("psycopg2 not installed. Run: pip install psycopg2-binary")
+            raise RuntimeError(
+                "psycopg2 not installed. Run: pip install psycopg2-binary"
+            )
 
         conn = None
         try:
@@ -61,7 +65,7 @@ class DatabaseManager:
                 port=self.config.port,
                 database=self.config.database,
                 user=self.config.user,
-                password=self.config.password
+                password=self.config.password,
             )
             yield conn
         finally:
@@ -211,9 +215,14 @@ class DatabaseManager:
         """Insert a job and return its ID."""
         with self.get_cursor() as cursor:
             # Generate unique job_id from source URL or hash
-            job_id = job.get('Source URL') or job.get('url') or f"job_{hash(json.dumps(job, sort_keys=True))}"
+            job_id = (
+                job.get("Source URL")
+                or job.get("url")
+                or f"job_{hash(json.dumps(job, sort_keys=True))}"
+            )
 
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO jobs (job_id, title, company, location, clearance, description,
                                  source, source_url, raw_data)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
@@ -221,18 +230,20 @@ class DatabaseManager:
                     title = EXCLUDED.title,
                     updated_at = CURRENT_TIMESTAMP
                 RETURNING id
-            """, (
-                job_id,
-                job.get('Job Title/Position') or job.get('title', ''),
-                job.get('Prime Contractor') or job.get('company', ''),
-                job.get('Location') or job.get('location', ''),
-                job.get('Security Clearance') or job.get('clearance', ''),
-                job.get('Position Overview') or job.get('description', ''),
-                job.get('Source', 'unknown'),
-                job.get('Source URL') or job.get('url', ''),
-                json.dumps(job)
-            ))
-            return cursor.fetchone()['id']
+            """,
+                (
+                    job_id,
+                    job.get("Job Title/Position") or job.get("title", ""),
+                    job.get("Prime Contractor") or job.get("company", ""),
+                    job.get("Location") or job.get("location", ""),
+                    job.get("Security Clearance") or job.get("clearance", ""),
+                    job.get("Position Overview") or job.get("description", ""),
+                    job.get("Source", "unknown"),
+                    job.get("Source URL") or job.get("url", ""),
+                    json.dumps(job),
+                ),
+            )
+            return cursor.fetchone()["id"]
 
     def insert_jobs_batch(self, jobs: List[Dict]) -> List[int]:
         """Insert multiple jobs and return their IDs."""
@@ -257,7 +268,7 @@ class DatabaseManager:
         location: str = None,
         clearance: str = None,
         since: datetime = None,
-        limit: int = 100
+        limit: int = 100,
     ) -> List[Dict]:
         """Get jobs matching specified filters."""
         conditions = ["1=1"]
@@ -279,12 +290,15 @@ class DatabaseManager:
         params.append(limit)
 
         with self.get_cursor() as cursor:
-            cursor.execute(f"""
+            cursor.execute(
+                f"""
                 SELECT * FROM jobs
-                WHERE {' AND '.join(conditions)}
+                WHERE {" AND ".join(conditions)}
                 ORDER BY processed_at DESC
                 LIMIT %s
-            """, params)
+            """,
+                params,
+            )
             return cursor.fetchall()
 
     # ============================================
@@ -294,32 +308,40 @@ class DatabaseManager:
     def insert_mapping(self, job_db_id: int, mapping: Dict) -> int:
         """Insert a program mapping for a job."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO program_mappings
                     (job_id, program_name, match_confidence, match_type, signals, secondary_candidates)
                 VALUES (%s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (
-                job_db_id,
-                mapping.get('program_name', ''),
-                mapping.get('match_confidence', 0.0),
-                mapping.get('match_type', 'inferred'),
-                json.dumps(mapping.get('signals', [])),
-                json.dumps(mapping.get('secondary_candidates', []))
-            ))
-            return cursor.fetchone()['id']
+            """,
+                (
+                    job_db_id,
+                    mapping.get("program_name", ""),
+                    mapping.get("match_confidence", 0.0),
+                    mapping.get("match_type", "inferred"),
+                    json.dumps(mapping.get("signals", [])),
+                    json.dumps(mapping.get("secondary_candidates", [])),
+                ),
+            )
+            return cursor.fetchone()["id"]
 
-    def get_mappings_by_program(self, program_name: str, limit: int = 100) -> List[Dict]:
+    def get_mappings_by_program(
+        self, program_name: str, limit: int = 100
+    ) -> List[Dict]:
         """Get all mappings for a specific program."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT m.*, j.title, j.company, j.location
                 FROM program_mappings m
                 JOIN jobs j ON m.job_id = j.id
                 WHERE m.program_name ILIKE %s
                 ORDER BY m.match_confidence DESC
                 LIMIT %s
-            """, (f"%{program_name}%", limit))
+            """,
+                (f"%{program_name}%", limit),
+            )
             return cursor.fetchall()
 
     # ============================================
@@ -329,24 +351,28 @@ class DatabaseManager:
     def insert_score(self, job_db_id: int, scoring: Dict) -> int:
         """Insert a BD score for a job."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO bd_scores
                     (job_id, bd_score, priority_tier, score_breakdown, recommendations)
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id
-            """, (
-                job_db_id,
-                scoring.get('BD Priority Score', 0),
-                scoring.get('Priority Tier', 'Cold'),
-                json.dumps(scoring.get('Score Breakdown', {})),
-                json.dumps(scoring.get('Recommendations', []))
-            ))
-            return cursor.fetchone()['id']
+            """,
+                (
+                    job_db_id,
+                    scoring.get("BD Priority Score", 0),
+                    scoring.get("Priority Tier", "Cold"),
+                    json.dumps(scoring.get("Score Breakdown", {})),
+                    json.dumps(scoring.get("Recommendations", [])),
+                ),
+            )
+            return cursor.fetchone()["id"]
 
     def get_hot_leads(self, min_score: int = 80, limit: int = 50) -> List[Dict]:
         """Get all hot leads above score threshold."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT j.*, s.bd_score, s.priority_tier, s.recommendations,
                        m.program_name, m.match_confidence
                 FROM jobs j
@@ -355,7 +381,9 @@ class DatabaseManager:
                 WHERE s.bd_score >= %s
                 ORDER BY s.bd_score DESC
                 LIMIT %s
-            """, (min_score, limit))
+            """,
+                (min_score, limit),
+            )
             return cursor.fetchall()
 
     def get_score_distribution(self) -> Dict:
@@ -379,23 +407,27 @@ class DatabaseManager:
     def insert_qa_review(self, job_db_id: int, qa_result: Dict) -> int:
         """Insert a QA review for a job."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO qa_reviews
                     (job_id, status, confidence, review_reasons)
                 VALUES (%s, %s, %s, %s)
                 RETURNING id
-            """, (
-                job_db_id,
-                qa_result.get('status', 'pending'),
-                qa_result.get('confidence', 0.5),
-                json.dumps(qa_result.get('review_reasons', []))
-            ))
-            return cursor.fetchone()['id']
+            """,
+                (
+                    job_db_id,
+                    qa_result.get("status", "pending"),
+                    qa_result.get("confidence", 0.5),
+                    json.dumps(qa_result.get("review_reasons", [])),
+                ),
+            )
+            return cursor.fetchone()["id"]
 
     def get_pending_reviews(self, limit: int = 50) -> List[Dict]:
         """Get all pending QA reviews."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT q.*, j.title, j.company, j.location,
                        m.program_name, s.bd_score
                 FROM qa_reviews q
@@ -405,13 +437,18 @@ class DatabaseManager:
                 WHERE q.status = 'needs_review' AND q.reviewed = FALSE
                 ORDER BY s.bd_score DESC NULLS LAST
                 LIMIT %s
-            """, (limit,))
+            """,
+                (limit,),
+            )
             return cursor.fetchall()
 
-    def update_review(self, review_id: int, feedback: str, approved: bool, reviewer: str) -> bool:
+    def update_review(
+        self, review_id: int, feedback: str, approved: bool, reviewer: str
+    ) -> bool:
         """Update a QA review with human feedback."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 UPDATE qa_reviews
                 SET reviewed = TRUE,
                     reviewed_by = %s,
@@ -419,7 +456,9 @@ class DatabaseManager:
                     feedback = %s,
                     status = %s
                 WHERE id = %s
-            """, (reviewer, feedback, 'approved' if approved else 'rejected', review_id))
+            """,
+                (reviewer, feedback, "approved" if approved else "rejected", review_id),
+            )
             return cursor.rowcount > 0
 
     # ============================================
@@ -429,45 +468,54 @@ class DatabaseManager:
     def insert_pipeline_run(self, result: Dict) -> int:
         """Record a pipeline run."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 INSERT INTO pipeline_runs
                     (batch_id, input_file, jobs_processed, hot_leads, warm_leads, cold_leads,
                      briefings_generated, qa_approved, qa_needs_review, duration_seconds,
                      success, errors, export_files, started_at)
                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id
-            """, (
-                result.get('batch_id', datetime.now().strftime('BATCH_%Y%m%d_%H%M%S')),
-                result.get('input_file', ''),
-                result.get('jobs_processed', 0),
-                result.get('hot_leads', 0),
-                result.get('warm_leads', 0),
-                result.get('cold_leads', 0),
-                result.get('briefings_generated', 0),
-                result.get('qa_approved', 0),
-                result.get('qa_needs_review', 0),
-                result.get('duration_seconds', 0),
-                result.get('success', False),
-                json.dumps(result.get('errors', [])),
-                json.dumps(result.get('export_files', {})),
-                result.get('started_at', datetime.now())
-            ))
-            return cursor.fetchone()['id']
+            """,
+                (
+                    result.get(
+                        "batch_id", datetime.now().strftime("BATCH_%Y%m%d_%H%M%S")
+                    ),
+                    result.get("input_file", ""),
+                    result.get("jobs_processed", 0),
+                    result.get("hot_leads", 0),
+                    result.get("warm_leads", 0),
+                    result.get("cold_leads", 0),
+                    result.get("briefings_generated", 0),
+                    result.get("qa_approved", 0),
+                    result.get("qa_needs_review", 0),
+                    result.get("duration_seconds", 0),
+                    result.get("success", False),
+                    json.dumps(result.get("errors", [])),
+                    json.dumps(result.get("export_files", {})),
+                    result.get("started_at", datetime.now()),
+                ),
+            )
+            return cursor.fetchone()["id"]
 
     def get_pipeline_history(self, limit: int = 20) -> List[Dict]:
         """Get recent pipeline run history."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT * FROM pipeline_runs
                 ORDER BY completed_at DESC
                 LIMIT %s
-            """, (limit,))
+            """,
+                (limit,),
+            )
             return cursor.fetchall()
 
     def get_pipeline_stats(self, days: int = 7) -> Dict:
         """Get pipeline statistics for the last N days."""
         with self.get_cursor() as cursor:
-            cursor.execute("""
+            cursor.execute(
+                """
                 SELECT
                     COUNT(*) as total_runs,
                     SUM(jobs_processed) as total_jobs,
@@ -476,7 +524,9 @@ class DatabaseManager:
                     COUNT(*) FILTER (WHERE success = TRUE) as successful_runs
                 FROM pipeline_runs
                 WHERE completed_at >= CURRENT_DATE - INTERVAL '%s days'
-            """, (days,))
+            """,
+                (days,),
+            )
             return dict(cursor.fetchone())
 
     # ============================================
@@ -492,7 +542,9 @@ class DatabaseManager:
                 FROM bd_scores
                 GROUP BY priority_tier
             """)
-            tier_dist = {row['priority_tier']: row['count'] for row in cursor.fetchall()}
+            tier_dist = {
+                row["priority_tier"]: row["count"] for row in cursor.fetchall()
+            }
 
             # Top programs
             cursor.execute("""
@@ -517,10 +569,10 @@ class DatabaseManager:
             daily_activity = cursor.fetchall()
 
             return {
-                'tier_distribution': tier_dist,
-                'top_programs': [dict(p) for p in top_programs],
-                'daily_activity': [dict(d) for d in daily_activity],
-                'generated_at': datetime.now().isoformat()
+                "tier_distribution": tier_dist,
+                "top_programs": [dict(p) for p in top_programs],
+                "daily_activity": [dict(d) for d in daily_activity],
+                "generated_at": datetime.now().isoformat(),
             }
 
 
@@ -528,45 +580,49 @@ class DatabaseManager:
 # FILE-BASED FALLBACK
 # ============================================
 
+
 class FileBasedStorage:
     """Fallback file-based storage when PostgreSQL is not available."""
 
     def __init__(self, data_dir: str = None):
         from pathlib import Path
-        self.data_dir = Path(data_dir) if data_dir else Path(__file__).parent.parent / 'data' / 'db'
+
+        self.data_dir = (
+            Path(data_dir) if data_dir else Path(__file__).parent.parent / "data" / "db"
+        )
         self.data_dir.mkdir(parents=True, exist_ok=True)
 
     def save_jobs(self, jobs: List[Dict], batch_id: str = None) -> str:
         """Save jobs to JSON file."""
-        batch_id = batch_id or datetime.now().strftime('batch_%Y%m%d_%H%M%S')
-        filepath = self.data_dir / f'jobs_{batch_id}.json'
-        with open(filepath, 'w', encoding='utf-8') as f:
+        batch_id = batch_id or datetime.now().strftime("batch_%Y%m%d_%H%M%S")
+        filepath = self.data_dir / f"jobs_{batch_id}.json"
+        with open(filepath, "w", encoding="utf-8") as f:
             json.dump(jobs, f, indent=2, default=str)
         return str(filepath)
 
     def load_jobs(self, batch_id: str = None) -> List[Dict]:
         """Load jobs from JSON file."""
         if batch_id:
-            filepath = self.data_dir / f'jobs_{batch_id}.json'
+            filepath = self.data_dir / f"jobs_{batch_id}.json"
         else:
             # Get most recent
-            files = list(self.data_dir.glob('jobs_*.json'))
+            files = list(self.data_dir.glob("jobs_*.json"))
             if not files:
                 return []
             filepath = max(files, key=lambda f: f.stat().st_mtime)
 
-        with open(filepath, 'r', encoding='utf-8') as f:
+        with open(filepath, "r", encoding="utf-8") as f:
             return json.load(f)
 
     def save_pipeline_run(self, result: Dict) -> str:
         """Save pipeline run result."""
-        runs_file = self.data_dir / 'pipeline_runs.json'
+        runs_file = self.data_dir / "pipeline_runs.json"
         runs = []
         if runs_file.exists():
-            with open(runs_file, 'r') as f:
+            with open(runs_file, "r") as f:
                 runs = json.load(f)
         runs.append(result)
-        with open(runs_file, 'w') as f:
+        with open(runs_file, "w") as f:
             json.dump(runs[-100:], f, indent=2, default=str)  # Keep last 100 runs
         return str(runs_file)
 
@@ -574,6 +630,7 @@ class FileBasedStorage:
 # ============================================
 # FACTORY FUNCTION
 # ============================================
+
 
 def get_storage(prefer_postgres: bool = True):
     """Get storage backend (PostgreSQL or file-based)."""
@@ -595,15 +652,21 @@ def get_storage(prefer_postgres: bool = True):
 # CLI INTERFACE
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD Automation Database Manager')
-    parser.add_argument('--init', action='store_true', help='Initialize database schema')
-    parser.add_argument('--stats', action='store_true', help='Show database statistics')
-    parser.add_argument('--hot-leads', action='store_true', help='Show hot leads')
-    parser.add_argument('--pending-reviews', action='store_true', help='Show pending QA reviews')
-    parser.add_argument('--dashboard', action='store_true', help='Generate dashboard data')
+    parser = argparse.ArgumentParser(description="BD Automation Database Manager")
+    parser.add_argument(
+        "--init", action="store_true", help="Initialize database schema"
+    )
+    parser.add_argument("--stats", action="store_true", help="Show database statistics")
+    parser.add_argument("--hot-leads", action="store_true", help="Show hot leads")
+    parser.add_argument(
+        "--pending-reviews", action="store_true", help="Show pending QA reviews"
+    )
+    parser.add_argument(
+        "--dashboard", action="store_true", help="Generate dashboard data"
+    )
 
     args = parser.parse_args()
 
@@ -626,13 +689,17 @@ if __name__ == '__main__':
             leads = db.get_hot_leads()
             print(f"\nHot Leads ({len(leads)}):")
             for lead in leads[:10]:
-                print(f"  - {lead['title']} | Score: {lead['bd_score']} | {lead['program_name']}")
+                print(
+                    f"  - {lead['title']} | Score: {lead['bd_score']} | {lead['program_name']}"
+                )
 
         if args.pending_reviews:
             reviews = db.get_pending_reviews()
             print(f"\nPending Reviews ({len(reviews)}):")
             for review in reviews[:10]:
-                print(f"  - {review['title']} | {review['program_name']} | Reasons: {review['review_reasons']}")
+                print(
+                    f"  - {review['title']} | {review['program_name']} | Reasons: {review['review_reasons']}"
+                )
 
         if args.dashboard:
             data = db.generate_dashboard_data()

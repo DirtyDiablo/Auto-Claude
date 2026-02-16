@@ -17,6 +17,7 @@ from src.graph.influence_scorer import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def scorer():
     return BDPageRank()
@@ -48,6 +49,7 @@ def sample_edges():
 # TIER WEIGHTS
 # =========================================
 
+
 class TestTierWeights:
     def test_tier_1_highest(self):
         assert TIER_WEIGHTS[1] == 10.0
@@ -66,6 +68,7 @@ class TestTierWeights:
 # =========================================
 # GLOBAL INFLUENCE
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestGlobalInfluence:
@@ -105,22 +108,28 @@ class TestGlobalInfluence:
 # PROGRAM INFLUENCE
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestProgramInfluence:
     async def test_program_scoped(self, scorer, sample_nodes, sample_edges):
-        scores = await scorer.compute_program_influence("DCGS", sample_nodes, sample_edges)
+        scores = await scorer.compute_program_influence(
+            "DCGS", sample_nodes, sample_edges
+        )
         assert isinstance(scores, list)
         # Should contain nodes on DCGS
         assert len(scores) > 0
 
     async def test_unknown_program(self, scorer, sample_nodes, sample_edges):
-        scores = await scorer.compute_program_influence("NONEXISTENT", sample_nodes, sample_edges)
+        scores = await scorer.compute_program_influence(
+            "NONEXISTENT", sample_nodes, sample_edges
+        )
         assert scores == []
 
 
 # =========================================
 # KEY CONNECTORS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestKeyConnectors:
@@ -142,6 +151,7 @@ class TestKeyConnectors:
 # INFLUENCE TRAJECTORY
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestInfluenceTrajectory:
     async def test_trajectory_returns_result(self, scorer, sample_nodes, sample_edges):
@@ -162,6 +172,7 @@ class TestInfluenceTrajectory:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_scorer_returns_instance(self):

@@ -16,6 +16,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class ContactMemoryBrief:
     """Brief summary of what an agent knows about a contact."""
+
     contact_id: str = ""
     contact_name: str = ""
     interaction_count: int = 0
@@ -34,13 +35,16 @@ class AgentMemoryMixin:
         self._local_memories: List[Dict[str, Any]] = []
         logger.info("agent_memory_mixin_init", agent_id=agent_id)
 
-    async def remember(self, content: str, metadata: Optional[Dict[str, Any]] = None) -> str:
+    async def remember(
+        self, content: str, metadata: Optional[Dict[str, Any]] = None
+    ) -> str:
         """Store a memory as this agent. Auto-classifies layer."""
         meta = metadata or {}
         meta["agent_id"] = self.agent_id
 
         if self._memory_store:
             from Engine8_Knowledge.memory.memory_store import MemoryContext
+
             ctx = MemoryContext(
                 user_id=self.agent_id,
                 agent_id=self.agent_id,
@@ -63,18 +67,20 @@ class AgentMemoryMixin:
         """Search memories relevant to this agent's current task."""
         if self._memory_store:
             from Engine8_Knowledge.memory.memory_store import MemoryContext
+
             ctx = MemoryContext(user_id=self.agent_id, agent_id=self.agent_id)
             recall = await self._memory_store.recall(query, ctx)
             results = []
             for layer_results in recall.results.values():
                 results.extend(layer_results)
-            return sorted(results, key=lambda x: x.get("score", 0), reverse=True)[:limit]
+            return sorted(results, key=lambda x: x.get("score", 0), reverse=True)[
+                :limit
+            ]
 
         q = query.lower()
-        return [
-            m for m in self._local_memories
-            if q in m.get("content", "").lower()
-        ][:limit]
+        return [m for m in self._local_memories if q in m.get("content", "").lower()][
+            :limit
+        ]
 
     async def recall_contact(self, contact_id: str) -> ContactMemoryBrief:
         """Everything this agent knows about a contact."""
@@ -89,7 +95,8 @@ class AgentMemoryMixin:
             )
 
         relevant = [
-            m for m in self._local_memories
+            m
+            for m in self._local_memories
             if contact_id in m.get("content", "") or m.get("contact_id") == contact_id
         ]
         return ContactMemoryBrief(
@@ -101,13 +108,16 @@ class AgentMemoryMixin:
     async def learn_from_outcome(self, action: str, outcome: str, score: float):
         """Store in procedural layer: what worked, what didn't."""
         content = f"Action: {action} | Outcome: {outcome} | Score: {score:.2f}"
-        await self.remember(content, {
-            "type": "pattern",
-            "layer": "procedural",
-            "action": action,
-            "outcome": outcome,
-            "score": score,
-        })
+        await self.remember(
+            content,
+            {
+                "type": "pattern",
+                "layer": "procedural",
+                "action": action,
+                "outcome": outcome,
+                "score": score,
+            },
+        )
         logger.info(
             "agent_learned_outcome",
             agent=self.agent_id,
@@ -117,7 +127,11 @@ class AgentMemoryMixin:
 
     async def forget(self, memory_id: str) -> bool:
         """Remove a specific memory."""
-        if self._memory_store and hasattr(self._memory_store, "mem0") and self._memory_store.mem0:
+        if (
+            self._memory_store
+            and hasattr(self._memory_store, "mem0")
+            and self._memory_store.mem0
+        ):
             return await self._memory_store.mem0.delete(memory_id)
 
         before = len(self._local_memories)

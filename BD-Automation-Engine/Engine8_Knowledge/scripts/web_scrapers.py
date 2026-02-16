@@ -31,6 +31,7 @@ class FirecrawlScraper:
         if self.api_key:
             try:
                 from firecrawl import FirecrawlApp
+
                 self.app = FirecrawlApp(api_key=self.api_key)
             except ImportError:
                 logger.warning("firecrawl-py not installed")
@@ -48,7 +49,7 @@ class FirecrawlScraper:
                 title=result.get("metadata", {}).get("title", ""),
                 content=result.get("markdown", ""),
                 metadata=result.get("metadata", {}),
-                source="firecrawl"
+                source="firecrawl",
             )
         except Exception as e:
             logger.error(f"Firecrawl error: {e}")
@@ -61,8 +62,7 @@ class FirecrawlScraper:
 
         try:
             result = self.app.crawl_url(
-                url,
-                params={"limit": max_pages, "formats": ["markdown"]}
+                url, params={"limit": max_pages, "formats": ["markdown"]}
             )
             pages = result.get("data", [])
             return [
@@ -71,7 +71,7 @@ class FirecrawlScraper:
                     title=p.get("metadata", {}).get("title", ""),
                     content=p.get("markdown", ""),
                     metadata=p.get("metadata", {}),
-                    source="firecrawl"
+                    source="firecrawl",
                 )
                 for p in pages
             ]
@@ -94,7 +94,7 @@ class Crawl4AIScraper:
                     title=result.metadata.get("title", "") if result.metadata else "",
                     content=result.markdown or "",
                     metadata=result.metadata or {},
-                    source="crawl4ai"
+                    source="crawl4ai",
                 )
         except ImportError:
             logger.warning("crawl4ai not installed")
@@ -113,13 +113,17 @@ class Crawl4AIScraper:
                 for url in urls:
                     try:
                         result = await crawler.arun(url=url)
-                        results.append(ScrapedContent(
-                            url=url,
-                            title=result.metadata.get("title", "") if result.metadata else "",
-                            content=result.markdown or "",
-                            metadata=result.metadata or {},
-                            source="crawl4ai"
-                        ))
+                        results.append(
+                            ScrapedContent(
+                                url=url,
+                                title=result.metadata.get("title", "")
+                                if result.metadata
+                                else "",
+                                content=result.markdown or "",
+                                metadata=result.metadata or {},
+                                source="crawl4ai",
+                            )
+                        )
                     except Exception as e:
                         logger.error(f"Error scraping {url}: {e}")
         except ImportError:
@@ -137,7 +141,13 @@ class UnifiedWebScraper:
         self.firecrawl = FirecrawlScraper()
         self.crawl4ai = Crawl4AIScraper()
 
-        self.js_domains = ["linkedin.com", "sam.gov", "usajobs.gov", "twitter.com", "x.com"]
+        self.js_domains = [
+            "linkedin.com",
+            "sam.gov",
+            "usajobs.gov",
+            "twitter.com",
+            "x.com",
+        ]
 
     def _needs_js(self, url: str) -> bool:
         return any(d in url for d in self.js_domains)
@@ -159,7 +169,9 @@ class UnifiedWebScraper:
                 results.append(content)
         return results
 
-    async def scrape_federal_sites(self, sites: List[str] = None) -> List[ScrapedContent]:
+    async def scrape_federal_sites(
+        self, sites: List[str] = None
+    ) -> List[ScrapedContent]:
         """Scrape common federal BD sites."""
         sites = sites or [
             "https://sam.gov/content/opportunities",
@@ -169,6 +181,7 @@ class UnifiedWebScraper:
 
 
 _scraper_instance = None
+
 
 def get_web_scraper() -> UnifiedWebScraper:
     global _scraper_instance

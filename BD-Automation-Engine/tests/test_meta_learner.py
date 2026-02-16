@@ -22,6 +22,7 @@ def engine():
 # LEARN ALL
 # =========================================
 
+
 def test_learn_returns_insights(engine):
     insights = engine.learn()
     assert len(insights) >= 5
@@ -45,6 +46,7 @@ def test_learn_stores_insights(engine):
 # =========================================
 # OUTREACH
 # =========================================
+
 
 def test_learn_outreach(engine):
     insights = engine.learn_outreach()
@@ -72,6 +74,7 @@ def test_outreach_best_time(engine):
 # PROGRAMS
 # =========================================
 
+
 def test_learn_programs(engine):
     insights = engine.learn_programs()
     assert len(insights) >= 3  # DCGS-A, DCGS-N, GBSD
@@ -93,6 +96,7 @@ def test_program_cycle_phase(engine):
 # =========================================
 # CONTACTS
 # =========================================
+
 
 def test_learn_contacts(engine):
     insights = engine.learn_contacts()
@@ -122,6 +126,7 @@ def test_career_progression(engine):
 # DATA QUALITY
 # =========================================
 
+
 def test_learn_data_quality(engine):
     insights = engine.learn_data_quality()
     assert len(insights) >= 2  # decay + source quality
@@ -143,6 +148,7 @@ def test_source_quality_insight(engine):
 # COMPETITIVE
 # =========================================
 
+
 def test_learn_competitive(engine):
     insights = engine.learn_competitive()
     assert len(insights) >= 1
@@ -157,6 +163,7 @@ def test_competitive_exit_detected(engine):
 # =========================================
 # TRANSFER LEARNING
 # =========================================
+
 
 def test_transfer_learning(engine):
     engine.learn()
@@ -185,6 +192,7 @@ def test_transfer_empty_source(engine):
 # =========================================
 # QUERIES
 # =========================================
+
 
 def test_get_insights_by_domain(engine):
     engine.learn()
@@ -221,6 +229,7 @@ def test_competitive_trends(engine):
 # STATS
 # =========================================
 
+
 def test_stats(engine):
     engine.learn()
     stats = engine.get_stats()
@@ -233,6 +242,7 @@ def test_stats(engine):
 # INSIGHT ID & FIELDS
 # =========================================
 
+
 def test_insight_auto_id():
     i = MetaInsight(domain="test", title="Test Insight")
     assert i.id.startswith("insight_")
@@ -243,6 +253,7 @@ def test_insight_auto_id():
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     e1 = get_meta_learner()

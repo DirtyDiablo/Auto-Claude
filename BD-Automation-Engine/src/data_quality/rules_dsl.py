@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class RuleParseError:
     """Error encountered while parsing a rule."""
+
     rule_name: str
     field: str
     message: str
@@ -29,6 +31,7 @@ class RuleParseError:
 @dataclass
 class ValidationResult:
     """Result of rule validation."""
+
     valid: bool
     errors: List[RuleParseError] = field(default_factory=list)
     warnings: List[str] = field(default_factory=list)
@@ -38,6 +41,7 @@ class ValidationResult:
 @dataclass
 class ReloadResult:
     """Result of hot-reload."""
+
     success: bool
     added: List[str] = field(default_factory=list)
     removed: List[str] = field(default_factory=list)
@@ -60,6 +64,7 @@ VALID_SEVERITIES = {"critical", "high", "medium", "low"}
 # QUALITY RULES DSL
 # =========================================
 
+
 class QualityRulesDSL:
     """Parse, validate, and manage quality rules from YAML-style dictionaries."""
 
@@ -79,7 +84,9 @@ class QualityRulesDSL:
     # Loading
     # -----------------------------------------
 
-    def load_rules_from_dict(self, rules_dict: Dict[str, List[Dict]]) -> List[DataQualityRule]:
+    def load_rules_from_dict(
+        self, rules_dict: Dict[str, List[Dict]]
+    ) -> List[DataQualityRule]:
         """Parse rules from a dictionary (YAML-parsed format).
 
         Expected format:
@@ -105,11 +112,13 @@ class QualityRulesDSL:
                     self._rules[rule.name] = rule
                     parsed_rules.append(rule)
 
-        self._load_history.append({
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-            "rules_loaded": len(parsed_rules),
-            "source": "dict",
-        })
+        self._load_history.append(
+            {
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "rules_loaded": len(parsed_rules),
+                "source": "dict",
+            }
+        )
 
         return parsed_rules
 
@@ -117,6 +126,7 @@ class QualityRulesDSL:
         """Parse rules from YAML text."""
         try:
             import yaml
+
             rules_dict = yaml.safe_load(yaml_text)
             if not isinstance(rules_dict, dict):
                 return []
@@ -194,7 +204,9 @@ class QualityRulesDSL:
     # Validation
     # -----------------------------------------
 
-    def validate_rules(self, rules: Optional[List[DataQualityRule]] = None) -> ValidationResult:
+    def validate_rules(
+        self, rules: Optional[List[DataQualityRule]] = None
+    ) -> ValidationResult:
         """Check rules for syntax errors, conflicts, and invalid values."""
         if rules is None:
             rules = list(self._rules.values())
@@ -206,42 +218,58 @@ class QualityRulesDSL:
         for rule in rules:
             # Check required fields
             if not rule.name:
-                errors.append(RuleParseError(
-                    rule_name="<unnamed>", field="name", message="Rule name is required",
-                ))
+                errors.append(
+                    RuleParseError(
+                        rule_name="<unnamed>",
+                        field="name",
+                        message="Rule name is required",
+                    )
+                )
                 continue
 
             # Check for duplicates
             if rule.name in seen_names:
-                errors.append(RuleParseError(
-                    rule_name=rule.name, field="name",
-                    message=f"Duplicate rule name: {rule.name}",
-                ))
+                errors.append(
+                    RuleParseError(
+                        rule_name=rule.name,
+                        field="name",
+                        message=f"Duplicate rule name: {rule.name}",
+                    )
+                )
             seen_names.add(rule.name)
 
             # Validate dimension
             if rule.dimension not in VALID_DIMENSIONS:
-                errors.append(RuleParseError(
-                    rule_name=rule.name, field="dimension",
-                    message=f"Invalid dimension '{rule.dimension}'. "
-                            f"Must be one of: {VALID_DIMENSIONS}",
-                ))
+                errors.append(
+                    RuleParseError(
+                        rule_name=rule.name,
+                        field="dimension",
+                        message=f"Invalid dimension '{rule.dimension}'. "
+                        f"Must be one of: {VALID_DIMENSIONS}",
+                    )
+                )
 
             # Validate domain
             if rule.domain not in VALID_DOMAINS:
-                errors.append(RuleParseError(
-                    rule_name=rule.name, field="domain",
-                    message=f"Invalid domain '{rule.domain}'. "
-                            f"Must be one of: {VALID_DOMAINS}",
-                ))
+                errors.append(
+                    RuleParseError(
+                        rule_name=rule.name,
+                        field="domain",
+                        message=f"Invalid domain '{rule.domain}'. "
+                        f"Must be one of: {VALID_DOMAINS}",
+                    )
+                )
 
             # Validate severity
             if rule.severity not in VALID_SEVERITIES:
-                errors.append(RuleParseError(
-                    rule_name=rule.name, field="severity",
-                    message=f"Invalid severity '{rule.severity}'. "
-                            f"Must be one of: {VALID_SEVERITIES}",
-                ))
+                errors.append(
+                    RuleParseError(
+                        rule_name=rule.name,
+                        field="severity",
+                        message=f"Invalid severity '{rule.severity}'. "
+                        f"Must be one of: {VALID_SEVERITIES}",
+                    )
+                )
 
             # Validate impact_score range
             if not (0.0 <= rule.impact_score <= 1.0):
@@ -287,10 +315,12 @@ class QualityRulesDSL:
         for name in common:
             old_rule = self._rules[name]
             new_rule = new_rules[name]
-            if (old_rule.dimension != new_rule.dimension or
-                    old_rule.severity != new_rule.severity or
-                    old_rule.impact_score != new_rule.impact_score or
-                    old_rule.enabled != new_rule.enabled):
+            if (
+                old_rule.dimension != new_rule.dimension
+                or old_rule.severity != new_rule.severity
+                or old_rule.impact_score != new_rule.impact_score
+                or old_rule.enabled != new_rule.enabled
+            ):
                 modified.append(name)
             else:
                 unchanged += 1
@@ -307,13 +337,15 @@ class QualityRulesDSL:
         # Apply
         self._rules = new_rules
 
-        self._load_history.append({
-            "timestamp": now,
-            "action": "hot_reload",
-            "added": len(added),
-            "removed": len(removed),
-            "modified": len(modified),
-        })
+        self._load_history.append(
+            {
+                "timestamp": now,
+                "action": "hot_reload",
+                "added": len(added),
+                "removed": len(removed),
+                "modified": len(modified),
+            }
+        )
 
         return ReloadResult(
             success=True,
@@ -334,14 +366,16 @@ class QualityRulesDSL:
         for rule in self._rules.values():
             if rule.domain not in result:
                 result[rule.domain] = []
-            result[rule.domain].append({
-                "rule": rule.name,
-                "dimension": rule.dimension,
-                "severity": rule.severity,
-                "description": rule.description,
-                "impact_score": rule.impact_score,
-                "enabled": rule.enabled,
-            })
+            result[rule.domain].append(
+                {
+                    "rule": rule.name,
+                    "dimension": rule.dimension,
+                    "severity": rule.severity,
+                    "description": rule.description,
+                    "impact_score": rule.impact_score,
+                    "enabled": rule.enabled,
+                }
+            )
         return result
 
     def get_load_history(self) -> List[Dict[str, Any]]:

@@ -104,12 +104,14 @@ SAMPLE_PROGRAMS = [
 # Phase 4 Agent Tests
 # ============================================
 
+
 class TestContactClassifierAgent:
     """Test ContactClassifierAgent."""
 
     @pytest.fixture
     def agent(self):
         from Engine8_Knowledge.agents import ContactClassifierAgent
+
         return ContactClassifierAgent()
 
     def test_classify_tier_executive(self, agent):
@@ -199,6 +201,7 @@ class TestScraperMonitorAgent:
     @pytest.fixture
     def agent(self):
         from Engine8_Knowledge.agents import ScraperMonitorAgent
+
         return ScraperMonitorAgent()
 
     def test_detect_competitors(self, agent):
@@ -206,7 +209,7 @@ class TestScraperMonitorAgent:
         job = {
             "title": "Systems Engineer",
             "company": "GDIT",
-            "description": "Work with Leidos team on ISR systems"
+            "description": "Work with Leidos team on ISR systems",
         }
         competitors = agent.detect_competitors(job)
         assert "leidos" in competitors
@@ -217,7 +220,7 @@ class TestScraperMonitorAgent:
             "title": "DCGS Network Engineer",
             "detected_clearance": "TS/SCI",
             "bd_score": 85,
-            "description": "Support ISR fusion operations"
+            "description": "Support ISR fusion operations",
         }
         is_high, signals = agent.is_high_value(job)
         assert is_high is True
@@ -229,7 +232,7 @@ class TestScraperMonitorAgent:
             "title": "Administrative Assistant",
             "detected_clearance": "Public Trust",
             "bd_score": 30,
-            "description": "Office support"
+            "description": "Office support",
         }
         is_high, signals = agent.is_high_value(job)
         assert is_high is False
@@ -237,9 +240,7 @@ class TestScraperMonitorAgent:
     def test_analyze_scrape_batch(self, agent):
         """Test scrape batch analysis."""
         analysis = agent.analyze_scrape_batch(
-            jobs=SAMPLE_JOBS,
-            scraper_name="test_scraper",
-            previous_job_ids={"j1"}
+            jobs=SAMPLE_JOBS, scraper_name="test_scraper", previous_job_ids={"j1"}
         )
         assert analysis.total_jobs == 3
         assert analysis.new_jobs == 2
@@ -250,8 +251,7 @@ class TestScraperMonitorAgent:
     async def test_process(self, agent):
         """Test agent process method."""
         result = await agent.process(
-            "Analyze scrape",
-            context={"jobs": SAMPLE_JOBS, "scraper_name": "test"}
+            "Analyze scrape", context={"jobs": SAMPLE_JOBS, "scraper_name": "test"}
         )
         assert result.success is True
         assert "analysis" in result.metadata
@@ -263,6 +263,7 @@ class TestQualityAssuranceAgent:
     @pytest.fixture
     def agent(self):
         from Engine8_Knowledge.agents import QualityAssuranceAgent
+
         return QualityAssuranceAgent()
 
     def test_check_completeness(self, agent):
@@ -303,7 +304,7 @@ class TestQualityAssuranceAgent:
         """Test agent process method."""
         result = await agent.process(
             "Check quality",
-            context={"records": SAMPLE_CONTACTS, "collection_type": "contacts"}
+            context={"records": SAMPLE_CONTACTS, "collection_type": "contacts"},
         )
         assert result.success is True
         assert "report" in result.metadata
@@ -315,6 +316,7 @@ class TestAnalyticsAgent:
     @pytest.fixture
     def agent(self):
         from Engine8_Knowledge.agents import AnalyticsAgent
+
         return AnalyticsAgent()
 
     def test_analyze_hiring_trends(self, agent):
@@ -344,7 +346,7 @@ class TestAnalyticsAgent:
             jobs=SAMPLE_JOBS,
             programs=SAMPLE_PROGRAMS,
             contacts=SAMPLE_CONTACTS,
-            period="weekly"
+            period="weekly",
         )
         assert report.period == "weekly"
         assert report.key_metrics["total_jobs"] == 3
@@ -358,8 +360,8 @@ class TestAnalyticsAgent:
             context={
                 "jobs": SAMPLE_JOBS,
                 "programs": SAMPLE_PROGRAMS,
-                "period": "weekly"
-            }
+                "period": "weekly",
+            },
         )
         assert result.success is True
         assert "report" in result.metadata
@@ -369,12 +371,14 @@ class TestAnalyticsAgent:
 # Orchestrator Tests
 # ============================================
 
+
 class TestBDCrewOrchestrator:
     """Test BDCrewOrchestrator."""
 
     @pytest.fixture
     def orchestrator(self):
         from Engine8_Knowledge.agents import get_orchestrator
+
         return get_orchestrator()
 
     @pytest.mark.asyncio
@@ -389,8 +393,7 @@ class TestBDCrewOrchestrator:
     async def test_analyze_scrape_workflow(self, orchestrator):
         """Test scrape analysis workflow."""
         result = await orchestrator.analyze_scrape_workflow(
-            jobs=SAMPLE_JOBS,
-            scraper_name="test_scraper"
+            jobs=SAMPLE_JOBS, scraper_name="test_scraper"
         )
         assert result.success is True
         assert result.workflow == "analyze_scrape"
@@ -400,8 +403,7 @@ class TestBDCrewOrchestrator:
     async def test_quality_check_workflow(self, orchestrator):
         """Test quality check workflow."""
         result = await orchestrator.quality_check_workflow(
-            records=SAMPLE_CONTACTS,
-            collection_type="contacts"
+            records=SAMPLE_CONTACTS, collection_type="contacts"
         )
         assert result.success is True
         assert result.workflow == "quality_check"
@@ -411,9 +413,7 @@ class TestBDCrewOrchestrator:
     async def test_generate_analytics_workflow(self, orchestrator):
         """Test analytics workflow."""
         result = await orchestrator.generate_analytics_workflow(
-            jobs=SAMPLE_JOBS,
-            contacts=SAMPLE_CONTACTS,
-            period="weekly"
+            jobs=SAMPLE_JOBS, contacts=SAMPLE_CONTACTS, period="weekly"
         )
         assert result.success is True
         assert result.workflow == "analytics"
@@ -422,9 +422,7 @@ class TestBDCrewOrchestrator:
     @pytest.mark.asyncio
     async def test_quick_intel_workflow(self, orchestrator):
         """Test quick intel workflow."""
-        result = await orchestrator.quick_intel_workflow(
-            "Tell me about DCGS programs"
-        )
+        result = await orchestrator.quick_intel_workflow("Tell me about DCGS programs")
         assert result.success is True
         assert result.workflow == "quick_intel"
 
@@ -432,6 +430,7 @@ class TestBDCrewOrchestrator:
 # ============================================
 # Data Model Tests
 # ============================================
+
 
 class TestUnifiedModels:
     """Test Pydantic v2 unified data models."""
@@ -491,6 +490,7 @@ class TestUnifiedModels:
 # Settings Tests
 # ============================================
 
+
 class TestSettings:
     """Test centralized settings."""
 
@@ -516,6 +516,7 @@ class TestSettings:
 # API Endpoint Tests
 # ============================================
 
+
 class TestAPIEndpoints:
     """Test unified API endpoints."""
 
@@ -523,6 +524,7 @@ class TestAPIEndpoints:
     def client(self):
         from fastapi.testclient import TestClient
         from Engine8_Knowledge.api import app
+
         return TestClient(app)
 
     def test_health_endpoint(self, client):
@@ -535,11 +537,7 @@ class TestAPIEndpoints:
         """Test search endpoint."""
         response = client.post(
             "/api/v1/search",
-            json={
-                "query": "DCGS engineer",
-                "collections": ["contacts"],
-                "limit": 5
-            }
+            json={"query": "DCGS engineer", "collections": ["contacts"], "limit": 5},
         )
         # May return 200 or 503 if Qdrant not running
         assert response.status_code in [200, 503]

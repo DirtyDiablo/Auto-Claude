@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class ConversationTurn:
     role: str  # "user" or "assistant"
@@ -55,14 +56,29 @@ class ConversationSession:
 # =========================================
 
 _PRONOUNS = {
-    "they", "them", "their", "those", "these",
-    "it", "its", "that", "this", "the same",
+    "they",
+    "them",
+    "their",
+    "those",
+    "these",
+    "it",
+    "its",
+    "that",
+    "this",
+    "the same",
 }
 
 _REFERENCE_PATTERNS = [
-    "those contacts", "these jobs", "that program", "that contract",
-    "the same company", "the same location", "those results",
-    "them", "they", "it",
+    "those contacts",
+    "these jobs",
+    "that program",
+    "that contract",
+    "the same company",
+    "the same location",
+    "those results",
+    "them",
+    "they",
+    "it",
 ]
 
 
@@ -81,7 +97,9 @@ class ConversationManager:
         self._sessions: Dict[str, ConversationSession] = {}
 
     async def ask(
-        self, user_id: str, query: str,
+        self,
+        user_id: str,
+        query: str,
     ) -> ConversationResponse:
         """Handle a question with full conversation context."""
         now = datetime.now(timezone.utc).isoformat()
@@ -155,7 +173,9 @@ class ConversationManager:
         )
 
     async def clarify(
-        self, user_id: str, clarification: str,
+        self,
+        user_id: str,
+        clarification: str,
     ) -> ConversationResponse:
         """Handle disambiguation responses."""
         session = self._get_or_create_session(user_id)
@@ -167,13 +187,16 @@ class ConversationManager:
             pending.clarification_needed = None
 
             # Re-route with clarification
-            return await self.ask(user_id, f"{pending.original_query} ({clarification})")
+            return await self.ask(
+                user_id, f"{pending.original_query} ({clarification})"
+            )
 
         # No pending plan — treat as a new question
         return await self.ask(user_id, clarification)
 
     async def get_suggestions(
-        self, context: Dict[str, Any],
+        self,
+        context: Dict[str, Any],
     ) -> List[str]:
         """Context-aware follow-up suggestions."""
         intent = context.get("last_intent", "")
@@ -230,21 +253,26 @@ class ConversationManager:
             ],
         }
 
-        return suggestions_map.get(intent, [
-            "Show me the pipeline",
-            "What's trending?",
-            "Find contacts at Leidos",
-        ])
+        return suggestions_map.get(
+            intent,
+            [
+                "Show me the pipeline",
+                "What's trending?",
+                "Find contacts at Leidos",
+            ],
+        )
 
     async def get_conversation_history(
-        self, user_id: str, limit: int = 20,
+        self,
+        user_id: str,
+        limit: int = 20,
     ) -> List[Dict[str, Any]]:
         """Get conversation history for a user."""
         session = self._sessions.get(user_id)
         if not session:
             return []
 
-        turns = session.turns[-limit * 2:]  # user+assistant pairs
+        turns = session.turns[-limit * 2 :]  # user+assistant pairs
         return [
             {
                 "role": t.role,
@@ -301,16 +329,24 @@ class ConversationManager:
 
         if "that program" in query_lower or "this program" in query_lower:
             if last_entities.get("programs"):
-                resolved = resolved.replace("that program", last_entities["programs"][0])
-                resolved = resolved.replace("this program", last_entities["programs"][0])
+                resolved = resolved.replace(
+                    "that program", last_entities["programs"][0]
+                )
+                resolved = resolved.replace(
+                    "this program", last_entities["programs"][0]
+                )
 
         if "the same company" in query_lower:
             if last_entities.get("companies"):
-                resolved = resolved.replace("the same company", last_entities["companies"][0])
+                resolved = resolved.replace(
+                    "the same company", last_entities["companies"][0]
+                )
 
         if "the same location" in query_lower:
             if last_entities.get("locations"):
-                resolved = resolved.replace("the same location", last_entities["locations"][0])
+                resolved = resolved.replace(
+                    "the same location", last_entities["locations"][0]
+                )
 
         if resolved != query:
             logger.debug(f"Resolved references: '{query}' → '{resolved}'")
@@ -323,8 +359,7 @@ class ConversationManager:
 
         # Add recent intents for pattern detection
         recent_intents = [
-            t.intent for t in session.turns[-6:]
-            if t.role == "user" and t.intent
+            t.intent for t in session.turns[-6:] if t.role == "user" and t.intent
         ]
         context["recent_intents"] = recent_intents
 

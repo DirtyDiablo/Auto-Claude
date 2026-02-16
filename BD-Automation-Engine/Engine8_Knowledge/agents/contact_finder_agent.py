@@ -11,10 +11,12 @@ class ContactFinderAgent(BDAgent):
         super().__init__(
             name="Contact Finder Agent",
             description="Identify key personnel for BD opportunities. "
-                       "Expert in org structures, clearance levels, decision makers."
+            "Expert in org structures, clearance levels, decision makers.",
         )
 
-    async def process(self, query: str, context: Optional[Dict] = None) -> AgentResponse:
+    async def process(
+        self, query: str, context: Optional[Dict] = None
+    ) -> AgentResponse:
         ctx = await self._get_context(query, ["contacts", "companies", "programs"])
 
         prompt = f"""Contact finder request:
@@ -31,10 +33,12 @@ Provide:
         response_text = await self._call_claude(prompt, ctx)
 
         response = AgentResponse(
-            success=True, content=response_text,
+            success=True,
+            content=response_text,
             sources=[{"context": ctx[:500]}],
-            confidence=0.80, agent_name=self.name,
-            metadata={"query": query}
+            confidence=0.80,
+            agent_name=self.name,
+            metadata={"query": query},
         )
         self._store_interaction(query, response)
         return response
@@ -42,7 +46,9 @@ Provide:
     async def find_decision_makers(self, program: str) -> AgentResponse:
         return await self.process(f"Decision makers for {program}")
 
-    async def find_by_clearance(self, clearance: str, location: str = None) -> AgentResponse:
+    async def find_by_clearance(
+        self, clearance: str, location: str = None
+    ) -> AgentResponse:
         q = f"Contacts with {clearance} clearance"
         if location:
             q += f" in {location}"

@@ -21,6 +21,7 @@ from src.proposals.past_performance import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def builder():
     return PastPerformanceBuilder()
@@ -42,7 +43,9 @@ def sample_entries():
             labor_categories=["Intelligence Analyst", "Systems Engineer"],
             clearance_level="TS/SCI",
             placements=25,
-            cpars=CPARSMetrics(quality="Very Good", schedule="Exceptional", overall="Very Good"),
+            cpars=CPARSMetrics(
+                quality="Very Good", schedule="Exceptional", overall="Very Good"
+            ),
         ),
         PastPerformanceEntry(
             id="pp-2",
@@ -77,7 +80,11 @@ def sample_entries():
 def dcgs_requirements():
     return {
         "naics_codes": ["541512"],
-        "labor_categories": ["Intelligence Analyst", "Systems Engineer", "Data Scientist"],
+        "labor_categories": [
+            "Intelligence Analyst",
+            "Systems Engineer",
+            "Data Scientist",
+        ],
         "clearance": "TS/SCI",
         "agency": "USAF",
         "contract_value": 6_000_000,
@@ -87,6 +94,7 @@ def dcgs_requirements():
 # =========================================
 # RELEVANCE WEIGHTS
 # =========================================
+
 
 class TestRelevanceWeights:
     def test_weights_sum_to_one(self):
@@ -100,6 +108,7 @@ class TestRelevanceWeights:
 # =========================================
 # RELEVANCE SCORING
 # =========================================
+
 
 class TestRelevanceScoring:
     def test_compute_relevance(self, sample_entries, dcgs_requirements):
@@ -139,6 +148,7 @@ class TestRelevanceScoring:
 # NARRATIVE GENERATION
 # =========================================
 
+
 class TestNarrativeGeneration:
     def test_generates_narrative(self, sample_entries):
         narrative = generate_narrative(sample_entries[0])
@@ -162,6 +172,7 @@ class TestNarrativeGeneration:
 # MATRIX BUILDING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestMatrixBuilding:
     async def test_build_empty_matrix(self, builder):
@@ -175,18 +186,25 @@ class TestMatrixBuilding:
         assert matrix.total_entries > 0
         assert matrix.avg_relevance > 0
 
-    async def test_entries_sorted_by_relevance(self, builder, sample_entries, dcgs_requirements):
+    async def test_entries_sorted_by_relevance(
+        self, builder, sample_entries, dcgs_requirements
+    ):
         builder.set_entries(sample_entries)
         matrix = await builder.build_matrix("DCGS-2025", dcgs_requirements)
         if len(matrix.entries) >= 2:
-            assert matrix.entries[0].relevance.overall >= matrix.entries[1].relevance.overall
+            assert (
+                matrix.entries[0].relevance.overall
+                >= matrix.entries[1].relevance.overall
+            )
 
     async def test_top_n_respected(self, builder, sample_entries, dcgs_requirements):
         builder.set_entries(sample_entries)
         matrix = await builder.build_matrix("DCGS-2025", dcgs_requirements, top_n=2)
         assert matrix.total_entries <= 2
 
-    async def test_narratives_generated(self, builder, sample_entries, dcgs_requirements):
+    async def test_narratives_generated(
+        self, builder, sample_entries, dcgs_requirements
+    ):
         builder.set_entries(sample_entries)
         matrix = await builder.build_matrix("DCGS-2025", dcgs_requirements)
         for entry in matrix.entries:
@@ -196,6 +214,7 @@ class TestMatrixBuilding:
 # =========================================
 # EXPORT
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestExport:
@@ -212,6 +231,7 @@ class TestExport:
 # CPARS
 # =========================================
 
+
 class TestCPARS:
     def test_ratings_ordered(self):
         assert CPARS_RATINGS[0] == "Exceptional"
@@ -225,6 +245,7 @@ class TestCPARS:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_builder_returns_instance(self):

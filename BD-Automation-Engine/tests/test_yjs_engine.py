@@ -22,6 +22,7 @@ def yjs():
 # ROOM CREATION
 # =========================================
 
+
 def test_create_call_sheet_room(yjs):
     room = yjs.create_room(RoomType.CALL_SHEET, "DCGS-A Call Prep")
     assert isinstance(room, CollaborationRoom)
@@ -51,7 +52,8 @@ def test_create_briefing_room(yjs):
 
 def test_create_with_initial_state(yjs):
     room = yjs.create_room(
-        RoomType.CALL_SHEET, "Custom",
+        RoomType.CALL_SHEET,
+        "Custom",
         initial_state={"custom_field": "value"},
     )
     assert room.state["custom_field"] == "value"
@@ -97,6 +99,7 @@ def test_delete_room(yjs):
 # =========================================
 # PRESENCE
 # =========================================
+
 
 def test_join_room(yjs):
     room = yjs.create_room(RoomType.CALL_SHEET, "Test")
@@ -144,6 +147,7 @@ def test_get_room_presence(yjs):
 # CRDT OPERATIONS
 # =========================================
 
+
 def test_insert_operation(yjs):
     room = yjs.create_room(RoomType.CALL_SHEET, "Test")
     op = yjs.apply_operation(room.room_id, "insert", "notes", "Call Craig at 3pm", "u1")
@@ -162,8 +166,7 @@ def test_update_operation(yjs):
 
 
 def test_delete_operation(yjs):
-    room = yjs.create_room(RoomType.CALL_SHEET, "Test",
-                            initial_state={"custom": "val"})
+    room = yjs.create_room(RoomType.CALL_SHEET, "Test", initial_state={"custom": "val"})
     yjs.apply_operation(room.room_id, "delete", "custom", user_id="u1")
     state = yjs.get_state(room.room_id)
     assert "custom" not in state
@@ -202,6 +205,7 @@ def test_operation_on_nonexistent_room(yjs):
 # TO DICT
 # =========================================
 
+
 def test_room_to_dict(yjs):
     room = yjs.create_room(RoomType.WAR_ROOM, "Test War Room")
     d = room.to_dict()
@@ -222,6 +226,7 @@ def test_room_to_full_dict(yjs):
 # STATS
 # =========================================
 
+
 def test_stats(yjs):
     yjs.create_room(RoomType.CALL_SHEET, "A")
     yjs.create_room(RoomType.PIPELINE, "B")
@@ -234,8 +239,10 @@ def test_stats(yjs):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.collaboration.yjs_engine as mod
+
     mod._instance = None
     s1 = get_yjs_engine()
     s2 = get_yjs_engine()

@@ -29,16 +29,32 @@ def _make_mock_bus():
     bus.redis = AsyncMock()
     bus.redis.ping = AsyncMock()
     bus.get_stream_length = AsyncMock(return_value=100)
-    bus.get_stream_stats = AsyncMock(return_value={
-        "jobs:scraped": StreamStats(name="jobs:scraped", length=42, consumer_groups=1),
-    })
-    bus.replay = AsyncMock(return_value=[
-        Event(event_type="test.event", source="test", payload={"key": "value"}),
-    ])
-    bus.get_event_chain = AsyncMock(return_value=[
-        Event(event_type="test.1", source="test", metadata={"correlation_id": "corr-1"}),
-        Event(event_type="test.2", source="test", metadata={"correlation_id": "corr-1"}),
-    ])
+    bus.get_stream_stats = AsyncMock(
+        return_value={
+            "jobs:scraped": StreamStats(
+                name="jobs:scraped", length=42, consumer_groups=1
+            ),
+        }
+    )
+    bus.replay = AsyncMock(
+        return_value=[
+            Event(event_type="test.event", source="test", payload={"key": "value"}),
+        ]
+    )
+    bus.get_event_chain = AsyncMock(
+        return_value=[
+            Event(
+                event_type="test.1",
+                source="test",
+                metadata={"correlation_id": "corr-1"},
+            ),
+            Event(
+                event_type="test.2",
+                source="test",
+                metadata={"correlation_id": "corr-1"},
+            ),
+        ]
+    )
     return bus
 
 
@@ -73,7 +89,7 @@ class TestRouterSetup:
 
     def test_router_has_expected_rest_routes(self):
         """Router should register 14 REST endpoints."""
-        paths = [route.path for route in router.routes if hasattr(route, 'methods')]
+        paths = [route.path for route in router.routes if hasattr(route, "methods")]
         expected = [
             "/streaming/stats",
             "/streaming/streams",
@@ -96,8 +112,7 @@ class TestRouterSetup:
     def test_router_has_websocket_routes(self):
         """Router should register 4 WebSocket endpoints."""
         ws_paths = [
-            route.path for route in router.routes
-            if not hasattr(route, 'methods')
+            route.path for route in router.routes if not hasattr(route, "methods")
         ]
         expected_ws = [
             "/streaming/ws/dashboard",

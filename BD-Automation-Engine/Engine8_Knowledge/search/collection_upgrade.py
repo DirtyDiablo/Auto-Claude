@@ -24,28 +24,43 @@ logger = logging.getLogger(__name__)
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
-        VectorParams, SparseVectorParams, Distance, Modifier,
-        PointStruct, SparseVector,
+        VectorParams,
+        SparseVectorParams,
+        Distance,
+        Modifier,
+        PointStruct,
+        SparseVector,
     )
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
 
 try:
     from fastembed import SparseTextEmbedding
+
     FASTEMBED_AVAILABLE = True
 except ImportError:
     FASTEMBED_AVAILABLE = False
 
 QDRANT_URL = "http://localhost:6333"
-PROGRESS_FILE = Path(__file__).parent.parent / "data" / "search" / "upgrade_progress.json"
+PROGRESS_FILE = (
+    Path(__file__).parent.parent / "data" / "search" / "upgrade_progress.json"
+)
 BATCH_SIZE = 500
-KNOWN_COLLECTIONS = ["bd_contacts", "bd_documents", "bd_activities", "bd_programs", "bd_jobs"]
+KNOWN_COLLECTIONS = [
+    "bd_contacts",
+    "bd_documents",
+    "bd_activities",
+    "bd_programs",
+    "bd_jobs",
+]
 
 
 # ---------------------------------------------------------------------------
 # Upgrade functions
 # ---------------------------------------------------------------------------
+
 
 def upgrade_collection(
     collection_name: str,
@@ -94,7 +109,9 @@ def upgrade_collection(
         result["status"] = "dry_run"
         result["vectors_count"] = vectors_count
         result["estimated_batches"] = (vectors_count + BATCH_SIZE - 1) // BATCH_SIZE
-        result["note"] = "Would create new collection with BM25 sparse config, migrate vectors, and rename"
+        result["note"] = (
+            "Would create new collection with BM25 sparse config, migrate vectors, and rename"
+        )
         return result
 
     temp_name = f"{collection_name}_hybrid_temp"
@@ -102,7 +119,10 @@ def upgrade_collection(
 
     # Load BM25 model
     if not FASTEMBED_AVAILABLE:
-        return {"status": "error", "error": "fastembed not installed — pip install fastembed"}
+        return {
+            "status": "error",
+            "error": "fastembed not installed — pip install fastembed",
+        }
     sparse_model = SparseTextEmbedding("Qdrant/bm25")
 
     try:
@@ -158,27 +178,39 @@ def upgrade_collection(
                 else:
                     sparse_vec = SparseVector(indices=[], values=[])
 
-                batch_points.append(PointStruct(
-                    id=pt.id,
-                    vector={
-                        "dense": dense_vec if isinstance(dense_vec, list) else list(dense_vec),
-                        "bm25": sparse_vec,
-                    },
-                    payload=payload,
-                ))
+                batch_points.append(
+                    PointStruct(
+                        id=pt.id,
+                        vector={
+                            "dense": dense_vec
+                            if isinstance(dense_vec, list)
+                            else list(dense_vec),
+                            "bm25": sparse_vec,
+                        },
+                        payload=payload,
+                    )
+                )
 
             # Upsert batch
             client.upsert(collection_name=temp_name, points=batch_points)
             migrated += len(batch_points)
 
             # Save progress
-            _save_progress(collection_name, {
-                "last_offset": next_offset,
-                "migrated": migrated,
-                "timestamp": datetime.now().isoformat(),
-            })
+            _save_progress(
+                collection_name,
+                {
+                    "last_offset": next_offset,
+                    "migrated": migrated,
+                    "timestamp": datetime.now().isoformat(),
+                },
+            )
 
-            logger.info("batch_migrated", collection=collection_name, migrated=migrated, total=vectors_count)
+            logger.info(
+                "batch_migrated",
+                collection=collection_name,
+                migrated=migrated,
+                total=vectors_count,
+            )
 
             if next_offset is None:
                 break
@@ -207,7 +239,9 @@ def upgrade_collection(
         result["old_collection"] = collection_name
         result["new_collection"] = temp_name
         result["elapsed_sec"] = round(time.time() - started, 1)
-        result["note"] = f"Upgraded collection at {temp_name}. Set alias or update config to use it."
+        result["note"] = (
+            f"Upgraded collection at {temp_name}. Set alias or update config to use it."
+        )
 
         # Clear progress
         _clear_progress(collection_name)
@@ -268,10 +302,19 @@ def rollback_upgrade(collection_name: str, qdrant_url: str = QDRANT_URL) -> dict
 # Helpers
 # ---------------------------------------------------------------------------
 
+
 def _extract_text(payload: dict) -> str:
     """Extract searchable text from a point payload."""
     parts = []
-    for key in ("text", "content", "name", "title", "description", "note_body", "summary"):
+    for key in (
+        "text",
+        "content",
+        "name",
+        "title",
+        "description",
+        "note_body",
+        "summary",
+    ):
         val = payload.get(key)
         if val and isinstance(val, str):
             parts.append(val)

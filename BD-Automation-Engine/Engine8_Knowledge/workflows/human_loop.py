@@ -18,7 +18,10 @@ from typing import Any, Dict, List, Optional
 
 import structlog
 
-from Engine8_Knowledge.workflows.checkpoint_store import CheckpointStore, get_checkpoint_store
+from Engine8_Knowledge.workflows.checkpoint_store import (
+    CheckpointStore,
+    get_checkpoint_store,
+)
 
 logger = structlog.get_logger(__name__)
 
@@ -26,6 +29,7 @@ logger = structlog.get_logger(__name__)
 # ---------------------------------------------------------------------------
 # Data classes
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class ApprovalRequest:
@@ -56,11 +60,15 @@ class ApprovalDecision:
 # HumanInTheLoopManager
 # ---------------------------------------------------------------------------
 
+
 class HumanInTheLoopManager:
     """Manages human approval gates in production workflows."""
 
-    def __init__(self, checkpoint_store: Optional[CheckpointStore] = None,
-                 storage_path: str = "data/approvals"):
+    def __init__(
+        self,
+        checkpoint_store: Optional[CheckpointStore] = None,
+        storage_path: str = "data/approvals",
+    ):
         self.checkpoint_store = checkpoint_store or get_checkpoint_store()
         self.storage_path = Path(storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
@@ -123,8 +131,14 @@ class HumanInTheLoopManager:
 
         # Extract relevant state fields (not full state)
         relevant_state = {}
-        for key in ("classifications", "recommendations", "risks",
-                     "analysis", "briefing", "report"):
+        for key in (
+            "classifications",
+            "recommendations",
+            "risks",
+            "analysis",
+            "briefing",
+            "report",
+        ):
             if key in state_snapshot:
                 val = state_snapshot[key]
                 # Truncate large lists
@@ -151,10 +165,14 @@ class HumanInTheLoopManager:
         self._requests[request_id] = request
         self._save_requests()
 
-        logger.info("human_loop.request_created",
-                     request_id=request_id, workflow=workflow_name,
-                     node=node_name, urgency=urgency,
-                     expires_in=expires_in_hours)
+        logger.info(
+            "human_loop.request_created",
+            request_id=request_id,
+            workflow=workflow_name,
+            node=node_name,
+            urgency=urgency,
+            expires_in=expires_in_hours,
+        )
         return request
 
     async def list_pending_approvals(
@@ -204,7 +222,9 @@ class HumanInTheLoopManager:
             raise ValueError(f"Request {request_id} is already {request.status}")
 
         if decision not in request.options:
-            raise ValueError(f"Invalid decision '{decision}'. Options: {request.options}")
+            raise ValueError(
+                f"Invalid decision '{decision}'. Options: {request.options}"
+            )
 
         # Update request status
         request.status = decision
@@ -222,9 +242,13 @@ class HumanInTheLoopManager:
         self._decisions[request_id] = decision_rec
         self._save_requests()
 
-        logger.info("human_loop.decision_submitted",
-                     request_id=request_id, decision=decision,
-                     workflow=request.workflow_name, decided_by=decided_by)
+        logger.info(
+            "human_loop.decision_submitted",
+            request_id=request_id,
+            decision=decision,
+            workflow=request.workflow_name,
+            decided_by=decided_by,
+        )
         return decision_rec
 
     async def resume_workflow(self, request_id: str) -> str:
@@ -255,13 +279,14 @@ class HumanInTheLoopManager:
         updated_state["_decided_by"] = decision.decided_by
 
         # Update checkpoint store
-        await self.checkpoint_store.update_thread_status(
-            request.thread_id, "running"
-        )
+        await self.checkpoint_store.update_thread_status(request.thread_id, "running")
 
-        logger.info("human_loop.workflow_resumed",
-                     request_id=request_id, thread_id=request.thread_id,
-                     decision=decision.decision)
+        logger.info(
+            "human_loop.workflow_resumed",
+            request_id=request_id,
+            thread_id=request.thread_id,
+            decision=decision.decision,
+        )
         return request.thread_id
 
     # ------------------------------------------------------------------
@@ -287,9 +312,11 @@ class HumanInTheLoopManager:
                 self._decisions[req.request_id] = decision
                 auto_approved.append(req.request_id)
 
-                logger.info("human_loop.auto_approved",
-                             request_id=req.request_id,
-                             workflow=req.workflow_name)
+                logger.info(
+                    "human_loop.auto_approved",
+                    request_id=req.request_id,
+                    workflow=req.workflow_name,
+                )
 
         if auto_approved:
             self._save_requests()
@@ -326,7 +353,9 @@ class HumanInTheLoopManager:
                 except (ValueError, TypeError):
                     pass
 
-        avg_response = sum(response_times) / len(response_times) if response_times else 0
+        avg_response = (
+            sum(response_times) / len(response_times) if response_times else 0
+        )
 
         return {
             "total_requests": total,

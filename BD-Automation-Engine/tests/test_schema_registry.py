@@ -21,6 +21,7 @@ def registry():
 # SEEDED SCHEMAS
 # =========================================
 
+
 def test_seeded_schemas(registry):
     schemas = registry.list_schemas()
     assert len(schemas) >= 3
@@ -43,11 +44,16 @@ def test_get_contact_schema(registry):
 # REGISTER & RETRIEVE
 # =========================================
 
+
 def test_register_new(registry):
-    schema_id = registry.register(DataSchema(
-        name="test_schema", domain="test", version=1,
-        fields=[SchemaField(name="id", field_type="string", required=True)],
-    ))
+    schema_id = registry.register(
+        DataSchema(
+            name="test_schema",
+            domain="test",
+            version=1,
+            fields=[SchemaField(name="id", field_type="string", required=True)],
+        )
+    )
     assert schema_id != ""
     assert registry.get("test_schema") is not None
 
@@ -65,56 +71,75 @@ def test_get_nonexistent(registry):
 # VALIDATION
 # =========================================
 
+
 def test_validate_valid_contact(registry):
-    result = registry.validate("contact", {
-        "name": "John Smith",
-        "email": "john@example.com",
-        "tier": 3,
-    })
+    result = registry.validate(
+        "contact",
+        {
+            "name": "John Smith",
+            "email": "john@example.com",
+            "tier": 3,
+        },
+    )
     assert result.valid is True
     assert len(result.errors) == 0
 
 
 def test_validate_missing_required(registry):
-    result = registry.validate("contact", {
-        "email": "john@example.com",
-    })
+    result = registry.validate(
+        "contact",
+        {
+            "email": "john@example.com",
+        },
+    )
     assert result.valid is False
     assert any("name" in e for e in result.errors)
 
 
 def test_validate_wrong_type(registry):
-    result = registry.validate("contact", {
-        "name": "John Smith",
-        "tier": "not_a_number",
-    })
+    result = registry.validate(
+        "contact",
+        {
+            "name": "John Smith",
+            "tier": "not_a_number",
+        },
+    )
     assert result.valid is False
     assert any("tier" in e for e in result.errors)
 
 
 def test_validate_constraint_min(registry):
-    result = registry.validate("contact", {
-        "name": "John Smith",
-        "tier": 0,
-    })
+    result = registry.validate(
+        "contact",
+        {
+            "name": "John Smith",
+            "tier": 0,
+        },
+    )
     assert result.valid is False
     assert any("minimum" in e for e in result.errors)
 
 
 def test_validate_constraint_max(registry):
-    result = registry.validate("contact", {
-        "name": "John Smith",
-        "tier": 10,
-    })
+    result = registry.validate(
+        "contact",
+        {
+            "name": "John Smith",
+            "tier": 10,
+        },
+    )
     assert result.valid is False
     assert any("maximum" in e for e in result.errors)
 
 
 def test_validate_extra_fields(registry):
-    result = registry.validate("contact", {
-        "name": "John Smith",
-        "unknown_field": "value",
-    })
+    result = registry.validate(
+        "contact",
+        {
+            "name": "John Smith",
+            "unknown_field": "value",
+        },
+    )
     assert result.valid is True
     assert any("Extra field" in w for w in result.warnings)
 
@@ -125,11 +150,14 @@ def test_validate_nonexistent_schema(registry):
 
 
 def test_validate_job_posting(registry):
-    result = registry.validate("job_posting", {
-        "title": "Software Engineer",
-        "company": "GDIT",
-        "bd_priority_score": 85.5,
-    })
+    result = registry.validate(
+        "job_posting",
+        {
+            "title": "Software Engineer",
+            "company": "GDIT",
+            "bd_priority_score": 85.5,
+        },
+    )
     assert result.valid is True
 
 
@@ -137,16 +165,20 @@ def test_validate_job_posting(registry):
 # EVOLUTION & COMPATIBILITY
 # =========================================
 
+
 def test_evolve_add_optional_field(registry):
     new_schema = DataSchema(
-        name="contact", domain="contacts",
+        name="contact",
+        domain="contacts",
         fields=[
             SchemaField(name="name", field_type="string", required=True),
             SchemaField(name="email", field_type="string"),
             SchemaField(name="phone", field_type="string"),
             SchemaField(name="title", field_type="string"),
             SchemaField(name="company", field_type="string"),
-            SchemaField(name="tier", field_type="integer", constraints={"min": 1, "max": 6}),
+            SchemaField(
+                name="tier", field_type="integer", constraints={"min": 1, "max": 6}
+            ),
             SchemaField(name="location", field_type="string"),
             SchemaField(name="source", field_type="string"),
             SchemaField(name="linkedin_url", field_type="string"),  # new optional
@@ -160,9 +192,12 @@ def test_evolve_add_optional_field(registry):
 
 def test_evolve_breaking_change(registry):
     new_schema = DataSchema(
-        name="contact", domain="contacts",
+        name="contact",
+        domain="contacts",
         fields=[
-            SchemaField(name="full_name", field_type="string", required=True),  # renamed
+            SchemaField(
+                name="full_name", field_type="string", required=True
+            ),  # renamed
         ],
         compatibility="backward",
     )
@@ -187,6 +222,7 @@ def test_compatibility_check(registry):
 # AUTO-GENERATE
 # =========================================
 
+
 def test_generate_from_data(registry):
     records = [
         {"name": "John", "age": 30, "active": True, "score": 0.95},
@@ -210,6 +246,7 @@ def test_generate_empty(registry):
 # =========================================
 # TYPE INFERENCE
 # =========================================
+
 
 def test_infer_string():
     assert _infer_type("hello") == "string"
@@ -247,6 +284,7 @@ def test_infer_dict():
 # STATS
 # =========================================
 
+
 def test_stats(registry):
     stats = registry.get_stats()
     assert stats["total_schemas"] >= 3
@@ -256,6 +294,7 @@ def test_stats(registry):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     r1 = get_schema_registry()

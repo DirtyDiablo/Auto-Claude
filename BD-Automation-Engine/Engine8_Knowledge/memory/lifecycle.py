@@ -22,6 +22,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class LifecycleReport:
     """Report from a lifecycle management pass."""
+
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
     memories_consolidated: int = 0

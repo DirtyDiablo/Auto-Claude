@@ -26,6 +26,7 @@ def orchestrator(registry):
 # PLAN GENERATION
 # =========================================
 
+
 def test_plan_outreach(orchestrator):
     plan = orchestrator.plan_from_intent("Prepare outreach for Navy DCGS-N contacts")
     assert plan.status == PlanStatus.READY.value
@@ -86,6 +87,7 @@ def test_list_plans(orchestrator):
 # EXECUTION
 # =========================================
 
+
 def test_execute_outreach(orchestrator):
     plan = orchestrator.plan_from_intent("Prepare outreach for contacts")
     result = orchestrator.execute_plan(plan)
@@ -145,6 +147,7 @@ def test_execute_with_unhealthy_server(orchestrator):
 # STEP EXECUTION
 # =========================================
 
+
 def test_step_auto_id():
     step = MCPExecutionStep(server_id="s1", tool_name="t1")
     assert step.step_id.startswith("step_")
@@ -153,7 +156,9 @@ def test_step_auto_id():
 def test_step_missing_server(orchestrator):
     plan = MCPExecutionPlan(
         intent="test",
-        steps=[MCPExecutionStep(step_id="s0", server_id="nonexistent", tool_name="test")],
+        steps=[
+            MCPExecutionStep(step_id="s0", server_id="nonexistent", tool_name="test")
+        ],
         status="ready",
     )
     result = orchestrator.execute_plan(plan)
@@ -163,6 +168,7 @@ def test_step_missing_server(orchestrator):
 # =========================================
 # EXECUTION HISTORY
 # =========================================
+
 
 def test_execution_history(orchestrator):
     plan = orchestrator.plan_from_intent("Test history")
@@ -174,6 +180,7 @@ def test_execution_history(orchestrator):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(orchestrator):
     plan = orchestrator.plan_from_intent("Test stats")
@@ -187,6 +194,7 @@ def test_stats(orchestrator):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     o1 = get_orchestrator()

@@ -23,6 +23,7 @@ from src.knowledge.temporal_kg import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def kg():
     return TemporalKnowledgeGraph()
@@ -43,6 +44,7 @@ def populated_kg(kg):
 # =========================================
 # ENTITY EXTRACTION
 # =========================================
+
 
 def test_extract_entities_person():
     entities = extract_entities_simple("John Smith is working on DCGS.")
@@ -80,6 +82,7 @@ def test_extract_entities_no_names():
 # RELATIONSHIP EXTRACTION
 # =========================================
 
+
 def test_extract_relationships_works_at():
     entities = extract_entities_simple("John Smith works at GDIT.")
     rels = extract_relationships_simple("John Smith works at GDIT.", entities)
@@ -103,6 +106,7 @@ def test_extract_relationships_empty():
 # =========================================
 # EPISODE INGESTION
 # =========================================
+
 
 def test_ingest_episode_basic(kg):
     ep = Episode(
@@ -162,6 +166,7 @@ def test_ingest_multiple_episodes(kg):
 # TEMPORAL QUERIES
 # =========================================
 
+
 def test_query_facts_at_time(populated_kg):
     now = datetime.now(timezone.utc).isoformat()
     facts = populated_kg.query_facts_at_time(now)
@@ -200,6 +205,7 @@ def test_get_active_facts_by_entity(populated_kg):
 # ENTITY TIMELINE
 # =========================================
 
+
 def test_get_entity_timeline(populated_kg):
     entities = list(populated_kg._entities.values())
     if entities:
@@ -218,6 +224,7 @@ def test_get_entity_timeline_nonexistent(kg):
 # CHANGE DETECTION
 # =========================================
 
+
 def test_detect_changes(populated_kg):
     entities = list(populated_kg._entities.values())
     if entities:
@@ -234,6 +241,7 @@ def test_detect_changes_nonexistent(kg):
 # =========================================
 # FACT EXPIRATION
 # =========================================
+
 
 def test_expire_fact(populated_kg):
     facts = list(populated_kg._facts.values())
@@ -254,6 +262,7 @@ def test_expire_fact_nonexistent(kg):
 # CONTRADICTION DETECTION
 # =========================================
 
+
 def test_find_contradictions_empty(kg):
     contradictions = kg.find_contradictions()
     assert contradictions == []
@@ -271,24 +280,35 @@ def test_find_contradictions_dual_employment(kg):
 
     now = datetime.now(timezone.utc).isoformat()
     f1 = TemporalFact(
-        id="f1", subject_id="e1", predicate=EdgeType.WORKS_AT.value,
-        object_id="o1", valid_from=now, confidence=0.9,
+        id="f1",
+        subject_id="e1",
+        predicate=EdgeType.WORKS_AT.value,
+        object_id="o1",
+        valid_from=now,
+        confidence=0.9,
     )
     f2 = TemporalFact(
-        id="f2", subject_id="e1", predicate=EdgeType.WORKS_AT.value,
-        object_id="o2", valid_from=now, confidence=0.9,
+        id="f2",
+        subject_id="e1",
+        predicate=EdgeType.WORKS_AT.value,
+        object_id="o2",
+        valid_from=now,
+        confidence=0.9,
     )
     kg.add_fact(f1)
     kg.add_fact(f2)
 
     contradictions = kg.find_contradictions()
     assert len(contradictions) >= 1
-    assert contradictions[0].contradiction_type == ContradictionType.DUAL_EMPLOYMENT.value
+    assert (
+        contradictions[0].contradiction_type == ContradictionType.DUAL_EMPLOYMENT.value
+    )
 
 
 # =========================================
 # SEARCH
 # =========================================
+
 
 def test_search_entities(populated_kg):
     results = populated_kg.search_entities("John")
@@ -322,6 +342,7 @@ def test_search_facts_active_only(populated_kg):
 # STATS
 # =========================================
 
+
 def test_get_stats_empty(kg):
     stats = kg.get_stats()
     assert stats["total_entities"] == 0
@@ -340,6 +361,7 @@ def test_get_stats_populated(populated_kg):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_get_temporal_kg_singleton():
     kg1 = get_temporal_kg()

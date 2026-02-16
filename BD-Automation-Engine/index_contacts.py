@@ -17,7 +17,7 @@ from datetime import datetime
 logger = logging.getLogger(__name__)
 
 # Fix Windows encoding
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Change to project directory
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
@@ -31,17 +31,22 @@ DB_PATH = "Engine7_BullhornETL/data/bullhorn_master.db"
 BATCH_SIZE = 500  # Larger batches for speed
 PROGRESS_INTERVAL = 5000  # Show progress every N records
 
+
 def get_indexed_count():
     """Get current count of indexed contacts."""
     try:
         import urllib.request
         import json
-        response = urllib.request.urlopen(f"{QDRANT_URL}/collections/contacts", timeout=10)
+
+        response = urllib.request.urlopen(
+            f"{QDRANT_URL}/collections/contacts", timeout=10
+        )
         data = json.loads(response.read())
         return data["result"]["points_count"]
     except (ConnectionError, TimeoutError, KeyError, ValueError) as e:
         logger.debug("qdrant_count_fetch_failed: %s", e)
         return 0
+
 
 def main():
     print("=" * 70)
@@ -112,26 +117,26 @@ def main():
     for row in cursor:
         # Convert row to dict
         contact = {
-            'id': str(row['id']),
-            'first_name': row['first_name'] or '',
-            'last_name': row['last_name'] or '',
-            'name': row['name'] or '',
-            'title': row['title'] or '',
-            'company': row['company'] or '',
-            'email': row['email'] or '',
-            'phone': row['phone'] or '',
-            'address': row['address'] or '',
-            'city': row['city'] or '',
-            'state': row['state'] or '',
-            'status': row['status'] or '',
-            'source': row['source'] or '',
-            'source_db': 'bullhorn_master',
-            'date_added': row['date_added'] or '',
-            'date_modified': row['date_modified'] or '',
-            'notes': row['notes'] or '',
-            'clearance': row['clearance'] or '',
-            'program': row['program'] or '',
-            'tier': classify_tier(row)
+            "id": str(row["id"]),
+            "first_name": row["first_name"] or "",
+            "last_name": row["last_name"] or "",
+            "name": row["name"] or "",
+            "title": row["title"] or "",
+            "company": row["company"] or "",
+            "email": row["email"] or "",
+            "phone": row["phone"] or "",
+            "address": row["address"] or "",
+            "city": row["city"] or "",
+            "state": row["state"] or "",
+            "status": row["status"] or "",
+            "source": row["source"] or "",
+            "source_db": "bullhorn_master",
+            "date_added": row["date_added"] or "",
+            "date_modified": row["date_modified"] or "",
+            "notes": row["notes"] or "",
+            "clearance": row["clearance"] or "",
+            "program": row["program"] or "",
+            "tier": classify_tier(row),
         }
 
         batch.append(contact)
@@ -156,8 +161,12 @@ def main():
                 eta_seconds = remaining / rate if rate > 0 else 0
                 eta_minutes = eta_seconds / 60
 
-                print(f"  Progress: {total_indexed:,}/{total_candidates:,} ({total_indexed*100/total_candidates:.1f}%)")
-                print(f"  Rate: {rate:.0f} records/sec | ETA: {eta_minutes:.1f} minutes")
+                print(
+                    f"  Progress: {total_indexed:,}/{total_candidates:,} ({total_indexed * 100 / total_candidates:.1f}%)"
+                )
+                print(
+                    f"  Rate: {rate:.0f} records/sec | ETA: {eta_minutes:.1f} minutes"
+                )
                 print(f"  Errors: {total_errors:,}")
                 print("-" * 70)
 
@@ -183,37 +192,57 @@ def main():
     print("=" * 70)
     print(f"  Total processed: {total_indexed:,}")
     print(f"  Total errors: {total_errors:,}")
-    print(f"  Time elapsed: {elapsed/60:.1f} minutes")
-    print(f"  Average rate: {total_indexed/elapsed:.0f} records/sec")
+    print(f"  Time elapsed: {elapsed / 60:.1f} minutes")
+    print(f"  Average rate: {total_indexed / elapsed:.0f} records/sec")
     print(f"  Final Qdrant count: {final_indexed:,} contacts")
     print("=" * 70)
 
 
 def classify_tier(row):
     """Classify contact into tier based on available data."""
-    title = (row['title'] or '').lower()
+    title = (row["title"] or "").lower()
 
     # Tier 1: Executive/Decision Maker
-    tier1_keywords = ['ceo', 'cto', 'cio', 'cfo', 'president', 'vice president', 'vp',
-                      'director', 'chief', 'partner', 'owner', 'founder', 'general manager']
+    tier1_keywords = [
+        "ceo",
+        "cto",
+        "cio",
+        "cfo",
+        "president",
+        "vice president",
+        "vp",
+        "director",
+        "chief",
+        "partner",
+        "owner",
+        "founder",
+        "general manager",
+    ]
     for kw in tier1_keywords:
         if kw in title:
-            return 'Tier 1'
+            return "Tier 1"
 
     # Tier 2: Senior/Manager
-    tier2_keywords = ['senior', 'manager', 'lead', 'head', 'principal', 'supervisor']
+    tier2_keywords = ["senior", "manager", "lead", "head", "principal", "supervisor"]
     for kw in tier2_keywords:
         if kw in title:
-            return 'Tier 2'
+            return "Tier 2"
 
     # Tier 3: Mid-level
-    tier3_keywords = ['engineer', 'analyst', 'specialist', 'consultant', 'developer', 'architect']
+    tier3_keywords = [
+        "engineer",
+        "analyst",
+        "specialist",
+        "consultant",
+        "developer",
+        "architect",
+    ]
     for kw in tier3_keywords:
         if kw in title:
-            return 'Tier 3'
+            return "Tier 3"
 
     # Default
-    return 'Tier 4'
+    return "Tier 4"
 
 
 if __name__ == "__main__":

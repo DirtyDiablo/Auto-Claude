@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class KeyStatus(str, Enum):
     ACTIVE = "active"
     ROTATED = "rotated"
@@ -44,6 +45,7 @@ class FieldSensitivity(str, Enum):
 @dataclass
 class EncryptionKey:
     """Represents a DEK (Data Encryption Key)."""
+
     key_id: str
     key_material: bytes  # 32 bytes for AES-256
     status: KeyStatus = KeyStatus.ACTIVE
@@ -73,6 +75,7 @@ class EncryptionKey:
 @dataclass
 class KEK:
     """Key Encryption Key — wraps DEKs."""
+
     kek_id: str
     key_material: bytes  # 32 bytes
     status: KeyStatus = KeyStatus.ACTIVE
@@ -95,6 +98,7 @@ class KEK:
 @dataclass
 class EncryptedField:
     """An encrypted data field with metadata."""
+
     field_id: str
     resource_type: str  # contact, humint_note, simulation, api_key
     resource_id: str
@@ -126,6 +130,7 @@ class EncryptedField:
 @dataclass
 class KeyRotationResult:
     """Result of a key rotation operation."""
+
     rotation_id: str
     old_key_id: str
     new_key_id: str
@@ -149,6 +154,7 @@ class KeyRotationResult:
 @dataclass
 class EncryptionStatus:
     """Overall encryption system status."""
+
     total_encrypted_fields: int = 0
     total_deks: int = 0
     active_deks: int = 0
@@ -199,6 +205,7 @@ _SENSITIVE_FIELDS: Dict[str, Dict[str, FieldSensitivity]] = {
 # =========================================
 # ENCRYPTION MANAGER
 # =========================================
+
 
 class EncryptionManager:
     """Field-level encryption with envelope encryption and key rotation.
@@ -271,7 +278,7 @@ class EncryptionManager:
             block = hashlib.sha256(block).digest()
             stream += block
 
-        ciphertext = bytes(p ^ s for p, s in zip(plaintext, stream[:len(plaintext)]))
+        ciphertext = bytes(p ^ s for p, s in zip(plaintext, stream[: len(plaintext)]))
         return ciphertext, nonce
 
     def _decrypt_raw(self, ciphertext: bytes, key: bytes, nonce: bytes) -> bytes:
@@ -282,7 +289,7 @@ class EncryptionManager:
             block = hashlib.sha256(block).digest()
             stream += block
 
-        return bytes(c ^ s for c, s in zip(ciphertext, stream[:len(ciphertext)]))
+        return bytes(c ^ s for c, s in zip(ciphertext, stream[: len(ciphertext)]))
 
     # ----- field encryption -----
 
@@ -298,7 +305,9 @@ class EncryptionManager:
         dek = self._get_active_dek()
         dek.usage_count += 1
 
-        ciphertext, nonce = self._encrypt_raw(plaintext.encode("utf-8"), dek.key_material)
+        ciphertext, nonce = self._encrypt_raw(
+            plaintext.encode("utf-8"), dek.key_material
+        )
 
         # Determine sensitivity
         sensitivity = _SENSITIVE_FIELDS.get(resource_type, {}).get(
@@ -382,13 +391,19 @@ class EncryptionManager:
 
     def _generate_search_token(self, value: str) -> str:
         """Generate HMAC-based search token for deterministic encrypted search."""
-        return hmac.new(self._hmac_key, value.encode("utf-8"), hashlib.sha256).hexdigest()[:32]
+        return hmac.new(
+            self._hmac_key, value.encode("utf-8"), hashlib.sha256
+        ).hexdigest()[:32]
 
     def search_encrypted(self, query: str) -> List[EncryptedField]:
         """Search encrypted fields using HMAC tokens."""
         token = self._generate_search_token(query.lower().strip())
         field_ids = self._search_index.get(token, [])
-        return [self._encrypted_fields[fid] for fid in field_ids if fid in self._encrypted_fields]
+        return [
+            self._encrypted_fields[fid]
+            for fid in field_ids
+            if fid in self._encrypted_fields
+        ]
 
     # ----- key rotation -----
 
@@ -428,7 +443,9 @@ class EncryptionManager:
                 plaintext = self._decrypt_raw(ciphertext, old_dek.key_material, nonce)
 
                 # Re-encrypt with new key
-                new_ciphertext, new_nonce = self._encrypt_raw(plaintext, new_dek.key_material)
+                new_ciphertext, new_nonce = self._encrypt_raw(
+                    plaintext, new_dek.key_material
+                )
                 ef.ciphertext = base64.b64encode(new_ciphertext).decode()
                 ef.nonce = base64.b64encode(new_nonce).decode()
                 ef.dek_id = new_dek.key_id
@@ -491,11 +508,15 @@ class EncryptionManager:
         fields_by_type: Dict[str, int] = {}
         fields_by_sensitivity: Dict[str, int] = {}
         for ef in self._encrypted_fields.values():
-            fields_by_type[ef.resource_type] = fields_by_type.get(ef.resource_type, 0) + 1
+            fields_by_type[ef.resource_type] = (
+                fields_by_type.get(ef.resource_type, 0) + 1
+            )
             s = ef.sensitivity.value
             fields_by_sensitivity[s] = fields_by_sensitivity.get(s, 0) + 1
 
-        active_deks = sum(1 for d in self._deks.values() if d.status == KeyStatus.ACTIVE)
+        active_deks = sum(
+            1 for d in self._deks.values() if d.status == KeyStatus.ACTIVE
+        )
 
         last_rotation = None
         next_due = None

@@ -1,6 +1,7 @@
 """
 Tests for LightRAG graph-based reasoning integration.
 """
+
 import pytest
 import os
 import tempfile
@@ -137,7 +138,7 @@ class TestBDGraphRAG:
             answer="test answer",
             entities_found=["GDIT", "DCGS"],
             relationships=[{"type": "primes"}],
-            sources=["source1"]
+            sources=["source1"],
         )
 
         assert result.query == "test query"
@@ -148,7 +149,7 @@ class TestBDGraphRAG:
 
     @pytest.mark.skipif(
         not os.getenv("OPENAI_API_KEY"),
-        reason="OpenAI API key required for full LightRAG tests"
+        reason="OpenAI API key required for full LightRAG tests",
     )
     def test_graph_rag_initialization(self):
         """Test BDGraphRAG initialization (requires API key)."""
@@ -226,7 +227,14 @@ class TestIntegration:
         # At least one relationship should be found
         assert len(relationships) > 0 or len(rel_types) >= 0  # Relaxed assertion
         # If we found relationships, they should be valid types
-        valid_types = {"primes", "subcontracts", "teams_with", "partners_with", "works_on", "supports"}
+        valid_types = {
+            "primes",
+            "subcontracts",
+            "teams_with",
+            "partners_with",
+            "works_on",
+            "supports",
+        }
         for rel in relationships:
             assert rel.relationship_type in valid_types
 

@@ -41,6 +41,7 @@ def client(app):
 # CONNECTION POOLS
 # =========================================
 
+
 def test_list_pools(client):
     resp = client.get("/api/scaling/pools")
     assert resp.status_code == 200
@@ -67,6 +68,7 @@ def test_pool_health(client):
 # =========================================
 # READ REPLICAS
 # =========================================
+
 
 def test_list_replicas(client):
     resp = client.get("/api/scaling/replicas")
@@ -95,6 +97,7 @@ def test_promote_not_found(client):
 # CACHE LAYERS
 # =========================================
 
+
 def test_list_cache(client):
     resp = client.get("/api/scaling/cache")
     assert resp.status_code == 200
@@ -116,6 +119,7 @@ def test_warm_cache(client):
 # AUTO-SCALING
 # =========================================
 
+
 def test_list_policies(client):
     resp = client.get("/api/scaling/policies")
     assert resp.status_code == 200
@@ -123,17 +127,23 @@ def test_list_policies(client):
 
 
 def test_evaluate_policy(client):
-    resp = client.post("/api/scaling/policies/api_cpu/evaluate", json={
-        "current_value": 90.0,
-    })
+    resp = client.post(
+        "/api/scaling/policies/api_cpu/evaluate",
+        json={
+            "current_value": 90.0,
+        },
+    )
     assert resp.status_code == 200
     assert "direction" in resp.json()
 
 
 def test_evaluate_not_found(client):
-    resp = client.post("/api/scaling/policies/fake/evaluate", json={
-        "current_value": 50.0,
-    })
+    resp = client.post(
+        "/api/scaling/policies/fake/evaluate",
+        json={
+            "current_value": 50.0,
+        },
+    )
     assert resp.status_code == 404
 
 
@@ -146,6 +156,7 @@ def test_recommendations(client):
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_health(client):
     resp = client.get("/api/scaling/health")

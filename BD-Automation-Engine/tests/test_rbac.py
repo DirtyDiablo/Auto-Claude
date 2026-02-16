@@ -18,6 +18,7 @@ from src.auth.rbac import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def rbac():
     return RBACManager()
@@ -26,6 +27,7 @@ def rbac():
 # =========================================
 # ROLE ENUM
 # =========================================
+
 
 class TestRoleEnum:
     def test_all_roles_defined(self):
@@ -40,6 +42,7 @@ class TestRoleEnum:
 # =========================================
 # PERMISSION CHECKING
 # =========================================
+
 
 class TestPermissionChecking:
     def test_super_admin_has_all(self, rbac):
@@ -66,7 +69,9 @@ class TestPermissionChecking:
 
     def test_bd_analyst_read_only(self, rbac):
         assert rbac.check_permission(Role.BD_ANALYST, Resource.CONTACTS, Action.READ)
-        assert not rbac.check_permission(Role.BD_ANALYST, Resource.CONTACTS, Action.CREATE)
+        assert not rbac.check_permission(
+            Role.BD_ANALYST, Resource.CONTACTS, Action.CREATE
+        )
 
     def test_bd_manager_crud_contacts(self, rbac):
         assert rbac.check_permission(Role.BD_MANAGER, Resource.CONTACTS, Action.CREATE)
@@ -80,7 +85,9 @@ class TestPermissionChecking:
 
     def test_bd_director_full_bd(self, rbac):
         assert rbac.check_permission(Role.BD_DIRECTOR, Resource.CONTACTS, Action.ADMIN)
-        assert rbac.check_permission(Role.BD_DIRECTOR, Resource.CAMPAIGNS, Action.EXPORT)
+        assert rbac.check_permission(
+            Role.BD_DIRECTOR, Resource.CAMPAIGNS, Action.EXPORT
+        )
 
     def test_bd_director_revenue_read(self, rbac):
         assert rbac.check_permission(Role.BD_DIRECTOR, Resource.REVENUE, Action.READ)
@@ -89,23 +96,32 @@ class TestPermissionChecking:
     def test_api_service_permissions(self, rbac):
         assert rbac.check_permission(Role.API_SERVICE, Resource.CONTACTS, Action.READ)
         assert rbac.check_permission(Role.API_SERVICE, Resource.CONTACTS, Action.CREATE)
-        assert not rbac.check_permission(Role.API_SERVICE, Resource.CONTACTS, Action.DELETE)
+        assert not rbac.check_permission(
+            Role.API_SERVICE, Resource.CONTACTS, Action.DELETE
+        )
 
     def test_scope_escalation_own_to_tenant(self, rbac):
         # If role has tenant scope, requesting own scope should also pass
-        assert rbac.check_permission(Role.TENANT_ADMIN, Resource.CONTACTS, Action.READ, Scope.OWN)
+        assert rbac.check_permission(
+            Role.TENANT_ADMIN, Resource.CONTACTS, Action.READ, Scope.OWN
+        )
 
     def test_scope_escalation_team_to_tenant(self, rbac):
-        assert rbac.check_permission(Role.TENANT_ADMIN, Resource.CONTACTS, Action.READ, Scope.TEAM)
+        assert rbac.check_permission(
+            Role.TENANT_ADMIN, Resource.CONTACTS, Action.READ, Scope.TEAM
+        )
 
 
 # =========================================
 # ROLE HIERARCHY
 # =========================================
 
+
 class TestRoleHierarchy:
     def test_hierarchy_order(self):
-        assert ROLE_HIERARCHY.index(Role.VIEWER) < ROLE_HIERARCHY.index(Role.SUPER_ADMIN)
+        assert ROLE_HIERARCHY.index(Role.VIEWER) < ROLE_HIERARCHY.index(
+            Role.SUPER_ADMIN
+        )
 
     def test_is_role_at_least(self, rbac):
         assert rbac.is_role_at_least(Role.TENANT_ADMIN, Role.VIEWER)
@@ -125,6 +141,7 @@ class TestRoleHierarchy:
 # =========================================
 # USER ROLE MANAGEMENT
 # =========================================
+
 
 class TestUserRoles:
     def test_assign_role(self, rbac):
@@ -152,6 +169,7 @@ class TestUserRoles:
 # =========================================
 # API KEY MANAGEMENT
 # =========================================
+
 
 class TestAPIKeys:
     def test_create_api_key(self, rbac):
@@ -185,6 +203,7 @@ class TestAPIKeys:
 # =========================================
 # CONVENIENCE + SINGLETON
 # =========================================
+
 
 class TestConvenience:
     def test_has_permission(self):

@@ -20,6 +20,7 @@ def bench():
 # GOLDEN QUERIES
 # =========================================
 
+
 def test_golden_queries_loaded(bench):
     queries = bench.get_golden_queries()
     assert len(queries) >= 25  # we defined 27 golden queries
@@ -71,6 +72,7 @@ def test_add_custom_golden_query(bench):
 # BENCHMARK EXECUTION
 # =========================================
 
+
 def test_run_benchmark_baseline(bench):
     run = bench.run_benchmark("baseline_001", "all-MiniLM-L6-v2", is_fine_tuned=False)
     assert isinstance(run, BenchmarkRun)
@@ -88,7 +90,10 @@ def test_fine_tuned_beats_baseline(bench):
     baseline = bench.run_benchmark("baseline_001", "baseline", is_fine_tuned=False)
     fine_tuned = bench.run_benchmark("ft_001", "fine_tuned", is_fine_tuned=True)
     # Fine-tuned should generally have higher recall
-    assert fine_tuned.overall_metrics["recall_at_10"] > baseline.overall_metrics["recall_at_10"]
+    assert (
+        fine_tuned.overall_metrics["recall_at_10"]
+        > baseline.overall_metrics["recall_at_10"]
+    )
 
 
 def test_benchmark_has_category_metrics(bench):
@@ -124,6 +129,7 @@ def test_benchmark_results_per_query(bench):
 # REGRESSION CHECKING
 # =========================================
 
+
 def test_regression_passes_for_improvement(bench):
     baseline = bench.run_benchmark("baseline_001", "baseline", is_fine_tuned=False)
     improved = bench.run_benchmark("ft_001", "fine_tuned", is_fine_tuned=True)
@@ -148,6 +154,7 @@ def test_regression_no_baseline(bench):
 # =========================================
 # COMPARISON
 # =========================================
+
 
 def test_compare_runs(bench):
     run_a = bench.run_benchmark("baseline", "baseline", is_fine_tuned=False)
@@ -176,6 +183,7 @@ def test_compare_shows_improvement(bench):
 # QUERIES & HISTORY
 # =========================================
 
+
 def test_get_run(bench):
     run = bench.run_benchmark("test_model", "test")
     retrieved = bench.get_run(run.id)
@@ -195,6 +203,7 @@ def test_get_runs(bench):
 # DIFFICULTY DISTRIBUTION
 # =========================================
 
+
 def test_difficulty_distribution(bench):
     stats = bench.get_stats()
     by_diff = stats["queries_by_difficulty"]
@@ -207,6 +216,7 @@ def test_difficulty_distribution(bench):
 # STATS
 # =========================================
 
+
 def test_stats(bench):
     bench.run_benchmark("m1", "model_1")
     stats = bench.get_stats()
@@ -218,6 +228,7 @@ def test_stats(bench):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     b1 = get_benchmark_suite()

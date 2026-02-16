@@ -16,12 +16,24 @@ from src.graph.path_router import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def router_with_data():
     r = OptimalPathRouter()
     nodes = [
-        {"id": "us", "name": "Our Contact", "tier": 2, "programs": ["DCGS"], "is_ours": True},
-        {"id": "mid1", "name": "Bridge Person", "tier": 3, "programs": ["DCGS", "NGEN"]},
+        {
+            "id": "us",
+            "name": "Our Contact",
+            "tier": 2,
+            "programs": ["DCGS"],
+            "is_ours": True,
+        },
+        {
+            "id": "mid1",
+            "name": "Bridge Person",
+            "tier": 3,
+            "programs": ["DCGS", "NGEN"],
+        },
         {"id": "mid2", "name": "Alt Path", "tier": 4, "programs": ["NGEN"]},
         {"id": "target", "name": "VP Target", "tier": 1, "programs": ["NGEN"]},
         {"id": "isolated", "name": "Lone Wolf", "tier": 5, "programs": ["GBSD"]},
@@ -46,6 +58,7 @@ def empty_router():
 # OPTIMAL PATH
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestOptimalPath:
     async def test_finds_paths(self, router_with_data):
@@ -69,7 +82,9 @@ class TestOptimalPath:
     async def test_path_names_populated(self, router_with_data):
         paths = await router_with_data.find_optimal_path("us", "target")
         assert len(paths[0].path_names) > 0
-        assert "Our Contact" in paths[0].path_names or "VP Target" in paths[0].path_names
+        assert (
+            "Our Contact" in paths[0].path_names or "VP Target" in paths[0].path_names
+        )
 
     async def test_no_path_returns_empty(self, router_with_data):
         paths = await router_with_data.find_optimal_path("us", "isolated")
@@ -92,6 +107,7 @@ class TestOptimalPath:
 # =========================================
 # WARM INTRO CHAIN
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestWarmIntroChain:
@@ -121,6 +137,7 @@ class TestWarmIntroChain:
 # MISSING LINKS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestMissingLinks:
     async def test_no_contacts_critical(self, router_with_data):
@@ -145,6 +162,7 @@ class TestMissingLinks:
 # NETWORK GAPS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestNetworkGaps:
     async def test_returns_gaps(self, router_with_data):
@@ -159,7 +177,9 @@ class TestNetworkGaps:
             assert isinstance(g.recommendations, list)
 
     async def test_specific_programs(self, router_with_data):
-        gaps = await router_with_data.get_network_gaps(programs=["DCGS", "NGEN", "UNKNOWN"])
+        gaps = await router_with_data.get_network_gaps(
+            programs=["DCGS", "NGEN", "UNKNOWN"]
+        )
         # UNKNOWN should show as critical
         unknown_gaps = [g for g in gaps if g.program == "UNKNOWN"]
         if unknown_gaps:
@@ -169,6 +189,7 @@ class TestNetworkGaps:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_router_returns_instance(self):

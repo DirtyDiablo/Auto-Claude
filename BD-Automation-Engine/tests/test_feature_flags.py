@@ -19,6 +19,7 @@ def engine():
 # DEFAULT FLAGS
 # =========================================
 
+
 def test_default_flags(engine):
     flags = engine.list_flags()
     assert len(flags) == 8
@@ -34,6 +35,7 @@ def test_dark_mode_flag(engine):
 # CREATE FLAGS
 # =========================================
 
+
 def test_create_flag(engine):
     flag = engine.create_flag("test_flag", FlagType.BOOLEAN, "A test flag")
     assert flag.flag_id.startswith("flag_")
@@ -48,6 +50,7 @@ def test_create_percentage_flag(engine):
 # =========================================
 # IS_ENABLED
 # =========================================
+
 
 def test_boolean_enabled(engine):
     flag = engine.create_flag("test_bool", FlagType.BOOLEAN)
@@ -87,6 +90,7 @@ def test_is_enabled_not_found(engine):
 # UPDATE / DELETE
 # =========================================
 
+
 def test_update_flag(engine):
     flag = engine.create_flag("upd", FlagType.BOOLEAN)
     result = engine.update_flag(flag.flag_id, description="Updated")
@@ -108,23 +112,30 @@ def test_delete_flag(engine):
 # ROLLOUT STAGES
 # =========================================
 
+
 def test_set_rollout_stages(engine):
     flag = engine.create_flag("rollout_test", FlagType.GRADUAL_ROLLOUT)
-    engine.set_rollout_stages(flag.flag_id, [
-        {"percentage": 10, "duration_hours": 24},
-        {"percentage": 50, "duration_hours": 48},
-        {"percentage": 100, "duration_hours": 72},
-    ])
+    engine.set_rollout_stages(
+        flag.flag_id,
+        [
+            {"percentage": 10, "duration_hours": 24},
+            {"percentage": 50, "duration_hours": 48},
+            {"percentage": 100, "duration_hours": 72},
+        ],
+    )
     f = engine.get_flag(flag.flag_id)
     assert len(f.rollout_stages) == 3
 
 
 def test_advance_rollout(engine):
     flag = engine.create_flag("adv_test", FlagType.GRADUAL_ROLLOUT)
-    engine.set_rollout_stages(flag.flag_id, [
-        {"percentage": 10, "duration_hours": 24},
-        {"percentage": 100, "duration_hours": 48},
-    ])
+    engine.set_rollout_stages(
+        flag.flag_id,
+        [
+            {"percentage": 10, "duration_hours": 24},
+            {"percentage": 100, "duration_hours": 48},
+        ],
+    )
     engine.advance_rollout(flag.flag_id)
     f = engine.get_flag(flag.flag_id)
     assert f.rollout_stages[0].completed is True
@@ -133,6 +144,7 @@ def test_advance_rollout(engine):
 # =========================================
 # QUERY
 # =========================================
+
 
 def test_list_by_status(engine):
     active = engine.list_flags(status=FlagStatus.ACTIVE)
@@ -156,6 +168,7 @@ def test_get_flag(engine):
 # TO_DICT & STATS
 # =========================================
 
+
 def test_flag_to_dict(engine):
     flag = engine.create_flag("dict_test", FlagType.BOOLEAN)
     d = flag.to_dict()
@@ -174,8 +187,10 @@ def test_stats(engine):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.experimentation.feature_flags as mod
+
     mod._instance = None
     e1 = get_flag_engine()
     e2 = get_flag_engine()

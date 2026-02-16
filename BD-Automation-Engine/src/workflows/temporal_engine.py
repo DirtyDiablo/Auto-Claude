@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class WorkflowStatus(str, Enum):
     PENDING = "pending"
     RUNNING = "running"
@@ -47,6 +48,7 @@ class StepStatus(str, Enum):
 @dataclass
 class StepCheckpoint:
     """Immutable checkpoint for a single workflow step."""
+
     step_id: str
     step_name: str
     status: StepStatus
@@ -74,6 +76,7 @@ class StepCheckpoint:
 @dataclass
 class WorkflowRun:
     """A single execution of a workflow."""
+
     run_id: str
     workflow_id: str
     workflow_name: str
@@ -118,6 +121,7 @@ class WorkflowRun:
 @dataclass
 class WorkflowDefinition:
     """Blueprint for a workflow — sequence of step definitions."""
+
     workflow_id: str
     name: str
     description: str
@@ -149,24 +153,48 @@ _FULL_BD_CAMPAIGN = WorkflowDefinition(
     name="FullBDCampaign",
     description="End-to-end BD campaign: scrape → map → enrich → score → playbook → outreach.",
     steps=[
-        {"name": "scrape_jobs", "task_queue": "scraper_tasks",
-         "description": "Scrape target job postings from Apify",
-         "timeout_sec": 300, "retries": 2},
-        {"name": "map_programs", "task_queue": "hub_tasks",
-         "description": "Map jobs to federal programs",
-         "timeout_sec": 120, "retries": 1},
-        {"name": "enrich_contacts", "task_queue": "hub_tasks",
-         "description": "Enrich contacts via Bullhorn + Qdrant",
-         "timeout_sec": 180, "retries": 2},
-        {"name": "score_opportunities", "task_queue": "hub_tasks",
-         "description": "Score BD priority for each opportunity",
-         "timeout_sec": 60, "retries": 1},
-        {"name": "generate_playbooks", "task_queue": "hub_tasks",
-         "description": "Generate BD playbooks for top opportunities",
-         "timeout_sec": 120, "retries": 1},
-        {"name": "draft_outreach", "task_queue": "n8n_tasks",
-         "description": "Draft and queue outreach emails via n8n",
-         "timeout_sec": 180, "retries": 2},
+        {
+            "name": "scrape_jobs",
+            "task_queue": "scraper_tasks",
+            "description": "Scrape target job postings from Apify",
+            "timeout_sec": 300,
+            "retries": 2,
+        },
+        {
+            "name": "map_programs",
+            "task_queue": "hub_tasks",
+            "description": "Map jobs to federal programs",
+            "timeout_sec": 120,
+            "retries": 1,
+        },
+        {
+            "name": "enrich_contacts",
+            "task_queue": "hub_tasks",
+            "description": "Enrich contacts via Bullhorn + Qdrant",
+            "timeout_sec": 180,
+            "retries": 2,
+        },
+        {
+            "name": "score_opportunities",
+            "task_queue": "hub_tasks",
+            "description": "Score BD priority for each opportunity",
+            "timeout_sec": 60,
+            "retries": 1,
+        },
+        {
+            "name": "generate_playbooks",
+            "task_queue": "hub_tasks",
+            "description": "Generate BD playbooks for top opportunities",
+            "timeout_sec": 120,
+            "retries": 1,
+        },
+        {
+            "name": "draft_outreach",
+            "task_queue": "n8n_tasks",
+            "description": "Draft and queue outreach emails via n8n",
+            "timeout_sec": 180,
+            "retries": 2,
+        },
     ],
     timeout_sec=1800,
     max_retries=3,
@@ -178,21 +206,41 @@ _CONTACT_ENRICHMENT = WorkflowDefinition(
     name="ContactEnrichment",
     description="Enrich a contact: classify tier, geocode, link programs, generate briefing.",
     steps=[
-        {"name": "fetch_crm_data", "task_queue": "hub_tasks",
-         "description": "Pull latest data from Bullhorn CRM",
-         "timeout_sec": 60, "retries": 2},
-        {"name": "classify_tier", "task_queue": "hub_tasks",
-         "description": "Classify contact into 6-tier hierarchy",
-         "timeout_sec": 30, "retries": 1},
-        {"name": "geocode_location", "task_queue": "hub_tasks",
-         "description": "Resolve contact location to coordinates",
-         "timeout_sec": 30, "retries": 1},
-        {"name": "link_programs", "task_queue": "hub_tasks",
-         "description": "Link contact to relevant programs",
-         "timeout_sec": 60, "retries": 1},
-        {"name": "generate_briefing", "task_queue": "hub_tasks",
-         "description": "Generate call briefing for the contact",
-         "timeout_sec": 90, "retries": 1},
+        {
+            "name": "fetch_crm_data",
+            "task_queue": "hub_tasks",
+            "description": "Pull latest data from Bullhorn CRM",
+            "timeout_sec": 60,
+            "retries": 2,
+        },
+        {
+            "name": "classify_tier",
+            "task_queue": "hub_tasks",
+            "description": "Classify contact into 6-tier hierarchy",
+            "timeout_sec": 30,
+            "retries": 1,
+        },
+        {
+            "name": "geocode_location",
+            "task_queue": "hub_tasks",
+            "description": "Resolve contact location to coordinates",
+            "timeout_sec": 30,
+            "retries": 1,
+        },
+        {
+            "name": "link_programs",
+            "task_queue": "hub_tasks",
+            "description": "Link contact to relevant programs",
+            "timeout_sec": 60,
+            "retries": 1,
+        },
+        {
+            "name": "generate_briefing",
+            "task_queue": "hub_tasks",
+            "description": "Generate call briefing for the contact",
+            "timeout_sec": 90,
+            "retries": 1,
+        },
     ],
     timeout_sec=600,
     max_retries=2,
@@ -204,21 +252,41 @@ _WEEKLY_INTEL_CYCLE = WorkflowDefinition(
     name="WeeklyIntelCycle",
     description="Weekly intelligence cycle: fresh scrape, re-score, alerts, report.",
     steps=[
-        {"name": "run_scrapers", "task_queue": "scraper_tasks",
-         "description": "Execute all configured Apify scrapers",
-         "timeout_sec": 600, "retries": 3},
-        {"name": "update_program_map", "task_queue": "hub_tasks",
-         "description": "Re-run program mapping on new data",
-         "timeout_sec": 180, "retries": 1},
-        {"name": "rescore_pipeline", "task_queue": "hub_tasks",
-         "description": "Re-score all BD opportunities",
-         "timeout_sec": 120, "retries": 1},
-        {"name": "check_alerts", "task_queue": "hub_tasks",
-         "description": "Check for threshold alerts and anomalies",
-         "timeout_sec": 60, "retries": 1},
-        {"name": "generate_weekly_report", "task_queue": "n8n_tasks",
-         "description": "Compile and distribute weekly intel report",
-         "timeout_sec": 120, "retries": 2},
+        {
+            "name": "run_scrapers",
+            "task_queue": "scraper_tasks",
+            "description": "Execute all configured Apify scrapers",
+            "timeout_sec": 600,
+            "retries": 3,
+        },
+        {
+            "name": "update_program_map",
+            "task_queue": "hub_tasks",
+            "description": "Re-run program mapping on new data",
+            "timeout_sec": 180,
+            "retries": 1,
+        },
+        {
+            "name": "rescore_pipeline",
+            "task_queue": "hub_tasks",
+            "description": "Re-score all BD opportunities",
+            "timeout_sec": 120,
+            "retries": 1,
+        },
+        {
+            "name": "check_alerts",
+            "task_queue": "hub_tasks",
+            "description": "Check for threshold alerts and anomalies",
+            "timeout_sec": 60,
+            "retries": 1,
+        },
+        {
+            "name": "generate_weekly_report",
+            "task_queue": "n8n_tasks",
+            "description": "Compile and distribute weekly intel report",
+            "timeout_sec": 120,
+            "retries": 2,
+        },
     ],
     timeout_sec=1800,
     max_retries=2,
@@ -230,24 +298,48 @@ _OPPORTUNITY_RESPONSE = WorkflowDefinition(
     name="OpportunityResponse",
     description="Rapid response to a new opportunity: analyze, score, assign, prep.",
     steps=[
-        {"name": "analyze_opportunity", "task_queue": "hub_tasks",
-         "description": "Analyze opportunity details and requirements",
-         "timeout_sec": 60, "retries": 1},
-        {"name": "competitive_analysis", "task_queue": "hub_tasks",
-         "description": "Run competitive density analysis for region",
-         "timeout_sec": 60, "retries": 1},
-        {"name": "identify_contacts", "task_queue": "hub_tasks",
-         "description": "Find relevant contacts for this opportunity",
-         "timeout_sec": 60, "retries": 1},
-        {"name": "score_and_prioritize", "task_queue": "hub_tasks",
-         "description": "Score and set BD priority",
-         "timeout_sec": 30, "retries": 1},
-        {"name": "assign_bd_rep", "task_queue": "n8n_tasks",
-         "description": "Assign BD representative and notify",
-         "timeout_sec": 30, "retries": 2},
-        {"name": "prep_materials", "task_queue": "hub_tasks",
-         "description": "Prepare call prep and playbook materials",
-         "timeout_sec": 120, "retries": 1},
+        {
+            "name": "analyze_opportunity",
+            "task_queue": "hub_tasks",
+            "description": "Analyze opportunity details and requirements",
+            "timeout_sec": 60,
+            "retries": 1,
+        },
+        {
+            "name": "competitive_analysis",
+            "task_queue": "hub_tasks",
+            "description": "Run competitive density analysis for region",
+            "timeout_sec": 60,
+            "retries": 1,
+        },
+        {
+            "name": "identify_contacts",
+            "task_queue": "hub_tasks",
+            "description": "Find relevant contacts for this opportunity",
+            "timeout_sec": 60,
+            "retries": 1,
+        },
+        {
+            "name": "score_and_prioritize",
+            "task_queue": "hub_tasks",
+            "description": "Score and set BD priority",
+            "timeout_sec": 30,
+            "retries": 1,
+        },
+        {
+            "name": "assign_bd_rep",
+            "task_queue": "n8n_tasks",
+            "description": "Assign BD representative and notify",
+            "timeout_sec": 30,
+            "retries": 2,
+        },
+        {
+            "name": "prep_materials",
+            "task_queue": "hub_tasks",
+            "description": "Prepare call prep and playbook materials",
+            "timeout_sec": 120,
+            "retries": 1,
+        },
     ],
     timeout_sec=900,
     max_retries=2,
@@ -266,6 +358,7 @@ BUILTIN_WORKFLOWS: Dict[str, WorkflowDefinition] = {
 # TEMPORAL WORKFLOW ENGINE
 # =========================================
 
+
 class TemporalWorkflowEngine:
     """Durable workflow execution engine with checkpointing, retry, and saga compensation.
 
@@ -279,8 +372,10 @@ class TemporalWorkflowEngine:
         self._step_handlers: Dict[str, Callable] = {}
         self._compensation_handlers: Dict[str, Callable] = {}
         self._run_counter = 0
-        logger.info("TemporalWorkflowEngine initialized with %d built-in workflows",
-                     len(self._workflows))
+        logger.info(
+            "TemporalWorkflowEngine initialized with %d built-in workflows",
+            len(self._workflows),
+        )
 
     # ----- workflow registry -----
 
@@ -308,7 +403,9 @@ class TemporalWorkflowEngine:
     # ----- execution -----
 
     def start_workflow(
-        self, workflow_id: str, params: Optional[Dict[str, Any]] = None,
+        self,
+        workflow_id: str,
+        params: Optional[Dict[str, Any]] = None,
     ) -> WorkflowRun:
         """Start a new workflow run.  Returns the WorkflowRun immediately."""
         defn = self._workflows.get(workflow_id)
@@ -386,7 +483,9 @@ class TemporalWorkflowEngine:
                 except Exception as exc:
                     last_error = str(exc)
                     cp.status = StepStatus.RETRYING
-                    logger.warning("Step %s attempt %d failed: %s", step_name, attempt, exc)
+                    logger.warning(
+                        "Step %s attempt %d failed: %s", step_name, attempt, exc
+                    )
 
             if not success:
                 cp.status = StepStatus.FAILED
@@ -404,7 +503,9 @@ class TemporalWorkflowEngine:
                             prev_cp.status = StepStatus.COMPENSATED
                             run.compensations_run += 1
                         except Exception as ce:
-                            logger.error("Compensation failed for %s: %s", prev_cp.step_name, ce)
+                            logger.error(
+                                "Compensation failed for %s: %s", prev_cp.step_name, ce
+                            )
 
                 run.status = WorkflowStatus.FAILED
                 run.error = f"Step '{step_name}' failed: {last_error}"
@@ -421,7 +522,9 @@ class TemporalWorkflowEngine:
         run.duration_sec = sum(c.duration_sec for c in run.checkpoints)
         run.output = {
             "total_steps": len(run.checkpoints),
-            "completed_steps": sum(1 for c in run.checkpoints if c.status == StepStatus.COMPLETED),
+            "completed_steps": sum(
+                1 for c in run.checkpoints if c.status == StepStatus.COMPLETED
+            ),
         }
         logger.info("Workflow %s completed in %.3fs", run_id, run.duration_sec)
         return run
@@ -459,7 +562,11 @@ class TemporalWorkflowEngine:
 
     def cancel_run(self, run_id: str) -> bool:
         run = self._runs.get(run_id)
-        if run and run.status in (WorkflowStatus.PENDING, WorkflowStatus.RUNNING, WorkflowStatus.PAUSED):
+        if run and run.status in (
+            WorkflowStatus.PENDING,
+            WorkflowStatus.RUNNING,
+            WorkflowStatus.PAUSED,
+        ):
             run.status = WorkflowStatus.CANCELLED
             run.completed_at = datetime.utcnow().isoformat()
             return True

@@ -18,7 +18,7 @@ class ExportEngine:
     async def to_svg(self, html: str) -> bytes:
         """Extract SVG from rendered D3.js HTML."""
         # Extract SVG content from HTML
-        svg_match = re.search(r'(<svg[^>]*>.*?</svg>)', html, re.DOTALL)
+        svg_match = re.search(r"(<svg[^>]*>.*?</svg>)", html, re.DOTALL)
         if svg_match:
             svg_content = svg_match.group(1)
             # Add XML header
@@ -32,9 +32,12 @@ class ExportEngine:
         """Render HTML to PNG using Playwright (if available)."""
         try:
             from playwright.async_api import async_playwright
+
             async with async_playwright() as pw:
                 browser = await pw.chromium.launch(headless=True)
-                page = await browser.new_page(viewport={"width": width, "height": height})
+                page = await browser.new_page(
+                    viewport={"width": width, "height": height}
+                )
                 await page.set_content(html)
                 await page.wait_for_timeout(2000)  # Wait for D3.js rendering
                 screenshot = await page.screenshot(type="png", full_page=True)
@@ -51,6 +54,7 @@ class ExportEngine:
         """Render to PDF with proper page sizing."""
         try:
             from playwright.async_api import async_playwright
+
             async with async_playwright() as pw:
                 browser = await pw.chromium.launch(headless=True)
                 page = await browser.new_page()
@@ -74,6 +78,7 @@ class ExportEngine:
         """Generate Word doc with contact table."""
         try:
             from docx import Document
+
             doc = Document()
             doc.add_heading(org_chart.title, level=1)
             doc.add_paragraph(f"Generated: {org_chart.generated_at}")
@@ -96,6 +101,7 @@ class ExportEngine:
                     row.cells[4].text = person.reports_to or ""
 
             import io
+
             buffer = io.BytesIO()
             doc.save(buffer)
             return buffer.getvalue()
@@ -109,6 +115,7 @@ class ExportEngine:
     async def to_json(self, org_chart) -> Dict[str, Any]:
         """Raw org chart data as JSON."""
         from dataclasses import asdict
+
         return asdict(org_chart)
 
     async def to_mermaid(self, org_chart) -> str:

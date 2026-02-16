@@ -1,6 +1,7 @@
 """
 Integration layer connecting UltraRAG to existing retrieval infrastructure.
 """
+
 from typing import List, Dict
 import structlog
 
@@ -26,12 +27,14 @@ class BDUltraRAG:
     BD-specific UltraRAG integration with existing Hub infrastructure.
     """
 
-    def __init__(self,
-                 qdrant_client=None,
-                 bm25_index=None,
-                 page_index: PageIndex = None,
-                 knowledge_graph=None,
-                 llm_client=None):
+    def __init__(
+        self,
+        qdrant_client=None,
+        bm25_index=None,
+        page_index: PageIndex = None,
+        knowledge_graph=None,
+        llm_client=None,
+    ):
         """
         Initialize with existing retrieval components.
 
@@ -52,20 +55,22 @@ class BDUltraRAG:
         config = PipelineConfig(
             parallel_retrieval=True,
             self_reflection=llm_client is not None,
-            citation_required=True
+            citation_required=True,
         )
 
         self.ultra = UltraRAG(
             retriever_func=self._unified_retrieve,
             llm_func=self._llm_generate if llm_client else None,
-            config=config
+            config=config,
         )
 
-    def _unified_retrieve(self,
-                          query: str,
-                          strategy: str = "hybrid",
-                          top_k: int = 5,
-                          collection: str = None) -> List[Dict]:
+    def _unified_retrieve(
+        self,
+        query: str,
+        strategy: str = "hybrid",
+        top_k: int = 5,
+        collection: str = None,
+    ) -> List[Dict]:
         """
         Unified retrieval across all backends.
         """
@@ -75,7 +80,9 @@ class BDUltraRAG:
             # Vector search via Qdrant
             try:
                 if self.qdrant:
-                    collections = [collection] if collection else ["jobs", "contacts", "programs"]
+                    collections = (
+                        [collection] if collection else ["jobs", "contacts", "programs"]
+                    )
                     for coll in collections:
                         try:
                             # Qdrant search implementation
@@ -93,7 +100,9 @@ class BDUltraRAG:
                             #     })
                             pass
                         except Exception as e:
-                            logger.error("qdrant_search_error", collection=coll, error=str(e))
+                            logger.error(
+                                "qdrant_search_error", collection=coll, error=str(e)
+                            )
             except Exception as e:
                 logger.error("vector_search_error", error=str(e))
 
@@ -109,19 +118,23 @@ class BDUltraRAG:
                 logger.error("bm25_search_error", error=str(e))
 
         # PageIndex: use for "pageindex" strategy OR as fallback for "hybrid" when no other results
-        if self.page_index and (strategy == "pageindex" or (strategy == "hybrid" and len(results) == 0)):
+        if self.page_index and (
+            strategy == "pageindex" or (strategy == "hybrid" and len(results) == 0)
+        ):
             # PageIndex search
             try:
                 page_results = self.page_index.search(query, top_k=top_k)
                 for r in page_results:
-                    results.append({
-                        "content": r.content,
-                        "source": r.document_name,
-                        "page": r.page_number,
-                        "score": r.score,
-                        "citation": r.citation,
-                        "matched_terms": r.matched_terms
-                    })
+                    results.append(
+                        {
+                            "content": r.content,
+                            "source": r.document_name,
+                            "page": r.page_number,
+                            "score": r.score,
+                            "citation": r.citation,
+                            "matched_terms": r.matched_terms,
+                        }
+                    )
             except Exception as e:
                 logger.error("page_index_search_error", error=str(e))
 
@@ -145,19 +158,19 @@ class BDUltraRAG:
 
         try:
             # Anthropic client
-            if hasattr(self.llm, 'messages'):
+            if hasattr(self.llm, "messages"):
                 response = self.llm.messages.create(
                     model="claude-3-haiku-20240307",
                     max_tokens=1024,
-                    messages=[{"role": "user", "content": prompt}]
+                    messages=[{"role": "user", "content": prompt}],
                 )
                 return response.content[0].text
 
             # OpenAI client
-            if hasattr(self.llm, 'chat'):
+            if hasattr(self.llm, "chat"):
                 response = self.llm.chat.completions.create(
                     model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}]
+                    messages=[{"role": "user", "content": prompt}],
                 )
                 return response.choices[0].message.content
 
@@ -183,7 +196,7 @@ class BDUltraRAG:
             "analysis": plan.final_answer,
             "confidence": plan.confidence,
             "citations": plan.citations,
-            "execution_time_ms": plan.execution_time_ms
+            "execution_time_ms": plan.execution_time_ms,
         }
 
     async def research_contact(self, contact_name: str) -> Dict:
@@ -198,7 +211,7 @@ class BDUltraRAG:
             "contact": contact_name,
             "research": plan.final_answer,
             "confidence": plan.confidence,
-            "citations": plan.citations
+            "citations": plan.citations,
         }
 
     async def compare_programs(self, program1: str, program2: str) -> Dict:
@@ -214,7 +227,7 @@ class BDUltraRAG:
             "comparison": plan.final_answer,
             "sub_queries": plan.sub_queries,
             "confidence": plan.confidence,
-            "citations": plan.citations
+            "citations": plan.citations,
         }
 
     async def verify_fact(self, claim: str) -> Dict:
@@ -230,7 +243,7 @@ class BDUltraRAG:
             "verification": plan.final_answer,
             "confidence": plan.confidence,
             "citations": plan.citations,
-            "verified": plan.confidence > 0.7
+            "verified": plan.confidence > 0.7,
         }
 
     def query_sync(self, query: str, pipeline: str = "auto") -> Dict:
@@ -244,7 +257,7 @@ class BDUltraRAG:
             "confidence": plan.confidence,
             "citations": plan.citations,
             "sub_queries": plan.sub_queries,
-            "execution_time_ms": plan.execution_time_ms
+            "execution_time_ms": plan.execution_time_ms,
         }
 
     def list_pipelines(self) -> List[Dict]:

@@ -46,7 +46,11 @@ class TestJobIntelProcessor:
         event = Event(
             event_type="job.scraped",
             source="scraper",
-            payload={"title": "Systems Analyst", "company": "GDIT", "location": "Langley, VA"},
+            payload={
+                "title": "Systems Analyst",
+                "company": "GDIT",
+                "location": "Langley, VA",
+            },
         )
         await proc.handle(event)
 
@@ -73,7 +77,9 @@ class TestJobIntelProcessor:
         )
         await proc.handle(event)
 
-        signal_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"]
+        signal_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"
+        ]
         assert len(signal_calls) >= 1
 
     async def test_duplicate_job_skipped(self):
@@ -91,7 +97,9 @@ class TestJobIntelProcessor:
         await proc.handle(event)
 
         # Should NOT publish enriched (was a duplicate)
-        enriched_calls = [c for c in bus.publish.call_args_list if c[0][0] == "jobs:enriched"]
+        enriched_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "jobs:enriched"
+        ]
         assert len(enriched_calls) == 0
 
     async def test_processor_tracks_count(self):
@@ -132,7 +140,9 @@ class TestContractIntelProcessor:
         )
         await proc.handle(event)
 
-        alert_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"]
+        alert_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"
+        ]
         assert len(alert_calls) >= 1
 
     async def test_pts_capability_match_critical_signal(self):
@@ -153,7 +163,9 @@ class TestContractIntelProcessor:
         )
         await proc.handle(event)
 
-        signal_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"]
+        signal_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"
+        ]
         assert len(signal_calls) >= 1
         signal_event = signal_calls[0][0][1]
         assert signal_event.priority == "critical"
@@ -183,7 +195,9 @@ class TestContractIntelProcessor:
         )
         await proc.handle(event)
 
-        signal_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"]
+        signal_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"
+        ]
         assert len(signal_calls) == 0
 
 
@@ -224,7 +238,9 @@ class TestContactChangeProcessor:
         )
         await proc.handle(event)
 
-        alert_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"]
+        alert_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"
+        ]
         assert len(alert_calls) >= 1
 
     async def test_company_change_publishes_signal(self):
@@ -244,7 +260,9 @@ class TestContactChangeProcessor:
         )
         await proc.handle(event)
 
-        signal_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"]
+        signal_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"
+        ]
         assert len(signal_calls) >= 1
 
     async def test_location_program_assignment(self):
@@ -257,7 +275,10 @@ class TestContactChangeProcessor:
     async def test_priority_scoring(self):
         """Should score BD priority based on tier and program."""
         proc = ContactChangeProcessor(_make_mock_bus())
-        assert proc._score_priority(1, "AF DCGS - PACAF", {"clearance": "TS/SCI"}) == "Critical"
+        assert (
+            proc._score_priority(1, "AF DCGS - PACAF", {"clearance": "TS/SCI"})
+            == "Critical"
+        )
         assert proc._score_priority(4, None, {}) == "Standard"
 
 
@@ -278,11 +299,18 @@ class TestCampaignEventProcessor:
         event = Event(
             event_type="campaign.response",
             source="outreach",
-            payload={"campaign_id": "c-1", "contact_id": "ct-1", "outcome": "interested", "channel": "email"},
+            payload={
+                "campaign_id": "c-1",
+                "contact_id": "ct-1",
+                "outcome": "interested",
+                "channel": "email",
+            },
         )
         await proc.handle(event)
 
-        signal_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"]
+        signal_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:signals"
+        ]
         assert len(signal_calls) >= 1
 
     async def test_meeting_booked_publishes_prep(self):
@@ -293,11 +321,18 @@ class TestCampaignEventProcessor:
         event = Event(
             event_type="campaign.response",
             source="outreach",
-            payload={"campaign_id": "c-1", "contact_id": "ct-1", "outcome": "meeting_booked", "channel": "linkedin"},
+            payload={
+                "campaign_id": "c-1",
+                "contact_id": "ct-1",
+                "outcome": "meeting_booked",
+                "channel": "linkedin",
+            },
         )
         await proc.handle(event)
 
-        campaign_calls = [c for c in bus.publish.call_args_list if c[0][0] == "campaigns:events"]
+        campaign_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "campaigns:events"
+        ]
         assert len(campaign_calls) >= 1
 
     async def test_rejection_publishes_cadence_adjust(self):
@@ -308,11 +343,18 @@ class TestCampaignEventProcessor:
         event = Event(
             event_type="campaign.response",
             source="outreach",
-            payload={"campaign_id": "c-1", "contact_id": "ct-1", "outcome": "rejected", "channel": "email"},
+            payload={
+                "campaign_id": "c-1",
+                "contact_id": "ct-1",
+                "outcome": "rejected",
+                "channel": "email",
+            },
         )
         await proc.handle(event)
 
-        campaign_calls = [c for c in bus.publish.call_args_list if c[0][0] == "campaigns:events"]
+        campaign_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "campaigns:events"
+        ]
         assert len(campaign_calls) >= 1
 
 
@@ -333,11 +375,17 @@ class TestAnomalyProcessor:
         event = Event(
             event_type="anomaly.detected",
             source="detector",
-            payload={"anomaly_type": "PATTERN_SHIFT", "severity": "high", "description": "Pattern shift detected"},
+            payload={
+                "anomaly_type": "PATTERN_SHIFT",
+                "severity": "high",
+                "description": "Pattern shift detected",
+            },
         )
         await proc.handle(event)
 
-        alert_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"]
+        alert_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"
+        ]
         assert len(alert_calls) >= 1
 
     async def test_volume_spike_adjusts_frequency(self):
@@ -348,11 +396,17 @@ class TestAnomalyProcessor:
         event = Event(
             event_type="anomaly.detected",
             source="detector",
-            payload={"anomaly_type": "VOLUME_SPIKE", "severity": "medium", "multiplier": 3.0},
+            payload={
+                "anomaly_type": "VOLUME_SPIKE",
+                "severity": "medium",
+                "multiplier": 3.0,
+            },
         )
         await proc.handle(event)
 
-        health_calls = [c for c in bus.publish.call_args_list if c[0][0] == "system:health"]
+        health_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "system:health"
+        ]
         assert len(health_calls) >= 1
 
     async def test_pacaf_priority_keyword_critical_alert(self):
@@ -363,15 +417,21 @@ class TestAnomalyProcessor:
         event = Event(
             event_type="anomaly.detected",
             source="detector",
-            payload={"anomaly_type": "VOLUME_SPIKE", "severity": "low", "program": "PACAF Operations", "description": "Surge at PACAF"},
+            payload={
+                "anomaly_type": "VOLUME_SPIKE",
+                "severity": "low",
+                "program": "PACAF Operations",
+                "description": "Surge at PACAF",
+            },
         )
         await proc.handle(event)
 
-        alert_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"]
+        alert_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"
+        ]
         # Should have at least one for priority keyword
         priority_calls = [
-            c for c in alert_calls
-            if c[0][1].event_type == "anomaly.priority_program"
+            c for c in alert_calls if c[0][1].event_type == "anomaly.priority_program"
         ]
         assert len(priority_calls) >= 1
 
@@ -409,11 +469,17 @@ class TestSystemHealthProcessor:
             event = Event(
                 event_type="health.check",
                 source="monitor",
-                payload={"service": "scraper_v2", "status": "error", "error": f"Timeout #{i+1}"},
+                payload={
+                    "service": "scraper_v2",
+                    "status": "error",
+                    "error": f"Timeout #{i + 1}",
+                },
             )
             await proc.handle(event)
 
-        alert_calls = [c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"]
+        alert_calls = [
+            c for c in bus.publish.call_args_list if c[0][0] == "intel:alerts"
+        ]
         assert len(alert_calls) >= 1
 
     async def test_success_resets_failure_count(self):
@@ -424,14 +490,16 @@ class TestSystemHealthProcessor:
         # Two failures
         for i in range(2):
             event = Event(
-                event_type="health.check", source="monitor",
+                event_type="health.check",
+                source="monitor",
                 payload={"service": "api", "status": "error"},
             )
             await proc.handle(event)
 
         # Success
         event = Event(
-            event_type="health.check", source="monitor",
+            event_type="health.check",
+            source="monitor",
             payload={"service": "api", "status": "healthy"},
         )
         await proc.handle(event)

@@ -52,7 +52,9 @@ class TestDefenseNERInit:
     def test_init_without_spacy(self):
         """DefenseNER should initialize gracefully when spaCy is not available."""
         with patch.dict("sys.modules", {"spacy": None}):
-            with patch("Engine8_Knowledge.ml.defense_ner.DefenseNER._load_model") as mock_load:
+            with patch(
+                "Engine8_Knowledge.ml.defense_ner.DefenseNER._load_model"
+            ) as mock_load:
                 DefenseNER()
                 mock_load.assert_called_once()
 
@@ -71,9 +73,16 @@ class TestDefenseNERInit:
     def test_entity_types_defined(self, ner):
         """ENTITY_TYPES should contain all expected defense entity categories."""
         expected = {
-            "PROGRAM", "CONTRACT", "COMPANY", "INSTALLATION",
-            "CLEARANCE", "NAICS", "ROLE_TITLE", "SET_ASIDE",
-            "AGENCY", "VALUE",
+            "PROGRAM",
+            "CONTRACT",
+            "COMPANY",
+            "INSTALLATION",
+            "CLEARANCE",
+            "NAICS",
+            "ROLE_TITLE",
+            "SET_ASIDE",
+            "AGENCY",
+            "VALUE",
         }
         assert set(ner.ENTITY_TYPES) == expected
 
@@ -202,13 +211,17 @@ class TestTrainingDataGeneration:
     def test_generate_training_data_has_company_examples(self, ner):
         """Generated data should include examples for each known company."""
         data = ner.generate_training_data()
-        company_examples = [d for d in data if any(e["label"] == "COMPANY" for e in d.entities)]
+        company_examples = [
+            d for d in data if any(e["label"] == "COMPANY" for e in d.entities)
+        ]
         assert len(company_examples) == len(ner.PATTERNS["COMPANY"])
 
     def test_generate_training_data_has_clearance_examples(self, ner):
         """Generated data should include examples for clearance entities."""
         data = ner.generate_training_data()
-        clearance_examples = [d for d in data if any(e["label"] == "CLEARANCE" for e in d.entities)]
+        clearance_examples = [
+            d for d in data if any(e["label"] == "CLEARANCE" for e in d.entities)
+        ]
         assert len(clearance_examples) == len(ner.PATTERNS["CLEARANCE"])
 
     def test_generate_training_data_entity_spans_are_valid(self, ner):
@@ -216,7 +229,7 @@ class TestTrainingDataGeneration:
         data = ner.generate_training_data()
         for example in data:
             for ent in example.entities:
-                extracted = example.text[ent["start"]:ent["end"]]
+                extracted = example.text[ent["start"] : ent["end"]]
                 assert len(extracted) > 0
 
 
@@ -288,6 +301,7 @@ class TestSingleton:
         """get_defense_ner() should return a DefenseNER instance."""
         # Reset the module-level singleton
         import Engine8_Knowledge.ml.defense_ner as mod
+
         mod._ner = None
         instance = get_defense_ner()
         assert isinstance(instance, DefenseNER)
@@ -295,6 +309,7 @@ class TestSingleton:
     def test_get_defense_ner_is_singleton(self):
         """Calling get_defense_ner() twice should return the same instance."""
         import Engine8_Knowledge.ml.defense_ner as mod
+
         mod._ner = None
         a = get_defense_ner()
         b = get_defense_ner()

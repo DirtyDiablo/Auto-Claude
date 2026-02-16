@@ -20,11 +20,12 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-logger = logging.getLogger('BD-AIEnrichment')
+logger = logging.getLogger("BD-AIEnrichment")
 
 # Try to import Anthropic
 try:
     from anthropic import Anthropic
+
     HAS_ANTHROPIC = True
 except ImportError:
     HAS_ANTHROPIC = False
@@ -34,6 +35,7 @@ except ImportError:
 @dataclass
 class EnrichmentResult:
     """Result from AI enrichment."""
+
     experience_years: Optional[int] = None
     skills: Optional[str] = None  # Comma-separated top 3
     technologies: Optional[str] = None  # Comma-separated top 3
@@ -76,11 +78,12 @@ Response format (JSON only):
 # ENRICHMENT ENGINE
 # ===========================================
 
+
 class AIEnrichmentEngine:
     """Engine for AI-powered job enrichment using Claude."""
 
     def __init__(self, api_key: str = None, model: str = "claude-sonnet-4-20250514"):
-        self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
+        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         self.model = model
         self._client = None
 
@@ -113,9 +116,7 @@ class AIEnrichmentEngine:
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=1024,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             # Extract text content
@@ -123,20 +124,20 @@ class AIEnrichmentEngine:
 
             # Parse JSON response
             # Handle markdown code blocks
-            if text.startswith('```'):
-                text = re.sub(r'^```(?:json)?\s*', '', text)
-                text = re.sub(r'\s*```$', '', text)
+            if text.startswith("```"):
+                text = re.sub(r"^```(?:json)?\s*", "", text)
+                text = re.sub(r"\s*```$", "", text)
 
             data = json.loads(text)
 
             return EnrichmentResult(
-                experience_years=data.get('experience_years'),
-                skills=data.get('skills'),
-                technologies=data.get('technologies'),
-                certifications_required=data.get('certifications_required'),
-                certifications_extra=data.get('certifications_extra'),
-                clearance_detected=data.get('clearance_level'),
-                raw_response=data
+                experience_years=data.get("experience_years"),
+                skills=data.get("skills"),
+                technologies=data.get("technologies"),
+                certifications_required=data.get("certifications_required"),
+                certifications_extra=data.get("certifications_extra"),
+                clearance_detected=data.get("clearance_level"),
+                raw_response=data,
             )
 
         except json.JSONDecodeError as e:
@@ -146,7 +147,9 @@ class AIEnrichmentEngine:
             logger.error(f"AI enrichment failed: {e}")
             return EnrichmentResult()
 
-    def enrich_jobs_batch(self, jobs: List[Dict], description_key: str = 'description') -> List[Dict]:
+    def enrich_jobs_batch(
+        self, jobs: List[Dict], description_key: str = "description"
+    ) -> List[Dict]:
         """Enrich a batch of jobs with AI-extracted data.
 
         Args:
@@ -159,32 +162,34 @@ class AIEnrichmentEngine:
         enriched = []
 
         for i, job in enumerate(jobs):
-            logger.info(f"Enriching job {i+1}/{len(jobs)}: {job.get('title', 'Unknown')[:50]}")
+            logger.info(
+                f"Enriching job {i + 1}/{len(jobs)}: {job.get('title', 'Unknown')[:50]}"
+            )
 
-            description = job.get(description_key, '')
+            description = job.get(description_key, "")
             result = self.enrich_job(description)
 
             # Merge enrichment into job
             job_copy = job.copy()
 
             if result.experience_years is not None:
-                job_copy['experience_years'] = result.experience_years
+                job_copy["experience_years"] = result.experience_years
 
             if result.skills:
-                job_copy['skills'] = result.skills
+                job_copy["skills"] = result.skills
 
             if result.technologies:
-                job_copy['technologies'] = result.technologies
+                job_copy["technologies"] = result.technologies
 
             if result.certifications_required:
-                job_copy['certifications_required'] = result.certifications_required
+                job_copy["certifications_required"] = result.certifications_required
 
             if result.certifications_extra:
-                job_copy['certifications_extra'] = result.certifications_extra
+                job_copy["certifications_extra"] = result.certifications_extra
 
             # Only override clearance if not already set
-            if result.clearance_detected and not job_copy.get('clearance'):
-                job_copy['clearance'] = result.clearance_detected
+            if result.clearance_detected and not job_copy.get("clearance"):
+                job_copy["clearance"] = result.clearance_detected
 
             enriched.append(job_copy)
 
@@ -195,13 +200,14 @@ class AIEnrichmentEngine:
 # FALLBACK EXTRACTION (No API Required)
 # ===========================================
 
+
 def extract_experience_fallback(description: str) -> Optional[int]:
     """Extract years of experience using regex patterns."""
     patterns = [
-        r'(\d+)\+?\s*years?\s*(?:of\s+)?(?:experience|exp)',
-        r'(?:minimum|min|at\s+least)\s*(\d+)\s*years?',
-        r'(\d+)\s*years?\s*(?:minimum|min)',
-        r'experience[:\s]+(\d+)\+?\s*years?',
+        r"(\d+)\+?\s*years?\s*(?:of\s+)?(?:experience|exp)",
+        r"(?:minimum|min|at\s+least)\s*(\d+)\s*years?",
+        r"(\d+)\s*years?\s*(?:minimum|min)",
+        r"experience[:\s]+(\d+)\+?\s*years?",
     ]
 
     for pattern in patterns:
@@ -215,26 +221,28 @@ def extract_experience_fallback(description: str) -> Optional[int]:
     return None
 
 
-def extract_certifications_fallback(description: str) -> tuple[Optional[str], Optional[str]]:
+def extract_certifications_fallback(
+    description: str,
+) -> tuple[Optional[str], Optional[str]]:
     """Extract certifications using pattern matching."""
     # Common certification patterns
     cert_patterns = [
-        r'Security\+',
-        r'CISSP',
-        r'CISM',
-        r'CEH',
-        r'CompTIA\s+\w+',
-        r'AWS\s+Certified\s+\w+',
-        r'Azure\s+\w+',
-        r'PMP',
-        r'CCNA',
-        r'CCNP',
-        r'CCIE',
-        r'ITIL',
-        r'IAT\s+Level\s+[I]+',
-        r'8570\s+\w+',
-        r'Red\s+Hat\s+\w+',
-        r'Kubernetes\s+\w+',
+        r"Security\+",
+        r"CISSP",
+        r"CISM",
+        r"CEH",
+        r"CompTIA\s+\w+",
+        r"AWS\s+Certified\s+\w+",
+        r"Azure\s+\w+",
+        r"PMP",
+        r"CCNA",
+        r"CCNP",
+        r"CCIE",
+        r"ITIL",
+        r"IAT\s+Level\s+[I]+",
+        r"8570\s+\w+",
+        r"Red\s+Hat\s+\w+",
+        r"Kubernetes\s+\w+",
     ]
 
     found = []
@@ -246,8 +254,14 @@ def extract_certifications_fallback(description: str) -> tuple[Optional[str], Op
         return None, None
 
     # Try to separate required vs preferred
-    required_section = re.search(r'required.*?(?=preferred|nice|desired|$)', description, re.IGNORECASE | re.DOTALL)
-    preferred_section = re.search(r'(?:preferred|nice|desired).*', description, re.IGNORECASE | re.DOTALL)
+    required_section = re.search(
+        r"required.*?(?=preferred|nice|desired|$)",
+        description,
+        re.IGNORECASE | re.DOTALL,
+    )
+    preferred_section = re.search(
+        r"(?:preferred|nice|desired).*", description, re.IGNORECASE | re.DOTALL
+    )
 
     required_certs = []
     extra_certs = []
@@ -261,8 +275,8 @@ def extract_certifications_fallback(description: str) -> tuple[Optional[str], Op
         else:
             required_certs.append(cert)  # Default to required
 
-    required_str = ', '.join(required_certs[:5]) if required_certs else None
-    extra_str = ', '.join(extra_certs[:5]) if extra_certs else None
+    required_str = ", ".join(required_certs[:5]) if required_certs else None
+    extra_str = ", ".join(extra_certs[:5]) if extra_certs else None
 
     return required_str, extra_str
 
@@ -278,7 +292,7 @@ class FallbackEnrichmentEngine:
         return EnrichmentResult(
             experience_years=experience,
             certifications_required=req_certs,
-            certifications_extra=extra_certs
+            certifications_extra=extra_certs,
         )
 
 
@@ -286,28 +300,33 @@ class FallbackEnrichmentEngine:
 # CLI INTERFACE
 # ===========================================
 
+
 def main():
     """CLI for testing AI enrichment."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='AI Enrichment Engine')
-    parser.add_argument('--input', '-i', required=True, help='Input JSON file with jobs')
-    parser.add_argument('--output', '-o', help='Output JSON file')
-    parser.add_argument('--limit', '-l', type=int, help='Limit number of jobs to process')
-    parser.add_argument('--fallback', action='store_true', help='Use fallback (no API)')
-    parser.add_argument('--test', action='store_true', help='Test with single job')
+    parser = argparse.ArgumentParser(description="AI Enrichment Engine")
+    parser.add_argument(
+        "--input", "-i", required=True, help="Input JSON file with jobs"
+    )
+    parser.add_argument("--output", "-o", help="Output JSON file")
+    parser.add_argument(
+        "--limit", "-l", type=int, help="Limit number of jobs to process"
+    )
+    parser.add_argument("--fallback", action="store_true", help="Use fallback (no API)")
+    parser.add_argument("--test", action="store_true", help="Test with single job")
 
     args = parser.parse_args()
 
     # Load jobs
-    with open(args.input, 'r', encoding='utf-8') as f:
+    with open(args.input, "r", encoding="utf-8") as f:
         jobs = json.load(f)
 
     if isinstance(jobs, dict):
         jobs = [jobs]
 
     if args.limit:
-        jobs = jobs[:args.limit]
+        jobs = jobs[: args.limit]
 
     print(f"Loaded {len(jobs)} jobs")
 
@@ -325,7 +344,7 @@ def main():
         print(f"\nTest job: {job.get('title', job.get('jobTitle', 'Unknown'))}")
         print(f"Description length: {len(job.get('description', ''))}")
 
-        result = engine.enrich_job(job.get('description', ''))
+        result = engine.enrich_job(job.get("description", ""))
         print(f"\nEnrichment Result:")
         print(f"  Experience: {result.experience_years} years")
         print(f"  Skills: {result.skills}")
@@ -339,14 +358,14 @@ def main():
     enriched = engine.enrich_jobs_batch(jobs)
 
     if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             json.dump(enriched, f, indent=2)
         print(f"\nSaved enriched jobs to: {args.output}")
 
     # Summary
-    with_experience = sum(1 for j in enriched if j.get('experience_years'))
-    with_skills = sum(1 for j in enriched if j.get('skills'))
-    with_certs = sum(1 for j in enriched if j.get('certifications_required'))
+    with_experience = sum(1 for j in enriched if j.get("experience_years"))
+    with_skills = sum(1 for j in enriched if j.get("skills"))
+    with_certs = sum(1 for j in enriched if j.get("certifications_required"))
 
     print(f"\nEnrichment Summary:")
     print(f"  Jobs with experience: {with_experience}/{len(enriched)}")
@@ -354,5 +373,5 @@ def main():
     print(f"  Jobs with certifications: {with_certs}/{len(enriched)}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

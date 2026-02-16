@@ -23,10 +23,13 @@ logger = logging.getLogger(__name__)
 
 try:
     from tree_sitter_language_pack import get_parser
+
     TREESITTER_AVAILABLE = True
 except ImportError:
     TREESITTER_AVAILABLE = False
-    logger.warning("tree-sitter-language-pack not installed. Install with: pip install tree-sitter-language-pack")
+    logger.warning(
+        "tree-sitter-language-pack not installed. Install with: pip install tree-sitter-language-pack"
+    )
 
 
 # Map file extensions to tree-sitter language names
@@ -66,6 +69,7 @@ EXTENSION_MAP = {
 @dataclass
 class FunctionDef:
     """Extracted function/method definition."""
+
     name: str
     start_line: int
     end_line: int
@@ -79,6 +83,7 @@ class FunctionDef:
 @dataclass
 class ClassDef:
     """Extracted class definition."""
+
     name: str
     start_line: int
     end_line: int
@@ -90,6 +95,7 @@ class ClassDef:
 @dataclass
 class ImportDef:
     """Extracted import statement."""
+
     module: str
     names: List[str] = field(default_factory=list)
     is_from: bool = False
@@ -99,6 +105,7 @@ class ImportDef:
 @dataclass
 class ParseResult:
     """Complete parse result for a file."""
+
     file_path: str
     language: str
     functions: List[FunctionDef] = field(default_factory=list)
@@ -113,7 +120,9 @@ class TreeSitterParser:
 
     def __init__(self):
         if not TREESITTER_AVAILABLE:
-            raise ImportError("tree-sitter-language-pack is required. Install with: pip install tree-sitter-language-pack")
+            raise ImportError(
+                "tree-sitter-language-pack is required. Install with: pip install tree-sitter-language-pack"
+            )
         self._parsers = {}
 
     def _get_parser(self, language: str):
@@ -122,7 +131,9 @@ class TreeSitterParser:
             try:
                 self._parsers[language] = get_parser(language)
             except Exception as e:
-                logger.warning("treesitter_language_not_found", language=language, error=str(e))
+                logger.warning(
+                    "treesitter_language_not_found", language=language, error=str(e)
+                )
                 return None
         return self._parsers[language]
 
@@ -144,21 +155,35 @@ class TreeSitterParser:
         """
         path = Path(file_path)
         if not path.exists():
-            return ParseResult(file_path=str(path), language="unknown", errors=[f"File not found: {path}"])
+            return ParseResult(
+                file_path=str(path),
+                language="unknown",
+                errors=[f"File not found: {path}"],
+            )
 
         lang = language or self.detect_language(str(path))
         if not lang:
-            return ParseResult(file_path=str(path), language="unknown", errors=[f"Unsupported file type: {path.suffix}"])
+            return ParseResult(
+                file_path=str(path),
+                language="unknown",
+                errors=[f"Unsupported file type: {path.suffix}"],
+            )
 
         parser = self._get_parser(lang)
         if not parser:
-            return ParseResult(file_path=str(path), language=lang, errors=[f"No parser for language: {lang}"])
+            return ParseResult(
+                file_path=str(path),
+                language=lang,
+                errors=[f"No parser for language: {lang}"],
+            )
 
         try:
             source = path.read_bytes()
             tree = parser.parse(source)
         except Exception as e:
-            return ParseResult(file_path=str(path), language=lang, errors=[f"Parse error: {e}"])
+            return ParseResult(
+                file_path=str(path), language=lang, errors=[f"Parse error: {e}"]
+            )
 
         result = ParseResult(
             file_path=str(path),
@@ -188,7 +213,7 @@ class TreeSitterParser:
 
     def _node_text(self, node, source: bytes) -> str:
         """Get text content of a node."""
-        return source[node.start_byte:node.end_byte].decode("utf-8", errors="replace")
+        return source[node.start_byte : node.end_byte].decode("utf-8", errors="replace")
 
     def _extract_python(self, root, source: bytes, result: ParseResult):
         """Extract Python-specific structures."""
@@ -231,7 +256,12 @@ class TreeSitterParser:
                 name = self._node_text(child, source)
             elif child.type == "parameters":
                 for param in child.children:
-                    if param.type in ("identifier", "typed_parameter", "default_parameter", "typed_default_parameter"):
+                    if param.type in (
+                        "identifier",
+                        "typed_parameter",
+                        "default_parameter",
+                        "typed_default_parameter",
+                    ):
                         params.append(self._node_text(param, source))
             elif child.type == "type":
                 return_type = self._node_text(child, source)
@@ -284,7 +314,8 @@ class TreeSitterParser:
                                 fn = self._parse_python_function(sub, source)
                                 fn.decorators = [
                                     self._node_text(d, source).strip()
-                                    for d in stmt.children if d.type == "decorator"
+                                    for d in stmt.children
+                                    if d.type == "decorator"
                                 ]
                                 methods.append(fn)
                     elif stmt.type == "expression_statement" and docstring is None:
@@ -331,8 +362,10 @@ class TreeSitterParser:
                     fn.name = self._node_text(child, source)
                 elif child.type == "formal_parameters":
                     fn.parameters = [
-                        self._node_text(p, source) for p in child.children
-                        if p.type in ("identifier", "required_parameter", "optional_parameter")
+                        self._node_text(p, source)
+                        for p in child.children
+                        if p.type
+                        in ("identifier", "required_parameter", "optional_parameter")
                     ]
             if fn.name:
                 result.functions.append(fn)
@@ -364,14 +397,18 @@ class TreeSitterParser:
         """Recursively find function/class-like nodes in any language."""
         if "function" in node.type.lower() and "definition" in node.type.lower():
             fn = FunctionDef(
-                name=self._node_text(node.children[1], source) if len(node.children) > 1 else "unknown",
+                name=self._node_text(node.children[1], source)
+                if len(node.children) > 1
+                else "unknown",
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
             )
             result.functions.append(fn)
         elif "class" in node.type.lower() and "definition" in node.type.lower():
             cls = ClassDef(
-                name=self._node_text(node.children[1], source) if len(node.children) > 1 else "unknown",
+                name=self._node_text(node.children[1], source)
+                if len(node.children) > 1
+                else "unknown",
                 start_line=node.start_point[0] + 1,
                 end_line=node.end_point[0] + 1,
             )
@@ -383,6 +420,7 @@ class TreeSitterParser:
 
 if __name__ == "__main__":
     import sys
+
     logging.basicConfig(level=logging.INFO)
 
     if len(sys.argv) < 2:
@@ -398,10 +436,14 @@ if __name__ == "__main__":
     print(f"Functions: {len(result.functions)}")
     for fn in result.functions:
         async_tag = "async " if fn.is_async else ""
-        print(f"  {async_tag}{fn.name}({', '.join(fn.parameters)}) L{fn.start_line}-{fn.end_line}")
+        print(
+            f"  {async_tag}{fn.name}({', '.join(fn.parameters)}) L{fn.start_line}-{fn.end_line}"
+        )
     print(f"Classes: {len(result.classes)}")
     for cls in result.classes:
-        print(f"  {cls.name}({', '.join(cls.bases)}) L{cls.start_line}-{cls.end_line} [{len(cls.methods)} methods]")
+        print(
+            f"  {cls.name}({', '.join(cls.bases)}) L{cls.start_line}-{cls.end_line} [{len(cls.methods)} methods]"
+        )
     print(f"Imports: {len(result.imports)}")
     for imp in result.imports:
         print(f"  {'from ' if imp.is_from else 'import '}{imp.module}")

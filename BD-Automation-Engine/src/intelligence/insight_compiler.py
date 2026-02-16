@@ -23,6 +23,7 @@ from src.intelligence.pattern_engine import (
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class BriefSection:
     heading: str = ""
@@ -114,6 +115,7 @@ class CampaignReview:
 # INSIGHT COMPILER
 # =========================================
 
+
 class InsightCompiler:
     """Compiles raw patterns and insights into executive-ready briefings."""
 
@@ -155,46 +157,56 @@ class InsightCompiler:
                     f"- [{opp['urgency'].upper()}] {opp['title']} "
                     f"(Score: {opp['score']}, Win Prob: {opp['win_probability']:.0%})"
                 )
-            sections.append(BriefSection(
-                heading="Top BD Opportunities",
-                content="\n".join(opp_lines),
-                priority="high",
-                data_points=opportunities[:5],
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Top BD Opportunities",
+                    content="\n".join(opp_lines),
+                    priority="high",
+                    data_points=opportunities[:5],
+                )
+            )
 
         # --- Pattern Alerts ---
         if active_patterns:
             pat_lines = []
             for p in active_patterns[:5]:
                 pat_lines.append(f"- [{p.pattern_type}] {p.title}: {p.description}")
-            sections.append(BriefSection(
-                heading="Strategic Patterns Detected",
-                content="\n".join(pat_lines),
-                priority="high",
-                data_points=[{"id": p.id, "type": p.pattern_type, "title": p.title}
-                             for p in active_patterns[:5]],
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Strategic Patterns Detected",
+                    content="\n".join(pat_lines),
+                    priority="high",
+                    data_points=[
+                        {"id": p.id, "type": p.pattern_type, "title": p.title}
+                        for p in active_patterns[:5]
+                    ],
+                )
+            )
 
         # --- Outreach Performance ---
-        sections.append(BriefSection(
-            heading="Outreach Performance",
-            content=(
-                f"Overall response rate: {outreach['overall_rate']:.0%} "
-                f"({outreach['total_responses']}/{outreach['total_attempts']} responses)"
-            ),
-            priority="medium",
-            data_points=[outreach],
-        ))
+        sections.append(
+            BriefSection(
+                heading="Outreach Performance",
+                content=(
+                    f"Overall response rate: {outreach['overall_rate']:.0%} "
+                    f"({outreach['total_responses']}/{outreach['total_attempts']} responses)"
+                ),
+                priority="medium",
+                data_points=[outreach],
+            )
+        )
 
         # --- Competitive Landscape ---
         comp_insights = [i for i in insights if i.domain == "competitive"]
         if comp_insights:
             comp_lines = [f"- {i.title}: {i.description}" for i in comp_insights[:3]]
-            sections.append(BriefSection(
-                heading="Competitive Intelligence",
-                content="\n".join(comp_lines),
-                priority="medium",
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Competitive Intelligence",
+                    content="\n".join(comp_lines),
+                    priority="medium",
+                )
+            )
 
         # Executive summary
         n_opp = len(opportunities)
@@ -251,31 +263,37 @@ class InsightCompiler:
         prog_insights = [i for i in insights if i.domain == "program"]
         if prog_insights:
             prog_lines = [f"- {i.title}: {i.description}" for i in prog_insights]
-            sections.append(BriefSection(
-                heading="Program Trends",
-                content="\n".join(prog_lines),
-                priority="high",
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Program Trends",
+                    content="\n".join(prog_lines),
+                    priority="high",
+                )
+            )
 
         # --- Contact Intelligence ---
         contact_insights = [i for i in insights if i.domain == "contact"]
         if contact_insights:
             contact_lines = [f"- {i.title}: {i.description}" for i in contact_insights]
-            sections.append(BriefSection(
-                heading="Contact Intelligence",
-                content="\n".join(contact_lines),
-                priority="medium",
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Contact Intelligence",
+                    content="\n".join(contact_lines),
+                    priority="medium",
+                )
+            )
 
         # --- Data Quality Health ---
         dq_insights = [i for i in insights if i.domain == "data_quality"]
         if dq_insights:
             dq_lines = [f"- {i.title}: {i.description}" for i in dq_insights]
-            sections.append(BriefSection(
-                heading="Data Quality Health",
-                content="\n".join(dq_lines),
-                priority="medium",
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Data Quality Health",
+                    content="\n".join(dq_lines),
+                    priority="medium",
+                )
+            )
 
         # --- Competitive Landscape ---
         comp_data = competitive.get("competitors", {})
@@ -283,20 +301,24 @@ class InsightCompiler:
             comp_lines = []
             for comp, data in comp_data.items():
                 comp_lines.append(f"- {comp}: {data['total_postings']} total postings")
-            sections.append(BriefSection(
-                heading="Competitive Landscape",
-                content="\n".join(comp_lines),
-                priority="high",
-            ))
+            sections.append(
+                BriefSection(
+                    heading="Competitive Landscape",
+                    content="\n".join(comp_lines),
+                    priority="high",
+                )
+            )
 
         # Trend analysis
         trend_analysis = {
             "growing_programs": [
-                i.title for i in prog_insights
+                i.title
+                for i in prog_insights
                 if hasattr(i, "trend") and getattr(i, "trend", "") == "growing"
             ],
             "shrinking_programs": [
-                i.title for i in prog_insights
+                i.title
+                for i in prog_insights
                 if hasattr(i, "trend") and getattr(i, "trend", "") == "shrinking"
             ],
             "total_insights": stats["total_insights"],
@@ -315,11 +337,13 @@ class InsightCompiler:
         risk_factors: List[Dict[str, Any]] = []
         critical_insights = [i for i in insights if i.severity == "critical"]
         for ci in critical_insights:
-            risk_factors.append({
-                "risk": ci.title,
-                "description": ci.description,
-                "severity": ci.severity,
-            })
+            risk_factors.append(
+                {
+                    "risk": ci.title,
+                    "description": ci.description,
+                    "severity": ci.severity,
+                }
+            )
 
         exec_summary = (
             f"Monthly assessment: {stats['total_insights']} insights generated, "
@@ -417,7 +441,9 @@ class InsightCompiler:
             if ch_rate >= 0.5:
                 what_worked.append(f"{ch.title()} channel: {ch_rate:.0%} response rate")
             elif ch_rate < 0.3:
-                what_didnt.append(f"{ch.title()} channel: only {ch_rate:.0%} response rate")
+                what_didnt.append(
+                    f"{ch.title()} channel: only {ch_rate:.0%} response rate"
+                )
 
         # Effectiveness score (normalize response rate to 0-100)
         effectiveness = round(rate * 100, 1)

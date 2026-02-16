@@ -29,6 +29,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class DifyAppConfig:
     """Configuration for a Dify application."""
+
     name: str
     mode: str  # chat, workflow, agent-chat, completion
     icon: str
@@ -66,12 +67,12 @@ class BDDifyApps:
             Dict mapping app names to their configurations
         """
         return {
-            'bd_research_chat': self._get_research_chat_config(),
-            'call_prep_workflow': self._get_call_prep_config(),
-            'pipeline_controller': self._get_pipeline_controller_config(),
-            'outreach_drafter': self._get_outreach_drafter_config(),
-            'program_analyzer': self._get_program_analyzer_config(),
-            'competitor_intel': self._get_competitor_intel_config(),
+            "bd_research_chat": self._get_research_chat_config(),
+            "call_prep_workflow": self._get_call_prep_config(),
+            "pipeline_controller": self._get_pipeline_controller_config(),
+            "outreach_drafter": self._get_outreach_drafter_config(),
+            "program_analyzer": self._get_program_analyzer_config(),
+            "competitor_intel": self._get_competitor_intel_config(),
         }
 
     def _get_research_chat_config(self) -> DifyAppConfig:
@@ -104,7 +105,7 @@ Be direct and actionable. The BD team needs intelligence they can act on today."
                 "qdrant_search",
                 "qdrant_contacts",
                 "qdrant_programs",
-                "qdrant_smart_query"
+                "qdrant_smart_query",
             ],
             knowledge_sources=[
                 "qdrant_external"  # Your existing Qdrant, not duplicated
@@ -112,8 +113,8 @@ Be direct and actionable. The BD team needs intelligence they can act on today."
             model_config={
                 "model": "claude-sonnet-4-20250514",
                 "temperature": 0.3,
-                "max_tokens": 4096
-            }
+                "max_tokens": 4096,
+            },
         )
 
     def _get_call_prep_config(self) -> DifyAppConfig:
@@ -151,14 +152,14 @@ Use the PTS BD formula: Problem → Capability → Proof → Ask""",
                 "contact_finder_agent",
                 "program_intel_agent",
                 "qdrant_contacts",
-                "memory_search"
+                "memory_search",
             ],
             knowledge_sources=["qdrant_humint"],
             model_config={
                 "model": "claude-sonnet-4-20250514",
                 "temperature": 0.4,
-                "max_tokens": 4096
-            }
+                "max_tokens": 4096,
+            },
         )
 
     def _get_pipeline_controller_config(self) -> DifyAppConfig:
@@ -194,14 +195,14 @@ Example interactions:
                 "n8n_job_scraper",
                 "n8n_hot_lead",
                 "n8n_weekly_report",
-                "n8n_master_pipeline"
+                "n8n_master_pipeline",
             ],
             knowledge_sources=[],
             model_config={
                 "model": "claude-sonnet-4-20250514",
                 "temperature": 0.2,
-                "max_tokens": 2048
-            }
+                "max_tokens": 2048,
+            },
         )
 
     def _get_outreach_drafter_config(self) -> DifyAppConfig:
@@ -235,14 +236,14 @@ Tone: Professional but conversational. We're building relationships, not selling
                 "contact_finder_agent",
                 "bd_strategy_agent",
                 "qdrant_contacts",
-                "qdrant_humint"
+                "qdrant_humint",
             ],
             knowledge_sources=["qdrant_humint", "qdrant_documents"],
             model_config={
                 "model": "claude-sonnet-4-20250514",
                 "temperature": 0.6,
-                "max_tokens": 2048
-            }
+                "max_tokens": 2048,
+            },
         )
 
     def _get_program_analyzer_config(self) -> DifyAppConfig:
@@ -289,14 +290,14 @@ Your output should include:
                 "company_research_agent",
                 "contact_finder_agent",
                 "bd_strategy_agent",
-                "crewai_analyze_program"
+                "crewai_analyze_program",
             ],
             knowledge_sources=["qdrant_programs", "qdrant_contacts"],
             model_config={
                 "model": "claude-sonnet-4-20250514",
                 "temperature": 0.3,
-                "max_tokens": 8192
-            }
+                "max_tokens": 8192,
+            },
         )
 
     def _get_competitor_intel_config(self) -> DifyAppConfig:
@@ -334,14 +335,18 @@ Be factual and cite your sources. Avoid speculation without data.""",
                 "company_research_agent",
                 "qdrant_search",
                 "qdrant_contacts",
-                "firecrawl_search"
+                "firecrawl_search",
             ],
-            knowledge_sources=["qdrant_programs", "qdrant_contacts", "qdrant_documents"],
+            knowledge_sources=[
+                "qdrant_programs",
+                "qdrant_contacts",
+                "qdrant_documents",
+            ],
             model_config={
                 "model": "claude-sonnet-4-20250514",
                 "temperature": 0.3,
-                "max_tokens": 4096
-            }
+                "max_tokens": 4096,
+            },
         )
 
     def export_app_config(self, app_name: str, format: str = "yaml") -> str:
@@ -357,80 +362,88 @@ Be factual and cite your sources. Avoid speculation without data.""",
         """
         configs = self.get_app_configs()
         if app_name not in configs:
-            raise ValueError(f"Unknown app: {app_name}. Available: {list(configs.keys())}")
+            raise ValueError(
+                f"Unknown app: {app_name}. Available: {list(configs.keys())}"
+            )
 
         config = configs[app_name]
 
         if format == "json":
             import json
-            return json.dumps({
-                "name": config.name,
-                "mode": config.mode,
-                "icon": config.icon,
-                "description": config.description,
-                "model_config": config.model_config,
-                "opening_statement": f"Welcome to {config.name}! How can I help you today?",
-                "suggested_questions": self._get_suggested_questions(app_name),
-                "prompt_config": {
-                    "prompt_template": config.system_prompt
+
+            return json.dumps(
+                {
+                    "name": config.name,
+                    "mode": config.mode,
+                    "icon": config.icon,
+                    "description": config.description,
+                    "model_config": config.model_config,
+                    "opening_statement": f"Welcome to {config.name}! How can I help you today?",
+                    "suggested_questions": self._get_suggested_questions(app_name),
+                    "prompt_config": {"prompt_template": config.system_prompt},
+                    "external_knowledge_id": None,  # Set after creating external knowledge
+                    "tools": config.tools,
                 },
-                "external_knowledge_id": None,  # Set after creating external knowledge
-                "tools": config.tools
-            }, indent=2)
+                indent=2,
+            )
 
         else:  # yaml
             import yaml
-            return yaml.dump({
-                "name": config.name,
-                "mode": config.mode,
-                "icon": config.icon,
-                "description": config.description,
-                "model_config": config.model_config,
-                "prompt_config": {
-                    "prompt_template": config.system_prompt
+
+            return yaml.dump(
+                {
+                    "name": config.name,
+                    "mode": config.mode,
+                    "icon": config.icon,
+                    "description": config.description,
+                    "model_config": config.model_config,
+                    "prompt_config": {"prompt_template": config.system_prompt},
+                    "tools": config.tools,
                 },
-                "tools": config.tools
-            }, default_flow_style=False)
+                default_flow_style=False,
+            )
 
     def _get_suggested_questions(self, app_name: str) -> List[str]:
         """Get suggested opening questions for an app."""
         suggestions = {
-            'bd_research_chat': [
+            "bd_research_chat": [
                 "Who are the Tier 1 contacts for AF DCGS?",
                 "What programs does Northrop Grumman prime on?",
                 "Find TS/SCI jobs related to ISR",
-                "What's our past performance on DCGS programs?"
+                "What's our past performance on DCGS programs?",
             ],
-            'call_prep_workflow': [
+            "call_prep_workflow": [
                 "Prepare me for a call with John Smith at GDIT",
                 "Generate a brief for my meeting about DCGS-A",
-                "What should I know before calling the DCGS program manager?"
+                "What should I know before calling the DCGS program manager?",
             ],
-            'pipeline_controller': [
+            "pipeline_controller": [
                 "Run the job scraper for DCGS positions",
                 "Generate this week's BD report",
                 "Trigger enrichment for pending jobs",
-                "Send a hot lead alert"
+                "Send a hot lead alert",
             ],
-            'outreach_drafter': [
+            "outreach_drafter": [
                 "Draft a LinkedIn message for a DCGS program manager",
                 "Write an introduction email for Northrop contact",
-                "Create a follow-up email after yesterday's meeting"
+                "Create a follow-up email after yesterday's meeting",
             ],
-            'program_analyzer': [
+            "program_analyzer": [
                 "Analyze the AF DCGS program for capture",
                 "What's our win probability for DCGS-A recompete?",
-                "Generate a capture strategy for GBSD"
+                "Generate a capture strategy for GBSD",
             ],
-            'competitor_intel': [
+            "competitor_intel": [
                 "Research Northrop Grumman's DCGS capabilities",
                 "What programs does GDIT compete with us on?",
-                "Who are the key Leidos contacts in ISR?"
-            ]
+                "Who are the key Leidos contacts in ISR?",
+            ],
         }
         return suggestions.get(app_name, [])
 
-    async def initialize_in_dify(self, _dify_api_url: str, _dify_api_key: str) -> Dict[str, str]:
+    async def initialize_in_dify(
+        self, _dify_api_url: str, _dify_api_key: str
+    ) -> Dict[str, str]:
         """
         Initialize all apps in a Dify instance.
 
@@ -444,10 +457,11 @@ Be factual and cite your sources. Avoid speculation without data.""",
         Returns:
             Dict mapping app names to their Dify IDs
         """
-        logger.info("Dify app initialization is manual - use export_app_config() to get configs")
+        logger.info(
+            "Dify app initialization is manual - use export_app_config() to get configs"
+        )
         return {
-            app_name: f"export:{app_name}"
-            for app_name in self.get_app_configs().keys()
+            app_name: f"export:{app_name}" for app_name in self.get_app_configs().keys()
         }
 
 

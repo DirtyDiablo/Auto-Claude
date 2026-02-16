@@ -16,6 +16,7 @@ from src.agents.swarm.decomposer import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def decomposer():
     return TaskDecomposer()
@@ -25,16 +26,25 @@ def decomposer():
 # TEMPLATE DETECTION
 # =========================================
 
+
 def test_detect_campaign(decomposer):
-    assert decomposer._detect_template("Build a BD campaign for DCGS") == "campaign_build"
+    assert (
+        decomposer._detect_template("Build a BD campaign for DCGS") == "campaign_build"
+    )
 
 
 def test_detect_enrichment(decomposer):
-    assert decomposer._detect_template("Enrich and validate contacts") == "contact_enrichment"
+    assert (
+        decomposer._detect_template("Enrich and validate contacts")
+        == "contact_enrichment"
+    )
 
 
 def test_detect_program_analysis(decomposer):
-    assert decomposer._detect_template("Analyze program intel for GBSD") == "program_analysis"
+    assert (
+        decomposer._detect_template("Analyze program intel for GBSD")
+        == "program_analysis"
+    )
 
 
 def test_detect_weekly_briefing(decomposer):
@@ -42,7 +52,10 @@ def test_detect_weekly_briefing(decomposer):
 
 
 def test_detect_competitive(decomposer):
-    assert decomposer._detect_template("Competitive analysis of rival firms") == "competitive_analysis"
+    assert (
+        decomposer._detect_template("Competitive analysis of rival firms")
+        == "competitive_analysis"
+    )
 
 
 def test_detect_default(decomposer):
@@ -52,6 +65,7 @@ def test_detect_default(decomposer):
 # =========================================
 # PARAMETER EXTRACTION
 # =========================================
+
 
 def test_extract_program(decomposer):
     params = decomposer._extract_parameters("Research the DCGS program")
@@ -76,6 +90,7 @@ def test_extract_empty(decomposer):
 # =========================================
 # DECOMPOSITION
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_decompose_campaign(decomposer):
@@ -125,6 +140,7 @@ async def test_decompose_dependencies_resolved(decomposer):
 # DAG OPTIMIZATION
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_optimize_dag(decomposer):
     dag = await decomposer.decompose("Campaign build", "campaign_build")
@@ -135,6 +151,7 @@ async def test_optimize_dag(decomposer):
 # =========================================
 # COST ESTIMATION
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_estimate_cost(decomposer):
@@ -159,6 +176,7 @@ async def test_estimate_worker_breakdown(decomposer):
 # CRITICAL PATH
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_critical_path_positive(decomposer):
     dag = await decomposer.decompose("Campaign build", "campaign_build")
@@ -175,6 +193,7 @@ async def test_critical_path_less_than_total(decomposer):
 # HISTORY
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_history(decomposer):
     await decomposer.decompose("Task 1")
@@ -186,6 +205,7 @@ async def test_history(decomposer):
 # TEMPLATES VALIDITY
 # =========================================
 
+
 def test_all_templates_have_keywords():
     for name in TASK_TEMPLATES:
         assert name in TEMPLATE_KEYWORDS
@@ -193,15 +213,18 @@ def test_all_templates_have_keywords():
 
 def test_template_workers_are_valid():
     from src.agents.swarm.workers import DEFAULT_CAPABILITIES
+
     for name, tasks in TASK_TEMPLATES.items():
         for t in tasks:
-            assert t["worker"] in DEFAULT_CAPABILITIES, \
+            assert t["worker"] in DEFAULT_CAPABILITIES, (
                 f"Template {name} references unknown worker: {t['worker']}"
+            )
 
 
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     d1 = get_task_decomposer()

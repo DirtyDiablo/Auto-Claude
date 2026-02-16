@@ -22,6 +22,7 @@ def dt():
 # TWIN CREATION
 # =========================================
 
+
 def test_create_twin(dt):
     twin = dt.create_twin()
     assert isinstance(twin, DigitalTwinState)
@@ -69,6 +70,7 @@ def test_twin_to_dict(dt):
 # SIMULATION
 # =========================================
 
+
 def test_simulate_basic(dt):
     twin = dt.create_twin()
     result = dt.simulate(twin.twin_id, days=90, monte_carlo_runs=100)
@@ -104,11 +106,16 @@ def test_simulate_unknown_twin(dt):
 def test_simulate_with_interventions(dt):
     twin = dt.create_twin()
     interventions = [
-        Intervention(variable="team_size", action="increase", value=4,
-                     description="Hire 4 more BD reps"),
+        Intervention(
+            variable="team_size",
+            action="increase",
+            value=4,
+            description="Hire 4 more BD reps",
+        ),
     ]
-    result_with = dt.simulate(twin.twin_id, days=90,
-                               interventions=interventions, monte_carlo_runs=200)
+    result_with = dt.simulate(
+        twin.twin_id, days=90, interventions=interventions, monte_carlo_runs=200
+    )
     result_without = dt.simulate(twin.twin_id, days=90, monte_carlo_runs=200)
     # More team → more pipeline (on average, with some MC variance)
     # We don't assert strictly since MC is random, just check it ran
@@ -121,8 +128,9 @@ def test_simulate_multiply_intervention(dt):
     interventions = [
         Intervention(variable="avg_calls_per_rep", action="multiply", value=2.0),
     ]
-    result = dt.simulate(twin.twin_id, days=90, interventions=interventions,
-                          monte_carlo_runs=100)
+    result = dt.simulate(
+        twin.twin_id, days=90, interventions=interventions, monte_carlo_runs=100
+    )
     assert result.days_simulated == 90
 
 
@@ -147,16 +155,23 @@ def test_simulation_to_dict(dt):
 # SCENARIO COMPARISON
 # =========================================
 
+
 def test_compare_scenarios(dt):
     twin = dt.create_twin()
     scenarios = [
         {"name": "Status Quo", "interventions": []},
-        {"name": "Hire 2 Reps", "interventions": [
-            {"variable": "team_size", "action": "increase", "value": 2}
-        ]},
-        {"name": "Double Outreach", "interventions": [
-            {"variable": "avg_calls_per_rep", "action": "multiply", "value": 2.0}
-        ]},
+        {
+            "name": "Hire 2 Reps",
+            "interventions": [
+                {"variable": "team_size", "action": "increase", "value": 2}
+            ],
+        },
+        {
+            "name": "Double Outreach",
+            "interventions": [
+                {"variable": "avg_calls_per_rep", "action": "multiply", "value": 2.0}
+            ],
+        },
     ]
     result = dt.compare_scenarios(twin.twin_id, scenarios, monte_carlo_runs=100)
     assert isinstance(result, ScenarioComparison)
@@ -168,9 +183,12 @@ def test_compare_has_per_scenario_results(dt):
     twin = dt.create_twin()
     scenarios = [
         {"name": "A", "interventions": []},
-        {"name": "B", "interventions": [
-            {"variable": "team_size", "action": "increase", "value": 3}
-        ]},
+        {
+            "name": "B",
+            "interventions": [
+                {"variable": "team_size", "action": "increase", "value": 3}
+            ],
+        },
     ]
     result = dt.compare_scenarios(twin.twin_id, scenarios, monte_carlo_runs=100)
     for s in result.scenarios:
@@ -180,9 +198,13 @@ def test_compare_has_per_scenario_results(dt):
 
 def test_compare_to_dict(dt):
     twin = dt.create_twin()
-    result = dt.compare_scenarios(twin.twin_id, [
-        {"name": "A", "interventions": []},
-    ], monte_carlo_runs=50)
+    result = dt.compare_scenarios(
+        twin.twin_id,
+        [
+            {"name": "A", "interventions": []},
+        ],
+        monte_carlo_runs=50,
+    )
     d = result.to_dict()
     assert "scenarios" in d
     assert "winner" in d
@@ -191,6 +213,7 @@ def test_compare_to_dict(dt):
 # =========================================
 # CALIBRATION
 # =========================================
+
 
 def test_calibrate(dt):
     twin = dt.create_twin()
@@ -240,6 +263,7 @@ def test_calibration_to_dict(dt):
 # SIMULATION HISTORY
 # =========================================
 
+
 def test_simulation_history(dt):
     twin = dt.create_twin()
     dt.simulate(twin.twin_id, monte_carlo_runs=50)
@@ -251,6 +275,7 @@ def test_simulation_history(dt):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(dt):
     twin = dt.create_twin()
@@ -264,8 +289,10 @@ def test_stats(dt):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.simulation.digital_twin as mod
+
     mod._instance = None
     s1 = get_digital_twin()
     s2 = get_digital_twin()

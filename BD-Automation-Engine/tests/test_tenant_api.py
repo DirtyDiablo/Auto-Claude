@@ -11,6 +11,7 @@ from src.api.tenant_api import include_tenant_router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     """Create a test FastAPI app with tenant routes."""
@@ -18,6 +19,7 @@ def app():
     import src.tenants.tenant_manager as tm
     import src.auth.auth_service as auth
     import src.auth.rbac as rbac_mod
+
     old_tm = tm._manager
     old_auth = auth._service
     old_rbac = rbac_mod._manager
@@ -42,11 +44,14 @@ def client(app):
 @pytest.fixture
 def tenant_id(client):
     """Create a tenant and return its ID."""
-    resp = client.post("/tenants/", json={
-        "name": "Test Corp",
-        "owner_email": "admin@test.com",
-        "plan": "enterprise",
-    })
+    resp = client.post(
+        "/tenants/",
+        json={
+            "name": "Test Corp",
+            "owner_email": "admin@test.com",
+            "plan": "enterprise",
+        },
+    )
     return resp.json()["id"]
 
 
@@ -54,21 +59,27 @@ def tenant_id(client):
 def user_and_tokens(client, tenant_id):
     """Create a user and login, return user_id + tokens."""
     # Create user
-    resp = client.post("/auth/users", json={
-        "email": "alice@test.com",
-        "tenant_id": tenant_id,
-        "password": "Pass123!",
-        "role": "bd_manager",
-        "display_name": "Alice",
-    })
+    resp = client.post(
+        "/auth/users",
+        json={
+            "email": "alice@test.com",
+            "tenant_id": tenant_id,
+            "password": "Pass123!",
+            "role": "bd_manager",
+            "display_name": "Alice",
+        },
+    )
     user_id = resp.json()["id"]
 
     # Login
-    resp = client.post("/auth/login", json={
-        "email": "alice@test.com",
-        "password": "Pass123!",
-        "tenant_id": tenant_id,
-    })
+    resp = client.post(
+        "/auth/login",
+        json={
+            "email": "alice@test.com",
+            "password": "Pass123!",
+            "tenant_id": tenant_id,
+        },
+    )
     data = resp.json()
     return {
         "user_id": user_id,
@@ -81,12 +92,16 @@ def user_and_tokens(client, tenant_id):
 # TENANT ENDPOINTS
 # =========================================
 
+
 class TestTenantEndpoints:
     def test_create_tenant(self, client):
-        resp = client.post("/tenants/", json={
-            "name": "Acme",
-            "owner_email": "a@a.com",
-        })
+        resp = client.post(
+            "/tenants/",
+            json={
+                "name": "Acme",
+                "owner_email": "a@a.com",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["name"] == "Acme"
@@ -132,77 +147,110 @@ class TestTenantEndpoints:
 # AUTH ENDPOINTS
 # =========================================
 
+
 class TestAuthEndpoints:
     def test_create_user(self, client, tenant_id):
-        resp = client.post("/auth/users", json={
-            "email": "bob@test.com",
-            "tenant_id": tenant_id,
-            "password": "Pass!",
-            "role": "viewer",
-        })
+        resp = client.post(
+            "/auth/users",
+            json={
+                "email": "bob@test.com",
+                "tenant_id": tenant_id,
+                "password": "Pass!",
+                "role": "viewer",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["email"] == "bob@test.com"
         assert data["role"] == "viewer"
 
     def test_create_user_invalid_role(self, client, tenant_id):
-        resp = client.post("/auth/users", json={
-            "email": "c@c.com",
-            "tenant_id": tenant_id,
-            "role": "invalid_role",
-        })
+        resp = client.post(
+            "/auth/users",
+            json={
+                "email": "c@c.com",
+                "tenant_id": tenant_id,
+                "role": "invalid_role",
+            },
+        )
         assert resp.status_code == 400
 
     def test_create_duplicate_user(self, client, tenant_id):
-        client.post("/auth/users", json={"email": "d@d.com", "tenant_id": tenant_id, "password": "p"})
-        resp = client.post("/auth/users", json={"email": "d@d.com", "tenant_id": tenant_id, "password": "p"})
+        client.post(
+            "/auth/users",
+            json={"email": "d@d.com", "tenant_id": tenant_id, "password": "p"},
+        )
+        resp = client.post(
+            "/auth/users",
+            json={"email": "d@d.com", "tenant_id": tenant_id, "password": "p"},
+        )
         assert resp.status_code == 409
 
     def test_login(self, client, tenant_id):
-        client.post("/auth/users", json={
-            "email": "login@test.com",
-            "tenant_id": tenant_id,
-            "password": "Pass!",
-        })
-        resp = client.post("/auth/login", json={
-            "email": "login@test.com",
-            "password": "Pass!",
-            "tenant_id": tenant_id,
-        })
+        client.post(
+            "/auth/users",
+            json={
+                "email": "login@test.com",
+                "tenant_id": tenant_id,
+                "password": "Pass!",
+            },
+        )
+        resp = client.post(
+            "/auth/login",
+            json={
+                "email": "login@test.com",
+                "password": "Pass!",
+                "tenant_id": tenant_id,
+            },
+        )
         assert resp.status_code == 200
         assert "access_token" in resp.json()
 
     def test_login_bad_credentials(self, client, tenant_id):
-        resp = client.post("/auth/login", json={
-            "email": "nobody@x.com",
-            "password": "bad",
-            "tenant_id": tenant_id,
-        })
+        resp = client.post(
+            "/auth/login",
+            json={
+                "email": "nobody@x.com",
+                "password": "bad",
+                "tenant_id": tenant_id,
+            },
+        )
         assert resp.status_code == 401
 
     def test_logout(self, client, user_and_tokens):
-        resp = client.post(f"/auth/logout?access_token={user_and_tokens['access_token']}")
+        resp = client.post(
+            f"/auth/logout?access_token={user_and_tokens['access_token']}"
+        )
         assert resp.status_code == 200
 
     def test_refresh_token(self, client, user_and_tokens):
-        resp = client.post("/auth/refresh", json={
-            "refresh_token": user_and_tokens["refresh_token"],
-        })
+        resp = client.post(
+            "/auth/refresh",
+            json={
+                "refresh_token": user_and_tokens["refresh_token"],
+            },
+        )
         assert resp.status_code == 200
         assert "access_token" in resp.json()
 
     def test_list_users(self, client, tenant_id):
-        client.post("/auth/users", json={"email": "u1@t.com", "tenant_id": tenant_id, "password": "p"})
+        client.post(
+            "/auth/users",
+            json={"email": "u1@t.com", "tenant_id": tenant_id, "password": "p"},
+        )
         resp = client.get(f"/auth/users/{tenant_id}")
         assert resp.status_code == 200
         assert resp.json()["total"] >= 1
 
     def test_change_password(self, client, user_and_tokens):
-        resp = client.post("/auth/change-password", json={
-            "user_id": user_and_tokens["user_id"],
-            "old_password": "Pass123!",
-            "new_password": "NewPass456!",
-        })
+        resp = client.post(
+            "/auth/change-password",
+            json={
+                "user_id": user_and_tokens["user_id"],
+                "old_password": "Pass123!",
+                "new_password": "NewPass456!",
+            },
+        )
         assert resp.status_code == 200
 
     def test_enable_mfa(self, client, user_and_tokens):
@@ -215,13 +263,17 @@ class TestAuthEndpoints:
 # RBAC ENDPOINTS
 # =========================================
 
+
 class TestRBACEndpoints:
     def test_assign_role(self, client, tenant_id, user_and_tokens):
-        resp = client.post("/auth/roles/assign", json={
-            "tenant_id": tenant_id,
-            "user_id": user_and_tokens["user_id"],
-            "role": "bd_director",
-        })
+        resp = client.post(
+            "/auth/roles/assign",
+            json={
+                "tenant_id": tenant_id,
+                "user_id": user_and_tokens["user_id"],
+                "role": "bd_director",
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["role"] == "bd_director"
 
@@ -235,19 +287,25 @@ class TestRBACEndpoints:
         assert resp.status_code == 400
 
     def test_check_permission(self, client):
-        resp = client.post("/auth/permissions/check", json={
-            "role": "tenant_admin",
-            "resource": "contacts",
-            "action": "create",
-        })
+        resp = client.post(
+            "/auth/permissions/check",
+            json={
+                "role": "tenant_admin",
+                "resource": "contacts",
+                "action": "create",
+            },
+        )
         assert resp.status_code == 200
         assert resp.json()["allowed"] is True
 
     def test_create_api_key(self, client, tenant_id):
-        resp = client.post("/auth/api-keys", json={
-            "tenant_id": tenant_id,
-            "name": "CI Bot",
-        })
+        resp = client.post(
+            "/auth/api-keys",
+            json={
+                "tenant_id": tenant_id,
+                "name": "CI Bot",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["key"].startswith("bdapi_")
@@ -257,6 +315,7 @@ class TestRBACEndpoints:
 # =========================================
 # AUDIT ENDPOINTS
 # =========================================
+
 
 class TestAuditEndpoints:
     def test_get_audit_log(self, client, tenant_id, user_and_tokens):
@@ -274,11 +333,15 @@ class TestAuditEndpoints:
 # SSO ENDPOINT
 # =========================================
 
+
 class TestSSOEndpoint:
     def test_sso_login_no_config(self, client, tenant_id):
-        resp = client.post("/auth/sso/login", json={
-            "tenant_id": tenant_id,
-            "sso_subject_id": "ext-1",
-            "email": "sso@test.com",
-        })
+        resp = client.post(
+            "/auth/sso/login",
+            json={
+                "tenant_id": tenant_id,
+                "sso_subject_id": "ext-1",
+                "email": "sso@test.com",
+            },
+        )
         assert resp.status_code == 401

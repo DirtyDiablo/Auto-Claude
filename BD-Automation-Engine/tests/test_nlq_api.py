@@ -12,6 +12,7 @@ from src.api.nlq_api import router
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def app():
     test_app = FastAPI()
@@ -28,6 +29,7 @@ def client(app):
 # ASK ENDPOINT
 # =========================================
 
+
 class TestAskEndpoint:
     def test_ask_returns_200(self, client):
         resp = client.post("/nlq/ask", json={"query": "Find contacts at Leidos"})
@@ -42,10 +44,13 @@ class TestAskEndpoint:
         assert "suggestions" in data
 
     def test_ask_with_format(self, client):
-        resp = client.post("/nlq/ask", json={
-            "query": "Show pipeline analytics",
-            "format": "brief",
-        })
+        resp = client.post(
+            "/nlq/ask",
+            json={
+                "query": "Show pipeline analytics",
+                "format": "brief",
+            },
+        )
         assert resp.status_code == 200
 
 
@@ -53,11 +58,15 @@ class TestAskEndpoint:
 # CLARIFY ENDPOINT
 # =========================================
 
+
 class TestClarifyEndpoint:
     def test_clarify_returns_200(self, client):
-        resp = client.post("/nlq/clarify", json={
-            "clarification": "I meant Hickam AFB",
-        })
+        resp = client.post(
+            "/nlq/clarify",
+            json={
+                "clarification": "I meant Hickam AFB",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert "answer" in data
@@ -66,6 +75,7 @@ class TestClarifyEndpoint:
 # =========================================
 # SUGGESTIONS ENDPOINT
 # =========================================
+
 
 class TestSuggestionsEndpoint:
     def test_suggestions_returns_200(self, client):
@@ -79,6 +89,7 @@ class TestSuggestionsEndpoint:
 # =========================================
 # AUTOCOMPLETE ENDPOINT
 # =========================================
+
 
 class TestAutocompleteEndpoint:
     def test_autocomplete_empty(self, client):
@@ -98,6 +109,7 @@ class TestAutocompleteEndpoint:
 # =========================================
 # HISTORY ENDPOINT
 # =========================================
+
 
 class TestHistoryEndpoint:
     def test_history_returns_200(self, client):
@@ -119,6 +131,7 @@ class TestHistoryEndpoint:
 # INTENTS ENDPOINT
 # =========================================
 
+
 class TestIntentsEndpoint:
     def test_intents_returns_14(self, client):
         resp = client.get("/nlq/intents")
@@ -131,6 +144,7 @@ class TestIntentsEndpoint:
 # =========================================
 # EXAMPLES ENDPOINT
 # =========================================
+
 
 class TestExamplesEndpoint:
     def test_examples_all(self, client):
@@ -152,13 +166,17 @@ class TestExamplesEndpoint:
 # FEEDBACK ENDPOINT
 # =========================================
 
+
 class TestFeedbackEndpoint:
     def test_feedback_returns_200(self, client):
-        resp = client.post("/nlq/feedback", json={
-            "query": "Find contacts at Leidos",
-            "rating": 5,
-            "comment": "Great results!",
-        })
+        resp = client.post(
+            "/nlq/feedback",
+            json={
+                "query": "Find contacts at Leidos",
+                "rating": 5,
+                "comment": "Great results!",
+            },
+        )
         assert resp.status_code == 200
         data = resp.json()
         assert data["status"] == "recorded"
@@ -168,10 +186,10 @@ class TestFeedbackEndpoint:
 # ENDPOINT COUNT
 # =========================================
 
+
 class TestEndpointCount:
     def test_nine_endpoints(self, app):
         nlq_routes = [
-            r for r in app.routes
-            if hasattr(r, "path") and r.path.startswith("/nlq")
+            r for r in app.routes if hasattr(r, "path") and r.path.startswith("/nlq")
         ]
         assert len(nlq_routes) == 9

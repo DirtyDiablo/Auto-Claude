@@ -19,56 +19,58 @@ from dataclasses import dataclass, field
 # ============================================
 
 # Default output directories (relative to repository root)
-DEFAULT_NOTION_OUTPUT_DIR = Path(__file__).parent.parent.parent.parent / "outputs" / "notion"
+DEFAULT_NOTION_OUTPUT_DIR = (
+    Path(__file__).parent.parent.parent.parent / "outputs" / "notion"
+)
 DEFAULT_N8N_OUTPUT_DIR = Path(__file__).parent.parent.parent.parent / "outputs" / "n8n"
 
 # Column order for Notion CSV export (24 fields from schema)
 # Required Fields (6)
 NOTION_REQUIRED_COLUMNS = [
-    'Job Title/Position',
-    'Date Posted',
-    'Location',
-    'Position Overview',
-    'Key Responsibilities',
-    'Required Qualifications',
+    "Job Title/Position",
+    "Date Posted",
+    "Location",
+    "Position Overview",
+    "Key Responsibilities",
+    "Required Qualifications",
 ]
 
 # Intelligence Fields (8)
 NOTION_INTELLIGENCE_COLUMNS = [
-    'Security Clearance',
-    'Program Hints',
-    'Client Hints',
-    'Contract Vehicle Hints',
-    'Prime Contractor',
-    'Recruiter Contact',
-    'Technologies',
-    'Certifications Required',
+    "Security Clearance",
+    "Program Hints",
+    "Client Hints",
+    "Contract Vehicle Hints",
+    "Prime Contractor",
+    "Recruiter Contact",
+    "Technologies",
+    "Certifications Required",
 ]
 
 # Enrichment Fields (6)
 NOTION_ENRICHMENT_COLUMNS = [
-    'Matched Program',
-    'Match Confidence',
-    'Match Type',
-    'BD Priority Score',
-    'Priority Tier',
-    'Match Signals',
+    "Matched Program",
+    "Match Confidence",
+    "Match Type",
+    "BD Priority Score",
+    "Priority Tier",
+    "Match Signals",
 ]
 
 # Metadata Fields (4)
 NOTION_METADATA_COLUMNS = [
-    'Source',
-    'Source URL',
-    'Scraped At',
-    'Processed At',
+    "Source",
+    "Source URL",
+    "Scraped At",
+    "Processed At",
 ]
 
 # Combined column order for Notion export
 NOTION_COLUMN_ORDER = (
-    NOTION_REQUIRED_COLUMNS +
-    NOTION_INTELLIGENCE_COLUMNS +
-    NOTION_ENRICHMENT_COLUMNS +
-    NOTION_METADATA_COLUMNS
+    NOTION_REQUIRED_COLUMNS
+    + NOTION_INTELLIGENCE_COLUMNS
+    + NOTION_ENRICHMENT_COLUMNS
+    + NOTION_METADATA_COLUMNS
 )
 
 
@@ -76,9 +78,11 @@ NOTION_COLUMN_ORDER = (
 # DATA CLASSES
 # ============================================
 
+
 @dataclass
 class ExportResult:
     """Result of an export operation."""
+
     success: bool
     file_path: str
     record_count: int
@@ -90,6 +94,7 @@ class ExportResult:
 # NOTION CSV EXPORTER
 # ============================================
 
+
 class NotionCSVExporter:
     """
     Exports enriched job data to Notion-compatible CSV format.
@@ -99,9 +104,7 @@ class NotionCSVExporter:
     """
 
     def __init__(
-        self,
-        output_dir: Optional[str] = None,
-        column_order: Optional[List[str]] = None
+        self, output_dir: Optional[str] = None, column_order: Optional[List[str]] = None
     ):
         """
         Initialize the NotionCSVExporter.
@@ -177,24 +180,41 @@ class NotionCSVExporter:
 
     # Field name mappings: Notion column name -> possible source field names
     FIELD_MAPPINGS = {
-        'Job Title/Position': ['Job Title/Position', 'title', 'jobTitle', 'position'],
-        'Date Posted': ['Date Posted', 'datePosted', 'date_posted', 'posted_date'],
-        'Location': ['Location', 'location'],
-        'Position Overview': ['Position Overview', 'description', 'overview', 'summary'],
-        'Key Responsibilities': ['Key Responsibilities', 'responsibilities', 'duties'],
-        'Required Qualifications': ['Required Qualifications', 'qualifications', 'requirements'],
-        'Security Clearance': ['Security Clearance', 'clearance', 'securityClearance'],
-        'Program Hints': ['Program Hints', 'programHints', 'program_hints'],
-        'Client Hints': ['Client Hints', 'clientHints', 'client_hints'],
-        'Contract Vehicle Hints': ['Contract Vehicle Hints', 'contractVehicleHints', 'contract_hints'],
-        'Prime Contractor': ['Prime Contractor', 'company', 'contractor', 'employer'],
-        'Recruiter Contact': ['Recruiter Contact', 'recruiter', 'contact'],
-        'Technologies': ['Technologies', 'technologies', 'tech', 'skills'],
-        'Certifications Required': ['Certifications Required', 'certifications', 'certs'],
-        'Source': ['Source', 'source'],
-        'Source URL': ['Source URL', 'url', 'source_url', 'link'],
-        'Scraped At': ['Scraped At', 'scrapedAt', 'scraped_at'],
-        'Processed At': ['Processed At', 'processedAt', 'processed_at'],
+        "Job Title/Position": ["Job Title/Position", "title", "jobTitle", "position"],
+        "Date Posted": ["Date Posted", "datePosted", "date_posted", "posted_date"],
+        "Location": ["Location", "location"],
+        "Position Overview": [
+            "Position Overview",
+            "description",
+            "overview",
+            "summary",
+        ],
+        "Key Responsibilities": ["Key Responsibilities", "responsibilities", "duties"],
+        "Required Qualifications": [
+            "Required Qualifications",
+            "qualifications",
+            "requirements",
+        ],
+        "Security Clearance": ["Security Clearance", "clearance", "securityClearance"],
+        "Program Hints": ["Program Hints", "programHints", "program_hints"],
+        "Client Hints": ["Client Hints", "clientHints", "client_hints"],
+        "Contract Vehicle Hints": [
+            "Contract Vehicle Hints",
+            "contractVehicleHints",
+            "contract_hints",
+        ],
+        "Prime Contractor": ["Prime Contractor", "company", "contractor", "employer"],
+        "Recruiter Contact": ["Recruiter Contact", "recruiter", "contact"],
+        "Technologies": ["Technologies", "technologies", "tech", "skills"],
+        "Certifications Required": [
+            "Certifications Required",
+            "certifications",
+            "certs",
+        ],
+        "Source": ["Source", "source"],
+        "Source URL": ["Source URL", "url", "source_url", "link"],
+        "Scraped At": ["Scraped At", "scrapedAt", "scraped_at"],
+        "Processed At": ["Processed At", "processedAt", "processed_at"],
     }
 
     def _extract_field_value(self, job: Dict, field_name: str) -> str:
@@ -220,40 +240,47 @@ class NotionCSVExporter:
                 break
 
         # Try _mapping for enrichment fields
-        if value is None and '_mapping' in job:
-            mapping = job['_mapping']
+        if value is None and "_mapping" in job:
+            mapping = job["_mapping"]
             # Map display names to internal keys
             mapping_keys = {
-                'Matched Program': 'program_name',
-                'Match Confidence': 'match_confidence',
-                'Match Type': 'match_type',
-                'BD Priority Score': 'bd_priority_score',
-                'Priority Tier': 'priority_tier',
-                'Match Signals': 'signals',
+                "Matched Program": "program_name",
+                "Match Confidence": "match_confidence",
+                "Match Type": "match_type",
+                "BD Priority Score": "bd_priority_score",
+                "Priority Tier": "priority_tier",
+                "Match Signals": "signals",
             }
             internal_key = mapping_keys.get(field_name)
             if internal_key:
                 value = mapping.get(internal_key)
 
         # Try _scoring for scoring fields
-        if value is None and '_scoring' in job:
-            scoring = job['_scoring']
+        if value is None and "_scoring" in job:
+            scoring = job["_scoring"]
             scoring_keys = {
-                'BD Priority Score': 'BD Priority Score',
-                'Priority Tier': 'Priority Tier',
+                "BD Priority Score": "BD Priority Score",
+                "Priority Tier": "Priority Tier",
             }
             internal_key = scoring_keys.get(field_name)
             if internal_key:
                 value = scoring.get(internal_key)
 
         # Format based on field type
-        if field_name == 'Match Confidence':
+        if field_name == "Match Confidence":
             return self._format_confidence(value)
-        elif field_name in ['Key Responsibilities', 'Required Qualifications',
-                           'Program Hints', 'Client Hints', 'Contract Vehicle Hints',
-                           'Technologies', 'Certifications Required', 'Match Signals']:
+        elif field_name in [
+            "Key Responsibilities",
+            "Required Qualifications",
+            "Program Hints",
+            "Client Hints",
+            "Contract Vehicle Hints",
+            "Technologies",
+            "Certifications Required",
+            "Match Signals",
+        ]:
             return self._format_array_field(value)
-        elif field_name == 'Recruiter Contact':
+        elif field_name == "Recruiter Contact":
             return self._format_object_field(value)
         elif value is None:
             return ""
@@ -264,7 +291,7 @@ class NotionCSVExporter:
         self,
         jobs: List[Dict],
         filename: Optional[str] = None,
-        include_header: bool = True
+        include_header: bool = True,
     ) -> ExportResult:
         """
         Export a list of enriched jobs to Notion-compatible CSV.
@@ -284,13 +311,13 @@ class NotionCSVExporter:
 
         # Generate filename if not provided
         if filename is None:
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"jobs_export_{timestamp}.csv"
 
         file_path = self.output_dir / filename
 
         try:
-            with open(file_path, 'w', newline='', encoding='utf-8') as csvfile:
+            with open(file_path, "w", newline="", encoding="utf-8") as csvfile:
                 writer = csv.writer(csvfile, quoting=csv.QUOTE_MINIMAL)
 
                 # Write header row
@@ -314,10 +341,10 @@ class NotionCSVExporter:
                 record_count=len(jobs),
                 errors=errors,
                 metadata={
-                    'columns': len(self.column_order),
-                    'timestamp': datetime.now().isoformat(),
-                    'format': 'csv'
-                }
+                    "columns": len(self.column_order),
+                    "timestamp": datetime.now().isoformat(),
+                    "format": "csv",
+                },
             )
 
         except Exception as e:
@@ -326,14 +353,14 @@ class NotionCSVExporter:
                 file_path=str(file_path),
                 record_count=0,
                 errors=[f"Export failed: {str(e)}"],
-                metadata={}
+                metadata={},
             )
 
     def export_batch(
         self,
         jobs: List[Dict],
         batch_size: int = 1000,
-        filename_prefix: str = "jobs_batch"
+        filename_prefix: str = "jobs_batch",
     ) -> List[ExportResult]:
         """
         Export jobs in batches for large datasets.
@@ -365,6 +392,7 @@ class NotionCSVExporter:
 # N8N WEBHOOK JSON EXPORTER
 # ============================================
 
+
 class N8nWebhookExporter:
     """
     Exports enriched job data to n8n-compatible JSON format.
@@ -374,9 +402,7 @@ class N8nWebhookExporter:
     """
 
     def __init__(
-        self,
-        output_dir: Optional[str] = None,
-        webhook_url: Optional[str] = None
+        self, output_dir: Optional[str] = None, webhook_url: Optional[str] = None
     ):
         """
         Initialize the N8nWebhookExporter.
@@ -386,7 +412,7 @@ class N8nWebhookExporter:
             webhook_url: n8n webhook URL for live delivery (optional).
         """
         self.output_dir = Path(output_dir) if output_dir else DEFAULT_N8N_OUTPUT_DIR
-        self.webhook_url = webhook_url or os.environ.get('N8N_WEBHOOK_URL')
+        self.webhook_url = webhook_url or os.environ.get("N8N_WEBHOOK_URL")
 
     def _ensure_output_dir(self) -> None:
         """Create output directory if it doesn't exist."""
@@ -407,38 +433,36 @@ class N8nWebhookExporter:
         payload = job.copy()
 
         # Ensure _mapping key exists
-        if '_mapping' not in payload:
-            payload['_mapping'] = {
-                'program_name': None,
-                'match_confidence': 0.0,
-                'match_type': 'unprocessed',
-                'bd_priority_score': 0,
-                'priority_tier': 'Cold',
-                'signals': [],
-                'secondary_candidates': []
+        if "_mapping" not in payload:
+            payload["_mapping"] = {
+                "program_name": None,
+                "match_confidence": 0.0,
+                "match_type": "unprocessed",
+                "bd_priority_score": 0,
+                "priority_tier": "Cold",
+                "signals": [],
+                "secondary_candidates": [],
             }
 
         # Ensure _scoring key exists
-        if '_scoring' not in payload:
-            payload['_scoring'] = {
-                'BD Priority Score': 0,
-                'Priority Tier': 'Cold',
-                'Score Breakdown': {},
-                'Recommendations': []
+        if "_scoring" not in payload:
+            payload["_scoring"] = {
+                "BD Priority Score": 0,
+                "Priority Tier": "Cold",
+                "Score Breakdown": {},
+                "Recommendations": [],
             }
 
         # Add webhook metadata
-        payload['_webhook_metadata'] = {
-            'exported_at': datetime.now().isoformat(),
-            'export_version': '2.0'
+        payload["_webhook_metadata"] = {
+            "exported_at": datetime.now().isoformat(),
+            "export_version": "2.0",
         }
 
         return payload
 
     def export_jobs(
-        self,
-        jobs: List[Dict],
-        filename: Optional[str] = None
+        self, jobs: List[Dict], filename: Optional[str] = None
     ) -> ExportResult:
         """
         Export a list of enriched jobs to n8n-compatible JSON.
@@ -457,7 +481,7 @@ class N8nWebhookExporter:
 
         # Generate filename if not provided
         if filename is None:
-            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"jobs_webhook_{timestamp}.json"
 
         file_path = self.output_dir / filename
@@ -474,17 +498,17 @@ class N8nWebhookExporter:
 
             # Create webhook-compatible structure
             output_data = {
-                'jobs': payloads,
-                'metadata': {
-                    'total_count': len(payloads),
-                    'exported_at': datetime.now().isoformat(),
-                    'export_version': '2.0',
-                    'source': 'ProgramMappingEngine'
-                }
+                "jobs": payloads,
+                "metadata": {
+                    "total_count": len(payloads),
+                    "exported_at": datetime.now().isoformat(),
+                    "export_version": "2.0",
+                    "source": "ProgramMappingEngine",
+                },
             }
 
             # Write JSON file
-            with open(file_path, 'w', encoding='utf-8') as f:
+            with open(file_path, "w", encoding="utf-8") as f:
                 json.dump(output_data, f, indent=2, ensure_ascii=False)
 
             return ExportResult(
@@ -493,10 +517,10 @@ class N8nWebhookExporter:
                 record_count=len(payloads),
                 errors=errors,
                 metadata={
-                    'timestamp': datetime.now().isoformat(),
-                    'format': 'json',
-                    'webhook_ready': True
-                }
+                    "timestamp": datetime.now().isoformat(),
+                    "format": "json",
+                    "webhook_ready": True,
+                },
             )
 
         except Exception as e:
@@ -505,7 +529,7 @@ class N8nWebhookExporter:
                 file_path=str(file_path),
                 record_count=0,
                 errors=[f"Export failed: {str(e)}"],
-                metadata={}
+                metadata={},
             )
 
     def export_single(self, job: Dict) -> Dict:
@@ -525,10 +549,11 @@ class N8nWebhookExporter:
 # CONVENIENCE FUNCTIONS
 # ============================================
 
+
 def export_batch(
     jobs: List[Dict],
     output_dir: Optional[str] = None,
-    formats: Optional[List[str]] = None
+    formats: Optional[List[str]] = None,
 ) -> Dict[str, ExportResult]:
     """
     Export jobs to multiple formats in one call.
@@ -542,19 +567,19 @@ def export_batch(
         Dict mapping format name to ExportResult
     """
     if formats is None:
-        formats = ['notion', 'n8n']
+        formats = ["notion", "n8n"]
 
     results = {}
 
-    if 'notion' in formats:
+    if "notion" in formats:
         notion_dir = Path(output_dir) / "notion" if output_dir else None
         exporter = NotionCSVExporter(output_dir=str(notion_dir) if notion_dir else None)
-        results['notion'] = exporter.export_jobs(jobs)
+        results["notion"] = exporter.export_jobs(jobs)
 
-    if 'n8n' in formats:
+    if "n8n" in formats:
         n8n_dir = Path(output_dir) / "n8n" if output_dir else None
         exporter = N8nWebhookExporter(output_dir=str(n8n_dir) if n8n_dir else None)
-        results['n8n'] = exporter.export_jobs(jobs)
+        results["n8n"] = exporter.export_jobs(jobs)
 
     return results
 
@@ -570,28 +595,28 @@ def generate_export_report(results: Dict[str, ExportResult]) -> Dict:
         Report dictionary with statistics
     """
     report = {
-        'timestamp': datetime.now().isoformat(),
-        'total_formats': len(results),
-        'successful_exports': 0,
-        'failed_exports': 0,
-        'total_records': 0,
-        'exports': {}
+        "timestamp": datetime.now().isoformat(),
+        "total_formats": len(results),
+        "successful_exports": 0,
+        "failed_exports": 0,
+        "total_records": 0,
+        "exports": {},
     }
 
     for format_name, result in results.items():
         if result.success:
-            report['successful_exports'] += 1
+            report["successful_exports"] += 1
         else:
-            report['failed_exports'] += 1
+            report["failed_exports"] += 1
 
-        report['total_records'] += result.record_count
+        report["total_records"] += result.record_count
 
-        report['exports'][format_name] = {
-            'success': result.success,
-            'file_path': result.file_path,
-            'record_count': result.record_count,
-            'errors': result.errors,
-            'metadata': result.metadata
+        report["exports"][format_name] = {
+            "success": result.success,
+            "file_path": result.file_path,
+            "record_count": result.record_count,
+            "errors": result.errors,
+            "metadata": result.metadata,
         }
 
     return report
@@ -601,24 +626,33 @@ def generate_export_report(results: Dict[str, ExportResult]) -> Dict:
 # CLI INTERFACE
 # ============================================
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description='Export enriched jobs to various formats')
-    parser.add_argument('--input', '-i', required=True, help='Input JSON file with enriched jobs')
-    parser.add_argument('--output', '-o', required=True, help='Output directory')
-    parser.add_argument('--format', '-f', choices=['notion', 'n8n', 'both'], default='both',
-                       help='Export format (default: both)')
+    parser = argparse.ArgumentParser(
+        description="Export enriched jobs to various formats"
+    )
+    parser.add_argument(
+        "--input", "-i", required=True, help="Input JSON file with enriched jobs"
+    )
+    parser.add_argument("--output", "-o", required=True, help="Output directory")
+    parser.add_argument(
+        "--format",
+        "-f",
+        choices=["notion", "n8n", "both"],
+        default="both",
+        help="Export format (default: both)",
+    )
 
     args = parser.parse_args()
 
     # Load jobs
-    with open(args.input, 'r', encoding='utf-8') as f:
+    with open(args.input, "r", encoding="utf-8") as f:
         jobs = json.load(f)
 
     # Determine formats
-    if args.format == 'both':
-        formats = ['notion', 'n8n']
+    if args.format == "both":
+        formats = ["notion", "n8n"]
     else:
         formats = [args.format]
 
@@ -633,10 +667,10 @@ if __name__ == '__main__':
     print(f"  Successful Exports: {report['successful_exports']}")
     print(f"  Failed Exports: {report['failed_exports']}")
 
-    for format_name, export_info in report['exports'].items():
-        status = "OK" if export_info['success'] else "FAILED"
+    for format_name, export_info in report["exports"].items():
+        status = "OK" if export_info["success"] else "FAILED"
         print(f"\n  {format_name.upper()} [{status}]:")
         print(f"    File: {export_info['file_path']}")
         print(f"    Records: {export_info['record_count']}")
-        if export_info['errors']:
+        if export_info["errors"]:
             print(f"    Errors: {len(export_info['errors'])}")

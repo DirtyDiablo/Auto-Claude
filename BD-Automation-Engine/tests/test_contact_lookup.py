@@ -23,26 +23,26 @@ class TestContactLookup:
         """Sample DCGS-related contacts."""
         return [
             {
-                'name': 'John Doe',
-                'company': 'Leidos',
-                'title': 'Program Manager - DCGS',
-                'tier': 1,
-                'program': 'AF DCGS - PACAF'
+                "name": "John Doe",
+                "company": "Leidos",
+                "title": "Program Manager - DCGS",
+                "tier": 1,
+                "program": "AF DCGS - PACAF",
             },
             {
-                'name': 'Jane Smith',
-                'company': 'GDIT',
-                'title': 'Intelligence Analyst',
-                'tier': 2,
-                'program': 'DGS-1'
+                "name": "Jane Smith",
+                "company": "GDIT",
+                "title": "Intelligence Analyst",
+                "tier": 2,
+                "program": "DGS-1",
             },
             {
-                'name': 'Bob Wilson',
-                'company': 'CACI',
-                'title': 'Systems Engineer',
-                'tier': 4,
-                'program': 'Navy DCGS-N'
-            }
+                "name": "Bob Wilson",
+                "company": "CACI",
+                "title": "Systems Engineer",
+                "tier": 4,
+                "program": "Navy DCGS-N",
+            },
         ]
 
     def test_lookup_contacts_by_program(self):
@@ -50,10 +50,10 @@ class TestContactLookup:
         try:
             from Engine3_OrgChart.scripts.contact_lookup import lookup_contacts
 
-            result = lookup_contacts(program_name='DCGS')
+            result = lookup_contacts(program_name="DCGS")
 
             assert result is not None
-            assert hasattr(result, 'contacts') or isinstance(result, dict)
+            assert hasattr(result, "contacts") or isinstance(result, dict)
             # Should return some results for DCGS (common program)
         except ImportError:
             pytest.skip("contact_lookup module not available")
@@ -63,14 +63,14 @@ class TestContactLookup:
         try:
             from Engine3_OrgChart.scripts.contact_lookup import lookup_contacts
 
-            result = lookup_contacts(program_name='DCGS')
+            result = lookup_contacts(program_name="DCGS")
 
             assert result is not None
             # Check for contact_count attribute or key
-            if hasattr(result, 'contact_count'):
+            if hasattr(result, "contact_count"):
                 assert isinstance(result.contact_count, int)
-            elif isinstance(result, dict) and 'contact_count' in result:
-                assert isinstance(result['contact_count'], int)
+            elif isinstance(result, dict) and "contact_count" in result:
+                assert isinstance(result["contact_count"], int)
         except ImportError:
             pytest.skip("contact_lookup module not available")
 
@@ -91,7 +91,7 @@ class TestContactLookup:
             db = ContactDatabase()
 
             # Test search returns list
-            results = db.search(program='DCGS')
+            results = db.search(program="DCGS")
             assert isinstance(results, list)
         except ImportError:
             pytest.skip("ContactDatabase not available")
@@ -114,10 +114,12 @@ class TestContactClassification:
     def test_format_contacts_for_briefing(self):
         """Test contact formatting for briefings."""
         try:
-            from Engine3_OrgChart.scripts.contact_lookup import format_contacts_for_briefing
+            from Engine3_OrgChart.scripts.contact_lookup import (
+                format_contacts_for_briefing,
+            )
 
             contacts = [
-                {'name': 'John Doe', 'title': 'PM', 'email': 'john@example.com'}
+                {"name": "John Doe", "title": "PM", "email": "john@example.com"}
             ]
 
             formatted = format_contacts_for_briefing(contacts)
@@ -141,15 +143,15 @@ class TestContactProgramMatching:
     def sample_contact(self):
         """Sample contact for testing."""
         return {
-            'name': 'Test User',
-            'company': 'Leidos',
-            'title': 'Senior Engineer - AF DCGS',
-            'email': 'test@leidos.com'
+            "name": "Test User",
+            "company": "Leidos",
+            "title": "Senior Engineer - AF DCGS",
+            "email": "test@leidos.com",
         }
 
     def test_contact_has_required_fields(self, sample_contact):
         """Test that contacts have required fields."""
-        required_fields = ['name', 'company']
+        required_fields = ["name", "company"]
 
         for field in required_fields:
             assert field in sample_contact
@@ -157,11 +159,17 @@ class TestContactProgramMatching:
     def test_contact_company_is_defense_prime(self, sample_contact):
         """Test defense prime detection."""
         defense_primes = [
-            'Leidos', 'GDIT', 'General Dynamics IT', 'Peraton',
-            'CACI', 'Northrop Grumman', 'Lockheed Martin', 'Boeing'
+            "Leidos",
+            "GDIT",
+            "General Dynamics IT",
+            "Peraton",
+            "CACI",
+            "Northrop Grumman",
+            "Lockheed Martin",
+            "Boeing",
         ]
 
-        is_defense_prime = sample_contact['company'] in defense_primes
+        is_defense_prime = sample_contact["company"] in defense_primes
         assert is_defense_prime  # Leidos is a defense prime
 
 
@@ -172,6 +180,7 @@ class TestContactIntegration:
         """Test that contact lookup module can be imported."""
         try:
             from Engine3_OrgChart.scripts import contact_lookup
+
             assert contact_lookup is not None
         except ImportError:
             pytest.skip("Engine3_OrgChart module not available")
@@ -182,7 +191,7 @@ class TestContactIntegration:
             from Engine3_OrgChart.scripts.contact_lookup import lookup_contacts
 
             # Filter by prime contractor
-            result = lookup_contacts(company='Leidos')
+            result = lookup_contacts(company="Leidos")
 
             assert result is not None
         except ImportError:

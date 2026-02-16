@@ -23,6 +23,7 @@ def engine():
 # ADMIN BYPASS
 # =========================================
 
+
 def test_admin_full_access(engine):
     subject = Subject(user_id="admin1", role="admin")
     resource = Resource(resource_type="contact", resource_id="c1")
@@ -40,6 +41,7 @@ def test_admin_bypass_program_isolation(engine):
 # =========================================
 # PROGRAM ISOLATION
 # =========================================
+
 
 def test_program_isolation_deny(engine):
     subject = Subject(user_id="u1", role="analyst", programs_assigned=["JADC2"])
@@ -67,10 +69,13 @@ def test_program_isolation_no_program(engine):
 # HUMINT ACCESS
 # =========================================
 
+
 def test_humint_owner_access(engine):
     subject = Subject(user_id="u1", role="analyst")
     resource = Resource(
-        resource_type="humint_note", resource_id="hn1", owner_id="u1",
+        resource_type="humint_note",
+        resource_id="hn1",
+        owner_id="u1",
     )
     decision = engine.evaluate(subject, "read", resource)
     assert decision.decision == Decision.ALLOW
@@ -79,7 +84,9 @@ def test_humint_owner_access(engine):
 def test_humint_bd_director_access(engine):
     subject = Subject(user_id="director1", role="bd_director")
     resource = Resource(
-        resource_type="humint_note", resource_id="hn1", owner_id="u1",
+        resource_type="humint_note",
+        resource_id="hn1",
+        owner_id="u1",
     )
     decision = engine.evaluate(subject, "read", resource)
     assert decision.decision == Decision.ALLOW
@@ -88,8 +95,10 @@ def test_humint_bd_director_access(engine):
 def test_humint_manager_access(engine):
     subject = Subject(user_id="mgr1", role="manager")
     resource = Resource(
-        resource_type="humint_note", resource_id="hn1",
-        owner_id="u1", owner_manager_id="mgr1",
+        resource_type="humint_note",
+        resource_id="hn1",
+        owner_id="u1",
+        owner_manager_id="mgr1",
     )
     decision = engine.evaluate(subject, "read", resource)
     assert decision.decision == Decision.ALLOW
@@ -98,8 +107,10 @@ def test_humint_manager_access(engine):
 def test_humint_deny_other_user(engine):
     subject = Subject(user_id="u2", role="analyst")
     resource = Resource(
-        resource_type="humint_note", resource_id="hn1",
-        owner_id="u1", owner_manager_id="mgr1",
+        resource_type="humint_note",
+        resource_id="hn1",
+        owner_id="u1",
+        owner_manager_id="mgr1",
     )
     decision = engine.evaluate(subject, "read", resource)
     assert decision.decision == Decision.DENY
@@ -110,10 +121,13 @@ def test_humint_deny_other_user(engine):
 # EXPORT THRESHOLD
 # =========================================
 
+
 def test_export_small_batch_allowed(engine):
     subject = Subject(user_id="u1", role="analyst", programs_assigned=["P1"])
     resource = Resource(
-        resource_type="export", program="P1", record_count=30,
+        resource_type="export",
+        program="P1",
+        record_count=30,
     )
     decision = engine.evaluate(subject, "export", resource)
     assert decision.decision == Decision.ALLOW
@@ -122,7 +136,9 @@ def test_export_small_batch_allowed(engine):
 def test_export_large_batch_requires_approval(engine):
     subject = Subject(user_id="u1", role="analyst", programs_assigned=["P1"])
     resource = Resource(
-        resource_type="export", program="P1", record_count=100,
+        resource_type="export",
+        program="P1",
+        record_count=100,
     )
     decision = engine.evaluate(subject, "export", resource)
     assert decision.decision == Decision.REQUIRE_APPROVAL
@@ -131,6 +147,7 @@ def test_export_large_batch_requires_approval(engine):
 # =========================================
 # GEO RESTRICTION
 # =========================================
+
 
 def test_dcgs_us_access_allowed(engine):
     subject = Subject(user_id="u1", role="analyst", programs_assigned=["DCGS-A"])
@@ -153,13 +170,18 @@ def test_dcgs_non_us_denied(engine):
 # NDA / COMPETITOR DATA
 # =========================================
 
+
 def test_competitor_data_with_nda_allowed(engine):
     subject = Subject(
-        user_id="u1", role="analyst",
-        programs_assigned=["P1"], nda_signed=True,
+        user_id="u1",
+        role="analyst",
+        programs_assigned=["P1"],
+        nda_signed=True,
     )
     resource = Resource(
-        resource_type="simulation", program="P1", has_competitor_data=True,
+        resource_type="simulation",
+        program="P1",
+        has_competitor_data=True,
     )
     decision = engine.evaluate(subject, "read", resource)
     assert decision.decision == Decision.ALLOW
@@ -167,11 +189,15 @@ def test_competitor_data_with_nda_allowed(engine):
 
 def test_competitor_data_without_nda_denied(engine):
     subject = Subject(
-        user_id="u1", role="analyst",
-        programs_assigned=["P1"], nda_signed=False,
+        user_id="u1",
+        role="analyst",
+        programs_assigned=["P1"],
+        nda_signed=False,
     )
     resource = Resource(
-        resource_type="simulation", program="P1", has_competitor_data=True,
+        resource_type="simulation",
+        program="P1",
+        has_competitor_data=True,
     )
     decision = engine.evaluate(subject, "read", resource)
     assert decision.decision == Decision.DENY
@@ -182,9 +208,11 @@ def test_competitor_data_without_nda_denied(engine):
 # CLEARANCE LEVEL
 # =========================================
 
+
 def test_clearance_sufficient(engine):
     subject = Subject(
-        user_id="u1", role="analyst",
+        user_id="u1",
+        role="analyst",
         clearance_level=ClearanceLevel.SECRET,
     )
     resource = Resource(
@@ -197,7 +225,8 @@ def test_clearance_sufficient(engine):
 
 def test_clearance_insufficient(engine):
     subject = Subject(
-        user_id="u1", role="analyst",
+        user_id="u1",
+        role="analyst",
         clearance_level=ClearanceLevel.CONFIDENTIAL,
     )
     resource = Resource(
@@ -211,7 +240,8 @@ def test_clearance_insufficient(engine):
 
 def test_clearance_equal(engine):
     subject = Subject(
-        user_id="u1", role="analyst",
+        user_id="u1",
+        role="analyst",
         clearance_level=ClearanceLevel.SECRET,
     )
     resource = Resource(
@@ -225,6 +255,7 @@ def test_clearance_equal(engine):
 # =========================================
 # VIEWER READ-ONLY
 # =========================================
+
 
 def test_viewer_can_read(engine):
     subject = Subject(user_id="v1", role="viewer")
@@ -258,6 +289,7 @@ def test_viewer_cannot_delete(engine):
 # =========================================
 # POLICY MANAGEMENT
 # =========================================
+
 
 def test_list_policies(engine):
     policies = engine.list_policies()
@@ -308,6 +340,7 @@ def test_add_custom_policy(engine):
 # EXPLAIN & CLASSIFY
 # =========================================
 
+
 def test_explain_allow(engine):
     subject = Subject(user_id="admin1", role="admin")
     resource = Resource(resource_type="contact")
@@ -348,6 +381,7 @@ def test_classify_generic(engine):
 # STATS & SINGLETON
 # =========================================
 
+
 def test_stats(engine):
     engine.evaluate(
         Subject(user_id="u1", role="admin"),
@@ -361,6 +395,7 @@ def test_stats(engine):
 
 def test_singleton():
     import src.security.abac_engine as mod
+
     mod._instance = None
     e1 = get_abac_engine()
     e2 = get_abac_engine()

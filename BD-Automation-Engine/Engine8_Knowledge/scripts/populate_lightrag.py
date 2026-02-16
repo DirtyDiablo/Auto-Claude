@@ -17,34 +17,37 @@ def contact_to_text(contact: Dict[str, Any]) -> str:
     """Convert a contact record to a text document for LightRAG."""
     parts = []
 
-    name = contact.get('name') or f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    name = (
+        contact.get("name")
+        or f"{contact.get('first_name', '')} {contact.get('last_name', '')}".strip()
+    )
     if name:
         parts.append(f"{name}")
 
-    title = contact.get('title')
-    company = contact.get('company')
+    title = contact.get("title")
+    company = contact.get("company")
     if title and company:
         parts.append(f"is {title} at {company}")
     elif company:
         parts.append(f"works at {company}")
 
-    tier = contact.get('tier')
+    tier = contact.get("tier")
     if tier:
         parts.append(f"(Tier {tier} contact)")
 
-    program = contact.get('program')
+    program = contact.get("program")
     if program and program != "Other Defense":
         parts.append(f"associated with {program} program")
 
-    email = contact.get('email')
-    if email and '@' in str(email):
+    email = contact.get("email")
+    if email and "@" in str(email):
         parts.append(f"email: {email}")
 
-    linkedin = contact.get('linkedin')
-    if linkedin and 'linkedin.com' in str(linkedin):
+    linkedin = contact.get("linkedin")
+    if linkedin and "linkedin.com" in str(linkedin):
         parts.append(f"LinkedIn: {linkedin}")
 
-    notes = contact.get('notes')
+    notes = contact.get("notes")
     if notes:
         parts.append(f"Notes: {notes}")
 
@@ -55,35 +58,35 @@ def program_to_text(program: Dict[str, Any]) -> str:
     """Convert a program record to a text document for LightRAG."""
     parts = []
 
-    name = program.get('name')
+    name = program.get("name")
     if name:
         parts.append(f"{name}")
 
-    prime = program.get('prime_contractor')
+    prime = program.get("prime_contractor")
     if prime:
         parts.append(f"is primed by {prime}")
 
-    vehicle = program.get('contract_vehicle')
+    vehicle = program.get("contract_vehicle")
     if vehicle:
         parts.append(f"under {vehicle}")
 
-    value = program.get('contract_value')
+    value = program.get("contract_value")
     if value:
         parts.append(f"valued at {value}")
 
-    status = program.get('status')
+    status = program.get("status")
     if status:
         parts.append(f"(Status: {status})")
 
-    location = program.get('location')
+    location = program.get("location")
     if location:
         parts.append(f"located in {location}")
 
-    mission = program.get('mission_area')
+    mission = program.get("mission_area")
     if mission:
         parts.append(f"mission area: {mission}")
 
-    notes = program.get('notes')
+    notes = program.get("notes")
     if notes:
         parts.append(f"Notes: {notes}")
 
@@ -94,21 +97,21 @@ def document_to_text(doc: Dict[str, Any]) -> str:
     """Convert a document record to text for LightRAG."""
     parts = []
 
-    title = doc.get('title') or doc.get('name')
+    title = doc.get("title") or doc.get("name")
     if title:
         parts.append(f"Document: {title}")
 
-    doc_type = doc.get('type') or doc.get('document_type')
+    doc_type = doc.get("type") or doc.get("document_type")
     if doc_type:
         parts.append(f"Type: {doc_type}")
 
-    content = doc.get('content') or doc.get('text') or doc.get('summary')
+    content = doc.get("content") or doc.get("text") or doc.get("summary")
     if content:
         if len(content) > 2000:
             content = content[:2000] + "..."
         parts.append(content)
 
-    company = doc.get('company')
+    company = doc.get("company")
     if company:
         parts.append(f"Company: {company}")
 
@@ -119,23 +122,23 @@ def activity_to_text(activity: Dict[str, Any]) -> str:
     """Convert an activity record to text for LightRAG."""
     parts = []
 
-    activity_type = activity.get('type') or activity.get('activity_type')
+    activity_type = activity.get("type") or activity.get("activity_type")
     if activity_type:
         parts.append(f"{activity_type}:")
 
-    subject = activity.get('subject') or activity.get('title')
+    subject = activity.get("subject") or activity.get("title")
     if subject:
         parts.append(subject)
 
-    contact = activity.get('contact_name') or activity.get('contact')
+    contact = activity.get("contact_name") or activity.get("contact")
     if contact:
         parts.append(f"with {contact}")
 
-    company = activity.get('company')
+    company = activity.get("company")
     if company:
         parts.append(f"at {company}")
 
-    notes = activity.get('notes') or activity.get('description')
+    notes = activity.get("notes") or activity.get("description")
     if notes:
         if len(notes) > 500:
             notes = notes[:500] + "..."
@@ -148,23 +151,23 @@ def job_to_text(job: Dict[str, Any]) -> str:
     """Convert a job record to text for LightRAG."""
     parts = []
 
-    title = job.get('title')
+    title = job.get("title")
     if title:
         parts.append(f"Job: {title}")
 
-    company = job.get('company')
+    company = job.get("company")
     if company:
         parts.append(f"at {company}")
 
-    location = job.get('location')
+    location = job.get("location")
     if location:
         parts.append(f"in {location}")
 
-    program = job.get('program_name') or job.get('program')
+    program = job.get("program_name") or job.get("program")
     if program:
         parts.append(f"for {program} program")
 
-    clearance = job.get('clearance')
+    clearance = job.get("clearance")
     if clearance:
         parts.append(f"requires {clearance} clearance")
 
@@ -172,11 +175,11 @@ def job_to_text(job: Dict[str, Any]) -> str:
 
 
 CONVERTERS = {
-    'contacts': contact_to_text,
-    'programs': program_to_text,
-    'documents': document_to_text,
-    'activities': activity_to_text,
-    'jobs': job_to_text,
+    "contacts": contact_to_text,
+    "programs": program_to_text,
+    "documents": document_to_text,
+    "activities": activity_to_text,
+    "jobs": job_to_text,
 }
 
 
@@ -187,24 +190,63 @@ def fetch_all_from_collection(collection: str, limit: int = 10000) -> List[Dict]
 
     # Search terms to cover most records
     search_terms = {
-        'contacts': ['GDIT', 'Leidos', 'SAIC', 'Northrop', 'Lockheed', 'Raytheon', 'BAE', 'CACI', 'ManTech', 'Peraton', 'L3Harris', 'Booz', 'Jacobs', 'KBR', 'AECOM', 'defense', 'manager', 'director', 'engineer', 'analyst', 'architect', 'consultant'],
-        'programs': ['GDIT', 'Leidos', 'SAIC', 'Northrop', 'contract', 'defense', 'army', 'navy', 'air force', 'DCGS', 'ISR', 'cyber'],
-        'documents': ['document', 'report', 'brief', 'proposal', 'performance', 'technical'],
-        'activities': ['call', 'meeting', 'email', 'note', 'discussion', 'outreach'],
-        'jobs': ['analyst', 'engineer', 'manager', 'developer', 'architect', 'GDIT'],
+        "contacts": [
+            "GDIT",
+            "Leidos",
+            "SAIC",
+            "Northrop",
+            "Lockheed",
+            "Raytheon",
+            "BAE",
+            "CACI",
+            "ManTech",
+            "Peraton",
+            "L3Harris",
+            "Booz",
+            "Jacobs",
+            "KBR",
+            "AECOM",
+            "defense",
+            "manager",
+            "director",
+            "engineer",
+            "analyst",
+            "architect",
+            "consultant",
+        ],
+        "programs": [
+            "GDIT",
+            "Leidos",
+            "SAIC",
+            "Northrop",
+            "contract",
+            "defense",
+            "army",
+            "navy",
+            "air force",
+            "DCGS",
+            "ISR",
+            "cyber",
+        ],
+        "documents": [
+            "document",
+            "report",
+            "brief",
+            "proposal",
+            "performance",
+            "technical",
+        ],
+        "activities": ["call", "meeting", "email", "note", "discussion", "outreach"],
+        "jobs": ["analyst", "engineer", "manager", "developer", "architect", "GDIT"],
     }
 
-    terms = search_terms.get(collection, ['defense', 'federal'])
+    terms = search_terms.get(collection, ["defense", "federal"])
     print(f"    Searching with {len(terms)} terms...")
 
     for i, term in enumerate(terms):
         try:
             url = f"{API_URL}/search"
-            payload = {
-                "query": term,
-                "collection": collection,
-                "limit": 50
-            }
+            payload = {"query": term, "collection": collection, "limit": 50}
             response = requests.post(url, json=payload, timeout=60)
 
             if i == 0:
@@ -212,27 +254,30 @@ def fetch_all_from_collection(collection: str, limit: int = 10000) -> List[Dict]
 
             if response.status_code == 200:
                 data = response.json()
-                results = data.get('results', [])
+                results = data.get("results", [])
                 if i == 0:
                     print(f"    First search returned {len(results)} results")
                 new_count = 0
                 for result in results:
-                    record_id = result.get('id')
+                    record_id = result.get("id")
                     if record_id and record_id not in seen_ids:
                         seen_ids.add(record_id)
-                        payload = result.get('payload', result)
+                        payload = result.get("payload", result)
                         all_records.append(payload)
                         new_count += 1
                 if i == 0:
                     print(f"    Added {new_count} new records")
             else:
-                print(f"    Search '{term}' failed: {response.status_code} - {response.text[:100]}")
+                print(
+                    f"    Search '{term}' failed: {response.status_code} - {response.text[:100]}"
+                )
 
             if len(all_records) >= limit:
                 break
         except Exception as e:
             print(f"    Warning: search for '{term}' failed: {e}")
             import traceback
+
             traceback.print_exc()
 
     return all_records
@@ -242,17 +287,16 @@ def insert_batch(documents: List[str]) -> Dict:
     """Insert a batch of documents into LightRAG."""
     response = requests.post(
         f"{API_URL}/lightrag/insert",
-        json={
-            "documents": documents,
-            "enrich_entities": True
-        },
-        timeout=300
+        json={"documents": documents, "enrich_entities": True},
+        timeout=300,
     )
     response.raise_for_status()
     return response.json()
 
 
-def populate_collection(collection: str, converter: callable, expected_count: int) -> Dict[str, int]:
+def populate_collection(
+    collection: str, converter: callable, expected_count: int
+) -> Dict[str, int]:
     """Populate LightRAG from a single Qdrant collection."""
     print(f"\n[*] Processing {collection} (expected ~{expected_count} records)...")
 
@@ -280,10 +324,14 @@ def populate_collection(collection: str, converter: callable, expected_count: in
     total_batches = (len(documents) - 1) // BATCH_SIZE + 1
 
     for i in range(0, len(documents), BATCH_SIZE):
-        batch = documents[i:i + BATCH_SIZE]
+        batch = documents[i : i + BATCH_SIZE]
         batch_num = i // BATCH_SIZE + 1
         try:
-            print(f"    Inserting batch {batch_num}/{total_batches} ({len(batch)} docs)...", end=" ", flush=True)
+            print(
+                f"    Inserting batch {batch_num}/{total_batches} ({len(batch)} docs)...",
+                end=" ",
+                flush=True,
+            )
             insert_batch(batch)
             inserted += len(batch)
             print("OK")
@@ -313,7 +361,7 @@ def main():
     try:
         response = requests.get(f"{API_URL}/stats", timeout=30)
         stats = response.json()
-        qdrant_stats = stats.get('qdrant', {})
+        qdrant_stats = stats.get("qdrant", {})
         for coll, info in qdrant_stats.items():
             print(f"    - {coll}: {info.get('points_count', 0)} records")
     except Exception as e:
@@ -323,7 +371,7 @@ def main():
     # Process each collection
     results = []
     for collection, converter in CONVERTERS.items():
-        expected = qdrant_stats.get(collection, {}).get('points_count', 0)
+        expected = qdrant_stats.get(collection, {}).get("points_count", 0)
         if expected > 0:
             result = populate_collection(collection, converter, expected)
             results.append(result)
@@ -337,7 +385,7 @@ def main():
     total_inserted = 0
     for r in results:
         print(f"  {r['collection']}: {r['inserted']} inserted, {r['skipped']} skipped")
-        total_inserted += r['inserted']
+        total_inserted += r["inserted"]
 
     print(f"\n  TOTAL: {total_inserted} documents inserted into LightRAG")
 
@@ -347,11 +395,11 @@ def main():
         response = requests.post(
             f"{API_URL}/lightrag/query",
             json={"query": "GDIT contacts in defense programs", "mode": "hybrid"},
-            timeout=60
+            timeout=60,
         )
         result = response.json()
-        answer = result.get('answer', 'No answer')
-        if 'failed' not in answer.lower():
+        answer = result.get("answer", "No answer")
+        if "failed" not in answer.lower():
             print(f"    [OK] Query working!")
             print(f"    Answer: {answer[:400]}...")
         else:

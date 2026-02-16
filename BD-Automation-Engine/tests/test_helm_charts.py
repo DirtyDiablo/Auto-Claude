@@ -75,7 +75,15 @@ class TestValuesYaml:
     def test_values_has_expected_service_keys(self):
         """values.yaml should have configuration for all core services."""
         doc = _load_yaml(HELM_DIR / "values.yaml")
-        expected_keys = ["hubApi", "qdrant", "neo4j", "redis", "dashboard", "ingress", "monitoring"]
+        expected_keys = [
+            "hubApi",
+            "qdrant",
+            "neo4j",
+            "redis",
+            "dashboard",
+            "ingress",
+            "monitoring",
+        ]
         for key in expected_keys:
             assert key in doc, f"Missing service key: {key}"
 
@@ -152,16 +160,22 @@ class TestValuesProdYaml:
         """Production should allocate more storage for Qdrant."""
         default = _load_yaml(HELM_DIR / "values.yaml")
         prod = _load_yaml(HELM_DIR / "values-prod.yaml")
+
         # Compare storage strings (e.g., "50Gi" vs "200Gi")
         def parse_gi(s):
             return int(str(s).replace("Gi", ""))
-        assert parse_gi(prod["qdrant"]["storage"]) >= parse_gi(default["qdrant"]["storage"])
+
+        assert parse_gi(prod["qdrant"]["storage"]) >= parse_gi(
+            default["qdrant"]["storage"]
+        )
 
 
 class TestAllValuesHubApiKey:
     """Cross-file test: all values files should have hubApi key."""
 
-    @pytest.mark.parametrize("filename", ["values.yaml", "values-dev.yaml", "values-prod.yaml"])
+    @pytest.mark.parametrize(
+        "filename", ["values.yaml", "values-dev.yaml", "values-prod.yaml"]
+    )
     def test_all_values_files_have_hub_api(self, filename):
         """Each values file should contain a hubApi configuration section."""
         filepath = HELM_DIR / filename

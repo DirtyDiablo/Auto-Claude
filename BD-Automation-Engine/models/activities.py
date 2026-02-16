@@ -1,5 +1,5 @@
 """BD activity/engagement data models."""
-from pydantic import BaseModel, Field
+
 from typing import Optional
 from datetime import datetime
 from enum import Enum
@@ -8,6 +8,7 @@ from .base import BaseDocument
 
 class ActivityType(str, Enum):
     """Type of BD activity."""
+
     CALL = "call"
     EMAIL = "email"
     LINKEDIN = "linkedin"
@@ -24,6 +25,7 @@ class Activity(BaseDocument):
 
     Tracks all engagement activities with contacts and programs.
     """
+
     contact_name: Optional[str] = None
     contact_id: Optional[str] = None
     activity_type: ActivityType

@@ -33,6 +33,7 @@ try:
         lookup_contacts,
         format_contacts_json,
     )
+
     HAS_CONTACT_LOOKUP = True
 except ImportError:
     HAS_CONTACT_LOOKUP = False
@@ -42,9 +43,11 @@ except ImportError:
 # DATA CLASSES
 # ============================================
 
+
 @dataclass
 class PlaybookData:
     """Data container for playbook generation."""
+
     # Core opportunity info
     job_title: str
     company: str
@@ -84,6 +87,7 @@ class PlaybookData:
 @dataclass
 class PlaybookOutput:
     """Container for generated playbook outputs."""
+
     full_playbook: str
     intro_email: str
     call_script: str
@@ -280,6 +284,7 @@ TALKING_POINTS_TEMPLATE = """# Talking Points: {job_title} - {program_name}
 # EXTRACTION FUNCTIONS
 # ============================================
 
+
 def extract_playbook_data(job: Dict[str, Any]) -> PlaybookData:
     """Extract playbook data from enriched job dictionary."""
     mapping = job.get("_mapping", {})
@@ -304,14 +309,22 @@ def extract_playbook_data(job: Dict[str, Any]) -> PlaybookData:
         location=job.get("Location", job.get("location", "Unknown Location")),
         clearance=job.get("Security Clearance", job.get("clearance", "Not specified")),
         description=job.get("Position Overview", job.get("description", ""))[:2000],
-        program_name=mapping.get("program_name", job.get("Matched Program", "Unmatched")),
+        program_name=mapping.get(
+            "program_name", job.get("Matched Program", "Unmatched")
+        ),
         agency=mapping.get("agency", infer_agency(mapping.get("program_name", ""))),
-        prime_contractor=mapping.get("prime_contractor", job.get("Prime Contractor", "")),
+        prime_contractor=mapping.get(
+            "prime_contractor", job.get("Prime Contractor", "")
+        ),
         match_confidence=mapping.get("match_confidence", 0.5),
         match_type=mapping.get("match_type", "inferred"),
         match_signals=mapping.get("signals", job.get("Match Signals", [])),
         bd_score=scoring.get("BD Priority Score", job.get("BD Priority Score", 50)),
-        priority_tier=scoring.get("Priority Tier", job.get("Priority Tier", "Warm")).replace("🔥", "").replace("🟡", "").replace("❄️", "").strip(),
+        priority_tier=scoring.get("Priority Tier", job.get("Priority Tier", "Warm"))
+        .replace("🔥", "")
+        .replace("🟡", "")
+        .replace("❄️", "")
+        .strip(),
         score_breakdown=scoring.get("Score Breakdown", {}),
         recommendations=scoring.get("Recommendations", []),
         technologies=technologies,
@@ -364,7 +377,9 @@ def infer_pain_points(job: Dict[str, Any]) -> List[str]:
 
     # Clearance-based pain points
     if "POLY" in clearance:
-        pain_points.append("High clearance requirement limits candidate pool significantly")
+        pain_points.append(
+            "High clearance requirement limits candidate pool significantly"
+        )
     if "TS/SCI" in clearance:
         pain_points.append("TS/SCI requirement reduces available talent by ~90%")
 
@@ -428,6 +443,7 @@ def get_location_insight(location: str) -> str:
 # GENERATION FUNCTIONS
 # ============================================
 
+
 def generate_full_playbook(data: PlaybookData) -> str:
     """Generate complete playbook markdown."""
 
@@ -447,14 +463,16 @@ def generate_full_playbook(data: PlaybookData) -> str:
         contacts_section = "No contacts found in database. Manual research recommended."
 
     # Format decision makers
-    key_contacts = [c for c in data.contacts if c.get('tier', 6) <= 3]
+    key_contacts = [c for c in data.contacts if c.get("tier", 6) <= 3]
     if key_contacts:
         decision_makers_section = "\n".join(
             f"- **{c.get('name', 'Unknown')}** - {c.get('title', '')} - Priority: {c.get('bd_priority', 'Medium')}"
             for c in key_contacts[:3]
         )
     else:
-        decision_makers_section = "No decision makers identified. Target Tier 1-3 contacts."
+        decision_makers_section = (
+            "No decision makers identified. Target Tier 1-3 contacts."
+        )
 
     # Format pain points
     if data.pain_points:
@@ -500,7 +518,11 @@ def generate_full_playbook(data: PlaybookData) -> str:
     outreach_sequence = generate_outreach_sequence(data)
 
     # Our position assessment
-    our_position = "Potential subcontractor/teaming partner" if data.prime_contractor else "Direct bid opportunity"
+    our_position = (
+        "Potential subcontractor/teaming partner"
+        if data.prime_contractor
+        else "Direct bid opportunity"
+    )
 
     return FULL_PLAYBOOK_TEMPLATE.format(
         job_title=data.job_title,
@@ -517,7 +539,9 @@ def generate_full_playbook(data: PlaybookData) -> str:
         clearance=data.clearance or "Not specified",
         company=data.company,
         match_signals_list=match_signals_list,
-        description=data.description[:1500] if data.description else "No description available.",
+        description=data.description[:1500]
+        if data.description
+        else "No description available.",
         contacts_section=contacts_section,
         decision_makers_section=decision_makers_section,
         pain_points_section=pain_points_section,
@@ -542,7 +566,9 @@ def generate_intro_email(data: PlaybookData) -> str:
 
     company_intro = f"[Your Company] specializes in providing cleared technical talent to {data.agency or 'DoD/IC'} programs."
 
-    relevant_experience = f"deep experience supporting {data.program_name} and similar programs"
+    relevant_experience = (
+        f"deep experience supporting {data.program_name} and similar programs"
+    )
 
     value_proposition = f"We have access to cleared candidates with the {data.clearance} clearance you require, and a track record of rapid fulfillment for {data.agency or 'DoD'} programs."
 
@@ -563,7 +589,7 @@ def generate_intro_email(data: PlaybookData) -> str:
 def generate_call_script(data: PlaybookData) -> str:
     """Generate phone call script."""
 
-    hook_statement = f'"I\'ve been tracking the {data.program_name} program and noticed you have some critical staffing needs, particularly for {data.clearance}-cleared talent in {data.location}. We\'ve had success helping similar programs fill these hard-to-find positions."'
+    hook_statement = f"\"I've been tracking the {data.program_name} program and noticed you have some critical staffing needs, particularly for {data.clearance}-cleared talent in {data.location}. We've had success helping similar programs fill these hard-to-find positions.\""
 
     # Generate talking points list
     talking_points = [
@@ -583,7 +609,7 @@ def generate_call_script(data: PlaybookData) -> str:
     pain_point_questions = "\n".join(f"- {q}" for q in pain_questions)
 
     # Value proposition
-    value_proposition = f"\"Our team has successfully supported multiple {data.agency or 'DoD'} programs with similar requirements. We maintain an active pipeline of {data.clearance}-cleared professionals and can typically present qualified candidates within 2 weeks.\""
+    value_proposition = f'"Our team has successfully supported multiple {data.agency or "DoD"} programs with similar requirements. We maintain an active pipeline of {data.clearance}-cleared professionals and can typically present qualified candidates within 2 weeks."'
 
     # Objection handling
     objections = [
@@ -622,9 +648,13 @@ def generate_talking_points(data: PlaybookData) -> str:
 
     # Pain points to address
     if data.pain_points:
-        pain_points_talking = "\n".join(f"- Address: {point}" for point in data.pain_points[:5])
+        pain_points_talking = "\n".join(
+            f"- Address: {point}" for point in data.pain_points[:5]
+        )
     else:
-        pain_points_talking = "- Explore staffing challenges\n- Identify timeline pressures"
+        pain_points_talking = (
+            "- Explore staffing challenges\n- Identify timeline pressures"
+        )
 
     # Competitive positioning
     competitive_positioning = f"""- Position against incumbent gaps
@@ -667,21 +697,31 @@ def generate_win_themes(data: PlaybookData) -> str:
     themes = []
 
     if "TS/SCI" in data.clearance.upper() or "POLY" in data.clearance.upper():
-        themes.append("- **Cleared Talent Pipeline:** Emphasize active pool of high-clearance candidates")
+        themes.append(
+            "- **Cleared Talent Pipeline:** Emphasize active pool of high-clearance candidates"
+        )
 
     if data.match_confidence >= 0.7:
-        themes.append(f"- **Program Expertise:** Demonstrate deep understanding of {data.program_name}")
+        themes.append(
+            f"- **Program Expertise:** Demonstrate deep understanding of {data.program_name}"
+        )
 
     if data.pain_points:
-        themes.append("- **Pain Point Solutions:** Address identified staffing challenges directly")
+        themes.append(
+            "- **Pain Point Solutions:** Address identified staffing challenges directly"
+        )
 
     if data.location:
-        themes.append(f"- **Local Presence:** Highlight {data.location} capabilities or remote flexibility")
+        themes.append(
+            f"- **Local Presence:** Highlight {data.location} capabilities or remote flexibility"
+        )
 
     if not themes:
-        themes = ["- **Technical Excellence:** Proven track record on similar programs",
-                  "- **Rapid Response:** Quick candidate turnaround",
-                  "- **Mission Focus:** Understanding of customer priorities"]
+        themes = [
+            "- **Technical Excellence:** Proven track record on similar programs",
+            "- **Rapid Response:** Quick candidate turnaround",
+            "- **Mission Focus:** Understanding of customer priorities",
+        ]
 
     return "\n".join(themes)
 
@@ -702,7 +742,9 @@ def generate_action_items(data: PlaybookData) -> str:
     actions = []
 
     if data.bd_score >= 80:
-        actions.append("1. **IMMEDIATE:** Reach out to identified contacts within 24 hours")
+        actions.append(
+            "1. **IMMEDIATE:** Reach out to identified contacts within 24 hours"
+        )
         actions.append(f"2. Research {data.prime_contractor} BD/capture team contacts")
         actions.append(f"3. Prepare {data.program_name} capabilities one-pager")
     else:
@@ -743,10 +785,9 @@ def generate_outreach_sequence(data: PlaybookData) -> str:
 # MAIN GENERATION FUNCTION
 # ============================================
 
+
 def generate_playbook(
-    job: Dict[str, Any],
-    include_contacts: bool = True,
-    output_formats: List[str] = None
+    job: Dict[str, Any], include_contacts: bool = True, output_formats: List[str] = None
 ) -> PlaybookOutput:
     """
     Generate complete playbook for an opportunity.
@@ -760,7 +801,7 @@ def generate_playbook(
         PlaybookOutput with all generated materials
     """
     if output_formats is None:
-        output_formats = ['full', 'email', 'call', 'talking']
+        output_formats = ["full", "email", "call", "talking"]
 
     # Extract data
     data = extract_playbook_data(job)
@@ -770,17 +811,19 @@ def generate_playbook(
         try:
             result = lookup_contacts(
                 program_name=data.program_name,
-                prime_contractor=data.prime_contractor or data.company
+                prime_contractor=data.prime_contractor or data.company,
             )
             data.contacts = format_contacts_json(result) if result else []
         except Exception:
             data.contacts = []
 
     # Generate outputs
-    full_playbook = generate_full_playbook(data) if 'full' in output_formats else ""
-    intro_email = generate_intro_email(data) if 'email' in output_formats else ""
-    call_script = generate_call_script(data) if 'call' in output_formats else ""
-    talking_points = generate_talking_points(data) if 'talking' in output_formats else ""
+    full_playbook = generate_full_playbook(data) if "full" in output_formats else ""
+    intro_email = generate_intro_email(data) if "email" in output_formats else ""
+    call_script = generate_call_script(data) if "call" in output_formats else ""
+    talking_points = (
+        generate_talking_points(data) if "talking" in output_formats else ""
+    )
 
     return PlaybookOutput(
         full_playbook=full_playbook,
@@ -797,7 +840,7 @@ def generate_playbooks_batch(
     output_dir: str = "outputs/BD_Briefings",
     min_score: int = 80,
     include_contacts: bool = True,
-    output_formats: List[str] = None
+    output_formats: List[str] = None,
 ) -> List[PlaybookOutput]:
     """
     Generate playbooks for a batch of opportunities.
@@ -813,7 +856,7 @@ def generate_playbooks_batch(
         List of PlaybookOutput objects
     """
     if output_formats is None:
-        output_formats = ['full', 'email', 'call', 'talking']
+        output_formats = ["full", "email", "call", "talking"]
 
     # Create output directory
     Path(output_dir).mkdir(parents=True, exist_ok=True)
@@ -822,8 +865,9 @@ def generate_playbooks_batch(
 
     for job in jobs:
         # Get BD score
-        score = job.get("_scoring", {}).get("BD Priority Score",
-                job.get("BD Priority Score", 50))
+        score = job.get("_scoring", {}).get(
+            "BD Priority Score", job.get("BD Priority Score", 50)
+        )
 
         # Skip if below threshold
         if score < min_score:
@@ -844,25 +888,25 @@ def generate_playbooks_batch(
             path = Path(output_dir) / f"{base_name}_Playbook.md"
             with open(path, "w", encoding="utf-8") as f:
                 f.write(output.full_playbook)
-            output.output_paths['playbook'] = str(path)
+            output.output_paths["playbook"] = str(path)
 
         if output.intro_email:
             path = Path(output_dir) / f"{base_name}_Email.txt"
             with open(path, "w", encoding="utf-8") as f:
                 f.write(output.intro_email)
-            output.output_paths['email'] = str(path)
+            output.output_paths["email"] = str(path)
 
         if output.call_script:
             path = Path(output_dir) / f"{base_name}_CallScript.md"
             with open(path, "w", encoding="utf-8") as f:
                 f.write(output.call_script)
-            output.output_paths['call_script'] = str(path)
+            output.output_paths["call_script"] = str(path)
 
         if output.talking_points:
             path = Path(output_dir) / f"{base_name}_TalkingPoints.md"
             with open(path, "w", encoding="utf-8") as f:
                 f.write(output.talking_points)
-            output.output_paths['talking_points'] = str(path)
+            output.output_paths["talking_points"] = str(path)
 
         results.append(output)
 
@@ -876,12 +920,24 @@ def generate_playbooks_batch(
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Generate BD Playbooks for Hot opportunities")
-    parser.add_argument("--input", "-i", required=True, help="Input JSON file with enriched jobs")
-    parser.add_argument("--output", "-o", default="outputs/BD_Briefings", help="Output directory")
-    parser.add_argument("--min-score", type=int, default=80, help="Minimum BD score (default: 80)")
-    parser.add_argument("--all-formats", action="store_true", help="Generate all output formats")
-    parser.add_argument("--no-contacts", action="store_true", help="Skip contact lookup")
+    parser = argparse.ArgumentParser(
+        description="Generate BD Playbooks for Hot opportunities"
+    )
+    parser.add_argument(
+        "--input", "-i", required=True, help="Input JSON file with enriched jobs"
+    )
+    parser.add_argument(
+        "--output", "-o", default="outputs/BD_Briefings", help="Output directory"
+    )
+    parser.add_argument(
+        "--min-score", type=int, default=80, help="Minimum BD score (default: 80)"
+    )
+    parser.add_argument(
+        "--all-formats", action="store_true", help="Generate all output formats"
+    )
+    parser.add_argument(
+        "--no-contacts", action="store_true", help="Skip contact lookup"
+    )
 
     args = parser.parse_args()
 
@@ -893,7 +949,7 @@ if __name__ == "__main__":
         jobs = [jobs]
 
     # Determine formats
-    formats = ['full', 'email', 'call', 'talking'] if args.all_formats else ['full']
+    formats = ["full", "email", "call", "talking"] if args.all_formats else ["full"]
 
     # Generate playbooks
     print(f"\nGenerating playbooks for jobs with BD Score >= {args.min_score}...")
@@ -908,7 +964,9 @@ if __name__ == "__main__":
 
     print(f"\nGenerated {len(results)} playbooks:")
     for output in results:
-        print(f"  - {output.data.job_title} ({output.data.program_name}) - Score: {output.data.bd_score}")
+        print(
+            f"  - {output.data.job_title} ({output.data.program_name}) - Score: {output.data.bd_score}"
+        )
         for fmt, path in output.output_paths.items():
             print(f"    {fmt}: {path}")
 

@@ -1,4 +1,5 @@
 """Base document model for unified data."""
+
 from pydantic import BaseModel, Field
 from datetime import datetime
 from typing import Optional, List
@@ -8,6 +9,7 @@ from enum import Enum
 
 class SourceProject(str, Enum):
     """Source project identifier for cross-project data."""
+
     BD_ENGINE = "bd_engine"
     DATA_SCRAPER = "data_scraper"
     N8N_BUILDER = "n8n_builder"
@@ -20,6 +22,7 @@ class BaseDocument(BaseModel):
     All data types (contacts, programs, jobs, activities) inherit from this
     to ensure consistent metadata across the platform.
     """
+
     id: str = Field(default_factory=lambda: str(uuid4()))
     source_project: SourceProject = SourceProject.BD_ENGINE
     source_type: str = "unknown"

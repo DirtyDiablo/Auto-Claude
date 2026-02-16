@@ -17,6 +17,7 @@ router = APIRouter()
 # REQUEST MODELS
 # =========================================
 
+
 class SubscribeRequest(BaseModel):
     user_id: str
     endpoint: str = ""
@@ -46,10 +47,12 @@ class DetectClientRequest(BaseModel):
 # PWA ENDPOINTS
 # =========================================
 
+
 @router.get("/api/pwa/manifest")
 def get_manifest():
     """Get the PWA web app manifest."""
     from src.pwa.pwa_manager import get_pwa_manager
+
     mgr = get_pwa_manager()
     return mgr.get_manifest().to_dict()
 
@@ -58,6 +61,7 @@ def get_manifest():
 def list_resources():
     """List offline-cached resources."""
     from src.pwa.pwa_manager import get_pwa_manager
+
     mgr = get_pwa_manager()
     resources = mgr.list_resources()
     return {"resources": [r.to_dict() for r in resources], "total": len(resources)}
@@ -67,6 +71,7 @@ def list_resources():
 def queue_sync(req: QueueSyncRequest):
     """Queue an offline action for sync."""
     from src.pwa.pwa_manager import get_pwa_manager
+
     mgr = get_pwa_manager()
     item = mgr.queue_sync(req.action, req.payload)
     return item.to_dict()
@@ -76,6 +81,7 @@ def queue_sync(req: QueueSyncRequest):
 def process_sync():
     """Process all pending sync items."""
     from src.pwa.pwa_manager import get_pwa_manager
+
     mgr = get_pwa_manager()
     return mgr.process_sync_queue()
 
@@ -84,19 +90,28 @@ def process_sync():
 # PUSH NOTIFICATION ENDPOINTS
 # =========================================
 
+
 @router.post("/api/pwa/notifications/subscribe")
 def subscribe(req: SubscribeRequest):
     """Subscribe to push notifications."""
     from src.pwa.push_notifications import get_push_service
+
     svc = get_push_service()
-    sub = svc.subscribe(user_id=req.user_id, endpoint=req.endpoint, topics=req.topics or None)
+    sub = svc.subscribe(
+        user_id=req.user_id, endpoint=req.endpoint, topics=req.topics or None
+    )
     return sub.to_dict()
 
 
 @router.post("/api/pwa/notifications/send")
 def send_notification(req: SendNotificationRequest):
     """Send a push notification."""
-    from src.pwa.push_notifications import get_push_service, NotificationTopic, NotificationPriority
+    from src.pwa.push_notifications import (
+        get_push_service,
+        NotificationTopic,
+        NotificationPriority,
+    )
+
     svc = get_push_service()
     topic_map = {t.value: t for t in NotificationTopic}
     priority_map = {p.value: p for p in NotificationPriority}
@@ -114,6 +129,7 @@ def send_notification(req: SendNotificationRequest):
 def list_templates():
     """List notification templates."""
     from src.pwa.push_notifications import get_push_service
+
     svc = get_push_service()
     templates = svc.list_templates()
     return {"templates": templates, "total": len(templates)}
@@ -123,10 +139,12 @@ def list_templates():
 # RESPONSIVE API ENDPOINTS
 # =========================================
 
+
 @router.post("/api/pwa/detect-client")
 def detect_client(req: DetectClientRequest):
     """Detect client capabilities."""
     from src.pwa.responsive_api import get_responsive_api
+
     api = get_responsive_api()
     profile = api.detect_client(
         user_agent=req.user_agent,
@@ -139,6 +157,7 @@ def detect_client(req: DetectClientRequest):
 # =========================================
 # HEALTH
 # =========================================
+
 
 @router.get("/api/pwa/health")
 def pwa_health():
@@ -158,6 +177,7 @@ def pwa_health():
 # =========================================
 # ROUTER REGISTRATION
 # =========================================
+
 
 def include_pwa_router(app: FastAPI) -> None:
     app.include_router(router)

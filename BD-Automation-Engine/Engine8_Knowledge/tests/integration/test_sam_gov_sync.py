@@ -154,7 +154,11 @@ class TestSearchAwards:
     @pytest.mark.asyncio
     async def test_search_awards(self, sync, sample_tango_awards_response):
         """Search awards via mocked Tango API."""
-        with patch.object(sync, "_tango_request", new=AsyncMock(return_value=sample_tango_awards_response)):
+        with patch.object(
+            sync,
+            "_tango_request",
+            new=AsyncMock(return_value=sample_tango_awards_response),
+        ):
             query = SearchQuery(keywords=["DCGS"], limit=50)
             awards = await sync.search_awards(query)
 
@@ -169,7 +173,11 @@ class TestSearchAwards:
     @pytest.mark.asyncio
     async def test_search_awards_empty(self, sync):
         """Empty Tango response returns empty list."""
-        with patch.object(sync, "_tango_request", new=AsyncMock(return_value={"results": [], "total": 0})):
+        with patch.object(
+            sync,
+            "_tango_request",
+            new=AsyncMock(return_value={"results": [], "total": 0}),
+        ):
             query = SearchQuery(keywords=["nonexistent"], limit=10)
             awards = await sync.search_awards(query)
 
@@ -202,8 +210,12 @@ class TestSearchOpportunities:
             "totalRecords": 1,
         }
 
-        with patch.object(sync, "_tango_request", new=AsyncMock(return_value=tango_response)):
-            with patch.object(sync, "_sam_request", new=AsyncMock(return_value=sam_response)):
+        with patch.object(
+            sync, "_tango_request", new=AsyncMock(return_value=tango_response)
+        ):
+            with patch.object(
+                sync, "_sam_request", new=AsyncMock(return_value=sam_response)
+            ):
                 query = OpportunityQuery(keywords=["DCGS"], limit=20)
                 opps = await sync.search_opportunities(query)
 
@@ -249,7 +261,9 @@ class TestMonitorAwards:
             filtered = {k: v for k, v in kwargs.items() if k in known}
             _orig_init(self, **filtered)
 
-        with patch.object(sync, "search_awards", new=AsyncMock(return_value=[mock_award])):
+        with patch.object(
+            sync, "search_awards", new=AsyncMock(return_value=[mock_award])
+        ):
             with patch.object(SearchQuery, "__init__", _tolerant_init):
                 alerts = await sync.monitor_awards()
 
@@ -287,7 +301,9 @@ class TestContractDetails:
             }
         }
 
-        with patch.object(sync, "_tango_request", new=AsyncMock(return_value=tango_data)):
+        with patch.object(
+            sync, "_tango_request", new=AsyncMock(return_value=tango_data)
+        ):
             detail = await sync.get_contract_details("AWD-100")
 
         assert isinstance(detail, ContractDetail)
@@ -300,11 +316,17 @@ class TestContractDetails:
     async def test_get_company_awards(self, sync):
         """Get all awards for a specific company."""
         mock_awards = [
-            ContractAward(award_id="A1", title="Contract 1", awardee="GDIT", value=10_000_000),
-            ContractAward(award_id="A2", title="Contract 2", awardee="GDIT", value=20_000_000),
+            ContractAward(
+                award_id="A1", title="Contract 1", awardee="GDIT", value=10_000_000
+            ),
+            ContractAward(
+                award_id="A2", title="Contract 2", awardee="GDIT", value=20_000_000
+            ),
         ]
 
-        with patch.object(sync, "search_awards", new=AsyncMock(return_value=mock_awards)):
+        with patch.object(
+            sync, "search_awards", new=AsyncMock(return_value=mock_awards)
+        ):
             awards = await sync.get_company_awards("GDIT", days=365)
 
         assert len(awards) == 2

@@ -23,6 +23,7 @@ RUNS_LOG = DATA_DIR / "agent_runs.jsonl"
 
 # ─── Agent Run Record ────────────────────────────────────────────────────────
 
+
 def _log_run(agent: str, status: str, summary: str, start_time: str, end_time: str):
     """Log an agent run to the JSONL file."""
     DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -63,11 +64,15 @@ def get_last_run(agent_name: str) -> Optional[Dict]:
 
 # ─── Agent Executor Functions ────────────────────────────────────────────────
 
+
 def _run_morning_briefing():
     """Execute morning briefing agent."""
     start = datetime.now().isoformat()
     try:
-        from Engine8_Knowledge.agents.autonomous.morning_briefing import MorningBriefingAgent
+        from Engine8_Knowledge.agents.autonomous.morning_briefing import (
+            MorningBriefingAgent,
+        )
+
         agent = MorningBriefingAgent()
         brief = agent.generate_brief()
         summary = (
@@ -76,7 +81,9 @@ def _run_morning_briefing():
             f"{len(brief.new_opportunities)} opportunities, "
             f"{len(brief.priority_contacts)} priority contacts"
         )
-        _log_run("morning_briefing", "success", summary, start, datetime.now().isoformat())
+        _log_run(
+            "morning_briefing", "success", summary, start, datetime.now().isoformat()
+        )
         logger.info(f"Morning briefing completed: {summary}")
         return brief.to_dict()
     except Exception as e:
@@ -89,7 +96,10 @@ def _run_contact_enrichment():
     """Execute contact enrichment agent."""
     start = datetime.now().isoformat()
     try:
-        from Engine8_Knowledge.agents.autonomous.contact_enrichment import ContactEnrichmentAgent
+        from Engine8_Knowledge.agents.autonomous.contact_enrichment import (
+            ContactEnrichmentAgent,
+        )
+
         agent = ContactEnrichmentAgent()
         report = agent.scan_all_contacts(limit=100)
         summary = (
@@ -97,11 +107,15 @@ def _run_contact_enrichment():
             f"{report.stale_contacts} stale, {report.missing_fields} missing fields, "
             f"{report.changes_detected} total issues"
         )
-        _log_run("contact_enrichment", "success", summary, start, datetime.now().isoformat())
+        _log_run(
+            "contact_enrichment", "success", summary, start, datetime.now().isoformat()
+        )
         logger.info(f"Contact enrichment completed: {summary}")
         return report.to_dict()
     except Exception as e:
-        _log_run("contact_enrichment", "error", str(e), start, datetime.now().isoformat())
+        _log_run(
+            "contact_enrichment", "error", str(e), start, datetime.now().isoformat()
+        )
         logger.error(f"Contact enrichment failed: {e}")
         return {"error": str(e)}
 
@@ -113,6 +127,7 @@ AGENT_EXECUTORS = {
 
 
 # ─── Agent Scheduler ─────────────────────────────────────────────────────────
+
 
 class AgentScheduler:
     """
@@ -174,7 +189,10 @@ class AgentScheduler:
         """Trigger an agent manually."""
         executor = AGENT_EXECUTORS.get(agent_name)
         if not executor:
-            return {"error": f"Unknown agent: {agent_name}", "available": list(AGENT_EXECUTORS.keys())}
+            return {
+                "error": f"Unknown agent: {agent_name}",
+                "available": list(AGENT_EXECUTORS.keys()),
+            }
 
         logger.info(f"Manual trigger: {agent_name}")
         result = executor()

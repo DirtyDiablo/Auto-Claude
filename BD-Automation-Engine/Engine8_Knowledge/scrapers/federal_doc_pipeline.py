@@ -25,6 +25,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class DocumentRef:
     """Reference to a discovered federal document."""
+
     doc_id: str = ""
     url: str = ""
     title: str = ""
@@ -40,6 +41,7 @@ class DocumentRef:
 @dataclass
 class ProcessedFederalDoc:
     """Fully processed federal document."""
+
     source_path: str = ""
     doc_type: str = ""
     title: str = ""
@@ -58,6 +60,7 @@ class ProcessedFederalDoc:
 @dataclass
 class BatchResult:
     """Result from batch processing."""
+
     total: int = 0
     processed: int = 0
     failed: int = 0
@@ -69,6 +72,7 @@ class BatchResult:
 @dataclass
 class DocumentAlert:
     """Alert for new federal documents matching watch criteria."""
+
     alert_id: str = ""
     doc_ref: Optional[DocumentRef] = None
     matched_criteria: str = ""
@@ -84,9 +88,20 @@ class DocumentAlert:
 DOC_TYPE_KEYWORDS = {
     "RFP": ["request for proposal", "rfp", "solicitation", "full and open"],
     "RFI": ["request for information", "rfi", "sources sought", "market research"],
-    "SOW": ["statement of work", "sow", "scope of work", "performance work statement", "pws"],
+    "SOW": [
+        "statement of work",
+        "sow",
+        "scope of work",
+        "performance work statement",
+        "pws",
+    ],
     "contract_mod": ["modification", "contract mod", "amendment", "change order"],
-    "award_notice": ["award notice", "contract award", "task order award", "delivery order"],
+    "award_notice": [
+        "award notice",
+        "contract award",
+        "task order award",
+        "delivery order",
+    ],
 }
 
 ALLOWED_CONTENT_TYPES = {
@@ -171,13 +186,15 @@ class FederalDocPipeline:
 
         for link in result.links:
             if any(ext in link.lower() for ext in [".pdf", ".docx", ".xlsx"]):
-                docs.append(DocumentRef(
-                    doc_id=f"sam_{uuid.uuid4().hex[:8]}",
-                    url=link,
-                    source="sam_gov",
-                    content_type=self._guess_content_type(link),
-                    discovered_at=datetime.utcnow().isoformat(),
-                ))
+                docs.append(
+                    DocumentRef(
+                        doc_id=f"sam_{uuid.uuid4().hex[:8]}",
+                        url=link,
+                        source="sam_gov",
+                        content_type=self._guess_content_type(link),
+                        discovered_at=datetime.utcnow().isoformat(),
+                    )
+                )
         return docs
 
     async def _discover_fpds(self, query: Dict[str, Any]) -> List[DocumentRef]:
@@ -189,13 +206,15 @@ class FederalDocPipeline:
         result = await self.crawler.crawl_url(url, extraction_strategy="contracts")
         docs = []
         for item in result.extracted_data:
-            docs.append(DocumentRef(
-                doc_id=f"fpds_{uuid.uuid4().hex[:8]}",
-                url=item.get("url", ""),
-                title=item.get("title", ""),
-                source="fpds",
-                discovered_at=datetime.utcnow().isoformat(),
-            ))
+            docs.append(
+                DocumentRef(
+                    doc_id=f"fpds_{uuid.uuid4().hex[:8]}",
+                    url=item.get("url", ""),
+                    title=item.get("title", ""),
+                    source="fpds",
+                    discovered_at=datetime.utcnow().isoformat(),
+                )
+            )
         return docs
 
     async def _discover_agency_sites(self, query: Dict[str, Any]) -> List[DocumentRef]:
@@ -208,19 +227,23 @@ class FederalDocPipeline:
         results = await self.crawler.crawl_site(
             url,
             max_pages=query.get("max_pages", 20),
-            url_filter=lambda u: any(ext in u.lower() for ext in [".pdf", ".docx", "document"]),
+            url_filter=lambda u: any(
+                ext in u.lower() for ext in [".pdf", ".docx", "document"]
+            ),
         )
         docs = []
         for r in results:
             for link in r.links:
                 if any(ext in link.lower() for ext in [".pdf", ".docx", ".xlsx"]):
-                    docs.append(DocumentRef(
-                        doc_id=f"agency_{uuid.uuid4().hex[:8]}",
-                        url=link,
-                        source="agency_site",
-                        content_type=self._guess_content_type(link),
-                        discovered_at=datetime.utcnow().isoformat(),
-                    ))
+                    docs.append(
+                        DocumentRef(
+                            doc_id=f"agency_{uuid.uuid4().hex[:8]}",
+                            url=link,
+                            source="agency_site",
+                            content_type=self._guess_content_type(link),
+                            discovered_at=datetime.utcnow().isoformat(),
+                        )
+                    )
         return docs
 
     # ------------------------------------------------------------------
@@ -242,16 +265,20 @@ class FederalDocPipeline:
 
         try:
             import httpx
-            async with httpx.AsyncClient(
-                follow_redirects=True, timeout=60.0
-            ) as client:
+
+            async with httpx.AsyncClient(follow_redirects=True, timeout=60.0) as client:
                 resp = await client.get(doc_ref.url)
                 resp.raise_for_status()
 
-                content_type = resp.headers.get("content-type", "").split(";")[0].strip()
+                content_type = (
+                    resp.headers.get("content-type", "").split(";")[0].strip()
+                )
                 if content_type and content_type not in ALLOWED_CONTENT_TYPES:
                     # Still allow if extension matches
-                    if not any(doc_ref.url.lower().endswith(ext) for ext in [".pdf", ".docx", ".xlsx"]):
+                    if not any(
+                        doc_ref.url.lower().endswith(ext)
+                        for ext in [".pdf", ".docx", ".xlsx"]
+                    ):
                         raise ValueError(f"Disallowed content type: {content_type}")
 
                 content = resp.content
@@ -310,6 +337,7 @@ class FederalDocPipeline:
         if self.hub:
             try:
                 import httpx
+
                 async with httpx.AsyncClient(timeout=120.0) as client:
                     with open(file_path, "rb") as f:
                         resp = await client.post(
@@ -342,6 +370,7 @@ class FederalDocPipeline:
         if self.hub:
             try:
                 import httpx
+
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     resp = await client.post(
                         f"{self.hub}/search",
@@ -405,11 +434,13 @@ class FederalDocPipeline:
                     result.documents.append(doc)
                 except Exception as exc:
                     result.failed += 1
-                    result.errors.append({
-                        "doc_id": ref.doc_id,
-                        "url": ref.url,
-                        "error": str(exc),
-                    })
+                    result.errors.append(
+                        {
+                            "doc_id": ref.doc_id,
+                            "url": ref.url,
+                            "error": str(exc),
+                        }
+                    )
 
         tasks = [_process_one(ref) for ref in doc_refs]
         await asyncio.gather(*tasks)
@@ -437,16 +468,20 @@ class FederalDocPipeline:
             for doc in docs:
                 relevance = self._score_relevance(doc, config)
                 if relevance >= 0.3:
-                    alerts.append(DocumentAlert(
-                        alert_id=f"alert_{uuid.uuid4().hex[:8]}",
-                        doc_ref=doc,
-                        matched_criteria=config.get("name", source),
-                        relevance_score=relevance,
-                        recommended_action="Review and process document",
-                        created_at=datetime.utcnow().isoformat(),
-                    ))
+                    alerts.append(
+                        DocumentAlert(
+                            alert_id=f"alert_{uuid.uuid4().hex[:8]}",
+                            doc_ref=doc,
+                            matched_criteria=config.get("name", source),
+                            relevance_score=relevance,
+                            recommended_action="Review and process document",
+                            created_at=datetime.utcnow().isoformat(),
+                        )
+                    )
 
-        logger.info("monitor_new_documents", configs=len(watch_configs), alerts=len(alerts))
+        logger.info(
+            "monitor_new_documents", configs=len(watch_configs), alerts=len(alerts)
+        )
         return alerts
 
     # ------------------------------------------------------------------
@@ -467,16 +502,25 @@ class FederalDocPipeline:
     def _extract_entities(self, text: str) -> Dict[str, Any]:
         """Basic entity extraction from text."""
         import re
+
         entities: Dict[str, Any] = {}
-        title_match = re.search(r"(?:Subject|Title|RE):\s*(.+?)(?:\n|$)", text[:2000], re.I)
+        title_match = re.search(
+            r"(?:Subject|Title|RE):\s*(.+?)(?:\n|$)", text[:2000], re.I
+        )
         if title_match:
             entities["title"] = title_match.group(1).strip()
 
         agency_keywords = [
-            "Department of Defense", "Department of the Air Force",
-            "Department of the Army", "Department of the Navy",
-            "Defense Intelligence Agency", "National Security Agency",
-            "NGA", "NRO", "DISA", "DARPA",
+            "Department of Defense",
+            "Department of the Air Force",
+            "Department of the Army",
+            "Department of the Navy",
+            "Defense Intelligence Agency",
+            "National Security Agency",
+            "NGA",
+            "NRO",
+            "DISA",
+            "DARPA",
         ]
         for agency in agency_keywords:
             if agency.lower() in text[:5000].lower():
@@ -487,7 +531,9 @@ class FederalDocPipeline:
         if naics_match:
             entities["naics"] = naics_match.group(1)
 
-        value_match = re.search(r"\$[\d,]+(?:\.\d{2})?(?:\s*(?:million|billion|M|B))?", text[:5000])
+        value_match = re.search(
+            r"\$[\d,]+(?:\.\d{2})?(?:\s*(?:million|billion|M|B))?", text[:5000]
+        )
         if value_match:
             entities["value"] = value_match.group(0)
 

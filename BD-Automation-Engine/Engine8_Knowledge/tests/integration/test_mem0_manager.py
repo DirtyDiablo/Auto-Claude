@@ -42,6 +42,7 @@ class TestInit:
 
     def test_singleton(self):
         import Engine8_Knowledge.memory.mem0_manager as mod
+
         original = mod._manager
         mod._manager = None
         m1 = mod.get_mem0_manager(qdrant_url="localhost:6333")
@@ -198,12 +199,13 @@ class TestHistory:
 class TestStats:
     @pytest.mark.asyncio
     async def test_stats(self, manager):
-        await manager.add("Memory A", user_id="u1", agent_id="a1",
-                          metadata={"type": "interaction"})
-        await manager.add("Memory B", user_id="u2", agent_id="a1",
-                          metadata={"type": "outcome"})
-        await manager.add("Memory C", user_id="u1",
-                          metadata={"type": "interaction"})
+        await manager.add(
+            "Memory A", user_id="u1", agent_id="a1", metadata={"type": "interaction"}
+        )
+        await manager.add(
+            "Memory B", user_id="u2", agent_id="a1", metadata={"type": "outcome"}
+        )
+        await manager.add("Memory C", user_id="u1", metadata={"type": "interaction"})
 
         stats = await manager.get_stats()
         assert isinstance(stats, MemoryStats)

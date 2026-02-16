@@ -22,13 +22,15 @@ ENRICHMENT_LOG = ENRICHMENT_DIR / "enrichment_log.jsonl"
 
 # ─── Data Models ─────────────────────────────────────────────────────────────
 
+
 @dataclass
 class ContactChange:
     """A detected change or issue for a single contact."""
+
     contact_id: str
     contact_name: str
-    change_type: str   # stale | missing_field | title_change | company_change | location_change | low_confidence
-    severity: str      # high | medium | low
+    change_type: str  # stale | missing_field | title_change | company_change | location_change | low_confidence
+    severity: str  # high | medium | low
     details: Dict[str, Any] = field(default_factory=dict)
     recommended_action: str = ""
 
@@ -39,6 +41,7 @@ class ContactChange:
 @dataclass
 class EnrichmentReport:
     """Results of an enrichment scan."""
+
     scan_date: str
     contacts_scanned: int = 0
     stale_contacts: int = 0
@@ -176,12 +179,16 @@ class ContactEnrichmentAgent:
                 contact_name=contact.get("name", ""),
                 change_type="stale",
                 severity="medium",
-                details={"reason": "no_date_fields", "message": "No timestamp fields found"},
+                details={
+                    "reason": "no_date_fields",
+                    "message": "No timestamp fields found",
+                },
                 recommended_action="Verify contact data is current",
             )
 
-        days_old = (datetime.now(last_date.tzinfo) if last_date.tzinfo
-                    else datetime.now()) - last_date.replace(tzinfo=None)
+        days_old = (
+            datetime.now(last_date.tzinfo) if last_date.tzinfo else datetime.now()
+        ) - last_date.replace(tzinfo=None)
 
         if days_old.days >= STALENESS_DAYS:
             return ContactChange(
@@ -207,26 +214,32 @@ class ContactEnrichmentAgent:
         for field_name in REQUIRED_FIELDS:
             value = contact.get(field_name)
             if not value or (isinstance(value, str) and not value.strip()):
-                changes.append(ContactChange(
-                    contact_id=contact_id,
-                    contact_name=contact_name,
-                    change_type="missing_field",
-                    severity="medium" if field_name in ("email", "phone") else "low",
-                    details={"missing_field": field_name},
-                    recommended_action=f"Add missing {field_name} for {contact_name}",
-                ))
+                changes.append(
+                    ContactChange(
+                        contact_id=contact_id,
+                        contact_name=contact_name,
+                        change_type="missing_field",
+                        severity="medium"
+                        if field_name in ("email", "phone")
+                        else "low",
+                        details={"missing_field": field_name},
+                        recommended_action=f"Add missing {field_name} for {contact_name}",
+                    )
+                )
 
         # Check LinkedIn specifically
         linkedin = contact.get("linkedin") or contact.get("linkedin_url")
         if not linkedin:
-            changes.append(ContactChange(
-                contact_id=contact_id,
-                contact_name=contact_name,
-                change_type="missing_field",
-                severity="low",
-                details={"missing_field": "linkedin"},
-                recommended_action=f"Find LinkedIn profile for {contact_name}",
-            ))
+            changes.append(
+                ContactChange(
+                    contact_id=contact_id,
+                    contact_name=contact_name,
+                    change_type="missing_field",
+                    severity="low",
+                    details={"missing_field": "linkedin"},
+                    recommended_action=f"Find LinkedIn profile for {contact_name}",
+                )
+            )
 
         return changes
 
@@ -236,7 +249,11 @@ class ContactEnrichmentAgent:
         bd_priority = contact.get("bd_priority", "")
 
         # Flag Tier 1-2 contacts with standard priority (should be critical/high)
-        if tier in (1, 2) and bd_priority and bd_priority.lower() in ("standard", "low"):
+        if (
+            tier in (1, 2)
+            and bd_priority
+            and bd_priority.lower() in ("standard", "low")
+        ):
             return ContactChange(
                 contact_id=contact.get("id", ""),
                 contact_name=contact.get("name", ""),
@@ -281,6 +298,7 @@ class ContactEnrichmentAgent:
         """Fetch contacts from the API."""
         try:
             import httpx
+
             resp = httpx.get(
                 f"{self.api_base}/api/v2/contacts",
                 params={"limit": limit},

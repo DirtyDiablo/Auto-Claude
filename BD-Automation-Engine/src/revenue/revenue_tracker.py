@@ -22,21 +22,23 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Placement:
     """Single placement record."""
+
     id: str
     contractor_name: str
     client: str
     program: str
     role_title: str
-    bill_rate: float = 0.0          # $/hr billed to client
-    pay_rate: float = 0.0           # $/hr paid to contractor
+    bill_rate: float = 0.0  # $/hr billed to client
+    pay_rate: float = 0.0  # $/hr paid to contractor
     start_date: str = ""
     end_date: str = ""
-    status: str = "active"          # active, completed, terminated
-    rep: str = ""                   # BD rep who sourced
-    contact_id: str = ""            # Client contact who approved
+    status: str = "active"  # active, completed, terminated
+    rep: str = ""  # BD rep who sourced
+    contact_id: str = ""  # Client contact who approved
     location: str = ""
     clearance: str = ""
     hours_per_week: float = 40.0
@@ -46,8 +48,9 @@ class Placement:
 @dataclass
 class RevenueRecord:
     """Revenue recognized from a placement."""
+
     placement_id: str
-    period: str                     # YYYY-MM
+    period: str  # YYYY-MM
     billed_hours: float = 0.0
     bill_amount: float = 0.0
     pay_amount: float = 0.0
@@ -58,6 +61,7 @@ class RevenueRecord:
 @dataclass
 class RevenueSummary:
     """Revenue summary for a period."""
+
     period: str
     total_revenue: float = 0.0
     total_cost: float = 0.0
@@ -70,6 +74,7 @@ class RevenueSummary:
 @dataclass
 class MarginAnalysis:
     """Margin analysis results."""
+
     avg_margin_pct: float = 0.0
     margin_by_program: Dict[str, float] = field(default_factory=dict)
     margin_trend: List[Dict[str, Any]] = field(default_factory=list)
@@ -80,16 +85,18 @@ class MarginAnalysis:
 @dataclass
 class ConcentrationRisk:
     """Revenue concentration risk assessment."""
+
     top_programs: List[Dict[str, Any]] = field(default_factory=list)
     top_3_pct: float = 0.0
-    herfindahl_index: float = 0.0   # 0-1, higher = more concentrated
-    risk_level: str = "low"         # low, moderate, high, critical
+    herfindahl_index: float = 0.0  # 0-1, higher = more concentrated
+    risk_level: str = "low"  # low, moderate, high, critical
     diversification_score: float = 0.0  # 0-100
 
 
 # =========================================
 # TRACKER
 # =========================================
+
 
 class RevenueTracker:
     """Track revenue from placement to billing."""
@@ -220,14 +227,16 @@ class RevenueTracker:
             margin = monthly_rev - monthly_cost
             margin_pct = (margin / monthly_rev * 100) if monthly_rev > 0 else 0
 
-            forecast.append({
-                "period": period,
-                "projected_revenue": round(monthly_rev, 2),
-                "projected_cost": round(monthly_cost, 2),
-                "projected_margin": round(margin, 2),
-                "margin_pct": round(margin_pct, 2),
-                "active_placements": active_count,
-            })
+            forecast.append(
+                {
+                    "period": period,
+                    "projected_revenue": round(monthly_rev, 2),
+                    "projected_cost": round(monthly_cost, 2),
+                    "projected_margin": round(margin, 2),
+                    "margin_pct": round(margin_pct, 2),
+                    "active_placements": active_count,
+                }
+            )
 
         return forecast
 
@@ -243,7 +252,9 @@ class RevenueTracker:
         # Overall avg margin
         total_rev = sum(r.bill_amount for r in self._revenue_records)
         total_cost = sum(r.pay_amount for r in self._revenue_records)
-        avg_margin = ((total_rev - total_cost) / total_rev * 100) if total_rev > 0 else 0
+        avg_margin = (
+            ((total_rev - total_cost) / total_rev * 100) if total_rev > 0 else 0
+        )
 
         # By program
         prog_rev: Dict[str, float] = defaultdict(float)
@@ -258,7 +269,9 @@ class RevenueTracker:
         for prog in prog_rev:
             rev = prog_rev[prog]
             cost = prog_cost[prog]
-            margin_by_prog[prog] = round(((rev - cost) / rev * 100) if rev > 0 else 0, 2)
+            margin_by_prog[prog] = round(
+                ((rev - cost) / rev * 100) if rev > 0 else 0, 2
+            )
 
         # Margin trend by period
         period_rev: Dict[str, float] = defaultdict(float)
@@ -303,11 +316,13 @@ class RevenueTracker:
         top_programs = []
         for prog, rev in list(by_program.items())[:10]:
             share = rev / total_rev * 100
-            top_programs.append({
-                "program": prog,
-                "revenue": round(rev, 2),
-                "share_pct": round(share, 2),
-            })
+            top_programs.append(
+                {
+                    "program": prog,
+                    "revenue": round(rev, 2),
+                    "share_pct": round(share, 2),
+                }
+            )
 
         # Top 3 concentration
         top_3_rev = sum(item["revenue"] for item in top_programs[:3])

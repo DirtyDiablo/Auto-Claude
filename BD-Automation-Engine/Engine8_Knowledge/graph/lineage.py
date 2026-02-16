@@ -43,15 +43,28 @@ LINEAGE_NODE_TYPES = {
     "File": {
         "description": "Data file in the pipeline (CSV, JSON, SQLite, etc.)",
         "properties": [
-            "path", "name", "type", "extension", "size_bytes", "hash",
-            "modified", "engine", "is_input", "is_output",
+            "path",
+            "name",
+            "type",
+            "extension",
+            "size_bytes",
+            "hash",
+            "modified",
+            "engine",
+            "is_input",
+            "is_output",
         ],
     },
     "Process": {
         "description": "Script or pipeline step that transforms data",
         "properties": [
-            "name", "script_path", "engine", "description",
-            "last_run", "run_count", "avg_duration_seconds",
+            "name",
+            "script_path",
+            "engine",
+            "description",
+            "last_run",
+            "run_count",
+            "avg_duration_seconds",
         ],
     },
 }
@@ -104,12 +117,18 @@ class LineageTracker:
         self.manager = neo4j_manager
         self._dry_run = neo4j_manager is None
         if self._dry_run:
-            logger.warning("lineage_dry_run: No Neo4j manager provided, operating in dry-run mode")
+            logger.warning(
+                "lineage_dry_run: No Neo4j manager provided, operating in dry-run mode"
+            )
 
     def apply_schema(self) -> Dict:
         """Apply lineage-specific constraints and indexes to Neo4j."""
         if self._dry_run:
-            return {"dry_run": True, "constraints": LINEAGE_CONSTRAINTS, "indexes": LINEAGE_INDEXES}
+            return {
+                "dry_run": True,
+                "constraints": LINEAGE_CONSTRAINTS,
+                "indexes": LINEAGE_INDEXES,
+            }
 
         results = {"constraints": [], "indexes": [], "errors": []}
 
@@ -169,7 +188,11 @@ class LineageTracker:
         return props
 
     def register_process(
-        self, script_path: str, name: str = None, engine: str = None, description: str = None
+        self,
+        script_path: str,
+        name: str = None,
+        engine: str = None,
+        description: str = None,
     ) -> Dict:
         """
         Register a process/script in the lineage graph.
@@ -234,7 +257,9 @@ class LineageTracker:
         SET r += $props
         RETURN r
         """
-        self.manager.write_query(query, {"source": source, "target": target, "props": rel_props})
+        self.manager.write_query(
+            query, {"source": source, "target": target, "props": rel_props}
+        )
 
         # Also register process reads/writes
         if process:
@@ -244,7 +269,9 @@ class LineageTracker:
 
         return {"source": source, "target": target, **rel_props}
 
-    def register_dependency(self, file_path: str, depends_on: str, dep_type: str = "import") -> Dict:
+    def register_dependency(
+        self, file_path: str, depends_on: str, dep_type: str = "import"
+    ) -> Dict:
         """Register that a file depends on another file."""
         if self._dry_run:
             return {"file": file_path, "depends_on": depends_on, "type": dep_type}
@@ -259,7 +286,9 @@ class LineageTracker:
         SET r.dependency_type = $dep_type
         RETURN r
         """
-        self.manager.write_query(query, {"file": file_path, "depends_on": depends_on, "dep_type": dep_type})
+        self.manager.write_query(
+            query, {"file": file_path, "depends_on": depends_on, "dep_type": dep_type}
+        )
         return {"file": file_path, "depends_on": depends_on, "type": dep_type}
 
     def _register_reads(self, process: str, file_path: str):
@@ -298,17 +327,23 @@ class LineageTracker:
             return {"file": file_path, "dry_run": True}
 
         # Upstream (where did this file come from?)
-        upstream_query = """
+        upstream_query = (
+            """
         MATCH path = (f:File {path: $file})-[:DERIVED_FROM*1..%d]->(ancestor:File)
         RETURN [n IN nodes(path) | n.path] AS chain
-        """ % depth
+        """
+            % depth
+        )
         upstream = self.manager.run_query(upstream_query, {"file": file_path})
 
         # Downstream (what was derived from this file?)
-        downstream_query = """
+        downstream_query = (
+            """
         MATCH path = (descendant:File)-[:DERIVED_FROM*1..%d]->(f:File {path: $file})
         RETURN [n IN nodes(path) | n.path] AS chain
-        """ % depth
+        """
+            % depth
+        )
         downstream = self.manager.run_query(downstream_query, {"file": file_path})
 
         return {
@@ -339,7 +374,9 @@ class LineageTracker:
             results = self.manager.run_query(query, {"limit": limit})
             return [dict(r) for r in results]
         except Exception as e:
-            logger.warning("gds_pagerank_failed: %s (GDS plugin may not be installed)", e)
+            logger.warning(
+                "gds_pagerank_failed: %s (GDS plugin may not be installed)", e
+            )
             return []
 
     def get_bottleneck_files(self, limit: int = 10) -> List[Dict]:
@@ -404,14 +441,24 @@ class LineageTracker:
         """Classify a file by type."""
         ext = path.suffix.lower()
         type_map = {
-            ".py": "python", ".ts": "typescript", ".tsx": "typescript",
-            ".js": "javascript", ".jsx": "javascript",
-            ".csv": "csv", ".json": "json", ".xlsx": "excel",
-            ".db": "sqlite", ".sql": "sql",
-            ".md": "markdown", ".txt": "text",
-            ".pdf": "pdf", ".docx": "word",
-            ".yaml": "yaml", ".yml": "yaml",
-            ".html": "html", ".css": "css",
+            ".py": "python",
+            ".ts": "typescript",
+            ".tsx": "typescript",
+            ".js": "javascript",
+            ".jsx": "javascript",
+            ".csv": "csv",
+            ".json": "json",
+            ".xlsx": "excel",
+            ".db": "sqlite",
+            ".sql": "sql",
+            ".md": "markdown",
+            ".txt": "text",
+            ".pdf": "pdf",
+            ".docx": "word",
+            ".yaml": "yaml",
+            ".yml": "yaml",
+            ".html": "html",
+            ".css": "css",
         }
         return type_map.get(ext, "other")
 
@@ -447,10 +494,18 @@ class LineageTracker:
             return {"dry_run": True}
 
         try:
-            file_count = self.manager.run_query("MATCH (f:File) RETURN count(f) AS count")
-            process_count = self.manager.run_query("MATCH (p:Process) RETURN count(p) AS count")
-            derivation_count = self.manager.run_query("MATCH ()-[r:DERIVED_FROM]->() RETURN count(r) AS count")
-            dependency_count = self.manager.run_query("MATCH ()-[r:DEPENDS_ON]->() RETURN count(r) AS count")
+            file_count = self.manager.run_query(
+                "MATCH (f:File) RETURN count(f) AS count"
+            )
+            process_count = self.manager.run_query(
+                "MATCH (p:Process) RETURN count(p) AS count"
+            )
+            derivation_count = self.manager.run_query(
+                "MATCH ()-[r:DERIVED_FROM]->() RETURN count(r) AS count"
+            )
+            dependency_count = self.manager.run_query(
+                "MATCH ()-[r:DEPENDS_ON]->() RETURN count(r) AS count"
+            )
 
             return {
                 "files": file_count[0]["count"] if file_count else 0,

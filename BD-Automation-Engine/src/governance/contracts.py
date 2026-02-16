@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 # ENUMS
 # =========================================
 
+
 class ContractStatus(str, Enum):
     DRAFT = "draft"
     ACTIVE = "active"
@@ -36,11 +37,13 @@ class BreachSeverity(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class QualityTerm:
     """A quality requirement within a contract."""
-    metric: str = ""         # completeness, accuracy, freshness_hours, consistency
-    operator: str = ">="     # >=, <=, ==, >, <
+
+    metric: str = ""  # completeness, accuracy, freshness_hours, consistency
+    operator: str = ">="  # >=, <=, ==, >, <
     threshold: float = 0.0
     description: str = ""
 
@@ -48,13 +51,14 @@ class QualityTerm:
 @dataclass
 class DataContract:
     """Formal contract between a data producer and consumer."""
+
     id: str = ""
     name: str = ""
     version: int = 1
-    producer: str = ""          # e.g., "Engine1_Scraper"
-    consumer: str = ""          # e.g., "Engine2_ProgramMapping"
-    asset_id: str = ""          # catalog asset ID
-    schema_name: str = ""       # schema registry name
+    producer: str = ""  # e.g., "Engine1_Scraper"
+    consumer: str = ""  # e.g., "Engine2_ProgramMapping"
+    asset_id: str = ""  # catalog asset ID
+    schema_name: str = ""  # schema registry name
     schema_version: Optional[int] = None
     description: str = ""
     quality_terms: List[QualityTerm] = field(default_factory=list)
@@ -71,6 +75,7 @@ class DataContract:
 @dataclass
 class ContractBreach:
     """A detected breach of a data contract."""
+
     id: str = ""
     contract_id: str = ""
     contract_name: str = ""
@@ -87,6 +92,7 @@ class ContractBreach:
 @dataclass
 class ContractCheckResult:
     """Result of checking a contract against current data state."""
+
     contract_id: str = ""
     contract_name: str = ""
     status: str = "passing"
@@ -99,6 +105,7 @@ class ContractCheckResult:
 # =========================================
 # DATA CONTRACTS ENGINE
 # =========================================
+
 
 class DataContractsEngine:
     """Manages data contracts between producers and consumers."""
@@ -123,10 +130,18 @@ class DataContractsEngine:
                 schema_name="job_posting",
                 description="Job scraper delivers daily postings conforming to job_posting schema",
                 quality_terms=[
-                    QualityTerm(metric="completeness", operator=">=", threshold=0.85,
-                                description="At least 85% field completeness"),
-                    QualityTerm(metric="accuracy", operator=">=", threshold=0.9,
-                                description="At least 90% data accuracy"),
+                    QualityTerm(
+                        metric="completeness",
+                        operator=">=",
+                        threshold=0.85,
+                        description="At least 85% field completeness",
+                    ),
+                    QualityTerm(
+                        metric="accuracy",
+                        operator=">=",
+                        threshold=0.9,
+                        description="At least 90% data accuracy",
+                    ),
                 ],
                 refresh_schedule="daily",
                 max_staleness_hours=28.0,
@@ -141,10 +156,18 @@ class DataContractsEngine:
                 schema_name="contact",
                 description="Bullhorn ETL delivers weekly contact updates conforming to contact schema",
                 quality_terms=[
-                    QualityTerm(metric="completeness", operator=">=", threshold=0.9,
-                                description="At least 90% field completeness"),
-                    QualityTerm(metric="accuracy", operator=">=", threshold=0.95,
-                                description="At least 95% accuracy for contact data"),
+                    QualityTerm(
+                        metric="completeness",
+                        operator=">=",
+                        threshold=0.9,
+                        description="At least 90% field completeness",
+                    ),
+                    QualityTerm(
+                        metric="accuracy",
+                        operator=">=",
+                        threshold=0.95,
+                        description="At least 95% accuracy for contact data",
+                    ),
                 ],
                 refresh_schedule="weekly",
                 max_staleness_hours=168.0,
@@ -159,8 +182,12 @@ class DataContractsEngine:
                 schema_name="program",
                 description="Program mapper delivers enriched programs to scoring engine",
                 quality_terms=[
-                    QualityTerm(metric="completeness", operator=">=", threshold=0.8,
-                                description="At least 80% completeness"),
+                    QualityTerm(
+                        metric="completeness",
+                        operator=">=",
+                        threshold=0.8,
+                        description="At least 80% completeness",
+                    ),
                 ],
                 refresh_schedule="weekly",
                 max_staleness_hours=168.0,
@@ -208,7 +235,9 @@ class DataContractsEngine:
             results = [c for c in results if c.status == status]
         return results
 
-    def update(self, contract_id: str, updates: Dict[str, Any]) -> Optional[DataContract]:
+    def update(
+        self, contract_id: str, updates: Dict[str, Any]
+    ) -> Optional[DataContract]:
         """Update a contract."""
         contract = self._contracts.get(contract_id)
         if not contract:
@@ -276,17 +305,19 @@ class DataContractsEngine:
             if staleness_hours <= contract.max_staleness_hours:
                 terms_passing += 1
             else:
-                breaches.append(ContractBreach(
-                    id=uuid.uuid4().hex[:10],
-                    contract_id=contract_id,
-                    contract_name=contract.name,
-                    severity=BreachSeverity.CRITICAL.value,
-                    term_violated="staleness",
-                    expected=f"<= {contract.max_staleness_hours}h",
-                    actual=f"{staleness_hours}h",
-                    message=f"Data staleness {staleness_hours}h exceeds max {contract.max_staleness_hours}h",
-                    detected_at=now_iso,
-                ))
+                breaches.append(
+                    ContractBreach(
+                        id=uuid.uuid4().hex[:10],
+                        contract_id=contract_id,
+                        contract_name=contract.name,
+                        severity=BreachSeverity.CRITICAL.value,
+                        term_violated="staleness",
+                        expected=f"<= {contract.max_staleness_hours}h",
+                        actual=f"{staleness_hours}h",
+                        message=f"Data staleness {staleness_hours}h exceeds max {contract.max_staleness_hours}h",
+                        detected_at=now_iso,
+                    )
+                )
 
         # Check record count
         if contract.min_record_count > 0 and record_count > 0:
@@ -294,17 +325,19 @@ class DataContractsEngine:
             if record_count >= contract.min_record_count:
                 terms_passing += 1
             else:
-                breaches.append(ContractBreach(
-                    id=uuid.uuid4().hex[:10],
-                    contract_id=contract_id,
-                    contract_name=contract.name,
-                    severity=BreachSeverity.WARNING.value,
-                    term_violated="record_count",
-                    expected=f">= {contract.min_record_count}",
-                    actual=str(record_count),
-                    message=f"Record count {record_count} below minimum {contract.min_record_count}",
-                    detected_at=now_iso,
-                ))
+                breaches.append(
+                    ContractBreach(
+                        id=uuid.uuid4().hex[:10],
+                        contract_id=contract_id,
+                        contract_name=contract.name,
+                        severity=BreachSeverity.WARNING.value,
+                        term_violated="record_count",
+                        expected=f">= {contract.min_record_count}",
+                        actual=str(record_count),
+                        message=f"Record count {record_count} below minimum {contract.min_record_count}",
+                        detected_at=now_iso,
+                    )
+                )
 
         # Update contract status
         status = "passing"
@@ -335,7 +368,10 @@ class DataContractsEngine:
         """Check all active contracts against provided metrics."""
         results = []
         for contract in self._contracts.values():
-            if contract.status in {ContractStatus.EXPIRED.value, ContractStatus.DEPRECATED.value}:
+            if contract.status in {
+                ContractStatus.EXPIRED.value,
+                ContractStatus.DEPRECATED.value,
+            }:
                 continue
             asset_metrics = metrics_by_asset.get(contract.asset_id, {})
             result = self.check_contract(

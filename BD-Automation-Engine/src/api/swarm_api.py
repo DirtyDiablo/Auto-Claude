@@ -11,10 +11,13 @@ from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from src.agents.swarm.coordinator import (
-    SwarmTask, SwarmResult, get_swarm_coordinator,
+    SwarmTask,
+    SwarmResult,
+    get_swarm_coordinator,
 )
 from src.agents.swarm.decomposer import (
-    TaskDAG, get_task_decomposer,
+    TaskDAG,
+    get_task_decomposer,
 )
 from src.agents.swarm.workers import (
     get_worker_registry,
@@ -26,6 +29,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST / RESPONSE MODELS
 # =========================================
+
 
 class SwarmExecuteRequest(BaseModel):
     description: str = Field(..., min_length=5)
@@ -50,6 +54,7 @@ class EstimateRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_swarm_router(app: FastAPI) -> None:
     """Register all swarm endpoints on the FastAPI app."""
@@ -221,7 +226,9 @@ def include_swarm_router(app: FastAPI) -> None:
         """Cancel a running swarm execution."""
         cancelled = await coordinator.cancel_swarm(swarm_id)
         if not cancelled:
-            raise HTTPException(status_code=404, detail="Swarm not found or already completed")
+            raise HTTPException(
+                status_code=404, detail="Swarm not found or already completed"
+            )
         return {"swarm_id": swarm_id, "status": "cancelled"}
 
     logger.info("Swarm API: 10 endpoints registered under /swarm/*")
@@ -230,6 +237,7 @@ def include_swarm_router(app: FastAPI) -> None:
 # =========================================
 # SERIALIZATION HELPERS
 # =========================================
+
 
 def _serialize_dag(dag: TaskDAG) -> Dict[str, Any]:
     """Serialize a TaskDAG to a JSON-safe dict."""

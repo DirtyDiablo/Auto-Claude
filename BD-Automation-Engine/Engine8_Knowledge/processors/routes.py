@@ -2,6 +2,7 @@
 FastAPI routes for Document Processing.
 Import this into main api.py during integration step.
 """
+
 import os
 import structlog
 from fastapi import APIRouter, HTTPException, BackgroundTasks, UploadFile, File
@@ -10,9 +11,17 @@ import tempfile
 import shutil
 
 try:
-    from .document_pipeline import BDDocumentPipeline, process_document, batch_process_folder
+    from .document_pipeline import (
+        BDDocumentPipeline,
+        process_document,
+        batch_process_folder,
+    )
 except ImportError:
-    from document_pipeline import BDDocumentPipeline, process_document, batch_process_folder
+    from document_pipeline import (
+        BDDocumentPipeline,
+        process_document,
+        batch_process_folder,
+    )
 
 try:
     from .docling_processor import ingest_document_to_qdrant
@@ -142,9 +151,7 @@ def _get_ingest_store():
 
 @router.post("/batch")
 async def api_batch_process(
-    folder_path: str,
-    _background_tasks: BackgroundTasks,
-    recursive: bool = True
+    folder_path: str, _background_tasks: BackgroundTasks, recursive: bool = True
 ):
     """Process all documents in a folder."""
     try:
@@ -165,5 +172,5 @@ async def processor_status():
         "status": "ready",
         "docling_available": pipeline.use_docling,
         "fallback": "pymupdf",
-        "supported_types": [".pdf", ".docx", ".pptx"]
+        "supported_types": [".pdf", ".docx", ".pptx"],
     }

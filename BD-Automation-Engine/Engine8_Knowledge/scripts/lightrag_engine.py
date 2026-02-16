@@ -17,6 +17,7 @@ try:
     from lightrag import LightRAG, QueryParam
     from lightrag.llm.anthropic import anthropic_complete
     from lightrag.utils import EmbeddingFunc
+
     LIGHTRAG_AVAILABLE = True
 except ImportError as e:
     LIGHTRAG_AVAILABLE = False
@@ -35,7 +36,7 @@ class FallbackKnowledgeGraph:
     def _load(self):
         if os.path.exists(self.docs_file):
             try:
-                with open(self.docs_file, 'r') as f:
+                with open(self.docs_file, "r") as f:
                     self.documents = json.load(f)
             except (json.JSONDecodeError, OSError) as e:
                 logger.warning(f"Failed to load {self.docs_file}: {e} - starting fresh")
@@ -43,21 +44,23 @@ class FallbackKnowledgeGraph:
 
     def _save(self):
         os.makedirs(self.working_dir, exist_ok=True)
-        with open(self.docs_file, 'w') as f:
+        with open(self.docs_file, "w") as f:
             json.dump(self.documents, f, indent=2)
 
     async def insert(self, content: str) -> bool:
-        self.documents.append({
-            "content": content,
-            "timestamp": datetime.now().isoformat()
-        })
+        self.documents.append(
+            {"content": content, "timestamp": datetime.now().isoformat()}
+        )
         self._save()
         return True
 
     async def query(self, query: str, mode: str = "hybrid") -> str:
         query_lower = query.lower()
-        relevant = [d["content"] for d in self.documents
-                   if any(w in d["content"].lower() for w in query_lower.split())]
+        relevant = [
+            d["content"]
+            for d in self.documents
+            if any(w in d["content"].lower() for w in query_lower.split())
+        ]
         if relevant:
             return "Based on knowledge graph:\n\n" + "\n\n".join(relevant[:3])
         return "No relevant information found."
@@ -75,8 +78,7 @@ class BDKnowledgeGraph:
 
     def __init__(self, working_dir: str = None):
         self.working_dir = working_dir or os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
-            "data", "lightrag"
+            os.path.dirname(os.path.dirname(__file__)), "data", "lightrag"
         )
         os.makedirs(self.working_dir, exist_ok=True)
 
@@ -88,7 +90,8 @@ class BDKnowledgeGraph:
     def _init_lightrag(self):
         try:
             from sentence_transformers import SentenceTransformer
-            embedder = SentenceTransformer('all-MiniLM-L6-v2')
+
+            embedder = SentenceTransformer("all-MiniLM-L6-v2")
 
             async def embed_func(texts):
                 return embedder.encode(texts).tolist()
@@ -128,36 +131,36 @@ class BDKnowledgeGraph:
     async def insert_program(self, program: Dict) -> bool:
         """Insert federal program."""
         content = f"""
-FEDERAL PROGRAM: {program.get('name', 'Unknown')}
-Description: {program.get('description', '')}
-Agency: {program.get('agency', '')}
-Prime Contractors: {', '.join(program.get('primes', []))}
-Contract Value: {program.get('value', '')}
-Clearance: {program.get('clearance', '')}
-Technologies: {', '.join(program.get('technologies', []))}
+FEDERAL PROGRAM: {program.get("name", "Unknown")}
+Description: {program.get("description", "")}
+Agency: {program.get("agency", "")}
+Prime Contractors: {", ".join(program.get("primes", []))}
+Contract Value: {program.get("value", "")}
+Clearance: {program.get("clearance", "")}
+Technologies: {", ".join(program.get("technologies", []))}
 """
         return await self.insert_document(content)
 
     async def insert_company(self, company: Dict) -> bool:
         """Insert company profile."""
         content = f"""
-COMPANY: {company.get('name', 'Unknown')}
-Type: {company.get('type', '')}
-Capabilities: {', '.join(company.get('capabilities', []))}
-Programs: {', '.join(company.get('programs', []))}
-Partners: {', '.join(company.get('partners', []))}
-Locations: {', '.join(company.get('locations', []))}
+COMPANY: {company.get("name", "Unknown")}
+Type: {company.get("type", "")}
+Capabilities: {", ".join(company.get("capabilities", []))}
+Programs: {", ".join(company.get("programs", []))}
+Partners: {", ".join(company.get("partners", []))}
+Locations: {", ".join(company.get("locations", []))}
 """
         return await self.insert_document(content)
 
     async def insert_contact(self, contact: Dict) -> bool:
         """Insert contact profile."""
         content = f"""
-CONTACT: {contact.get('name', 'Unknown')}
-Company: {contact.get('company', '')}
-Title: {contact.get('title', '')}
-Programs: {', '.join(contact.get('programs', []))}
-Clearance: {contact.get('clearance', '')}
+CONTACT: {contact.get("name", "Unknown")}
+Company: {contact.get("company", "")}
+Title: {contact.get("title", "")}
+Programs: {", ".join(contact.get("programs", []))}
+Clearance: {contact.get("clearance", "")}
 """
         return await self.insert_document(content)
 
@@ -178,8 +181,7 @@ Clearance: {contact.get('clearance', '')}
     async def find_relationships(self, entity_name: str) -> Dict:
         """Find all relationships for an entity."""
         response = await self.query(
-            f"What are all relationships for {entity_name}?",
-            mode="local"
+            f"What are all relationships for {entity_name}?", mode="local"
         )
         return {"entity": entity_name, "relationships": response}
 
@@ -187,7 +189,7 @@ Clearance: {contact.get('clearance', '')}
         """Analyze contractor network."""
         return await self.query(
             f"Analyze network of {company_name}: partners, programs, positioning",
-            mode="global"
+            mode="global",
         )
 
     def get_stats(self) -> Dict:
@@ -195,12 +197,13 @@ Clearance: {contact.get('clearance', '')}
         return {
             "working_dir": self.working_dir,
             "backend": self.backend,
-            "files": len(files)
+            "files": len(files),
         }
 
 
 # Singleton
 _graph_instance = None
+
 
 def get_knowledge_graph(working_dir: str = None) -> BDKnowledgeGraph:
     global _graph_instance

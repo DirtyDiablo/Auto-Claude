@@ -14,7 +14,8 @@ from src.simulation.causal_engine import (
     get_causal_engine,
 )
 from src.simulation.digital_twin import (
-    get_digital_twin, Intervention,
+    get_digital_twin,
+    Intervention,
 )
 from src.simulation.scenario_api import (
     get_scenario_api,
@@ -26,6 +27,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class EstimateEffectRequest(BaseModel):
     treatment: str
@@ -72,6 +74,7 @@ class SensitivityRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_simulation_router(app: FastAPI) -> None:
     """Register all simulation & causal intelligence endpoints."""

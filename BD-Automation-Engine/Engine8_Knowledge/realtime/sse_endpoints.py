@@ -24,7 +24,9 @@ SSE_RETRY_MS = 5000
 POLL_INTERVAL = 1.0
 
 
-def _format_sse(data: str, event: Optional[str] = None, event_id: Optional[str] = None) -> str:
+def _format_sse(
+    data: str, event: Optional[str] = None, event_id: Optional[str] = None
+) -> str:
     """Format a message as an SSE frame."""
     lines = []
     if event_id:
@@ -55,11 +57,13 @@ async def _event_generator(
 
     # Send initial connection event
     yield _format_sse(
-        json.dumps({
-            "type": "connected",
-            "filter": event_filter,
-            "timestamp": datetime.now().isoformat(),
-        }),
+        json.dumps(
+            {
+                "type": "connected",
+                "filter": event_filter,
+                "timestamp": datetime.now().isoformat(),
+            }
+        ),
         event="connected",
     )
 

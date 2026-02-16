@@ -22,7 +22,10 @@ from qdrant_client.models import (
     Modifier,
 )
 
-from Engine8_Knowledge.scripts.sparse_encoder import BM25SparseEncoder, DEFAULT_VOCAB_DIR
+from Engine8_Knowledge.scripts.sparse_encoder import (
+    BM25SparseEncoder,
+    DEFAULT_VOCAB_DIR,
+)
 
 logger = logging.getLogger(__name__)
 

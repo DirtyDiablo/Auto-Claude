@@ -18,6 +18,7 @@ def mgr():
 # PRE-REGISTERED REPLICAS
 # =========================================
 
+
 def test_default_replicas(mgr):
     replicas = mgr.list_replicas()
     assert len(replicas) == 4
@@ -38,6 +39,7 @@ def test_standby_replica(mgr):
 # =========================================
 # ROUTING
 # =========================================
+
 
 def test_route_write_to_primary(mgr):
     result = mgr.route_query("write")
@@ -61,6 +63,7 @@ def test_route_read_increments_queries(mgr):
 # =========================================
 # STATUS UPDATES
 # =========================================
+
 
 def test_update_status(mgr):
     mgr.update_replica_status("qdrant_replica_2", ReplicaStatus.ACTIVE)
@@ -88,6 +91,7 @@ def test_promote_not_found(mgr):
 # LAG REPORT
 # =========================================
 
+
 def test_lag_report(mgr):
     report = mgr.get_lag_report()
     assert "qdrant_primary" in report
@@ -105,6 +109,7 @@ def test_lag_values(mgr):
 # FILTER BY STATUS
 # =========================================
 
+
 def test_list_active(mgr):
     active = mgr.list_replicas(status_filter=ReplicaStatus.ACTIVE)
     assert len(active) >= 2
@@ -118,6 +123,7 @@ def test_list_standby(mgr):
 # =========================================
 # TO_DICT & STATS
 # =========================================
+
 
 def test_replica_to_dict(mgr):
     r = mgr.get_replica("qdrant_primary")
@@ -136,8 +142,10 @@ def test_stats(mgr):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.scaling.read_replicas as mod
+
     mod._instance = None
     a1 = get_replica_manager()
     a2 = get_replica_manager()

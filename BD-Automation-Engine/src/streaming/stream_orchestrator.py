@@ -96,7 +96,14 @@ def _is_ts_sci_priority_job(event: Event) -> bool:
     payload = event.payload
     clearance = str(payload.get("clearance", "")).upper()
     location = str(payload.get("location", "")).lower()
-    priority_locations = {"langley", "hickam", "pearl harbor", "san diego", "beale", "ramstein"}
+    priority_locations = {
+        "langley",
+        "hickam",
+        "pearl harbor",
+        "san diego",
+        "beale",
+        "ramstein",
+    }
     return "TS/SCI" in clearance and any(loc in location for loc in priority_locations)
 
 
@@ -154,12 +161,34 @@ def _build_default_workflows() -> List[EventWorkflow]:
             trigger_streams=["jobs:scraped"],
             trigger_condition="ts_sci_priority_job",
             steps=[
-                WorkflowStep(name="enrich_job", processor="job_intel", output_key="enriched_job"),
-                WorkflowStep(name="map_program", processor="job_intel", output_key="program_match"),
-                WorkflowStep(name="match_contacts", processor="contact_change", output_key="matched_contacts"),
-                WorkflowStep(name="score_priority", processor="job_intel", output_key="priority_score"),
-                WorkflowStep(name="generate_outreach", processor="campaign_event", output_key="outreach_draft"),
-                WorkflowStep(name="queue_campaign", processor="campaign_event", output_key="campaign_queued"),
+                WorkflowStep(
+                    name="enrich_job", processor="job_intel", output_key="enriched_job"
+                ),
+                WorkflowStep(
+                    name="map_program",
+                    processor="job_intel",
+                    output_key="program_match",
+                ),
+                WorkflowStep(
+                    name="match_contacts",
+                    processor="contact_change",
+                    output_key="matched_contacts",
+                ),
+                WorkflowStep(
+                    name="score_priority",
+                    processor="job_intel",
+                    output_key="priority_score",
+                ),
+                WorkflowStep(
+                    name="generate_outreach",
+                    processor="campaign_event",
+                    output_key="outreach_draft",
+                ),
+                WorkflowStep(
+                    name="queue_campaign",
+                    processor="campaign_event",
+                    output_key="campaign_queued",
+                ),
             ],
             timeout_seconds=120,
         ),
@@ -170,11 +199,29 @@ def _build_default_workflows() -> List[EventWorkflow]:
             trigger_streams=["contracts:awards"],
             trigger_condition="large_award",
             steps=[
-                WorkflowStep(name="match_program", processor="contract_intel", output_key="program_match"),
-                WorkflowStep(name="update_graph", processor="contract_intel", output_key="graph_updated"),
-                WorkflowStep(name="rescore_contacts", processor="contact_change", output_key="rescored"),
-                WorkflowStep(name="generate_briefing", processor="contract_intel", output_key="briefing"),
-                WorkflowStep(name="alert_bd_team", processor="anomaly", output_key="alert_sent"),
+                WorkflowStep(
+                    name="match_program",
+                    processor="contract_intel",
+                    output_key="program_match",
+                ),
+                WorkflowStep(
+                    name="update_graph",
+                    processor="contract_intel",
+                    output_key="graph_updated",
+                ),
+                WorkflowStep(
+                    name="rescore_contacts",
+                    processor="contact_change",
+                    output_key="rescored",
+                ),
+                WorkflowStep(
+                    name="generate_briefing",
+                    processor="contract_intel",
+                    output_key="briefing",
+                ),
+                WorkflowStep(
+                    name="alert_bd_team", processor="anomaly", output_key="alert_sent"
+                ),
             ],
             timeout_seconds=180,
         ),
@@ -185,9 +232,21 @@ def _build_default_workflows() -> List[EventWorkflow]:
             trigger_streams=["contacts:updated"],
             trigger_condition="tier_promotion",
             steps=[
-                WorkflowStep(name="reclassify_tier", processor="contact_change", output_key="new_tier"),
-                WorkflowStep(name="update_strategy", processor="campaign_event", output_key="strategy_update"),
-                WorkflowStep(name="adjust_cadence", processor="campaign_event", output_key="cadence_adjusted"),
+                WorkflowStep(
+                    name="reclassify_tier",
+                    processor="contact_change",
+                    output_key="new_tier",
+                ),
+                WorkflowStep(
+                    name="update_strategy",
+                    processor="campaign_event",
+                    output_key="strategy_update",
+                ),
+                WorkflowStep(
+                    name="adjust_cadence",
+                    processor="campaign_event",
+                    output_key="cadence_adjusted",
+                ),
             ],
             timeout_seconds=90,
         ),
@@ -198,10 +257,26 @@ def _build_default_workflows() -> List[EventWorkflow]:
             trigger_streams=["intel:anomalies"],
             trigger_condition="volume_spike",
             steps=[
-                WorkflowStep(name="identify_program", processor="anomaly", output_key="program_identified"),
-                WorkflowStep(name="find_contacts", processor="contact_change", output_key="contacts_found"),
-                WorkflowStep(name="generate_surge_brief", processor="anomaly", output_key="surge_brief"),
-                WorkflowStep(name="create_blitz_campaign", processor="campaign_event", output_key="blitz_created"),
+                WorkflowStep(
+                    name="identify_program",
+                    processor="anomaly",
+                    output_key="program_identified",
+                ),
+                WorkflowStep(
+                    name="find_contacts",
+                    processor="contact_change",
+                    output_key="contacts_found",
+                ),
+                WorkflowStep(
+                    name="generate_surge_brief",
+                    processor="anomaly",
+                    output_key="surge_brief",
+                ),
+                WorkflowStep(
+                    name="create_blitz_campaign",
+                    processor="campaign_event",
+                    output_key="blitz_created",
+                ),
             ],
             timeout_seconds=180,
         ),
@@ -212,11 +287,31 @@ def _build_default_workflows() -> List[EventWorkflow]:
             trigger_streams=["system:health"],
             trigger_condition="always",
             steps=[
-                WorkflowStep(name="aggregate_events", processor="system_health", output_key="aggregated"),
-                WorkflowStep(name="compile_digest", processor="system_health", output_key="digest"),
-                WorkflowStep(name="score_opportunities", processor="job_intel", output_key="scored"),
-                WorkflowStep(name="generate_summary", processor="system_health", output_key="summary"),
-                WorkflowStep(name="deliver_digest", processor="campaign_event", output_key="delivered"),
+                WorkflowStep(
+                    name="aggregate_events",
+                    processor="system_health",
+                    output_key="aggregated",
+                ),
+                WorkflowStep(
+                    name="compile_digest",
+                    processor="system_health",
+                    output_key="digest",
+                ),
+                WorkflowStep(
+                    name="score_opportunities",
+                    processor="job_intel",
+                    output_key="scored",
+                ),
+                WorkflowStep(
+                    name="generate_summary",
+                    processor="system_health",
+                    output_key="summary",
+                ),
+                WorkflowStep(
+                    name="deliver_digest",
+                    processor="campaign_event",
+                    output_key="delivered",
+                ),
             ],
             timeout_seconds=300,
         ),
@@ -226,7 +321,9 @@ def _build_default_workflows() -> List[EventWorkflow]:
 class StreamOrchestrator:
     """Chains events into intelligent workflows."""
 
-    def __init__(self, event_bus: EventBus, processors: Optional[Dict[str, Any]] = None):
+    def __init__(
+        self, event_bus: EventBus, processors: Optional[Dict[str, Any]] = None
+    ):
         self.event_bus = event_bus
         self.processors = processors or {}
         self.workflows: Dict[str, EventWorkflow] = {}
@@ -300,12 +397,13 @@ class StreamOrchestrator:
     async def register_workflow(self, workflow: EventWorkflow) -> str:
         """Register a new workflow. Returns workflow_id."""
         self.workflows[workflow.workflow_id] = workflow
-        logger.info("Workflow registered", extra={"id": workflow.workflow_id, "name": workflow.name})
+        logger.info(
+            "Workflow registered",
+            extra={"id": workflow.workflow_id, "name": workflow.name},
+        )
         return workflow.workflow_id
 
-    async def trigger_workflow(
-        self, workflow_id: str, trigger_event: Event
-    ) -> str:
+    async def trigger_workflow(self, workflow_id: str, trigger_event: Event) -> str:
         """Start a workflow execution. Returns execution_id."""
         workflow = self.workflows.get(workflow_id)
         if not workflow:
@@ -317,9 +415,7 @@ class StreamOrchestrator:
             status=WorkflowStatus.RUNNING,
             trigger_event=trigger_event.model_dump(),
             started_at=datetime.now(timezone.utc),
-            steps=[
-                StepExecution(step_name=step.name) for step in workflow.steps
-            ],
+            steps=[StepExecution(step_name=step.name) for step in workflow.steps],
         )
         self.executions[execution.execution_id] = execution
 
@@ -447,21 +543,19 @@ class StreamOrchestrator:
         )
         await self.event_bus.publish("system:health", event)
 
-    async def get_execution_status(self, execution_id: str) -> Optional[WorkflowExecution]:
+    async def get_execution_status(
+        self, execution_id: str
+    ) -> Optional[WorkflowExecution]:
         """Get current status of a workflow execution."""
         return self.executions.get(execution_id)
 
     async def list_active_workflows(self) -> List[WorkflowExecution]:
         """List all active (running) workflow executions."""
         return [
-            ex
-            for ex in self.executions.values()
-            if ex.status == WorkflowStatus.RUNNING
+            ex for ex in self.executions.values() if ex.status == WorkflowStatus.RUNNING
         ]
 
-    async def list_all_executions(
-        self, limit: int = 50
-    ) -> List[WorkflowExecution]:
+    async def list_all_executions(self, limit: int = 50) -> List[WorkflowExecution]:
         """List recent workflow executions."""
         execs = sorted(
             self.executions.values(),

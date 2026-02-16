@@ -26,9 +26,11 @@ random.seed(42)
 # DATA MODELS
 # =========================================
 
+
 @dataclass
 class CausalNode:
     """A node in the causal graph."""
+
     name: str
     node_type: str  # treatment | outcome | confounder | mediator
     description: str = ""
@@ -46,6 +48,7 @@ class CausalNode:
 @dataclass
 class CausalEdge:
     """A directed edge in the causal graph (cause → effect)."""
+
     source: str
     target: str
     weight: float = 1.0
@@ -63,6 +66,7 @@ class CausalEdge:
 @dataclass
 class CausalGraph:
     """A directed acyclic graph (DAG) of causal relationships."""
+
     graph_id: str
     nodes: List[CausalNode] = field(default_factory=list)
     edges: List[CausalEdge] = field(default_factory=list)
@@ -95,6 +99,7 @@ class CausalGraph:
 @dataclass
 class CausalEstimate:
     """Result of a causal effect estimation."""
+
     estimate_id: str
     treatment: str
     outcome: str
@@ -126,6 +131,7 @@ class CausalEstimate:
 @dataclass
 class CounterfactualResult:
     """Result of a counterfactual analysis."""
+
     result_id: str
     scenario: str
     conditions: Dict[str, Any] = field(default_factory=dict)
@@ -154,35 +160,82 @@ class CounterfactualResult:
 
 _BD_NODES = [
     CausalNode("outreach_volume", "treatment", "Weekly outreach calls", (0, 100)),
-    CausalNode("contacts_engaged", "mediator", "Contacts engaged this quarter", (0, 50)),
+    CausalNode(
+        "contacts_engaged", "mediator", "Contacts engaged this quarter", (0, 50)
+    ),
     CausalNode("meetings_scheduled", "mediator", "Client meetings booked", (0, 30)),
-    CausalNode("proposals_submitted", "mediator", "Proposals and RFP responses", (0, 15)),
+    CausalNode(
+        "proposals_submitted", "mediator", "Proposals and RFP responses", (0, 15)
+    ),
     CausalNode("contracts_won", "outcome", "Contracts/TOs won", (0, 10)),
     CausalNode("revenue", "outcome", "Revenue generated ($M)", (0, 50)),
     CausalNode("team_size", "treatment", "BD team headcount", (1, 20)),
     CausalNode("program_size", "confounder", "Target program budget ($M)", (10, 500)),
     CausalNode("competitor_activity", "confounder", "Competitor bid volume", (0, 20)),
-    CausalNode("clearance_availability", "confounder", "Cleared workforce pool size", (5, 100)),
-    CausalNode("contract_cycle_phase", "confounder", "Phase in contract cycle (0-1)", (0, 1)),
-    CausalNode("past_performance", "confounder", "Relevant past performance score", (0, 10)),
+    CausalNode(
+        "clearance_availability", "confounder", "Cleared workforce pool size", (5, 100)
+    ),
+    CausalNode(
+        "contract_cycle_phase", "confounder", "Phase in contract cycle (0-1)", (0, 1)
+    ),
+    CausalNode(
+        "past_performance", "confounder", "Relevant past performance score", (0, 10)
+    ),
 ]
 
 _BD_EDGES = [
-    CausalEdge("outreach_volume", "contacts_engaged", 0.35, "More calls → more engaged contacts"),
-    CausalEdge("contacts_engaged", "meetings_scheduled", 0.40, "Engaged contacts → meetings"),
-    CausalEdge("meetings_scheduled", "proposals_submitted", 0.30, "Meetings → proposals"),
+    CausalEdge(
+        "outreach_volume",
+        "contacts_engaged",
+        0.35,
+        "More calls → more engaged contacts",
+    ),
+    CausalEdge(
+        "contacts_engaged", "meetings_scheduled", 0.40, "Engaged contacts → meetings"
+    ),
+    CausalEdge(
+        "meetings_scheduled", "proposals_submitted", 0.30, "Meetings → proposals"
+    ),
     CausalEdge("proposals_submitted", "contracts_won", 0.25, "Proposals → wins"),
     CausalEdge("contracts_won", "revenue", 0.90, "Wins → revenue"),
     CausalEdge("team_size", "outreach_volume", 0.60, "More reps → more outreach"),
     CausalEdge("team_size", "meetings_scheduled", 0.20, "More reps → more meetings"),
-    CausalEdge("program_size", "contracts_won", 0.15, "Bigger programs → more opportunities"),
-    CausalEdge("program_size", "competitor_activity", 0.30, "Big programs attract competitors"),
-    CausalEdge("competitor_activity", "contracts_won", -0.25, "More competition → fewer wins"),
-    CausalEdge("clearance_availability", "contacts_engaged", 0.20, "Cleared staff → faster engagement"),
-    CausalEdge("clearance_availability", "proposals_submitted", 0.15, "Cleared pool → stronger proposals"),
-    CausalEdge("contract_cycle_phase", "proposals_submitted", 0.25, "Right timing → more proposals"),
-    CausalEdge("past_performance", "contracts_won", 0.30, "Strong track record → more wins"),
-    CausalEdge("past_performance", "proposals_submitted", 0.10, "Good past perf → bid confidence"),
+    CausalEdge(
+        "program_size", "contracts_won", 0.15, "Bigger programs → more opportunities"
+    ),
+    CausalEdge(
+        "program_size", "competitor_activity", 0.30, "Big programs attract competitors"
+    ),
+    CausalEdge(
+        "competitor_activity", "contracts_won", -0.25, "More competition → fewer wins"
+    ),
+    CausalEdge(
+        "clearance_availability",
+        "contacts_engaged",
+        0.20,
+        "Cleared staff → faster engagement",
+    ),
+    CausalEdge(
+        "clearance_availability",
+        "proposals_submitted",
+        0.15,
+        "Cleared pool → stronger proposals",
+    ),
+    CausalEdge(
+        "contract_cycle_phase",
+        "proposals_submitted",
+        0.25,
+        "Right timing → more proposals",
+    ),
+    CausalEdge(
+        "past_performance", "contracts_won", 0.30, "Strong track record → more wins"
+    ),
+    CausalEdge(
+        "past_performance",
+        "proposals_submitted",
+        0.10,
+        "Good past perf → bid confidence",
+    ),
 ]
 
 # Pre-built treatment effects (simulated DoWhy results)
@@ -207,6 +260,7 @@ _TREATMENT_EFFECTS: Dict[Tuple[str, str], Dict[str, float]] = {
 # BD CAUSAL ENGINE
 # =========================================
 
+
 class BDCausalEngine:
     """Causal inference engine for BD strategy analysis.
 
@@ -227,14 +281,19 @@ class BDCausalEngine:
 
     def build_causal_graph(self) -> CausalGraph:
         """Build the BD pipeline causal DAG from domain knowledge."""
-        graph_id = f"cg_{hashlib.md5(f'bd_graph:{time.time()}'.encode()).hexdigest()[:10]}"
+        graph_id = (
+            f"cg_{hashlib.md5(f'bd_graph:{time.time()}'.encode()).hexdigest()[:10]}"
+        )
         self._graph = CausalGraph(
             graph_id=graph_id,
             nodes=list(_BD_NODES),
             edges=list(_BD_EDGES),
         )
-        logger.info("Built causal graph with %d nodes, %d edges",
-                     len(self._graph.nodes), len(self._graph.edges))
+        logger.info(
+            "Built causal graph with %d nodes, %d edges",
+            len(self._graph.nodes),
+            len(self._graph.edges),
+        )
         return self._graph
 
     def get_graph(self) -> Optional[CausalGraph]:
@@ -303,13 +362,16 @@ class BDCausalEngine:
 
         ci_lower = ate - 1.96 * se
         ci_upper = ate + 1.96 * se
-        p_value = max(0.001, min(0.5, 2 * (1 - self._normal_cdf(abs(ate / max(se, 0.001))))))
+        p_value = max(
+            0.001, min(0.5, 2 * (1 - self._normal_cdf(abs(ate / max(se, 0.001)))))
+        )
 
         # Identify confounders to control for
-        confounders = [
-            n.name for n in self._graph.nodes
-            if n.node_type == "confounder"
-        ] if self._graph else []
+        confounders = (
+            [n.name for n in self._graph.nodes if n.node_type == "confounder"]
+            if self._graph
+            else []
+        )
 
         # Simulated refutation tests
         refutations = [
@@ -406,12 +468,14 @@ class BDCausalEngine:
             effect = self._compute_path_effect(var, "contracts_won")
             contribution = effect * float(value)
             effect_sum += contribution
-            key_drivers.append({
-                "variable": var,
-                "value": value,
-                "effect": round(effect, 4),
-                "contribution": round(contribution, 4),
-            })
+            key_drivers.append(
+                {
+                    "variable": var,
+                    "value": value,
+                    "effect": round(effect, 4),
+                    "contribution": round(contribution, 4),
+                }
+            )
 
         predicted = base_outcome + effect_sum
         se = abs(predicted) * 0.15  # 15% uncertainty

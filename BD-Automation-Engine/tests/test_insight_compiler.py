@@ -43,6 +43,7 @@ def compiler(learner, pattern_engine):
 # WEEKLY BRIEF
 # =========================================
 
+
 def test_weekly_brief(compiler):
     brief = compiler.compile_weekly_brief()
     assert isinstance(brief, WeeklyBrief)
@@ -84,6 +85,7 @@ def test_weekly_brief_stored(compiler):
 # MONTHLY ASSESSMENT
 # =========================================
 
+
 def test_monthly_assessment(compiler):
     assessment = compiler.compile_monthly_assessment()
     assert isinstance(assessment, MonthlyAssessment)
@@ -117,6 +119,7 @@ def test_monthly_stored(compiler):
 # =========================================
 # FLASH REPORT
 # =========================================
+
 
 def test_flash_report(compiler, pattern_engine):
     patterns = pattern_engine.get_active_patterns()
@@ -162,6 +165,7 @@ def test_flash_report_stored(compiler, pattern_engine):
 # CAMPAIGN REVIEW
 # =========================================
 
+
 def test_campaign_review_all(compiler):
     review = compiler.compile_campaign_review()
     assert isinstance(review, CampaignReview)
@@ -200,6 +204,7 @@ def test_campaign_review_stored(compiler):
 # STATS
 # =========================================
 
+
 def test_stats(compiler):
     compiler.compile_weekly_brief()
     compiler.compile_monthly_assessment()
@@ -212,6 +217,7 @@ def test_stats(compiler):
 # BRIEF SECTION
 # =========================================
 
+
 def test_brief_section():
     s = BriefSection(heading="Test", content="Content", priority="high")
     assert s.heading == "Test"
@@ -221,6 +227,7 @@ def test_brief_section():
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     c1 = get_insight_compiler()

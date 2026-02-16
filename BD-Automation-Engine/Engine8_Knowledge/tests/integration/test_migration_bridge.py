@@ -26,6 +26,7 @@ from Engine8_Knowledge.graph.migration_bridge import (
 # TestGraphInterface
 # ---------------------------------------------------------------------------
 
+
 class TestGraphInterface:
     """Test the abstract interface."""
 
@@ -54,13 +55,17 @@ class TestGraphInterface:
 # TestSQLiteBackend
 # ---------------------------------------------------------------------------
 
+
 class TestSQLiteBackend:
     """Test SQLite graph backend."""
 
     def test_search_entities_no_graph(self):
         backend = SQLiteGraphBackend()
         backend._graph = None
-        with patch("Engine8_Knowledge.graph.migration_bridge.SQLiteGraphBackend._get_graph", return_value=None):
+        with patch(
+            "Engine8_Knowledge.graph.migration_bridge.SQLiteGraphBackend._get_graph",
+            return_value=None,
+        ):
             result = backend.search_entities("test")
         assert result == []
 
@@ -107,14 +112,20 @@ class TestSQLiteBackend:
 # TestNeo4jBackend
 # ---------------------------------------------------------------------------
 
+
 class TestNeo4jBackend:
     """Test Neo4j graph backend."""
 
     def test_search_entities(self):
         backend = Neo4jGraphBackend()
         mock_mgr = MagicMock()
-        mock_mgr.run_query.return_value = [{"name": "Bob", "type": "Person", "props": {}}]
-        with patch("Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager", return_value=mock_mgr):
+        mock_mgr.run_query.return_value = [
+            {"name": "Bob", "type": "Person", "props": {}}
+        ]
+        with patch(
+            "Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager",
+            return_value=mock_mgr,
+        ):
             result = backend.search_entities("Bob")
         assert len(result) == 1
 
@@ -128,9 +139,17 @@ class TestNeo4jBackend:
         backend = Neo4jGraphBackend()
         mock_mgr = MagicMock()
         mock_mgr.run_query.return_value = [
-            {"source": "Alice", "relationship": "WORKS_AT", "target": "Leidos", "target_type": "Company"},
+            {
+                "source": "Alice",
+                "relationship": "WORKS_AT",
+                "target": "Leidos",
+                "target_type": "Company",
+            },
         ]
-        with patch("Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager", return_value=mock_mgr):
+        with patch(
+            "Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager",
+            return_value=mock_mgr,
+        ):
             result = backend.get_neighbors("Alice")
         assert result["entity"] == "Alice"
         assert len(result["neighbors"]) == 1
@@ -146,6 +165,7 @@ class TestNeo4jBackend:
 # ---------------------------------------------------------------------------
 # TestFeatureFlag
 # ---------------------------------------------------------------------------
+
 
 class TestFeatureFlag:
     """Test USE_NEO4J feature flag routing."""
@@ -165,11 +185,15 @@ class TestFeatureFlag:
 # TestExportSQLiteToNeo4j
 # ---------------------------------------------------------------------------
 
+
 class TestExportSQLiteToNeo4j:
     """Test migration function."""
 
     def test_export_no_sqlite_graph(self):
-        with patch("Engine8_Knowledge.graph.migration_bridge.get_bd_knowledge_graph", return_value=None):
+        with patch(
+            "Engine8_Knowledge.graph.migration_bridge.get_bd_knowledge_graph",
+            return_value=None,
+        ):
             result = export_sqlite_to_neo4j()
         assert "error" in result
 
@@ -178,7 +202,10 @@ class TestExportSQLiteToNeo4j:
         # Entities cursor
         mock_bg.conn.execute.side_effect = [
             # entities query
-            [("id1", "Person", "Alice", '{"title":"PM"}'), ("id2", "Company", "Leidos", '{}')],
+            [
+                ("id1", "Person", "Alice", '{"title":"PM"}'),
+                ("id2", "Company", "Leidos", "{}"),
+            ],
             # relationships query
             [("id1", "id2", "WORKS_FOR")],
         ]
@@ -186,9 +213,17 @@ class TestExportSQLiteToNeo4j:
         mock_mgr.run_batch.return_value = {}
         mock_mgr.write_query.return_value = {}
 
-        with patch("Engine8_Knowledge.graph.migration_bridge.get_bd_knowledge_graph", return_value=mock_bg), \
-             patch("Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager", return_value=mock_mgr), \
-             patch("Engine8_Knowledge.graph.migration_bridge.apply_schema"):
+        with (
+            patch(
+                "Engine8_Knowledge.graph.migration_bridge.get_bd_knowledge_graph",
+                return_value=mock_bg,
+            ),
+            patch(
+                "Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager",
+                return_value=mock_mgr,
+            ),
+            patch("Engine8_Knowledge.graph.migration_bridge.apply_schema"),
+        ):
             result = export_sqlite_to_neo4j()
         assert result["entities_exported"] == 2
         assert result["relationships_exported"] == 1
@@ -198,6 +233,7 @@ class TestExportSQLiteToNeo4j:
 # TestImportNeo4jToNetworkX
 # ---------------------------------------------------------------------------
 
+
 class TestImportNeo4jToNetworkX:
     """Test Neo4j → NetworkX import."""
 
@@ -205,11 +241,17 @@ class TestImportNeo4jToNetworkX:
         mock_mgr = MagicMock()
         mock_mgr.run_query.side_effect = [
             # nodes
-            [{"id": 1, "labels": ["Person"], "props": {"name": "Alice"}}, {"id": 2, "labels": ["Company"], "props": {"name": "Leidos"}}],
+            [
+                {"id": 1, "labels": ["Person"], "props": {"name": "Alice"}},
+                {"id": 2, "labels": ["Company"], "props": {"name": "Leidos"}},
+            ],
             # edges
             [{"src": 1, "dst": 2, "type": "WORKS_AT"}],
         ]
-        with patch("Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager", return_value=mock_mgr):
+        with patch(
+            "Engine8_Knowledge.graph.migration_bridge.get_neo4j_manager",
+            return_value=mock_mgr,
+        ):
             G = import_neo4j_subgraph_to_networkx()
         if G is not None:  # networkx might not be installed
             assert len(G.nodes) == 2

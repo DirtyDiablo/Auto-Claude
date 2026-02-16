@@ -1,4 +1,5 @@
 """Tests for Phase 29A - Optimizer API Router."""
+
 import sys
 import pytest
 from pathlib import Path
@@ -37,6 +38,7 @@ from Engine8_Knowledge.optimization.retrain_orchestrator import (
 # Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def app():
     """Create a FastAPI test app with the optimizer router."""
@@ -68,10 +70,14 @@ def mock_assessment():
     )
     sa.run_full_assessment = AsyncMock(return_value=report)
     sa.get_assessment_history = AsyncMock(return_value=[report])
-    sa.get_trend = AsyncMock(return_value=MetricTrend(
-        metric="api_latency", data_points=[{"date": "2025-01-01", "value": 95.0}],
-        trend="stable", current_value=95.0,
-    ))
+    sa.get_trend = AsyncMock(
+        return_value=MetricTrend(
+            metric="api_latency",
+            data_points=[{"date": "2025-01-01", "value": 95.0}],
+            trend="stable",
+            current_value=95.0,
+        )
+    )
     return sa
 
 
@@ -81,23 +87,39 @@ def mock_optimizer():
     opt = MagicMock(spec=AutoOptimizer)
     opt._optimizations = [
         Optimization(
-            opt_id="opt_0001", category="create_index",
-            description="Test", expected_impact="Test",
-            risk_level="safe", status="pending",
+            opt_id="opt_0001",
+            category="create_index",
+            description="Test",
+            expected_impact="Test",
+            risk_level="safe",
+            status="pending",
         ),
     ]
-    opt.get_optimization = MagicMock(return_value=Optimization(
-        opt_id="opt_0001", category="create_index",
-        description="Test", expected_impact="Test",
-        risk_level="safe", status="pending",
-    ))
-    opt.auto_apply = AsyncMock(return_value=ApplyResult(
-        opt_id="opt_0001", success=True, message="Applied create_index",
-        applied_at="2025-01-01T00:00:00",
-    ))
-    opt.approve = AsyncMock(return_value=ApplyResult(
-        opt_id="opt_0001", success=True, message="Approved and applied",
-    ))
+    opt.get_optimization = MagicMock(
+        return_value=Optimization(
+            opt_id="opt_0001",
+            category="create_index",
+            description="Test",
+            expected_impact="Test",
+            risk_level="safe",
+            status="pending",
+        )
+    )
+    opt.auto_apply = AsyncMock(
+        return_value=ApplyResult(
+            opt_id="opt_0001",
+            success=True,
+            message="Applied create_index",
+            applied_at="2025-01-01T00:00:00",
+        )
+    )
+    opt.approve = AsyncMock(
+        return_value=ApplyResult(
+            opt_id="opt_0001",
+            success=True,
+            message="Approved and applied",
+        )
+    )
     opt.rollback = AsyncMock(return_value=True)
     return opt
 
@@ -106,13 +128,18 @@ def mock_optimizer():
 def mock_detector():
     """Create a mock RegressionDetector instance."""
     det = MagicMock(spec=RegressionDetector)
-    det.get_active_regressions = AsyncMock(return_value=[
-        Regression(
-            regression_id="reg_0001", metric="search_relevance",
-            severity="warning", current_value=0.72, baseline_value=0.85,
-            change_pct=-0.15,
-        ),
-    ])
+    det.get_active_regressions = AsyncMock(
+        return_value=[
+            Regression(
+                regression_id="reg_0001",
+                metric="search_relevance",
+                severity="warning",
+                current_value=0.72,
+                baseline_value=0.85,
+                change_pct=-0.15,
+            ),
+        ]
+    )
     return det
 
 
@@ -120,24 +147,34 @@ def mock_detector():
 def mock_retrain():
     """Create a mock RetrainOrchestrator instance."""
     retrain = MagicMock(spec=RetrainOrchestrator)
-    retrain.orchestrate_retrain = AsyncMock(return_value=RetrainResult(
-        model_name="defense_ner", success=True,
-        old_metric=0.73, new_metric=0.80,
-        improvement=0.096, duration_seconds=5.0,
-    ))
-    retrain.check_all_models = AsyncMock(return_value=[
-        ModelDriftReport(
+    retrain.orchestrate_retrain = AsyncMock(
+        return_value=RetrainResult(
             model_name="defense_ner",
-            current_metric=0.76, baseline_metric=0.78,
-            drift_pct=0.026, needs_retrain=False,
-        ),
-    ])
+            success=True,
+            old_metric=0.73,
+            new_metric=0.80,
+            improvement=0.096,
+            duration_seconds=5.0,
+        )
+    )
+    retrain.check_all_models = AsyncMock(
+        return_value=[
+            ModelDriftReport(
+                model_name="defense_ner",
+                current_metric=0.76,
+                baseline_metric=0.78,
+                drift_pct=0.026,
+                needs_retrain=False,
+            ),
+        ]
+    )
     return retrain
 
 
 # =============================================================================
 # Router Structure Tests
 # =============================================================================
+
 
 class TestRouterStructure:
     """Tests for the optimizer API router structure."""
@@ -168,6 +205,7 @@ class TestRouterStructure:
 # =============================================================================
 # Assessment Endpoint Tests
 # =============================================================================
+
 
 class TestAssessEndpoint:
     """Tests for the /optimizer/assess endpoint."""
@@ -201,6 +239,7 @@ class TestAssessEndpoint:
 # Recommendations Endpoint Tests
 # =============================================================================
 
+
 class TestRecommendationsEndpoint:
     """Tests for the /optimizer/recommendations endpoint."""
 
@@ -232,6 +271,7 @@ class TestRecommendationsEndpoint:
 # =============================================================================
 # Apply Endpoint Tests
 # =============================================================================
+
 
 class TestApplyEndpoint:
     """Tests for the /optimizer/apply/{opt_id} endpoint."""
@@ -265,6 +305,7 @@ class TestApplyEndpoint:
 # Approve Endpoint Tests
 # =============================================================================
 
+
 class TestApproveEndpoint:
     """Tests for the /optimizer/approve/{opt_id} endpoint."""
 
@@ -284,6 +325,7 @@ class TestApproveEndpoint:
 # =============================================================================
 # Rollback Endpoint Tests
 # =============================================================================
+
 
 class TestRollbackEndpoint:
     """Tests for the /optimizer/rollback/{opt_id} endpoint."""
@@ -317,6 +359,7 @@ class TestRollbackEndpoint:
 # Regressions Endpoint Tests
 # =============================================================================
 
+
 class TestRegressionsEndpoint:
     """Tests for the /optimizer/regressions endpoint."""
 
@@ -349,6 +392,7 @@ class TestRegressionsEndpoint:
 # =============================================================================
 # Retrain Endpoint Tests
 # =============================================================================
+
 
 class TestRetrainEndpoint:
     """Tests for the /optimizer/retrain/{model} endpoint."""

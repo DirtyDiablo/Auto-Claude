@@ -21,6 +21,7 @@ def cs():
 # CLAIM CONTACT
 # =========================================
 
+
 def test_claim_contact(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     assert isinstance(claim, ContactClaim)
@@ -31,7 +32,10 @@ def test_claim_contact(cs):
 
 def test_claim_with_reason_and_program(cs):
     claim = cs.claim_contact(
-        "c001", "Craig Lindahl", "rep_01", "Sarah Mitchell",
+        "c001",
+        "Craig Lindahl",
+        "rep_01",
+        "Sarah Mitchell",
         reason="Key decision maker for DCGS-A",
         program="DCGS-A",
     )
@@ -64,6 +68,7 @@ def test_duplicate_claim_raises(cs):
 # GET CLAIMS
 # =========================================
 
+
 def test_get_claim(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     fetched = cs.get_claim(claim.claim_id)
@@ -90,6 +95,7 @@ def test_get_claim_for_unclaimed_contact(cs):
 # RELEASE
 # =========================================
 
+
 def test_release_claim(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     assert cs.release_claim(claim.claim_id) is True
@@ -107,6 +113,7 @@ def test_release_allows_reclaim(cs):
 # =========================================
 # EXTEND
 # =========================================
+
 
 def test_extend_claim(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
@@ -127,6 +134,7 @@ def test_extend_limit(cs):
 # TRANSFER
 # =========================================
 
+
 def test_transfer_claim(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     assert cs.transfer_claim(claim.claim_id, "rep_02", "James Chen") is True
@@ -141,10 +149,13 @@ def test_transfer_claim(cs):
 # CONTESTS
 # =========================================
 
+
 def test_contest_claim(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     contest = cs.contest_claim(
-        claim.claim_id, "rep_02", "James Chen",
+        claim.claim_id,
+        "rep_02",
+        "James Chen",
         reason="I have an existing relationship",
     )
     assert isinstance(contest, ClaimContest)
@@ -191,6 +202,7 @@ def test_list_pending_contests(cs):
 # QUERIES
 # =========================================
 
+
 def test_list_claims(cs):
     cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     cs.claim_contact("c002", "Mike Thompson", "rep_02", "James Chen")
@@ -230,6 +242,7 @@ def test_get_bd_reps(cs):
 # TO DICT
 # =========================================
 
+
 def test_claim_to_dict(cs):
     claim = cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
     d = claim.to_dict()
@@ -241,6 +254,7 @@ def test_claim_to_dict(cs):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(cs):
     cs.claim_contact("c001", "Craig Lindahl", "rep_01", "Sarah Mitchell")
@@ -254,8 +268,10 @@ def test_stats(cs):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.collaboration.contact_claiming as mod
+
     mod._instance = None
     s1 = get_claiming_system()
     s2 = get_claiming_system()

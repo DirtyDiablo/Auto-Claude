@@ -13,13 +13,16 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.hybrid_engine import (
-    HybridSearchEngine, SearchResult, SearchResponse,
+    HybridSearchEngine,
+    SearchResult,
+    SearchResponse,
 )
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def engine():
@@ -35,6 +38,7 @@ def engine():
 # TestInit
 # ---------------------------------------------------------------------------
 
+
 class TestHybridEngineInit:
     """Test initialization and lazy loading."""
 
@@ -44,7 +48,9 @@ class TestHybridEngineInit:
         assert e._embedding_model == "text-embedding-3-small"
 
     def test_custom_config(self):
-        e = HybridSearchEngine(qdrant_url="http://custom:6333", embedding_model="custom-model")
+        e = HybridSearchEngine(
+            qdrant_url="http://custom:6333", embedding_model="custom-model"
+        )
         assert e._qdrant_url == "http://custom:6333"
         assert e._embedding_model == "custom-model"
 
@@ -60,6 +66,7 @@ class TestHybridEngineInit:
 # ---------------------------------------------------------------------------
 # TestEmbeddings
 # ---------------------------------------------------------------------------
+
 
 class TestEmbeddings:
     """Test embedding generation."""
@@ -90,6 +97,7 @@ class TestEmbeddings:
 # ---------------------------------------------------------------------------
 # TestSearch
 # ---------------------------------------------------------------------------
+
 
 class TestSearch:
     """Test hybrid search."""
@@ -141,13 +149,16 @@ class TestSearch:
         mock_sparse.values.tolist.return_value = []
         engine._sparse_model.embed.return_value = [mock_sparse]
 
-        resp = engine.search("test", collections=["bad_collection"], top_k=5, use_rerank=False)
+        resp = engine.search(
+            "test", collections=["bad_collection"], top_k=5, use_rerank=False
+        )
         assert isinstance(resp, SearchResponse)
 
 
 # ---------------------------------------------------------------------------
 # TestSearchWithGraph
 # ---------------------------------------------------------------------------
+
 
 class TestSearchWithGraph:
     """Test triple-channel search."""
@@ -194,6 +205,7 @@ class TestSearchWithGraph:
 # TestReranking
 # ---------------------------------------------------------------------------
 
+
 class TestReranking:
     """Test cross-encoder reranking."""
 
@@ -211,7 +223,10 @@ class TestReranking:
         assert reranked == []
 
     def test_rerank_respects_top_k(self, engine):
-        results = [SearchResult(id=str(i), content=f"r{i}", score=0.5, source="test") for i in range(10)]
+        results = [
+            SearchResult(id=str(i), content=f"r{i}", score=0.5, source="test")
+            for i in range(10)
+        ]
         engine._reranker.predict.return_value = list(range(10))
         reranked = engine._rerank_results("query", results, top_k=3)
         assert len(reranked) == 3
@@ -220,6 +235,7 @@ class TestReranking:
 # ---------------------------------------------------------------------------
 # TestFilter
 # ---------------------------------------------------------------------------
+
 
 class TestFilter:
     """Test filter building."""
@@ -241,11 +257,13 @@ class TestFilter:
 # TestSingleton
 # ---------------------------------------------------------------------------
 
+
 class TestSingleton:
     """Test singleton factory."""
 
     def test_get_instance(self):
         import Engine8_Knowledge.search.hybrid_engine as mod
+
         mod._instance = None
         e = mod.get_hybrid_search_engine()
         assert e is not None
@@ -257,6 +275,7 @@ class TestSingleton:
 # ---------------------------------------------------------------------------
 # TestFormatResults
 # ---------------------------------------------------------------------------
+
 
 class TestFormatResults:
     """Test Qdrant point formatting."""

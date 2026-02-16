@@ -13,8 +13,8 @@ Tools connect to:
 import os
 
 # Base URLs from environment or defaults
-KNOWLEDGE_API_URL = os.getenv('KNOWLEDGE_API_URL', 'http://127.0.0.1:8100')
-N8N_API_URL = os.getenv('N8N_API_URL', 'https://primetech.app.n8n.cloud')
+KNOWLEDGE_API_URL = os.getenv("KNOWLEDGE_API_URL", "http://127.0.0.1:8100")
+N8N_API_URL = os.getenv("N8N_API_URL", "https://primetech.app.n8n.cloud")
 
 # ============================================
 # DIFY EXTERNAL TOOLS CONFIGURATION
@@ -34,20 +34,20 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Search query in natural language"
+                "description": "Search query in natural language",
             },
             "collection": {
                 "type": "string",
                 "required": False,
                 "enum": ["contacts", "programs", "jobs", "documents", "activities"],
-                "description": "Collection to search (default: all)"
+                "description": "Collection to search (default: all)",
             },
             "limit": {
                 "type": "integer",
                 "default": 10,
-                "description": "Maximum results to return"
-            }
-        }
+                "description": "Maximum results to return",
+            },
+        },
     },
     {
         "name": "qdrant_smart_query",
@@ -59,14 +59,14 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Your BD question"
+                "description": "Your BD question",
             },
             "use_cache": {
                 "type": "boolean",
                 "default": True,
-                "description": "Use semantic cache for faster responses"
-            }
-        }
+                "description": "Use semantic cache for faster responses",
+            },
+        },
     },
     {
         "name": "qdrant_hybrid_search",
@@ -75,26 +75,19 @@ DIFY_EXTERNAL_TOOLS = [
         "endpoint": f"{KNOWLEDGE_API_URL}/search/hybrid",
         "method": "GET",
         "parameters": {
-            "q": {
-                "type": "string",
-                "required": True,
-                "description": "Search query"
-            },
+            "q": {"type": "string", "required": True, "description": "Search query"},
             "collection": {
                 "type": "string",
                 "default": "bd_knowledge",
-                "description": "Collection to search"
+                "description": "Collection to search",
             },
-            "limit": {
-                "type": "integer",
-                "default": 10
-            },
+            "limit": {"type": "integer", "default": 10},
             "use_rerank": {
                 "type": "boolean",
                 "default": True,
-                "description": "Apply cross-encoder reranking"
-            }
-        }
+                "description": "Apply cross-encoder reranking",
+            },
+        },
     },
     {
         "name": "qdrant_rag",
@@ -106,21 +99,20 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Question to answer"
+                "description": "Question to answer",
             },
             "collection": {
                 "type": "string",
                 "required": False,
-                "description": "Collection to search"
+                "description": "Collection to search",
             },
             "limit": {
                 "type": "integer",
                 "default": 5,
-                "description": "Number of sources to retrieve"
-            }
-        }
+                "description": "Number of sources to retrieve",
+            },
+        },
     },
-
     # ----------------------------------------
     # SPECIALIZED SEARCH TOOLS
     # ----------------------------------------
@@ -134,13 +126,10 @@ DIFY_EXTERNAL_TOOLS = [
             "company_name": {
                 "type": "string",
                 "required": True,
-                "description": "Company to find contacts at"
+                "description": "Company to find contacts at",
             },
-            "limit": {
-                "type": "integer",
-                "default": 20
-            }
-        }
+            "limit": {"type": "integer", "default": 20},
+        },
     },
     {
         "name": "qdrant_programs",
@@ -152,9 +141,9 @@ DIFY_EXTERNAL_TOOLS = [
             "program_name": {
                 "type": "string",
                 "required": True,
-                "description": "Program name (e.g., AF DCGS, DCGS-A, GBSD)"
+                "description": "Program name (e.g., AF DCGS, DCGS-A, GBSD)",
             }
-        }
+        },
     },
     {
         "name": "qdrant_jobs",
@@ -166,15 +155,11 @@ DIFY_EXTERNAL_TOOLS = [
             "program_name": {
                 "type": "string",
                 "required": True,
-                "description": "Program name to search jobs for"
+                "description": "Program name to search jobs for",
             },
-            "limit": {
-                "type": "integer",
-                "default": 20
-            }
-        }
+            "limit": {"type": "integer", "default": 20},
+        },
     },
-
     # ----------------------------------------
     # KNOWLEDGE GRAPH TOOLS
     # ----------------------------------------
@@ -185,18 +170,14 @@ DIFY_EXTERNAL_TOOLS = [
         "endpoint": f"{KNOWLEDGE_API_URL}/graph/query",
         "method": "GET",
         "parameters": {
-            "q": {
-                "type": "string",
-                "required": True,
-                "description": "Graph query"
-            },
+            "q": {"type": "string", "required": True, "description": "Graph query"},
             "mode": {
                 "type": "string",
                 "default": "hybrid",
                 "enum": ["naive", "local", "global", "hybrid"],
-                "description": "Query mode"
-            }
-        }
+                "description": "Query mode",
+            },
+        },
     },
     {
         "name": "graph_program_ecosystem",
@@ -208,9 +189,9 @@ DIFY_EXTERNAL_TOOLS = [
             "program_name": {
                 "type": "string",
                 "required": True,
-                "description": "Program name"
+                "description": "Program name",
             }
-        }
+        },
     },
     {
         "name": "graph_contact_network",
@@ -222,9 +203,9 @@ DIFY_EXTERNAL_TOOLS = [
             "contact_name": {
                 "type": "string",
                 "required": True,
-                "description": "Contact name"
+                "description": "Contact name",
             }
-        }
+        },
     },
     {
         "name": "graph_teaming_path",
@@ -236,20 +217,16 @@ DIFY_EXTERNAL_TOOLS = [
             "from_contractor": {
                 "type": "string",
                 "required": True,
-                "description": "Source contractor"
+                "description": "Source contractor",
             },
             "to_program": {
                 "type": "string",
                 "required": True,
-                "description": "Target program"
+                "description": "Target program",
             },
-            "max_depth": {
-                "type": "integer",
-                "default": 4
-            }
-        }
+            "max_depth": {"type": "integer", "default": 4},
+        },
     },
-
     # ----------------------------------------
     # MEMORY TOOLS
     # ----------------------------------------
@@ -263,13 +240,10 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Memory search query"
+                "description": "Memory search query",
             },
-            "limit": {
-                "type": "integer",
-                "default": 10
-            }
-        }
+            "limit": {"type": "integer", "default": 10},
+        },
     },
     {
         "name": "memory_contact_context",
@@ -281,11 +255,10 @@ DIFY_EXTERNAL_TOOLS = [
             "contact_name": {
                 "type": "string",
                 "required": True,
-                "description": "Contact name"
+                "description": "Contact name",
             }
-        }
+        },
     },
-
     # ----------------------------------------
     # AGENT TOOLS
     # ----------------------------------------
@@ -299,9 +272,9 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Strategy request (e.g., 'Develop capture plan for AF DCGS')"
+                "description": "Strategy request (e.g., 'Develop capture plan for AF DCGS')",
             }
-        }
+        },
     },
     {
         "name": "company_research_agent",
@@ -313,9 +286,9 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Company to research"
+                "description": "Company to research",
             }
-        }
+        },
     },
     {
         "name": "contact_finder_agent",
@@ -327,9 +300,9 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Contact search criteria"
+                "description": "Contact search criteria",
             }
-        }
+        },
     },
     {
         "name": "program_intel_agent",
@@ -341,11 +314,10 @@ DIFY_EXTERNAL_TOOLS = [
             "q": {
                 "type": "string",
                 "required": True,
-                "description": "Program to analyze"
+                "description": "Program to analyze",
             }
-        }
+        },
     },
-
     # ----------------------------------------
     # CREWAI WORKFLOW TOOLS
     # ----------------------------------------
@@ -359,9 +331,9 @@ DIFY_EXTERNAL_TOOLS = [
             "program_name": {
                 "type": "string",
                 "required": True,
-                "description": "Program to analyze"
+                "description": "Program to analyze",
             }
-        }
+        },
     },
     {
         "name": "crewai_prepare_outreach",
@@ -373,9 +345,9 @@ DIFY_EXTERNAL_TOOLS = [
             "contact_name": {
                 "type": "string",
                 "required": True,
-                "description": "Contact to prepare outreach for"
+                "description": "Contact to prepare outreach for",
             }
-        }
+        },
     },
     {
         "name": "crewai_weekly_intel",
@@ -383,9 +355,8 @@ DIFY_EXTERNAL_TOOLS = [
         "description": "Generate weekly BD intelligence report with multi-agent workflow",
         "endpoint": f"{KNOWLEDGE_API_URL}/agents/weekly-intel",
         "method": "POST",
-        "parameters": {}
+        "parameters": {},
     },
-
     # ----------------------------------------
     # N8N WORKFLOW TOOLS
     # ----------------------------------------
@@ -399,13 +370,10 @@ DIFY_EXTERNAL_TOOLS = [
             "keywords": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "Search keywords"
+                "description": "Search keywords",
             },
-            "max_results": {
-                "type": "integer",
-                "default": 100
-            }
-        }
+            "max_results": {"type": "integer", "default": 100},
+        },
     },
     {
         "name": "n8n_hot_lead_alert",
@@ -414,23 +382,12 @@ DIFY_EXTERNAL_TOOLS = [
         "endpoint": f"{N8N_API_URL}/webhook/hot-lead",
         "method": "POST",
         "parameters": {
-            "contact_name": {
-                "type": "string",
-                "required": True
-            },
-            "company": {
-                "type": "string"
-            },
-            "program": {
-                "type": "string"
-            },
-            "score": {
-                "type": "integer"
-            },
-            "reason": {
-                "type": "string"
-            }
-        }
+            "contact_name": {"type": "string", "required": True},
+            "company": {"type": "string"},
+            "program": {"type": "string"},
+            "score": {"type": "integer"},
+            "reason": {"type": "string"},
+        },
     },
     {
         "name": "n8n_weekly_report",
@@ -442,9 +399,9 @@ DIFY_EXTERNAL_TOOLS = [
             "recipients": {
                 "type": "array",
                 "items": {"type": "string"},
-                "description": "Email recipients"
+                "description": "Email recipients",
             }
-        }
+        },
     },
     {
         "name": "n8n_master_pipeline",
@@ -456,11 +413,10 @@ DIFY_EXTERNAL_TOOLS = [
             "stage": {
                 "type": "string",
                 "enum": ["scrape", "enrich", "score", "full"],
-                "default": "full"
+                "default": "full",
             }
-        }
+        },
     },
-
     # ----------------------------------------
     # MCP TOOLS (via MCP servers)
     # ----------------------------------------
@@ -469,15 +425,15 @@ DIFY_EXTERNAL_TOOLS = [
         "type": "mcp",
         "description": "Query Notion databases (contacts, programs, opportunities)",
         "mcp_server": "notion",
-        "note": "Requires Notion MCP server to be running"
+        "note": "Requires Notion MCP server to be running",
     },
     {
         "name": "apify_scrape",
         "type": "mcp",
         "description": "Run Apify actors for web scraping",
         "mcp_server": "apify",
-        "note": "Requires Apify MCP server to be running"
-    }
+        "note": "Requires Apify MCP server to be running",
+    },
 ]
 
 
@@ -490,44 +446,34 @@ TOOL_CATEGORIES = {
         "qdrant_search",
         "qdrant_smart_query",
         "qdrant_hybrid_search",
-        "qdrant_rag"
+        "qdrant_rag",
     ],
     "Contacts & Companies": [
         "qdrant_contacts",
         "qdrant_programs",
         "qdrant_jobs",
-        "graph_contact_network"
+        "graph_contact_network",
     ],
-    "Knowledge Graph": [
-        "graph_query",
-        "graph_program_ecosystem",
-        "graph_teaming_path"
-    ],
-    "Memory": [
-        "memory_search",
-        "memory_contact_context"
-    ],
+    "Knowledge Graph": ["graph_query", "graph_program_ecosystem", "graph_teaming_path"],
+    "Memory": ["memory_search", "memory_contact_context"],
     "AI Agents": [
         "bd_strategy_agent",
         "company_research_agent",
         "contact_finder_agent",
-        "program_intel_agent"
+        "program_intel_agent",
     ],
     "Multi-Agent Workflows": [
         "crewai_analyze_program",
         "crewai_prepare_outreach",
-        "crewai_weekly_intel"
+        "crewai_weekly_intel",
     ],
     "Automation (n8n)": [
         "n8n_job_scraper",
         "n8n_hot_lead_alert",
         "n8n_weekly_report",
-        "n8n_master_pipeline"
+        "n8n_master_pipeline",
     ],
-    "External (MCP)": [
-        "notion_query",
-        "apify_scrape"
-    ]
+    "External (MCP)": ["notion_query", "apify_scrape"],
 }
 
 

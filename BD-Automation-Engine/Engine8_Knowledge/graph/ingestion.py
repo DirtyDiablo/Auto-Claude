@@ -22,9 +22,15 @@ logger = logging.getLogger(__name__)
 # Data source paths (relative to project root)
 PROJECT_ROOT = Path(__file__).parent.parent.parent
 BULLHORN_DB = PROJECT_ROOT / "Engine7_BullhornETL" / "data" / "bullhorn_master.db"
-MASTER_NOTES = PROJECT_ROOT / "Engine7_BullhornETL" / "colton_scurry_analysis" / "master_notes.csv"
-CONTACTS_CSV = PROJECT_ROOT / "Engine7_BullhornETL" / "colton_scurry_analysis" / "contacts.csv"
-FEDERAL_PROGRAMS = PROJECT_ROOT / "data" / "from_data_scraper" / "Federal_Programs_Enriched.csv"
+MASTER_NOTES = (
+    PROJECT_ROOT / "Engine7_BullhornETL" / "colton_scurry_analysis" / "master_notes.csv"
+)
+CONTACTS_CSV = (
+    PROJECT_ROOT / "Engine7_BullhornETL" / "colton_scurry_analysis" / "contacts.csv"
+)
+FEDERAL_PROGRAMS = (
+    PROJECT_ROOT / "data" / "from_data_scraper" / "Federal_Programs_Enriched.csv"
+)
 
 BATCH_SIZE = 500
 
@@ -67,6 +73,7 @@ LOCATION_COORDS: dict[str, tuple[float, float]] = {
 # GraphIngestionEngine
 # ---------------------------------------------------------------------------
 
+
 class GraphIngestionEngine:
     """Bulk data ingestion from BD platform sources into Neo4j."""
 
@@ -76,9 +83,15 @@ class GraphIngestionEngine:
 
     def _reset_stats(self) -> None:
         self._stats = {
-            "persons": 0, "companies": 0, "programs": 0,
-            "jobs": 0, "locations": 0, "interactions": 0,
-            "relationships": 0, "errors": 0, "skipped": 0,
+            "persons": 0,
+            "companies": 0,
+            "programs": 0,
+            "jobs": 0,
+            "locations": 0,
+            "interactions": 0,
+            "relationships": 0,
+            "errors": 0,
+            "skipped": 0,
         }
 
     # ── 1. Contacts ──────────────────────────────────────
@@ -128,19 +141,39 @@ class GraphIngestionEngine:
                 for i, row in enumerate(reader):
                     if limit and i >= limit:
                         break
-                    contacts.append({
-                        "name": (row.get("name") or row.get("Name") or "").strip(),
-                        "title": (row.get("title") or row.get("Title") or "").strip(),
-                        "email": (row.get("email") or row.get("Email") or "").strip(),
-                        "phone": (row.get("phone") or row.get("Phone") or "").strip(),
-                        "company": (row.get("company") or row.get("Company") or "").strip(),
-                        "linkedin": (row.get("linkedin") or row.get("LinkedIn") or "").strip(),
-                        "program": (row.get("program") or row.get("Program") or "").strip(),
-                        "tier": row.get("tier") or row.get("Tier") or "5",
-                        "bd_priority": (row.get("bd_priority") or row.get("BD Priority") or "").strip(),
-                        "source_db": (row.get("source_db") or row.get("Source") or "csv").strip(),
-                        "location": (row.get("location") or row.get("Location") or "").strip(),
-                    })
+                    contacts.append(
+                        {
+                            "name": (row.get("name") or row.get("Name") or "").strip(),
+                            "title": (
+                                row.get("title") or row.get("Title") or ""
+                            ).strip(),
+                            "email": (
+                                row.get("email") or row.get("Email") or ""
+                            ).strip(),
+                            "phone": (
+                                row.get("phone") or row.get("Phone") or ""
+                            ).strip(),
+                            "company": (
+                                row.get("company") or row.get("Company") or ""
+                            ).strip(),
+                            "linkedin": (
+                                row.get("linkedin") or row.get("LinkedIn") or ""
+                            ).strip(),
+                            "program": (
+                                row.get("program") or row.get("Program") or ""
+                            ).strip(),
+                            "tier": row.get("tier") or row.get("Tier") or "5",
+                            "bd_priority": (
+                                row.get("bd_priority") or row.get("BD Priority") or ""
+                            ).strip(),
+                            "source_db": (
+                                row.get("source_db") or row.get("Source") or "csv"
+                            ).strip(),
+                            "location": (
+                                row.get("location") or row.get("Location") or ""
+                            ).strip(),
+                        }
+                    )
         except Exception as e:
             logger.error("contacts_csv_error", error=str(e))
         return contacts
@@ -189,7 +222,11 @@ class GraphIngestionEngine:
                             MERGE (sub:Company {name: $sub_name})
                             MERGE (sub)-[:SUBS_TO {on_program: $program}]->(pr)
                             """,
-                            {"acronym": prog.get("acronym", prog["name"]), "sub_name": sub_name, "program": prog["name"]},
+                            {
+                                "acronym": prog.get("acronym", prog["name"]),
+                                "sub_name": sub_name,
+                                "program": prog["name"],
+                            },
                         )
                     except Exception:
                         self._stats["errors"] += 1
@@ -209,20 +246,36 @@ class GraphIngestionEngine:
                 for i, row in enumerate(reader):
                     if limit and i >= limit:
                         break
-                    programs.append({
-                        "name": (row.get("Program Name") or "").strip(),
-                        "acronym": (row.get("Acronym") or row.get("Program Name", "")).strip(),
-                        "value": (row.get("Contract Value") or "").strip(),
-                        "agency_owner": (row.get("Agency Owner") or "").strip(),
-                        "prime_contractor": (row.get("Prime Contractor") or "").strip(),
-                        "clearance_req": (row.get("Clearance Requirements") or "").strip(),
-                        "program_type": (row.get("Program Type") or "").strip(),
-                        "contract_vehicle": (row.get("Contract Vehicle") or "").strip(),
-                        "hiring_velocity": (row.get("Hiring Velocity") or "").strip(),
-                        "recompete_date": (row.get("Recompete Date") or "").strip(),
-                        "confidence_level": (row.get("Confidence Level") or "").strip(),
-                        "subcontractors": (row.get("Known Subcontractors") or "").strip(),
-                    })
+                    programs.append(
+                        {
+                            "name": (row.get("Program Name") or "").strip(),
+                            "acronym": (
+                                row.get("Acronym") or row.get("Program Name", "")
+                            ).strip(),
+                            "value": (row.get("Contract Value") or "").strip(),
+                            "agency_owner": (row.get("Agency Owner") or "").strip(),
+                            "prime_contractor": (
+                                row.get("Prime Contractor") or ""
+                            ).strip(),
+                            "clearance_req": (
+                                row.get("Clearance Requirements") or ""
+                            ).strip(),
+                            "program_type": (row.get("Program Type") or "").strip(),
+                            "contract_vehicle": (
+                                row.get("Contract Vehicle") or ""
+                            ).strip(),
+                            "hiring_velocity": (
+                                row.get("Hiring Velocity") or ""
+                            ).strip(),
+                            "recompete_date": (row.get("Recompete Date") or "").strip(),
+                            "confidence_level": (
+                                row.get("Confidence Level") or ""
+                            ).strip(),
+                            "subcontractors": (
+                                row.get("Known Subcontractors") or ""
+                            ).strip(),
+                        }
+                    )
         except Exception as e:
             logger.error("programs_csv_error", error=str(e))
         return programs
@@ -267,6 +320,7 @@ class GraphIngestionEngine:
         """Load jobs from the Hub API."""
         try:
             import httpx
+
             r = httpx.get(
                 "http://127.0.0.1:8100/api/v2/jobs",
                 params={"limit": limit or 1000},
@@ -341,15 +395,21 @@ class GraphIngestionEngine:
                 for i, row in enumerate(reader):
                     if limit and i >= limit:
                         break
-                    interactions.append({
-                        "date": (row.get("date_added") or "").strip(),
-                        "type": (row.get("type") or "note").strip(),
-                        "action": (row.get("action") or "").strip(),
-                        "status": (row.get("status") or "").strip(),
-                        "summary": (row.get("note_body_clean") or row.get("note_body_raw") or "").strip()[:500],
-                        "about": (row.get("about") or "").strip(),
-                        "author": (row.get("note_author") or "").strip(),
-                    })
+                    interactions.append(
+                        {
+                            "date": (row.get("date_added") or "").strip(),
+                            "type": (row.get("type") or "note").strip(),
+                            "action": (row.get("action") or "").strip(),
+                            "status": (row.get("status") or "").strip(),
+                            "summary": (
+                                row.get("note_body_clean")
+                                or row.get("note_body_raw")
+                                or ""
+                            ).strip()[:500],
+                            "about": (row.get("about") or "").strip(),
+                            "author": (row.get("note_author") or "").strip(),
+                        }
+                    )
         except Exception as e:
             logger.error("interactions_csv_error", error=str(e))
         return interactions
@@ -374,14 +434,18 @@ class GraphIngestionEngine:
             # Parse city/state from name
             city = name
             state = ""
-            locations.append({
-                "hub_name": name,
-                "city": city,
-                "state": state,
-                "lat": lat,
-                "lon": lon,
-                "military": name.startswith("Fort") or name in ("Shaw", "Beale", "Creech", "Peterson", "Schriever", "Buckley"),
-            })
+            locations.append(
+                {
+                    "hub_name": name,
+                    "city": city,
+                    "state": state,
+                    "lat": lat,
+                    "lon": lon,
+                    "military": name.startswith("Fort")
+                    or name
+                    in ("Shaw", "Beale", "Creech", "Peterson", "Schriever", "Buckley"),
+                }
+            )
 
         result = self._mgr.run_batch(location_cypher, locations, BATCH_SIZE)
         self._stats["locations"] = result.get("nodes_created", 0)

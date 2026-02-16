@@ -24,6 +24,7 @@ def spatial():
 # HAVERSINE
 # =========================================
 
+
 def test_haversine_zero_distance():
     dist = SpatialQueryProcessor.haversine(38.87, -77.05, 38.87, -77.05)
     assert dist == 0.0
@@ -45,6 +46,7 @@ def test_haversine_short_distance():
 # RADIUS SEARCH
 # =========================================
 
+
 def test_radius_around_pentagon(spatial):
     # Pentagon: 38.8719, -77.0563
     result = spatial.find_within_radius(38.8719, -77.0563, radius_miles=15.0)
@@ -61,14 +63,20 @@ def test_radius_sorted_by_distance(spatial):
 
 def test_radius_entity_type_filter(spatial):
     result = spatial.find_within_radius(
-        38.8719, -77.0563, radius_miles=30.0, entity_types=["facility"],
+        38.8719,
+        -77.0563,
+        radius_miles=30.0,
+        entity_types=["facility"],
     )
     assert all(e["entity_type"] == "facility" for e in result.entities)
 
 
 def test_radius_contacts_only(spatial):
     result = spatial.find_within_radius(
-        38.8719, -77.0563, radius_miles=50.0, entity_types=["contact"],
+        38.8719,
+        -77.0563,
+        radius_miles=50.0,
+        entity_types=["contact"],
     )
     assert all(e["entity_type"] == "contact" for e in result.entities)
 
@@ -90,6 +98,7 @@ def test_radius_includes_distance(spatial):
 # CLUSTER ANALYSIS
 # =========================================
 
+
 def test_cluster_contacts(spatial):
     clusters = spatial.cluster_analysis("contact")
     assert isinstance(clusters, list)
@@ -100,7 +109,9 @@ def test_cluster_contacts(spatial):
 def test_cluster_has_region(spatial):
     clusters = spatial.cluster_analysis("contact")
     regions = [c.region for c in clusters]
-    assert "NCR" in regions or "southeast" in regions  # most contacts are in these areas
+    assert (
+        "NCR" in regions or "southeast" in regions
+    )  # most contacts are in these areas
 
 
 def test_cluster_has_center(spatial):
@@ -138,6 +149,7 @@ def test_cluster_dominant_programs(spatial):
 # OVERLAP ANALYSIS
 # =========================================
 
+
 def test_overlap_dcgs_a_jadc2(spatial):
     """DCGS-A and JADC2 share Fort Meade."""
     result = spatial.overlap_analysis("DCGS-A", "JADC2")
@@ -172,6 +184,7 @@ def test_overlap_unknown_program(spatial):
 # COMMUTE ANALYSIS
 # =========================================
 
+
 def test_commute_from_langley(spatial):
     # Langley AFB area: 37.0833, -76.3605
     result = spatial.commute_analysis(37.0833, -76.3605, max_commute_miles=15.0)
@@ -202,6 +215,7 @@ def test_commute_no_results(spatial):
 # COMPETITIVE DENSITY
 # =========================================
 
+
 def test_competitive_density_ncr(spatial):
     result = spatial.competitive_density("NCR")
     assert isinstance(result, CompetitiveDensity)
@@ -224,6 +238,7 @@ def test_competitive_density_empty_region(spatial):
 # =========================================
 # HEATMAP
 # =========================================
+
 
 def test_heatmap_contacts(spatial):
     points = spatial.generate_heatmap("contact")
@@ -253,6 +268,7 @@ def test_heatmap_programs(spatial):
 # STATS
 # =========================================
 
+
 def test_stats(spatial):
     stats = spatial.get_stats()
     assert stats["total_contacts"] >= 10
@@ -264,6 +280,7 @@ def test_stats(spatial):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     s1 = get_spatial_processor()

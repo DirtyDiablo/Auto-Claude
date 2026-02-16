@@ -22,6 +22,7 @@ logger = structlog.get_logger(__name__)
 # Data classes
 # ---------------------------------------------------------------------------
 
+
 @dataclass
 class ThreadInfo:
     thread_id: str
@@ -48,6 +49,7 @@ class CheckpointSnapshot:
 # CheckpointStore
 # ---------------------------------------------------------------------------
 
+
 class CheckpointStore:
     """Production checkpoint store using SQLite for persistent LangGraph state."""
 
@@ -60,7 +62,9 @@ class CheckpointStore:
         # Ensure directory exists
         Path(db_path).parent.mkdir(parents=True, exist_ok=True)
 
-        logger.info("checkpoint_store.init", db_path=db_path, max_per_thread=max_per_thread)
+        logger.info(
+            "checkpoint_store.init", db_path=db_path, max_per_thread=max_per_thread
+        )
 
     # ------------------------------------------------------------------
     # LangGraph checkpointer
@@ -71,11 +75,14 @@ class CheckpointStore:
         if self._checkpointer is None:
             try:
                 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
+
                 self._checkpointer = AsyncSqliteSaver.from_conn_string(self.db_path)
                 await self._checkpointer.setup()
                 logger.info("checkpoint_store.checkpointer_ready", db=self.db_path)
             except ImportError:
-                logger.warning("checkpoint_store.langgraph_sqlite_not_available, using in-memory fallback")
+                logger.warning(
+                    "checkpoint_store.langgraph_sqlite_not_available, using in-memory fallback"
+                )
                 self._checkpointer = InMemoryCheckpointer()
         return self._checkpointer
 
@@ -84,7 +91,10 @@ class CheckpointStore:
         if self._db is None:
             try:
                 import aiosqlite
-                self._db = await aiosqlite.connect(self.db_path.replace(".db", "_meta.db"))
+
+                self._db = await aiosqlite.connect(
+                    self.db_path.replace(".db", "_meta.db")
+                )
                 await self._init_tables()
             except ImportError:
                 logger.warning("aiosqlite not available, using dict fallback")
@@ -127,8 +137,12 @@ class CheckpointStore:
     # Thread management
     # ------------------------------------------------------------------
 
-    async def create_thread(self, workflow_name: str, thread_id: Optional[str] = None,
-                            metadata: Optional[Dict] = None) -> str:
+    async def create_thread(
+        self,
+        workflow_name: str,
+        thread_id: Optional[str] = None,
+        metadata: Optional[Dict] = None,
+    ) -> str:
         """Create a new workflow thread."""
         tid = thread_id or f"thread_{uuid.uuid4().hex[:12]}"
         now = datetime.utcnow().isoformat()
@@ -136,22 +150,33 @@ class CheckpointStore:
 
         if isinstance(db, DictMetaStore):
             db.threads[tid] = ThreadInfo(
-                thread_id=tid, workflow_name=workflow_name, status="running",
-                created_at=now, updated_at=now, step_count=0, metadata=metadata or {}
+                thread_id=tid,
+                workflow_name=workflow_name,
+                status="running",
+                created_at=now,
+                updated_at=now,
+                step_count=0,
+                metadata=metadata or {},
             )
         else:
             await db.execute(
                 "INSERT INTO threads (thread_id, workflow_name, status, created_at, updated_at, metadata) VALUES (?,?,?,?,?,?)",
-                (tid, workflow_name, "running", now, now, json.dumps(metadata or {}))
+                (tid, workflow_name, "running", now, now, json.dumps(metadata or {})),
             )
             await db.commit()
 
-        logger.info("checkpoint_store.thread_created", thread_id=tid, workflow=workflow_name)
+        logger.info(
+            "checkpoint_store.thread_created", thread_id=tid, workflow=workflow_name
+        )
         return tid
 
-    async def update_thread_status(self, thread_id: str, status: str,
-                                   current_node: Optional[str] = None,
-                                   step_count: Optional[int] = None) -> None:
+    async def update_thread_status(
+        self,
+        thread_id: str,
+        status: str,
+        current_node: Optional[str] = None,
+        step_count: Optional[int] = None,
+    ) -> None:
         """Update thread status and optional fields."""
         now = datetime.utcnow().isoformat()
         db = await self._get_db()
@@ -175,11 +200,17 @@ class CheckpointStore:
                 parts.append("step_count=?")
                 vals.append(step_count)
             vals.append(thread_id)
-            await db.execute(f"UPDATE threads SET {', '.join(parts)} WHERE thread_id=?", vals)
+            await db.execute(
+                f"UPDATE threads SET {', '.join(parts)} WHERE thread_id=?", vals
+            )
             await db.commit()
 
-    async def list_threads(self, workflow_name: Optional[str] = None,
-                           status: Optional[str] = None, limit: int = 50) -> List[ThreadInfo]:
+    async def list_threads(
+        self,
+        workflow_name: Optional[str] = None,
+        status: Optional[str] = None,
+        limit: int = 50,
+    ) -> List[ThreadInfo]:
         """List workflow threads with optional filtering."""
         db = await self._get_db()
 
@@ -206,9 +237,14 @@ class CheckpointStore:
         rows = await cursor.fetchall()
         return [
             ThreadInfo(
-                thread_id=r[0], workflow_name=r[1], status=r[2],
-                created_at=r[3], updated_at=r[4], step_count=r[5],
-                current_node=r[6], metadata=json.loads(r[7] or "{}")
+                thread_id=r[0],
+                workflow_name=r[1],
+                status=r[2],
+                created_at=r[3],
+                updated_at=r[4],
+                step_count=r[5],
+                current_node=r[6],
+                metadata=json.loads(r[7] or "{}"),
             )
             for r in rows
         ]
@@ -222,56 +258,83 @@ class CheckpointStore:
 
         cursor = await db.execute(
             "SELECT thread_id, step, node_name, timestamp, state, metadata FROM checkpoint_snapshots WHERE thread_id=? ORDER BY step",
-            (thread_id,)
+            (thread_id,),
         )
         rows = await cursor.fetchall()
         return [
             CheckpointSnapshot(
-                thread_id=r[0], step=r[1], node_name=r[2],
-                timestamp=r[3], state=json.loads(r[4]),
-                metadata=json.loads(r[5] or "{}")
+                thread_id=r[0],
+                step=r[1],
+                node_name=r[2],
+                timestamp=r[3],
+                state=json.loads(r[4]),
+                metadata=json.loads(r[5] or "{}"),
             )
             for r in rows
         ]
 
-    async def save_snapshot(self, thread_id: str, step: int, node_name: str,
-                            state: Dict[str, Any], metadata: Optional[Dict] = None) -> None:
+    async def save_snapshot(
+        self,
+        thread_id: str,
+        step: int,
+        node_name: str,
+        state: Dict[str, Any],
+        metadata: Optional[Dict] = None,
+    ) -> None:
         """Save a checkpoint snapshot and enforce retention limit."""
         now = datetime.utcnow().isoformat()
         db = await self._get_db()
 
         snap = CheckpointSnapshot(
-            thread_id=thread_id, step=step, node_name=node_name,
-            timestamp=now, state=state, metadata=metadata or {}
+            thread_id=thread_id,
+            step=step,
+            node_name=node_name,
+            timestamp=now,
+            state=state,
+            metadata=metadata or {},
         )
 
         if isinstance(db, DictMetaStore):
             db.snapshots.setdefault(thread_id, []).append(snap)
             # Enforce retention
             if len(db.snapshots[thread_id]) > self.max_per_thread:
-                db.snapshots[thread_id] = db.snapshots[thread_id][-self.max_per_thread:]
+                db.snapshots[thread_id] = db.snapshots[thread_id][
+                    -self.max_per_thread :
+                ]
         else:
             await db.execute(
                 "INSERT INTO checkpoint_snapshots (thread_id, step, node_name, timestamp, state, metadata) VALUES (?,?,?,?,?,?)",
-                (thread_id, step, node_name, now, json.dumps(state), json.dumps(metadata or {}))
+                (
+                    thread_id,
+                    step,
+                    node_name,
+                    now,
+                    json.dumps(state),
+                    json.dumps(metadata or {}),
+                ),
             )
             # Enforce retention
             cursor = await db.execute(
-                "SELECT COUNT(*) FROM checkpoint_snapshots WHERE thread_id=?", (thread_id,)
+                "SELECT COUNT(*) FROM checkpoint_snapshots WHERE thread_id=?",
+                (thread_id,),
             )
             count = (await cursor.fetchone())[0]
             if count > self.max_per_thread:
                 excess = count - self.max_per_thread
                 await db.execute(
                     "DELETE FROM checkpoint_snapshots WHERE id IN (SELECT id FROM checkpoint_snapshots WHERE thread_id=? ORDER BY step LIMIT ?)",
-                    (thread_id, excess)
+                    (thread_id, excess),
                 )
             await db.commit()
 
         # Update thread
-        await self.update_thread_status(thread_id, "running", current_node=node_name, step_count=step)
+        await self.update_thread_status(
+            thread_id, "running", current_node=node_name, step_count=step
+        )
 
-    async def get_checkpoint_at(self, thread_id: str, step: int) -> Optional[CheckpointSnapshot]:
+    async def get_checkpoint_at(
+        self, thread_id: str, step: int
+    ) -> Optional[CheckpointSnapshot]:
         """Get the state at a specific checkpoint step."""
         db = await self._get_db()
 
@@ -283,14 +346,17 @@ class CheckpointStore:
 
         cursor = await db.execute(
             "SELECT thread_id, step, node_name, timestamp, state, metadata FROM checkpoint_snapshots WHERE thread_id=? AND step=?",
-            (thread_id, step)
+            (thread_id, step),
         )
         row = await cursor.fetchone()
         if row:
             return CheckpointSnapshot(
-                thread_id=row[0], step=row[1], node_name=row[2],
-                timestamp=row[3], state=json.loads(row[4]),
-                metadata=json.loads(row[5] or "{}")
+                thread_id=row[0],
+                step=row[1],
+                node_name=row[2],
+                timestamp=row[3],
+                state=json.loads(row[4]),
+                metadata=json.loads(row[5] or "{}"),
             )
         return None
 
@@ -303,7 +369,9 @@ class CheckpointStore:
             db.snapshots.pop(thread_id, None)
             return removed
 
-        await db.execute("DELETE FROM checkpoint_snapshots WHERE thread_id=?", (thread_id,))
+        await db.execute(
+            "DELETE FROM checkpoint_snapshots WHERE thread_id=?", (thread_id,)
+        )
         await db.execute("DELETE FROM threads WHERE thread_id=?", (thread_id,))
         await db.commit()
         logger.info("checkpoint_store.thread_deleted", thread_id=thread_id)
@@ -325,13 +393,19 @@ class CheckpointStore:
                 db.snapshots.pop(t.thread_id, None)
             return len(old)
 
-        cursor = await db.execute("SELECT thread_id FROM threads WHERE updated_at < ?", (cutoff,))
+        cursor = await db.execute(
+            "SELECT thread_id FROM threads WHERE updated_at < ?", (cutoff,)
+        )
         old_threads = [r[0] for r in await cursor.fetchall()]
         for tid in old_threads:
-            await db.execute("DELETE FROM checkpoint_snapshots WHERE thread_id=?", (tid,))
+            await db.execute(
+                "DELETE FROM checkpoint_snapshots WHERE thread_id=?", (tid,)
+            )
             await db.execute("DELETE FROM threads WHERE thread_id=?", (tid,))
         await db.commit()
-        logger.info("checkpoint_store.cleanup", removed=len(old_threads), cutoff_days=days)
+        logger.info(
+            "checkpoint_store.cleanup", removed=len(old_threads), cutoff_days=days
+        )
         return len(old_threads)
 
     # ------------------------------------------------------------------
@@ -360,18 +434,23 @@ class CheckpointStore:
         await self.create_thread(
             workflow_name=thread_data.get("workflow_name", "unknown"),
             thread_id=new_tid,
-            metadata={"imported_from": thread_data.get("thread_id", "unknown")}
+            metadata={"imported_from": thread_data.get("thread_id", "unknown")},
         )
 
         for snap in data.get("snapshots", []):
             await self.save_snapshot(
-                thread_id=new_tid, step=snap["step"],
-                node_name=snap["node_name"], state=snap["state"],
-                metadata=snap.get("metadata", {})
+                thread_id=new_tid,
+                step=snap["step"],
+                node_name=snap["node_name"],
+                state=snap["state"],
+                metadata=snap.get("metadata", {}),
             )
 
-        logger.info("checkpoint_store.imported", new_thread_id=new_tid,
-                     original=thread_data.get("thread_id"))
+        logger.info(
+            "checkpoint_store.imported",
+            new_thread_id=new_tid,
+            original=thread_data.get("thread_id"),
+        )
         return new_tid
 
     # ------------------------------------------------------------------
@@ -400,7 +479,9 @@ class CheckpointStore:
         total_threads = (await cursor.fetchone())[0]
         cursor = await db.execute("SELECT COUNT(*) FROM checkpoint_snapshots")
         total_snapshots = (await cursor.fetchone())[0]
-        cursor = await db.execute("SELECT status, COUNT(*) FROM threads GROUP BY status")
+        cursor = await db.execute(
+            "SELECT status, COUNT(*) FROM threads GROUP BY status"
+        )
         by_status = {r[0]: r[1] for r in await cursor.fetchall()}
 
         db_size = 0
@@ -438,6 +519,7 @@ class CheckpointStore:
 # ---------------------------------------------------------------------------
 # Fallback stores for when dependencies aren't installed
 # ---------------------------------------------------------------------------
+
 
 class DictMetaStore:
     """In-memory fallback when aiosqlite is not available."""

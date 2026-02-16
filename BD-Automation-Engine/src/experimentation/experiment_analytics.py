@@ -22,9 +22,11 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 @dataclass
 class AnalyticsEvent:
     """A single analytics event tied to an experiment."""
+
     event_id: str
     experiment_id: str
     variant_id: str
@@ -52,6 +54,7 @@ class AnalyticsEvent:
 @dataclass
 class FunnelStep:
     """A single step in a conversion funnel."""
+
     step_name: str
     count: int = 0
     conversion_rate: float = 0.0
@@ -67,6 +70,7 @@ class FunnelStep:
 # =========================================
 # EXPERIMENT ANALYTICS
 # =========================================
+
 
 class ExperimentAnalytics:
     """Tracks events and provides analytical views over experiment data.
@@ -130,8 +134,13 @@ class ExperimentAnalytics:
             value=value,
         )
         self._events.append(event)
-        logger.debug("Tracked event %s: %s for experiment %s, variant %s",
-                      event_id, event_type, experiment_id, variant_id)
+        logger.debug(
+            "Tracked event %s: %s for experiment %s, variant %s",
+            event_id,
+            event_type,
+            experiment_id,
+            variant_id,
+        )
         return event
 
     # ----- funnel analysis -----
@@ -163,11 +172,13 @@ class ExperimentAnalytics:
             if not funnel:
                 top_count = max(count, 1)  # avoid division by zero
             conversion_rate = count / top_count
-            funnel.append(FunnelStep(
-                step_name=step_name,
-                count=count,
-                conversion_rate=conversion_rate,
-            ))
+            funnel.append(
+                FunnelStep(
+                    step_name=step_name,
+                    count=count,
+                    conversion_rate=conversion_rate,
+                )
+            )
 
         return funnel
 
@@ -190,7 +201,8 @@ class ExperimentAnalytics:
             Sorted list of ``{"date", "count", "value"}`` dicts.
         """
         exp_events = [
-            e for e in self._events
+            e
+            for e in self._events
             if e.experiment_id == experiment_id and e.event_type == metric_name
         ]
 
@@ -293,7 +305,9 @@ class ExperimentAnalytics:
         p2 = baseline_rate + min_detectable_effect
 
         if p1 <= 0 or p1 >= 1 or p2 <= 0 or p2 >= 1:
-            logger.warning("Invalid rates for sample size calculation: p1=%s p2=%s", p1, p2)
+            logger.warning(
+                "Invalid rates for sample size calculation: p1=%s p2=%s", p1, p2
+            )
             return 0
 
         z_alpha = self._z_score(1.0 - significance / 2.0)
@@ -309,7 +323,11 @@ class ExperimentAnalytics:
         logger.info(
             "Sample size needed: %d per variant (baseline=%.2f%%, MDE=%.2f%%, "
             "alpha=%.2f, power=%.2f)",
-            n, p1 * 100, min_detectable_effect * 100, significance, power,
+            n,
+            p1 * 100,
+            min_detectable_effect * 100,
+            significance,
+            power,
         )
         return n
 
@@ -342,7 +360,9 @@ class ExperimentAnalytics:
         d2 = 0.189269
         d3 = 0.001308
 
-        z = t - (c0 + c1 * t + c2 * t * t) / (1.0 + d1 * t + d2 * t * t + d3 * t * t * t)
+        z = t - (c0 + c1 * t + c2 * t * t) / (
+            1.0 + d1 * t + d2 * t * t + d3 * t * t * t
+        )
         return sign * z
 
     # ----- stats -----

@@ -12,10 +12,14 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.checkpoint_store import (
-    CheckpointStore, DictMetaStore,
+    CheckpointStore,
+    DictMetaStore,
 )
 from Engine8_Knowledge.workflows.time_travel import (
-    TimeTravelDebugger, ExecutionTimeline, StateDiff, get_time_travel_debugger,
+    TimeTravelDebugger,
+    ExecutionTimeline,
+    StateDiff,
+    get_time_travel_debugger,
 )
 
 
@@ -119,7 +123,9 @@ async def test_compare_executions(store, debugger):
     await _seed_thread(store, "t_a", "same_wf")
     await _seed_thread(store, "t_b", "same_wf")
     # Modify t_b state
-    await store.save_snapshot("t_b", 4, "extra_node", {"x": 1, "y": 2, "z": 3, "w": 4, "errors": []})
+    await store.save_snapshot(
+        "t_b", 4, "extra_node", {"x": 1, "y": 2, "z": 3, "w": 4, "errors": []}
+    )
 
     report = await debugger.compare_executions("t_a", "t_b")
     assert report.thread_id_a == "t_a"

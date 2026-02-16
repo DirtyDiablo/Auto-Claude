@@ -12,6 +12,7 @@ router = APIRouter(prefix="/agents/autonomous", tags=["Autonomous Agents"])
 
 # ─── Scheduler Endpoints ────────────────────────────────────────────────────
 
+
 @router.get("/schedule")
 async def get_schedule():
     """Get current agent schedule with next run times."""
@@ -69,10 +70,13 @@ async def get_runs(limit: int = Query(50, description="Max entries")):
 
 # ─── Briefing Endpoints ─────────────────────────────────────────────────────
 
+
 @router.get("/briefing/latest")
 async def get_latest_briefing():
     """Get the most recent morning briefing."""
-    from Engine8_Knowledge.agents.autonomous.morning_briefing import MorningBriefingAgent
+    from Engine8_Knowledge.agents.autonomous.morning_briefing import (
+        MorningBriefingAgent,
+    )
 
     agent = MorningBriefingAgent()
     brief = agent.get_latest_brief()
@@ -86,7 +90,9 @@ async def get_latest_briefing():
 @router.get("/briefing/{date}")
 async def get_briefing_by_date(date: str):
     """Get briefing for a specific date (YYYY-MM-DD)."""
-    from Engine8_Knowledge.agents.autonomous.morning_briefing import MorningBriefingAgent
+    from Engine8_Knowledge.agents.autonomous.morning_briefing import (
+        MorningBriefingAgent,
+    )
 
     agent = MorningBriefingAgent()
     brief = agent.get_brief(date)
@@ -99,10 +105,13 @@ async def get_briefing_by_date(date: str):
 
 # ─── Enrichment Endpoints ───────────────────────────────────────────────────
 
+
 @router.get("/enrichment/report")
 async def get_enrichment_report():
     """Get the latest contact enrichment scan results."""
-    from Engine8_Knowledge.agents.autonomous.contact_enrichment import ContactEnrichmentAgent
+    from Engine8_Knowledge.agents.autonomous.contact_enrichment import (
+        ContactEnrichmentAgent,
+    )
 
     agent = ContactEnrichmentAgent()
     report = agent.get_latest_report()

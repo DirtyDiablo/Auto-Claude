@@ -17,6 +17,7 @@ import os
 # Import settings if available
 try:
     from config.settings import get_settings
+
     settings = get_settings()
 except ImportError:
     settings = None
@@ -25,8 +26,10 @@ except ImportError:
 try:
     from utils.llm_retry import openai_retry
 except ImportError:
+
     def openai_retry(func):
         return func
+
 
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v2", tags=["unified"])
@@ -58,19 +61,19 @@ def get_embedding(text: str) -> list:
     if not api_key:
         raise HTTPException(status_code=500, detail="OPENAI_API_KEY not configured")
     client = OpenAI(api_key=api_key)
-    response = client.embeddings.create(
-        input=text,
-        model="text-embedding-3-small"
-    )
+    response = client.embeddings.create(input=text, model="text-embedding-3-small")
     return response.data[0].embedding
 
 
 # ====== UNIFIED SEARCH ======
 
+
 @router.get("/search")
 async def unified_search(
     query: str = Query(..., min_length=2),
-    collections: Optional[str] = Query(None, description="Comma-separated collection names"),
+    collections: Optional[str] = Query(
+        None, description="Comma-separated collection names"
+    ),
     limit: int = Query(10, ge=1, le=100),
     _authenticated: bool = Depends(verify_api_key),
 ):
@@ -82,10 +85,11 @@ async def unified_search(
     qdrant = get_qdrant()
     embedding = get_embedding(query)
 
-    target_collections = collections.split(",") if collections else [
-        "contacts", "programs", "jobs",
-        "activities", "documents"
-    ]
+    target_collections = (
+        collections.split(",")
+        if collections
+        else ["contacts", "programs", "jobs", "activities", "documents"]
+    )
 
     results = []
     for coll in target_collections:
@@ -97,12 +101,14 @@ async def unified_search(
                 limit=limit,
             )
             for hit in response.points:
-                results.append({
-                    "collection": coll,
-                    "score": hit.score,
-                    "id": str(hit.id),
-                    "payload": hit.payload,
-                })
+                results.append(
+                    {
+                        "collection": coll,
+                        "score": hit.score,
+                        "id": str(hit.id),
+                        "payload": hit.payload,
+                    }
+                )
         except Exception as e:
             logger.warning("search_collection_failed", collection=coll, error=str(e))
 
@@ -114,6 +120,7 @@ async def unified_search(
 
 
 # ====== CONTACTS ======
+
 
 @router.get("/contacts")
 async def list_contacts(
@@ -130,13 +137,21 @@ async def list_contacts(
 
     must_conditions = []
     if program:
-        must_conditions.append(FieldCondition(key="program", match=MatchValue(value=program)))
+        must_conditions.append(
+            FieldCondition(key="program", match=MatchValue(value=program))
+        )
     if tier:
-        must_conditions.append(FieldCondition(key="hierarchy_tier", match=MatchValue(value=tier)))
+        must_conditions.append(
+            FieldCondition(key="hierarchy_tier", match=MatchValue(value=tier))
+        )
     if priority:
-        must_conditions.append(FieldCondition(key="bd_priority", match=MatchValue(value=priority)))
+        must_conditions.append(
+            FieldCondition(key="bd_priority", match=MatchValue(value=priority))
+        )
     if location:
-        must_conditions.append(FieldCondition(key="location_hub", match=MatchValue(value=location)))
+        must_conditions.append(
+            FieldCondition(key="location_hub", match=MatchValue(value=location))
+        )
 
     filter_obj = Filter(must=must_conditions) if must_conditions else None
 
@@ -177,7 +192,10 @@ async def search_contacts(
         )
 
         return {
-            "results": [{"id": str(h.id), "score": h.score, **h.payload} for h in response.points],
+            "results": [
+                {"id": str(h.id), "score": h.score, **h.payload}
+                for h in response.points
+            ],
             "query": query,
         }
     except Exception as e:
@@ -186,6 +204,7 @@ async def search_contacts(
 
 
 # ====== PROGRAMS ======
+
 
 @router.get("/programs")
 async def list_programs(
@@ -200,11 +219,19 @@ async def list_programs(
 
     must_conditions = []
     if prime:
-        must_conditions.append(FieldCondition(key="prime_contractor", match=MatchValue(value=prime)))
+        must_conditions.append(
+            FieldCondition(key="prime_contractor", match=MatchValue(value=prime))
+        )
     if pts_involvement:
-        must_conditions.append(FieldCondition(key="pts_involvement", match=MatchValue(value=pts_involvement)))
+        must_conditions.append(
+            FieldCondition(
+                key="pts_involvement", match=MatchValue(value=pts_involvement)
+            )
+        )
     if priority:
-        must_conditions.append(FieldCondition(key="priority_level", match=MatchValue(value=priority)))
+        must_conditions.append(
+            FieldCondition(key="priority_level", match=MatchValue(value=priority))
+        )
 
     filter_obj = Filter(must=must_conditions) if must_conditions else None
 
@@ -216,13 +243,17 @@ async def list_programs(
             with_payload=True,
         )
 
-        return {"programs": [{"id": str(p.id), **p.payload} for p in results], "total": len(results)}
+        return {
+            "programs": [{"id": str(p.id), **p.payload} for p in results],
+            "total": len(results),
+        }
     except Exception as e:
         logger.error("list_programs_failed", error=str(e))
         return {"programs": [], "total": 0, "error": str(e)}
 
 
 # ====== JOBS ======
+
 
 @router.get("/jobs")
 async def list_jobs(
@@ -237,11 +268,17 @@ async def list_jobs(
 
     must_conditions = []
     if status:
-        must_conditions.append(FieldCondition(key="status", match=MatchValue(value=status)))
+        must_conditions.append(
+            FieldCondition(key="status", match=MatchValue(value=status))
+        )
     if program:
-        must_conditions.append(FieldCondition(key="mapped_program", match=MatchValue(value=program)))
+        must_conditions.append(
+            FieldCondition(key="mapped_program", match=MatchValue(value=program))
+        )
     if clearance:
-        must_conditions.append(FieldCondition(key="detected_clearance", match=MatchValue(value=clearance)))
+        must_conditions.append(
+            FieldCondition(key="detected_clearance", match=MatchValue(value=clearance))
+        )
 
     filter_obj = Filter(must=must_conditions) if must_conditions else None
 
@@ -253,13 +290,17 @@ async def list_jobs(
             with_payload=True,
         )
 
-        return {"jobs": [{"id": str(p.id), **p.payload} for p in results], "total": len(results)}
+        return {
+            "jobs": [{"id": str(p.id), **p.payload} for p in results],
+            "total": len(results),
+        }
     except Exception as e:
         logger.error("list_jobs_failed", error=str(e))
         return {"jobs": [], "total": 0, "error": str(e)}
 
 
 # ====== PIPELINE ======
+
 
 @router.get("/pipeline")
 async def get_pipeline(_authenticated: bool = Depends(verify_api_key)):
@@ -288,14 +329,14 @@ async def get_pipeline(_authenticated: bool = Depends(verify_api_key)):
 
 # ====== ANALYTICS ======
 
+
 @router.get("/analytics/overview")
 async def analytics_overview(_authenticated: bool = Depends(verify_api_key)):
     """Get cross-collection analytics overview."""
     qdrant = get_qdrant()
 
     collections_data = {}
-    for name in ["contacts", "programs", "jobs",
-                 "activities", "documents"]:
+    for name in ["contacts", "programs", "jobs", "activities", "documents"]:
         try:
             info = qdrant.get_collection(name)
             collections_data[name] = {"count": info.points_count}
@@ -312,6 +353,7 @@ async def analytics_overview(_authenticated: bool = Depends(verify_api_key)):
 
 
 # ====== COLLECTIONS MANAGEMENT ======
+
 
 @router.get("/collections/stats")
 async def collection_stats(_authenticated: bool = Depends(verify_api_key)):
@@ -333,6 +375,7 @@ async def collection_stats(_authenticated: bool = Depends(verify_api_key)):
 
 # ====== TOOLS / OPERATIONS ======
 
+
 @router.post("/tools/trigger-scrape")
 async def trigger_scrape(
     scraper_name: str = "insight_global",
@@ -340,7 +383,11 @@ async def trigger_scrape(
 ):
     """Trigger a job scraper run (proxied to Data-Scraper)."""
     logger.info("scrape_triggered", scraper=scraper_name)
-    return {"status": "triggered", "scraper": scraper_name, "message": "Connect to Data-Scraper API"}
+    return {
+        "status": "triggered",
+        "scraper": scraper_name,
+        "message": "Connect to Data-Scraper API",
+    }
 
 
 @router.post("/tools/trigger-enrichment")
@@ -350,10 +397,15 @@ async def trigger_enrichment(
 ):
     """Trigger program enrichment (proxied to N8N-Builder)."""
     logger.info("enrichment_triggered", program=program_id)
-    return {"status": "triggered", "program": program_id, "message": "Connect to N8N-Builder API"}
+    return {
+        "status": "triggered",
+        "program": program_id,
+        "message": "Connect to N8N-Builder API",
+    }
 
 
 # ====== SYNC OPERATIONS ======
+
 
 @router.get("/sync/status")
 async def sync_status(_authenticated: bool = Depends(verify_api_key)):
@@ -361,10 +413,7 @@ async def sync_status(_authenticated: bool = Depends(verify_api_key)):
     qdrant = get_qdrant()
     status = {}
 
-    collection_names = [
-        "contacts", "programs", "jobs",
-        "activities", "documents"
-    ]
+    collection_names = ["contacts", "programs", "jobs", "activities", "documents"]
 
     for name in collection_names:
         try:
@@ -387,6 +436,7 @@ async def trigger_notion_sync(
 
 
 # ====== HEALTH CHECK ======
+
 
 @router.get("/health")
 async def health_check():

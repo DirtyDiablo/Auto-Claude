@@ -19,6 +19,7 @@ def pipeline():
 # BUILT-IN METRICS
 # =========================================
 
+
 def test_builtin_metrics(pipeline):
     metrics = pipeline.list_metrics()
     assert len(metrics) == 14
@@ -39,6 +40,7 @@ def test_builtin_contacts_indexed(pipeline):
 # =========================================
 # RECORDING
 # =========================================
+
 
 def test_record_counter(pipeline):
     pipeline.increment("api_requests_total")
@@ -79,6 +81,7 @@ def test_auto_create_metric(pipeline):
 # STATISTICS
 # =========================================
 
+
 def test_percentile(pipeline):
     for i in range(100):
         pipeline.observe("api_request_duration_ms", float(i))
@@ -111,6 +114,7 @@ def test_histogram_buckets(pipeline):
 # CUSTOM METRICS
 # =========================================
 
+
 def test_register_metric(pipeline):
     m = pipeline.register_metric(
         "my_custom_counter",
@@ -141,9 +145,13 @@ def test_get_metric_value_not_found(pipeline):
 # ALERTS
 # =========================================
 
+
 def test_add_alert_rule(pipeline):
     rule = pipeline.add_alert_rule(
-        "api_request_duration_ms", "gt", 1000.0, "critical",
+        "api_request_duration_ms",
+        "gt",
+        1000.0,
+        "critical",
     )
     assert isinstance(rule, AlertRule)
     assert rule.rule_id.startswith("rule_")
@@ -151,7 +159,10 @@ def test_add_alert_rule(pipeline):
 
 def test_alert_triggers(pipeline):
     pipeline.add_alert_rule(
-        "api_request_duration_ms", "gt", 100.0, "warning",
+        "api_request_duration_ms",
+        "gt",
+        100.0,
+        "warning",
     )
     pipeline.observe("api_request_duration_ms", 200.0)
     alerts = pipeline.get_alerts()
@@ -161,7 +172,10 @@ def test_alert_triggers(pipeline):
 
 def test_alert_not_triggered_below_threshold(pipeline):
     pipeline.add_alert_rule(
-        "api_request_duration_ms", "gt", 1000.0, "critical",
+        "api_request_duration_ms",
+        "gt",
+        1000.0,
+        "critical",
     )
     pipeline.observe("api_request_duration_ms", 50.0)
     alerts = pipeline.get_alerts()
@@ -188,6 +202,7 @@ def test_alert_to_dict(pipeline):
 # EXPORT
 # =========================================
 
+
 def test_export_prometheus(pipeline):
     pipeline.increment("api_requests_total")
     text = pipeline.export_prometheus()
@@ -206,6 +221,7 @@ def test_export_json(pipeline):
 # =========================================
 # TO_DICT & STATS
 # =========================================
+
 
 def test_metric_to_dict(pipeline):
     pipeline.observe("api_request_duration_ms", 100)
@@ -227,8 +243,10 @@ def test_stats(pipeline):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.observability.metrics_pipeline as mod
+
     mod._instance = None
     m1 = get_metrics()
     m2 = get_metrics()

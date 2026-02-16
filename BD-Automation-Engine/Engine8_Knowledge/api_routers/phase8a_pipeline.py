@@ -35,6 +35,7 @@ def _get_orchestrator():
     if _orchestrator is None:
         try:
             from Engine0_Orchestrator.orchestrator import PipelineOrchestrator
+
             _orchestrator = PipelineOrchestrator()
             logger.info("Pipeline orchestrator initialized")
         except ImportError as e:
@@ -46,6 +47,7 @@ def _get_orchestrator():
 # REQUEST MODELS
 # =========================================
 
+
 class PipelineRunRequest(BaseModel):
     test_mode: bool = False
 
@@ -54,12 +56,15 @@ class PipelineRunRequest(BaseModel):
 # PIPELINE ENDPOINTS
 # =========================================
 
+
 @router.post("/pipeline/run")
 async def run_pipeline(req: PipelineRunRequest):
     """Trigger a full pipeline execution."""
     orch = _get_orchestrator()
     if orch is None:
-        raise HTTPException(status_code=503, detail="Pipeline orchestrator not available")
+        raise HTTPException(
+            status_code=503, detail="Pipeline orchestrator not available"
+        )
 
     if orch.is_running:
         raise HTTPException(status_code=409, detail="Pipeline is already running")
@@ -115,6 +120,7 @@ async def pipeline_history(
 # =========================================
 # BACKGROUND STALENESS CHECKER
 # =========================================
+
 
 async def staleness_auto_alerts(interval_seconds: int = 3600):
     """

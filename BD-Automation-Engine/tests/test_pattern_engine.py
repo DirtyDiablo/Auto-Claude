@@ -21,6 +21,7 @@ def engine():
 # SCAN ALL PATTERNS
 # =========================================
 
+
 def test_scan_returns_patterns(engine):
     patterns = engine.scan_patterns()
     assert len(patterns) >= 3
@@ -41,6 +42,7 @@ def test_scan_stores_patterns(engine):
 # HIRING SURGE
 # =========================================
 
+
 def test_hiring_surge_detected(engine):
     patterns = engine.scan_patterns()
     surges = [p for p in patterns if p.pattern_type == PatternType.HIRING_SURGE.value]
@@ -52,20 +54,29 @@ def test_hiring_surge_detected(engine):
 # LEADERSHIP CHANGE
 # =========================================
 
+
 def test_leadership_change_detected(engine):
     patterns = engine.scan_patterns()
-    changes = [p for p in patterns if p.pattern_type == PatternType.LEADERSHIP_CHANGE.value]
+    changes = [
+        p for p in patterns if p.pattern_type == PatternType.LEADERSHIP_CHANGE.value
+    ]
     assert len(changes) >= 1
-    assert "departure" in changes[0].description.lower() or "gap" in changes[0].title.lower()
+    assert (
+        "departure" in changes[0].description.lower()
+        or "gap" in changes[0].title.lower()
+    )
 
 
 # =========================================
 # CONTRACT MILESTONE
 # =========================================
 
+
 def test_contract_milestone_detected(engine):
     patterns = engine.scan_patterns()
-    milestones = [p for p in patterns if p.pattern_type == PatternType.CONTRACT_MILESTONE.value]
+    milestones = [
+        p for p in patterns if p.pattern_type == PatternType.CONTRACT_MILESTONE.value
+    ]
     assert len(milestones) >= 1
 
 
@@ -73,9 +84,12 @@ def test_contract_milestone_detected(engine):
 # COMPETITIVE SHIFT
 # =========================================
 
+
 def test_competitive_shift_detected(engine):
     patterns = engine.scan_patterns()
-    shifts = [p for p in patterns if p.pattern_type == PatternType.COMPETITIVE_SHIFT.value]
+    shifts = [
+        p for p in patterns if p.pattern_type == PatternType.COMPETITIVE_SHIFT.value
+    ]
     assert len(shifts) >= 1
 
 
@@ -89,6 +103,7 @@ def test_competitive_exit_flagged(engine):
 # BUDGET SIGNAL
 # =========================================
 
+
 def test_budget_signal_detected(engine):
     patterns = engine.scan_patterns()
     signals = [p for p in patterns if p.pattern_type == PatternType.BUDGET_SIGNAL.value]
@@ -99,16 +114,22 @@ def test_budget_signal_detected(engine):
 # GEOGRAPHIC SHIFT
 # =========================================
 
+
 def test_geographic_shift_detected(engine):
     patterns = engine.scan_patterns()
-    shifts = [p for p in patterns if p.pattern_type == PatternType.GEOGRAPHIC_SHIFT.value]
+    shifts = [
+        p for p in patterns if p.pattern_type == PatternType.GEOGRAPHIC_SHIFT.value
+    ]
     assert len(shifts) >= 1
-    assert "new site" in shifts[0].title.lower() or "Fort Meade" in shifts[0].description
+    assert (
+        "new site" in shifts[0].title.lower() or "Fort Meade" in shifts[0].description
+    )
 
 
 # =========================================
 # SKILL DEMAND
 # =========================================
+
 
 def test_skill_demand_detected(engine):
     patterns = engine.scan_patterns()
@@ -119,6 +140,7 @@ def test_skill_demand_detected(engine):
 # =========================================
 # SCORE OPPORTUNITY
 # =========================================
+
 
 def test_score_opportunity(engine):
     patterns = engine.scan_patterns()
@@ -148,6 +170,7 @@ def test_score_all_patterns(engine):
 # =========================================
 # GENERATE ALERTS
 # =========================================
+
 
 def test_generate_alerts(engine):
     patterns = engine.scan_patterns()
@@ -179,6 +202,7 @@ def test_alert_has_actions(engine):
 # =========================================
 # QUERIES
 # =========================================
+
 
 def test_get_active_by_type(engine):
     engine.scan_patterns()
@@ -232,6 +256,7 @@ def test_acknowledge_nonexistent(engine):
 # STATS
 # =========================================
 
+
 def test_stats(engine):
     patterns = engine.scan_patterns()
     for p in patterns:
@@ -246,6 +271,7 @@ def test_stats(engine):
 # =========================================
 # PATTERN ID & FIELDS
 # =========================================
+
 
 def test_pattern_auto_id():
     p = StrategicPattern(pattern_type="test", title="Test")
@@ -263,6 +289,7 @@ def test_alert_auto_id():
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     e1 = get_pattern_engine()

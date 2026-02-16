@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class BulkheadType(str, Enum):
     THREAD_POOL = "thread_pool"
     SEMAPHORE = "semaphore"
@@ -30,6 +31,7 @@ class BulkheadType(str, Enum):
 @dataclass
 class Bulkhead:
     """A single bulkhead partition protecting a resource pool."""
+
     name: str
     bulkhead_type: BulkheadType = BulkheadType.SEMAPHORE
     max_concurrent: int = 10
@@ -59,17 +61,43 @@ class Bulkhead:
 # =========================================
 
 _DEFAULT_BULKHEADS = [
-    {"name": "search_pool", "bulkhead_type": BulkheadType.THREAD_POOL, "max_concurrent": 10, "max_queue": 20},
-    {"name": "agent_pool", "bulkhead_type": BulkheadType.THREAD_POOL, "max_concurrent": 5, "max_queue": 10},
-    {"name": "api_requests", "bulkhead_type": BulkheadType.SEMAPHORE, "max_concurrent": 100, "max_queue": 50},
-    {"name": "export_queue", "bulkhead_type": BulkheadType.SEMAPHORE, "max_concurrent": 3, "max_queue": 10},
-    {"name": "webhook_rate", "bulkhead_type": BulkheadType.RATE_LIMITER, "max_concurrent": 50, "max_queue": 100},
+    {
+        "name": "search_pool",
+        "bulkhead_type": BulkheadType.THREAD_POOL,
+        "max_concurrent": 10,
+        "max_queue": 20,
+    },
+    {
+        "name": "agent_pool",
+        "bulkhead_type": BulkheadType.THREAD_POOL,
+        "max_concurrent": 5,
+        "max_queue": 10,
+    },
+    {
+        "name": "api_requests",
+        "bulkhead_type": BulkheadType.SEMAPHORE,
+        "max_concurrent": 100,
+        "max_queue": 50,
+    },
+    {
+        "name": "export_queue",
+        "bulkhead_type": BulkheadType.SEMAPHORE,
+        "max_concurrent": 3,
+        "max_queue": 10,
+    },
+    {
+        "name": "webhook_rate",
+        "bulkhead_type": BulkheadType.RATE_LIMITER,
+        "max_concurrent": 50,
+        "max_queue": 100,
+    },
 ]
 
 
 # =========================================
 # BULKHEAD MANAGER
 # =========================================
+
 
 class BulkheadManager:
     """Manages named bulkhead partitions to isolate resource pools.
@@ -115,7 +143,10 @@ class BulkheadManager:
         self._bulkheads[name] = bulkhead
         logger.info(
             "Registered bulkhead '%s' (%s, max=%d, queue=%d)",
-            name, bulkhead_type.value, max_concurrent, max_queue,
+            name,
+            bulkhead_type.value,
+            max_concurrent,
+            max_queue,
         )
         return bulkhead
 
@@ -142,7 +173,9 @@ class BulkheadManager:
             bulkhead.total_acquired += 1
             logger.debug(
                 "Bulkhead '%s' at capacity, request queued (%d/%d)",
-                name, bulkhead.queue_size, bulkhead.max_queue,
+                name,
+                bulkhead.queue_size,
+                bulkhead.max_queue,
             )
             return True
 
@@ -150,7 +183,9 @@ class BulkheadManager:
         bulkhead.rejected_count += 1
         logger.warning(
             "Bulkhead '%s' REJECTED request (active=%d, queue=%d)",
-            name, bulkhead.active_count, bulkhead.queue_size,
+            name,
+            bulkhead.active_count,
+            bulkhead.queue_size,
         )
         return False
 
@@ -200,6 +235,7 @@ class BulkheadManager:
 # GRACEFUL DEGRADATION
 # =========================================
 
+
 class DegradationLevel(str, Enum):
     NORMAL = "normal"
     DEGRADED = "degraded"
@@ -228,7 +264,8 @@ class GracefulDegradation:
         self._level_changed_at: str = datetime.utcnow().isoformat()
         logger.info(
             "GracefulDegradation initialized at level=%s with %d fallback mappings",
-            self._level.value, len(self._fallbacks),
+            self._level.value,
+            len(self._fallbacks),
         )
 
     # ----- level management -----
@@ -244,7 +281,8 @@ class GracefulDegradation:
         self._level_changed_at = datetime.utcnow().isoformat()
         logger.info(
             "Degradation level changed: %s -> %s",
-            old.value, level.value,
+            old.value,
+            level.value,
         )
 
     # ----- fallbacks -----

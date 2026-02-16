@@ -14,6 +14,7 @@ from src.nlq.conversation_manager import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def manager():
     router = NLQueryRouter()
@@ -24,6 +25,7 @@ def manager():
 # =========================================
 # BASIC ASK
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestBasicAsk:
@@ -54,6 +56,7 @@ class TestBasicAsk:
 # MULTI-TURN CONTEXT
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestMultiTurnContext:
     async def test_second_turn_has_context(self, manager):
@@ -79,13 +82,15 @@ class TestMultiTurnContext:
         await manager.ask("user2", "Show jobs in San Diego")
         assert "user1" in manager._sessions
         assert "user2" in manager._sessions
-        assert manager._sessions["user1"].context.get("last_intent") != \
-               manager._sessions["user2"].context.get("last_intent")
+        assert manager._sessions["user1"].context.get(
+            "last_intent"
+        ) != manager._sessions["user2"].context.get("last_intent")
 
 
 # =========================================
 # CLARIFICATION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestClarification:
@@ -93,6 +98,7 @@ class TestClarification:
         # Force a clarification scenario
         session = manager._get_or_create_session("user1")
         from src.nlq.query_router import QueryPlan
+
         session.context["pending_plan"] = QueryPlan(
             intent="search_contacts",
             parameters={"search_query": "PACAF contacts"},
@@ -112,6 +118,7 @@ class TestClarification:
 # =========================================
 # CONVERSATION HISTORY
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestConversationHistory:
@@ -145,6 +152,7 @@ class TestConversationHistory:
 # =========================================
 # SUGGESTIONS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestSuggestions:

@@ -149,7 +149,13 @@ class TestDashboardUrlsEndpoint:
         data = client.get("/monitoring/dashboard-urls").json()
         assert "dashboards" in data
         dashboards = data["dashboards"]
-        expected_keys = ["api_health", "search_performance", "agent_activity", "campaign_metrics", "infrastructure"]
+        expected_keys = [
+            "api_health",
+            "search_performance",
+            "agent_activity",
+            "campaign_metrics",
+            "infrastructure",
+        ]
         for key in expected_keys:
             assert key in dashboards, f"Missing dashboard: {key}"
 
@@ -158,7 +164,9 @@ class TestDashboardUrlsEndpoint:
         data = client.get("/monitoring/dashboard-urls").json()
         for name, url in data["dashboards"].items():
             assert isinstance(url, str)
-            assert url.startswith("http"), f"Dashboard URL for {name} does not start with http"
+            assert url.startswith("http"), (
+                f"Dashboard URL for {name} does not start with http"
+            )
 
 
 class TestAlertsEndpoint:

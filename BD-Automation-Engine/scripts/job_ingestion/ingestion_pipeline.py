@@ -18,35 +18,37 @@ from typing import Dict, List, Optional
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from scripts.job_ingestion.job_parser import (
     parse_job_file,
     deduplicate_jobs,
-    NormalizedJob
+    NormalizedJob,
 )
 from scripts.job_ingestion.ai_enrichment import (
     AIEnrichmentEngine,
-    FallbackEnrichmentEngine
+    FallbackEnrichmentEngine,
 )
-from scripts.job_ingestion.relational_enrichment import (
-    RelationalEnrichmentEngine
-)
+from scripts.job_ingestion.relational_enrichment import RelationalEnrichmentEngine
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger('BD-Ingestion')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
+logger = logging.getLogger("BD-Ingestion")
 
 
 # ===========================================
 # NOTION UPLOAD
 # ===========================================
 
+
 class NotionJobUploader:
     """Handles uploading jobs to Notion."""
 
     def __init__(self):
-        self.token = os.getenv('NOTION_TOKEN')
-        self.db_id = os.getenv('NOTION_DB_GDIT_JOBS')
+        self.token = os.getenv("NOTION_TOKEN")
+        self.db_id = os.getenv("NOTION_DB_GDIT_JOBS")
         self._client = None
         self._data_source_id = None
 
@@ -56,9 +58,12 @@ class NotionJobUploader:
         if self._client is None:
             try:
                 from notion_client import Client
+
                 self._client = Client(auth=self.token)
             except ImportError:
-                raise RuntimeError("notion-client not installed. Run: pip install notion-client")
+                raise RuntimeError(
+                    "notion-client not installed. Run: pip install notion-client"
+                )
         return self._client
 
     def get_data_source_id(self) -> str:
@@ -67,10 +72,11 @@ class NotionJobUploader:
             return self._data_source_id
 
         import requests
+
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Notion-Version": "2022-06-28",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         url = f"https://api.notion.com/v1/databases/{self.db_id}"
@@ -78,9 +84,9 @@ class NotionJobUploader:
         response.raise_for_status()
         db_info = response.json()
 
-        data_sources = db_info.get('data_sources', [])
+        data_sources = db_info.get("data_sources", [])
         if data_sources:
-            self._data_source_id = data_sources[0]['id']
+            self._data_source_id = data_sources[0]["id"]
         else:
             # Fall back to database_id for older API versions
             self._data_source_id = self.db_id
@@ -94,7 +100,7 @@ class NotionJobUploader:
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Notion-Version": "2022-06-28",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         try:
@@ -107,16 +113,21 @@ class NotionJobUploader:
         body = {
             "filter": {
                 "and": [
-                    {"property": "Job Number", "number": {"equals": int(job_number) if job_number.isdigit() else 0}},
+                    {
+                        "property": "Job Number",
+                        "number": {
+                            "equals": int(job_number) if job_number.isdigit() else 0
+                        },
+                    },
                 ]
             },
-            "page_size": 1
+            "page_size": 1,
         }
 
         try:
             response = requests.post(url, headers=headers, json=body)
             response.raise_for_status()
-            results = response.json().get('results', [])
+            results = response.json().get("results", [])
             return len(results) > 0
         except Exception as e:
             logger.warning(f"Could not check for existing job: {e}")
@@ -129,7 +140,7 @@ class NotionJobUploader:
         headers = {
             "Authorization": f"Bearer {self.token}",
             "Notion-Version": "2022-06-28",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
         properties = job.to_notion_properties()
@@ -138,14 +149,11 @@ class NotionJobUploader:
             data_source_id = self.get_data_source_id()
             body = {
                 "parent": {"data_source_id": data_source_id},
-                "properties": properties
+                "properties": properties,
             }
         except Exception:
             # Fall back to database_id
-            body = {
-                "parent": {"database_id": self.db_id},
-                "properties": properties
-            }
+            body = {"parent": {"database_id": self.db_id}, "properties": properties}
 
         url = "https://api.notion.com/v1/pages"
 
@@ -153,39 +161,36 @@ class NotionJobUploader:
             response = requests.post(url, headers=headers, json=body)
             response.raise_for_status()
             result = response.json()
-            return result.get('id')
+            return result.get("id")
         except Exception as e:
             logger.error(f"Failed to upload job: {e}")
-            if hasattr(e, 'response') and e.response is not None:
+            if hasattr(e, "response") and e.response is not None:
                 logger.error(f"Response: {e.response.text}")
             return None
 
-    def upload_jobs_batch(self, jobs: List[NormalizedJob], skip_existing: bool = True) -> Dict:
+    def upload_jobs_batch(
+        self, jobs: List[NormalizedJob], skip_existing: bool = True
+    ) -> Dict:
         """Upload a batch of jobs to Notion."""
-        results = {
-            'uploaded': 0,
-            'skipped': 0,
-            'failed': 0,
-            'page_ids': []
-        }
+        results = {"uploaded": 0, "skipped": 0, "failed": 0, "page_ids": []}
 
         for i, job in enumerate(jobs):
-            logger.info(f"Uploading {i+1}/{len(jobs)}: {job.title[:50]}")
+            logger.info(f"Uploading {i + 1}/{len(jobs)}: {job.title[:50]}")
 
             # Check if already exists
             if skip_existing and job.job_number:
                 if self.check_job_exists(job.job_number, job.company):
                     logger.info(f"  Skipping (already exists): {job.job_number}")
-                    results['skipped'] += 1
+                    results["skipped"] += 1
                     continue
 
             page_id = self.upload_job(job)
 
             if page_id:
-                results['uploaded'] += 1
-                results['page_ids'].append(page_id)
+                results["uploaded"] += 1
+                results["page_ids"].append(page_id)
             else:
-                results['failed'] += 1
+                results["failed"] += 1
 
         return results
 
@@ -193,6 +198,7 @@ class NotionJobUploader:
 # ===========================================
 # PIPELINE
 # ===========================================
+
 
 class JobIngestionPipeline:
     """Complete job ingestion pipeline."""
@@ -249,7 +255,7 @@ class JobIngestionPipeline:
         engine = self._get_enrichment_engine()
 
         for i, job in enumerate(jobs):
-            logger.info(f"Enriching {i+1}/{len(jobs)}: {job.title[:50]}")
+            logger.info(f"Enriching {i + 1}/{len(jobs)}: {job.title[:50]}")
 
             result = engine.enrich_job(job.description)
 
@@ -271,11 +277,13 @@ class JobIngestionPipeline:
 
             # Update status
             if job.skills or job.technologies:
-                job.status = 'enriched'
+                job.status = "enriched"
 
         return jobs
 
-    def upload_jobs(self, jobs: List[NormalizedJob], skip_existing: bool = True) -> Dict:
+    def upload_jobs(
+        self, jobs: List[NormalizedJob], skip_existing: bool = True
+    ) -> Dict:
         """Upload jobs to Notion."""
         uploader = self._get_uploader()
         return uploader.upload_jobs_batch(jobs, skip_existing)
@@ -285,28 +293,37 @@ class JobIngestionPipeline:
         engine = self._get_relational_engine()
 
         for i, job in enumerate(jobs):
-            logger.info(f"Relational enrichment {i+1}/{len(jobs)}: {job.title[:50]}")
+            logger.info(f"Relational enrichment {i + 1}/{len(jobs)}: {job.title[:50]}")
 
             # Convert NormalizedJob to dict for enrichment
             job_dict = job.to_dict()
             enriched = engine.enrich_job(job_dict)
 
             # Apply enrichment back to job
-            if enriched.get('prime'):
-                job.prime = enriched['prime']
-            if enriched.get('subcontractors'):
-                job.subcontractors = enriched['subcontractors']
-            if enriched.get('matched_program'):
-                job.task_order = enriched.get('matched_program')  # Use program as task order proxy
+            if enriched.get("prime"):
+                job.prime = enriched["prime"]
+            if enriched.get("subcontractors"):
+                job.subcontractors = enriched["subcontractors"]
+            if enriched.get("matched_program"):
+                job.task_order = enriched.get(
+                    "matched_program"
+                )  # Use program as task order proxy
 
             # Update status if matched
-            if enriched.get('match_confidence', 0) >= 0.5:
-                job.status = 'enriched'
+            if enriched.get("match_confidence", 0) >= 0.5:
+                job.status = "enriched"
 
         return jobs
 
-    def run(self, file_paths: List[str], enrich: bool = True, relational: bool = True,
-            upload: bool = False, dedupe: bool = True, skip_existing: bool = True) -> Dict:
+    def run(
+        self,
+        file_paths: List[str],
+        enrich: bool = True,
+        relational: bool = True,
+        upload: bool = False,
+        dedupe: bool = True,
+        skip_existing: bool = True,
+    ) -> Dict:
         """Run the full pipeline.
 
         Args:
@@ -321,19 +338,19 @@ class JobIngestionPipeline:
             Pipeline results summary
         """
         results = {
-            'files_processed': len(file_paths),
-            'jobs_parsed': 0,
-            'jobs_after_dedupe': 0,
-            'jobs_ai_enriched': 0,
-            'jobs_program_matched': 0,
-            'upload_results': None,
-            'jobs': []
+            "files_processed": len(file_paths),
+            "jobs_parsed": 0,
+            "jobs_after_dedupe": 0,
+            "jobs_ai_enriched": 0,
+            "jobs_program_matched": 0,
+            "upload_results": None,
+            "jobs": [],
         }
 
         # Step 1: Parse
         logger.info("=== Step 1: Parsing Files ===")
         jobs = self.parse_files(file_paths)
-        results['jobs_parsed'] = len(jobs)
+        results["jobs_parsed"] = len(jobs)
 
         if not jobs:
             logger.warning("No jobs parsed")
@@ -344,29 +361,33 @@ class JobIngestionPipeline:
             logger.info("=== Step 2: Deduplication ===")
             before = len(jobs)
             jobs = deduplicate_jobs(jobs)
-            results['jobs_after_dedupe'] = len(jobs)
+            results["jobs_after_dedupe"] = len(jobs)
             logger.info(f"Deduplicated: {before} -> {len(jobs)}")
         else:
-            results['jobs_after_dedupe'] = len(jobs)
+            results["jobs_after_dedupe"] = len(jobs)
 
         # Step 3: AI Enrichment (Skills, Technologies, Certifications)
         if enrich:
             logger.info("=== Step 3: AI Enrichment ===")
             jobs = self.enrich_jobs(jobs)
-            results['jobs_ai_enriched'] = sum(1 for j in jobs if j.skills or j.technologies)
+            results["jobs_ai_enriched"] = sum(
+                1 for j in jobs if j.skills or j.technologies
+            )
 
         # Step 4: Relational Enrichment (Program matching, Prime/Subcontractors)
         if relational:
             logger.info("=== Step 4: Relational Enrichment ===")
             jobs = self.enrich_relational(jobs)
-            results['jobs_program_matched'] = sum(1 for j in jobs if j.prime or j.task_order)
+            results["jobs_program_matched"] = sum(
+                1 for j in jobs if j.prime or j.task_order
+            )
 
         # Step 5: Upload
         if upload:
             logger.info("=== Step 5: Notion Upload ===")
-            results['upload_results'] = self.upload_jobs(jobs, skip_existing)
+            results["upload_results"] = self.upload_jobs(jobs, skip_existing)
 
-        results['jobs'] = jobs
+        results["jobs"] = jobs
         return results
 
 
@@ -374,11 +395,12 @@ class JobIngestionPipeline:
 # STATISTICS
 # ===========================================
 
+
 def print_statistics(jobs: List[NormalizedJob]):
     """Print detailed statistics about jobs."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("JOB STATISTICS")
-    print("="*60)
+    print("=" * 60)
 
     print(f"\nTotal Jobs: {len(jobs)}")
 
@@ -393,7 +415,7 @@ def print_statistics(jobs: List[NormalizedJob]):
     # By clearance
     by_clearance = {}
     for job in jobs:
-        key = job.clearance or 'Unknown/None'
+        key = job.clearance or "Unknown/None"
         by_clearance[key] = by_clearance.get(key, 0) + 1
     print("\nBy Clearance:")
     for clearance, count in sorted(by_clearance.items(), key=lambda x: -x[1]):
@@ -410,7 +432,7 @@ def print_statistics(jobs: List[NormalizedJob]):
     # By location (top 10)
     by_location = {}
     for job in jobs:
-        loc = job.location or 'Unknown'
+        loc = job.location or "Unknown"
         by_location[loc] = by_location.get(loc, 0) + 1
     print("\nTop 10 Locations:")
     for loc, count in sorted(by_location.items(), key=lambda x: -x[1])[:10]:
@@ -423,10 +445,16 @@ def print_statistics(jobs: List[NormalizedJob]):
     with_certs = sum(1 for j in jobs if j.certifications_required)
 
     print("\nAI Enrichment Coverage:")
-    print(f"  Experience Years: {with_experience}/{len(jobs)} ({100*with_experience/len(jobs):.1f}%)")
-    print(f"  Skills: {with_skills}/{len(jobs)} ({100*with_skills/len(jobs):.1f}%)")
-    print(f"  Technologies: {with_tech}/{len(jobs)} ({100*with_tech/len(jobs):.1f}%)")
-    print(f"  Certifications: {with_certs}/{len(jobs)} ({100*with_certs/len(jobs):.1f}%)")
+    print(
+        f"  Experience Years: {with_experience}/{len(jobs)} ({100 * with_experience / len(jobs):.1f}%)"
+    )
+    print(f"  Skills: {with_skills}/{len(jobs)} ({100 * with_skills / len(jobs):.1f}%)")
+    print(
+        f"  Technologies: {with_tech}/{len(jobs)} ({100 * with_tech / len(jobs):.1f}%)"
+    )
+    print(
+        f"  Certifications: {with_certs}/{len(jobs)} ({100 * with_certs / len(jobs):.1f}%)"
+    )
 
     # Relational enrichment stats
     with_prime = sum(1 for j in jobs if j.prime)
@@ -434,9 +462,15 @@ def print_statistics(jobs: List[NormalizedJob]):
     with_subs = sum(1 for j in jobs if j.subcontractors)
 
     print("\nRelational Enrichment Coverage:")
-    print(f"  Prime Contractor: {with_prime}/{len(jobs)} ({100*with_prime/len(jobs):.1f}%)")
-    print(f"  Matched Program: {with_program}/{len(jobs)} ({100*with_program/len(jobs):.1f}%)")
-    print(f"  Subcontractors: {with_subs}/{len(jobs)} ({100*with_subs/len(jobs):.1f}%)")
+    print(
+        f"  Prime Contractor: {with_prime}/{len(jobs)} ({100 * with_prime / len(jobs):.1f}%)"
+    )
+    print(
+        f"  Matched Program: {with_program}/{len(jobs)} ({100 * with_program / len(jobs):.1f}%)"
+    )
+    print(
+        f"  Subcontractors: {with_subs}/{len(jobs)} ({100 * with_subs / len(jobs):.1f}%)"
+    )
 
     # Top primes
     if with_prime > 0:
@@ -453,20 +487,43 @@ def print_statistics(jobs: List[NormalizedJob]):
 # CLI
 # ===========================================
 
+
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description='Job Ingestion Pipeline')
-    parser.add_argument('--files', '-f', nargs='+', required=True, help='JSON files to process')
-    parser.add_argument('--output', '-o', help='Output JSON file for processed jobs')
-    parser.add_argument('--enrich', '-e', action='store_true', help='Run AI enrichment (Skills, Tech, Certs)')
-    parser.add_argument('--relational', '-r', action='store_true', help='Run relational enrichment (Program matching)')
-    parser.add_argument('--upload', '-u', action='store_true', help='Upload to Notion')
-    parser.add_argument('--no-dedupe', action='store_true', help='Skip deduplication')
-    parser.add_argument('--no-ai', action='store_true', help='Use fallback extraction (no API)')
-    parser.add_argument('--data-dir', '-d', help='Data directory with CSV files for relational enrichment')
-    parser.add_argument('--stats-only', action='store_true', help='Only show statistics')
-    parser.add_argument('--limit', '-l', type=int, help='Limit number of jobs to process')
+    parser = argparse.ArgumentParser(description="Job Ingestion Pipeline")
+    parser.add_argument(
+        "--files", "-f", nargs="+", required=True, help="JSON files to process"
+    )
+    parser.add_argument("--output", "-o", help="Output JSON file for processed jobs")
+    parser.add_argument(
+        "--enrich",
+        "-e",
+        action="store_true",
+        help="Run AI enrichment (Skills, Tech, Certs)",
+    )
+    parser.add_argument(
+        "--relational",
+        "-r",
+        action="store_true",
+        help="Run relational enrichment (Program matching)",
+    )
+    parser.add_argument("--upload", "-u", action="store_true", help="Upload to Notion")
+    parser.add_argument("--no-dedupe", action="store_true", help="Skip deduplication")
+    parser.add_argument(
+        "--no-ai", action="store_true", help="Use fallback extraction (no API)"
+    )
+    parser.add_argument(
+        "--data-dir",
+        "-d",
+        help="Data directory with CSV files for relational enrichment",
+    )
+    parser.add_argument(
+        "--stats-only", action="store_true", help="Only show statistics"
+    )
+    parser.add_argument(
+        "--limit", "-l", type=int, help="Limit number of jobs to process"
+    )
 
     args = parser.parse_args()
 
@@ -479,7 +536,7 @@ def main():
         if not args.no_dedupe:
             jobs = deduplicate_jobs(jobs)
         if args.limit:
-            jobs = jobs[:args.limit]
+            jobs = jobs[: args.limit]
         print_statistics(jobs)
         return
 
@@ -489,13 +546,13 @@ def main():
         enrich=args.enrich,
         relational=args.relational,
         upload=args.upload,
-        dedupe=not args.no_dedupe
+        dedupe=not args.no_dedupe,
     )
 
-    jobs = results['jobs']
+    jobs = results["jobs"]
 
     if args.limit:
-        jobs = jobs[:args.limit]
+        jobs = jobs[: args.limit]
 
     # Show statistics
     print_statistics(jobs)
@@ -503,18 +560,18 @@ def main():
     # Save output
     if args.output:
         output_data = [job.to_dict() for job in jobs]
-        with open(args.output, 'w', encoding='utf-8') as f:
+        with open(args.output, "w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2)
         print(f"\nSaved to: {args.output}")
 
     # Show upload results
-    if results['upload_results']:
-        ur = results['upload_results']
+    if results["upload_results"]:
+        ur = results["upload_results"]
         print(f"\nUpload Results:")
         print(f"  Uploaded: {ur['uploaded']}")
         print(f"  Skipped: {ur['skipped']}")
         print(f"  Failed: {ur['failed']}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

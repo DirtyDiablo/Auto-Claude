@@ -23,9 +23,11 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class QuotaAttainment:
     """Rep quota attainment."""
+
     rep: str
     revenue: float = 0.0
     quota: float = 0.0
@@ -37,27 +39,30 @@ class QuotaAttainment:
 @dataclass
 class DiversificationScore:
     """Customer/program diversification score."""
-    score: float = 0.0              # 0-100
+
+    score: float = 0.0  # 0-100
     program_count: int = 0
     top_program_pct: float = 0.0
-    assessment: str = "balanced"    # concentrated, moderate, balanced, diversified
+    assessment: str = "balanced"  # concentrated, moderate, balanced, diversified
 
 
 @dataclass
 class PeriodComparison:
     """Period-over-period comparison."""
+
     current_period: str
     prior_period: str
     current_revenue: float = 0.0
     prior_revenue: float = 0.0
     change_pct: float = 0.0
     change_absolute: float = 0.0
-    trend: str = "stable"           # growing, stable, declining
+    trend: str = "stable"  # growing, stable, declining
 
 
 @dataclass
 class ExecutiveSummary:
     """Auto-generated executive summary."""
+
     period: str
     total_revenue: float = 0.0
     target_revenue: float = 0.0
@@ -78,12 +83,13 @@ class ExecutiveSummary:
 # EXECUTIVE ANALYTICS ENGINE
 # =========================================
 
+
 class ExecutiveAnalytics:
     """Generate board-ready executive revenue analytics."""
 
     def __init__(self):
-        self._revenue_data: Dict[str, float] = {}      # period -> revenue
-        self._target_data: Dict[str, float] = {}        # period -> target
+        self._revenue_data: Dict[str, float] = {}  # period -> revenue
+        self._target_data: Dict[str, float] = {}  # period -> target
         self._rep_data: List[Dict[str, Any]] = []
         self._program_revenue: Dict[str, float] = {}
         self._account_data: List[Dict[str, Any]] = []
@@ -129,13 +135,15 @@ class ExecutiveAnalytics:
             revenue = r.get("revenue", 0)
             quota = r.get("quota", 0)
             pct = (revenue / quota * 100) if quota > 0 else 0
-            results.append(QuotaAttainment(
-                rep=r.get("rep", ""),
-                revenue=revenue,
-                quota=quota,
-                attainment_pct=round(pct, 1),
-                placements=r.get("placements", 0),
-            ))
+            results.append(
+                QuotaAttainment(
+                    rep=r.get("rep", ""),
+                    revenue=revenue,
+                    quota=quota,
+                    attainment_pct=round(pct, 1),
+                    placements=r.get("placements", 0),
+                )
+            )
         results.sort(key=lambda r: r.attainment_pct, reverse=True)
         for i, r in enumerate(results):
             r.rank = i + 1
@@ -185,7 +193,9 @@ class ExecutiveAnalytics:
     # -----------------------------------------
 
     def get_period_comparison(
-        self, current_period: str, prior_period: str,
+        self,
+        current_period: str,
+        prior_period: str,
     ) -> PeriodComparison:
         """Compare revenue between two periods."""
         current_rev = self._revenue_data.get(current_period, 0)
@@ -218,12 +228,22 @@ class ExecutiveAnalytics:
     def get_weighted_pipeline(self) -> Dict[str, Any]:
         """Calculate weighted pipeline value with confidence intervals."""
         if not self._pipeline_data:
-            return {"weighted_value": 0, "deal_count": 0, "confidence_low": 0, "confidence_high": 0}
+            return {
+                "weighted_value": 0,
+                "deal_count": 0,
+                "confidence_low": 0,
+                "confidence_high": 0,
+            }
 
         stage_probs = {
-            "discovery": 0.10, "qualification": 0.20, "requirements": 0.35,
-            "submission": 0.50, "interview": 0.65, "offer": 0.80,
-            "start": 0.95, "revenue": 1.0,
+            "discovery": 0.10,
+            "qualification": 0.20,
+            "requirements": 0.35,
+            "submission": 0.50,
+            "interview": 0.65,
+            "offer": 0.80,
+            "start": 0.95,
+            "revenue": 1.0,
         }
 
         weighted = 0.0
@@ -260,12 +280,16 @@ class ExecutiveAnalytics:
 
         # Fall back to program revenue
         accounts = []
-        for prog, rev in sorted(self._program_revenue.items(), key=lambda x: x[1], reverse=True)[:n]:
-            accounts.append({
-                "account": prog,
-                "revenue": round(rev, 2),
-                "growth_potential": "medium",
-            })
+        for prog, rev in sorted(
+            self._program_revenue.items(), key=lambda x: x[1], reverse=True
+        )[:n]:
+            accounts.append(
+                {
+                    "account": prog,
+                    "revenue": round(rev, 2),
+                    "growth_potential": "medium",
+                }
+            )
         return accounts
 
     # -----------------------------------------
@@ -306,10 +330,16 @@ class ExecutiveAnalytics:
 
         # Generate narrative
         narrative = _generate_narrative(
-            period, total_rev, target, attainment,
+            period,
+            total_rev,
+            target,
+            attainment,
             pipeline["weighted_value"],
-            self._placement_count, self._new_placements,
-            self._avg_margin, diversification, comparison,
+            self._placement_count,
+            self._new_placements,
+            self._avg_margin,
+            diversification,
+            comparison,
         )
 
         summary = ExecutiveSummary(
@@ -329,13 +359,16 @@ class ExecutiveAnalytics:
             generated_at=datetime.now(timezone.utc).isoformat(),
         )
 
-        logger.info(f"Generated executive summary for {period}: ${total_rev:,.0f} revenue ({attainment:.0f}% of target)")
+        logger.info(
+            f"Generated executive summary for {period}: ${total_rev:,.0f} revenue ({attainment:.0f}% of target)"
+        )
         return summary
 
 
 # =========================================
 # NARRATIVE GENERATOR
 # =========================================
+
 
 def _generate_narrative(
     period: str,
@@ -356,7 +389,9 @@ def _generate_narrative(
         if attainment >= 100:
             parts.append(f" ({attainment:.0f}% of ${target:,.0f} target — on track).")
         elif attainment >= 80:
-            parts.append(f" ({attainment:.0f}% of ${target:,.0f} target — close to plan).")
+            parts.append(
+                f" ({attainment:.0f}% of ${target:,.0f} target — close to plan)."
+            )
         else:
             parts.append(f" ({attainment:.0f}% of ${target:,.0f} target — below plan).")
     else:
@@ -372,12 +407,18 @@ def _generate_narrative(
 
     if comparison:
         if comparison.trend == "growing":
-            parts.append(f" Revenue is up {comparison.change_pct:.1f}% vs prior period.")
+            parts.append(
+                f" Revenue is up {comparison.change_pct:.1f}% vs prior period."
+            )
         elif comparison.trend == "declining":
-            parts.append(f" Revenue is down {abs(comparison.change_pct):.1f}% vs prior period.")
+            parts.append(
+                f" Revenue is down {abs(comparison.change_pct):.1f}% vs prior period."
+            )
 
     if diversification.assessment == "concentrated":
-        parts.append(f" Warning: revenue is concentrated (top program = {diversification.top_program_pct:.0f}%).")
+        parts.append(
+            f" Warning: revenue is concentrated (top program = {diversification.top_program_pct:.0f}%)."
+        )
 
     return "".join(parts)
 

@@ -11,6 +11,7 @@ logger = logging.getLogger("BD-Agents")
 
 try:
     from crewai import Agent, LLM
+
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False

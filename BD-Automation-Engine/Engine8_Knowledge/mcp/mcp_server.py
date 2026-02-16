@@ -21,6 +21,7 @@ class AsyncHubClient:
     async def get(self, path: str, params: Optional[Dict] = None) -> Dict[str, Any]:
         try:
             import httpx
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.get(f"{self.base_url}{path}", params=params or {})
                 resp.raise_for_status()
@@ -32,6 +33,7 @@ class AsyncHubClient:
     async def post(self, path: str, json: Optional[Dict] = None) -> Dict[str, Any]:
         try:
             import httpx
+
             async with httpx.AsyncClient(timeout=30.0) as client:
                 resp = await client.post(f"{self.base_url}{path}", json=json or {})
                 resp.raise_for_status()
@@ -57,6 +59,7 @@ class PTSBDMCPServer:
             return self._mcp
         try:
             from fastmcp import FastMCP
+
             self._mcp = FastMCP("PTS BD Intelligence", version="1.0.0")
             self._register_tools()
             logger.info("fastmcp_initialized", tools=self._tools_registered)
@@ -90,10 +93,12 @@ class PTSBDMCPServer:
         tools = []
         if hasattr(mcp, "_tools"):
             for name, tool in mcp._tools.items():
-                tools.append({
-                    "name": name,
-                    "description": getattr(tool, "description", ""),
-                })
+                tools.append(
+                    {
+                        "name": name,
+                        "description": getattr(tool, "description", ""),
+                    }
+                )
         return tools
 
     def generate_claude_desktop_config(self) -> Dict[str, Any]:

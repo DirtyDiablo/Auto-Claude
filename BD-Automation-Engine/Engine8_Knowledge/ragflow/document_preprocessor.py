@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # Optional imports for document processing
 try:
     from docx import Document as DocxDocument
+
     DOCX_AVAILABLE = True
 except ImportError:
     DOCX_AVAILABLE = False
@@ -28,6 +29,7 @@ except ImportError:
 
 try:
     import pandas as pd
+
     PANDAS_AVAILABLE = True
 except ImportError:
     PANDAS_AVAILABLE = False
@@ -35,6 +37,7 @@ except ImportError:
 
 try:
     import PyPDF2
+
     PDF_AVAILABLE = True
 except ImportError:
     PDF_AVAILABLE = False
@@ -44,6 +47,7 @@ except ImportError:
 @dataclass
 class PreprocessedDocument:
     """Result of document preprocessing."""
+
     original_path: str
     processed_path: str
     document_type: str
@@ -153,7 +157,7 @@ class BDDocumentPreprocessor:
 
         # Extract tables
         for i, table in enumerate(doc.tables):
-            content_parts.append(f"\n[TABLE {i+1}]")
+            content_parts.append(f"\n[TABLE {i + 1}]")
             table_md = self._table_to_markdown(table)
             content_parts.append(table_md)
 
@@ -179,10 +183,10 @@ sections: {sections_found}
             document_type="playbook",
             metadata={
                 "original_file": path.name,
-                "preprocessed_at": datetime.now().isoformat()
+                "preprocessed_at": datetime.now().isoformat(),
             },
             sections=sections_found,
-            processing_notes="Extracted with section markers"
+            processing_notes="Extracted with section markers",
         )
 
     def _table_to_markdown(self, table) -> str:
@@ -198,7 +202,9 @@ sections: {sections_found}
         if len(rows) >= 2:
             # Add header separator
             header = rows[0]
-            separator = "| " + " | ".join(["---"] * len(rows[0].split("|")[1:-1])) + " |"
+            separator = (
+                "| " + " | ".join(["---"] * len(rows[0].split("|")[1:-1])) + " |"
+            )
             body = rows[1:]
             return "\n".join([header, separator] + body)
 
@@ -239,7 +245,7 @@ sections: {sections_found}
             f"Extracted: {datetime.now().isoformat()}",
             "",
             "---",
-            ""
+            "",
         ]
 
         # Common column name mappings
@@ -299,9 +305,22 @@ sections: {sections_found}
                 parts.append(f"**Notes:** {row[notes_col]}")
 
             # Add any other columns as metadata
-            other_cols = [c for c in df.columns if c not in
-                         [name_col, title_col, org_col, email_col, phone_col, tier_col, program_col, notes_col]
-                         and pd.notna(row.get(c))]
+            other_cols = [
+                c
+                for c in df.columns
+                if c
+                not in [
+                    name_col,
+                    title_col,
+                    org_col,
+                    email_col,
+                    phone_col,
+                    tier_col,
+                    program_col,
+                    notes_col,
+                ]
+                and pd.notna(row.get(c))
+            ]
             if other_cols:
                 parts.append("\n**Additional Info:**")
                 for col in other_cols[:5]:  # Limit extra columns
@@ -325,10 +344,10 @@ sections: {sections_found}
             metadata={
                 "original_file": path.name,
                 "total_contacts": contacts_processed,
-                "preprocessed_at": datetime.now().isoformat()
+                "preprocessed_at": datetime.now().isoformat(),
             },
             sections=[f"contact_{i}" for i in range(contacts_processed)],
-            processing_notes=f"Converted {contacts_processed} contacts to markdown"
+            processing_notes=f"Converted {contacts_processed} contacts to markdown",
         )
 
     # =========================================================================
@@ -359,7 +378,7 @@ sections: {sections_found}
 
                 for i, page in enumerate(reader.pages):
                     page_text = page.extract_text() or ""
-                    text_parts.append(f"[PAGE {i+1}]\n{page_text}")
+                    text_parts.append(f"[PAGE {i + 1}]\n{page_text}")
 
                 raw_text = "\n\n".join(text_parts)
         except Exception as e:
@@ -383,21 +402,23 @@ sections: {sections_found}
 
         processed_text = raw_text
         for pattern, marker in section_patterns.items():
-            processed_text = re.sub(pattern, f"\n{marker} \\1", processed_text, flags=re.IGNORECASE)
+            processed_text = re.sub(
+                pattern, f"\n{marker} \\1", processed_text, flags=re.IGNORECASE
+            )
 
         # Build output
         header = f"""---
 document_type: rfp
 original_file: {path.name}
-solicitation_number: {metadata.get('solicitation_number', 'Unknown')}
-agency: {metadata.get('agency', 'Unknown')}
-naics: {metadata.get('naics', 'Unknown')}
-due_date: {metadata.get('due_date', 'Unknown')}
-set_aside: {metadata.get('set_aside', 'None')}
+solicitation_number: {metadata.get("solicitation_number", "Unknown")}
+agency: {metadata.get("agency", "Unknown")}
+naics: {metadata.get("naics", "Unknown")}
+due_date: {metadata.get("due_date", "Unknown")}
+set_aside: {metadata.get("set_aside", "None")}
 preprocessed_at: {datetime.now().isoformat()}
 ---
 
-# RFP: {metadata.get('solicitation_number', path.stem)}
+# RFP: {metadata.get("solicitation_number", path.stem)}
 
 """
         output_path = self.output_dir / f"{path.stem}_preprocessed.md"
@@ -411,7 +432,7 @@ preprocessed_at: {datetime.now().isoformat()}
             document_type="rfp",
             metadata=metadata,
             sections=list(set(re.findall(r"\[SECTION:\s*(\w+)\]", processed_text))),
-            processing_notes="Extracted with section markers and metadata"
+            processing_notes="Extracted with section markers and metadata",
         )
 
     def _extract_rfp_metadata(self, text: str) -> Dict[str, str]:
@@ -431,7 +452,9 @@ preprocessed_at: {datetime.now().isoformat()}
                 break
 
         # NAICS code
-        naics_match = re.search(r"naics\s*(?:code)?\s*[:=]?\s*(\d{6})", text, re.IGNORECASE)
+        naics_match = re.search(
+            r"naics\s*(?:code)?\s*[:=]?\s*(\d{6})", text, re.IGNORECASE
+        )
         if naics_match:
             metadata["naics"] = naics_match.group(1)
 
@@ -483,7 +506,7 @@ preprocessed_at: {datetime.now().isoformat()}
         contact: str,
         date: str,
         program: Optional[str] = None,
-        output_name: Optional[str] = None
+        output_name: Optional[str] = None,
     ) -> PreprocessedDocument:
         """
         Structure call notes with metadata for searchability.
@@ -501,7 +524,7 @@ preprocessed_at: {datetime.now().isoformat()}
             "action_items": [],
             "follow_ups": [],
             "quotes": [],
-            "general": []
+            "general": [],
         }
 
         lines = notes.split("\n")
@@ -536,7 +559,7 @@ preprocessed_at: {datetime.now().isoformat()}
 document_type: call_notes
 contact: {contact}
 date: {date}
-program: {program or 'General'}
+program: {program or "General"}
 preprocessed_at: {datetime.now().isoformat()}
 ---
 
@@ -587,13 +610,9 @@ preprocessed_at: {datetime.now().isoformat()}
             original_path="inline",
             processed_path=str(output_path),
             document_type="call_notes",
-            metadata={
-                "contact": contact,
-                "date": date,
-                "program": program
-            },
+            metadata={"contact": contact, "date": date, "program": program},
             sections=list(sections.keys()),
-            processing_notes="Structured call notes with sections"
+            processing_notes="Structured call notes with sections",
         )
 
     # =========================================================================
@@ -601,9 +620,7 @@ preprocessed_at: {datetime.now().isoformat()}
     # =========================================================================
 
     async def batch_preprocess(
-        self,
-        folder: str,
-        recursive: bool = True
+        self, folder: str, recursive: bool = True
     ) -> List[PreprocessedDocument]:
         """
         Preprocess all supported files in folder.
@@ -651,13 +668,15 @@ preprocessed_at: {datetime.now().isoformat()}
                 logger.info(f"Preprocessed: {file_path.name}")
             except Exception as e:
                 logger.error(f"Failed to preprocess {file_path}: {e}")
-                results.append(PreprocessedDocument(
-                    original_path=str(file_path),
-                    processed_path="",
-                    document_type="error",
-                    metadata={"error": str(e)},
-                    processing_notes=f"Failed: {e}"
-                ))
+                results.append(
+                    PreprocessedDocument(
+                        original_path=str(file_path),
+                        processed_path="",
+                        document_type="error",
+                        metadata={"error": str(e)},
+                        processing_notes=f"Failed: {e}",
+                    )
+                )
 
         return results
 
@@ -666,9 +685,7 @@ preprocessed_at: {datetime.now().isoformat()}
     # =========================================================================
 
     def _fallback_preprocess(
-        self,
-        file_path: str,
-        doc_type: str
+        self, file_path: str, doc_type: str
     ) -> PreprocessedDocument:
         """
         Fallback when specialized libraries aren't available.
@@ -702,9 +719,9 @@ note: Basic preprocessing (install python-docx/PyPDF2/pandas for full features)
                     processed_path=str(output_path),
                     document_type=doc_type,
                     metadata={"fallback": True},
-                    processing_notes="Basic preprocessing - libraries not available"
+                    processing_notes="Basic preprocessing - libraries not available",
                 )
-            except Exception as e:
+            except Exception:
                 pass
 
         # Can't preprocess, return original
@@ -713,5 +730,5 @@ note: Basic preprocessing (install python-docx/PyPDF2/pandas for full features)
             processed_path=file_path,
             document_type=doc_type,
             metadata={"preprocessed": False},
-            processing_notes="No preprocessing available for this file type"
+            processing_notes="No preprocessing available for this file type",
         )

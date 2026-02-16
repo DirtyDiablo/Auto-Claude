@@ -9,6 +9,9 @@ from src.middleware.tenant_middleware import (
 )
 
 __all__ = [
-    "TenantContext", "TenantMiddleware",
-    "get_current_tenant", "require_permission", "require_role",
+    "TenantContext",
+    "TenantMiddleware",
+    "get_current_tenant",
+    "require_permission",
+    "require_role",
 ]

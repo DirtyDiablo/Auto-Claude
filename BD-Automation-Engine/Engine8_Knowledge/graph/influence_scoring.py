@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class InfluenceScore:
     """Composite influence score for an entity."""
+
     entity_id: str
     entity_name: str
     entity_type: str
@@ -176,7 +177,9 @@ class InfluenceScorer:
 
         return betweenness
 
-    def compute_eigenvector(self, iterations: int = 50, tol: float = 1e-6) -> Dict[str, float]:
+    def compute_eigenvector(
+        self, iterations: int = 50, tol: float = 1e-6
+    ) -> Dict[str, float]:
         """
         Compute eigenvector centrality using power iteration.
 
@@ -194,7 +197,9 @@ class InfluenceScorer:
         for _ in range(iterations):
             new_ev = {}
             for nid in nodes:
-                new_ev[nid] = sum(ev.get(nb, 0.0) for nb in self._adjacency.get(nid, set()))
+                new_ev[nid] = sum(
+                    ev.get(nb, 0.0) for nb in self._adjacency.get(nid, set())
+                )
 
             # Normalize
             norm = math.sqrt(sum(v * v for v in new_ev.values()))
@@ -294,7 +299,9 @@ class InfluenceScorer:
             )
 
         # Assign ranks
-        sorted_scores = sorted(self._scores.values(), key=lambda s: s.composite, reverse=True)
+        sorted_scores = sorted(
+            self._scores.values(), key=lambda s: s.composite, reverse=True
+        )
         for i, score in enumerate(sorted_scores):
             score.rank = i + 1
 
@@ -319,7 +326,11 @@ class InfluenceScorer:
         scores = self.compute_all()
 
         filtered = sorted(
-            (s for s in scores.values() if not entity_type or s.entity_type == entity_type),
+            (
+                s
+                for s in scores.values()
+                if not entity_type or s.entity_type == entity_type
+            ),
             key=lambda s: s.composite,
             reverse=True,
         )[:limit]

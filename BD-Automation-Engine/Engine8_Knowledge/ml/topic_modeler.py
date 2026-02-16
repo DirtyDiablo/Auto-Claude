@@ -3,6 +3,7 @@
 BERTopic clustering for discovering hidden program clusters and hiring trends
 across job postings, call notes, and BD documents.
 """
+
 import structlog
 from collections import Counter
 from dataclasses import dataclass, field

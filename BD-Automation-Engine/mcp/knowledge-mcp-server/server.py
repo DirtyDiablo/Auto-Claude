@@ -24,12 +24,13 @@ Install:
 
 import os
 import logging
-from typing import Optional, List
+from typing import List
 
 logger = logging.getLogger(__name__)
 
 try:
     from fastmcp import FastMCP
+
     FASTMCP_AVAILABLE = True
 except ImportError:
     FASTMCP_AVAILABLE = False
@@ -37,6 +38,7 @@ except ImportError:
 
 try:
     import httpx
+
     HTTPX_AVAILABLE = True
 except ImportError:
     HTTPX_AVAILABLE = False
@@ -54,7 +56,10 @@ mcp = FastMCP(
 # HTTP helper
 # ---------------------------------------------------------------------------
 
-async def _api(method: str, endpoint: str, json_body: dict = None, params: dict = None) -> dict:
+
+async def _api(
+    method: str, endpoint: str, json_body: dict = None, params: dict = None
+) -> dict:
     """Call the FastAPI backend."""
     async with httpx.AsyncClient(base_url=API_URL, timeout=30.0) as client:
         if method == "GET":
@@ -73,6 +78,7 @@ async def _api(method: str, endpoint: str, json_body: dict = None, params: dict 
 # SEARCH TOOLS
 # ===========================================================================
 
+
 @mcp.tool()
 async def search_knowledge(
     query: str,
@@ -86,16 +92,22 @@ async def search_knowledge(
         collection: Collection to search (jobs, contacts, programs, documents, activities, or all)
         limit: Maximum results (1-50)
     """
-    result = await _api("POST", "/search", json_body={
-        "query": query,
-        "collection": collection if collection != "all" else None,
-        "limit": min(limit, 50),
-    })
+    result = await _api(
+        "POST",
+        "/search",
+        json_body={
+            "query": query,
+            "collection": collection if collection != "all" else None,
+            "limit": min(limit, 50),
+        },
+    )
     return _format_search(result)
 
 
 @mcp.tool()
-async def semantic_search(query: str, collection: str = "bd_knowledge", limit: int = 10) -> str:
+async def semantic_search(
+    query: str, collection: str = "bd_knowledge", limit: int = 10
+) -> str:
     """Deep semantic similarity search across 1.42M vectors.
 
     Args:
@@ -103,14 +115,22 @@ async def semantic_search(query: str, collection: str = "bd_knowledge", limit: i
         collection: Vector collection to search
         limit: Maximum results
     """
-    result = await _api("GET", "/search/semantic", params={
-        "q": query, "collection": collection, "limit": limit,
-    })
+    result = await _api(
+        "GET",
+        "/search/semantic",
+        params={
+            "q": query,
+            "collection": collection,
+            "limit": limit,
+        },
+    )
     return _format_search(result)
 
 
 @mcp.tool()
-async def hybrid_search(query: str, collection: str = "bd_knowledge", limit: int = 10) -> str:
+async def hybrid_search(
+    query: str, collection: str = "bd_knowledge", limit: int = 10
+) -> str:
     """Combined BM25 keyword + semantic vector search with reranking.
 
     Args:
@@ -118,9 +138,16 @@ async def hybrid_search(query: str, collection: str = "bd_knowledge", limit: int
         collection: Collection to search
         limit: Maximum results
     """
-    result = await _api("GET", "/search/hybrid", params={
-        "q": query, "collection": collection, "limit": limit, "use_rerank": "true",
-    })
+    result = await _api(
+        "GET",
+        "/search/hybrid",
+        params={
+            "q": query,
+            "collection": collection,
+            "limit": limit,
+            "use_rerank": "true",
+        },
+    )
     return _format_search(result)
 
 
@@ -140,6 +167,7 @@ async def smart_ask(query: str) -> str:
 # FILE & DEPENDENCY TOOLS
 # ===========================================================================
 
+
 @mcp.tool()
 async def search_files(query: str, category: str = None, limit: int = 10) -> str:
     """Search across all indexed files using hybrid search.
@@ -152,9 +180,15 @@ async def search_files(query: str, category: str = None, limit: int = 10) -> str
     params = {"q": query, "limit": limit}
     if category:
         params["category"] = category
-    result = await _api("GET", "/search/semantic", params={
-        "q": query, "collection": "documents", "limit": limit,
-    })
+    result = await _api(
+        "GET",
+        "/search/semantic",
+        params={
+            "q": query,
+            "collection": "documents",
+            "limit": limit,
+        },
+    )
     return _format_search(result)
 
 
@@ -169,7 +203,9 @@ async def get_file_info(path: str) -> str:
         result = await _api("GET", f"/neo4j/file/{path}")
         return _format_dict(result)
     except Exception:
-        return f"File info not found for: {path}. Neo4j lineage may not be populated yet."
+        return (
+            f"File info not found for: {path}. Neo4j lineage may not be populated yet."
+        )
 
 
 @mcp.tool()
@@ -181,7 +217,9 @@ async def find_dependencies(path: str, direction: str = "both") -> str:
         direction: 'upstream' (what this file depends on), 'downstream' (what depends on this), or 'both'
     """
     try:
-        result = await _api("GET", f"/neo4j/file/{path}/dependencies", params={"direction": direction})
+        result = await _api(
+            "GET", f"/neo4j/file/{path}/dependencies", params={"direction": direction}
+        )
         return _format_dict(result)
     except Exception:
         return f"No dependency data for: {path}. Run lineage indexing first."
@@ -190,6 +228,7 @@ async def find_dependencies(path: str, direction: str = "both") -> str:
 # ===========================================================================
 # GRAPH TOOLS
 # ===========================================================================
+
 
 @mcp.tool()
 async def query_knowledge_graph(query: str, mode: str = "hybrid") -> str:
@@ -218,6 +257,7 @@ async def find_relationships(entity: str) -> str:
 # SPECIALIZED BD TOOLS
 # ===========================================================================
 
+
 @mcp.tool()
 async def get_program_intel(program_name: str) -> str:
     """Get comprehensive intelligence about a federal program.
@@ -231,7 +271,9 @@ async def get_program_intel(program_name: str) -> str:
 
 
 @mcp.tool()
-async def get_company_contacts(company_name: str, tier: int = None, limit: int = 20) -> str:
+async def get_company_contacts(
+    company_name: str, tier: int = None, limit: int = 20
+) -> str:
     """Find contacts at a specific company, optionally filtered by tier.
 
     Args:
@@ -250,6 +292,7 @@ async def get_company_contacts(company_name: str, tier: int = None, limit: int =
 # MEMORY TOOLS
 # ===========================================================================
 
+
 @mcp.tool()
 async def memory_add(content: str, memory_type: str = "interaction") -> str:
     """Add information to BD memory for future reference.
@@ -258,10 +301,14 @@ async def memory_add(content: str, memory_type: str = "interaction") -> str:
         content: Information to remember
         memory_type: Type of memory (interaction, fact, insight, observation)
     """
-    result = await _api("POST", "/memory/add", json_body={
-        "content": content,
-        "metadata": {"memory_type": memory_type},
-    })
+    result = await _api(
+        "POST",
+        "/memory/add",
+        json_body={
+            "content": content,
+            "metadata": {"memory_type": memory_type},
+        },
+    )
     return _format_dict(result)
 
 
@@ -292,12 +339,16 @@ async def memory_add_insight(
         source: Source of the insight
         confidence: Confidence level (0-1)
     """
-    result = await _api("POST", "/memory/insight", json_body={
-        "insight_type": insight_type,
-        "insight": insight,
-        "source": source,
-        "confidence": confidence,
-    })
+    result = await _api(
+        "POST",
+        "/memory/insight",
+        json_body={
+            "insight_type": insight_type,
+            "insight": insight,
+            "source": source,
+            "confidence": confidence,
+        },
+    )
     return _format_dict(result)
 
 
@@ -305,8 +356,11 @@ async def memory_add_insight(
 # INGEST TOOLS
 # ===========================================================================
 
+
 @mcp.tool()
-async def ingest_document(text: str, title: str = None, doc_type: str = "general") -> str:
+async def ingest_document(
+    text: str, title: str = None, doc_type: str = "general"
+) -> str:
     """Index a document into the knowledge base.
 
     Args:
@@ -314,10 +368,14 @@ async def ingest_document(text: str, title: str = None, doc_type: str = "general
         title: Optional document title
         doc_type: Document type (general, briefing, past_performance, proposal)
     """
-    result = await _api("POST", "/ingest/document", json_body={
-        "text": text,
-        "metadata": {"title": title, "doc_type": doc_type},
-    })
+    result = await _api(
+        "POST",
+        "/ingest/document",
+        json_body={
+            "text": text,
+            "metadata": {"title": title, "doc_type": doc_type},
+        },
+    )
     return _format_dict(result)
 
 
@@ -359,6 +417,7 @@ async def ingest_program(
 # SYSTEM TOOLS
 # ===========================================================================
 
+
 @mcp.tool()
 async def get_system_stats() -> str:
     """Get BD Intelligence Hub system statistics.
@@ -372,6 +431,7 @@ async def get_system_stats() -> str:
 # Formatting helpers
 # ===========================================================================
 
+
 def _format_search(result: dict) -> str:
     """Format search results for readability."""
     lines = []
@@ -383,7 +443,9 @@ def _format_search(result: dict) -> str:
     for i, r in enumerate(results, 1):
         score = r.get("score", 0)
         payload = r.get("payload", r)
-        title = payload.get("title", payload.get("name", payload.get("full_name", "Untitled")))
+        title = payload.get(
+            "title", payload.get("name", payload.get("full_name", "Untitled"))
+        )
         lines.append(f"{i}. [{score:.3f}] {title}")
         # Add key fields
         for key in ("company", "program", "location", "clearance", "tier", "status"):
@@ -396,6 +458,7 @@ def _format_search(result: dict) -> str:
 def _format_dict(result: dict) -> str:
     """Format dict result for readability."""
     import json
+
     return json.dumps(result, indent=2, default=str)
 
 

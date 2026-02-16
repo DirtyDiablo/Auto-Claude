@@ -9,14 +9,14 @@ from .bd_knowledge_graph import (
     Relationship,
     ENTITY_TYPES,
     RELATIONSHIP_TYPES,
-    get_knowledge_graph
+    get_knowledge_graph,
 )
 
 __all__ = [
-    'BDKnowledgeGraph',
-    'Entity',
-    'Relationship',
-    'ENTITY_TYPES',
-    'RELATIONSHIP_TYPES',
-    'get_knowledge_graph'
+    "BDKnowledgeGraph",
+    "Entity",
+    "Relationship",
+    "ENTITY_TYPES",
+    "RELATIONSHIP_TYPES",
+    "get_knowledge_graph",
 ]

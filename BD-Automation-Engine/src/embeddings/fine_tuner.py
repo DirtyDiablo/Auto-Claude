@@ -22,6 +22,7 @@ from src.embeddings.synthetic_data_generator import Triplet
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class ModelStatus(str, Enum):
     TRAINING = "training"
     EVALUATING = "evaluating"
@@ -143,6 +144,7 @@ class ABTest:
 # EMBEDDING FINE-TUNER
 # =========================================
 
+
 class EmbeddingFineTuner:
     """Fine-tunes domain-specific embeddings with Matryoshka dimensions."""
 
@@ -165,8 +167,13 @@ class EmbeddingFineTuner:
             deployed_at=datetime.now(timezone.utc).isoformat(),
         )
         baseline.metrics[384] = EvalMetrics(
-            recall_at_1=0.42, recall_at_5=0.68, recall_at_10=0.78,
-            recall_at_20=0.85, mrr=0.55, ndcg_at_10=0.62, dimension=384,
+            recall_at_1=0.42,
+            recall_at_5=0.68,
+            recall_at_10=0.78,
+            recall_at_20=0.85,
+            mrr=0.55,
+            ndcg_at_10=0.62,
+            dimension=384,
         )
         self._models[baseline.id] = baseline
         self._deployed_model_id = baseline.id
@@ -204,7 +211,9 @@ class EmbeddingFineTuner:
 
         # Evaluate at each Matryoshka dimension
         for dim in config.matryoshka_dims:
-            metrics = self._evaluate_on_triplets(eval_triplets, dim, len(train_triplets))
+            metrics = self._evaluate_on_triplets(
+                eval_triplets, dim, len(train_triplets)
+            )
             job.metrics[dim] = metrics
 
         # Find best dimension (highest Recall@10)
@@ -229,16 +238,18 @@ class EmbeddingFineTuner:
         self._models[model.id] = model
 
         # Record quality history
-        self._quality_history.append({
-            "model_id": model.id,
-            "model_name": model.name,
-            "recall_at_10": job.metrics[best_dim].recall_at_10,
-            "mrr": job.metrics[best_dim].mrr,
-            "ndcg_at_10": job.metrics[best_dim].ndcg_at_10,
-            "dimension": best_dim,
-            "training_triplets": len(train_triplets),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
-        })
+        self._quality_history.append(
+            {
+                "model_id": model.id,
+                "model_name": model.name,
+                "recall_at_10": job.metrics[best_dim].recall_at_10,
+                "mrr": job.metrics[best_dim].mrr,
+                "ndcg_at_10": job.metrics[best_dim].ndcg_at_10,
+                "dimension": best_dim,
+                "training_triplets": len(train_triplets),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
         return job
 
@@ -255,8 +266,9 @@ class EmbeddingFineTuner:
             loss_curve.append(round(max(base_loss + noise, 0.1), 4))
         return loss_curve
 
-    def _evaluate_on_triplets(self, triplets: List[Triplet], dim: int,
-                               training_size: int) -> EvalMetrics:
+    def _evaluate_on_triplets(
+        self, triplets: List[Triplet], dim: int, training_size: int
+    ) -> EvalMetrics:
         """Simulate evaluation metrics for a dimension.
 
         Higher dimensions and more training data yield better metrics.
@@ -274,12 +286,24 @@ class EmbeddingFineTuner:
         base_r1, base_r5, base_r10, base_r20 = 0.42, 0.68, 0.78, 0.85
         base_mrr, base_ndcg = 0.55, 0.62
 
-        r1 = min(base_r1 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99)
-        r5 = min(base_r5 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99)
-        r10 = min(base_r10 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99)
-        r20 = min(base_r20 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99)
-        mrr = min(base_mrr + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99)
-        ndcg = min(base_ndcg + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99)
+        r1 = min(
+            base_r1 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99
+        )
+        r5 = min(
+            base_r5 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99
+        )
+        r10 = min(
+            base_r10 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99
+        )
+        r20 = min(
+            base_r20 + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99
+        )
+        mrr = min(
+            base_mrr + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99
+        )
+        ndcg = min(
+            base_ndcg + base_improvement + dim_bonus + self._rng.gauss(0, 0.01), 0.99
+        )
 
         return EvalMetrics(
             recall_at_1=round(r1, 4),
@@ -295,8 +319,9 @@ class EmbeddingFineTuner:
     # EVALUATION
     # --------------------------------------------------
 
-    def evaluate_model(self, model_id: str, triplets: List[Triplet],
-                       dimension: int = 768) -> EvalMetrics:
+    def evaluate_model(
+        self, model_id: str, triplets: List[Triplet], dimension: int = 768
+    ) -> EvalMetrics:
         """Evaluate a specific model on a test set."""
         model = self._models.get(model_id)
         if not model:
@@ -308,8 +333,9 @@ class EmbeddingFineTuner:
         training_size = model.training_triplets
         return self._evaluate_on_triplets(triplets, dimension, training_size)
 
-    def compare_models(self, model_a_id: str, model_b_id: str,
-                       triplets: List[Triplet]) -> Dict[str, Any]:
+    def compare_models(
+        self, model_a_id: str, model_b_id: str, triplets: List[Triplet]
+    ) -> Dict[str, Any]:
         """Compare two models head-to-head on the same test set."""
         model_a = self._models.get(model_a_id)
         model_b = self._models.get(model_b_id)
@@ -324,12 +350,24 @@ class EmbeddingFineTuner:
         metrics_b = self.evaluate_model(model_b_id, triplets, dim_b)
 
         # Determine winner by Recall@10
-        winner = model_a_id if metrics_a.recall_at_10 >= metrics_b.recall_at_10 else model_b_id
+        winner = (
+            model_a_id
+            if metrics_a.recall_at_10 >= metrics_b.recall_at_10
+            else model_b_id
+        )
         improvement = abs(metrics_b.recall_at_10 - metrics_a.recall_at_10)
 
         return {
-            "model_a": {"id": model_a_id, "name": model_a.name, "metrics": metrics_a.to_dict()},
-            "model_b": {"id": model_b_id, "name": model_b.name, "metrics": metrics_b.to_dict()},
+            "model_a": {
+                "id": model_a_id,
+                "name": model_a.name,
+                "metrics": metrics_a.to_dict(),
+            },
+            "model_b": {
+                "id": model_b_id,
+                "name": model_b.name,
+                "metrics": metrics_b.to_dict(),
+            },
             "winner": winner,
             "recall_at_10_improvement": round(improvement, 4),
             "recommendation": "deploy_b" if winner == model_b_id else "keep_a",
@@ -371,8 +409,9 @@ class EmbeddingFineTuner:
     # A/B TESTING
     # --------------------------------------------------
 
-    def start_ab_test(self, model_a_id: str, model_b_id: str,
-                      traffic_split: float = 0.5) -> ABTest:
+    def start_ab_test(
+        self, model_a_id: str, model_b_id: str, traffic_split: float = 0.5
+    ) -> ABTest:
         """Start an A/B test between two models."""
         test = ABTest(
             model_a_id=model_a_id,
@@ -421,21 +460,27 @@ class EmbeddingFineTuner:
         """Get all A/B test results."""
         results: List[Dict[str, Any]] = []
         for test in self._ab_tests.values():
-            winner = test.model_a_id if test.model_a_wins > test.model_b_wins else test.model_b_id
-            results.append({
-                "id": test.id,
-                "model_a_id": test.model_a_id,
-                "model_b_id": test.model_b_id,
-                "queries_served": test.queries_served,
-                "model_a_wins": test.model_a_wins,
-                "model_b_wins": test.model_b_wins,
-                "model_a_avg_relevance": test.model_a_avg_relevance,
-                "model_b_avg_relevance": test.model_b_avg_relevance,
-                "winner": winner,
-                "status": test.status,
-                "started_at": test.started_at,
-                "completed_at": test.completed_at,
-            })
+            winner = (
+                test.model_a_id
+                if test.model_a_wins > test.model_b_wins
+                else test.model_b_id
+            )
+            results.append(
+                {
+                    "id": test.id,
+                    "model_a_id": test.model_a_id,
+                    "model_b_id": test.model_b_id,
+                    "queries_served": test.queries_served,
+                    "model_a_wins": test.model_a_wins,
+                    "model_b_wins": test.model_b_wins,
+                    "model_a_avg_relevance": test.model_a_avg_relevance,
+                    "model_b_avg_relevance": test.model_b_avg_relevance,
+                    "winner": winner,
+                    "status": test.status,
+                    "started_at": test.started_at,
+                    "completed_at": test.completed_at,
+                }
+            )
         return results
 
     # --------------------------------------------------
@@ -452,9 +497,13 @@ class EmbeddingFineTuner:
         """List all available embedding models."""
         return [
             {
-                "id": m.id, "name": m.name, "base_model": m.base_model,
-                "dimensions": m.dimensions, "status": m.status,
-                "is_baseline": m.is_baseline, "training_triplets": m.training_triplets,
+                "id": m.id,
+                "name": m.name,
+                "base_model": m.base_model,
+                "dimensions": m.dimensions,
+                "status": m.status,
+                "is_baseline": m.is_baseline,
+                "training_triplets": m.training_triplets,
                 "fine_tune_job_id": m.fine_tune_job_id,
                 "created_at": m.created_at,
                 "best_recall_at_10": max(
@@ -473,7 +522,9 @@ class EmbeddingFineTuner:
             "total_jobs": len(self._jobs),
             "total_models": len(self._models),
             "deployed_model": self._deployed_model_id,
-            "active_ab_tests": sum(1 for t in self._ab_tests.values() if t.status == "running"),
+            "active_ab_tests": sum(
+                1 for t in self._ab_tests.values() if t.status == "running"
+            ),
             "total_ab_tests": len(self._ab_tests),
         }
 

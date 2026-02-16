@@ -18,6 +18,7 @@ class TestNeo4jManagerInit:
     def test_default_config(self):
         with patch.dict("os.environ", {}, clear=False):
             from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
             mgr = Neo4jManager()
             assert mgr._uri == "bolt://localhost:7687"
             assert mgr._user == "neo4j"
@@ -27,6 +28,7 @@ class TestNeo4jManagerInit:
 
     def test_custom_config(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager(
             uri="bolt://custom:7688",
             user="admin",
@@ -40,34 +42,43 @@ class TestNeo4jManagerInit:
         assert mgr._max_pool == 10
 
     def test_env_config(self):
-        with patch.dict("os.environ", {
-            "NEO4J_URI": "bolt://envhost:7687",
-            "NEO4J_USER": "envuser",
-            "NEO4J_PASSWORD": "envpass",
-        }):
+        with patch.dict(
+            "os.environ",
+            {
+                "NEO4J_URI": "bolt://envhost:7687",
+                "NEO4J_USER": "envuser",
+                "NEO4J_PASSWORD": "envpass",
+            },
+        ):
             # Need to reimport to pick up env
             import importlib
             import Engine8_Knowledge.graph.neo4j_manager as mod
+
             importlib.reload(mod)
             mgr = mod.Neo4jManager()
             assert mgr._uri == "bolt://envhost:7687"
 
     def test_driver_initially_none(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
         assert mgr._driver is None
 
     def test_context_manager(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
-        with patch.object(mgr, "connect") as mock_connect, \
-             patch.object(mgr, "close") as mock_close:
+        with (
+            patch.object(mgr, "connect") as mock_connect,
+            patch.object(mgr, "close") as mock_close,
+        ):
             with mgr:
                 mock_connect.assert_called_once()
             mock_close.assert_called_once()
 
     def test_close_sets_driver_none(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
         mock_driver = MagicMock()
         mgr._driver = mock_driver
@@ -81,6 +92,7 @@ class TestNeo4jManagerHealth:
 
     def test_health_check_healthy(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
         mock_driver = MagicMock()
         mock_session = MagicMock()
@@ -98,6 +110,7 @@ class TestNeo4jManagerHealth:
 
     def test_health_check_unhealthy(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
         mock_driver = MagicMock()
         mock_driver.session.side_effect = Exception("Connection refused")
@@ -113,6 +126,7 @@ class TestNeo4jManagerQueries:
 
     def _setup_mgr_with_mock(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
         mock_driver = MagicMock()
         mock_session = MagicMock()
@@ -125,7 +139,9 @@ class TestNeo4jManagerQueries:
     def test_run_query_returns_list(self):
         mgr, session = self._setup_mgr_with_mock()
         mock_result = MagicMock()
-        mock_result.__iter__ = MagicMock(return_value=iter([{"name": "Alice"}, {"name": "Bob"}]))
+        mock_result.__iter__ = MagicMock(
+            return_value=iter([{"name": "Alice"}, {"name": "Bob"}])
+        )
         session.run.return_value = mock_result
 
         results = mgr.run_query("MATCH (n) RETURN n.name AS name")
@@ -193,22 +209,40 @@ class TestNeo4jManagerBatch:
 
     def test_run_batch_small(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
 
         with patch.object(mgr, "write_query") as mock_write:
-            mock_write.return_value = {"nodes_created": 3, "properties_set": 9, "relationships_created": 0, "nodes_deleted": 0, "relationships_deleted": 0}
-            result = mgr.run_batch("UNWIND $batch AS row CREATE (n:Test)", [{"a": 1}, {"a": 2}, {"a": 3}])
+            mock_write.return_value = {
+                "nodes_created": 3,
+                "properties_set": 9,
+                "relationships_created": 0,
+                "nodes_deleted": 0,
+                "relationships_deleted": 0,
+            }
+            result = mgr.run_batch(
+                "UNWIND $batch AS row CREATE (n:Test)", [{"a": 1}, {"a": 2}, {"a": 3}]
+            )
             assert result["total_records"] == 3
             assert result["batches"] == 1
 
     def test_run_batch_large(self):
         from Engine8_Knowledge.graph.neo4j_manager import Neo4jManager
+
         mgr = Neo4jManager()
 
         with patch.object(mgr, "write_query") as mock_write:
-            mock_write.return_value = {"nodes_created": 500, "properties_set": 0, "relationships_created": 0, "nodes_deleted": 0, "relationships_deleted": 0}
+            mock_write.return_value = {
+                "nodes_created": 500,
+                "properties_set": 0,
+                "relationships_created": 0,
+                "nodes_deleted": 0,
+                "relationships_deleted": 0,
+            }
             data = [{"i": i} for i in range(1200)]
-            result = mgr.run_batch("UNWIND $batch AS row CREATE (n:Test)", data, batch_size=500)
+            result = mgr.run_batch(
+                "UNWIND $batch AS row CREATE (n:Test)", data, batch_size=500
+            )
             assert result["total_records"] == 1200
             assert result["batches"] == 3
             assert mock_write.call_count == 3
@@ -219,6 +253,7 @@ class TestNeo4jSingleton:
 
     def test_get_neo4j_manager_returns_instance(self):
         import Engine8_Knowledge.graph.neo4j_manager as mod
+
         mod._instance = None  # reset
         mgr = mod.get_neo4j_manager()
         assert mgr is not None

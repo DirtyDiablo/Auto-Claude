@@ -100,6 +100,7 @@ class BatchProcessRequest(BaseModel):
 def _get_crawl_engine():
     try:
         from Engine8_Knowledge.scrapers.crawl4ai_engine import get_crawl4ai_engine
+
         return get_crawl4ai_engine()
     except Exception as exc:
         logger.warning("crawl4ai_engine_unavailable", error=str(exc))
@@ -109,6 +110,7 @@ def _get_crawl_engine():
 def _get_sam_sync():
     try:
         from Engine8_Knowledge.scrapers.sam_gov_sync import get_sam_gov_sync
+
         return get_sam_gov_sync()
     except Exception as exc:
         logger.warning("sam_sync_unavailable", error=str(exc))
@@ -117,7 +119,10 @@ def _get_sam_sync():
 
 def _get_doc_pipeline():
     try:
-        from Engine8_Knowledge.scrapers.federal_doc_pipeline import get_federal_doc_pipeline
+        from Engine8_Knowledge.scrapers.federal_doc_pipeline import (
+            get_federal_doc_pipeline,
+        )
+
         return get_federal_doc_pipeline()
     except Exception as exc:
         logger.warning("doc_pipeline_unavailable", error=str(exc))
@@ -126,7 +131,10 @@ def _get_doc_pipeline():
 
 def _get_orchestrator():
     try:
-        from Engine8_Knowledge.scrapers.scrape_orchestrator_v2 import get_scrape_orchestrator
+        from Engine8_Knowledge.scrapers.scrape_orchestrator_v2 import (
+            get_scrape_orchestrator,
+        )
+
         return get_scrape_orchestrator()
     except Exception as exc:
         logger.warning("orchestrator_unavailable", error=str(exc))
@@ -145,6 +153,7 @@ async def crawl_url(req: CrawlUrlRequest):
     if not engine:
         raise HTTPException(503, "Crawl4AI engine not available")
     from dataclasses import asdict
+
     result = await engine.crawl_url(req.url, req.extraction_strategy)
     return asdict(result)
 
@@ -156,7 +165,10 @@ async def crawl_site(req: CrawlSiteRequest):
     if not engine:
         raise HTTPException(503, "Crawl4AI engine not available")
     from dataclasses import asdict
-    results = await engine.crawl_site(req.base_url, req.max_pages, req.extraction_strategy)
+
+    results = await engine.crawl_site(
+        req.base_url, req.max_pages, req.extraction_strategy
+    )
     return {"results": [asdict(r) for r in results], "total": len(results)}
 
 
@@ -182,6 +194,7 @@ async def trigger_full_cycle():
     if not orch:
         raise HTTPException(503, "Scrape orchestrator not available")
     from dataclasses import asdict
+
     report = await orch.run_full_cycle()
     return asdict(report)
 
@@ -193,6 +206,7 @@ async def list_sources():
     if not orch:
         raise HTTPException(503, "Scrape orchestrator not available")
     from dataclasses import asdict
+
     sources = await orch.list_sources()
     return {"sources": [asdict(s) for s in sources], "total": len(sources)}
 
@@ -204,6 +218,7 @@ async def add_source(req: SourceConfigRequest):
     if not orch:
         raise HTTPException(503, "Scrape orchestrator not available")
     from Engine8_Knowledge.scrapers.scrape_orchestrator_v2 import SourceConfig
+
     cfg = SourceConfig(
         name=req.name,
         source_type=req.source_type,
@@ -224,6 +239,7 @@ async def get_source_health(source_id: str):
     if not orch:
         raise HTTPException(503, "Scrape orchestrator not available")
     from dataclasses import asdict
+
     health = await orch.get_source_health(source_id)
     return asdict(health)
 
@@ -261,6 +277,7 @@ async def orchestrator_stats():
     if not orch:
         raise HTTPException(503, "Scrape orchestrator not available")
     from dataclasses import asdict
+
     stats = await orch.get_orchestrator_stats()
     return asdict(stats)
 
@@ -278,6 +295,7 @@ async def search_awards(req: AwardSearchRequest):
         raise HTTPException(503, "SAM.gov sync not available")
     from Engine8_Knowledge.scrapers.sam_gov_sync import SearchQuery
     from dataclasses import asdict
+
     query = SearchQuery(
         keywords=req.keywords,
         naics_codes=req.naics_codes,
@@ -299,6 +317,7 @@ async def search_opportunities(req: OpportunitySearchRequest):
         raise HTTPException(503, "SAM.gov sync not available")
     from Engine8_Knowledge.scrapers.sam_gov_sync import OpportunityQuery
     from dataclasses import asdict
+
     query = OpportunityQuery(
         keywords=req.keywords,
         naics_codes=req.naics_codes,
@@ -318,6 +337,7 @@ async def monitor_awards():
     if not sam:
         raise HTTPException(503, "SAM.gov sync not available")
     from dataclasses import asdict
+
     alerts = await sam.monitor_awards()
     return {"alerts": [asdict(a) for a in alerts], "total": len(alerts)}
 
@@ -329,6 +349,7 @@ async def list_watches():
     if not sam:
         raise HTTPException(503, "SAM.gov sync not available")
     from dataclasses import asdict
+
     watches = sam.list_watches()
     return {"watches": [asdict(w) for w in watches], "total": len(watches)}
 
@@ -341,6 +362,7 @@ async def create_watch(req: WatchConfigRequest):
         raise HTTPException(503, "SAM.gov sync not available")
     from Engine8_Knowledge.scrapers.sam_gov_sync import WatchConfig
     from dataclasses import asdict
+
     watch = WatchConfig(
         name=req.name,
         keywords=req.keywords,
@@ -378,8 +400,10 @@ async def discover_docs(req: DiscoverDocsRequest):
     if not pipeline:
         raise HTTPException(503, "Federal doc pipeline not available")
     from dataclasses import asdict
+
     docs = await pipeline.discover_documents(
-        req.source, {"keywords": req.keywords, "url": req.url, "max_pages": req.max_pages}
+        req.source,
+        {"keywords": req.keywords, "url": req.url, "max_pages": req.max_pages},
     )
     return {"documents": [asdict(d) for d in docs], "total": len(docs)}
 
@@ -391,6 +415,7 @@ async def process_doc(req: ProcessDocRequest):
     if not pipeline:
         raise HTTPException(503, "Federal doc pipeline not available")
     from dataclasses import asdict
+
     try:
         result = await pipeline.process_document(req.file_path)
         return asdict(result)
@@ -406,6 +431,7 @@ async def batch_process(req: BatchProcessRequest):
         raise HTTPException(503, "Federal doc pipeline not available")
     from Engine8_Knowledge.scrapers.federal_doc_pipeline import DocumentRef
     from dataclasses import asdict
+
     refs = [DocumentRef(**d) for d in req.doc_refs]
     result = await pipeline.process_batch(refs, req.max_concurrent)
     return asdict(result)
@@ -421,6 +447,7 @@ async def recent_docs(limit: int = Query(20)):
     index_path = pipeline._output_dir / "index.json"
     if index_path.exists():
         import json
+
         try:
             data = json.loads(index_path.read_text())
             return {"documents": data[-limit:], "total": len(data)}

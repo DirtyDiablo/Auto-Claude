@@ -26,8 +26,10 @@ router = APIRouter(prefix="/memory", tags=["memory"])
 # PYDANTIC MODELS
 # =============================================================================
 
+
 class AddMemoryRequest(BaseModel):
     """Request to add a text memory."""
+
     content: str = Field(..., description="Text content to store")
     source_type: str = Field("text", description="Source type (text, note, snippet)")
     tags: Optional[List[str]] = Field(None, description="Tags for categorization")
@@ -36,12 +38,14 @@ class AddMemoryRequest(BaseModel):
 
 class AddUrlRequest(BaseModel):
     """Request to add a URL memory."""
+
     url: str = Field(..., description="URL to save and index")
     tags: Optional[List[str]] = Field(None, description="Tags for categorization")
 
 
 class SearchRequest(BaseModel):
     """Request to search memories."""
+
     query: str = Field(..., description="Search query")
     top_k: int = Field(10, ge=1, le=50, description="Maximum results")
     tags: Optional[List[str]] = Field(None, description="Filter by tags")
@@ -50,12 +54,16 @@ class SearchRequest(BaseModel):
 
 class ChatRequest(BaseModel):
     """Request to chat with memories."""
+
     message: str = Field(..., description="User message/question")
-    conversation_id: Optional[str] = Field(None, description="Conversation ID for continuity")
+    conversation_id: Optional[str] = Field(
+        None, description="Conversation ID for continuity"
+    )
 
 
 class StoreRfpRequest(BaseModel):
     """Request to store an RFP (with file upload handled separately)."""
+
     title: str = Field(..., description="RFP title")
     agency: Optional[str] = Field(None, description="Issuing agency")
     deadline: Optional[str] = Field(None, description="Response deadline")
@@ -65,6 +73,7 @@ class StoreRfpRequest(BaseModel):
 
 class StoreContractRequest(BaseModel):
     """Request to store a contract (with file upload handled separately)."""
+
     contract_number: str = Field(..., description="Contract number")
     contractor: Optional[str] = Field(None, description="Contractor name")
     agency: Optional[str] = Field(None, description="Contracting agency")
@@ -75,6 +84,7 @@ class StoreContractRequest(BaseModel):
 
 class StoreIntelRequest(BaseModel):
     """Request to store intelligence."""
+
     content: str = Field(..., description="Intelligence content")
     entity_name: str = Field(..., description="Program or competitor name")
     intel_type: str = Field("general", description="Type of intel")
@@ -82,6 +92,7 @@ class StoreIntelRequest(BaseModel):
 
 class MemoryResponse(BaseModel):
     """Standard memory response."""
+
     success: bool
     id: Optional[str] = None
     message: Optional[str] = None
@@ -90,6 +101,7 @@ class MemoryResponse(BaseModel):
 
 class SearchResponse(BaseModel):
     """Search response."""
+
     query: str
     results: List[Dict[str, Any]]
     count: int
@@ -98,6 +110,7 @@ class SearchResponse(BaseModel):
 
 class ChatResponse(BaseModel):
     """Chat response."""
+
     message: str
     response: str
     citations: Optional[List[Dict[str, Any]]] = None
@@ -108,6 +121,7 @@ class ChatResponse(BaseModel):
 # =============================================================================
 # BASIC MEMORY ENDPOINTS
 # =============================================================================
+
 
 @router.post("/add", response_model=MemoryResponse)
 async def add_memory(request: AddMemoryRequest):
@@ -208,6 +222,7 @@ async def add_document_memory(
 # SEARCH ENDPOINTS
 # =============================================================================
 
+
 @router.post("/search", response_model=SearchResponse)
 async def search_memories(request: SearchRequest):
     """
@@ -250,6 +265,7 @@ async def search_memories_get(
 # CHAT ENDPOINTS
 # =============================================================================
 
+
 @router.post("/chat", response_model=ChatResponse)
 async def chat_with_memories(request: ChatRequest):
     """
@@ -288,6 +304,7 @@ async def chat_get(
 # =============================================================================
 # BD-SPECIFIC ENDPOINTS
 # =============================================================================
+
 
 @router.post("/bd/rfp", response_model=MemoryResponse)
 async def store_rfp(
@@ -475,6 +492,7 @@ async def store_competitor_intel(request: StoreIntelRequest):
 # UTILITY ENDPOINTS
 # =============================================================================
 
+
 @router.get("/list")
 async def list_memories(
     limit: int = Query(50, ge=1, le=100, description="Maximum memories"),
@@ -524,7 +542,9 @@ async def delete_memory(memory_id: str):
         manager = get_bd_memory_manager()
         success = await manager.supermemory.delete_memory(memory_id)
         if not success:
-            raise HTTPException(status_code=404, detail="Memory not found or delete failed")
+            raise HTTPException(
+                status_code=404, detail="Memory not found or delete failed"
+            )
         return {"success": True, "message": f"Memory {memory_id} deleted"}
     except HTTPException:
         raise

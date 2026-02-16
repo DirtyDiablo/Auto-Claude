@@ -20,6 +20,7 @@ def nl():
 # INTENT PARSING — CAMPAIGNS
 # =========================================
 
+
 def test_parse_campaign_intent(nl):
     intent = nl.parse_intent("Run full BD campaign for DCGS-A")
     assert intent.intent == IntentType.CREATE_CAMPAIGN
@@ -41,6 +42,7 @@ def test_parse_campaign_create(nl):
 # INTENT PARSING — ENRICHMENT
 # =========================================
 
+
 def test_parse_enrich_contact(nl):
     intent = nl.parse_intent("Enrich contact John Smith")
     assert intent.intent == IntentType.ENRICH_CONTACT
@@ -57,6 +59,7 @@ def test_parse_update_contact(nl):
 # INTENT PARSING — SCRAPING
 # =========================================
 
+
 def test_parse_scrape_jobs(nl):
     intent = nl.parse_intent("Scrape jobs from defense boards")
     assert intent.intent == IntentType.SCRAPE_JOBS
@@ -71,6 +74,7 @@ def test_parse_run_scraper(nl):
 # =========================================
 # INTENT PARSING — SCORING
 # =========================================
+
 
 def test_parse_score_pipeline(nl):
     intent = nl.parse_intent("Rescore pipeline opportunities")
@@ -87,6 +91,7 @@ def test_parse_update_scores(nl):
 # INTENT PARSING — REPORTS
 # =========================================
 
+
 def test_parse_generate_report(nl):
     intent = nl.parse_intent("Generate weekly report for leadership")
     assert intent.intent == IntentType.GENERATE_REPORT
@@ -102,6 +107,7 @@ def test_parse_weekly_intel(nl):
 # INTENT PARSING — COMPETITION
 # =========================================
 
+
 def test_parse_analyze_competition(nl):
     intent = nl.parse_intent("Analyze competition in the NCR region")
     assert intent.intent == IntentType.ANALYZE_COMPETITION
@@ -116,6 +122,7 @@ def test_parse_competitive_density(nl):
 # INTENT PARSING — FIND CONTACTS
 # =========================================
 
+
 def test_parse_find_contacts(nl):
     intent = nl.parse_intent("Find contacts at Northrop Grumman")
     assert intent.intent == IntentType.FIND_CONTACTS
@@ -126,6 +133,7 @@ def test_parse_find_contacts(nl):
 # INTENT PARSING — SCHEDULE
 # =========================================
 
+
 def test_parse_schedule_cycle(nl):
     intent = nl.parse_intent("Run weekly intel cycle now")
     assert intent.intent == IntentType.SCHEDULE_CYCLE
@@ -134,6 +142,7 @@ def test_parse_schedule_cycle(nl):
 # =========================================
 # INTENT PARSING — UNKNOWN
 # =========================================
+
 
 def test_parse_unknown_intent(nl):
     intent = nl.parse_intent("What is the meaning of life?")
@@ -155,6 +164,7 @@ def test_parse_whitespace_text(nl):
 # =========================================
 # ENTITY EXTRACTION
 # =========================================
+
 
 def test_extract_program_entity(nl):
     intent = nl.parse_intent("Run campaign for DCGS-A")
@@ -184,6 +194,7 @@ def test_extract_params_programs(nl):
 # VALIDATION
 # =========================================
 
+
 def test_validate_valid_intent(nl):
     intent = nl.parse_intent("Run full BD campaign for DCGS-A")
     result = nl.validate(intent)
@@ -207,6 +218,7 @@ def test_validate_missing_params(nl):
 # =========================================
 # EXECUTION
 # =========================================
+
 
 def test_execute_valid(nl):
     result = nl.execute("Run full BD campaign for DCGS-A")
@@ -248,6 +260,7 @@ def test_list_executions(nl):
 # AUTOCOMPLETE
 # =========================================
 
+
 def test_autocomplete(nl):
     suggestions = nl.autocomplete("Run")
     assert len(suggestions) >= 1
@@ -267,6 +280,7 @@ def test_autocomplete_empty(nl):
 # =========================================
 # TO DICT
 # =========================================
+
 
 def test_parsed_intent_to_dict(nl):
     intent = nl.parse_intent("Run full BD campaign")
@@ -288,6 +302,7 @@ def test_execution_to_dict(nl):
 # STATS
 # =========================================
 
+
 def test_stats(nl):
     nl.execute("Run full BD campaign")
     stats = nl.get_stats()
@@ -299,8 +314,10 @@ def test_stats(nl):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.workflows.nl_to_workflow as mod
+
     mod._instance = None
     s1 = get_nl_engine()
     s2 = get_nl_engine()

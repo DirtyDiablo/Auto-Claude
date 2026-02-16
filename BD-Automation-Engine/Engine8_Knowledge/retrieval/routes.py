@@ -2,6 +2,7 @@
 FastAPI routes for PageIndex retrieval.
 Import this into main api.py during integration step.
 """
+
 from fastapi import APIRouter, HTTPException
 from typing import Optional
 from pathlib import Path
@@ -28,6 +29,7 @@ def get_page_index() -> PageIndex:
     if _page_index is None:
         # Use absolute path relative to this module
         import os
+
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         db_path = os.path.join(base_dir, "data", "page_index.db")
         _page_index = PageIndex(db_path=db_path)
@@ -44,9 +46,7 @@ def get_page_rag() -> PageIndexRAG:
 
 @router.get("/search")
 async def pageindex_search(
-    query: str,
-    top_k: int = 5,
-    document_filter: Optional[str] = None
+    query: str, top_k: int = 5, document_filter: Optional[str] = None
 ):
     """Search with explainable page-level retrieval."""
     index = get_page_index()
@@ -59,10 +59,10 @@ async def pageindex_search(
                 "content": r.content[:1000],
                 "score": r.score,
                 "matched_terms": r.matched_terms,
-                "page_id": r.page_id
+                "page_id": r.page_id,
             }
             for r in results
-        ]
+        ],
     }
 
 
@@ -83,7 +83,7 @@ async def index_document(file_path: str):
     if not path.exists():
         raise HTTPException(status_code=404, detail="File not found")
 
-    if path.suffix.lower() != '.pdf':
+    if path.suffix.lower() != ".pdf":
         raise HTTPException(status_code=400, detail="Only PDF files supported")
 
     try:
@@ -92,9 +92,7 @@ async def index_document(file_path: str):
 
         index = get_page_index()
         num_indexed = index.index_document(
-            document_id=doc_id,
-            document_name=path.name,
-            pages=pages
+            document_id=doc_id, document_name=path.name, pages=pages
         )
 
         return {"document_id": doc_id, "pages_indexed": num_indexed}

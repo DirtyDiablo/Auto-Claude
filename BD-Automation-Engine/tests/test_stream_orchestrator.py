@@ -45,7 +45,8 @@ class TestTriggerConditions:
     def test_ts_sci_priority_job_match(self):
         """Should match TS/SCI jobs at priority locations."""
         event = Event(
-            event_type="job.scraped", source="test",
+            event_type="job.scraped",
+            source="test",
             payload={"clearance": "TS/SCI", "location": "Langley, VA"},
         )
         assert _is_ts_sci_priority_job(event) is True
@@ -53,13 +54,15 @@ class TestTriggerConditions:
     def test_ts_sci_priority_job_no_match(self):
         """Should not match non-TS/SCI or non-priority locations."""
         event = Event(
-            event_type="job.scraped", source="test",
+            event_type="job.scraped",
+            source="test",
             payload={"clearance": "Secret", "location": "Langley, VA"},
         )
         assert _is_ts_sci_priority_job(event) is False
 
         event2 = Event(
-            event_type="job.scraped", source="test",
+            event_type="job.scraped",
+            source="test",
             payload={"clearance": "TS/SCI", "location": "New York, NY"},
         )
         assert _is_ts_sci_priority_job(event2) is False
@@ -67,7 +70,8 @@ class TestTriggerConditions:
     def test_large_award_match(self):
         """Should match awards >$10M."""
         event = Event(
-            event_type="contract.awarded", source="test",
+            event_type="contract.awarded",
+            source="test",
             payload={"amount": 15000000},
         )
         assert _is_large_award(event) is True
@@ -75,7 +79,8 @@ class TestTriggerConditions:
     def test_large_award_no_match(self):
         """Should not match awards <=$10M."""
         event = Event(
-            event_type="contract.awarded", source="test",
+            event_type="contract.awarded",
+            source="test",
             payload={"amount": 5000000},
         )
         assert _is_large_award(event) is False
@@ -83,7 +88,8 @@ class TestTriggerConditions:
     def test_tier_promotion_match(self):
         """Should match tier 1-2 with previous tier >2."""
         event = Event(
-            event_type="contact.updated", source="test",
+            event_type="contact.updated",
+            source="test",
             payload={"tier": 2, "previous_tier": 4},
         )
         assert _is_tier_promotion(event) is True
@@ -91,7 +97,8 @@ class TestTriggerConditions:
     def test_tier_promotion_no_match(self):
         """Should not match tier >2."""
         event = Event(
-            event_type="contact.updated", source="test",
+            event_type="contact.updated",
+            source="test",
             payload={"tier": 3},
         )
         assert _is_tier_promotion(event) is False
@@ -99,7 +106,8 @@ class TestTriggerConditions:
     def test_volume_spike_match(self):
         """Should match volume spike >=2x."""
         event = Event(
-            event_type="anomaly.detected", source="test",
+            event_type="anomaly.detected",
+            source="test",
             payload={"anomaly_type": "VOLUME_SPIKE", "multiplier": 3.0},
         )
         assert _is_volume_spike(event) is True
@@ -107,14 +115,21 @@ class TestTriggerConditions:
     def test_volume_spike_no_match(self):
         """Should not match low multiplier."""
         event = Event(
-            event_type="anomaly.detected", source="test",
+            event_type="anomaly.detected",
+            source="test",
             payload={"anomaly_type": "VOLUME_SPIKE", "multiplier": 1.5},
         )
         assert _is_volume_spike(event) is False
 
     def test_all_conditions_registered(self):
         """All named conditions should be in the registry."""
-        expected = ["ts_sci_priority_job", "large_award", "tier_promotion", "volume_spike", "always"]
+        expected = [
+            "ts_sci_priority_job",
+            "large_award",
+            "tier_promotion",
+            "volume_spike",
+            "always",
+        ]
         for name in expected:
             assert name in TRIGGER_CONDITIONS
 
@@ -232,7 +247,9 @@ class TestStreamOrchestrator:
         orch = StreamOrchestrator(bus)
 
         trigger_event = Event(event_type="test.trigger", source="test")
-        exec_id = await orch.trigger_workflow("daily_intelligence_digest", trigger_event)
+        exec_id = await orch.trigger_workflow(
+            "daily_intelligence_digest", trigger_event
+        )
 
         assert exec_id is not None
         assert exec_id in orch.executions
@@ -254,7 +271,9 @@ class TestStreamOrchestrator:
         orch = StreamOrchestrator(bus)
 
         trigger_event = Event(event_type="test", source="test")
-        exec_id = await orch.trigger_workflow("daily_intelligence_digest", trigger_event)
+        exec_id = await orch.trigger_workflow(
+            "daily_intelligence_digest", trigger_event
+        )
 
         # Wait for the async task to complete
         await asyncio.sleep(0.5)

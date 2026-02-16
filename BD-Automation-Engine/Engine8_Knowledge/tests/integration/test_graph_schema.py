@@ -11,8 +11,13 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.graph.schema import (
-    NODE_TYPES, RELATIONSHIP_TYPES, CONSTRAINTS, INDEXES,
-    FULLTEXT_INDEXES, apply_schema, get_schema_info,
+    NODE_TYPES,
+    RELATIONSHIP_TYPES,
+    CONSTRAINTS,
+    INDEXES,
+    FULLTEXT_INDEXES,
+    apply_schema,
+    get_schema_info,
 )
 
 
@@ -21,7 +26,15 @@ class TestSchemaDefinitions:
 
     def test_seven_node_types(self):
         assert len(NODE_TYPES) == 7
-        expected = {"Person", "Company", "Program", "Job", "Contract", "Location", "Interaction"}
+        expected = {
+            "Person",
+            "Company",
+            "Program",
+            "Job",
+            "Contract",
+            "Location",
+            "Interaction",
+        }
         assert set(NODE_TYPES.keys()) == expected
 
     def test_person_has_required_properties(self):

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class RelationshipScore:
     contact_a: str
@@ -169,7 +170,8 @@ class RelationshipStrengthModel:
         return score
 
     async def score_all_relationships(
-        self, relationships: Optional[List[dict]] = None,
+        self,
+        relationships: Optional[List[dict]] = None,
     ) -> List[RelationshipScore]:
         """Batch score all relationships."""
         if relationships is None:
@@ -189,7 +191,9 @@ class RelationshipStrengthModel:
         return scores
 
     async def get_decaying_relationships(
-        self, threshold: float = 30.0, days: int = 14,
+        self,
+        threshold: float = 30.0,
+        days: int = 14,
     ) -> List[DecayingRelationship]:
         """Find relationships at risk of decay."""
         datetime.now(timezone.utc)
@@ -216,15 +220,17 @@ class RelationshipStrengthModel:
                 risk = "watch"
                 action = "Monitor — consider a casual touch point"
 
-            decaying.append(DecayingRelationship(
-                contact_a=score.contact_a,
-                contact_b=score.contact_b,
-                current_score=score.total_score,
-                days_since_contact=days_inactive,
-                projected_score_7d=round(projected, 1),
-                risk_level=risk,
-                recommended_action=action,
-            ))
+            decaying.append(
+                DecayingRelationship(
+                    contact_a=score.contact_a,
+                    contact_b=score.contact_b,
+                    current_score=score.total_score,
+                    days_since_contact=days_inactive,
+                    projected_score_7d=round(projected, 1),
+                    risk_level=risk,
+                    recommended_action=action,
+                )
+            )
 
         decaying.sort(key=lambda d: d.days_since_contact, reverse=True)
         return decaying
@@ -237,7 +243,9 @@ class RelationshipStrengthModel:
         max_hops: int = 4,
     ) -> List[RankedPath]:
         """Find strongest paths between two contacts."""
-        graph_data = graph_data or await self._fetch_graph_neighborhood(from_contact, max_hops)
+        graph_data = graph_data or await self._fetch_graph_neighborhood(
+            from_contact, max_hops
+        )
 
         if not graph_data:
             return []
@@ -266,12 +274,14 @@ class RelationshipStrengthModel:
                 a, b = path[i], path[i + 1]
                 s = adjacency.get(a, {}).get(b, 0)
                 strengths.append(s)
-                segments.append(PathSegment(
-                    from_contact=a,
-                    to_contact=b,
-                    strength=s,
-                    relationship_type=edge_types.get(f"{a}:{b}", "knows"),
-                ))
+                segments.append(
+                    PathSegment(
+                        from_contact=a,
+                        to_contact=b,
+                        strength=s,
+                        relationship_type=edge_types.get(f"{a}:{b}", "knows"),
+                    )
+                )
 
             if not strengths:
                 continue
@@ -282,13 +292,15 @@ class RelationshipStrengthModel:
                 product *= max(s, 0.01) / 100.0
             total = (product ** (1.0 / len(strengths))) * 100
 
-            ranked.append(RankedPath(
-                path=path,
-                segments=segments,
-                total_strength=round(total, 1),
-                weakest_link=round(min(strengths), 1),
-                hops=len(path) - 1,
-            ))
+            ranked.append(
+                RankedPath(
+                    path=path,
+                    segments=segments,
+                    total_strength=round(total, 1),
+                    weakest_link=round(min(strengths), 1),
+                    hops=len(path) - 1,
+                )
+            )
 
         ranked.sort(key=lambda r: r.total_strength, reverse=True)
         return ranked[:5]  # Top 5 paths
@@ -342,7 +354,10 @@ class RelationshipStrengthModel:
         return min(100, avg * 100)
 
     def _score_reciprocity(
-        self, interactions: List[dict], contact_a: str, contact_b: str,
+        self,
+        interactions: List[dict],
+        contact_a: str,
+        contact_b: str,
     ) -> float:
         """Two-way communication score."""
         if not interactions:
@@ -358,7 +373,9 @@ class RelationshipStrengthModel:
         if total == 0:
             return 50.0
 
-        ratio = min(from_a, from_b) / max(from_a, from_b) if max(from_a, from_b) > 0 else 0
+        ratio = (
+            min(from_a, from_b) / max(from_a, from_b) if max(from_a, from_b) > 0 else 0
+        )
         return min(100, ratio * 100)
 
     def _score_depth(self, shared_data: dict) -> float:
@@ -380,7 +397,9 @@ class RelationshipStrengthModel:
     # HELPERS
     # =========================================
 
-    def _most_recent_date(self, interactions: List[dict], now: datetime) -> Optional[datetime]:
+    def _most_recent_date(
+        self, interactions: List[dict], now: datetime
+    ) -> Optional[datetime]:
         """Get the most recent interaction date."""
         dates = []
         for i in interactions:
@@ -390,7 +409,11 @@ class RelationshipStrengthModel:
 
     def _interaction_date(self, interaction: dict, now: datetime) -> datetime:
         """Parse interaction date."""
-        dt = interaction.get("date") or interaction.get("timestamp") or interaction.get("created_at")
+        dt = (
+            interaction.get("date")
+            or interaction.get("timestamp")
+            or interaction.get("created_at")
+        )
         if isinstance(dt, datetime):
             return dt if dt.tzinfo else dt.replace(tzinfo=timezone.utc)
         if isinstance(dt, str):
@@ -402,8 +425,11 @@ class RelationshipStrengthModel:
         return now - timedelta(days=90)  # Default to 90 days ago
 
     def _find_all_paths(
-        self, adjacency: Dict[str, Dict[str, float]],
-        start: str, end: str, max_hops: int,
+        self,
+        adjacency: Dict[str, Dict[str, float]],
+        start: str,
+        end: str,
+        max_hops: int,
     ) -> List[List[str]]:
         """BFS to find all paths up to max_hops."""
         if start not in adjacency:
@@ -436,7 +462,9 @@ class RelationshipStrengthModel:
         return []
 
     async def _fetch_graph_neighborhood(
-        self, contact_id: str, max_hops: int,
+        self,
+        contact_id: str,
+        max_hops: int,
     ) -> Dict[str, List[dict]]:
         """Fetch graph neighborhood from client."""
         if self._graph and hasattr(self._graph, "get_neighborhood"):

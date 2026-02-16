@@ -1,6 +1,7 @@
 """
 Re-index a batch of contacts with proper OpenAI embeddings.
 """
+
 import os
 import sys
 from pathlib import Path
@@ -9,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 import openai
@@ -26,15 +28,14 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
 
+
 @openai_retry
 def generate_embedding(text: str) -> list:
     """Generate embedding using OpenAI API."""
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
-    response = client.embeddings.create(
-        model=EMBEDDING_MODEL,
-        input=text
-    )
+    response = client.embeddings.create(model=EMBEDDING_MODEL, input=text)
     return response.data[0].embedding
+
 
 def reindex_batch(collection: str = "contacts", batch_size: int = 20):
     """Re-index a batch of records with proper embeddings."""
@@ -47,7 +48,7 @@ def reindex_batch(collection: str = "contacts", batch_size: int = 20):
         collection_name=collection,
         limit=batch_size,
         with_payload=True,
-        with_vectors=False
+        with_vectors=False,
     )
 
     points = result[0]
@@ -63,7 +64,14 @@ def reindex_batch(collection: str = "contacts", batch_size: int = 20):
         if not content:
             # Build from other fields
             parts = []
-            for field in ["name", "first_name", "last_name", "title", "company", "program"]:
+            for field in [
+                "name",
+                "first_name",
+                "last_name",
+                "title",
+                "company",
+                "program",
+            ]:
                 if payload.get(field):
                     parts.append(str(payload[field]))
             content = " ".join(parts)
@@ -80,13 +88,7 @@ def reindex_batch(collection: str = "contacts", batch_size: int = 20):
             # Update the point with new vector
             client.upsert(
                 collection_name=collection,
-                points=[
-                    PointStruct(
-                        id=point_id,
-                        vector=embedding,
-                        payload=payload
-                    )
-                ]
+                points=[PointStruct(id=point_id, vector=embedding, payload=payload)],
             )
             updated += 1
             logger.info(f"  Updated {updated}/{len(points)}")
@@ -97,8 +99,10 @@ def reindex_batch(collection: str = "contacts", batch_size: int = 20):
     logger.info(f"Re-indexed {updated} points in {collection}")
     return updated
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
     parser.add_argument("--collection", default="contacts")
     parser.add_argument("--batch-size", type=int, default=20)

@@ -17,6 +17,7 @@ router = APIRouter()
 # REQUEST / RESPONSE MODELS
 # =========================================
 
+
 class EvaluateRequest(BaseModel):
     user_id: str
     role: str = "analyst"
@@ -80,14 +81,22 @@ class SearchEncryptedRequest(BaseModel):
 # ABAC POLICY ENDPOINTS
 # =========================================
 
+
 @router.post("/api/security/evaluate")
 def evaluate_access(req: EvaluateRequest):
     """Evaluate an ABAC policy decision."""
     from src.security.abac_engine import (
-        get_abac_engine, Subject, Resource, Environment, ClearanceLevel,
+        get_abac_engine,
+        Subject,
+        Resource,
+        Environment,
+        ClearanceLevel,
     )
     from src.security.audit_trail import (
-        get_audit_trail, AuditActor, AuditAction, AuditResource,
+        get_audit_trail,
+        AuditActor,
+        AuditAction,
+        AuditResource,
     )
 
     engine = get_abac_engine()
@@ -178,6 +187,7 @@ def update_policy(policy_id: str, req: PolicyUpdateRequest):
 # AUDIT TRAIL ENDPOINTS
 # =========================================
 
+
 @router.get("/api/security/audit")
 def query_audit_trail(
     actor_id: Optional[str] = Query(None),
@@ -225,6 +235,7 @@ def audit_stats():
 # ENCRYPTION ENDPOINTS
 # =========================================
 
+
 @router.get("/api/security/encryption/status")
 def encryption_status():
     """Get encryption system status."""
@@ -267,6 +278,7 @@ def get_sensitive_field_registry():
 # COMPLIANCE ENDPOINTS
 # =========================================
 
+
 @router.get("/api/security/compliance/soc2")
 def soc2_readiness():
     """SOC 2 Type II readiness assessment."""
@@ -305,6 +317,7 @@ def compliance_report(
 # HEALTH
 # =========================================
 
+
 @router.get("/api/security/health")
 def security_health():
     """Security subsystem health check."""
@@ -327,6 +340,7 @@ def security_health():
 # =========================================
 # ROUTER REGISTRATION
 # =========================================
+
 
 def include_security_router(app: FastAPI) -> None:
     app.include_router(router)

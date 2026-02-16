@@ -1,4 +1,5 @@
 """Tests for Phase 29A - Retrain Orchestrator."""
+
 import sys
 import pytest
 from pathlib import Path
@@ -19,6 +20,7 @@ from Engine8_Knowledge.optimization.retrain_orchestrator import (
 # Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def orchestrator(tmp_path):
     """Create RetrainOrchestrator with temp storage."""
@@ -28,6 +30,7 @@ def orchestrator(tmp_path):
 # =============================================================================
 # Dataclass Tests
 # =============================================================================
+
 
 class TestRetrainDataclasses:
     """Tests for retrain-related dataclasses."""
@@ -76,6 +79,7 @@ class TestRetrainDataclasses:
 # REGISTERED_MODELS Tests
 # =============================================================================
 
+
 class TestRegisteredModels:
     """Tests for the REGISTERED_MODELS constant."""
 
@@ -108,6 +112,7 @@ class TestRegisteredModels:
 # =============================================================================
 # RetrainOrchestrator Core Tests
 # =============================================================================
+
 
 class TestRetrainOrchestrator:
     """Tests for RetrainOrchestrator engine."""
@@ -234,12 +239,14 @@ class TestRetrainOrchestrator:
 # Singleton Tests
 # =============================================================================
 
+
 class TestGetRetrainOrchestrator:
     """Tests for the get_retrain_orchestrator singleton factory."""
 
     def test_get_retrain_orchestrator_returns_instance(self):
         """Test get_retrain_orchestrator returns a RetrainOrchestrator instance."""
         import Engine8_Knowledge.optimization.retrain_orchestrator as mod
+
         original = mod._orchestrator
         try:
             mod._orchestrator = None
@@ -251,6 +258,7 @@ class TestGetRetrainOrchestrator:
     def test_get_retrain_orchestrator_returns_same_instance(self):
         """Test get_retrain_orchestrator returns the same singleton."""
         import Engine8_Knowledge.optimization.retrain_orchestrator as mod
+
         original = mod._orchestrator
         try:
             mod._orchestrator = None

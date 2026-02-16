@@ -24,6 +24,7 @@ def client(app):
 # CATALOG
 # =========================================
 
+
 def test_catalog_list(client):
     resp = client.get("/governance/catalog")
     assert resp.status_code == 200
@@ -61,6 +62,7 @@ def test_catalog_search(client):
 # SCHEMAS
 # =========================================
 
+
 def test_schemas_list(client):
     resp = client.get("/governance/schemas")
     assert resp.status_code == 200
@@ -69,20 +71,26 @@ def test_schemas_list(client):
 
 
 def test_validate_valid(client):
-    resp = client.post("/governance/schemas/validate", json={
-        "schema_name": "contact",
-        "data": {"name": "John Smith", "email": "j@test.com"},
-    })
+    resp = client.post(
+        "/governance/schemas/validate",
+        json={
+            "schema_name": "contact",
+            "data": {"name": "John Smith", "email": "j@test.com"},
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["valid"] is True
 
 
 def test_validate_invalid(client):
-    resp = client.post("/governance/schemas/validate", json={
-        "schema_name": "contact",
-        "data": {"email": "j@test.com"},  # missing required "name"
-    })
+    resp = client.post(
+        "/governance/schemas/validate",
+        json={
+            "schema_name": "contact",
+            "data": {"email": "j@test.com"},  # missing required "name"
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["valid"] is False
@@ -92,6 +100,7 @@ def test_validate_invalid(client):
 # CONTRACTS
 # =========================================
 
+
 def test_contracts_list(client):
     resp = client.get("/governance/contracts")
     assert resp.status_code == 200
@@ -100,22 +109,28 @@ def test_contracts_list(client):
 
 
 def test_contract_check_passing(client):
-    resp = client.post("/governance/contracts/check", json={
-        "contract_id": "contract_jobs_scraper",
-        "metrics": {"completeness": 0.95, "accuracy": 0.95},
-        "record_count": 10,
-        "staleness_hours": 4.0,
-    })
+    resp = client.post(
+        "/governance/contracts/check",
+        json={
+            "contract_id": "contract_jobs_scraper",
+            "metrics": {"completeness": 0.95, "accuracy": 0.95},
+            "record_count": 10,
+            "staleness_hours": 4.0,
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "passing"
 
 
 def test_contract_check_breached(client):
-    resp = client.post("/governance/contracts/check", json={
-        "contract_id": "contract_jobs_scraper",
-        "metrics": {"completeness": 0.5, "accuracy": 0.5},
-    })
+    resp = client.post(
+        "/governance/contracts/check",
+        json={
+            "contract_id": "contract_jobs_scraper",
+            "metrics": {"completeness": 0.5, "accuracy": 0.5},
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "breached"
@@ -126,6 +141,7 @@ def test_contract_check_breached(client):
 # SLAs
 # =========================================
 
+
 def test_slas_list(client):
     resp = client.get("/governance/slas")
     assert resp.status_code == 200
@@ -134,10 +150,17 @@ def test_slas_list(client):
 
 
 def test_sla_check_meeting(client):
-    resp = client.post("/governance/slas/check", json={
-        "sla_id": "sla_contacts_freshness",
-        "metrics": {"freshness_hours": 48.0, "accuracy": 0.99, "completeness": 0.99},
-    })
+    resp = client.post(
+        "/governance/slas/check",
+        json={
+            "sla_id": "sla_contacts_freshness",
+            "metrics": {
+                "freshness_hours": 48.0,
+                "accuracy": 0.99,
+                "completeness": 0.99,
+            },
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     # All targets met, none violated (may be at_risk for near-1.0 thresholds)
@@ -146,10 +169,13 @@ def test_sla_check_meeting(client):
 
 
 def test_sla_check_violated(client):
-    resp = client.post("/governance/slas/check", json={
-        "sla_id": "sla_jobs_freshness",
-        "metrics": {"freshness_hours": 10.0, "completeness": 0.5},
-    })
+    resp = client.post(
+        "/governance/slas/check",
+        json={
+            "sla_id": "sla_jobs_freshness",
+            "metrics": {"freshness_hours": 10.0, "completeness": 0.5},
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "violated"
@@ -159,14 +185,26 @@ def test_sla_check_violated(client):
 # CHECK ALL
 # =========================================
 
+
 def test_check_all(client):
-    resp = client.post("/governance/check-all", json={
-        "metrics_by_asset": {
-            "contacts": {"completeness": 0.95, "accuracy": 0.97, "freshness_hours": 48},
-            "jobs": {"completeness": 0.9, "accuracy": 0.95, "freshness_hours": 2},
-            "programs": {"completeness": 0.85, "accuracy": 0.92, "freshness_hours": 72},
+    resp = client.post(
+        "/governance/check-all",
+        json={
+            "metrics_by_asset": {
+                "contacts": {
+                    "completeness": 0.95,
+                    "accuracy": 0.97,
+                    "freshness_hours": 48,
+                },
+                "jobs": {"completeness": 0.9, "accuracy": 0.95, "freshness_hours": 2},
+                "programs": {
+                    "completeness": 0.85,
+                    "accuracy": 0.92,
+                    "freshness_hours": 72,
+                },
+            },
         },
-    })
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert "contracts" in data
@@ -176,6 +214,7 @@ def test_check_all(client):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(client):
     resp = client.get("/governance/stats")

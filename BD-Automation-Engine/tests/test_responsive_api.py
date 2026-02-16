@@ -19,13 +19,24 @@ def api():
 
 # Sample data for testing adaptation
 SAMPLE_DATA = [
-    {"id": i, "name": f"Record {i}", "title": f"Title {i}",
-     "description": f"Description for record {i}",
-     "status": "active", "score": 75 + i, "company": f"Company {i}",
-     "email": f"user{i}@example.com", "phone": "555-0100",
-     "program": f"Program {i}", "tier": "Tier 1",
-     "created_at": "2025-01-01", "updated_at": "2025-06-01",
-     "metadata": {}, "tags": ["bd"], "notes": "Some notes"}
+    {
+        "id": i,
+        "name": f"Record {i}",
+        "title": f"Title {i}",
+        "description": f"Description for record {i}",
+        "status": "active",
+        "score": 75 + i,
+        "company": f"Company {i}",
+        "email": f"user{i}@example.com",
+        "phone": "555-0100",
+        "program": f"Program {i}",
+        "tier": "Tier 1",
+        "created_at": "2025-01-01",
+        "updated_at": "2025-06-01",
+        "metadata": {},
+        "tags": ["bd"],
+        "notes": "Some notes",
+    }
     for i in range(100)
 ]
 
@@ -33,6 +44,7 @@ SAMPLE_DATA = [
 # =========================================
 # CLIENT DETECTION
 # =========================================
+
 
 def test_detect_desktop(api):
     profile = api.detect_client(user_agent="Mozilla/5.0 Desktop", screen_width=1920)
@@ -78,24 +90,34 @@ def test_detect_network_poor(api):
 # RESPONSE ADAPTATION
 # =========================================
 
+
 def test_adapt_full(api):
-    profile = ClientProfile(profile_id="test", device_type=DeviceType.DESKTOP,
-                            preferred_format=ResponseFormat.FULL)
+    profile = ClientProfile(
+        profile_id="test",
+        device_type=DeviceType.DESKTOP,
+        preferred_format=ResponseFormat.FULL,
+    )
     result = api.adapt_response(SAMPLE_DATA, profile)
     assert len(result["data"]) == 50  # desktop page size
     assert result["total"] == 100
 
 
 def test_adapt_mobile(api):
-    profile = ClientProfile(profile_id="test", device_type=DeviceType.MOBILE,
-                            preferred_format=ResponseFormat.COMPACT)
+    profile = ClientProfile(
+        profile_id="test",
+        device_type=DeviceType.MOBILE,
+        preferred_format=ResponseFormat.COMPACT,
+    )
     result = api.adapt_response(SAMPLE_DATA, profile)
     assert len(result["data"]) == 15  # mobile page size
 
 
 def test_adapt_watch(api):
-    profile = ClientProfile(profile_id="test", device_type=DeviceType.WATCH,
-                            preferred_format=ResponseFormat.MINIMAL)
+    profile = ClientProfile(
+        profile_id="test",
+        device_type=DeviceType.WATCH,
+        preferred_format=ResponseFormat.MINIMAL,
+    )
     result = api.adapt_response(SAMPLE_DATA, profile)
     assert len(result["data"]) == 5  # watch page size
 
@@ -134,6 +156,7 @@ def test_adapt_empty_data(api):
 # PAGE SIZES
 # =========================================
 
+
 def test_page_size_desktop(api):
     assert api.get_recommended_page_size(DeviceType.DESKTOP) == 50
 
@@ -150,6 +173,7 @@ def test_page_size_api(api):
 # FIELDS FOR FORMAT
 # =========================================
 
+
 def test_full_fields(api):
     fields = api.get_fields_for_format(ResponseFormat.FULL)
     assert len(fields) > 10
@@ -163,6 +187,7 @@ def test_minimal_fields(api):
 # =========================================
 # PROFILE & STATS
 # =========================================
+
 
 def test_profile_to_dict(api):
     profile = api.detect_client(user_agent="Test")
@@ -187,8 +212,10 @@ def test_stats(api):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.pwa.responsive_api as mod
+
     mod._instance = None
     a1 = get_responsive_api()
     a2 = get_responsive_api()

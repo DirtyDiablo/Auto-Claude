@@ -45,10 +45,10 @@ except ImportError:
     BDDocumentProcessor = None
 
 __all__ = [
-    'BDKnowledgeStore',
-    'BDIndexer',
-    'BDRAGEngine',
-    'AutoTagger',
-    'BDDocumentProcessor',
+    "BDKnowledgeStore",
+    "BDIndexer",
+    "BDRAGEngine",
+    "AutoTagger",
+    "BDDocumentProcessor",
 ]
-__version__ = '1.0.0'
+__version__ = "1.0.0"

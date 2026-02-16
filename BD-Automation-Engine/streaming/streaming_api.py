@@ -26,6 +26,7 @@ BDStreamingPipeline = None
 
 try:
     from .bd_streaming_pipeline import BDStreamingPipeline
+
     PATHWAY_AVAILABLE = True
 except (ImportError, ModuleNotFoundError):
     pass
@@ -39,8 +40,10 @@ router = APIRouter(prefix="/streaming", tags=["streaming"])
 # MODELS
 # =============================================================================
 
+
 class PipelineConfig(BaseModel):
     """Configuration for starting the pipeline."""
+
     kafka_bootstrap_servers: str = "localhost:9092"
     postgres_connection: str = "postgresql://localhost:5432/bd_intelligence"
     s3_bucket: str = "bd-intelligence-data"
@@ -58,6 +61,7 @@ class PipelineConfig(BaseModel):
 
 class PipelineStatus(BaseModel):
     """Pipeline status response."""
+
     status: str
     running: bool
     started_at: Optional[str] = None
@@ -68,6 +72,7 @@ class PipelineStatus(BaseModel):
 
 class PipelineMetrics(BaseModel):
     """Real-time pipeline metrics."""
+
     opportunities_processed: int = 0
     contracts_processed: int = 0
     activities_processed: int = 0
@@ -82,24 +87,28 @@ class PipelineMetrics(BaseModel):
 # GLOBAL STATE
 # =============================================================================
 
+
 @dataclass
 class PipelineState:
     """Global pipeline state."""
+
     running: bool = False
     started_at: Optional[datetime] = None
     config: Optional[PipelineConfig] = None
     pipeline: Optional[BDStreamingPipeline] = None
     thread: Optional[threading.Thread] = None
     error: Optional[str] = None
-    metrics: Dict[str, int] = field(default_factory=lambda: {
-        "opportunities_processed": 0,
-        "contracts_processed": 0,
-        "activities_processed": 0,
-        "alerts_generated": 0,
-        "relevant_opportunities": 0,
-        "recompete_signals": 0,
-        "competitor_wins": 0,
-    })
+    metrics: Dict[str, int] = field(
+        default_factory=lambda: {
+            "opportunities_processed": 0,
+            "contracts_processed": 0,
+            "activities_processed": 0,
+            "alerts_generated": 0,
+            "relevant_opportunities": 0,
+            "recompete_signals": 0,
+            "competitor_wins": 0,
+        }
+    )
 
 
 _state = PipelineState()
@@ -109,6 +118,7 @@ _state_lock = threading.Lock()
 # =============================================================================
 # PIPELINE EXECUTION
 # =============================================================================
+
 
 def _run_pipeline_thread(config: PipelineConfig) -> None:
     """Run the pipeline in a background thread."""
@@ -158,6 +168,7 @@ def _run_pipeline_thread(config: PipelineConfig) -> None:
 # API ENDPOINTS
 # =============================================================================
 
+
 @router.get("/status", response_model=PipelineStatus)
 async def get_pipeline_status() -> PipelineStatus:
     """
@@ -203,15 +214,12 @@ async def start_pipeline(
     if not PATHWAY_AVAILABLE:
         raise HTTPException(
             status_code=503,
-            detail="Pathway not available. Requires Linux/macOS. Use WSL, Docker, or VM on Windows."
+            detail="Pathway not available. Requires Linux/macOS. Use WSL, Docker, or VM on Windows.",
         )
 
     with _state_lock:
         if _state.running:
-            raise HTTPException(
-                status_code=400,
-                detail="Pipeline is already running"
-            )
+            raise HTTPException(status_code=400, detail="Pipeline is already running")
 
         _state.running = True
         _state.started_at = datetime.now()
@@ -263,10 +271,7 @@ async def stop_pipeline() -> PipelineStatus:
 
     with _state_lock:
         if not _state.running:
-            raise HTTPException(
-                status_code=400,
-                detail="Pipeline is not running"
-            )
+            raise HTTPException(status_code=400, detail="Pipeline is not running")
 
         # Signal pipeline to stop
         if _state.pipeline:
@@ -274,7 +279,9 @@ async def stop_pipeline() -> PipelineStatus:
 
         _state.running = False
         stopped_at = datetime.now()
-        uptime = (stopped_at - _state.started_at).total_seconds() if _state.started_at else 0
+        uptime = (
+            (stopped_at - _state.started_at).total_seconds() if _state.started_at else 0
+        )
 
     logger.info(f"Pipeline stopped after {uptime:.1f} seconds")
 
@@ -324,6 +331,7 @@ async def health_check() -> Dict[str, Any]:
     if PATHWAY_AVAILABLE:
         try:
             import pathway as pw
+
             pathway_version = getattr(pw, "__version__", "unknown")
         except ImportError:
             pass
@@ -333,7 +341,9 @@ async def health_check() -> Dict[str, Any]:
         "pathway_available": PATHWAY_AVAILABLE,
         "pathway_version": pathway_version,
         "pipeline_running": _state.running,
-        "platform_note": None if PATHWAY_AVAILABLE else "Pathway requires Linux/macOS. Use WSL, Docker, or VM on Windows.",
+        "platform_note": None
+        if PATHWAY_AVAILABLE
+        else "Pathway requires Linux/macOS. Use WSL, Docker, or VM on Windows.",
         "timestamp": datetime.now().isoformat(),
     }
 
@@ -341,6 +351,7 @@ async def health_check() -> Dict[str, Any]:
 # =============================================================================
 # INTEGRATION WITH MAIN API
 # =============================================================================
+
 
 def include_streaming_router(app) -> None:
     """

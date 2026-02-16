@@ -23,16 +23,18 @@ from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BD-RelationalEnrichment')
+logger = logging.getLogger("BD-RelationalEnrichment")
 
 
 # ===========================================
 # DATA CLASSES
 # ===========================================
 
+
 @dataclass
 class FederalProgram:
     """Federal Program record from CSV."""
+
     name: str
     acronym: str
     agency: str
@@ -60,20 +62,31 @@ class FederalProgram:
     def __post_init__(self):
         # Normalize lists
         if isinstance(self.key_locations, str):
-            self.key_locations = [loc.strip() for loc in self.key_locations.split(';') if loc.strip()]
+            self.key_locations = [
+                loc.strip() for loc in self.key_locations.split(";") if loc.strip()
+            ]
         if isinstance(self.subcontractors, str):
-            self.subcontractors = [s.strip() for s in self.subcontractors.split(';') if s.strip()]
+            self.subcontractors = [
+                s.strip() for s in self.subcontractors.split(";") if s.strip()
+            ]
         if isinstance(self.clearance_requirements, str):
-            self.clearance_requirements = [c.strip() for c in self.clearance_requirements.split(',') if c.strip()]
+            self.clearance_requirements = [
+                c.strip() for c in self.clearance_requirements.split(",") if c.strip()
+            ]
         if isinstance(self.typical_roles, str):
-            self.typical_roles = [r.strip() for r in self.typical_roles.split(';') if r.strip()]
+            self.typical_roles = [
+                r.strip() for r in self.typical_roles.split(";") if r.strip()
+            ]
         if isinstance(self.keywords, str):
-            self.keywords = [k.strip().strip('"') for k in self.keywords.split(';') if k.strip()]
+            self.keywords = [
+                k.strip().strip('"') for k in self.keywords.split(";") if k.strip()
+            ]
 
 
 @dataclass
 class ProgramMatch:
     """Result of matching a job to a program."""
+
     program_name: str
     acronym: str
     prime_contractor: str
@@ -86,21 +99,22 @@ class ProgramMatch:
 
     def to_dict(self) -> Dict:
         return {
-            'program_name': self.program_name,
-            'acronym': self.acronym,
-            'prime': self.prime_contractor,
-            'subcontractors': self.subcontractors,
-            'confidence': self.confidence,
-            'match_reasons': self.match_reasons,
-            'task_order': self.task_order,
-            'program_type': self.program_type,
-            'agency': self.agency
+            "program_name": self.program_name,
+            "acronym": self.acronym,
+            "prime": self.prime_contractor,
+            "subcontractors": self.subcontractors,
+            "confidence": self.confidence,
+            "match_reasons": self.match_reasons,
+            "task_order": self.task_order,
+            "program_type": self.program_type,
+            "agency": self.agency,
         }
 
 
 # ===========================================
 # DATA LOADING
 # ===========================================
+
 
 class ProgramDatabase:
     """Manages Federal Programs data from CSV."""
@@ -123,25 +137,28 @@ class ProgramDatabase:
 
         self.programs = []
 
-        with open(path, 'r', encoding='utf-8-sig') as f:
+        with open(path, "r", encoding="utf-8-sig") as f:
             reader = csv.DictReader(f)
 
             for row in reader:
                 try:
                     program = FederalProgram(
-                        name=row.get('Program Name', '').strip(),
-                        acronym=row.get('Acronym', '').strip(),
-                        agency=row.get('Agency Owner', '').strip(),
-                        prime_contractor=row.get('Prime Contractor', '') or row.get('Prime Contractor 1', ''),
-                        key_locations=row.get('Key Locations', ''),
-                        subcontractors=row.get('Key Subcontractors', '') or row.get('Known Subcontractors', ''),
-                        clearance_requirements=row.get('Clearance Requirements', ''),
-                        typical_roles=row.get('Typical Roles', ''),
-                        keywords=row.get('Keywords/Signals', ''),
-                        program_type=row.get('Program Type', '') or row.get('Program Type 1', ''),
-                        contract_value=row.get('Contract Value', ''),
-                        priority_level=row.get('Priority Level', ''),
-                        raw_data=row
+                        name=row.get("Program Name", "").strip(),
+                        acronym=row.get("Acronym", "").strip(),
+                        agency=row.get("Agency Owner", "").strip(),
+                        prime_contractor=row.get("Prime Contractor", "")
+                        or row.get("Prime Contractor 1", ""),
+                        key_locations=row.get("Key Locations", ""),
+                        subcontractors=row.get("Key Subcontractors", "")
+                        or row.get("Known Subcontractors", ""),
+                        clearance_requirements=row.get("Clearance Requirements", ""),
+                        typical_roles=row.get("Typical Roles", ""),
+                        keywords=row.get("Keywords/Signals", ""),
+                        program_type=row.get("Program Type", "")
+                        or row.get("Program Type 1", ""),
+                        contract_value=row.get("Contract Value", ""),
+                        priority_level=row.get("Priority Level", ""),
+                        raw_data=row,
                     )
 
                     if program.name:  # Only add if has a name
@@ -184,32 +201,46 @@ class ProgramDatabase:
                     self._prime_index[prime_key] = []
                 self._prime_index[prime_key].append(program)
 
-        logger.info(f"Built indexes: {len(self._location_index)} locations, "
-                   f"{len(self._keyword_index)} keywords, {len(self._prime_index)} primes")
+        logger.info(
+            f"Built indexes: {len(self._location_index)} locations, "
+            f"{len(self._keyword_index)} keywords, {len(self._prime_index)} primes"
+        )
 
     def _normalize_location(self, location: str) -> str:
         """Normalize location string for matching."""
         if not location:
-            return ''
+            return ""
 
         # Extract city and state
         loc = location.strip().lower()
 
         # Remove common suffixes
-        for suffix in ['afb', 'sfb', 'base', 'arsenal', 'proving ground']:
-            loc = loc.replace(suffix, '').strip()
+        for suffix in ["afb", "sfb", "base", "arsenal", "proving ground"]:
+            loc = loc.replace(suffix, "").strip()
 
         # Map state abbreviations
         state_map = {
-            'al': 'alabama', 'az': 'arizona', 'ca': 'california', 'co': 'colorado',
-            'fl': 'florida', 'ga': 'georgia', 'md': 'maryland', 'nc': 'north carolina',
-            'nm': 'new mexico', 'nv': 'nevada', 'ny': 'new york', 'oh': 'ohio',
-            'tx': 'texas', 'ut': 'utah', 'va': 'virginia', 'dc': 'district of columbia'
+            "al": "alabama",
+            "az": "arizona",
+            "ca": "california",
+            "co": "colorado",
+            "fl": "florida",
+            "ga": "georgia",
+            "md": "maryland",
+            "nc": "north carolina",
+            "nm": "new mexico",
+            "nv": "nevada",
+            "ny": "new york",
+            "oh": "ohio",
+            "tx": "texas",
+            "ut": "utah",
+            "va": "virginia",
+            "dc": "district of columbia",
         }
 
         for abbr, full in state_map.items():
-            if loc.endswith(f' {abbr}'):
-                loc = loc[:-len(abbr)-1] + ' ' + full
+            if loc.endswith(f" {abbr}"):
+                loc = loc[: -len(abbr) - 1] + " " + full
 
         return loc.strip()
 
@@ -258,23 +289,47 @@ class ProgramDatabase:
 
 # Known prime contractors to detect in job descriptions
 KNOWN_PRIMES = [
-    'Lockheed Martin', 'Northrop Grumman', 'Raytheon', 'Boeing', 'General Dynamics',
-    'BAE Systems', 'L3Harris', 'Leidos', 'SAIC', 'Booz Allen Hamilton',
-    'CACI', 'ManTech', 'Peraton', 'KBR', 'Jacobs', 'Parsons',
-    'GDIT', 'General Dynamics IT', 'Accenture Federal', 'Deloitte',
-    'CGI Federal', 'Maximus', 'ICF', 'Guidehouse', 'MITRE',
-    'Battelle', 'Dynetics', 'Sierra Nevada', 'Textron', 'Leonardo DRS'
+    "Lockheed Martin",
+    "Northrop Grumman",
+    "Raytheon",
+    "Boeing",
+    "General Dynamics",
+    "BAE Systems",
+    "L3Harris",
+    "Leidos",
+    "SAIC",
+    "Booz Allen Hamilton",
+    "CACI",
+    "ManTech",
+    "Peraton",
+    "KBR",
+    "Jacobs",
+    "Parsons",
+    "GDIT",
+    "General Dynamics IT",
+    "Accenture Federal",
+    "Deloitte",
+    "CGI Federal",
+    "Maximus",
+    "ICF",
+    "Guidehouse",
+    "MITRE",
+    "Battelle",
+    "Dynetics",
+    "Sierra Nevada",
+    "Textron",
+    "Leonardo DRS",
 ]
 
 # Location aliases for matching
 LOCATION_ALIASES = {
-    'huntsville': ['redstone', 'huntsville', 'madison'],
-    'colorado springs': ['peterson', 'schriever', 'cheyenne mountain'],
-    'san antonio': ['lackland', 'randolph', 'joint base san antonio'],
-    'washington dc': ['pentagon', 'arlington', 'fort belvoir', 'andrews'],
-    'tampa': ['macdill', 'centcom', 'socom'],
-    'norfolk': ['naval station norfolk', 'little creek', 'dam neck'],
-    'san diego': ['north island', 'coronado', 'point loma'],
+    "huntsville": ["redstone", "huntsville", "madison"],
+    "colorado springs": ["peterson", "schriever", "cheyenne mountain"],
+    "san antonio": ["lackland", "randolph", "joint base san antonio"],
+    "washington dc": ["pentagon", "arlington", "fort belvoir", "andrews"],
+    "tampa": ["macdill", "centcom", "socom"],
+    "norfolk": ["naval station norfolk", "little creek", "dam neck"],
+    "san diego": ["north island", "coronado", "point loma"],
 }
 
 
@@ -284,8 +339,14 @@ class ProgramMatcher:
     def __init__(self, program_db: ProgramDatabase):
         self.program_db = program_db
 
-    def match_job(self, job_title: str, location: str, clearance: str,
-                  description: str, company: str = None) -> Optional[ProgramMatch]:
+    def match_job(
+        self,
+        job_title: str,
+        location: str,
+        clearance: str,
+        description: str,
+        company: str = None,
+    ) -> Optional[ProgramMatch]:
         """
         Match a job to the best federal program.
 
@@ -311,7 +372,9 @@ class ProgramMatcher:
         if detected_prime:
             prime_matches = self.program_db.get_programs_by_prime(detected_prime)
             for program in prime_matches:
-                self._add_candidate(candidates, program, 30, f"Prime detected: {detected_prime}")
+                self._add_candidate(
+                    candidates, program, 30, f"Prime detected: {detected_prime}"
+                )
 
         # 3. Keyword matching (weight: 20)
         keyword_matches = self.program_db.get_programs_by_keyword(description)
@@ -320,58 +383,65 @@ class ProgramMatcher:
 
         # 4. Job title to typical roles matching (weight: 25)
         for program in self.program_db.programs:
-            role_score = self._match_job_title_to_roles(job_title, program.typical_roles)
+            role_score = self._match_job_title_to_roles(
+                job_title, program.typical_roles
+            )
             if role_score > 0.4:
                 weight = int(25 * role_score)
-                self._add_candidate(candidates, program, weight, f"Role match ({role_score:.0%})")
+                self._add_candidate(
+                    candidates, program, weight, f"Role match ({role_score:.0%})"
+                )
 
         # 5. Clearance matching (weight: 10 bonus)
         if clearance:
             for program in self.program_db.programs:
                 if self._clearance_matches(clearance, program.clearance_requirements):
                     if program.name in candidates:
-                        candidates[program.name]['score'] += 10
-                        candidates[program.name]['reasons'].append(f"Clearance match: {clearance}")
+                        candidates[program.name]["score"] += 10
+                        candidates[program.name]["reasons"].append(
+                            f"Clearance match: {clearance}"
+                        )
 
         # 6. Agency/acronym in description (weight: 15)
         for program in self.program_db.programs:
             if program.acronym and len(program.acronym) > 2:
-                if re.search(rf'\b{re.escape(program.acronym)}\b', description, re.IGNORECASE):
-                    self._add_candidate(candidates, program, 15, f"Acronym: {program.acronym}")
+                if re.search(
+                    rf"\b{re.escape(program.acronym)}\b", description, re.IGNORECASE
+                ):
+                    self._add_candidate(
+                        candidates, program, 15, f"Acronym: {program.acronym}"
+                    )
 
         if not candidates:
             return None
 
         # Find best match
-        best = max(candidates.values(), key=lambda x: x['score'])
-        program = best['program']
+        best = max(candidates.values(), key=lambda x: x["score"])
+        program = best["program"]
 
         # Calculate confidence (0-1)
         max_possible = 100  # Location + Prime + Keyword + Role + Clearance
-        confidence = min(1.0, best['score'] / max_possible)
+        confidence = min(1.0, best["score"] / max_possible)
 
         return ProgramMatch(
             program_name=program.name,
             acronym=program.acronym,
             prime_contractor=program.prime_contractor,
-            subcontractors=', '.join(program.subcontractors[:5]),
+            subcontractors=", ".join(program.subcontractors[:5]),
             confidence=confidence,
-            match_reasons=best['reasons'],
+            match_reasons=best["reasons"],
             program_type=program.program_type,
-            agency=program.agency
+            agency=program.agency,
         )
 
-    def _add_candidate(self, candidates: Dict, program: FederalProgram,
-                       score: int, reason: str):
+    def _add_candidate(
+        self, candidates: Dict, program: FederalProgram, score: int, reason: str
+    ):
         """Add or update a candidate program."""
         if program.name not in candidates:
-            candidates[program.name] = {
-                'program': program,
-                'score': 0,
-                'reasons': []
-            }
-        candidates[program.name]['score'] += score
-        candidates[program.name]['reasons'].append(reason)
+            candidates[program.name] = {"program": program, "score": 0, "reasons": []}
+        candidates[program.name]["score"] += score
+        candidates[program.name]["reasons"].append(reason)
 
     def _match_by_location(self, location: str) -> List[FederalProgram]:
         """Match programs by location with alias handling."""
@@ -398,7 +468,9 @@ class ProgramMatcher:
 
         return None
 
-    def _match_job_title_to_roles(self, job_title: str, typical_roles: List[str]) -> float:
+    def _match_job_title_to_roles(
+        self, job_title: str, typical_roles: List[str]
+    ) -> float:
         """Calculate similarity between job title and typical roles."""
         if not typical_roles:
             return 0.0
@@ -427,7 +499,9 @@ class ProgramMatcher:
 
         return best_score
 
-    def _clearance_matches(self, job_clearance: str, program_clearances: List[str]) -> bool:
+    def _clearance_matches(
+        self, job_clearance: str, program_clearances: List[str]
+    ) -> bool:
         """Check if job clearance matches program requirements."""
         if not job_clearance or not program_clearances:
             return False
@@ -442,11 +516,13 @@ class ProgramMatcher:
                 return True
 
             # Level matching
-            if 'ts/sci' in job_lower and 'ts/sci' in pc_lower:
+            if "ts/sci" in job_lower and "ts/sci" in pc_lower:
                 return True
-            if 'top secret' in job_lower and ('ts' in pc_lower or 'top secret' in pc_lower):
+            if "top secret" in job_lower and (
+                "ts" in pc_lower or "top secret" in pc_lower
+            ):
                 return True
-            if 'secret' in job_lower and 'secret' in pc_lower:
+            if "secret" in job_lower and "secret" in pc_lower:
                 return True
 
         return False
@@ -455,6 +531,7 @@ class ProgramMatcher:
 # ===========================================
 # ENRICHMENT ENGINE
 # ===========================================
+
 
 class RelationalEnrichmentEngine:
     """
@@ -471,9 +548,9 @@ class RelationalEnrichmentEngine:
         """Find the data directory."""
         # Try relative paths
         candidates = [
-            Path(__file__).parent.parent.parent / 'Engine2_ProgramMapping' / 'data',
-            Path('Engine2_ProgramMapping/data'),
-            Path('BD-Automation-Engine/Engine2_ProgramMapping/data'),
+            Path(__file__).parent.parent.parent / "Engine2_ProgramMapping" / "data",
+            Path("Engine2_ProgramMapping/data"),
+            Path("BD-Automation-Engine/Engine2_ProgramMapping/data"),
         ]
 
         for path in candidates:
@@ -488,9 +565,9 @@ class RelationalEnrichmentEngine:
             return
 
         # Load Federal Programs
-        programs_csv = Path(self.data_dir) / 'Federal ProgramsAll.csv'
+        programs_csv = Path(self.data_dir) / "Federal ProgramsAll.csv"
         if not programs_csv.exists():
-            programs_csv = Path(self.data_dir) / 'Federal Programs.csv'
+            programs_csv = Path(self.data_dir) / "Federal Programs.csv"
 
         if programs_csv.exists():
             self.program_db = ProgramDatabase(str(programs_csv))
@@ -517,11 +594,11 @@ class RelationalEnrichmentEngine:
             return job
 
         # Extract job fields
-        title = job.get('title', job.get('jobTitle', ''))
-        location = job.get('location', '')
-        clearance = job.get('clearance', '')
-        description = job.get('description', '')
-        company = job.get('company', '')
+        title = job.get("title", job.get("jobTitle", ""))
+        location = job.get("location", "")
+        clearance = job.get("clearance", "")
+        description = job.get("description", "")
+        company = job.get("company", "")
 
         # Match to program
         match = self.matcher.match_job(
@@ -529,21 +606,21 @@ class RelationalEnrichmentEngine:
             location=location,
             clearance=clearance,
             description=description,
-            company=company
+            company=company,
         )
 
         if match:
-            job['prime'] = match.prime_contractor
-            job['subcontractors'] = match.subcontractors
-            job['matched_program'] = match.program_name
-            job['program_acronym'] = match.acronym
-            job['program_type'] = match.program_type
-            job['match_confidence'] = round(match.confidence, 2)
-            job['match_reasons'] = match.match_reasons
+            job["prime"] = match.prime_contractor
+            job["subcontractors"] = match.subcontractors
+            job["matched_program"] = match.program_name
+            job["program_acronym"] = match.acronym
+            job["program_type"] = match.program_type
+            job["match_confidence"] = round(match.confidence, 2)
+            job["match_reasons"] = match.match_reasons
 
             # Update status if good match
             if match.confidence >= 0.5:
-                job['status'] = 'enriched'
+                job["status"] = "enriched"
 
         return job
 
@@ -555,12 +632,14 @@ class RelationalEnrichmentEngine:
         matched_count = 0
 
         for i, job in enumerate(jobs):
-            logger.info(f"Enriching {i+1}/{len(jobs)}: {job.get('title', 'Unknown')[:50]}")
+            logger.info(
+                f"Enriching {i + 1}/{len(jobs)}: {job.get('title', 'Unknown')[:50]}"
+            )
 
             enriched_job = self.enrich_job(job.copy())
             enriched.append(enriched_job)
 
-            if enriched_job.get('matched_program'):
+            if enriched_job.get("matched_program"):
                 matched_count += 1
 
         logger.info(f"Matched {matched_count}/{len(jobs)} jobs to programs")
@@ -571,17 +650,20 @@ class RelationalEnrichmentEngine:
 # CLI
 # ===========================================
 
+
 def main():
     import argparse
     import json
 
-    parser = argparse.ArgumentParser(description='Relational Enrichment Engine')
-    parser.add_argument('--input', '-i', help='Input JSON file with jobs')
-    parser.add_argument('--output', '-o', help='Output JSON file')
-    parser.add_argument('--data-dir', '-d', help='Data directory with CSV files')
-    parser.add_argument('--test', action='store_true', help='Test with sample job')
-    parser.add_argument('--list-programs', action='store_true', help='List loaded programs')
-    parser.add_argument('--limit', '-l', type=int, help='Limit jobs to process')
+    parser = argparse.ArgumentParser(description="Relational Enrichment Engine")
+    parser.add_argument("--input", "-i", help="Input JSON file with jobs")
+    parser.add_argument("--output", "-o", help="Output JSON file")
+    parser.add_argument("--data-dir", "-d", help="Data directory with CSV files")
+    parser.add_argument("--test", action="store_true", help="Test with sample job")
+    parser.add_argument(
+        "--list-programs", action="store_true", help="List loaded programs"
+    )
+    parser.add_argument("--limit", "-l", type=int, help="Limit jobs to process")
 
     args = parser.parse_args()
 
@@ -600,16 +682,16 @@ def main():
     if args.test:
         # Test with sample job
         test_job = {
-            'title': 'Systems Engineer',
-            'location': 'Huntsville, Alabama',
-            'clearance': 'Secret',
-            'description': '''
+            "title": "Systems Engineer",
+            "location": "Huntsville, Alabama",
+            "clearance": "Secret",
+            "description": """
                 Looking for a Systems Engineer to support Army missile defense programs.
                 Work with Northrop Grumman on IBCS integration. Must have experience with
                 C2 systems and radar integration. Secret clearance required.
                 Location: Redstone Arsenal, Huntsville AL.
-            ''',
-            'company': 'Insight Global'
+            """,
+            "company": "Insight Global",
         }
 
         print("\nTest Job:")
@@ -630,25 +712,25 @@ def main():
 
     if args.input:
         # Process file
-        with open(args.input, 'r', encoding='utf-8') as f:
+        with open(args.input, "r", encoding="utf-8") as f:
             jobs = json.load(f)
 
         if isinstance(jobs, dict):
             jobs = [jobs]
 
         if args.limit:
-            jobs = jobs[:args.limit]
+            jobs = jobs[: args.limit]
 
         print(f"Processing {len(jobs)} jobs...")
 
         enriched = engine.enrich_jobs_batch(jobs)
 
         # Stats
-        matched = sum(1 for j in enriched if j.get('matched_program'))
+        matched = sum(1 for j in enriched if j.get("matched_program"))
         print(f"\nResults: {matched}/{len(enriched)} matched to programs")
 
         if args.output:
-            with open(args.output, 'w', encoding='utf-8') as f:
+            with open(args.output, "w", encoding="utf-8") as f:
                 json.dump(enriched, f, indent=2)
             print(f"Saved to: {args.output}")
 
@@ -657,5 +739,5 @@ def main():
     parser.print_help()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

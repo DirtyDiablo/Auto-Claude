@@ -13,17 +13,36 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.workflows.production.morning_briefing import (
     MORNING_BRIEFING_STATE,
-    gather_pipeline_updates, gather_new_jobs, gather_competitive_intel,
-    gather_contact_changes, gather_graph_insights, merge_all_sections,
-    prioritize_items, format_briefing, quality_check, quality_router,
-    deliver, get_morning_briefing_definition,
+    gather_pipeline_updates,
+    gather_new_jobs,
+    gather_competitive_intel,
+    gather_contact_changes,
+    gather_graph_insights,
+    merge_all_sections,
+    prioritize_items,
+    format_briefing,
+    quality_check,
+    quality_router,
+    deliver,
+    get_morning_briefing_definition,
 )
 
 
 def test_state_schema_keys():
-    expected = {"briefing_date", "pipeline_updates", "new_jobs", "competitive_intel",
-                "contact_changes", "graph_insights", "merged_items", "briefing",
-                "quality_score", "delivery_results", "errors", "step_timings"}
+    expected = {
+        "briefing_date",
+        "pipeline_updates",
+        "new_jobs",
+        "competitive_intel",
+        "contact_changes",
+        "graph_insights",
+        "merged_items",
+        "briefing",
+        "quality_score",
+        "delivery_results",
+        "errors",
+        "step_timings",
+    }
     assert set(MORNING_BRIEFING_STATE.keys()) == expected
 
 
@@ -78,11 +97,13 @@ async def test_merge_all_sections():
 
 @pytest.mark.asyncio
 async def test_prioritize_items_order():
-    state = {"merged_items": [
-        {"priority": "low", "type": "a"},
-        {"priority": "critical", "type": "b"},
-        {"priority": "medium", "type": "c"},
-    ]}
+    state = {
+        "merged_items": [
+            {"priority": "low", "type": "a"},
+            {"priority": "critical", "type": "b"},
+            {"priority": "medium", "type": "c"},
+        ]
+    }
     result = await prioritize_items(state)
     assert result["merged_items"][0]["priority"] == "critical"
     assert result["merged_items"][-1]["priority"] == "low"
@@ -93,11 +114,14 @@ async def test_quality_check_high():
     state = {
         "briefing": {
             "sections": {
-                "pipeline_updates": [1], "new_jobs": [1], "competitive_intel": [1],
-                "contact_changes": [1], "graph_insights": [1],
+                "pipeline_updates": [1],
+                "new_jobs": [1],
+                "competitive_intel": [1],
+                "contact_changes": [1],
+                "graph_insights": [1],
             },
             "total_items": 20,
-            "executive_summary": "This is a substantial executive summary for the morning briefing."
+            "executive_summary": "This is a substantial executive summary for the morning briefing.",
         }
     }
     result = await quality_check(state)
@@ -122,10 +146,16 @@ def test_quality_router_fail():
 @pytest.mark.asyncio
 async def test_format_briefing():
     state = {
-        "merged_items": [{"type": "job", "priority": "high"}, {"type": "contact", "priority": "critical"}],
+        "merged_items": [
+            {"type": "job", "priority": "high"},
+            {"type": "contact", "priority": "critical"},
+        ],
         "briefing_date": "2024-01-15",
-        "pipeline_updates": [], "new_jobs": [], "competitive_intel": [],
-        "contact_changes": [], "graph_insights": [],
+        "pipeline_updates": [],
+        "new_jobs": [],
+        "competitive_intel": [],
+        "contact_changes": [],
+        "graph_insights": [],
     }
     result = await format_briefing(state)
     assert "briefing" in result

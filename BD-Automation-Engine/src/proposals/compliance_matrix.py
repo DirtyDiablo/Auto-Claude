@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 class ComplianceStatus(str, Enum):
     COMPLIANT = "compliant"
     PARTIALLY_COMPLIANT = "partially_compliant"
@@ -44,24 +45,26 @@ class RequirementType(str, Enum):
 @dataclass
 class ComplianceRow:
     """Single requirement compliance entry."""
+
     requirement_id: str
     requirement_text: str
-    section_ref: str = ""       # RFP section (e.g., "L.5.2", "M.3.1")
+    section_ref: str = ""  # RFP section (e.g., "L.5.2", "M.3.1")
     requirement_type: RequirementType = RequirementType.OTHER
     compliance_status: ComplianceStatus = ComplianceStatus.COMPLIANT
     evidence: str = ""
     proposal_section: str = ""  # Where addressed in our proposal
     notes: str = ""
-    confidence: float = 0.0    # 0-1 confidence in assessment
+    confidence: float = 0.0  # 0-1 confidence in assessment
 
 
 @dataclass
 class GapAnalysis:
     """Requirement gap that PTS cannot currently meet."""
+
     requirement_id: str
     requirement_text: str
     gap_description: str
-    severity: str = "medium"    # critical, high, medium, low
+    severity: str = "medium"  # critical, high, medium, low
     mitigation: str = ""
     teaming_needed: bool = False
 
@@ -69,9 +72,10 @@ class GapAnalysis:
 @dataclass
 class TeamingRecommendation:
     """Recommendation for teaming partner to fill gaps."""
+
     gap_id: str
     capability_needed: str
-    partner_type: str = ""      # e.g., "large prime", "SB subcontractor"
+    partner_type: str = ""  # e.g., "large prime", "SB subcontractor"
     recommended_naics: str = ""
     rationale: str = ""
 
@@ -79,6 +83,7 @@ class TeamingRecommendation:
 @dataclass
 class ComplianceMatrix:
     """Complete compliance matrix for an RFP."""
+
     id: str
     rfp_title: str
     rows: List[ComplianceRow] = field(default_factory=list)
@@ -98,11 +103,26 @@ class ComplianceMatrix:
 
 PTS_CAPABILITIES = {
     "staffing": {
-        "keywords": ["staffing", "personnel", "workforce", "talent", "recruitment", "hiring"],
+        "keywords": [
+            "staffing",
+            "personnel",
+            "workforce",
+            "talent",
+            "recruitment",
+            "hiring",
+        ],
         "evidence": "PTS maintains 8,400+ indexed cleared professionals with average placement time 40% faster than industry.",
     },
     "intelligence": {
-        "keywords": ["intelligence", "isr", "sigint", "geoint", "humint", "analysis", "dcgs"],
+        "keywords": [
+            "intelligence",
+            "isr",
+            "sigint",
+            "geoint",
+            "humint",
+            "analysis",
+            "dcgs",
+        ],
         "evidence": "PTS supports 15+ intelligence programs including DCGS, with 500+ successful intelligence analyst placements.",
     },
     "cybersecurity": {
@@ -110,19 +130,45 @@ PTS_CAPABILITIES = {
         "evidence": "PTS provides cleared cybersecurity professionals across DoD/IC with TS/SCI CI Poly capabilities.",
     },
     "engineering": {
-        "keywords": ["systems engineer", "software engineer", "devops", "devsecops", "cloud", "aws"],
+        "keywords": [
+            "systems engineer",
+            "software engineer",
+            "devops",
+            "devsecops",
+            "cloud",
+            "aws",
+        ],
         "evidence": "PTS delivers senior systems and software engineers for C4ISR and cloud migration programs.",
     },
     "cleared_workforce": {
-        "keywords": ["clearance", "ts/sci", "top secret", "secret", "polygraph", "cleared"],
+        "keywords": [
+            "clearance",
+            "ts/sci",
+            "top secret",
+            "secret",
+            "polygraph",
+            "cleared",
+        ],
         "evidence": "PTS workforce spans all clearance levels from Public Trust to TS/SCI with CI Polygraph.",
     },
     "program_management": {
-        "keywords": ["program management", "project management", "pmp", "agile", "scrum"],
+        "keywords": [
+            "program management",
+            "project management",
+            "pmp",
+            "agile",
+            "scrum",
+        ],
         "evidence": "PTS provides PMP-certified program managers with DoD acquisition experience.",
     },
     "past_performance": {
-        "keywords": ["past performance", "cpars", "ppirs", "experience", "track record"],
+        "keywords": [
+            "past performance",
+            "cpars",
+            "ppirs",
+            "experience",
+            "track record",
+        ],
         "evidence": "PTS maintains Satisfactory or above CPARS ratings across all active contracts.",
     },
     "small_business": {
@@ -143,9 +189,16 @@ _SECTION_PATTERNS = [
 ]
 
 _REQUIREMENT_INDICATORS = [
-    "shall", "must", "required", "mandatory", "will provide",
-    "contractor shall", "offeror shall", "vendor shall",
-    "is required to", "are required to",
+    "shall",
+    "must",
+    "required",
+    "mandatory",
+    "will provide",
+    "contractor shall",
+    "offeror shall",
+    "vendor shall",
+    "is required to",
+    "are required to",
 ]
 
 
@@ -180,12 +233,14 @@ def extract_requirements(document_text: str) -> List[Dict[str, str]]:
         # Classify requirement type
         req_type = _classify_requirement(line_lower)
 
-        requirements.append({
-            "id": f"REQ-{req_id:03d}",
-            "text": line_stripped,
-            "section_ref": section_ref,
-            "type": req_type,
-        })
+        requirements.append(
+            {
+                "id": f"REQ-{req_id:03d}",
+                "text": line_stripped,
+                "section_ref": section_ref,
+                "type": req_type,
+            }
+        )
 
     return requirements
 
@@ -195,11 +250,23 @@ def _classify_requirement(text: str) -> str:
     type_keywords = {
         "clearance": ["clearance", "cleared", "polygraph", "ts/sci", "secret"],
         "staffing": ["staffing", "personnel", "workforce", "labor", "fte"],
-        "technical": ["technical", "system", "software", "engineer", "design", "develop"],
+        "technical": [
+            "technical",
+            "system",
+            "software",
+            "engineer",
+            "design",
+            "develop",
+        ],
         "management": ["manage", "program management", "project", "schedule", "report"],
         "experience": ["experience", "years", "past performance", "track record"],
         "certification": ["certif", "pmp", "cissp", "comptia", "itil"],
-        "past_performance": ["cpars", "ppirs", "past performance", "contract reference"],
+        "past_performance": [
+            "cpars",
+            "ppirs",
+            "past performance",
+            "contract reference",
+        ],
     }
     for req_type, keywords in type_keywords.items():
         if any(kw in text for kw in keywords):
@@ -210,6 +277,7 @@ def _classify_requirement(text: str) -> str:
 # =========================================
 # COMPLIANCE ASSESSMENT
 # =========================================
+
 
 def _assess_compliance(requirement_text: str) -> tuple:
     """Assess PTS compliance against a requirement, returns (status, evidence, confidence)."""
@@ -225,7 +293,11 @@ def _assess_compliance(requirement_text: str) -> tuple:
             best_match = cap_data
 
     if best_score >= 2:
-        return ComplianceStatus.COMPLIANT, best_match["evidence"], min(0.95, 0.6 + best_score * 0.1)
+        return (
+            ComplianceStatus.COMPLIANT,
+            best_match["evidence"],
+            min(0.95, 0.6 + best_score * 0.1),
+        )
     elif best_score == 1:
         return ComplianceStatus.PARTIALLY_COMPLIANT, best_match["evidence"], 0.5
     else:
@@ -235,6 +307,7 @@ def _assess_compliance(requirement_text: str) -> tuple:
 # =========================================
 # GENERATOR
 # =========================================
+
 
 class ComplianceMatrixGenerator:
     """Generate compliance matrices from RFP/SOW documents."""
@@ -293,17 +366,21 @@ class ComplianceMatrixGenerator:
                     requirement_id=req.get("id", ""),
                     requirement_text=req.get("text", ""),
                     gap_description=f"PTS does not currently have demonstrated capability for: {req.get('text', '')[:100]}",
-                    severity="high" if req.get("type") in ("clearance", "technical") else "medium",
+                    severity="high"
+                    if req.get("type") in ("clearance", "technical")
+                    else "medium",
                     teaming_needed=True,
                 )
                 gaps.append(gap)
 
-                teaming.append(TeamingRecommendation(
-                    gap_id=req.get("id", ""),
-                    capability_needed=req.get("text", "")[:200],
-                    partner_type="specialized subcontractor",
-                    rationale=f"PTS requires teaming partner to address {req.get('type', 'this')} requirement.",
-                ))
+                teaming.append(
+                    TeamingRecommendation(
+                        gap_id=req.get("id", ""),
+                        capability_needed=req.get("text", "")[:200],
+                        partner_type="specialized subcontractor",
+                        rationale=f"PTS requires teaming partner to address {req.get('type', 'this')} requirement.",
+                    )
+                )
             elif status == ComplianceStatus.PARTIALLY_COMPLIANT:
                 gap = GapAnalysis(
                     requirement_id=req.get("id", ""),
@@ -314,9 +391,17 @@ class ComplianceMatrixGenerator:
                 )
                 gaps.append(gap)
 
-        compliant = sum(1 for r in rows if r.compliance_status == ComplianceStatus.COMPLIANT)
-        partial = sum(1 for r in rows if r.compliance_status == ComplianceStatus.PARTIALLY_COMPLIANT)
-        non_compliant = sum(1 for r in rows if r.compliance_status == ComplianceStatus.NON_COMPLIANT)
+        compliant = sum(
+            1 for r in rows if r.compliance_status == ComplianceStatus.COMPLIANT
+        )
+        partial = sum(
+            1
+            for r in rows
+            if r.compliance_status == ComplianceStatus.PARTIALLY_COMPLIANT
+        )
+        non_compliant = sum(
+            1 for r in rows if r.compliance_status == ComplianceStatus.NON_COMPLIANT
+        )
         total = len(rows)
         rate = ((compliant + partial * 0.5) / total * 100) if total > 0 else 0.0
 
@@ -341,7 +426,9 @@ class ComplianceMatrixGenerator:
         )
         return matrix
 
-    def get_section_l_m_mapping(self, matrix: ComplianceMatrix) -> Dict[str, List[ComplianceRow]]:
+    def get_section_l_m_mapping(
+        self, matrix: ComplianceMatrix
+    ) -> Dict[str, List[ComplianceRow]]:
         """Map requirements to Section L (instructions) and Section M (evaluation) groupings."""
         mapping: Dict[str, List[ComplianceRow]] = {"L": [], "M": [], "other": []}
         for row in matrix.rows:

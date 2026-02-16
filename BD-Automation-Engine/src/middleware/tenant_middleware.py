@@ -25,16 +25,18 @@ logger = logging.getLogger(__name__)
 # TENANT CONTEXT
 # =========================================
 
+
 @dataclass
 class TenantContext:
     """Per-request tenant context injected by middleware."""
+
     tenant_id: str
     tenant_name: str = ""
     user_id: str = ""
     user_email: str = ""
     role: Role = Role.VIEWER
     session_id: str = ""
-    auth_method: str = "none"   # token, api_key, sso
+    auth_method: str = "none"  # token, api_key, sso
     request_id: str = ""
     timestamp: str = ""
 
@@ -42,6 +44,7 @@ class TenantContext:
 # =========================================
 # RATE LIMITER
 # =========================================
+
 
 class TenantRateLimiter:
     """Simple in-memory per-tenant rate limiter."""
@@ -83,6 +86,7 @@ class TenantRateLimiter:
 # MIDDLEWARE
 # =========================================
 
+
 class TenantMiddleware:
     """Resolve tenant context from request headers.
 
@@ -103,6 +107,7 @@ class TenantMiddleware:
     ) -> Optional[TenantContext]:
         """Resolve tenant context from request headers."""
         import uuid
+
         request_id = uuid.uuid4().hex[:8]
         now = datetime.now(timezone.utc).isoformat()
 
@@ -120,7 +125,9 @@ class TenantMiddleware:
                 if user:
                     return TenantContext(
                         tenant_id=session.tenant_id,
-                        tenant_name=self._get_tenant_name(tenant_mgr, session.tenant_id),
+                        tenant_name=self._get_tenant_name(
+                            tenant_mgr, session.tenant_id
+                        ),
                         user_id=user.id,
                         user_email=user.email,
                         role=user.role,
@@ -176,6 +183,7 @@ class TenantMiddleware:
 # =========================================
 # PERMISSION DECORATORS (functional style)
 # =========================================
+
 
 def get_current_tenant(headers: Dict[str, str]) -> Optional[TenantContext]:
     """Quick helper to resolve tenant context from headers."""

@@ -13,9 +13,11 @@ DATA_DIR = BASE_DIR / "dashboard" / "public" / "data"
 OUTPUT_DIR = BASE_DIR / "outputs"
 OUTPUT_DIR.mkdir(exist_ok=True)
 
+
 def load_json(filename):
-    with open(DATA_DIR / filename, 'r', encoding='utf-8') as f:
+    with open(DATA_DIR / filename, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def normalize_state(loc):
     """Normalize state for matching."""
@@ -23,41 +25,72 @@ def normalize_state(loc):
         return None
     loc = loc.lower().strip()
     state_map = {
-        'arizona': 'az', 'virginia': 'va', 'maryland': 'md', 'california': 'ca',
-        'texas': 'tx', 'colorado': 'co', 'florida': 'fl', 'georgia': 'ga',
-        'alabama': 'al', 'new york': 'ny', 'massachusetts': 'ma',
-        'north carolina': 'nc', 'ohio': 'oh', 'pennsylvania': 'pa',
-        'new mexico': 'nm', 'utah': 'ut', 'hawaii': 'hi', 'nevada': 'nv',
-        'district of columbia': 'dc', 'washington dc': 'dc', 'dc': 'dc'
+        "arizona": "az",
+        "virginia": "va",
+        "maryland": "md",
+        "california": "ca",
+        "texas": "tx",
+        "colorado": "co",
+        "florida": "fl",
+        "georgia": "ga",
+        "alabama": "al",
+        "new york": "ny",
+        "massachusetts": "ma",
+        "north carolina": "nc",
+        "ohio": "oh",
+        "pennsylvania": "pa",
+        "new mexico": "nm",
+        "utah": "ut",
+        "hawaii": "hi",
+        "nevada": "nv",
+        "district of columbia": "dc",
+        "washington dc": "dc",
+        "dc": "dc",
     }
     for full, abbr in state_map.items():
         if full in loc:
             return abbr
     for abbr in state_map.values():
-        if f', {abbr}' in loc or loc.endswith(f' {abbr}') or loc == abbr:
+        if f", {abbr}" in loc or loc.endswith(f" {abbr}") or loc == abbr:
             return abbr
     # Check for abbreviations in location
-    parts = loc.replace(',', ' ').split()
+    parts = loc.replace(",", " ").split()
     for part in parts:
-        if part.upper() in ['VA', 'MD', 'TX', 'CA', 'CO', 'FL', 'GA', 'AL', 'MA', 'NC', 'AZ', 'HI', 'DC']:
+        if part.upper() in [
+            "VA",
+            "MD",
+            "TX",
+            "CA",
+            "CO",
+            "FL",
+            "GA",
+            "AL",
+            "MA",
+            "NC",
+            "AZ",
+            "HI",
+            "DC",
+        ]:
             return part.lower()
     return None
+
 
 def extract_program_from_job(job_name):
     """Extract GDIT program from job name."""
     name = job_name.upper()
     programs = {
-        'JUSTIFIED': 'JUSTIFIED',
-        'MPCO': 'MPCO',
-        'BIM': 'BIM',
-        'ISEE': 'ISEE',
-        'BICES': 'BICES',
-        'ADCNOMS': 'ADCNOMS',
+        "JUSTIFIED": "JUSTIFIED",
+        "MPCO": "MPCO",
+        "BIM": "BIM",
+        "ISEE": "ISEE",
+        "BICES": "BICES",
+        "ADCNOMS": "ADCNOMS",
     }
     for key, prog in programs.items():
         if key in name:
             return prog
     return None
+
 
 def get_role_keywords(title):
     """Extract role keywords from title."""
@@ -67,47 +100,58 @@ def get_role_keywords(title):
     keywords = set()
 
     # Security roles
-    if any(x in title_lower for x in ['isso', 'issm', 'security']):
-        keywords.add('security')
-    if any(x in title_lower for x in ['network', 'system admin', 'sysadmin']):
-        keywords.add('network')
-    if any(x in title_lower for x in ['engineer', 'engineering']):
-        keywords.add('engineer')
-    if any(x in title_lower for x in ['manager', 'lead', 'director']):
-        keywords.add('manager')
-    if any(x in title_lower for x in ['analyst']):
-        keywords.add('analyst')
-    if any(x in title_lower for x in ['it', 'ia', 'information']):
-        keywords.add('it')
+    if any(x in title_lower for x in ["isso", "issm", "security"]):
+        keywords.add("security")
+    if any(x in title_lower for x in ["network", "system admin", "sysadmin"]):
+        keywords.add("network")
+    if any(x in title_lower for x in ["engineer", "engineering"]):
+        keywords.add("engineer")
+    if any(x in title_lower for x in ["manager", "lead", "director"]):
+        keywords.add("manager")
+    if any(x in title_lower for x in ["analyst"]):
+        keywords.add("analyst")
+    if any(x in title_lower for x in ["it", "ia", "information"]):
+        keywords.add("it")
 
     return keywords
 
+
 def is_hiring_manager(contact):
     """Check if contact is likely a hiring manager (Tier 1-4)."""
-    title = (contact.get('jobTitle') or '').lower()
-    tier = contact.get('tier', 6)
+    title = (contact.get("jobTitle") or "").lower()
+    tier = contact.get("tier", 6)
 
     # Tier 1-4 are managers
     if tier <= 4:
         return True
 
     # Also check title keywords
-    manager_keywords = ['manager', 'director', 'lead', 'chief', 'head', 'vp', 'president', 'supervisor']
+    manager_keywords = [
+        "manager",
+        "director",
+        "lead",
+        "chief",
+        "head",
+        "vp",
+        "president",
+        "supervisor",
+    ]
     return any(kw in title for kw in manager_keywords)
+
 
 def match_contact_to_job(contact, job):
     """Calculate match score. Returns (score, reasons)."""
     score = 0
     reasons = []
 
-    contact_title = (contact.get('jobTitle') or '').lower()
-    contact_state = contact.get('state', '')
-    (contact.get('city') or '').lower()
-    contact_tier = contact.get('tier', 6)
+    contact_title = (contact.get("jobTitle") or "").lower()
+    contact_state = contact.get("state", "")
+    (contact.get("city") or "").lower()
+    contact_tier = contact.get("tier", 6)
 
-    job_title = job.get('title', '')
-    job_location = job.get('location', '')
-    job_program = job.get('program', '')
+    job_title = job.get("title", "")
+    job_location = job.get("location", "")
+    job_program = job.get("program", "")
 
     # 1. Must be a manager/decision maker (Tier 1-4) - required
     if not is_hiring_manager(contact):
@@ -124,7 +168,11 @@ def match_contact_to_job(contact, job):
         if job_state == contact_state_norm:
             score += 30
             reasons.append(f"Location match: {contact_state}")
-        elif contact_state_norm in ['va', 'md', 'dc'] and job_state in ['va', 'md', 'dc']:
+        elif contact_state_norm in ["va", "md", "dc"] and job_state in [
+            "va",
+            "md",
+            "dc",
+        ]:
             # DMV area match
             score += 25
             reasons.append("DMV area match")
@@ -148,13 +196,16 @@ def match_contact_to_job(contact, job):
 
     return score, reasons
 
+
 def main():
     print("Loading data...")
-    jobs = load_json('jobs.json')
-    contacts = load_json('contacts.json')
+    jobs = load_json("jobs.json")
+    contacts = load_json("contacts.json")
 
     # Filter to GDIT jobs only (these are the ones we can call GDIT contacts about)
-    gdit_jobs = [j for j in jobs if j.get('source') == 'GDIT' and j.get('status') == 'Open']
+    gdit_jobs = [
+        j for j in jobs if j.get("source") == "GDIT" and j.get("status") == "Open"
+    ]
     print(f"GDIT Open jobs: {len(gdit_jobs)}")
 
     # Filter to manager-level contacts only
@@ -170,105 +221,130 @@ def main():
         for contact in manager_contacts:
             score, reasons = match_contact_to_job(contact, job)
             if score >= 50:
-                job_matches.append({
-                    'contact': contact,
-                    'score': score,
-                    'reasons': reasons
-                })
+                job_matches.append(
+                    {"contact": contact, "score": score, "reasons": reasons}
+                )
 
         # Sort by score and take top 5 contacts per job
-        job_matches.sort(key=lambda x: -x['score'])
+        job_matches.sort(key=lambda x: -x["score"])
         for match in job_matches[:5]:
-            matches.append({
-                'job': job,
-                'contact': match['contact'],
-                'score': match['score'],
-                'reasons': match['reasons']
-            })
+            matches.append(
+                {
+                    "job": job,
+                    "contact": match["contact"],
+                    "score": match["score"],
+                    "reasons": match["reasons"],
+                }
+            )
 
     print(f"Found {len(matches)} high-confidence matches")
 
     # Sort all matches by score
-    matches.sort(key=lambda x: -x['score'])
+    matches.sort(key=lambda x: -x["score"])
 
     # Create CSV
     csv_path = OUTPUT_DIR / "gdit_call_sheet.csv"
 
-    with open(csv_path, 'w', newline='', encoding='utf-8') as f:
+    with open(csv_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.writer(f)
 
         # Header
-        writer.writerow([
-            # Job Info
-            'Job_ID', 'Job_Title', 'Job_Location', 'Job_Status', 'Job_Program',
-            # Contact Info
-            'Contact_Name', 'Contact_Title', 'Contact_Tier',
-            'Contact_Email', 'Contact_Phone', 'Contact_LinkedIn',
-            'Contact_City', 'Contact_State',
-            # Match Info
-            'Match_Score', 'Match_Reasons',
-            # SCRIPT TEMPLATE FIELDS
-            'FIRST_NAME', 'FULL_NAME', 'COMPANY_NAME', 'OPEN_JOB_TITLE',
-            'JOB_LOCATION', 'PROGRAM_NAME', 'CONTACT_TITLE_SHORT'
-        ])
+        writer.writerow(
+            [
+                # Job Info
+                "Job_ID",
+                "Job_Title",
+                "Job_Location",
+                "Job_Status",
+                "Job_Program",
+                # Contact Info
+                "Contact_Name",
+                "Contact_Title",
+                "Contact_Tier",
+                "Contact_Email",
+                "Contact_Phone",
+                "Contact_LinkedIn",
+                "Contact_City",
+                "Contact_State",
+                # Match Info
+                "Match_Score",
+                "Match_Reasons",
+                # SCRIPT TEMPLATE FIELDS
+                "FIRST_NAME",
+                "FULL_NAME",
+                "COMPANY_NAME",
+                "OPEN_JOB_TITLE",
+                "JOB_LOCATION",
+                "PROGRAM_NAME",
+                "CONTACT_TITLE_SHORT",
+            ]
+        )
 
         for match in matches:
-            job = match['job']
-            contact = match['contact']
+            job = match["job"]
+            contact = match["contact"]
 
             # Template fields
-            first_name = contact.get('firstName') or contact.get('name', '').split()[0]
-            full_name = contact.get('name', '')
-            company_name = 'GDIT'
+            first_name = contact.get("firstName") or contact.get("name", "").split()[0]
+            full_name = contact.get("name", "")
+            company_name = "GDIT"
 
             # Clean job title (remove job number prefix)
-            job_title = job.get('title', '')
-            if '|' in job_title:
-                open_job_title = job_title.split('|')[-1].strip()
+            job_title = job.get("title", "")
+            if "|" in job_title:
+                open_job_title = job_title.split("|")[-1].strip()
             else:
                 open_job_title = job_title
 
-            job_location = job.get('location', '')
-            program_name = extract_program_from_job(job_title) or job.get('program', '') or 'your program'
+            job_location = job.get("location", "")
+            program_name = (
+                extract_program_from_job(job_title)
+                or job.get("program", "")
+                or "your program"
+            )
 
             # Short contact title
-            contact_title = contact.get('jobTitle', '')
-            contact_title_short = ' '.join(contact_title.split()[:4]) if contact_title else ''
+            contact_title = contact.get("jobTitle", "")
+            contact_title_short = (
+                " ".join(contact_title.split()[:4]) if contact_title else ""
+            )
 
-            writer.writerow([
-                # Job Info
-                job.get('id', ''),
-                job.get('title', ''),
-                job.get('location', ''),
-                job.get('status', ''),
-                job.get('program', ''),
-                # Contact Info
-                contact.get('name', ''),
-                contact.get('jobTitle', ''),
-                contact.get('tier', ''),
-                contact.get('email', ''),
-                contact.get('phone', ''),
-                contact.get('linkedIn', ''),
-                contact.get('city', ''),
-                contact.get('state', ''),
-                # Match Info
-                match['score'],
-                ' | '.join(match['reasons']),
-                # Template Fields
-                first_name,
-                full_name,
-                company_name,
-                open_job_title,
-                job_location,
-                program_name,
-                contact_title_short
-            ])
+            writer.writerow(
+                [
+                    # Job Info
+                    job.get("id", ""),
+                    job.get("title", ""),
+                    job.get("location", ""),
+                    job.get("status", ""),
+                    job.get("program", ""),
+                    # Contact Info
+                    contact.get("name", ""),
+                    contact.get("jobTitle", ""),
+                    contact.get("tier", ""),
+                    contact.get("email", ""),
+                    contact.get("phone", ""),
+                    contact.get("linkedIn", ""),
+                    contact.get("city", ""),
+                    contact.get("state", ""),
+                    # Match Info
+                    match["score"],
+                    " | ".join(match["reasons"]),
+                    # Template Fields
+                    first_name,
+                    full_name,
+                    company_name,
+                    open_job_title,
+                    job_location,
+                    program_name,
+                    contact_title_short,
+                ]
+            )
 
     print(f"\nCall sheet saved to: {csv_path}")
 
     # Create George's script template
     script_path = OUTPUT_DIR / "george_call_script.txt"
-    with open(script_path, 'w', encoding='utf-8') as f:
+    with open(script_path, "w", encoding="utf-8") as f:
         f.write("""
 ================================================================================
 GEORGE MARANVILLE - BD CALL SCRIPT
@@ -387,9 +463,9 @@ gmaranville@primetechservices.com
     print(f"Script template saved to: {script_path}")
 
     # Summary stats
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("SUMMARY")
-    print("="*60)
+    print("=" * 60)
     print(f"Total matches: {len(matches)}")
     print(f"Unique jobs with contacts: {len(set(m['job']['id'] for m in matches))}")
     print(f"Unique contacts matched: {len(set(m['contact']['id'] for m in matches))}")
@@ -397,13 +473,22 @@ gmaranville@primetechservices.com
     # Show top 10 matches
     print("\nTop 10 highest-confidence matches:")
     for i, match in enumerate(matches[:10], 1):
-        job = match['job']
-        contact = match['contact']
-        job_title = job.get('title', '').split('|')[-1].strip() if '|' in job.get('title', '') else job.get('title', '')
-        print(f"{i}. [{match['score']}] {contact.get('name')} ({contact.get('jobTitle')[:30]}...)")
+        job = match["job"]
+        contact = match["contact"]
+        job_title = (
+            job.get("title", "").split("|")[-1].strip()
+            if "|" in job.get("title", "")
+            else job.get("title", "")
+        )
+        print(
+            f"{i}. [{match['score']}] {contact.get('name')} ({contact.get('jobTitle')[:30]}...)"
+        )
         print(f"   -> {job_title[:50]}...")
-        print(f"   Location: {contact.get('city')}, {contact.get('state')} | {job.get('location')}")
+        print(
+            f"   Location: {contact.get('city')}, {contact.get('state')} | {job.get('location')}"
+        )
         print()
+
 
 if __name__ == "__main__":
     main()

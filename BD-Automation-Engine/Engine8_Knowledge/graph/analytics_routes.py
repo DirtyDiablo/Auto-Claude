@@ -18,6 +18,7 @@ router = APIRouter(prefix="/graph", tags=["Graph Analytics"])
 # REQUEST MODELS
 # =========================================
 
+
 class GraphRAGQuery(BaseModel):
     question: str
     max_hops: int = 2
@@ -28,14 +29,18 @@ class GraphRAGQuery(BaseModel):
 # INFLUENCE SCORING ENDPOINTS
 # =========================================
 
+
 @router.get("/influence/leaderboard")
 async def influence_leaderboard(
-    entity_type: Optional[str] = Query(None, description="Filter: Contact, Contractor, Program"),
+    entity_type: Optional[str] = Query(
+        None, description="Filter: Contact, Contractor, Program"
+    ),
     limit: int = Query(25, description="Max results"),
 ):
     """Get ranked leaderboard by composite influence score."""
     try:
         from Engine8_Knowledge.graph.influence_scoring import get_influence_scorer
+
         scorer = get_influence_scorer()
         return {"leaderboard": scorer.get_leaderboard(entity_type, limit)}
     except Exception as e:
@@ -48,10 +53,13 @@ async def influence_entity(entity_name: str):
     """Get influence details for a specific entity."""
     try:
         from Engine8_Knowledge.graph.influence_scoring import get_influence_scorer
+
         scorer = get_influence_scorer()
         result = scorer.get_entity_influence(entity_name)
         if not result:
-            raise HTTPException(status_code=404, detail=f"Entity not found: {entity_name}")
+            raise HTTPException(
+                status_code=404, detail=f"Entity not found: {entity_name}"
+            )
         return result
     except HTTPException:
         raise
@@ -65,6 +73,7 @@ async def influence_hidden_gems(limit: int = Query(20)):
     """Get high-centrality entities with low official tier/priority."""
     try:
         from Engine8_Knowledge.graph.influence_scoring import get_influence_scorer
+
         scorer = get_influence_scorer()
         return {"hidden_gems": scorer.get_hidden_gems(limit)}
     except Exception as e:
@@ -77,6 +86,7 @@ async def graph_bridges(limit: int = Query(20)):
     """Get bridge nodes with high betweenness centrality."""
     try:
         from Engine8_Knowledge.graph.influence_scoring import get_influence_scorer
+
         scorer = get_influence_scorer()
         return {"bridges": scorer.get_bridges(limit)}
     except Exception as e:
@@ -88,11 +98,13 @@ async def graph_bridges(limit: int = Query(20)):
 # COMMUNITY DETECTION ENDPOINTS
 # =========================================
 
+
 @router.get("/communities/summary")
 async def communities_summary():
     """Get summary of all detected communities."""
     try:
         from Engine8_Knowledge.graph.community_detection import get_community_detector
+
         detector = get_community_detector()
         return detector.get_community_summary()
     except Exception as e:
@@ -105,10 +117,13 @@ async def community_detail(community_id: int):
     """Get detailed view of a specific community."""
     try:
         from Engine8_Knowledge.graph.community_detection import get_community_detector
+
         detector = get_community_detector()
         result = detector.get_community_detail(community_id)
         if not result:
-            raise HTTPException(status_code=404, detail=f"Community not found: {community_id}")
+            raise HTTPException(
+                status_code=404, detail=f"Community not found: {community_id}"
+            )
         return result
     except HTTPException:
         raise
@@ -122,10 +137,14 @@ async def entity_community(entity_name: str):
     """Find which community an entity belongs to."""
     try:
         from Engine8_Knowledge.graph.community_detection import get_community_detector
+
         detector = get_community_detector()
         result = detector.get_entity_community(entity_name)
         if not result:
-            raise HTTPException(status_code=404, detail=f"Entity not found or not in any community: {entity_name}")
+            raise HTTPException(
+                status_code=404,
+                detail=f"Entity not found or not in any community: {entity_name}",
+            )
         return result
     except HTTPException:
         raise
@@ -139,6 +158,7 @@ async def community_bridges(limit: int = Query(20)):
     """Get entities that bridge multiple communities."""
     try:
         from Engine8_Knowledge.graph.community_detection import get_community_detector
+
         detector = get_community_detector()
         return {"bridges": detector.get_cross_community_bridges(limit)}
     except Exception as e:
@@ -151,6 +171,7 @@ async def community_meta_graph():
     """Get meta-graph of communities (communities as nodes, cross-edges between them)."""
     try:
         from Engine8_Knowledge.graph.community_detection import get_community_detector
+
         detector = get_community_detector()
         return detector.get_community_graph()
     except Exception as e:
@@ -162,6 +183,7 @@ async def community_meta_graph():
 # GRAPH RAG ENDPOINTS
 # =========================================
 
+
 @router.post("/rag-query")
 async def graph_rag_query(data: GraphRAGQuery):
     """
@@ -170,6 +192,7 @@ async def graph_rag_query(data: GraphRAGQuery):
     """
     try:
         from Engine8_Knowledge.graph.graph_rag import get_graph_rag
+
         engine = get_graph_rag()
         result = engine.query(
             question=data.question,
@@ -196,6 +219,7 @@ async def graph_rag_entity_context(entity_name: str):
     """Get rich Graph RAG context for a specific entity."""
     try:
         from Engine8_Knowledge.graph.graph_rag import get_graph_rag
+
         engine = get_graph_rag()
         return engine.get_entity_context(entity_name)
     except Exception as e:

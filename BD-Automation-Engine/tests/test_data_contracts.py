@@ -19,6 +19,7 @@ def engine():
 # SEEDED CONTRACTS
 # =========================================
 
+
 def test_seeded_contracts(engine):
     contracts = engine.list_contracts()
     assert len(contracts) >= 3
@@ -38,13 +39,16 @@ def test_get_seeded(engine):
 # CRUD
 # =========================================
 
+
 def test_create(engine):
-    cid = engine.create(DataContract(
-        name="Test Contract",
-        producer="test_producer",
-        consumer="test_consumer",
-        asset_id="test_asset",
-    ))
+    cid = engine.create(
+        DataContract(
+            name="Test Contract",
+            producer="test_producer",
+            consumer="test_consumer",
+            asset_id="test_asset",
+        )
+    )
     assert cid != ""
     assert engine.get(cid) is not None
 
@@ -75,6 +79,7 @@ def test_delete(engine):
 # CHECK CONTRACT — PASSING
 # =========================================
 
+
 def test_check_passing(engine):
     result = engine.check_contract(
         "contract_jobs_scraper",
@@ -90,6 +95,7 @@ def test_check_passing(engine):
 # =========================================
 # CHECK CONTRACT — BREACHED
 # =========================================
+
 
 def test_check_quality_breach(engine):
     result = engine.check_contract(
@@ -130,6 +136,7 @@ def test_check_nonexistent(engine):
 # CHECK ALL
 # =========================================
 
+
 def test_check_all(engine):
     metrics = {
         "jobs": {"completeness": 0.9, "accuracy": 0.95},
@@ -143,6 +150,7 @@ def test_check_all(engine):
 # =========================================
 # BREACHES
 # =========================================
+
 
 def test_get_breaches(engine):
     engine.check_contract(
@@ -181,6 +189,7 @@ def test_resolve_nonexistent(engine):
 # EVALUATE TERM
 # =========================================
 
+
 def test_evaluate_gte():
     assert DataContractsEngine._evaluate_term(">=", 0.9, 0.85) is True
     assert DataContractsEngine._evaluate_term(">=", 0.8, 0.85) is False
@@ -199,6 +208,7 @@ def test_evaluate_eq():
 # STATS
 # =========================================
 
+
 def test_stats(engine):
     stats = engine.get_stats()
     assert stats["total_contracts"] >= 3
@@ -208,6 +218,7 @@ def test_stats(engine):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     e1 = get_contracts_engine()

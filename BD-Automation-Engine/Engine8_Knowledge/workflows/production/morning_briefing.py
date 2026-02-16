@@ -15,7 +15,10 @@ from typing import Any, Dict
 import structlog
 
 from Engine8_Knowledge.workflows.graph_builder import (
-    EdgeSpec, NodeSpec, RetryConfig, WorkflowDefinition,
+    EdgeSpec,
+    NodeSpec,
+    RetryConfig,
+    WorkflowDefinition,
 )
 
 logger = structlog.get_logger(__name__)
@@ -45,26 +48,30 @@ MORNING_BRIEFING_STATE = {
 # Node functions
 # ---------------------------------------------------------------------------
 
+
 async def gather_pipeline_updates(state: Dict[str, Any]) -> Dict[str, Any]:
     """Gather pipeline updates: new submissions, placements, interviews."""
     updates = []
 
     try:
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         # Recent job activity
         hits = client.scroll(collection_name="jobs", limit=20)
         if hits and hits[0]:
             for point in hits[0]:
-                updates.append({
-                    "type": "pipeline_item",
-                    "title": point.payload.get("title", ""),
-                    "company": point.payload.get("company", ""),
-                    "status": point.payload.get("status", ""),
-                    "program": point.payload.get("program", ""),
-                    "priority": "medium",
-                })
+                updates.append(
+                    {
+                        "type": "pipeline_item",
+                        "title": point.payload.get("title", ""),
+                        "company": point.payload.get("company", ""),
+                        "status": point.payload.get("status", ""),
+                        "program": point.payload.get("program", ""),
+                        "priority": "medium",
+                    }
+                )
 
     except ImportError:
         pass
@@ -82,21 +89,24 @@ async def gather_new_jobs(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         # Scroll recent jobs
         hits = client.scroll(collection_name="jobs", limit=30)
         if hits and hits[0]:
             for point in hits[0]:
-                jobs.append({
-                    "type": "new_job",
-                    "title": point.payload.get("title", ""),
-                    "company": point.payload.get("company", ""),
-                    "location": point.payload.get("location", ""),
-                    "clearance": point.payload.get("clearance", ""),
-                    "program": point.payload.get("program", ""),
-                    "priority": "medium",
-                })
+                jobs.append(
+                    {
+                        "type": "new_job",
+                        "title": point.payload.get("title", ""),
+                        "company": point.payload.get("company", ""),
+                        "location": point.payload.get("location", ""),
+                        "clearance": point.payload.get("clearance", ""),
+                        "program": point.payload.get("program", ""),
+                        "priority": "medium",
+                    }
+                )
 
     except ImportError:
         pass
@@ -114,18 +124,21 @@ async def gather_competitive_intel(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         hits = client.scroll(collection_name="documents", limit=10)
         if hits and hits[0]:
             for point in hits[0]:
-                intel.append({
-                    "type": "competitive_signal",
-                    "title": point.payload.get("title", ""),
-                    "company": point.payload.get("company", ""),
-                    "date": point.payload.get("date", ""),
-                    "priority": "low",
-                })
+                intel.append(
+                    {
+                        "type": "competitive_signal",
+                        "title": point.payload.get("title", ""),
+                        "company": point.payload.get("company", ""),
+                        "date": point.payload.get("date", ""),
+                        "priority": "low",
+                    }
+                )
 
     except ImportError:
         pass
@@ -143,20 +156,23 @@ async def gather_contact_changes(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.scripts.vector_store import get_qdrant_client
+
         client = get_qdrant_client()
 
         hits = client.scroll(collection_name="contacts", limit=20)
         if hits and hits[0]:
             for point in hits[0]:
                 tier = point.payload.get("tier", 6)
-                changes.append({
-                    "type": "contact_update",
-                    "name": point.payload.get("name", ""),
-                    "company": point.payload.get("company", ""),
-                    "tier": tier,
-                    "change": "recent_activity",
-                    "priority": "high" if tier <= 2 else "medium",
-                })
+                changes.append(
+                    {
+                        "type": "contact_update",
+                        "name": point.payload.get("name", ""),
+                        "company": point.payload.get("company", ""),
+                        "tier": tier,
+                        "change": "recent_activity",
+                        "priority": "high" if tier <= 2 else "medium",
+                    }
+                )
 
     except ImportError:
         pass
@@ -174,6 +190,7 @@ async def gather_graph_insights(state: Dict[str, Any]) -> Dict[str, Any]:
 
     try:
         from Engine8_Knowledge.graph.neo4j_manager import get_neo4j_manager
+
         mgr = get_neo4j_manager()
 
         # Find orphaned contacts (no relationships)
@@ -186,13 +203,15 @@ async def gather_graph_insights(state: Dict[str, Any]) -> Dict[str, Any]:
             """
             records = await mgr.execute_query(query, {})
             for rec in records:
-                insights.append({
-                    "type": "orphaned_contact",
-                    "name": rec.get("name", ""),
-                    "title": rec.get("title", ""),
-                    "recommendation": "Investigate and establish relationships",
-                    "priority": "low",
-                })
+                insights.append(
+                    {
+                        "type": "orphaned_contact",
+                        "name": rec.get("name", ""),
+                        "title": rec.get("title", ""),
+                        "recommendation": "Investigate and establish relationships",
+                        "priority": "low",
+                    }
+                )
         except Exception:
             pass
 
@@ -208,13 +227,15 @@ async def gather_graph_insights(state: Dict[str, Any]) -> Dict[str, Any]:
             """
             records = await mgr.execute_query(query, {})
             for rec in records:
-                insights.append({
-                    "type": "key_influencer",
-                    "name": rec.get("name", ""),
-                    "connections": rec.get("connections", 0),
-                    "recommendation": "Prioritize relationship maintenance",
-                    "priority": "high",
-                })
+                insights.append(
+                    {
+                        "type": "key_influencer",
+                        "name": rec.get("name", ""),
+                        "connections": rec.get("connections", 0),
+                        "recommendation": "Prioritize relationship maintenance",
+                        "priority": "high",
+                    }
+                )
         except Exception:
             pass
 
@@ -248,8 +269,7 @@ async def prioritize_items(state: Dict[str, Any]) -> Dict[str, Any]:
     priority_order = {"critical": 0, "high": 1, "medium": 2, "low": 3, "standard": 4}
 
     sorted_items = sorted(
-        items,
-        key=lambda x: priority_order.get(x.get("priority", "standard"), 4)
+        items, key=lambda x: priority_order.get(x.get("priority", "standard"), 4)
     )
 
     state["merged_items"] = sorted_items
@@ -312,8 +332,13 @@ async def quality_check(state: Dict[str, Any]) -> Dict[str, Any]:
     sections = briefing.get("sections", {})
 
     # Score based on section completeness
-    expected_sections = ["pipeline_updates", "new_jobs", "competitive_intel",
-                         "contact_changes", "graph_insights"]
+    expected_sections = [
+        "pipeline_updates",
+        "new_jobs",
+        "competitive_intel",
+        "contact_changes",
+        "graph_insights",
+    ]
     populated = sum(1 for s in expected_sections if sections.get(s))
     section_score = populated / len(expected_sections)
 
@@ -325,12 +350,18 @@ async def quality_check(state: Dict[str, Any]) -> Dict[str, Any]:
     summary = briefing.get("executive_summary", "")
     summary_score = 1.0 if len(summary) > 50 else 0.5
 
-    quality_score = round((section_score * 0.4 + item_score * 0.4 + summary_score * 0.2), 2)
+    quality_score = round(
+        (section_score * 0.4 + item_score * 0.4 + summary_score * 0.2), 2
+    )
     state["quality_score"] = quality_score
 
-    logger.info("morning_briefing.quality_check",
-                score=quality_score, sections=populated,
-                items=total, pass_=quality_score >= 0.6)
+    logger.info(
+        "morning_briefing.quality_check",
+        score=quality_score,
+        sections=populated,
+        items=total,
+        pass_=quality_score >= 0.6,
+    )
     return state
 
 
@@ -371,14 +402,16 @@ async def deliver(state: Dict[str, Any]) -> Dict[str, Any]:
         "channels": ["dashboard"],
         "is_fallback": briefing.get("is_fallback", False),
     }
-    logger.info("morning_briefing.delivered",
-                fallback=briefing.get("is_fallback", False))
+    logger.info(
+        "morning_briefing.delivered", fallback=briefing.get("is_fallback", False)
+    )
     return state
 
 
 # ---------------------------------------------------------------------------
 # Workflow Definition
 # ---------------------------------------------------------------------------
+
 
 def get_morning_briefing_definition() -> WorkflowDefinition:
     """Return the production morning briefing workflow definition."""
@@ -388,57 +421,69 @@ def get_morning_briefing_definition() -> WorkflowDefinition:
         state_schema=MORNING_BRIEFING_STATE,
         nodes={
             "gather_pipeline_updates": NodeSpec(
-                name="gather_pipeline_updates", function=gather_pipeline_updates,
+                name="gather_pipeline_updates",
+                function=gather_pipeline_updates,
                 description="Gather pipeline updates",
                 timeout_seconds=120,
             ),
             "gather_new_jobs": NodeSpec(
-                name="gather_new_jobs", function=gather_new_jobs,
+                name="gather_new_jobs",
+                function=gather_new_jobs,
                 description="Gather new job postings",
                 timeout_seconds=120,
             ),
             "gather_competitive_intel": NodeSpec(
-                name="gather_competitive_intel", function=gather_competitive_intel,
+                name="gather_competitive_intel",
+                function=gather_competitive_intel,
                 description="Gather competitive intelligence",
                 timeout_seconds=120,
             ),
             "gather_contact_changes": NodeSpec(
-                name="gather_contact_changes", function=gather_contact_changes,
+                name="gather_contact_changes",
+                function=gather_contact_changes,
                 description="Gather contact changes",
                 timeout_seconds=120,
             ),
             "gather_graph_insights": NodeSpec(
-                name="gather_graph_insights", function=gather_graph_insights,
+                name="gather_graph_insights",
+                function=gather_graph_insights,
                 description="Gather Neo4j graph insights",
                 timeout_seconds=120,
             ),
             "merge_all_sections": NodeSpec(
-                name="merge_all_sections", function=merge_all_sections,
+                name="merge_all_sections",
+                function=merge_all_sections,
                 description="Merge all gathered sections",
                 timeout_seconds=30,
             ),
             "prioritize_items": NodeSpec(
-                name="prioritize_items", function=prioritize_items,
+                name="prioritize_items",
+                function=prioritize_items,
                 description="Rank items by BD impact",
                 timeout_seconds=30,
             ),
             "format_briefing": NodeSpec(
-                name="format_briefing", function=format_briefing,
+                name="format_briefing",
+                function=format_briefing,
                 description="Format briefing with executive summary",
                 timeout_seconds=60,
             ),
             "quality_check": NodeSpec(
-                name="quality_check", function=quality_check,
+                name="quality_check",
+                function=quality_check,
                 description="Verify briefing completeness",
-                timeout_seconds=30, retry_on_error=False,
+                timeout_seconds=30,
+                retry_on_error=False,
             ),
             "fallback_briefing": NodeSpec(
-                name="fallback_briefing", function=fallback_briefing,
+                name="fallback_briefing",
+                function=fallback_briefing,
                 description="Generate abbreviated fallback briefing",
                 timeout_seconds=30,
             ),
             "deliver": NodeSpec(
-                name="deliver", function=deliver,
+                name="deliver",
+                function=deliver,
                 description="Deliver briefing to channels",
                 timeout_seconds=60,
             ),
@@ -452,7 +497,9 @@ def get_morning_briefing_definition() -> WorkflowDefinition:
             EdgeSpec(source="merge_all_sections", target="prioritize_items"),
             EdgeSpec(source="prioritize_items", target="format_briefing"),
             EdgeSpec(source="format_briefing", target="quality_check"),
-            EdgeSpec(source="quality_check", target="deliver", condition=quality_router),
+            EdgeSpec(
+                source="quality_check", target="deliver", condition=quality_router
+            ),
             EdgeSpec(source="fallback_briefing", target="deliver"),
             EdgeSpec(source="deliver", target="__end__"),
         ],
@@ -460,15 +507,19 @@ def get_morning_briefing_definition() -> WorkflowDefinition:
         interrupt_nodes=[],  # Fully autonomous
         parallel_groups=[
             [
-                "gather_pipeline_updates", "gather_new_jobs",
-                "gather_competitive_intel", "gather_contact_changes",
+                "gather_pipeline_updates",
+                "gather_new_jobs",
+                "gather_competitive_intel",
+                "gather_contact_changes",
                 "gather_graph_insights",
             ],
         ],
         retry_config={
             "gather_pipeline_updates": RetryConfig(max_attempts=2, backoff_seconds=3.0),
             "gather_new_jobs": RetryConfig(max_attempts=2, backoff_seconds=3.0),
-            "gather_competitive_intel": RetryConfig(max_attempts=2, backoff_seconds=3.0),
+            "gather_competitive_intel": RetryConfig(
+                max_attempts=2, backoff_seconds=3.0
+            ),
             "gather_contact_changes": RetryConfig(max_attempts=2, backoff_seconds=3.0),
             "gather_graph_insights": RetryConfig(max_attempts=2, backoff_seconds=3.0),
         },

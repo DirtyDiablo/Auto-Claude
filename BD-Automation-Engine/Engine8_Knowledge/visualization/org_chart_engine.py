@@ -23,6 +23,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class Person:
     """A person in the org chart."""
+
     id: str = ""
     name: str = ""
     title: str = ""
@@ -40,6 +41,7 @@ class Person:
 @dataclass
 class OrgChart:
     """Complete org chart data."""
+
     chart_id: str = ""
     title: str = ""
     mode: str = "tree"
@@ -55,6 +57,7 @@ class OrgChart:
 @dataclass
 class Team:
     """A person's team."""
+
     leader: Optional[Person] = None
     direct_reports: List[Person] = field(default_factory=list)
     skip_level: List[Person] = field(default_factory=list)
@@ -64,6 +67,7 @@ class Team:
 @dataclass
 class InferenceReport:
     """Report from REPORTS_TO inference."""
+
     relationships_inferred: int = 0
     by_tier_hierarchy: int = 0
     by_location_match: int = 0
@@ -76,6 +80,7 @@ class InferenceReport:
 @dataclass
 class OrgDiff:
     """Differences between two org chart snapshots."""
+
     program: str = ""
     date1: str = ""
     date2: str = ""
@@ -99,12 +104,29 @@ TIER_HIERARCHY = {
 }
 
 TITLE_TIER_MAP = {
-    "ceo": 1, "cto": 1, "cio": 1, "cfo": 1, "president": 1, "evp": 1,
-    "svp": 2, "vice president": 2, "vp": 2, "general manager": 2,
-    "director": 3, "senior director": 3,
-    "manager": 4, "team lead": 4, "lead": 4, "supervisor": 4,
-    "senior": 5, "sr.": 5, "principal": 5,
-    "analyst": 6, "engineer": 6, "specialist": 6, "associate": 6,
+    "ceo": 1,
+    "cto": 1,
+    "cio": 1,
+    "cfo": 1,
+    "president": 1,
+    "evp": 1,
+    "svp": 2,
+    "vice president": 2,
+    "vp": 2,
+    "general manager": 2,
+    "director": 3,
+    "senior director": 3,
+    "manager": 4,
+    "team lead": 4,
+    "lead": 4,
+    "supervisor": 4,
+    "senior": 5,
+    "sr.": 5,
+    "principal": 5,
+    "analyst": 6,
+    "engineer": 6,
+    "specialist": 6,
+    "associate": 6,
 }
 
 
@@ -152,11 +174,13 @@ class OrgChartEngine:
         # Build edges based on reports_to
         for person in people:
             if person.reports_to:
-                chart.edges.append({
-                    "source": person.reports_to,
-                    "target": person.name,
-                    "type": "REPORTS_TO",
-                })
+                chart.edges.append(
+                    {
+                        "source": person.reports_to,
+                        "target": person.name,
+                        "type": "REPORTS_TO",
+                    }
+                )
 
         chart.metadata = {
             "total_nodes": len(chart.nodes),
@@ -276,9 +300,7 @@ class OrgChartEngine:
 
         return chain
 
-    async def compare_org_charts(
-        self, date1: str, date2: str, program: str
-    ) -> OrgDiff:
+    async def compare_org_charts(self, date1: str, date2: str, program: str) -> OrgDiff:
         """Show org chart changes between two dates."""
         # In production would query Neo4j temporal data
         # For now, return empty diff structure
@@ -301,7 +323,9 @@ class OrgChartEngine:
                 cypher = "MATCH (p:Person)"
                 params = {}
                 if program:
-                    cypher = "MATCH (p:Person)-[:WORKS_ON]->(prog:Program {name: $program})"
+                    cypher = (
+                        "MATCH (p:Person)-[:WORKS_ON]->(prog:Program {name: $program})"
+                    )
                     params["program"] = program
                 elif root:
                     cypher = "MATCH (p:Person {name: $root})"
@@ -321,6 +345,7 @@ class OrgChartEngine:
                 if program:
                     params["q"] = program
                 import httpx
+
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     resp = await client.get(
                         f"{self.hub}/api/v2/contacts", params=params
@@ -353,16 +378,18 @@ class OrgChartEngine:
         for record in results:
             node = record.get("p", {})
             if isinstance(node, dict):
-                people.append(Person(
-                    id=str(node.get("id", "")),
-                    name=node.get("name", ""),
-                    title=node.get("title", ""),
-                    company=node.get("company", ""),
-                    program=node.get("program", ""),
-                    tier=node.get("tier", 5),
-                    location=node.get("location", ""),
-                    reports_to=record.get("manager"),
-                ))
+                people.append(
+                    Person(
+                        id=str(node.get("id", "")),
+                        name=node.get("name", ""),
+                        title=node.get("title", ""),
+                        company=node.get("company", ""),
+                        program=node.get("program", ""),
+                        tier=node.get("tier", 5),
+                        location=node.get("location", ""),
+                        reports_to=record.get("manager"),
+                    )
+                )
         return people
 
     def get_cached(self, chart_id: str) -> Optional[OrgChart]:
@@ -370,7 +397,11 @@ class OrgChartEngine:
 
     def list_cached(self) -> List[Dict[str, str]]:
         return [
-            {"chart_id": c.chart_id, "title": c.title, "generated_at": c.generated_at or ""}
+            {
+                "chart_id": c.chart_id,
+                "title": c.title,
+                "generated_at": c.generated_at or "",
+            }
             for c in self._cache.values()
         ]
 

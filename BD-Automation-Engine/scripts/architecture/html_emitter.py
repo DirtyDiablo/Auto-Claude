@@ -11,39 +11,45 @@ for interactive architecture visualization. Four tabbed views:
 import json
 from pathlib import Path
 
-from .name_map import CATEGORY_DEFS, PROJECT_LABELS, assign_category
+from .name_map import CATEGORY_DEFS
 
 
 def _build_graph_nodes(entities: dict) -> list[dict]:
     """Build React Flow nodes from merged entities."""
     nodes = []
     for i, (name, ent) in enumerate(sorted(entities.items())):
-        category = ent.get('category', 'Meta/Ops')
-        color = CATEGORY_DEFS.get(category, {}).get('color', '#64748b')
-        projects = ent.get('projects', [])
-        prop_count = len(ent.get('properties', []))
+        category = ent.get("category", "Meta/Ops")
+        color = CATEGORY_DEFS.get(category, {}).get("color", "#64748b")
+        projects = ent.get("projects", [])
+        prop_count = len(ent.get("properties", []))
 
-        nodes.append({
-            'id': name,
-            'type': 'entityNode',
-            'data': {
-                'label': name,
-                'category': category,
-                'color': color,
-                'records': ent.get('records', '?'),
-                'propCount': prop_count,
-                'projects': projects,
-                'pk': ent.get('pk', 'id'),
-                'description': ent.get('description', ''),
-                'sources': ent.get('sources', []),
-                'storage': ent.get('storage', []),
-                'properties': [
-                    {'name': p.get('name', ''), 'type': p.get('type', ''), 'note': p.get('note', '')}
-                    for p in ent.get('properties', [])[:30]  # Limit for size
-                ],
-            },
-            'position': {'x': 0, 'y': 0},
-        })
+        nodes.append(
+            {
+                "id": name,
+                "type": "entityNode",
+                "data": {
+                    "label": name,
+                    "category": category,
+                    "color": color,
+                    "records": ent.get("records", "?"),
+                    "propCount": prop_count,
+                    "projects": projects,
+                    "pk": ent.get("pk", "id"),
+                    "description": ent.get("description", ""),
+                    "sources": ent.get("sources", []),
+                    "storage": ent.get("storage", []),
+                    "properties": [
+                        {
+                            "name": p.get("name", ""),
+                            "type": p.get("type", ""),
+                            "note": p.get("note", ""),
+                        }
+                        for p in ent.get("properties", [])[:30]  # Limit for size
+                    ],
+                },
+                "position": {"x": 0, "y": 0},
+            }
+        )
     return nodes
 
 
@@ -51,22 +57,24 @@ def _build_graph_edges(relationships: list[dict]) -> list[dict]:
     """Build React Flow edges from relationships."""
     edges = []
     for i, r in enumerate(relationships):
-        edge_type = r.get('type', 'FK')
-        animated = edge_type in ('derived', 'many')
-        edges.append({
-            'id': f"e-{i}",
-            'source': r['from'],
-            'target': r['to'],
-            'label': r.get('label', ''),
-            'type': 'smoothstep',
-            'animated': animated,
-            'style': {'stroke': '#475569', 'strokeWidth': 1.5},
-            'labelStyle': {'fontSize': 9, 'fill': '#94a3b8'},
-            'data': {
-                'cardinality': edge_type,
-                'description': r.get('description', ''),
-            },
-        })
+        edge_type = r.get("type", "FK")
+        animated = edge_type in ("derived", "many")
+        edges.append(
+            {
+                "id": f"e-{i}",
+                "source": r["from"],
+                "target": r["to"],
+                "label": r.get("label", ""),
+                "type": "smoothstep",
+                "animated": animated,
+                "style": {"stroke": "#475569", "strokeWidth": 1.5},
+                "labelStyle": {"fontSize": 9, "fill": "#94a3b8"},
+                "data": {
+                    "cardinality": edge_type,
+                    "description": r.get("description", ""),
+                },
+            }
+        )
     return edges
 
 
@@ -79,60 +87,101 @@ def _build_flow_nodes(infrastructure: dict) -> list[dict]:
 
     # Source nodes (left column)
     source_systems = [
-        ('Bullhorn CRM', 'External API', '#f97316'),
-        ('Apify Scraper', 'External Service', '#f97316'),
-        ('SAM.gov', 'Government API', '#3b82f6'),
-        ('USASpending', 'Government API', '#3b82f6'),
-        ('Tango API', 'Government API', '#3b82f6'),
-        ('CSV Imports', 'File System', '#64748b'),
+        ("Bullhorn CRM", "External API", "#f97316"),
+        ("Apify Scraper", "External Service", "#f97316"),
+        ("SAM.gov", "Government API", "#3b82f6"),
+        ("USASpending", "Government API", "#3b82f6"),
+        ("Tango API", "Government API", "#3b82f6"),
+        ("CSV Imports", "File System", "#64748b"),
     ]
     for name, stype, color in source_systems:
-        nodes.append({
-            'id': f'src-{name}',
-            'type': 'flowNode',
-            'data': {'label': name, 'subLabel': stype, 'color': color, 'nodeType': 'source'},
-            'position': {'x': 0, 'y': y_src},
-        })
+        nodes.append(
+            {
+                "id": f"src-{name}",
+                "type": "flowNode",
+                "data": {
+                    "label": name,
+                    "subLabel": stype,
+                    "color": color,
+                    "nodeType": "source",
+                },
+                "position": {"x": 0, "y": y_src},
+            }
+        )
         y_src += 80
 
     # Transform nodes (middle column)
     transforms = [
-        ('Engine 1: Scraper', '#8b5cf6'),
-        ('Engine 2: Program Map', '#8b5cf6'),
-        ('Engine 3: OrgChart', '#8b5cf6'),
-        ('Engine 4: Playbook', '#8b5cf6'),
-        ('Engine 5: Scoring', '#8b5cf6'),
-        ('Engine 6: QA', '#8b5cf6'),
-        ('Engine 7: Bullhorn ETL', '#8b5cf6'),
-        ('Engine 8: Knowledge', '#8b5cf6'),
-        ('N8N Workflows', '#10b981'),
-        ('Hub Sync Pipeline', '#10b981'),
+        ("Engine 1: Scraper", "#8b5cf6"),
+        ("Engine 2: Program Map", "#8b5cf6"),
+        ("Engine 3: OrgChart", "#8b5cf6"),
+        ("Engine 4: Playbook", "#8b5cf6"),
+        ("Engine 5: Scoring", "#8b5cf6"),
+        ("Engine 6: QA", "#8b5cf6"),
+        ("Engine 7: Bullhorn ETL", "#8b5cf6"),
+        ("Engine 8: Knowledge", "#8b5cf6"),
+        ("N8N Workflows", "#10b981"),
+        ("Hub Sync Pipeline", "#10b981"),
     ]
     for name, color in transforms:
-        nodes.append({
-            'id': f'xfm-{name}',
-            'type': 'flowNode',
-            'data': {'label': name, 'subLabel': 'Transform', 'color': color, 'nodeType': 'transform'},
-            'position': {'x': 350, 'y': y_transform},
-        })
+        nodes.append(
+            {
+                "id": f"xfm-{name}",
+                "type": "flowNode",
+                "data": {
+                    "label": name,
+                    "subLabel": "Transform",
+                    "color": color,
+                    "nodeType": "transform",
+                },
+                "position": {"x": 350, "y": y_transform},
+            }
+        )
         y_transform += 70
 
     # Destination nodes (right column)
     destinations = [
-        ('Qdrant Vectors', f"{len(infrastructure.get('qdrant_collections', []))} collections", '#06b6d4'),
-        ('SQLite DBs', f"{len(infrastructure.get('sqlite_databases', []))} databases", '#06b6d4'),
-        ('Neo4j Graph', f"{infrastructure.get('neo4j_graph', {}).get('total_node_types', 0)} node types", '#06b6d4'),
-        ('Notion DBs', f"{len(infrastructure.get('notion_databases', []))} databases", '#06b6d4'),
-        ('REST APIs', f"{infrastructure.get('api_endpoints', {}).get('total_endpoints', 0)} endpoints", '#f43f5e'),
-        ('Dashboard', 'Vite + React', '#f43f5e'),
+        (
+            "Qdrant Vectors",
+            f"{len(infrastructure.get('qdrant_collections', []))} collections",
+            "#06b6d4",
+        ),
+        (
+            "SQLite DBs",
+            f"{len(infrastructure.get('sqlite_databases', []))} databases",
+            "#06b6d4",
+        ),
+        (
+            "Neo4j Graph",
+            f"{infrastructure.get('neo4j_graph', {}).get('total_node_types', 0)} node types",
+            "#06b6d4",
+        ),
+        (
+            "Notion DBs",
+            f"{len(infrastructure.get('notion_databases', []))} databases",
+            "#06b6d4",
+        ),
+        (
+            "REST APIs",
+            f"{infrastructure.get('api_endpoints', {}).get('total_endpoints', 0)} endpoints",
+            "#f43f5e",
+        ),
+        ("Dashboard", "Vite + React", "#f43f5e"),
     ]
     for name, sub, color in destinations:
-        nodes.append({
-            'id': f'dest-{name}',
-            'type': 'flowNode',
-            'data': {'label': name, 'subLabel': sub, 'color': color, 'nodeType': 'destination'},
-            'position': {'x': 700, 'y': y_dest},
-        })
+        nodes.append(
+            {
+                "id": f"dest-{name}",
+                "type": "flowNode",
+                "data": {
+                    "label": name,
+                    "subLabel": sub,
+                    "color": color,
+                    "nodeType": "destination",
+                },
+                "position": {"x": 700, "y": y_dest},
+            }
+        )
         y_dest += 80
 
     return nodes
@@ -142,38 +191,40 @@ def _build_flow_edges() -> list[dict]:
     """Build data flow pipeline edges."""
     edges = []
     flow_connections = [
-        ('src-Apify Scraper', 'xfm-Engine 1: Scraper', 'JSON'),
-        ('src-Bullhorn CRM', 'xfm-Engine 7: Bullhorn ETL', 'API/CSV'),
-        ('src-SAM.gov', 'xfm-N8N Workflows', 'API'),
-        ('src-USASpending', 'xfm-N8N Workflows', 'API'),
-        ('src-Tango API', 'xfm-N8N Workflows', 'SQL/API'),
-        ('src-CSV Imports', 'xfm-Hub Sync Pipeline', 'CSV'),
-        ('xfm-Engine 1: Scraper', 'xfm-Engine 2: Program Map', 'Jobs'),
-        ('xfm-Engine 2: Program Map', 'xfm-Engine 3: OrgChart', 'Programs'),
-        ('xfm-Engine 3: OrgChart', 'xfm-Engine 4: Playbook', 'Contacts'),
-        ('xfm-Engine 4: Playbook', 'xfm-Engine 5: Scoring', 'Playbooks'),
-        ('xfm-Engine 5: Scoring', 'xfm-Engine 6: QA', 'Scores'),
-        ('xfm-Engine 7: Bullhorn ETL', 'xfm-Engine 8: Knowledge', 'CRM Data'),
-        ('xfm-Engine 8: Knowledge', 'dest-Qdrant Vectors', 'Embeddings'),
-        ('xfm-Engine 7: Bullhorn ETL', 'dest-SQLite DBs', 'Tables'),
-        ('xfm-N8N Workflows', 'dest-SQLite DBs', 'Federal Data'),
-        ('xfm-N8N Workflows', 'dest-Neo4j Graph', 'Entities'),
-        ('xfm-Hub Sync Pipeline', 'dest-REST APIs', 'Sync'),
-        ('xfm-Engine 5: Scoring', 'dest-Notion DBs', 'BD Data'),
-        ('dest-REST APIs', 'dest-Dashboard', 'JSON'),
-        ('dest-Qdrant Vectors', 'dest-REST APIs', 'Search'),
+        ("src-Apify Scraper", "xfm-Engine 1: Scraper", "JSON"),
+        ("src-Bullhorn CRM", "xfm-Engine 7: Bullhorn ETL", "API/CSV"),
+        ("src-SAM.gov", "xfm-N8N Workflows", "API"),
+        ("src-USASpending", "xfm-N8N Workflows", "API"),
+        ("src-Tango API", "xfm-N8N Workflows", "SQL/API"),
+        ("src-CSV Imports", "xfm-Hub Sync Pipeline", "CSV"),
+        ("xfm-Engine 1: Scraper", "xfm-Engine 2: Program Map", "Jobs"),
+        ("xfm-Engine 2: Program Map", "xfm-Engine 3: OrgChart", "Programs"),
+        ("xfm-Engine 3: OrgChart", "xfm-Engine 4: Playbook", "Contacts"),
+        ("xfm-Engine 4: Playbook", "xfm-Engine 5: Scoring", "Playbooks"),
+        ("xfm-Engine 5: Scoring", "xfm-Engine 6: QA", "Scores"),
+        ("xfm-Engine 7: Bullhorn ETL", "xfm-Engine 8: Knowledge", "CRM Data"),
+        ("xfm-Engine 8: Knowledge", "dest-Qdrant Vectors", "Embeddings"),
+        ("xfm-Engine 7: Bullhorn ETL", "dest-SQLite DBs", "Tables"),
+        ("xfm-N8N Workflows", "dest-SQLite DBs", "Federal Data"),
+        ("xfm-N8N Workflows", "dest-Neo4j Graph", "Entities"),
+        ("xfm-Hub Sync Pipeline", "dest-REST APIs", "Sync"),
+        ("xfm-Engine 5: Scoring", "dest-Notion DBs", "BD Data"),
+        ("dest-REST APIs", "dest-Dashboard", "JSON"),
+        ("dest-Qdrant Vectors", "dest-REST APIs", "Search"),
     ]
     for i, (src, tgt, label) in enumerate(flow_connections):
-        edges.append({
-            'id': f'fe-{i}',
-            'source': src,
-            'target': tgt,
-            'label': label,
-            'type': 'smoothstep',
-            'animated': True,
-            'style': {'stroke': '#475569', 'strokeWidth': 1.5},
-            'labelStyle': {'fontSize': 9, 'fill': '#94a3b8'},
-        })
+        edges.append(
+            {
+                "id": f"fe-{i}",
+                "source": src,
+                "target": tgt,
+                "label": label,
+                "type": "smoothstep",
+                "animated": True,
+                "style": {"stroke": "#475569", "strokeWidth": 1.5},
+                "labelStyle": {"fontSize": 9, "fill": "#94a3b8"},
+            }
+        )
     return edges
 
 
@@ -183,32 +234,46 @@ def _build_integration_nodes() -> list[dict]:
 
     # Center: shared infrastructure
     shared = [
-        ('Qdrant Server', ':6333', '#06b6d4', 0, 0),
-        ('BD Hub API', ':8100', '#f43f5e', 200, 0),
-        ('Neo4j Graph', ':7687', '#10b981', 100, -100),
-        ('N8N Cloud', 'n8n.io', '#8b5cf6', 100, 100),
+        ("Qdrant Server", ":6333", "#06b6d4", 0, 0),
+        ("BD Hub API", ":8100", "#f43f5e", 200, 0),
+        ("Neo4j Graph", ":7687", "#10b981", 100, -100),
+        ("N8N Cloud", "n8n.io", "#8b5cf6", 100, 100),
     ]
     for name, port, color, x, y in shared:
-        nodes.append({
-            'id': f'infra-{name}',
-            'type': 'integrationNode',
-            'data': {'label': name, 'subLabel': port, 'color': color, 'nodeType': 'infrastructure'},
-            'position': {'x': 300 + x, 'y': 300 + y},
-        })
+        nodes.append(
+            {
+                "id": f"infra-{name}",
+                "type": "integrationNode",
+                "data": {
+                    "label": name,
+                    "subLabel": port,
+                    "color": color,
+                    "nodeType": "infrastructure",
+                },
+                "position": {"x": 300 + x, "y": 300 + y},
+            }
+        )
 
     # Spokes: repositories
     repos = [
-        ('BD-Automation-Engine', '8 engines, 340 APIs', '#3b82f6', -200, -150),
-        ('Data-Scraper', '33 domains, 250 APIs', '#10b981', -200, 150),
-        ('N8N-Builder', '40 workflows, 267 APIs', '#f97316', 500, 0),
+        ("BD-Automation-Engine", "8 engines, 340 APIs", "#3b82f6", -200, -150),
+        ("Data-Scraper", "33 domains, 250 APIs", "#10b981", -200, 150),
+        ("N8N-Builder", "40 workflows, 267 APIs", "#f97316", 500, 0),
     ]
     for name, sub, color, x, y in repos:
-        nodes.append({
-            'id': f'repo-{name}',
-            'type': 'integrationNode',
-            'data': {'label': name, 'subLabel': sub, 'color': color, 'nodeType': 'repository'},
-            'position': {'x': 300 + x, 'y': 300 + y},
-        })
+        nodes.append(
+            {
+                "id": f"repo-{name}",
+                "type": "integrationNode",
+                "data": {
+                    "label": name,
+                    "subLabel": sub,
+                    "color": color,
+                    "nodeType": "repository",
+                },
+                "position": {"x": 300 + x, "y": 300 + y},
+            }
+        )
 
     return nodes
 
@@ -216,61 +281,67 @@ def _build_integration_nodes() -> list[dict]:
 def _build_integration_edges() -> list[dict]:
     """Build integration map edges."""
     connections = [
-        ('repo-BD-Automation-Engine', 'infra-Qdrant Server', '9 collections'),
-        ('repo-BD-Automation-Engine', 'infra-BD Hub API', '340 endpoints'),
-        ('repo-BD-Automation-Engine', 'infra-Neo4j Graph', '9 node types'),
-        ('repo-Data-Scraper', 'infra-Qdrant Server', '2 collections'),
-        ('repo-Data-Scraper', 'infra-BD Hub API', 'Hub sync'),
-        ('repo-N8N-Builder', 'infra-Qdrant Server', '3 collections'),
-        ('repo-N8N-Builder', 'infra-N8N Cloud', '40 workflows'),
-        ('repo-N8N-Builder', 'infra-Neo4j Graph', '6 node types'),
-        ('repo-N8N-Builder', 'infra-BD Hub API', '267 endpoints'),
+        ("repo-BD-Automation-Engine", "infra-Qdrant Server", "9 collections"),
+        ("repo-BD-Automation-Engine", "infra-BD Hub API", "340 endpoints"),
+        ("repo-BD-Automation-Engine", "infra-Neo4j Graph", "9 node types"),
+        ("repo-Data-Scraper", "infra-Qdrant Server", "2 collections"),
+        ("repo-Data-Scraper", "infra-BD Hub API", "Hub sync"),
+        ("repo-N8N-Builder", "infra-Qdrant Server", "3 collections"),
+        ("repo-N8N-Builder", "infra-N8N Cloud", "40 workflows"),
+        ("repo-N8N-Builder", "infra-Neo4j Graph", "6 node types"),
+        ("repo-N8N-Builder", "infra-BD Hub API", "267 endpoints"),
     ]
     edges = []
     for i, (src, tgt, label) in enumerate(connections):
-        edges.append({
-            'id': f'ie-{i}',
-            'source': src,
-            'target': tgt,
-            'label': label,
-            'type': 'smoothstep',
-            'style': {'stroke': '#475569', 'strokeWidth': 2},
-            'labelStyle': {'fontSize': 10, 'fill': '#94a3b8'},
-        })
+        edges.append(
+            {
+                "id": f"ie-{i}",
+                "source": src,
+                "target": tgt,
+                "label": label,
+                "type": "smoothstep",
+                "style": {"stroke": "#475569", "strokeWidth": 2},
+                "labelStyle": {"fontSize": 10, "fill": "#94a3b8"},
+            }
+        )
     return edges
 
 
-def _build_dashboard_data(entities: dict, relationships: list, infrastructure: dict) -> dict:
+def _build_dashboard_data(
+    entities: dict, relationships: list, infrastructure: dict
+) -> dict:
     """Build dashboard statistics for View 4."""
     # Category breakdown
     categories = {}
     for cat_name, cat_data in CATEGORY_DEFS.items():
-        count = sum(1 for e in entities.values() if e.get('category') == cat_name)
+        count = sum(1 for e in entities.values() if e.get("category") == cat_name)
         if count:
-            categories[cat_name] = {'count': count, 'color': cat_data['color']}
+            categories[cat_name] = {"count": count, "color": cat_data["color"]}
 
     # Storage summary
-    qdrant = infrastructure.get('qdrant_collections', [])
-    sqlite = infrastructure.get('sqlite_databases', [])
-    neo4j = infrastructure.get('neo4j_graph', {})
-    api = infrastructure.get('api_endpoints', {})
+    qdrant = infrastructure.get("qdrant_collections", [])
+    sqlite = infrastructure.get("sqlite_databases", [])
+    neo4j = infrastructure.get("neo4j_graph", {})
+    api = infrastructure.get("api_endpoints", {})
 
     return {
-        'totalEntities': len(entities),
-        'totalProperties': sum(len(e.get('properties', [])) for e in entities.values()),
-        'totalRelationships': len(relationships),
-        'multiProjectEntities': sum(1 for e in entities.values() if len(e.get('projects', [])) > 1),
-        'categories': categories,
-        'qdrantCollections': len(qdrant),
-        'sqliteDatabases': len(sqlite),
-        'neo4jNodeTypes': neo4j.get('total_node_types', 0),
-        'neo4jRelTypes': neo4j.get('total_relationship_types', 0),
-        'apiEndpoints': api.get('total_endpoints', 0),
-        'dataFlows': len(infrastructure.get('data_flows', [])),
-        'engines': len(infrastructure.get('engines', [])),
-        'n8nWorkflows': (
-            len(infrastructure.get('n8n_workflows', {}).get('cloud', []))
-            if isinstance(infrastructure.get('n8n_workflows'), dict)
+        "totalEntities": len(entities),
+        "totalProperties": sum(len(e.get("properties", [])) for e in entities.values()),
+        "totalRelationships": len(relationships),
+        "multiProjectEntities": sum(
+            1 for e in entities.values() if len(e.get("projects", [])) > 1
+        ),
+        "categories": categories,
+        "qdrantCollections": len(qdrant),
+        "sqliteDatabases": len(sqlite),
+        "neo4jNodeTypes": neo4j.get("total_node_types", 0),
+        "neo4jRelTypes": neo4j.get("total_relationship_types", 0),
+        "apiEndpoints": api.get("total_endpoints", 0),
+        "dataFlows": len(infrastructure.get("data_flows", [])),
+        "engines": len(infrastructure.get("engines", [])),
+        "n8nWorkflows": (
+            len(infrastructure.get("n8n_workflows", {}).get("cloud", []))
+            if isinstance(infrastructure.get("n8n_workflows"), dict)
             else 0
         ),
     }
@@ -293,30 +364,40 @@ def generate_v4_html(
     dashboard = _build_dashboard_data(entities, relationships, infrastructure)
 
     # Inline all data
-    arch_data = json.dumps({
-        'graph': {'nodes': graph_nodes, 'edges': graph_edges},
-        'flow': {'nodes': flow_nodes, 'edges': flow_edges},
-        'integration': {'nodes': integration_nodes, 'edges': integration_edges},
-        'dashboard': dashboard,
-        'categories': {k: {'color': v['color'], 'count': len([
-            n for n in graph_nodes if n['data']['category'] == k
-        ])} for k, v in CATEGORY_DEFS.items()},
-    }, indent=None, ensure_ascii=False)
+    arch_data = json.dumps(
+        {
+            "graph": {"nodes": graph_nodes, "edges": graph_edges},
+            "flow": {"nodes": flow_nodes, "edges": flow_edges},
+            "integration": {"nodes": integration_nodes, "edges": integration_edges},
+            "dashboard": dashboard,
+            "categories": {
+                k: {
+                    "color": v["color"],
+                    "count": len(
+                        [n for n in graph_nodes if n["data"]["category"] == k]
+                    ),
+                }
+                for k, v in CATEGORY_DEFS.items()
+            },
+        },
+        indent=None,
+        ensure_ascii=False,
+    )
 
-    return _HTML_TEMPLATE.replace('__ARCHITECTURE_DATA__', arch_data)
+    return _HTML_TEMPLATE.replace("__ARCHITECTURE_DATA__", arch_data)
 
 
 def write_html(html: str, output_path: Path) -> None:
     """Write HTML to disk."""
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(html, encoding='utf-8')
+    output_path.write_text(html, encoding="utf-8")
     size = output_path.stat().st_size
-    print(f"  Written: {output_path} ({size:,} bytes, {size/1024:.1f} KB)")
+    print(f"  Written: {output_path} ({size:,} bytes, {size / 1024:.1f} KB)")
 
 
 # === HTML TEMPLATE ===
 # Single-file React 18 + React Flow app loaded via ESM CDN
-_HTML_TEMPLATE = r'''<!DOCTYPE html>
+_HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1033,12 +1114,13 @@ document.getElementById('headerStats').innerHTML =
 })();
 </script>
 </body>
-</html>'''
+</html>"""
 
 
 # ====================================================================
 # V5: React Flow + elkjs + htm visualization
 # ====================================================================
+
 
 def generate_v5_html(
     entities: dict,
@@ -1058,29 +1140,46 @@ def generate_v5_html(
 
     # Enhance edge styling for V5
     for edge in graph_edges:
-        card = edge.get('data', {}).get('cardinality', 'FK')
-        if card == 'FK':
-            edge['style'] = {'stroke': '#475569', 'strokeWidth': 1.5}
-        elif card == 'one-many':
-            edge['style'] = {'stroke': '#475569', 'strokeWidth': 1.5, 'strokeDasharray': '8 4'}
-        elif card in ('many', 'many-to-many'):
-            edge['style'] = {'stroke': '#64748b', 'strokeWidth': 1.5, 'strokeDasharray': '3 3'}
-            edge['animated'] = True
+        card = edge.get("data", {}).get("cardinality", "FK")
+        if card == "FK":
+            edge["style"] = {"stroke": "#475569", "strokeWidth": 1.5}
+        elif card == "one-many":
+            edge["style"] = {
+                "stroke": "#475569",
+                "strokeWidth": 1.5,
+                "strokeDasharray": "8 4",
+            }
+        elif card in ("many", "many-to-many"):
+            edge["style"] = {
+                "stroke": "#64748b",
+                "strokeWidth": 1.5,
+                "strokeDasharray": "3 3",
+            }
+            edge["animated"] = True
         # Add arrow markers
-        edge['markerEnd'] = {'type': 'arrowclosed', 'color': '#475569', 'width': 15, 'height': 15}
+        edge["markerEnd"] = {
+            "type": "arrowclosed",
+            "color": "#475569",
+            "width": 15,
+            "height": 15,
+        }
 
-    arch_data = json.dumps({
-        'graph': {'nodes': graph_nodes, 'edges': graph_edges},
-        'flow': {'nodes': flow_nodes, 'edges': flow_edges},
-        'integration': {'nodes': integration_nodes, 'edges': integration_edges},
-        'dashboard': dashboard,
-        'categories': {k: {'color': v['color']} for k, v in CATEGORY_DEFS.items()},
-    }, indent=None, ensure_ascii=False)
+    arch_data = json.dumps(
+        {
+            "graph": {"nodes": graph_nodes, "edges": graph_edges},
+            "flow": {"nodes": flow_nodes, "edges": flow_edges},
+            "integration": {"nodes": integration_nodes, "edges": integration_edges},
+            "dashboard": dashboard,
+            "categories": {k: {"color": v["color"]} for k, v in CATEGORY_DEFS.items()},
+        },
+        indent=None,
+        ensure_ascii=False,
+    )
 
-    return _V5_HTML_TEMPLATE.replace('__ARCHITECTURE_DATA__', arch_data)
+    return _V5_HTML_TEMPLATE.replace("__ARCHITECTURE_DATA__", arch_data)
 
 
-_V5_HTML_TEMPLATE = r'''<!DOCTYPE html>
+_V5_HTML_TEMPLATE = r"""<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -1684,4 +1783,4 @@ const root = createRoot(document.getElementById('root'));
 root.render(html`<${App} />`);
 </script>
 </body>
-</html>'''
+</html>"""

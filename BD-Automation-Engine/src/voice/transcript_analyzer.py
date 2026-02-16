@@ -19,6 +19,7 @@ from typing import Any, Dict, List, Optional
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class Sentiment(str, Enum):
     POSITIVE = "positive"
     NEUTRAL = "neutral"
@@ -83,10 +84,13 @@ class TranscriptIntel:
     @property
     def total_intel_items(self) -> int:
         return (
-            len(self.pain_points) + len(self.job_openings) +
-            len(self.contact_mentions) + len(self.budget_signals) +
-            len(self.competitor_mentions) + len(self.contract_signals) +
-            len(self.action_items)
+            len(self.pain_points)
+            + len(self.job_openings)
+            + len(self.contact_mentions)
+            + len(self.budget_signals)
+            + len(self.competitor_mentions)
+            + len(self.contract_signals)
+            + len(self.action_items)
         )
 
 
@@ -113,59 +117,133 @@ class CallRecord:
 # =========================================
 
 _PAIN_KEYWORDS = [
-    "struggling", "challenge", "problem", "issue", "difficult",
-    "behind schedule", "understaffed", "can't find", "need help",
-    "short-staffed", "overworked", "frustrated", "bottleneck",
-    "latency", "outage", "downtime",
+    "struggling",
+    "challenge",
+    "problem",
+    "issue",
+    "difficult",
+    "behind schedule",
+    "understaffed",
+    "can't find",
+    "need help",
+    "short-staffed",
+    "overworked",
+    "frustrated",
+    "bottleneck",
+    "latency",
+    "outage",
+    "downtime",
 ]
 
 _JOB_KEYWORDS = [
-    "hiring", "open position", "looking for", "staffing",
-    "need to fill", "vacancy", "recruiting", "new role",
-    "headcount", "req open", "posting",
+    "hiring",
+    "open position",
+    "looking for",
+    "staffing",
+    "need to fill",
+    "vacancy",
+    "recruiting",
+    "new role",
+    "headcount",
+    "req open",
+    "posting",
 ]
 
 _BUDGET_KEYWORDS = [
-    "budget", "funding", "fiscal year", "appropriation",
-    "spend authority", "allocation", "cost ceiling",
-    "contract value", "ceiling increase", "obligated",
+    "budget",
+    "funding",
+    "fiscal year",
+    "appropriation",
+    "spend authority",
+    "allocation",
+    "cost ceiling",
+    "contract value",
+    "ceiling increase",
+    "obligated",
 ]
 
 _COMPETITOR_NAMES = [
-    "Leidos", "Northrop", "Raytheon", "BAE", "Booz Allen",
-    "Peraton", "SAIC", "ManTech", "L3Harris", "Lockheed",
-    "General Dynamics", "CACI", "Accenture Federal",
+    "Leidos",
+    "Northrop",
+    "Raytheon",
+    "BAE",
+    "Booz Allen",
+    "Peraton",
+    "SAIC",
+    "ManTech",
+    "L3Harris",
+    "Lockheed",
+    "General Dynamics",
+    "CACI",
+    "Accenture Federal",
 ]
 
 _CONTRACT_KEYWORDS = [
-    "recompete", "option year", "re-compete", "task order",
-    "IDIQ", "BPA", "contract award", "period of performance",
-    "transition", "incumbent", "protest",
+    "recompete",
+    "option year",
+    "re-compete",
+    "task order",
+    "IDIQ",
+    "BPA",
+    "contract award",
+    "period of performance",
+    "transition",
+    "incumbent",
+    "protest",
 ]
 
 _ACTION_KEYWORDS = [
-    "send me", "follow up", "schedule", "set up a meeting",
-    "get back to", "will provide", "action item", "next steps",
-    "let me check", "i'll send", "due by", "by friday",
-    "by next week", "by end of month",
+    "send me",
+    "follow up",
+    "schedule",
+    "set up a meeting",
+    "get back to",
+    "will provide",
+    "action item",
+    "next steps",
+    "let me check",
+    "i'll send",
+    "due by",
+    "by friday",
+    "by next week",
+    "by end of month",
 ]
 
 _POSITIVE_WORDS = [
-    "great", "excellent", "appreciate", "thank", "excited",
-    "impressed", "looking forward", "absolutely", "perfect",
-    "wonderful", "fantastic", "glad",
+    "great",
+    "excellent",
+    "appreciate",
+    "thank",
+    "excited",
+    "impressed",
+    "looking forward",
+    "absolutely",
+    "perfect",
+    "wonderful",
+    "fantastic",
+    "glad",
 ]
 
 _NEGATIVE_WORDS = [
-    "disappointed", "frustrated", "concerned", "worried",
-    "unacceptable", "unfortunately", "regret", "unhappy",
-    "angry", "terrible", "awful", "failing",
+    "disappointed",
+    "frustrated",
+    "concerned",
+    "worried",
+    "unacceptable",
+    "unfortunately",
+    "regret",
+    "unhappy",
+    "angry",
+    "terrible",
+    "awful",
+    "failing",
 ]
 
 
 # =========================================
 # TRANSCRIPT INTELLIGENCE EXTRACTOR
 # =========================================
+
 
 class TranscriptIntelligenceExtractor:
     """Extracts actionable intelligence from call transcripts."""
@@ -175,19 +253,39 @@ class TranscriptIntelligenceExtractor:
         self._calls: Dict[str, CallRecord] = {}
         self._call_counter: int = 0
         self._coaching_rules: List[Dict[str, Any]] = [
-            {"trigger": "competitor", "suggestion": "Acknowledge competitor strengths, then differentiate on PTS-specific capabilities"},
-            {"trigger": "budget", "suggestion": "Ask about timeline for funding decisions and key decision-makers"},
-            {"trigger": "pain_point", "suggestion": "Quantify the impact — ask about downstream effects and current workarounds"},
-            {"trigger": "staffing", "suggestion": "Mention GDIT's cleared talent pipeline and rapid staffing capability"},
-            {"trigger": "recompete", "suggestion": "Ask about teaming strategy and whether they're open to new partners"},
+            {
+                "trigger": "competitor",
+                "suggestion": "Acknowledge competitor strengths, then differentiate on PTS-specific capabilities",
+            },
+            {
+                "trigger": "budget",
+                "suggestion": "Ask about timeline for funding decisions and key decision-makers",
+            },
+            {
+                "trigger": "pain_point",
+                "suggestion": "Quantify the impact — ask about downstream effects and current workarounds",
+            },
+            {
+                "trigger": "staffing",
+                "suggestion": "Mention GDIT's cleared talent pipeline and rapid staffing capability",
+            },
+            {
+                "trigger": "recompete",
+                "suggestion": "Ask about teaming strategy and whether they're open to new partners",
+            },
         ]
 
     # --------------------------------------------------
     # ANALYSIS
     # --------------------------------------------------
 
-    def analyze_transcript(self, transcript: str, contact_id: str = "",
-                           call_id: str = "", duration_sec: int = 0) -> TranscriptIntel:
+    def analyze_transcript(
+        self,
+        transcript: str,
+        contact_id: str = "",
+        call_id: str = "",
+        duration_sec: int = 0,
+    ) -> TranscriptIntel:
         """Extract all intelligence from a transcript."""
         text_lower = transcript.lower()
         sentences = self._split_sentences(transcript)
@@ -207,11 +305,19 @@ class TranscriptIntelligenceExtractor:
         )
 
         # Extract all intelligence types
-        pain_points = self._extract_by_keywords(sentences, _PAIN_KEYWORDS, IntelType.PAIN_POINT.value)
-        job_openings = self._extract_by_keywords(sentences, _JOB_KEYWORDS, IntelType.JOB_OPENING.value)
-        budget_signals = self._extract_by_keywords(sentences, _BUDGET_KEYWORDS, IntelType.BUDGET_SIGNAL.value)
+        pain_points = self._extract_by_keywords(
+            sentences, _PAIN_KEYWORDS, IntelType.PAIN_POINT.value
+        )
+        job_openings = self._extract_by_keywords(
+            sentences, _JOB_KEYWORDS, IntelType.JOB_OPENING.value
+        )
+        budget_signals = self._extract_by_keywords(
+            sentences, _BUDGET_KEYWORDS, IntelType.BUDGET_SIGNAL.value
+        )
         competitor_mentions = self._extract_competitors(sentences)
-        contract_signals = self._extract_by_keywords(sentences, _CONTRACT_KEYWORDS, IntelType.CONTRACT_SIGNAL.value)
+        contract_signals = self._extract_by_keywords(
+            sentences, _CONTRACT_KEYWORDS, IntelType.CONTRACT_SIGNAL.value
+        )
         contact_mentions = self._extract_contact_mentions(sentences)
         action_items = self._extract_action_items(sentences)
 
@@ -223,8 +329,12 @@ class TranscriptIntelligenceExtractor:
 
         # Summary
         summary = self._build_summary(
-            contact_id, pain_points, job_openings, competitor_mentions,
-            action_items, sentiment,
+            contact_id,
+            pain_points,
+            job_openings,
+            competitor_mentions,
+            action_items,
+            sentiment,
         )
 
         intel = TranscriptIntel(
@@ -253,7 +363,9 @@ class TranscriptIntelligenceExtractor:
     def process_vapi_webhook(self, webhook_data: Dict[str, Any]) -> TranscriptIntel:
         """Handle Vapi post-call webhook with transcript."""
         transcript = webhook_data.get("transcript", "")
-        contact_id = webhook_data.get("contact_id", webhook_data.get("metadata", {}).get("contact_id", ""))
+        contact_id = webhook_data.get(
+            "contact_id", webhook_data.get("metadata", {}).get("contact_id", "")
+        )
         call_id = webhook_data.get("call_id", webhook_data.get("id", ""))
         duration = webhook_data.get("duration_seconds", webhook_data.get("duration", 0))
 
@@ -277,26 +389,29 @@ class TranscriptIntelligenceExtractor:
     def _split_sentences(self, text: str) -> List[str]:
         """Split text into sentences, preserving honorifics like Mr./Dr."""
         # Protect honorifics from sentence splitting
-        protected = re.sub(r'\b(Mr|Ms|Mrs|Dr)\.\s', r'\1_DOT_ ', text)
-        parts = re.split(r'[.!?]+', protected)
+        protected = re.sub(r"\b(Mr|Ms|Mrs|Dr)\.\s", r"\1_DOT_ ", text)
+        parts = re.split(r"[.!?]+", protected)
         # Restore honorifics
-        return [s.strip().replace('_DOT_', '.') for s in parts if s.strip()]
+        return [s.strip().replace("_DOT_", ".") for s in parts if s.strip()]
 
-    def _extract_by_keywords(self, sentences: List[str], keywords: List[str],
-                             intel_type: str) -> List[ExtractedIntel]:
+    def _extract_by_keywords(
+        self, sentences: List[str], keywords: List[str], intel_type: str
+    ) -> List[ExtractedIntel]:
         """Extract intelligence items by keyword matching."""
         results: List[ExtractedIntel] = []
         for sentence in sentences:
             s_lower = sentence.lower()
             matched = [kw for kw in keywords if kw in s_lower]
             if matched:
-                results.append(ExtractedIntel(
-                    intel_type=intel_type,
-                    content=sentence,
-                    confidence=min(0.5 + len(matched) * 0.15, 0.95),
-                    context=f"Matched keywords: {', '.join(matched[:3])}",
-                    source_segment=sentence,
-                ))
+                results.append(
+                    ExtractedIntel(
+                        intel_type=intel_type,
+                        content=sentence,
+                        confidence=min(0.5 + len(matched) * 0.15, 0.95),
+                        context=f"Matched keywords: {', '.join(matched[:3])}",
+                        source_segment=sentence,
+                    )
+                )
         return results
 
     def _extract_competitors(self, sentences: List[str]) -> List[ExtractedIntel]:
@@ -305,13 +420,15 @@ class TranscriptIntelligenceExtractor:
         for sentence in sentences:
             for comp in _COMPETITOR_NAMES:
                 if comp.lower() in sentence.lower():
-                    results.append(ExtractedIntel(
-                        intel_type=IntelType.COMPETITOR_MENTION.value,
-                        content=sentence,
-                        confidence=0.90,
-                        context=f"Competitor: {comp}",
-                        source_segment=sentence,
-                    ))
+                    results.append(
+                        ExtractedIntel(
+                            intel_type=IntelType.COMPETITOR_MENTION.value,
+                            content=sentence,
+                            confidence=0.90,
+                            context=f"Competitor: {comp}",
+                            source_segment=sentence,
+                        )
+                    )
                     break  # one per sentence
         return results
 
@@ -319,17 +436,19 @@ class TranscriptIntelligenceExtractor:
         """Extract mentions of other people (names)."""
         results: List[ExtractedIntel] = []
         # Simple heuristic: look for "Mr./Ms./Dr." or "Name Last" patterns
-        name_pattern = re.compile(r'\b(?:Mr|Ms|Mrs|Dr)\.?\s+[A-Z][a-z]+\b')
+        name_pattern = re.compile(r"\b(?:Mr|Ms|Mrs|Dr)\.?\s+[A-Z][a-z]+\b")
         for sentence in sentences:
             matches = name_pattern.findall(sentence)
             for match in matches:
-                results.append(ExtractedIntel(
-                    intel_type=IntelType.CONTACT_MENTION.value,
-                    content=match,
-                    confidence=0.70,
-                    context=sentence,
-                    source_segment=sentence,
-                ))
+                results.append(
+                    ExtractedIntel(
+                        intel_type=IntelType.CONTACT_MENTION.value,
+                        content=match,
+                        confidence=0.70,
+                        context=sentence,
+                        source_segment=sentence,
+                    )
+                )
         return results
 
     def _extract_action_items(self, sentences: List[str]) -> List[ActionItem]:
@@ -340,7 +459,14 @@ class TranscriptIntelligenceExtractor:
             matched = [kw for kw in _ACTION_KEYWORDS if kw in s_lower]
             if matched:
                 # Determine owner
-                owner = "us" if any(w in s_lower for w in ["i'll", "we'll", "let me", "i will", "we will"]) else "them"
+                owner = (
+                    "us"
+                    if any(
+                        w in s_lower
+                        for w in ["i'll", "we'll", "let me", "i will", "we will"]
+                    )
+                    else "them"
+                )
 
                 # Try to find due date
                 due = ""
@@ -351,12 +477,16 @@ class TranscriptIntelligenceExtractor:
                 elif "end of month" in s_lower:
                     due = "End of month"
 
-                items.append(ActionItem(
-                    description=sentence,
-                    owner=owner,
-                    due_date=due,
-                    priority="high" if "asap" in s_lower or "urgent" in s_lower else "medium",
-                ))
+                items.append(
+                    ActionItem(
+                        description=sentence,
+                        owner=owner,
+                        due_date=due,
+                        priority="high"
+                        if "asap" in s_lower or "urgent" in s_lower
+                        else "medium",
+                    )
+                )
         return items
 
     def _analyze_sentiment(self, text_lower: str) -> tuple:
@@ -450,7 +580,9 @@ class TranscriptIntelligenceExtractor:
         return [c for c in self._calls.values() if c.contact_id == contact_id]
 
     def get_recent_intel(self, limit: int = 20) -> List[TranscriptIntel]:
-        intels = sorted(self._analyses.values(), key=lambda i: i.created_at, reverse=True)
+        intels = sorted(
+            self._analyses.values(), key=lambda i: i.created_at, reverse=True
+        )
         return intels[:limit]
 
     def get_all_pain_points(self) -> List[ExtractedIntel]:
@@ -464,15 +596,17 @@ class TranscriptIntelligenceExtractor:
         for intel in self._analyses.values():
             for ai in intel.action_items:
                 if not status or ai.status == status:
-                    items.append({
-                        "call_id": intel.call_id,
-                        "contact_id": intel.contact_id,
-                        "description": ai.description,
-                        "owner": ai.owner,
-                        "due_date": ai.due_date,
-                        "priority": ai.priority,
-                        "status": ai.status,
-                    })
+                    items.append(
+                        {
+                            "call_id": intel.call_id,
+                            "contact_id": intel.contact_id,
+                            "description": ai.description,
+                            "owner": ai.owner,
+                            "due_date": ai.due_date,
+                            "priority": ai.priority,
+                            "status": ai.status,
+                        }
+                    )
         return items
 
     def get_analytics(self) -> Dict[str, Any]:
@@ -491,9 +625,15 @@ class TranscriptIntelligenceExtractor:
             "avg_duration_sec": round(total_duration / max(total_calls, 1), 1),
             "sentiment_distribution": sentiments,
             "total_intel_extracted": total_intel,
-            "total_pain_points": sum(len(i.pain_points) for i in self._analyses.values()),
-            "total_action_items": sum(len(i.action_items) for i in self._analyses.values()),
-            "total_competitor_mentions": sum(len(i.competitor_mentions) for i in self._analyses.values()),
+            "total_pain_points": sum(
+                len(i.pain_points) for i in self._analyses.values()
+            ),
+            "total_action_items": sum(
+                len(i.action_items) for i in self._analyses.values()
+            ),
+            "total_competitor_mentions": sum(
+                len(i.competitor_mentions) for i in self._analyses.values()
+            ),
             "sources": self._count_by_source(),
         }
 

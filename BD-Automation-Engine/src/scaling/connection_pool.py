@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class PoolType(Enum):
     DATABASE = "database"
     HTTP = "http"
@@ -81,6 +82,7 @@ class ConnectionPool:
 # CONNECTION POOL MANAGER
 # =========================================
 
+
 class ConnectionPoolManager:
     """Manages named connection pools with acquire/release,
     dynamic resizing, health monitoring, and aggregate stats.
@@ -94,11 +96,21 @@ class ConnectionPoolManager:
 
     def _register_defaults(self) -> None:
         defaults = [
-            ConnectionPool(name="qdrant_pool", pool_type=PoolType.DATABASE, min_size=2, max_size=20),
-            ConnectionPool(name="api_pool", pool_type=PoolType.HTTP, min_size=5, max_size=50),
-            ConnectionPool(name="redis_cache", pool_type=PoolType.REDIS, min_size=3, max_size=30),
-            ConnectionPool(name="grpc_agents", pool_type=PoolType.GRPC, min_size=2, max_size=15),
-            ConnectionPool(name="webhook_pool", pool_type=PoolType.HTTP, min_size=1, max_size=10),
+            ConnectionPool(
+                name="qdrant_pool", pool_type=PoolType.DATABASE, min_size=2, max_size=20
+            ),
+            ConnectionPool(
+                name="api_pool", pool_type=PoolType.HTTP, min_size=5, max_size=50
+            ),
+            ConnectionPool(
+                name="redis_cache", pool_type=PoolType.REDIS, min_size=3, max_size=30
+            ),
+            ConnectionPool(
+                name="grpc_agents", pool_type=PoolType.GRPC, min_size=2, max_size=15
+            ),
+            ConnectionPool(
+                name="webhook_pool", pool_type=PoolType.HTTP, min_size=1, max_size=10
+            ),
         ]
         for pool in defaults:
             self._pools[pool.name] = pool
@@ -166,7 +178,11 @@ class ConnectionPoolManager:
         pool = self._pools.get(pool_name)
         if pool is None:
             return None
-        utilization = (pool.active_connections / pool.max_size * 100) if pool.max_size > 0 else 0.0
+        utilization = (
+            (pool.active_connections / pool.max_size * 100)
+            if pool.max_size > 0
+            else 0.0
+        )
         if utilization > 90:
             status = "critical"
         elif utilization > 70:

@@ -12,15 +12,21 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.benchmark_v2 import (
-    SearchBenchmarkV2, BenchmarkResult, GOLDEN_QUERIES,
-    precision_at_k, recall_at_k, mean_reciprocal_rank,
-    ndcg_at_k, _is_relevant,
+    SearchBenchmarkV2,
+    BenchmarkResult,
+    GOLDEN_QUERIES,
+    precision_at_k,
+    recall_at_k,
+    mean_reciprocal_rank,
+    ndcg_at_k,
+    _is_relevant,
 )
 
 
 # ---------------------------------------------------------------------------
 # TestGoldenSet
 # ---------------------------------------------------------------------------
+
 
 class TestGoldenSet:
     """Test golden query set structure."""
@@ -49,6 +55,7 @@ class TestGoldenSet:
 # TestMetrics
 # ---------------------------------------------------------------------------
 
+
 class TestMetrics:
     """Test metric computation functions."""
 
@@ -75,7 +82,7 @@ class TestMetrics:
         retrieved = ["Alice is great", "Bob is here", "X"] + ["Y"] * 7
         expected = ["Alice", "Bob", "Carol"]
         r = recall_at_k(retrieved, expected, 10)
-        assert abs(r - 2.0/3.0) < 0.01  # Found 2 of 3
+        assert abs(r - 2.0 / 3.0) < 0.01  # Found 2 of 3
 
     def test_recall_perfect(self):
         retrieved = ["Alice", "Bob"]
@@ -120,14 +127,18 @@ class TestMetrics:
 # TestBenchmarkRun
 # ---------------------------------------------------------------------------
 
+
 class TestBenchmarkRun:
     """Test benchmark execution."""
 
     def test_run_benchmark_structure(self):
         from Engine8_Knowledge.search.hybrid_engine import SearchResponse, SearchResult
+
         mock_search = MagicMock()
         mock_search.search.return_value = SearchResponse(
-            results=[SearchResult(id="1", content="Alice at DCGS", score=0.9, source="test")],
+            results=[
+                SearchResult(id="1", content="Alice at DCGS", score=0.9, source="test")
+            ],
             mode_used="hybrid",
             search_latency_ms=50,
             total_candidates=10,
@@ -151,8 +162,12 @@ class TestBenchmarkRun:
     def test_compare_modes(self):
         bench = SearchBenchmarkV2()
         results = {
-            "hybrid": BenchmarkResult(mode="hybrid", precision_at_5=0.5, mrr=0.6, ndcg_at_10=0.55),
-            "graphrag": BenchmarkResult(mode="graphrag", precision_at_5=0.7, mrr=0.8, ndcg_at_10=0.75),
+            "hybrid": BenchmarkResult(
+                mode="hybrid", precision_at_5=0.5, mrr=0.6, ndcg_at_10=0.55
+            ),
+            "graphrag": BenchmarkResult(
+                mode="graphrag", precision_at_5=0.7, mrr=0.8, ndcg_at_10=0.75
+            ),
         }
         rows = bench.compare_modes(results)
         assert len(rows) == 2
@@ -164,13 +179,20 @@ class TestBenchmarkRun:
 # TestReport
 # ---------------------------------------------------------------------------
 
+
 class TestReport:
     """Test report export."""
 
     def test_export_report(self, tmp_path):
         bench = SearchBenchmarkV2()
         results = {
-            "hybrid": BenchmarkResult(mode="hybrid", precision_at_5=0.5, mrr=0.6, ndcg_at_10=0.55, total_queries=50),
+            "hybrid": BenchmarkResult(
+                mode="hybrid",
+                precision_at_5=0.5,
+                mrr=0.6,
+                ndcg_at_10=0.55,
+                total_queries=50,
+            ),
         }
         path = str(tmp_path / "report.json")
         report = bench.export_report(results, path=path)

@@ -30,7 +30,9 @@ from Engine8_Knowledge.scrapers.crawl4ai_engine import (
 @pytest.fixture
 def engine():
     """Fresh engine instance per test."""
-    return Crawl4AIEngine(llm_model="gpt-4o-mini", stealth_level="medium", max_concurrent=5)
+    return Crawl4AIEngine(
+        llm_model="gpt-4o-mini", stealth_level="medium", max_concurrent=5
+    )
 
 
 @pytest.fixture
@@ -114,7 +116,9 @@ class TestInit:
         assert "contacts" in engine._extraction_schemas
 
     def test_init_custom_model(self):
-        eng = Crawl4AIEngine(llm_model="claude-3-haiku", stealth_level="high", max_concurrent=10)
+        eng = Crawl4AIEngine(
+            llm_model="claude-3-haiku", stealth_level="high", max_concurrent=10
+        )
         assert eng.llm_model == "claude-3-haiku"
         assert eng.stealth_level == "high"
         assert eng.max_concurrent == 10
@@ -141,13 +145,19 @@ class TestCrawlUrl:
         assert result.success is True
 
     @pytest.mark.asyncio
-    async def test_crawl_url_success(self, engine, mock_crawler_result, mock_crawl4ai_modules):
+    async def test_crawl_url_success(
+        self, engine, mock_crawler_result, mock_crawl4ai_modules
+    ):
         """Successful crawl via AsyncWebCrawler."""
         mock_crawler = AsyncMock()
         mock_crawler.arun = AsyncMock(return_value=mock_crawler_result)
 
-        with patch.object(engine, "_get_crawler", new=AsyncMock(return_value=mock_crawler)):
-            result = await engine.crawl_url("https://example.com/jobs", extraction_strategy="auto")
+        with patch.object(
+            engine, "_get_crawler", new=AsyncMock(return_value=mock_crawler)
+        ):
+            result = await engine.crawl_url(
+                "https://example.com/jobs", extraction_strategy="auto"
+            )
 
         assert result.success is True
         assert result.url == "https://example.com/jobs"
@@ -163,7 +173,9 @@ class TestCrawlUrl:
         mock_crawler = AsyncMock()
         mock_crawler.arun = AsyncMock(side_effect=Exception("Connection timeout"))
 
-        with patch.object(engine, "_get_crawler", new=AsyncMock(return_value=mock_crawler)):
+        with patch.object(
+            engine, "_get_crawler", new=AsyncMock(return_value=mock_crawler)
+        ):
             result = await engine.crawl_url("https://example.com/broken")
 
         assert result.success is False
@@ -299,7 +311,9 @@ class TestSchemaExtraction:
         )
 
         with patch.object(engine, "crawl_url", new=AsyncMock(return_value=mock_result)):
-            items = await engine.crawl_with_schema("https://example.com/jobs", JobExtraction)
+            items = await engine.crawl_with_schema(
+                "https://example.com/jobs", JobExtraction
+            )
 
         assert len(items) == 2
         assert all(isinstance(i, JobExtraction) for i in items)
@@ -394,6 +408,7 @@ class TestSingleton:
     def test_singleton(self):
         """get_crawl4ai_engine returns the same instance."""
         import Engine8_Knowledge.scrapers.crawl4ai_engine as mod
+
         mod._engine = None  # Reset
         e1 = get_crawl4ai_engine(llm_model="gpt-4o-mini")
         e2 = get_crawl4ai_engine()

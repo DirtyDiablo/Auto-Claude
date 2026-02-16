@@ -1,5 +1,6 @@
 """Federal program data models."""
-from pydantic import BaseModel, Field
+
+from pydantic import Field
 from typing import Optional, List
 from enum import Enum
 from .base import BaseDocument
@@ -7,6 +8,7 @@ from .base import BaseDocument
 
 class PTSInvolvement(str, Enum):
     """PTS involvement status with program."""
+
     CURRENT = "Current"
     PAST = "Past"
     TARGET = "Target"
@@ -15,6 +17,7 @@ class PTSInvolvement(str, Enum):
 
 class PriorityLevel(str, Enum):
     """Program priority level for BD focus."""
+
     CRITICAL = "Critical"
     HIGH = "High"
     MEDIUM = "Medium"
@@ -27,6 +30,7 @@ class FederalProgram(BaseDocument):
 
     Represents defense/intelligence programs for BD targeting.
     """
+
     program_name: str
     acronym: Optional[str] = None
     agency_owner: Optional[str] = None

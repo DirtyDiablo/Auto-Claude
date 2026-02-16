@@ -3,11 +3,14 @@
 Basic Enrichment Runner - Fast enrichment without AI
 Enriches Tier + Contact Value for all contacts
 """
+
 import sys
 import os
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+sys.path.insert(
+    0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 
 from services.ai_enrichment.notion_client import NotionClient
 from services.ai_enrichment.engine import EnrichmentEngine
@@ -22,18 +25,18 @@ def run_basic_contact_enrichment():
     engine.client = None
 
     databases = [
-        ('ff111f82-fdbd-4353-ad59-ea4de70a058b', 'GDIT PTS Contacts'),
-        ('c1b1d358-9d82-4f03-b77c-db43d9795c6f', 'GDIT Other Contacts'),
-        ('2ccdef65-baa5-80d0-9b66-c67d66e7a54d', 'DCGS Contacts'),
+        ("ff111f82-fdbd-4353-ad59-ea4de70a058b", "GDIT PTS Contacts"),
+        ("c1b1d358-9d82-4f03-b77c-db43d9795c6f", "GDIT Other Contacts"),
+        ("2ccdef65-baa5-80d0-9b66-c67d66e7a54d", "DCGS Contacts"),
     ]
 
     total_success = 0
     total_failed = 0
 
     for db_id, db_name in databases:
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Processing: {db_name}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         # Get all contacts
         all_pages = notion.query_all_pages(db_id)
@@ -43,13 +46,13 @@ def run_basic_contact_enrichment():
         failed = 0
 
         for i, page in enumerate(all_pages):
-            page_id = page.get('id')
-            props = page.get('properties', {})
+            page_id = page.get("id")
+            props = page.get("properties", {})
 
             # Get name for display
             for key, val in props.items():
-                if val.get('type') == 'title':
-                    ''.join([t.get('plain_text', '') for t in val.get('title', [])])
+                if val.get("type") == "title":
+                    "".join([t.get("plain_text", "") for t in val.get("title", [])])
                     break
 
             # Run enrichment (without AI)
@@ -58,23 +61,24 @@ def run_basic_contact_enrichment():
             if enriched:
                 # Only keep basic fields (Tier, Contact Value)
                 basic_enriched = {
-                    k: v for k, v in enriched.items()
-                    if k in ['Tier', 'Contact Value']
+                    k: v for k, v in enriched.items() if k in ["Tier", "Contact Value"]
                 }
 
                 result = notion.update_page(page_id, basic_enriched)
-                if result.get('error'):
+                if result.get("error"):
                     failed += 1
                     if failed <= 5:  # Only show first 5 errors
-                        print(f"  [{i+1}] FAILED: {result.get('message')[:50]}")
+                        print(f"  [{i + 1}] FAILED: {result.get('message')[:50]}")
                 else:
                     success += 1
-                    enriched.get('Tier', {}).get('select', {}).get('name', '?')
-                    enriched.get('Contact Value', {}).get('number', 0)
+                    enriched.get("Tier", {}).get("select", {}).get("name", "?")
+                    enriched.get("Contact Value", {}).get("number", 0)
 
                     # Progress every 100 records
                     if (i + 1) % 100 == 0:
-                        print(f"  Progress: {i+1}/{len(all_pages)} ({success} enriched)")
+                        print(
+                            f"  Progress: {i + 1}/{len(all_pages)} ({success} enriched)"
+                        )
 
             time.sleep(0.35)  # Rate limiting
 
@@ -82,9 +86,9 @@ def run_basic_contact_enrichment():
         total_success += success
         total_failed += failed
 
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"TOTAL: {total_success} enriched, {total_failed} failed")
-    print(f"{'='*60}")
+    print(f"{'=' * 60}")
 
 
 if __name__ == "__main__":

@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class Decision(str, Enum):
     ALLOW = "allow"
     DENY = "deny"
@@ -48,6 +49,7 @@ _CLEARANCE_RANK = {
 @dataclass
 class Subject:
     """Who is making the request."""
+
     user_id: str
     role: str  # admin | bd_director | manager | account_manager | analyst | viewer
     team: str = ""
@@ -71,7 +73,10 @@ class Subject:
 @dataclass
 class Resource:
     """What is being accessed."""
-    resource_type: str  # contact | program | job | humint_note | simulation | report | export
+
+    resource_type: (
+        str  # contact | program | job | humint_note | simulation | report | export
+    )
     resource_id: str = ""
     program: str = ""
     classification: ClearanceLevel = ClearanceLevel.UNCLASSIFIED
@@ -96,6 +101,7 @@ class Resource:
 @dataclass
 class Environment:
     """Context of the request."""
+
     ip_address: str = "127.0.0.1"
     geo_country: str = "US"
     device_type: str = "desktop"
@@ -119,6 +125,7 @@ class Environment:
 @dataclass
 class PolicyDecision:
     """Result of an ABAC policy evaluation."""
+
     decision: Decision
     policy_id: str
     policy_name: str
@@ -146,6 +153,7 @@ class PolicyDecision:
 @dataclass
 class Policy:
     """A single ABAC policy rule."""
+
     policy_id: str
     name: str
     description: str
@@ -253,6 +261,7 @@ _BUILTIN_POLICIES = [
 # ABAC POLICY ENGINE
 # =========================================
 
+
 class ABACPolicyEngine:
     """Attribute-Based Access Control engine.
 
@@ -266,8 +275,10 @@ class ABACPolicyEngine:
         self._evaluation_count = 0
         for p in _BUILTIN_POLICIES:
             self._policies[p.policy_id] = p
-        logger.info("ABACPolicyEngine initialized with %d built-in policies",
-                     len(self._policies))
+        logger.info(
+            "ABACPolicyEngine initialized with %d built-in policies",
+            len(self._policies),
+        )
 
     # ----- policy management -----
 
@@ -397,9 +408,11 @@ class ABACPolicyEngine:
 
         # HUMINT ownership check
         if check == "humint_ownership":
-            if (subject.user_id == resource.owner_id or
-                    subject.role == "bd_director" or
-                    subject.user_id == resource.owner_manager_id):
+            if (
+                subject.user_id == resource.owner_id
+                or subject.role == "bd_director"
+                or subject.user_id == resource.owner_manager_id
+            ):
                 return None  # allowed
             return PolicyDecision(
                 decision=Decision.DENY,

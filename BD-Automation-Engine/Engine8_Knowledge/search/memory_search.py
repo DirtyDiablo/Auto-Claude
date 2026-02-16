@@ -22,6 +22,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class MemorySearchResult:
     """Search result enhanced with memory context."""
+
     query: str = ""
     search_results: List[Dict[str, Any]] = field(default_factory=list)
     memory_context: List[Dict[str, Any]] = field(default_factory=list)
@@ -86,6 +87,7 @@ class MemoryAwareSearch:
         mem_start = time.time()
         if self.memory_store:
             from Engine8_Knowledge.memory.memory_store import MemoryContext
+
             ctx = MemoryContext(user_id=user_id)
             recall = await self.memory_store.recall(
                 query, ctx, layers=["episodic", "semantic"]

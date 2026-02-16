@@ -11,6 +11,7 @@ logger = logging.getLogger("BD-Crews")
 
 try:
     from crewai import Crew, Task, Process
+
     CREWAI_AVAILABLE = True
 except ImportError:
     CREWAI_AVAILABLE = False
@@ -107,14 +108,21 @@ def create_bd_research_crew(
     )
 
     return Crew(
-        agents=[program_researcher, contact_enricher, competitive_analyst, outreach_composer],
+        agents=[
+            program_researcher,
+            contact_enricher,
+            competitive_analyst,
+            outreach_composer,
+        ],
         tasks=[t1, t2, t3, t4, t_synthesis],
         process=Process.sequential,
         verbose=True,
     )
 
 
-def create_weekly_intel_crew(focus_programs: Optional[list[str]] = None) -> Optional["Crew"]:
+def create_weekly_intel_crew(
+    focus_programs: Optional[list[str]] = None,
+) -> Optional["Crew"]:
     """
     Weekly intelligence digest crew: HUMINT analysis → competitive scan → summary.
 
@@ -130,7 +138,9 @@ def create_weekly_intel_crew(focus_programs: Optional[list[str]] = None) -> Opti
     )
     from Engine8_Knowledge.agents.models import HUMINTBrief, WeeklyIntelBundle
 
-    programs_str = ", ".join(focus_programs) if focus_programs else "all active DCGS programs"
+    programs_str = (
+        ", ".join(focus_programs) if focus_programs else "all active DCGS programs"
+    )
 
     t1 = Task(
         description=(

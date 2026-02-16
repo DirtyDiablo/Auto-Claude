@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class FixStatus(str, Enum):
     FIXED = "fixed"
     SKIPPED = "skipped"
@@ -36,6 +37,7 @@ class FixStatus(str, Enum):
 @dataclass
 class AutoFixResult:
     """Result of an auto-fix attempt."""
+
     issue: DataIssue
     status: str  # fixed, skipped, failed, needs_human
     confidence: float
@@ -50,6 +52,7 @@ class AutoFixResult:
 @dataclass
 class HealerConfig:
     """Configuration for a data healer."""
+
     name: str
     domain: str
     field_name: str
@@ -62,6 +65,7 @@ class HealerConfig:
 # FIX FUNCTIONS
 # =========================================
 
+
 def fix_email_normalize(value: str) -> tuple:
     """Normalize email: lowercase, strip, fix common typos."""
     if not value:
@@ -70,14 +74,20 @@ def fix_email_normalize(value: str) -> tuple:
 
     # Common domain typos
     typo_map = {
-        ".con": ".com", ".cmo": ".com", ".ocom": ".com",
-        ".coom": ".com", ".orgg": ".org", ".rog": ".org",
-        ".nett": ".net", ".gmal.com": ".gmail.com",
-        ".gmial.com": ".gmail.com", ".yaho.com": ".yahoo.com",
+        ".con": ".com",
+        ".cmo": ".com",
+        ".ocom": ".com",
+        ".coom": ".com",
+        ".orgg": ".org",
+        ".rog": ".org",
+        ".nett": ".net",
+        ".gmal.com": ".gmail.com",
+        ".gmial.com": ".gmail.com",
+        ".yaho.com": ".yahoo.com",
     }
     for typo, fix in typo_map.items():
         if email.endswith(typo):
-            email = email[:-len(typo)] + fix
+            email = email[: -len(typo)] + fix
             return email, 0.95
 
     if email != value:
@@ -89,7 +99,7 @@ def fix_phone_format(value: str) -> tuple:
     """Normalize phone to E.164 format."""
     if not value:
         return None, 0.0
-    digits = re.sub(r'\D', '', value.strip())
+    digits = re.sub(r"\D", "", value.strip())
     if not digits:
         return None, 0.0
 
@@ -141,14 +151,28 @@ def fix_title_standardize(value: str) -> tuple:
     title = value.strip()
 
     abbreviation_map = {
-        "Sr.": "Senior", "Sr ": "Senior ", "Jr.": "Junior", "Jr ": "Junior ",
-        "VP": "Vice President", "SVP": "Senior Vice President",
-        "EVP": "Executive Vice President", "AVP": "Assistant Vice President",
-        "Dir.": "Director", "Dir ": "Director ", "Mgr": "Manager",
-        "Mgr.": "Manager", "Engr": "Engineer", "Engr.": "Engineer",
-        "Dept": "Department", "Dept.": "Department", "Assoc": "Associate",
-        "Assoc.": "Associate", "Admin": "Administrator", "Admin.": "Administrator",
-        "Coord": "Coordinator", "Coord.": "Coordinator",
+        "Sr.": "Senior",
+        "Sr ": "Senior ",
+        "Jr.": "Junior",
+        "Jr ": "Junior ",
+        "VP": "Vice President",
+        "SVP": "Senior Vice President",
+        "EVP": "Executive Vice President",
+        "AVP": "Assistant Vice President",
+        "Dir.": "Director",
+        "Dir ": "Director ",
+        "Mgr": "Manager",
+        "Mgr.": "Manager",
+        "Engr": "Engineer",
+        "Engr.": "Engineer",
+        "Dept": "Department",
+        "Dept.": "Department",
+        "Assoc": "Associate",
+        "Assoc.": "Associate",
+        "Admin": "Administrator",
+        "Admin.": "Administrator",
+        "Coord": "Coordinator",
+        "Coord.": "Coordinator",
     }
 
     fixed = title
@@ -245,11 +269,18 @@ def fix_date_format(value: str) -> tuple:
         return None, 0.0
 
     import re
+
     # Try common formats
     formats = [
-        (r'(\d{1,2})/(\d{1,2})/(\d{4})', lambda m: f"{m.group(3)}-{m.group(1).zfill(2)}-{m.group(2).zfill(2)}"),
-        (r'(\d{4})-(\d{1,2})-(\d{1,2})', lambda m: f"{m.group(1)}-{m.group(2).zfill(2)}-{m.group(3).zfill(2)}"),
-        (r'(\w+) (\d{1,2}), (\d{4})', None),
+        (
+            r"(\d{1,2})/(\d{1,2})/(\d{4})",
+            lambda m: f"{m.group(3)}-{m.group(1).zfill(2)}-{m.group(2).zfill(2)}",
+        ),
+        (
+            r"(\d{4})-(\d{1,2})-(\d{1,2})",
+            lambda m: f"{m.group(1)}-{m.group(2).zfill(2)}-{m.group(3).zfill(2)}",
+        ),
+        (r"(\w+) (\d{1,2}), (\d{4})", None),
     ]
     for pattern, formatter in formats:
         match = re.match(pattern, value.strip())
@@ -272,14 +303,17 @@ def fix_value_normalize(value: Any) -> tuple:
 
     text = str(value).strip().replace(",", "").replace("$", "")
     multipliers = {
-        "k": 1_000, "m": 1_000_000, "b": 1_000_000_000,
-        "million": 1_000_000, "billion": 1_000_000_000,
+        "k": 1_000,
+        "m": 1_000_000,
+        "b": 1_000_000_000,
+        "million": 1_000_000,
+        "billion": 1_000_000_000,
         "thousand": 1_000,
     }
     for suffix, mult in multipliers.items():
         if text.lower().endswith(suffix):
             try:
-                num = float(text[:text.lower().rindex(suffix)].strip())
+                num = float(text[: text.lower().rindex(suffix)].strip())
                 return num * mult, 0.9
             except (ValueError, IndexError):
                 continue
@@ -318,6 +352,7 @@ def fix_linkedin_url(value: str) -> tuple:
 # SELF-HEALING PIPELINE
 # =========================================
 
+
 class SelfHealingPipeline:
     """Fixes data quality issues automatically when confidence is high enough."""
 
@@ -343,63 +378,99 @@ class SelfHealingPipeline:
         """Register all data healers."""
         return {
             "email_normalizer": HealerConfig(
-                name="email_normalizer", domain="contacts", field_name="email",
-                fix_fn=fix_email_normalize, confidence=0.95,
+                name="email_normalizer",
+                domain="contacts",
+                field_name="email",
+                fix_fn=fix_email_normalize,
+                confidence=0.95,
                 description="Lowercase, strip whitespace, fix common typos",
             ),
             "phone_formatter": HealerConfig(
-                name="phone_formatter", domain="contacts", field_name="phone",
-                fix_fn=fix_phone_format, confidence=0.90,
+                name="phone_formatter",
+                domain="contacts",
+                field_name="phone",
+                fix_fn=fix_phone_format,
+                confidence=0.90,
                 description="Normalize to E.164 format",
             ),
             "name_capitalizer": HealerConfig(
-                name="name_capitalizer", domain="contacts", field_name="name",
-                fix_fn=fix_name_capitalize, confidence=0.92,
+                name="name_capitalizer",
+                domain="contacts",
+                field_name="name",
+                fix_fn=fix_name_capitalize,
+                confidence=0.92,
                 description="Fix ALL CAPS or all lowercase names",
             ),
             "title_standardizer": HealerConfig(
-                name="title_standardizer", domain="contacts", field_name="job_title",
-                fix_fn=fix_title_standardize, confidence=0.93,
+                name="title_standardizer",
+                domain="contacts",
+                field_name="job_title",
+                fix_fn=fix_title_standardize,
+                confidence=0.93,
                 description="Map title abbreviations to canonical forms",
             ),
             "location_geocoder": HealerConfig(
-                name="location_geocoder", domain="contacts", field_name="location",
-                fix_fn=fix_location_geocode, confidence=0.90,
+                name="location_geocoder",
+                domain="contacts",
+                field_name="location",
+                fix_fn=fix_location_geocode,
+                confidence=0.90,
                 description="Parse freeform location to structured form",
             ),
             "program_reassigner": HealerConfig(
-                name="program_reassigner", domain="contacts", field_name="program",
-                fix_fn=lambda v: fix_program_from_location(v), confidence=0.92,
+                name="program_reassigner",
+                domain="contacts",
+                field_name="program",
+                fix_fn=lambda v: fix_program_from_location(v),
+                confidence=0.92,
                 description="Re-map program based on location",
             ),
             "tier_recalculator": HealerConfig(
-                name="tier_recalculator", domain="contacts", field_name="hierarchy_tier",
-                fix_fn=lambda v: fix_tier_from_title(v), confidence=0.95,
+                name="tier_recalculator",
+                domain="contacts",
+                field_name="hierarchy_tier",
+                fix_fn=lambda v: fix_tier_from_title(v),
+                confidence=0.95,
                 description="Recalculate tier from job title",
             ),
             "clearance_mapper": HealerConfig(
-                name="clearance_mapper", domain="jobs", field_name="clearance",
-                fix_fn=fix_clearance_normalize, confidence=0.96,
+                name="clearance_mapper",
+                domain="jobs",
+                field_name="clearance",
+                fix_fn=fix_clearance_normalize,
+                confidence=0.96,
                 description="Map clearance text to standardized levels",
             ),
             "date_formatter": HealerConfig(
-                name="date_formatter", domain="programs", field_name="dates",
-                fix_fn=fix_date_format, confidence=0.95,
+                name="date_formatter",
+                domain="programs",
+                field_name="dates",
+                fix_fn=fix_date_format,
+                confidence=0.95,
                 description="Normalize dates to ISO 8601",
             ),
             "value_normalizer": HealerConfig(
-                name="value_normalizer", domain="programs", field_name="contract_value",
-                fix_fn=fix_value_normalize, confidence=0.90,
+                name="value_normalizer",
+                domain="programs",
+                field_name="contract_value",
+                fix_fn=fix_value_normalize,
+                confidence=0.90,
                 description="Parse value text to consistent number format",
             ),
             "linkedin_fixer": HealerConfig(
-                name="linkedin_fixer", domain="contacts", field_name="linkedin_url",
-                fix_fn=fix_linkedin_url, confidence=0.85,
+                name="linkedin_fixer",
+                domain="contacts",
+                field_name="linkedin_url",
+                fix_fn=fix_linkedin_url,
+                confidence=0.85,
                 description="Fix common LinkedIn URL issues",
             ),
             "acronym_expander": HealerConfig(
-                name="acronym_expander", domain="programs", field_name="name",
-                fix_fn=None, confidence=0.90,
+                name="acronym_expander",
+                domain="programs",
+                field_name="name",
+                fix_fn=None,
+                confidence=0.90,
                 description="Expand known acronyms",
             ),
         }
@@ -460,8 +531,10 @@ class SelfHealingPipeline:
         for issue in issues:
             if not issue.auto_fixable:
                 result = AutoFixResult(
-                    issue=issue, status=FixStatus.SKIPPED.value,
-                    confidence=0.0, timestamp=now,
+                    issue=issue,
+                    status=FixStatus.SKIPPED.value,
+                    confidence=0.0,
+                    timestamp=now,
                     reason="Not auto-fixable",
                 )
                 results.append(result)
@@ -471,8 +544,10 @@ class SelfHealingPipeline:
             healer = self._select_healer(issue)
             if not healer or not healer.fix_fn:
                 result = AutoFixResult(
-                    issue=issue, status=FixStatus.NEEDS_HUMAN.value,
-                    confidence=0.0, timestamp=now,
+                    issue=issue,
+                    status=FixStatus.NEEDS_HUMAN.value,
+                    confidence=0.0,
+                    timestamp=now,
                     reason="No suitable healer found",
                 )
                 results.append(result)
@@ -489,9 +564,12 @@ class SelfHealingPipeline:
                     new_value, confidence = healer.fix_fn(issue.current_value)
                 except Exception as e:
                     result = AutoFixResult(
-                        issue=issue, status=FixStatus.FAILED.value,
-                        confidence=0.0, old_value=issue.current_value,
-                        healer_used=healer.name, timestamp=now,
+                        issue=issue,
+                        status=FixStatus.FAILED.value,
+                        confidence=0.0,
+                        old_value=issue.current_value,
+                        healer_used=healer.name,
+                        timestamp=now,
                         reason=f"Healer error: {e}",
                     )
                     results.append(result)
@@ -500,9 +578,12 @@ class SelfHealingPipeline:
 
             if new_value is None or confidence < self.confidence_threshold:
                 result = AutoFixResult(
-                    issue=issue, status=FixStatus.SKIPPED.value,
-                    confidence=confidence, old_value=issue.current_value,
-                    new_value=new_value, healer_used=healer.name,
+                    issue=issue,
+                    status=FixStatus.SKIPPED.value,
+                    confidence=confidence,
+                    old_value=issue.current_value,
+                    new_value=new_value,
+                    healer_used=healer.name,
                     timestamp=now,
                     reason=f"Confidence {confidence:.2f} below threshold {self.confidence_threshold}",
                 )
@@ -514,10 +595,14 @@ class SelfHealingPipeline:
             self._apply_fix(issue, new_value)
 
             result = AutoFixResult(
-                issue=issue, status=FixStatus.FIXED.value,
-                confidence=confidence, old_value=issue.current_value,
-                new_value=new_value, healer_used=healer.name,
-                timestamp=now, reason="Auto-fixed",
+                issue=issue,
+                status=FixStatus.FIXED.value,
+                confidence=confidence,
+                old_value=issue.current_value,
+                new_value=new_value,
+                healer_used=healer.name,
+                timestamp=now,
+                reason="Auto-fixed",
             )
 
             # Check for cascading fixes
@@ -540,20 +625,29 @@ class SelfHealingPipeline:
             program_result = fix_program_from_location(str(fix.new_value))
             if program_result[0] and program_result[1] >= self.confidence_threshold:
                 cascade_issue = DataIssue(
-                    id=uuid.uuid4().hex[:8], domain=issue.domain,
-                    dimension="consistency", record_id=issue.record_id,
-                    record_type=issue.record_type, field_name="program",
-                    current_value="", expected_pattern=program_result[0],
+                    id=uuid.uuid4().hex[:8],
+                    domain=issue.domain,
+                    dimension="consistency",
+                    record_id=issue.record_id,
+                    record_type=issue.record_type,
+                    field_name="program",
+                    current_value="",
+                    expected_pattern=program_result[0],
                     severity="high",
                     description=f"Cascade: location→program reassignment",
-                    auto_fixable=True, suggested_fix=program_result[0],
+                    auto_fixable=True,
+                    suggested_fix=program_result[0],
                     detected_at=now,
                 )
                 cascade_fix = AutoFixResult(
-                    issue=cascade_issue, status=FixStatus.FIXED.value,
-                    confidence=program_result[1], old_value="",
-                    new_value=program_result[0], healer_used="program_reassigner",
-                    timestamp=now, reason="Cascading fix from location change",
+                    issue=cascade_issue,
+                    status=FixStatus.FIXED.value,
+                    confidence=program_result[1],
+                    old_value="",
+                    new_value=program_result[0],
+                    healer_used="program_reassigner",
+                    timestamp=now,
+                    reason="Cascading fix from location change",
                 )
                 self._apply_fix(cascade_issue, program_result[0])
                 cascading.append(cascade_fix)
@@ -562,22 +656,34 @@ class SelfHealingPipeline:
         # Title change → tier recalculation
         if issue.field_name == "job_title" and fix.status == FixStatus.FIXED.value:
             tier_result = fix_tier_from_title(str(fix.new_value))
-            if tier_result[0] is not None and tier_result[1] >= self.confidence_threshold:
+            if (
+                tier_result[0] is not None
+                and tier_result[1] >= self.confidence_threshold
+            ):
                 cascade_issue = DataIssue(
-                    id=uuid.uuid4().hex[:8], domain=issue.domain,
-                    dimension="consistency", record_id=issue.record_id,
-                    record_type=issue.record_type, field_name="hierarchy_tier",
-                    current_value="", expected_pattern=str(tier_result[0]),
+                    id=uuid.uuid4().hex[:8],
+                    domain=issue.domain,
+                    dimension="consistency",
+                    record_id=issue.record_id,
+                    record_type=issue.record_type,
+                    field_name="hierarchy_tier",
+                    current_value="",
+                    expected_pattern=str(tier_result[0]),
                     severity="high",
                     description="Cascade: title→tier recalculation",
-                    auto_fixable=True, suggested_fix=tier_result[0],
+                    auto_fixable=True,
+                    suggested_fix=tier_result[0],
                     detected_at=now,
                 )
                 cascade_fix = AutoFixResult(
-                    issue=cascade_issue, status=FixStatus.FIXED.value,
-                    confidence=tier_result[1], old_value="",
-                    new_value=tier_result[0], healer_used="tier_recalculator",
-                    timestamp=now, reason="Cascading fix from title change",
+                    issue=cascade_issue,
+                    status=FixStatus.FIXED.value,
+                    confidence=tier_result[1],
+                    old_value="",
+                    new_value=tier_result[0],
+                    healer_used="tier_recalculator",
+                    timestamp=now,
+                    reason="Cascading fix from title change",
                 )
                 self._apply_fix(cascade_issue, tier_result[0])
                 cascading.append(cascade_fix)
@@ -595,7 +701,9 @@ class SelfHealingPipeline:
             record = self._records[domain][record_id]
             record[field_name] = new_value
 
-    def validate_batch(self, records: List[Dict[str, Any]], domain: str) -> List[Dict[str, Any]]:
+    def validate_batch(
+        self, records: List[Dict[str, Any]], domain: str
+    ) -> List[Dict[str, Any]]:
         """Validate and auto-fix a batch of records before import."""
         results = []
         for record in records:
@@ -617,11 +725,13 @@ class SelfHealingPipeline:
                         record["phone"] = fixed
                         fixes.append({"field": "phone", "old": phone, "new": fixed})
 
-            results.append({
-                "record": record,
-                "fixes_applied": fixes,
-                "fix_count": len(fixes),
-            })
+            results.append(
+                {
+                    "record": record,
+                    "fixes_applied": fixes,
+                    "fix_count": len(fixes),
+                }
+            )
         return results
 
 

@@ -59,9 +59,9 @@ SAMPLE_JOBS = [
 
 
 def print_header(title: str):
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f"  {title}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
 
 def print_result(name: str, success: bool, details: str = ""):
@@ -84,6 +84,7 @@ def test_contact_classifier():
             PROGRAM_KEYWORDS,
             LOCATION_HUB_MAP,
         )
+
         print_result("Import classification patterns", True)
         results.append(True)
     except ImportError as e:
@@ -172,15 +173,27 @@ def test_scraper_monitor():
 
     # Test competitor detection
     COMPETITORS = [
-        "leidos", "northrop", "booz allen", "peraton", "caci",
-        "saic", "mantech", "raytheon", "l3harris", "parsons"
+        "leidos",
+        "northrop",
+        "booz allen",
+        "peraton",
+        "caci",
+        "saic",
+        "mantech",
+        "raytheon",
+        "l3harris",
+        "parsons",
     ]
 
     def detect_competitors(job: dict) -> list:
         text = f"{job.get('title', '')} {job.get('company', '')} {job.get('description', '')}".lower()
         return [c for c in COMPETITORS if c in text]
 
-    job = {"title": "Engineer", "company": "GDIT", "description": "Work with Leidos team"}
+    job = {
+        "title": "Engineer",
+        "company": "GDIT",
+        "description": "Work with Leidos team",
+    }
     competitors = detect_competitors(job)
     success = "leidos" in competitors
     print_result("Competitor detection", success, f"Found: {competitors}")
@@ -251,11 +264,13 @@ def test_quality_assurance():
             for field in required:
                 value = record.get(field)
                 if value is None or (isinstance(value, str) and not value.strip()):
-                    issues.append({
-                        "type": "missing_field",
-                        "record_id": record.get("id", "?"),
-                        "field": field,
-                    })
+                    issues.append(
+                        {
+                            "type": "missing_field",
+                            "record_id": record.get("id", "?"),
+                            "field": field,
+                        }
+                    )
         return issues
 
     test_records = [
@@ -278,11 +293,13 @@ def test_quality_assurance():
         for record in records:
             h = get_content_hash(record, dedup_fields)
             if h in seen:
-                issues.append({
-                    "type": "duplicate",
-                    "record_id": record.get("id", "?"),
-                    "duplicate_of": seen[h],
-                })
+                issues.append(
+                    {
+                        "type": "duplicate",
+                        "record_id": record.get("id", "?"),
+                        "duplicate_of": seen[h],
+                    }
+                )
             else:
                 seen[h] = record.get("id", "?")
         return issues
@@ -302,11 +319,13 @@ def test_quality_assurance():
         for record in records:
             conf = record.get("confidence_score")
             if conf is not None and conf < threshold:
-                issues.append({
-                    "type": "low_confidence",
-                    "record_id": record.get("id", "?"),
-                    "confidence": conf,
-                })
+                issues.append(
+                    {
+                        "type": "low_confidence",
+                        "record_id": record.get("id", "?"),
+                        "confidence": conf,
+                    }
+                )
         return issues
 
     conf_records = [
@@ -346,27 +365,35 @@ def test_analytics():
         top_companies = company_counts.most_common(5)
 
         if top_companies:
-            insights.append({
-                "type": "trend",
-                "category": "hiring",
-                "title": "Top Hiring Companies",
-                "data": top_companies,
-            })
+            insights.append(
+                {
+                    "type": "trend",
+                    "category": "hiring",
+                    "title": "Top Hiring Companies",
+                    "data": top_companies,
+                }
+            )
 
-        ts_sci_count = sum(1 for j in jobs if "ts/sci" in str(j.get("detected_clearance", "")).lower())
+        ts_sci_count = sum(
+            1 for j in jobs if "ts/sci" in str(j.get("detected_clearance", "")).lower()
+        )
         if ts_sci_count > 0:
-            insights.append({
-                "type": "pattern",
-                "category": "clearances",
-                "title": "TS/SCI Demand",
-                "count": ts_sci_count,
-            })
+            insights.append(
+                {
+                    "type": "pattern",
+                    "category": "clearances",
+                    "title": "TS/SCI Demand",
+                    "count": ts_sci_count,
+                }
+            )
 
         return insights
 
     insights = analyze_hiring_trends(SAMPLE_JOBS)
     success = len(insights) >= 2
-    print_result("Hiring trends analysis", success, f"Generated {len(insights)} insights")
+    print_result(
+        "Hiring trends analysis", success, f"Generated {len(insights)} insights"
+    )
     results.append(success)
 
     # Test program activity analysis
@@ -376,12 +403,14 @@ def test_analytics():
         top_programs = [p for p in program_counts.most_common(10) if p[0] != "Unmapped"]
 
         if top_programs:
-            insights.append({
-                "type": "trend",
-                "category": "programs",
-                "title": "Active Programs",
-                "data": top_programs,
-            })
+            insights.append(
+                {
+                    "type": "trend",
+                    "category": "programs",
+                    "title": "Active Programs",
+                    "data": top_programs,
+                }
+            )
         return insights
 
     insights = analyze_program_activity(SAMPLE_JOBS)
@@ -394,9 +423,9 @@ def test_analytics():
 
 def main():
     """Run all Phase 4 agent tests."""
-    print("\n" + "="*60)
+    print("\n" + "=" * 60)
     print("  PHASE 4 AGENT VERIFICATION")
-    print("="*60)
+    print("=" * 60)
 
     all_results = []
 
@@ -423,7 +452,7 @@ def main():
     else:
         print("\n  [ERROR] Multiple tests failed.")
 
-    print("\n" + "="*60 + "\n")
+    print("\n" + "=" * 60 + "\n")
 
     return success_rate >= 80
 

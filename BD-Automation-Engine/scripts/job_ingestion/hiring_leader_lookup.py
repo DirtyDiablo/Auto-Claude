@@ -18,16 +18,18 @@ from dotenv import load_dotenv
 load_dotenv()
 
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BD-HiringLeader')
+logger = logging.getLogger("BD-HiringLeader")
 
 
 # ===========================================
 # DATA CLASSES
 # ===========================================
 
+
 @dataclass
 class Contact:
     """Normalized contact data."""
+
     id: str
     name: str
     first_name: str
@@ -54,8 +56,16 @@ class Contact:
             return False
         title_lower = self.job_title.lower()
         leadership_keywords = [
-            'director', 'manager', 'lead', 'chief', 'head', 'vp',
-            'vice president', 'president', 'executive', 'senior'
+            "director",
+            "manager",
+            "lead",
+            "chief",
+            "head",
+            "vp",
+            "vice president",
+            "president",
+            "executive",
+            "senior",
         ]
         return any(kw in title_lower for kw in leadership_keywords)
 
@@ -67,17 +77,17 @@ class Contact:
         title_lower = self.job_title.lower()
 
         # Score based on title keywords
-        if any(x in title_lower for x in ['chief', 'ceo', 'cto', 'cio', 'president']):
+        if any(x in title_lower for x in ["chief", "ceo", "cto", "cio", "president"]):
             return 100
-        if any(x in title_lower for x in ['vp', 'vice president']):
+        if any(x in title_lower for x in ["vp", "vice president"]):
             return 90
-        if 'director' in title_lower:
+        if "director" in title_lower:
             return 80
-        if 'senior manager' in title_lower:
+        if "senior manager" in title_lower:
             return 70
-        if 'manager' in title_lower:
+        if "manager" in title_lower:
             return 60
-        if any(x in title_lower for x in ['lead', 'principal', 'senior']):
+        if any(x in title_lower for x in ["lead", "principal", "senior"]):
             return 50
         return 30
 
@@ -86,107 +96,110 @@ class Contact:
 # CONTACT LOADER
 # ===========================================
 
+
 class NotionContactLoader:
     """Loads contacts from Notion databases."""
 
     def __init__(self):
-        self.token = os.getenv('NOTION_TOKEN')
+        self.token = os.getenv("NOTION_TOKEN")
         self.headers = {
-            'Authorization': f'Bearer {self.token}',
-            'Notion-Version': '2022-06-28',
-            'Content-Type': 'application/json'
+            "Authorization": f"Bearer {self.token}",
+            "Notion-Version": "2022-06-28",
+            "Content-Type": "application/json",
         }
 
         # Database configurations
         self.databases = {
-            'DCGS': {
-                'id': os.getenv('NOTION_DB_DCGS_CONTACTS'),
-                'name_field': 'Name',
-                'title_field': 'Job Title',
-                'first_name_field': 'First Name',
+            "DCGS": {
+                "id": os.getenv("NOTION_DB_DCGS_CONTACTS"),
+                "name_field": "Name",
+                "title_field": "Job Title",
+                "first_name_field": "First Name",
             },
-            'GDIT_Other': {
-                'id': os.getenv('NOTION_DB_GDIT_OTHER_CONTACTS'),
-                'name_field': 'Name',
-                'title_field': 'Job Title',
-                'first_name_field': 'First Name',
+            "GDIT_Other": {
+                "id": os.getenv("NOTION_DB_GDIT_OTHER_CONTACTS"),
+                "name_field": "Name",
+                "title_field": "Job Title",
+                "first_name_field": "First Name",
             },
-            'GDIT_PTS': {
-                'id': os.getenv('NOTION_DB_GDIT_PTS_CONTACTS'),
-                'name_field': 'Contact Name',
-                'title_field': 'Role/Title',
-                'first_name_field': None,  # PTS doesn't have first name
-            }
+            "GDIT_PTS": {
+                "id": os.getenv("NOTION_DB_GDIT_PTS_CONTACTS"),
+                "name_field": "Contact Name",
+                "title_field": "Role/Title",
+                "first_name_field": None,  # PTS doesn't have first name
+            },
         }
 
-    def _extract_text(self, prop: Dict, prop_type: str = 'rich_text') -> str:
+    def _extract_text(self, prop: Dict, prop_type: str = "rich_text") -> str:
         """Extract text from Notion property."""
         if not prop:
-            return ''
+            return ""
 
-        if prop_type == 'title':
-            items = prop.get('title', [])
-        elif prop_type == 'rich_text':
-            items = prop.get('rich_text', [])
+        if prop_type == "title":
+            items = prop.get("title", [])
+        elif prop_type == "rich_text":
+            items = prop.get("rich_text", [])
         else:
-            return ''
+            return ""
 
         if items:
-            return items[0].get('plain_text', '')
-        return ''
+            return items[0].get("plain_text", "")
+        return ""
 
     def _extract_select(self, prop: Dict) -> str:
         """Extract select value from Notion property."""
         if not prop:
-            return ''
-        select = prop.get('select')
+            return ""
+        select = prop.get("select")
         if select:
-            return select.get('name', '')
-        return ''
+            return select.get("name", "")
+        return ""
 
     def _parse_contact(self, page: Dict, db_config: Dict, source_db: str) -> Contact:
         """Parse a Notion page into a Contact."""
-        props = page.get('properties', {})
+        props = page.get("properties", {})
 
         # Extract name
-        name_field = db_config['name_field']
-        name = self._extract_text(props.get(name_field), 'title')
+        name_field = db_config["name_field"]
+        name = self._extract_text(props.get(name_field), "title")
 
         # Extract first name
-        first_name = ''
-        if db_config.get('first_name_field'):
-            first_name = self._extract_text(props.get(db_config['first_name_field']))
+        first_name = ""
+        if db_config.get("first_name_field"):
+            first_name = self._extract_text(props.get(db_config["first_name_field"]))
 
         # Extract job title
-        title_field = db_config['title_field']
+        title_field = db_config["title_field"]
         job_title = self._extract_text(props.get(title_field))
 
         # Common fields
-        program = self._extract_select(props.get('Program'))
-        city = self._extract_text(props.get('Person City'))
-        state = self._extract_text(props.get('Person State'))
+        program = self._extract_select(props.get("Program"))
+        city = self._extract_text(props.get("Person City"))
+        state = self._extract_text(props.get("Person State"))
 
         # For PTS database, location is different
-        if source_db == 'GDIT_PTS':
-            location_site = self._extract_text(props.get('Location/Site'))
+        if source_db == "GDIT_PTS":
+            location_site = self._extract_text(props.get("Location/Site"))
             if location_site and not city:
                 city = location_site
 
-        tier = self._extract_select(props.get('Hierarchy Tier')) or self._extract_select(props.get('Tier'))
+        tier = self._extract_select(
+            props.get("Hierarchy Tier")
+        ) or self._extract_select(props.get("Tier"))
 
         # Email and phone
-        email_prop = props.get('Email Address', {})
-        email = email_prop.get('email', '') or ''
+        email_prop = props.get("Email Address", {})
+        email = email_prop.get("email", "") or ""
 
-        phone_prop = props.get('Phone Number', {})
-        phone = phone_prop.get('phone_number', '') or ''
+        phone_prop = props.get("Phone Number", {})
+        phone = phone_prop.get("phone_number", "") or ""
 
         # LinkedIn
-        linkedin_prop = props.get('LinkedIn Contact Profile URL', {})
-        linkedin_url = linkedin_prop.get('url', '') or ''
+        linkedin_prop = props.get("LinkedIn Contact Profile URL", {})
+        linkedin_url = linkedin_prop.get("url", "") or ""
 
         return Contact(
-            id=page.get('id', ''),
+            id=page.get("id", ""),
             name=name,
             first_name=first_name,
             job_title=job_title,
@@ -197,7 +210,7 @@ class NotionContactLoader:
             email=email,
             phone=phone,
             linkedin_url=linkedin_url,
-            source_db=source_db
+            source_db=source_db,
         )
 
     def load_all_contacts(self) -> List[Contact]:
@@ -205,7 +218,7 @@ class NotionContactLoader:
         all_contacts = []
 
         for db_name, config in self.databases.items():
-            db_id = config.get('id')
+            db_id = config.get("id")
             if not db_id:
                 logger.warning(f"Database {db_name} not configured, skipping")
                 continue
@@ -225,10 +238,10 @@ class NotionContactLoader:
         start_cursor = None
 
         while has_more:
-            url = f'https://api.notion.com/v1/databases/{db_id}/query'
-            body = {'page_size': 100}
+            url = f"https://api.notion.com/v1/databases/{db_id}/query"
+            body = {"page_size": 100}
             if start_cursor:
-                body['start_cursor'] = start_cursor
+                body["start_cursor"] = start_cursor
 
             response = requests.post(url, headers=self.headers, json=body)
 
@@ -237,7 +250,7 @@ class NotionContactLoader:
                 break
 
             data = response.json()
-            results = data.get('results', [])
+            results = data.get("results", [])
 
             for page in results:
                 try:
@@ -247,8 +260,8 @@ class NotionContactLoader:
                 except Exception as e:
                     logger.warning(f"Failed to parse contact: {e}")
 
-            has_more = data.get('has_more', False)
-            start_cursor = data.get('next_cursor')
+            has_more = data.get("has_more", False)
+            start_cursor = data.get("next_cursor")
 
         return contacts
 
@@ -257,24 +270,63 @@ class NotionContactLoader:
 # HIRING LEADER MATCHER
 # ===========================================
 
+
 class HiringLeaderMatcher:
     """Matches jobs to potential hiring leaders."""
 
     # State abbreviations for normalization
     STATE_ABBREVS = {
-        'alabama': 'AL', 'alaska': 'AK', 'arizona': 'AZ', 'arkansas': 'AR',
-        'california': 'CA', 'colorado': 'CO', 'connecticut': 'CT', 'delaware': 'DE',
-        'florida': 'FL', 'georgia': 'GA', 'hawaii': 'HI', 'idaho': 'ID',
-        'illinois': 'IL', 'indiana': 'IN', 'iowa': 'IA', 'kansas': 'KS',
-        'kentucky': 'KY', 'louisiana': 'LA', 'maine': 'ME', 'maryland': 'MD',
-        'massachusetts': 'MA', 'michigan': 'MI', 'minnesota': 'MN', 'mississippi': 'MS',
-        'missouri': 'MO', 'montana': 'MT', 'nebraska': 'NE', 'nevada': 'NV',
-        'new hampshire': 'NH', 'new jersey': 'NJ', 'new mexico': 'NM', 'new york': 'NY',
-        'north carolina': 'NC', 'north dakota': 'ND', 'ohio': 'OH', 'oklahoma': 'OK',
-        'oregon': 'OR', 'pennsylvania': 'PA', 'rhode island': 'RI', 'south carolina': 'SC',
-        'south dakota': 'SD', 'tennessee': 'TN', 'texas': 'TX', 'utah': 'UT',
-        'vermont': 'VT', 'virginia': 'VA', 'washington': 'WA', 'west virginia': 'WV',
-        'wisconsin': 'WI', 'wyoming': 'WY', 'district of columbia': 'DC'
+        "alabama": "AL",
+        "alaska": "AK",
+        "arizona": "AZ",
+        "arkansas": "AR",
+        "california": "CA",
+        "colorado": "CO",
+        "connecticut": "CT",
+        "delaware": "DE",
+        "florida": "FL",
+        "georgia": "GA",
+        "hawaii": "HI",
+        "idaho": "ID",
+        "illinois": "IL",
+        "indiana": "IN",
+        "iowa": "IA",
+        "kansas": "KS",
+        "kentucky": "KY",
+        "louisiana": "LA",
+        "maine": "ME",
+        "maryland": "MD",
+        "massachusetts": "MA",
+        "michigan": "MI",
+        "minnesota": "MN",
+        "mississippi": "MS",
+        "missouri": "MO",
+        "montana": "MT",
+        "nebraska": "NE",
+        "nevada": "NV",
+        "new hampshire": "NH",
+        "new jersey": "NJ",
+        "new mexico": "NM",
+        "new york": "NY",
+        "north carolina": "NC",
+        "north dakota": "ND",
+        "ohio": "OH",
+        "oklahoma": "OK",
+        "oregon": "OR",
+        "pennsylvania": "PA",
+        "rhode island": "RI",
+        "south carolina": "SC",
+        "south dakota": "SD",
+        "tennessee": "TN",
+        "texas": "TX",
+        "utah": "UT",
+        "vermont": "VT",
+        "virginia": "VA",
+        "washington": "WA",
+        "west virginia": "WV",
+        "wisconsin": "WI",
+        "wyoming": "WY",
+        "district of columbia": "DC",
     }
 
     def __init__(self, contacts: List[Contact]):
@@ -306,7 +358,9 @@ class HiringLeaderMatcher:
             if contact.is_leadership:
                 self.leadership.append(contact)
 
-        logger.info(f"Indexed: {len(self.by_state)} states, {len(self.by_program)} programs, {len(self.leadership)} leaders")
+        logger.info(
+            f"Indexed: {len(self.by_state)} states, {len(self.by_program)} programs, {len(self.leadership)} leaders"
+        )
 
     def _normalize_state(self, state: str) -> Optional[str]:
         """Normalize state to 2-letter abbreviation."""
@@ -332,7 +386,7 @@ class HiringLeaderMatcher:
             return None
 
         # Pattern: "City, ST" or "City, ST ZIP"
-        match = re.search(r',\s*([A-Z]{2})(?:\s|\d|$)', location)
+        match = re.search(r",\s*([A-Z]{2})(?:\s|\d|$)", location)
         if match:
             return match.group(1)
 
@@ -344,7 +398,9 @@ class HiringLeaderMatcher:
 
         return None
 
-    def find_hiring_leaders(self, job: Dict, top_n: int = 3) -> List[Tuple[Contact, float]]:
+    def find_hiring_leaders(
+        self, job: Dict, top_n: int = 3
+    ) -> List[Tuple[Contact, float]]:
         """Find potential hiring leaders for a job.
 
         Returns list of (contact, score) tuples, sorted by score descending.
@@ -352,9 +408,9 @@ class HiringLeaderMatcher:
         candidates = []
         seen_ids = set()
 
-        job_state = self._extract_state_from_location(job.get('location', ''))
-        job_prime = (job.get('prime', '') or '').lower()
-        job_program = (job.get('task_order', '') or '').lower()
+        job_state = self._extract_state_from_location(job.get("location", ""))
+        job_prime = (job.get("prime", "") or "").lower()
+        job_program = (job.get("task_order", "") or "").lower()
 
         # Score all contacts
         for contact in self.contacts:
@@ -371,7 +427,9 @@ class HiringLeaderMatcher:
 
         return candidates[:top_n]
 
-    def _score_contact(self, contact: Contact, job_state: str, job_prime: str, job_program: str) -> float:
+    def _score_contact(
+        self, contact: Contact, job_state: str, job_prime: str, job_program: str
+    ) -> float:
         """Score a contact's relevance to a job."""
         score = 0.0
 
@@ -413,9 +471,9 @@ class HiringLeaderMatcher:
         # Tier bonus
         if contact.tier:
             tier_lower = contact.tier.lower()
-            if 'executive' in tier_lower or 'tier 1' in tier_lower:
+            if "executive" in tier_lower or "tier 1" in tier_lower:
                 score += 15
-            elif 'tier 2' in tier_lower:
+            elif "tier 2" in tier_lower:
                 score += 10
 
         return score
@@ -425,7 +483,10 @@ class HiringLeaderMatcher:
 # MAIN FUNCTION
 # ===========================================
 
-def find_hiring_leaders_for_jobs(jobs: List[Dict], contacts: List[Contact] = None) -> List[Dict]:
+
+def find_hiring_leaders_for_jobs(
+    jobs: List[Dict], contacts: List[Contact] = None
+) -> List[Dict]:
     """Find hiring leaders for a list of jobs.
 
     Args:
@@ -450,20 +511,20 @@ def find_hiring_leaders_for_jobs(jobs: List[Dict], contacts: List[Contact] = Non
         if matches:
             # Format as "Name (Title)" for top match
             top_match = matches[0][0]
-            job['hiring_leader'] = f"{top_match.name}"
+            job["hiring_leader"] = f"{top_match.name}"
             if top_match.job_title:
-                job['hiring_leader'] += f" ({top_match.job_title})"
+                job["hiring_leader"] += f" ({top_match.job_title})"
 
             # Store all matches with scores for reference
-            job['hiring_leader_matches'] = [
+            job["hiring_leader_matches"] = [
                 {
-                    'name': c.name,
-                    'title': c.job_title,
-                    'program': c.program,
-                    'location': c.full_location,
-                    'score': round(score, 1),
-                    'email': c.email,
-                    'linkedin': c.linkedin_url
+                    "name": c.name,
+                    "title": c.job_title,
+                    "program": c.program,
+                    "location": c.full_location,
+                    "score": round(score, 1),
+                    "email": c.email,
+                    "linkedin": c.linkedin_url,
                 }
                 for c, score in matches
             ]
@@ -474,11 +535,11 @@ def find_hiring_leaders_for_jobs(jobs: List[Dict], contacts: List[Contact] = Non
     return jobs
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     import json
 
     # Test with enriched jobs
-    with open('outputs/all_jobs_fully_enriched.json', 'r') as f:
+    with open("outputs/all_jobs_fully_enriched.json", "r") as f:
         jobs = json.load(f)
 
     print(f"Finding hiring leaders for {len(jobs)} jobs...")
@@ -497,7 +558,7 @@ if __name__ == '__main__':
         print(f"  Prime: {job.get('prime')}")
         print(f"  Program: {job.get('task_order')}")
         print(f"  Hiring Leader: {job.get('hiring_leader', 'None found')}")
-        if job.get('hiring_leader_matches'):
+        if job.get("hiring_leader_matches"):
             print("  All matches:")
-            for m in job['hiring_leader_matches']:
+            for m in job["hiring_leader_matches"]:
                 print(f"    - {m['name']} ({m['title']}) - Score: {m['score']}")

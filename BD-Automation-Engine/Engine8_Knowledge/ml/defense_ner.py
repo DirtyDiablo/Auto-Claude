@@ -1,4 +1,5 @@
 """Phase 28A — Defense NER v2 (Custom Trained)"""
+
 import structlog
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -156,7 +157,11 @@ class DefenseNER:
         entities: List[Entity] = []
         for label, patterns in self.PATTERNS.items():
             for pattern in patterns:
-                if pattern.startswith(r"\b") or pattern.startswith("[") or pattern.startswith(r"\$"):
+                if (
+                    pattern.startswith(r"\b")
+                    or pattern.startswith("[")
+                    or pattern.startswith(r"\$")
+                ):
                     for m in re.finditer(pattern, text, re.IGNORECASE):
                         entities.append(
                             Entity(
@@ -192,7 +197,9 @@ class DefenseNER:
                 result.append(e)
         return result
 
-    def train(self, training_data: List[TrainingExample], epochs: int = 30) -> NERMetrics:
+    def train(
+        self, training_data: List[TrainingExample], epochs: int = 30
+    ) -> NERMetrics:
         """Train the NER model on labeled examples.
 
         Args:

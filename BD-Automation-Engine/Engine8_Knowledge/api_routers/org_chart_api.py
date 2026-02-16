@@ -53,7 +53,10 @@ class ExportRequest(BaseModel):
 
 def _get_engine():
     try:
-        from Engine8_Knowledge.visualization.org_chart_engine import get_org_chart_engine
+        from Engine8_Knowledge.visualization.org_chart_engine import (
+            get_org_chart_engine,
+        )
+
         return get_org_chart_engine()
     except Exception:
         return None
@@ -62,8 +65,11 @@ def _get_engine():
 def _get_renderer(mode: str):
     try:
         from Engine8_Knowledge.visualization.renderers import (
-            TreeRenderer, NetworkRenderer, MatrixRenderer,
+            TreeRenderer,
+            NetworkRenderer,
+            MatrixRenderer,
         )
+
         if mode == "network":
             return NetworkRenderer()
         elif mode == "matrix":
@@ -76,6 +82,7 @@ def _get_renderer(mode: str):
 def _get_exporter():
     try:
         from Engine8_Knowledge.visualization.export_engine import ExportEngine
+
         return ExportEngine()
     except Exception:
         return None
@@ -93,6 +100,7 @@ async def generate_org_chart(req: GenerateRequest):
     if not engine:
         raise HTTPException(503, "Org chart engine not available")
     from dataclasses import asdict
+
     chart = await engine.generate(
         root=req.root, program=req.program, mode=req.mode, depth=req.depth
     )
@@ -117,6 +125,7 @@ async def infer_reports_to(req: InferRequest):
     if not engine:
         raise HTTPException(503, "Org chart engine not available")
     from dataclasses import asdict
+
     report = await engine.infer_reports_to(program=req.program)
     return asdict(report)
 
@@ -128,6 +137,7 @@ async def get_team(person: str):
     if not engine:
         raise HTTPException(503, "Org chart engine not available")
     from dataclasses import asdict
+
     team = await engine.get_team(person)
     return asdict(team)
 
@@ -139,6 +149,7 @@ async def get_chain(person: str):
     if not engine:
         raise HTTPException(503, "Org chart engine not available")
     from dataclasses import asdict
+
     chain = await engine.get_chain_of_command(person)
     return {"person": person, "chain": [asdict(p) for p in chain], "hops": len(chain)}
 
@@ -150,6 +161,7 @@ async def compare_org_charts(req: CompareRequest):
     if not engine:
         raise HTTPException(503, "Org chart engine not available")
     from dataclasses import asdict
+
     diff = await engine.compare_org_charts(req.date1, req.date2, req.program)
     return asdict(diff)
 
@@ -200,7 +212,10 @@ async def export_org_chart(format: str, req: ExportRequest):
         data = await exporter.to_docx(chart)
         if not data:
             raise HTTPException(503, "DOCX export requires python-docx")
-        return Response(content=data, media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document")
+        return Response(
+            content=data,
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        )
     else:
         raise HTTPException(400, f"Unsupported format: {format}")
 

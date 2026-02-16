@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class RelevanceScore:
     """Relevance score for a passage against a query."""
+
     passage_index: int = 0
     passage_text: str = ""
     score: float = 0.0
@@ -31,6 +33,7 @@ class RelevanceScore:
 @dataclass
 class SupportScore:
     """Whether an answer is supported by the given passages."""
+
     score: float = 0.0  # 0-1, 1 = fully supported
     supported: bool = False
     unsupported_claims: List[str] = field(default_factory=list)
@@ -40,6 +43,7 @@ class SupportScore:
 @dataclass
 class UtilityScore:
     """Whether an answer is useful for the given query."""
+
     score: float = 0.0  # 0-1, 1 = fully useful
     useful: bool = False
     explanation: str = ""
@@ -48,6 +52,7 @@ class UtilityScore:
 @dataclass
 class RetrievalRound:
     """Record of a single retrieval round."""
+
     round_number: int = 0
     query_used: str = ""
     passages_retrieved: int = 0
@@ -59,6 +64,7 @@ class RetrievalRound:
 @dataclass
 class SelfRAGResult:
     """Complete result from the Self-RAG pipeline."""
+
     query_id: str = ""
     answer: str = ""
     confidence: float = 0.0
@@ -76,17 +82,53 @@ class SelfRAGResult:
 # RELEVANCE EVALUATION
 # =========================================
 
+
 def _compute_token_overlap(query: str, text: str) -> float:
     """Compute normalized token overlap between query and text."""
     if not query or not text:
         return 0.0
-    q_tokens = set(re.findall(r'\b\w+\b', query.lower()))
-    t_tokens = set(re.findall(r'\b\w+\b', text.lower()))
+    q_tokens = set(re.findall(r"\b\w+\b", query.lower()))
+    t_tokens = set(re.findall(r"\b\w+\b", text.lower()))
     # Remove stopwords
-    stopwords = {"the", "a", "an", "is", "are", "was", "were", "in", "on", "at",
-                 "to", "for", "of", "with", "and", "or", "but", "not", "this",
-                 "that", "it", "i", "you", "we", "they", "he", "she", "what",
-                 "who", "how", "which", "do", "does", "did", "has", "have", "had"}
+    stopwords = {
+        "the",
+        "a",
+        "an",
+        "is",
+        "are",
+        "was",
+        "were",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "with",
+        "and",
+        "or",
+        "but",
+        "not",
+        "this",
+        "that",
+        "it",
+        "i",
+        "you",
+        "we",
+        "they",
+        "he",
+        "she",
+        "what",
+        "who",
+        "how",
+        "which",
+        "do",
+        "does",
+        "did",
+        "has",
+        "have",
+        "had",
+    }
     q_tokens -= stopwords
     t_tokens -= stopwords
     if not q_tokens:
@@ -98,7 +140,7 @@ def _compute_token_overlap(query: str, text: str) -> float:
 def _compute_entity_overlap(query: str, text: str) -> float:
     """Check if named entities from query appear in text."""
     # Extract capitalized words/phrases as potential entities
-    q_entities = set(re.findall(r'\b[A-Z][a-zA-Z-]+(?:\s+[A-Z][a-zA-Z-]+)*\b', query))
+    q_entities = set(re.findall(r"\b[A-Z][a-zA-Z-]+(?:\s+[A-Z][a-zA-Z-]+)*\b", query))
     if not q_entities:
         return 1.0  # No entities to check
     found = 0
@@ -113,9 +155,9 @@ def _assess_retrieval_need(query: str) -> bool:
     """Decide if retrieval is needed for this query."""
     # Queries that likely don't need retrieval (greetings, simple math, etc.)
     no_retrieval_patterns = [
-        re.compile(r'^(hi|hello|hey|thanks|thank you)\b', re.IGNORECASE),
-        re.compile(r'^\d+\s*[+\-*/]\s*\d+', re.IGNORECASE),
-        re.compile(r'^(what is|define)\s+(the meaning|the definition)', re.IGNORECASE),
+        re.compile(r"^(hi|hello|hey|thanks|thank you)\b", re.IGNORECASE),
+        re.compile(r"^\d+\s*[+\-*/]\s*\d+", re.IGNORECASE),
+        re.compile(r"^(what is|define)\s+(the meaning|the definition)", re.IGNORECASE),
     ]
     for p in no_retrieval_patterns:
         if p.search(query.strip()):
@@ -127,10 +169,11 @@ def _assess_retrieval_need(query: str) -> bool:
 # QUERY REFORMULATION
 # =========================================
 
+
 def reformulate_query(original: str, gaps: List[str], round_num: int) -> str:
     """Reformulate query to address retrieval gaps."""
     # Strategy 1: Add entity emphasis
-    entities = re.findall(r'\b[A-Z][a-zA-Z-]+(?:\s+[A-Z][a-zA-Z-]+)*\b', original)
+    entities = re.findall(r"\b[A-Z][a-zA-Z-]+(?:\s+[A-Z][a-zA-Z-]+)*\b", original)
 
     if round_num == 2:
         # Make query more specific by emphasizing entities
@@ -141,7 +184,9 @@ def reformulate_query(original: str, gaps: List[str], round_num: int) -> str:
     if round_num >= 3:
         # Broaden the query
         # Remove very specific terms and search more broadly
-        broader = re.sub(r'\b(specific|exactly|precisely|only)\b', '', original, flags=re.IGNORECASE)
+        broader = re.sub(
+            r"\b(specific|exactly|precisely|only)\b", "", original, flags=re.IGNORECASE
+        )
         return broader.strip() or original
 
     return original
@@ -150,6 +195,7 @@ def reformulate_query(original: str, gaps: List[str], round_num: int) -> str:
 # =========================================
 # SELF-REFLECTIVE RAG
 # =========================================
+
 
 class SelfReflectiveRAG:
     """Self-RAG: retrieve, evaluate, decide if more retrieval is needed."""
@@ -174,7 +220,9 @@ class SelfReflectiveRAG:
     # -----------------------------------------
 
     async def evaluate_relevance(
-        self, query: str, passages: List[str],
+        self,
+        query: str,
+        passages: List[str],
     ) -> List[RelevanceScore]:
         """Score each passage for relevance to the query."""
         scores = []
@@ -189,26 +237,34 @@ class SelfReflectiveRAG:
             length_bonus = min(len(passage) / 500, 0.1)
             combined = min(combined + length_bonus, 1.0)
 
-            scores.append(RelevanceScore(
-                passage_index=i,
-                passage_text=passage[:200],
-                score=round(combined, 4),
-                relevant=combined >= self.relevance_threshold,
-                explanation=f"token_overlap={token_score:.2f}, entity_overlap={entity_score:.2f}",
-            ))
+            scores.append(
+                RelevanceScore(
+                    passage_index=i,
+                    passage_text=passage[:200],
+                    score=round(combined, 4),
+                    relevant=combined >= self.relevance_threshold,
+                    explanation=f"token_overlap={token_score:.2f}, entity_overlap={entity_score:.2f}",
+                )
+            )
         return scores
 
     async def evaluate_support(
-        self, answer: str, passages: List[str],
+        self,
+        answer: str,
+        passages: List[str],
     ) -> SupportScore:
         """Check if the answer is supported by the passages."""
         if not answer or not passages:
-            return SupportScore(score=0.0, supported=False, explanation="No answer or passages")
+            return SupportScore(
+                score=0.0, supported=False, explanation="No answer or passages"
+            )
 
         # Extract claims from answer (sentences)
-        claims = [s.strip() for s in re.split(r'[.!?]+', answer) if len(s.strip()) > 10]
+        claims = [s.strip() for s in re.split(r"[.!?]+", answer) if len(s.strip()) > 10]
         if not claims:
-            return SupportScore(score=1.0, supported=True, explanation="No verifiable claims")
+            return SupportScore(
+                score=1.0, supported=True, explanation="No verifiable claims"
+            )
 
         all_passage_text = " ".join(passages).lower()
         supported_claims = 0
@@ -216,15 +272,25 @@ class SelfReflectiveRAG:
 
         for claim in claims:
             # Check if key terms from the claim appear in passages
-            claim_tokens = set(re.findall(r'\b\w{3,}\b', claim.lower()))
-            stopwords = {"the", "and", "for", "are", "was", "with", "this", "that", "from"}
+            claim_tokens = set(re.findall(r"\b\w{3,}\b", claim.lower()))
+            stopwords = {
+                "the",
+                "and",
+                "for",
+                "are",
+                "was",
+                "with",
+                "this",
+                "that",
+                "from",
+            }
             claim_tokens -= stopwords
 
             if not claim_tokens:
                 supported_claims += 1
                 continue
 
-            passage_tokens = set(re.findall(r'\b\w{3,}\b', all_passage_text))
+            passage_tokens = set(re.findall(r"\b\w{3,}\b", all_passage_text))
             overlap = claim_tokens & passage_tokens
             coverage = len(overlap) / len(claim_tokens) if claim_tokens else 0
 
@@ -243,19 +309,26 @@ class SelfReflectiveRAG:
         )
 
     async def evaluate_utility(
-        self, query: str, answer: str,
+        self,
+        query: str,
+        answer: str,
     ) -> UtilityScore:
         """Score how useful the answer is for the query."""
         if not answer or not query:
-            return UtilityScore(score=0.0, useful=False, explanation="Empty query or answer")
+            return UtilityScore(
+                score=0.0, useful=False, explanation="Empty query or answer"
+            )
 
         # Check if answer addresses query entities
         entity_coverage = _compute_entity_overlap(query, answer)
 
         # Check if answer is substantive (not just "I don't know")
         negative_patterns = [
-            re.compile(r'\b(cannot|could not|don\'t know|no information|not found)\b', re.IGNORECASE),
-            re.compile(r'\b(insufficient|unavailable|unable to)\b', re.IGNORECASE),
+            re.compile(
+                r"\b(cannot|could not|don\'t know|no information|not found)\b",
+                re.IGNORECASE,
+            ),
+            re.compile(r"\b(insufficient|unavailable|unable to)\b", re.IGNORECASE),
         ]
         is_negative = any(p.search(answer) for p in negative_patterns)
         substance_score = 0.2 if is_negative else min(len(answer) / 200, 1.0)
@@ -282,7 +355,10 @@ class SelfReflectiveRAG:
             try:
                 results = await self._retrieval_fn(query, limit=limit)
                 if isinstance(results, list):
-                    return [r.get("text", str(r)) if isinstance(r, dict) else str(r) for r in results]
+                    return [
+                        r.get("text", str(r)) if isinstance(r, dict) else str(r)
+                        for r in results
+                    ]
                 return [str(results)]
             except Exception as e:
                 logger.warning(f"Retrieval failed: {e}")
@@ -294,7 +370,9 @@ class SelfReflectiveRAG:
     # -----------------------------------------
 
     async def adaptive_retrieve(
-        self, query: str, max_rounds: Optional[int] = None,
+        self,
+        query: str,
+        max_rounds: Optional[int] = None,
     ) -> SelfRAGResult:
         """Full self-reflective retrieval loop."""
         start_time = time.time()
@@ -337,17 +415,20 @@ class SelfReflectiveRAG:
 
             avg_rel = (
                 sum(s.score for s in relevance_scores) / len(relevance_scores)
-                if relevance_scores else 0.0
+                if relevance_scores
+                else 0.0
             )
 
-            rounds.append(RetrievalRound(
-                round_number=round_num,
-                query_used=current_query,
-                passages_retrieved=len(passages),
-                passages_relevant=len(round_relevant),
-                avg_relevance=round(avg_rel, 4),
-                latency_ms=round((time.time() - round_start) * 1000, 2),
-            ))
+            rounds.append(
+                RetrievalRound(
+                    round_number=round_num,
+                    query_used=current_query,
+                    passages_retrieved=len(passages),
+                    passages_relevant=len(round_relevant),
+                    avg_relevance=round(avg_rel, 4),
+                    latency_ms=round((time.time() - round_start) * 1000, 2),
+                )
+            )
 
             # Step 4: Check if we have enough relevant passages
             if len(relevant_passages) >= 3 and avg_rel >= self.relevance_threshold:
@@ -365,17 +446,19 @@ class SelfReflectiveRAG:
         if relevant_passages:
             answer = "\n\n".join(relevant_passages[:5])
         else:
-            answer = "Could not find sufficiently relevant information to answer this query."
+            answer = (
+                "Could not find sufficiently relevant information to answer this query."
+            )
 
         # Step 7: Evaluate support and utility
         support = await self.evaluate_support(answer, relevant_passages)
         utility = await self.evaluate_utility(query, answer)
 
         # Compute confidence
-        avg_relevance = (
-            sum(s.score for s in all_relevance_scores if s.relevant) / max(len([s for s in all_relevance_scores if s.relevant]), 1)
+        avg_relevance = sum(s.score for s in all_relevance_scores if s.relevant) / max(
+            len([s for s in all_relevance_scores if s.relevant]), 1
         )
-        confidence = (avg_relevance * 0.4 + support.score * 0.3 + utility.score * 0.3)
+        confidence = avg_relevance * 0.4 + support.score * 0.3 + utility.score * 0.3
 
         elapsed_ms = (time.time() - start_time) * 1000
 

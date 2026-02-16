@@ -39,13 +39,17 @@ def client(app):
 # EVALUATE
 # =========================================
 
+
 def test_evaluate_allow(client):
-    resp = client.post("/api/security/evaluate", json={
-        "user_id": "admin1",
-        "role": "admin",
-        "action": "delete",
-        "resource_type": "contact",
-    })
+    resp = client.post(
+        "/api/security/evaluate",
+        json={
+            "user_id": "admin1",
+            "role": "admin",
+            "action": "delete",
+            "resource_type": "contact",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["decision"] == "allow"
@@ -53,40 +57,49 @@ def test_evaluate_allow(client):
 
 
 def test_evaluate_deny(client):
-    resp = client.post("/api/security/evaluate", json={
-        "user_id": "u1",
-        "role": "analyst",
-        "action": "read",
-        "resource_type": "contact",
-        "program": "DCGS-A",
-    })
+    resp = client.post(
+        "/api/security/evaluate",
+        json={
+            "user_id": "u1",
+            "role": "analyst",
+            "action": "read",
+            "resource_type": "contact",
+            "program": "DCGS-A",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["decision"] == "deny"
 
 
 def test_evaluate_require_approval(client):
-    resp = client.post("/api/security/evaluate", json={
-        "user_id": "u1",
-        "role": "analyst",
-        "action": "export",
-        "resource_type": "export",
-        "program": "P1",
-        "programs_assigned": ["P1"],
-        "record_count": 100,
-    })
+    resp = client.post(
+        "/api/security/evaluate",
+        json={
+            "user_id": "u1",
+            "role": "analyst",
+            "action": "export",
+            "resource_type": "export",
+            "program": "P1",
+            "programs_assigned": ["P1"],
+            "record_count": 100,
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["decision"] == "require_approval"
 
 
 def test_evaluate_clearance(client):
-    resp = client.post("/api/security/evaluate", json={
-        "user_id": "u1",
-        "role": "analyst",
-        "action": "read",
-        "resource_type": "contact",
-        "classification": "top_secret",
-        "clearance_level": "confidential",
-    })
+    resp = client.post(
+        "/api/security/evaluate",
+        json={
+            "user_id": "u1",
+            "role": "analyst",
+            "action": "read",
+            "resource_type": "contact",
+            "classification": "top_secret",
+            "clearance_level": "confidential",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["decision"] == "deny"
 
@@ -94,6 +107,7 @@ def test_evaluate_clearance(client):
 # =========================================
 # POLICIES
 # =========================================
+
 
 def test_list_policies(client):
     resp = client.get("/api/security/policies")
@@ -106,7 +120,9 @@ def test_list_policies(client):
 def test_list_enabled_policies(client):
     resp = client.get("/api/security/policies?enabled_only=true")
     assert resp.status_code == 200
-    assert resp.json()["total"] >= 6  # may be fewer if prior test modified shared policy objects
+    assert (
+        resp.json()["total"] >= 6
+    )  # may be fewer if prior test modified shared policy objects
 
 
 def test_get_policy(client):
@@ -121,23 +137,30 @@ def test_get_policy_not_found(client):
 
 
 def test_update_policy(client):
-    resp = client.patch("/api/security/policies/pol_admin_bypass", json={
-        "description": "Updated for test",
-    })
+    resp = client.patch(
+        "/api/security/policies/pol_admin_bypass",
+        json={
+            "description": "Updated for test",
+        },
+    )
     assert resp.status_code == 200
     assert resp.json()["description"] == "Updated for test"
 
 
 def test_update_policy_not_found(client):
-    resp = client.patch("/api/security/policies/pol_fake", json={
-        "description": "test",
-    })
+    resp = client.patch(
+        "/api/security/policies/pol_fake",
+        json={
+            "description": "test",
+        },
+    )
     assert resp.status_code == 404
 
 
 # =========================================
 # AUDIT TRAIL
 # =========================================
+
 
 def test_audit_trail_empty(client):
     resp = client.get("/api/security/audit")
@@ -146,20 +169,30 @@ def test_audit_trail_empty(client):
 
 
 def test_audit_trail_after_evaluate(client):
-    client.post("/api/security/evaluate", json={
-        "user_id": "u1", "role": "admin",
-        "action": "read", "resource_type": "contact",
-    })
+    client.post(
+        "/api/security/evaluate",
+        json={
+            "user_id": "u1",
+            "role": "admin",
+            "action": "read",
+            "resource_type": "contact",
+        },
+    )
     resp = client.get("/api/security/audit")
     assert resp.status_code == 200
     assert resp.json()["total"] >= 1
 
 
 def test_audit_verify_chain(client):
-    client.post("/api/security/evaluate", json={
-        "user_id": "u1", "role": "admin",
-        "action": "read", "resource_type": "contact",
-    })
+    client.post(
+        "/api/security/evaluate",
+        json={
+            "user_id": "u1",
+            "role": "admin",
+            "action": "read",
+            "resource_type": "contact",
+        },
+    )
     resp = client.post("/api/security/audit/verify")
     assert resp.status_code == 200
     assert resp.json()["verified"] is True
@@ -174,6 +207,7 @@ def test_audit_stats(client):
 # =========================================
 # ENCRYPTION
 # =========================================
+
 
 def test_encryption_status(client):
     resp = client.get("/api/security/encryption/status")
@@ -214,6 +248,7 @@ def test_sensitive_registry(client):
 # COMPLIANCE
 # =========================================
 
+
 def test_soc2_readiness(client):
     resp = client.get("/api/security/compliance/soc2")
     assert resp.status_code == 200
@@ -232,10 +267,15 @@ def test_fedramp_readiness(client):
 def test_compliance_report(client):
     # Generate some audit events first
     for i in range(5):
-        client.post("/api/security/evaluate", json={
-            "user_id": f"u{i}", "role": "admin",
-            "action": "read", "resource_type": "contact",
-        })
+        client.post(
+            "/api/security/evaluate",
+            json={
+                "user_id": f"u{i}",
+                "role": "admin",
+                "action": "read",
+                "resource_type": "contact",
+            },
+        )
     resp = client.get("/api/security/compliance/report?report_type=soc2&period_days=30")
     assert resp.status_code == 200
     data = resp.json()
@@ -246,6 +286,7 @@ def test_compliance_report(client):
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_security_health(client):
     resp = client.get("/api/security/health")

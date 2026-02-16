@@ -17,14 +17,18 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class SubQuery:
     """An atomic sub-query extracted from a complex query."""
+
     id: str = ""
     text: str = ""
     intent: str = ""  # person, program, hiring, trend, comparison
     entities: List[str] = field(default_factory=list)
-    depends_on: List[str] = field(default_factory=list)  # IDs of prerequisite sub-queries
+    depends_on: List[str] = field(
+        default_factory=list
+    )  # IDs of prerequisite sub-queries
     priority: int = 1  # Lower = higher priority
     answer: str = ""  # Filled after retrieval
 
@@ -32,15 +36,23 @@ class SubQuery:
 @dataclass
 class DependencyGraph:
     """Dependency graph for sub-queries."""
+
     nodes: List[str] = field(default_factory=list)  # sub-query IDs
-    edges: List[Tuple[str, str]] = field(default_factory=list)  # (from, to) = "from" must complete before "to"
-    parallel_groups: List[List[str]] = field(default_factory=list)  # Groups that can run in parallel
-    execution_order: List[List[str]] = field(default_factory=list)  # Ordered layers of parallel groups
+    edges: List[Tuple[str, str]] = field(
+        default_factory=list
+    )  # (from, to) = "from" must complete before "to"
+    parallel_groups: List[List[str]] = field(
+        default_factory=list
+    )  # Groups that can run in parallel
+    execution_order: List[List[str]] = field(
+        default_factory=list
+    )  # Ordered layers of parallel groups
 
 
 @dataclass
 class DecompositionPlan:
     """Complete plan for decomposing and executing a complex query."""
+
     original_query: str = ""
     sub_queries: List[SubQuery] = field(default_factory=list)
     dependency_graph: Optional[DependencyGraph] = None
@@ -55,44 +67,61 @@ class DecompositionPlan:
 
 # Comparison patterns: "X vs Y", "compare X and Y"
 COMPARISON_PATTERNS = [
-    re.compile(r'\b(compare|versus|vs\.?|compared to|difference between)\b', re.IGNORECASE),
-    re.compile(r'(\w+)\s+(?:vs\.?|versus)\s+(\w+)', re.IGNORECASE),
+    re.compile(
+        r"\b(compare|versus|vs\.?|compared to|difference between)\b", re.IGNORECASE
+    ),
+    re.compile(r"(\w+)\s+(?:vs\.?|versus)\s+(\w+)", re.IGNORECASE),
 ]
 
 # Conjunction patterns: "X and Y", "X as well as Y"
 CONJUNCTION_PATTERNS = [
-    re.compile(r'\band\b(?!\s+(?:the|a|an)\b)', re.IGNORECASE),
-    re.compile(r'\b(as well as|along with|together with|in addition to|also)\b', re.IGNORECASE),
+    re.compile(r"\band\b(?!\s+(?:the|a|an)\b)", re.IGNORECASE),
+    re.compile(
+        r"\b(as well as|along with|together with|in addition to|also)\b", re.IGNORECASE
+    ),
 ]
 
 # Multi-aspect patterns: "who ... and what ..."
 MULTI_ASPECT_PATTERNS = [
-    re.compile(r'\b(who|what|where|when|how)\b.*\b(and|also|plus)\b.*\b(who|what|where|when|how)\b', re.IGNORECASE),
+    re.compile(
+        r"\b(who|what|where|when|how)\b.*\b(and|also|plus)\b.*\b(who|what|where|when|how)\b",
+        re.IGNORECASE,
+    ),
 ]
 
 # Temporal decomposition: "over the last X months"
 TEMPORAL_PATTERNS = [
-    re.compile(r'\b(over|during|in|for)\s+the\s+(last|past|previous)\s+(\d+)\s+(month|year|quarter|week)s?\b', re.IGNORECASE),
-    re.compile(r'\b(trend|change|growth|evolution|history)\b', re.IGNORECASE),
+    re.compile(
+        r"\b(over|during|in|for)\s+the\s+(last|past|previous)\s+(\d+)\s+(month|year|quarter|week)s?\b",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\b(trend|change|growth|evolution|history)\b", re.IGNORECASE),
 ]
 
 # Entity extraction for sub-query generation
 ENTITY_PATTERNS = [
-    re.compile(r'\b([A-Z][a-z]+ [A-Z][a-z]+)\b'),
-    re.compile(r'\b(DCGS|DCGS-A|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b', re.IGNORECASE),
-    re.compile(r'\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton)\b', re.IGNORECASE),
-    re.compile(r'\b(Langley|PACAF|Wright-Patterson|San Diego|Fort Meade)\b', re.IGNORECASE),
+    re.compile(r"\b([A-Z][a-z]+ [A-Z][a-z]+)\b"),
+    re.compile(
+        r"\b(DCGS|DCGS-A|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b", re.IGNORECASE
+    ),
+    re.compile(
+        r"\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton)\b",
+        re.IGNORECASE,
+    ),
+    re.compile(
+        r"\b(Langley|PACAF|Wright-Patterson|San Diego|Fort Meade)\b", re.IGNORECASE
+    ),
 ]
 
 # Intent markers for sub-query classification
 INTENT_MARKERS = {
-    "person": [r'\b(who|contact|manager|director|lead|pm|email|phone)\b'],
-    "program": [r'\b(program|contract|award|prime|sub|status)\b'],
-    "hiring": [r'\b(hiring|recruiting|open positions?|vacancy|staffing|headcount)\b'],
-    "trend": [r'\b(trend|change|growth|decline|over time|historically)\b'],
-    "comparison": [r'\b(compare|versus|vs|difference|better|worse)\b'],
-    "relationship": [r'\b(connection|relationship|reports to|works with|network)\b'],
-    "pain_point": [r'\b(pain point|challenge|issue|concern|problem|struggle)\b'],
+    "person": [r"\b(who|contact|manager|director|lead|pm|email|phone)\b"],
+    "program": [r"\b(program|contract|award|prime|sub|status)\b"],
+    "hiring": [r"\b(hiring|recruiting|open positions?|vacancy|staffing|headcount)\b"],
+    "trend": [r"\b(trend|change|growth|decline|over time|historically)\b"],
+    "comparison": [r"\b(compare|versus|vs|difference|better|worse)\b"],
+    "relationship": [r"\b(connection|relationship|reports to|works with|network)\b"],
+    "pain_point": [r"\b(pain point|challenge|issue|concern|problem|struggle)\b"],
 }
 
 
@@ -124,11 +153,13 @@ def _compute_complexity(query: str) -> float:
     score += min(words / 30, 0.3)
 
     # Conjunction count
-    conjunctions = len(re.findall(r'\band\b', query, re.IGNORECASE))
+    conjunctions = len(re.findall(r"\band\b", query, re.IGNORECASE))
     score += min(conjunctions * 0.1, 0.2)
 
     # Question word count
-    q_words = len(re.findall(r'\b(who|what|where|when|how|which|why)\b', query, re.IGNORECASE))
+    q_words = len(
+        re.findall(r"\b(who|what|where|when|how|which|why)\b", query, re.IGNORECASE)
+    )
     score += min(q_words * 0.1, 0.2)
 
     # Comparison markers
@@ -150,6 +181,7 @@ def _compute_complexity(query: str) -> float:
 # QUERY DECOMPOSER
 # =========================================
 
+
 class QueryDecomposer:
     """Break complex queries into atomic sub-queries for parallel retrieval."""
 
@@ -165,13 +197,15 @@ class QueryDecomposer:
         if complexity < self.complexity_threshold:
             plan = DecompositionPlan(
                 original_query=query,
-                sub_queries=[SubQuery(
-                    id=uuid.uuid4().hex[:8],
-                    text=query,
-                    intent=_classify_sub_intent(query),
-                    entities=_extract_entities(query),
-                    priority=1,
-                )],
+                sub_queries=[
+                    SubQuery(
+                        id=uuid.uuid4().hex[:8],
+                        text=query,
+                        intent=_classify_sub_intent(query),
+                        entities=_extract_entities(query),
+                        priority=1,
+                    )
+                ],
                 is_decomposed=False,
                 complexity_score=round(complexity, 4),
                 synthesis_strategy="direct",
@@ -200,13 +234,15 @@ class QueryDecomposer:
 
         # Fallback: single query
         if not sub_queries:
-            sub_queries.append(SubQuery(
-                id=uuid.uuid4().hex[:8],
-                text=query,
-                intent=_classify_sub_intent(query),
-                entities=_extract_entities(query),
-                priority=1,
-            ))
+            sub_queries.append(
+                SubQuery(
+                    id=uuid.uuid4().hex[:8],
+                    text=query,
+                    intent=_classify_sub_intent(query),
+                    entities=_extract_entities(query),
+                    priority=1,
+                )
+            )
 
         # Determine synthesis strategy
         strategy = "merge"
@@ -232,7 +268,8 @@ class QueryDecomposer:
         return plan
 
     async def classify_dependency(
-        self, sub_queries: List[str],
+        self,
+        sub_queries: List[str],
     ) -> DependencyGraph:
         """Identify which sub-queries can run in parallel vs. sequentially."""
         n = len(sub_queries)
@@ -292,7 +329,9 @@ class QueryDecomposer:
         )
 
     async def synthesize(
-        self, query: str, sub_answers: Dict[str, str],
+        self,
+        query: str,
+        sub_answers: Dict[str, str],
     ) -> str:
         """Combine sub-query answers into a coherent final answer."""
         if not sub_answers:
@@ -308,7 +347,9 @@ class QueryDecomposer:
                 parts.append(f"**{sub_q}**\n{answer}")
 
         if not parts:
-            return "Could not synthesize a meaningful answer from the sub-query results."
+            return (
+                "Could not synthesize a meaningful answer from the sub-query results."
+            )
 
         return "\n\n".join(parts)
 
@@ -334,23 +375,27 @@ class QueryDecomposer:
                 sub_queries.append(sq)
 
             # Add a comparative sub-query
-            sub_queries.append(SubQuery(
-                id=uuid.uuid4().hex[:8],
-                text=query,
-                intent="comparison",
-                entities=entities,
-                depends_on=[sq.id for sq in sub_queries],
-                priority=2,
-            ))
+            sub_queries.append(
+                SubQuery(
+                    id=uuid.uuid4().hex[:8],
+                    text=query,
+                    intent="comparison",
+                    entities=entities,
+                    depends_on=[sq.id for sq in sub_queries],
+                    priority=2,
+                )
+            )
         else:
             # Can't identify entities to compare, treat as single query
-            sub_queries.append(SubQuery(
-                id=uuid.uuid4().hex[:8],
-                text=query,
-                intent="comparison",
-                entities=entities,
-                priority=1,
-            ))
+            sub_queries.append(
+                SubQuery(
+                    id=uuid.uuid4().hex[:8],
+                    text=query,
+                    intent="comparison",
+                    entities=entities,
+                    priority=1,
+                )
+            )
 
         return sub_queries
 
@@ -358,7 +403,7 @@ class QueryDecomposer:
         """Decompose multi-aspect queries (who + what)."""
         sub_queries = []
         # Split on question words
-        parts = re.split(r'\b(and|also|plus)\b', query, flags=re.IGNORECASE)
+        parts = re.split(r"\b(and|also|plus)\b", query, flags=re.IGNORECASE)
         for part in parts:
             part = part.strip()
             if len(part) > 10 and part.lower() not in {"and", "also", "plus"}:
@@ -386,31 +431,35 @@ class QueryDecomposer:
             sq_text = template.replace("{ENTITY}", entity)
             # If template has multiple {ENTITY}, fill all with same entity
             sq_text = sq_text.replace("{ENTITY}", entity)
-            sub_queries.append(SubQuery(
-                id=uuid.uuid4().hex[:8],
-                text=sq_text,
-                intent=_classify_sub_intent(query),
-                entities=[entity],
-                priority=1,
-            ))
+            sub_queries.append(
+                SubQuery(
+                    id=uuid.uuid4().hex[:8],
+                    text=sq_text,
+                    intent=_classify_sub_intent(query),
+                    entities=[entity],
+                    priority=1,
+                )
+            )
 
         return sub_queries
 
     def _decompose_conjunctions(self, query: str) -> List[SubQuery]:
         """Split on conjunctions (and, as well as, etc.)."""
         # Split on "and" that's not part of a common phrase
-        parts = re.split(r'\band\b', query, flags=re.IGNORECASE)
+        parts = re.split(r"\band\b", query, flags=re.IGNORECASE)
         sub_queries = []
         for part in parts:
             part = part.strip().strip(",").strip()
             if len(part) > 10:
-                sub_queries.append(SubQuery(
-                    id=uuid.uuid4().hex[:8],
-                    text=part,
-                    intent=_classify_sub_intent(part),
-                    entities=_extract_entities(part),
-                    priority=1,
-                ))
+                sub_queries.append(
+                    SubQuery(
+                        id=uuid.uuid4().hex[:8],
+                        text=part,
+                        intent=_classify_sub_intent(part),
+                        entities=_extract_entities(part),
+                        priority=1,
+                    )
+                )
         return sub_queries
 
     def get_history(self) -> List[DecompositionPlan]:

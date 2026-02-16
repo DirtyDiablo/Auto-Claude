@@ -13,10 +13,11 @@ BASE_DIR = Path(__file__).parent.parent
 OUTPUT_DIR = BASE_DIR / "dashboard" / "public" / "data"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
+
 def load_csv(filepath):
     """Load CSV file and return list of dicts."""
     rows = []
-    with open(filepath, 'r', encoding='utf-8-sig') as f:
+    with open(filepath, "r", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f)
         for row in reader:
             # Clean up empty strings
@@ -24,17 +25,20 @@ def load_csv(filepath):
             rows.append(cleaned)
     return rows
 
+
 def load_json(filepath):
     """Load JSON file."""
-    with open(filepath, 'r', encoding='utf-8') as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         return json.load(f)
+
 
 def save_json(data, filename):
     """Save data to JSON file in output directory."""
     filepath = OUTPUT_DIR / filename
-    with open(filepath, 'w', encoding='utf-8') as f:
+    with open(filepath, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=2, default=str)
     print(f"Saved: {filepath}")
+
 
 def convert_jobs():
     """Convert job scrape data to unified format."""
@@ -53,22 +57,26 @@ def convert_jobs():
             data = load_json(filepath)
             source = "Apex" if "Apex" in filepath.name else "Insight Global"
             for item in data:
-                jobs.append({
-                    "id": f"job-{job_id}",
-                    "title": item.get("jobTitle", ""),
-                    "location": item.get("location", ""),
-                    "datePosted": item.get("datePosted", ""),
-                    "description": item.get("description", "")[:500] + "..." if item.get("description") else "",
-                    "securityClearance": item.get("securityClearance", ""),
-                    "employmentType": item.get("employmentType", "Contract"),
-                    "payRate": item.get("payRate", ""),
-                    "duration": item.get("duration", ""),
-                    "url": item.get("url", ""),
-                    "source": source,
-                    "status": "Open",
-                    "program": None,
-                    "company": source,
-                })
+                jobs.append(
+                    {
+                        "id": f"job-{job_id}",
+                        "title": item.get("jobTitle", ""),
+                        "location": item.get("location", ""),
+                        "datePosted": item.get("datePosted", ""),
+                        "description": item.get("description", "")[:500] + "..."
+                        if item.get("description")
+                        else "",
+                        "securityClearance": item.get("securityClearance", ""),
+                        "employmentType": item.get("employmentType", "Contract"),
+                        "payRate": item.get("payRate", ""),
+                        "duration": item.get("duration", ""),
+                        "url": item.get("url", ""),
+                        "source": source,
+                        "status": "Open",
+                        "program": None,
+                        "company": source,
+                    }
+                )
                 job_id += 1
             print(f"Loaded {len(data)} jobs from {filepath.name}")
 
@@ -78,63 +86,76 @@ def convert_jobs():
         gdit_data = load_csv(gdit_jobs_path)
         for item in gdit_data:
             name = item.get("Name", "")
-            jobs.append({
-                "id": f"job-{job_id}",
-                "title": item.get("Job Title") or name.split("|")[-1].strip() if "|" in name else name,
-                "location": item.get("Location", ""),
-                "datePosted": item.get("Date Added", ""),
-                "description": "",
-                "securityClearance": "",
-                "employmentType": item.get("Employment Type", "Contract"),
-                "payRate": item.get("Pay Rate", ""),
-                "duration": "",
-                "url": "",
-                "source": "GDIT",
-                "status": item.get("Status") or item.get("Open/Closed", "Open"),
-                "program": item.get("Program", ""),
-                "company": "GDIT",
-                "clientBillRate": item.get("Client Bill Rate", ""),
-                "owner": item.get("Owner", ""),
-            })
+            jobs.append(
+                {
+                    "id": f"job-{job_id}",
+                    "title": item.get("Job Title") or name.split("|")[-1].strip()
+                    if "|" in name
+                    else name,
+                    "location": item.get("Location", ""),
+                    "datePosted": item.get("Date Added", ""),
+                    "description": "",
+                    "securityClearance": "",
+                    "employmentType": item.get("Employment Type", "Contract"),
+                    "payRate": item.get("Pay Rate", ""),
+                    "duration": "",
+                    "url": "",
+                    "source": "GDIT",
+                    "status": item.get("Status") or item.get("Open/Closed", "Open"),
+                    "program": item.get("Program", ""),
+                    "company": "GDIT",
+                    "clientBillRate": item.get("Client Bill Rate", ""),
+                    "owner": item.get("Owner", ""),
+                }
+            )
             job_id += 1
         print(f"Loaded {len(gdit_data)} jobs from GDIT Jobs CSV")
 
     save_json(jobs, "jobs.json")
     return jobs
 
+
 def convert_programs():
     """Convert federal programs data."""
-    programs_path = BASE_DIR / "Engine2_ProgramMapping" / "data" / "Federal ProgramsAll.csv"
+    programs_path = (
+        BASE_DIR / "Engine2_ProgramMapping" / "data" / "Federal ProgramsAll.csv"
+    )
     programs = []
 
     if programs_path.exists():
         data = load_csv(programs_path)
         for i, item in enumerate(data):
-            programs.append({
-                "id": f"prog-{i+1}",
-                "name": item.get("Program Name", ""),
-                "acronym": item.get("Acronym", ""),
-                "agency": item.get("Agency Owner", ""),
-                "budget": item.get("Budget", ""),
-                "contractValue": item.get("Contract Value", ""),
-                "clearanceRequirements": item.get("Clearance Requirements", ""),
-                "primeContractor": item.get("Prime Contractor") or item.get("Prime Contractor 1", ""),
-                "keyLocations": item.get("Key Locations", ""),
-                "keySubcontractors": item.get("Key Subcontractors") or item.get("Known Subcontractors", ""),
-                "programType": item.get("Program Type") or item.get("Program Type 1", ""),
-                "priorityLevel": item.get("Priority Level", "Medium"),
-                "periodOfPerformance": item.get("Period of Performance", ""),
-                "popStart": item.get("PoP Start", ""),
-                "popEnd": item.get("PoP End", ""),
-                "contractVehicle": item.get("Contract Vehicle", ""),
-                "notes": item.get("Notes", ""),
-                "typicalRoles": item.get("Typical Roles", ""),
-                "confidenceLevel": item.get("Confidence Level", ""),
-            })
+            programs.append(
+                {
+                    "id": f"prog-{i + 1}",
+                    "name": item.get("Program Name", ""),
+                    "acronym": item.get("Acronym", ""),
+                    "agency": item.get("Agency Owner", ""),
+                    "budget": item.get("Budget", ""),
+                    "contractValue": item.get("Contract Value", ""),
+                    "clearanceRequirements": item.get("Clearance Requirements", ""),
+                    "primeContractor": item.get("Prime Contractor")
+                    or item.get("Prime Contractor 1", ""),
+                    "keyLocations": item.get("Key Locations", ""),
+                    "keySubcontractors": item.get("Key Subcontractors")
+                    or item.get("Known Subcontractors", ""),
+                    "programType": item.get("Program Type")
+                    or item.get("Program Type 1", ""),
+                    "priorityLevel": item.get("Priority Level", "Medium"),
+                    "periodOfPerformance": item.get("Period of Performance", ""),
+                    "popStart": item.get("PoP Start", ""),
+                    "popEnd": item.get("PoP End", ""),
+                    "contractVehicle": item.get("Contract Vehicle", ""),
+                    "notes": item.get("Notes", ""),
+                    "typicalRoles": item.get("Typical Roles", ""),
+                    "confidenceLevel": item.get("Confidence Level", ""),
+                }
+            )
         print(f"Loaded {len(data)} programs")
 
     save_json(programs, "programs.json")
     return programs
+
 
 def convert_contacts():
     """Convert contact data from multiple sources."""
@@ -161,27 +182,35 @@ def convert_contacts():
                 if email:
                     seen.add(email)
 
-                name = item.get("Name", "") or f"{item.get('First Name', '')} {item.get('Last Name', '')}".strip()
-                contacts.append({
-                    "id": f"contact-{contact_id}",
-                    "name": name,
-                    "firstName": item.get("First Name", ""),
-                    "lastName": item.get("Last Name") or item.get("Name", ""),
-                    "jobTitle": item.get("Job Title", ""),
-                    "email": email,
-                    "phone": item.get("Phone Number") or item.get("Direct Phone Number") or item.get("Mobile phone", ""),
-                    "linkedIn": item.get("LinkedIn Contact Profile URL", ""),
-                    "city": item.get("Person City", ""),
-                    "state": item.get("Person State", ""),
-                    "company": "GDIT",
-                    "source": source,
-                    "tier": classify_contact_tier(item.get("Job Title", "")),
-                })
+                name = (
+                    item.get("Name", "")
+                    or f"{item.get('First Name', '')} {item.get('Last Name', '')}".strip()
+                )
+                contacts.append(
+                    {
+                        "id": f"contact-{contact_id}",
+                        "name": name,
+                        "firstName": item.get("First Name", ""),
+                        "lastName": item.get("Last Name") or item.get("Name", ""),
+                        "jobTitle": item.get("Job Title", ""),
+                        "email": email,
+                        "phone": item.get("Phone Number")
+                        or item.get("Direct Phone Number")
+                        or item.get("Mobile phone", ""),
+                        "linkedIn": item.get("LinkedIn Contact Profile URL", ""),
+                        "city": item.get("Person City", ""),
+                        "state": item.get("Person State", ""),
+                        "company": "GDIT",
+                        "source": source,
+                        "tier": classify_contact_tier(item.get("Job Title", "")),
+                    }
+                )
                 contact_id += 1
             print(f"Loaded {len(data)} contacts from {filepath.name}")
 
     save_json(contacts, "contacts.json")
     return contacts
+
 
 def classify_contact_tier(job_title):
     """Classify contact into 6-tier hierarchy based on job title."""
@@ -191,7 +220,9 @@ def classify_contact_tier(job_title):
     title_lower = job_title.lower()
 
     # Tier 1: C-Suite
-    if any(x in title_lower for x in ["ceo", "cto", "cio", "cfo", "president", "chief"]):
+    if any(
+        x in title_lower for x in ["ceo", "cto", "cio", "cfo", "president", "chief"]
+    ):
         return 1
 
     # Tier 2: VP/Director
@@ -199,7 +230,9 @@ def classify_contact_tier(job_title):
         return 2
 
     # Tier 3: Senior Manager
-    if any(x in title_lower for x in ["senior manager", "sr. manager", "program manager"]):
+    if any(
+        x in title_lower for x in ["senior manager", "sr. manager", "program manager"]
+    ):
         return 3
 
     # Tier 4: Manager
@@ -213,13 +246,16 @@ def classify_contact_tier(job_title):
     # Tier 6: Individual Contributor
     return 6
 
+
 def generate_summary(jobs, programs, contacts):
     """Generate executive summary stats."""
     summary = {
         "totalJobs": len(jobs),
         "openJobs": len([j for j in jobs if j.get("status") == "Open"]),
         "totalPrograms": len(programs),
-        "highPriorityPrograms": len([p for p in programs if p.get("priorityLevel") == "High"]),
+        "highPriorityPrograms": len(
+            [p for p in programs if p.get("priorityLevel") == "High"]
+        ),
         "totalContacts": len(contacts),
         "tier1Contacts": len([c for c in contacts if c.get("tier") == 1]),
         "tier2Contacts": len([c for c in contacts if c.get("tier") == 2]),
@@ -246,7 +282,9 @@ def generate_summary(jobs, programs, contacts):
     # Count programs by agency
     for prog in programs:
         agency = prog.get("agency", "Unknown") or "Unknown"
-        summary["programsByAgency"][agency] = summary["programsByAgency"].get(agency, 0) + 1
+        summary["programsByAgency"][agency] = (
+            summary["programsByAgency"].get(agency, 0) + 1
+        )
 
     # Count contacts by tier
     for contact in contacts:
@@ -255,6 +293,7 @@ def generate_summary(jobs, programs, contacts):
 
     save_json(summary, "summary.json")
     return summary
+
 
 def main():
     print("Converting BD data files to JSON for dashboard...")
@@ -267,8 +306,11 @@ def main():
     summary = generate_summary(jobs, programs, contacts)
 
     print("-" * 50)
-    print(f"Summary: {summary['totalJobs']} jobs, {summary['totalPrograms']} programs, {summary['totalContacts']} contacts")
+    print(
+        f"Summary: {summary['totalJobs']} jobs, {summary['totalPrograms']} programs, {summary['totalContacts']} contacts"
+    )
     print("Done!")
+
 
 if __name__ == "__main__":
     main()

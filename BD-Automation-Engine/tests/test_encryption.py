@@ -22,6 +22,7 @@ def mgr():
 # BOOTSTRAP
 # =========================================
 
+
 def test_bootstrap_creates_kek(mgr):
     assert len(mgr._keks) == 1
 
@@ -43,6 +44,7 @@ def test_dek_is_active(mgr):
 # =========================================
 # FIELD ENCRYPTION
 # =========================================
+
 
 def test_encrypt_field(mgr):
     ef = mgr.encrypt_field("contact", "c1", "email", "test@example.com")
@@ -107,9 +109,11 @@ def test_dek_usage_count(mgr):
 # RESOURCE ENCRYPTION
 # =========================================
 
+
 def test_encrypt_resource(mgr):
     fields = mgr.encrypt_resource(
-        "contact", "c1",
+        "contact",
+        "c1",
         {"email": "test@example.com", "phone": "555-1234"},
     )
     assert len(fields) == 2
@@ -117,7 +121,8 @@ def test_encrypt_resource(mgr):
 
 def test_decrypt_resource(mgr):
     mgr.encrypt_resource(
-        "contact", "c1",
+        "contact",
+        "c1",
         {"email": "test@example.com", "phone": "555-1234"},
     )
     result = mgr.decrypt_resource("contact", "c1")
@@ -127,7 +132,8 @@ def test_decrypt_resource(mgr):
 
 def test_encrypt_resource_with_searchable(mgr):
     fields = mgr.encrypt_resource(
-        "contact", "c1",
+        "contact",
+        "c1",
         {"email": "test@example.com", "phone": "555-1234"},
         searchable_fields={"email"},
     )
@@ -141,16 +147,25 @@ def test_encrypt_resource_with_searchable(mgr):
 # SEARCHABLE ENCRYPTION
 # =========================================
 
+
 def test_searchable_encrypt(mgr):
     ef = mgr.encrypt_field(
-        "contact", "c1", "email", "test@example.com", searchable=True,
+        "contact",
+        "c1",
+        "email",
+        "test@example.com",
+        searchable=True,
     )
     assert ef.search_token != ""
 
 
 def test_search_encrypted(mgr):
     mgr.encrypt_field(
-        "contact", "c1", "email", "test@example.com", searchable=True,
+        "contact",
+        "c1",
+        "email",
+        "test@example.com",
+        searchable=True,
     )
     results = mgr.search_encrypted("test@example.com")
     assert len(results) == 1
@@ -159,7 +174,11 @@ def test_search_encrypted(mgr):
 
 def test_search_case_insensitive(mgr):
     mgr.encrypt_field(
-        "contact", "c1", "email", "Test@Example.com", searchable=True,
+        "contact",
+        "c1",
+        "email",
+        "Test@Example.com",
+        searchable=True,
     )
     results = mgr.search_encrypted("test@example.com")
     assert len(results) == 1
@@ -167,7 +186,11 @@ def test_search_case_insensitive(mgr):
 
 def test_search_no_match(mgr):
     mgr.encrypt_field(
-        "contact", "c1", "email", "test@example.com", searchable=True,
+        "contact",
+        "c1",
+        "email",
+        "test@example.com",
+        searchable=True,
     )
     results = mgr.search_encrypted("other@example.com")
     assert len(results) == 0
@@ -175,10 +198,18 @@ def test_search_no_match(mgr):
 
 def test_search_multiple_matches(mgr):
     mgr.encrypt_field(
-        "contact", "c1", "email", "shared@example.com", searchable=True,
+        "contact",
+        "c1",
+        "email",
+        "shared@example.com",
+        searchable=True,
     )
     mgr.encrypt_field(
-        "contact", "c2", "email", "shared@example.com", searchable=True,
+        "contact",
+        "c2",
+        "email",
+        "shared@example.com",
+        searchable=True,
     )
     results = mgr.search_encrypted("shared@example.com")
     assert len(results) == 2
@@ -187,6 +218,7 @@ def test_search_multiple_matches(mgr):
 # =========================================
 # KEY ROTATION
 # =========================================
+
 
 def test_rotate_keys(mgr):
     mgr.encrypt_field("contact", "c1", "email", "test@example.com")
@@ -245,6 +277,7 @@ def test_rotation_re_encrypts_all(mgr):
 # QUERIES
 # =========================================
 
+
 def test_get_encrypted_field(mgr):
     ef = mgr.encrypt_field("contact", "c1", "email", "test@example.com")
     fetched = mgr.get_encrypted_field(ef.field_id)
@@ -295,6 +328,7 @@ def test_list_keys_dek_only(mgr):
 # STATUS & STATS
 # =========================================
 
+
 def test_status(mgr):
     mgr.encrypt_field("contact", "c1", "email", "test@example.com")
     status = mgr.get_status()
@@ -328,6 +362,7 @@ def test_sensitive_field_registry(mgr):
 # FIELD TO_DICT
 # =========================================
 
+
 def test_encrypted_field_to_dict(mgr):
     ef = mgr.encrypt_field("contact", "c1", "email", "test@example.com")
     d = ef.to_dict()
@@ -355,8 +390,10 @@ def test_rotation_result_to_dict(mgr):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.security.encryption as mod
+
     mod._instance = None
     m1 = get_encryption_manager()
     m2 = get_encryption_manager()

@@ -28,9 +28,7 @@ class ProgramIntelligence(BaseModel):
         default_factory=list,
         description="Known program pain points",
     )
-    recommendation: str = Field(
-        description="Specific BD recommendation and next steps"
-    )
+    recommendation: str = Field(description="Specific BD recommendation and next steps")
     confidence_score: float = Field(
         ge=0, le=1, description="Confidence in the analysis"
     )
@@ -48,9 +46,7 @@ class ContactProfile(BaseModel):
         default="", description="Summary of past interactions"
     )
     outreach_recommendation: str
-    best_channel: str = Field(
-        description="Email, LinkedIn, Phone, or SMS"
-    )
+    best_channel: str = Field(description="Email, LinkedIn, Phone, or SMS")
 
 
 class CompetitiveReport(BaseModel):
@@ -59,9 +55,7 @@ class CompetitiveReport(BaseModel):
         description="List of {company, role, strengths, weaknesses}"
     )
     pts_differentiators: list[str]
-    win_probability: str = Field(
-        description="High/Medium/Low with reasoning"
-    )
+    win_probability: str = Field(description="High/Medium/Low with reasoning")
     risks: list[str]
     recommended_strategy: str
 
@@ -77,9 +71,7 @@ class OutreachPlan(BaseModel):
     pain_point_reference: str = Field(
         description="Their specific challenge we can solve"
     )
-    labor_gap_reference: str = Field(
-        description="Current vacancies at their location"
-    )
+    labor_gap_reference: str = Field(description="Current vacancies at their location")
     pts_past_performance: str = Field(
         description="Relevant PTS experience matching their needs"
     )
@@ -103,6 +95,7 @@ class HUMINTBrief(BaseModel):
 
 class BDResearchBundle(BaseModel):
     """Collects all intermediate crew outputs into one response."""
+
     program_intel: dict = Field(default_factory=dict)
     competitive_report: dict = Field(default_factory=dict)
     contact_profiles: list[dict] = Field(default_factory=list)
@@ -112,6 +105,7 @@ class BDResearchBundle(BaseModel):
 
 class WeeklyIntelBundle(BaseModel):
     """Collects all intermediate weekly intel crew outputs into one response."""
+
     humint_brief: dict = Field(default_factory=dict)
     competitive_scan: dict = Field(default_factory=dict)
     weekly_summary: str = ""

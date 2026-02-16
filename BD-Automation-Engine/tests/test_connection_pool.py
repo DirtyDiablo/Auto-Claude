@@ -18,6 +18,7 @@ def mgr():
 # PRE-REGISTERED POOLS
 # =========================================
 
+
 def test_default_pools(mgr):
     pools = mgr.list_pools()
     assert len(pools) == 5
@@ -44,6 +45,7 @@ def test_redis_cache_pool(mgr):
 # =========================================
 # ACQUIRE / RELEASE
 # =========================================
+
 
 def test_acquire(mgr):
     result = mgr.acquire("qdrant_pool")
@@ -81,6 +83,7 @@ def test_release_unknown(mgr):
 # RESIZE
 # =========================================
 
+
 def test_resize(mgr):
     mgr.resize("qdrant_pool", 100)
     p = mgr.get_pool("qdrant_pool")
@@ -95,6 +98,7 @@ def test_resize_unknown(mgr):
 # =========================================
 # HEALTH
 # =========================================
+
 
 def test_health_healthy(mgr):
     health = mgr.get_health("qdrant_pool")
@@ -129,6 +133,7 @@ def test_health_not_found(mgr):
 # TO_DICT & STATS
 # =========================================
 
+
 def test_pool_to_dict(mgr):
     p = mgr.get_pool("qdrant_pool")
     d = p.to_dict()
@@ -146,8 +151,10 @@ def test_stats(mgr):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.scaling.connection_pool as mod
+
     mod._instance = None
     a1 = get_pool_manager()
     a2 = get_pool_manager()

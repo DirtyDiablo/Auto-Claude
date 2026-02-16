@@ -19,6 +19,7 @@ def geocoder():
 # EXACT CACHE HITS
 # =========================================
 
+
 def test_geocode_exact_name(geocoder):
     geo = geocoder.geocode("Pentagon")
     assert geo is not None
@@ -72,6 +73,7 @@ def test_geocode_hill_afb(geocoder):
 # FUZZY MATCHING
 # =========================================
 
+
 def test_geocode_fuzzy_substring(geocoder):
     geo = geocoder.geocode("Pax River")
     assert geo is not None
@@ -92,6 +94,7 @@ def test_geocode_st_inigoes(geocoder):
 # =========================================
 # STATE FALLBACK
 # =========================================
+
 
 def test_geocode_unknown_va_location(geocoder):
     """Unknown location in VA should fallback to a VA facility."""
@@ -115,6 +118,7 @@ def test_geocode_empty(geocoder):
 # ENTITY GEOCODING
 # =========================================
 
+
 def test_geocode_entity(geocoder):
     ge = geocoder.geocode_entity("c001", "contact", "Craig Lindahl", "Langley AFB, VA")
     assert isinstance(ge, GeocodedEntity)
@@ -131,6 +135,7 @@ def test_geocode_entity_unresolved(geocoder):
 # =========================================
 # BATCH GEOCODING
 # =========================================
+
 
 def test_batch_contacts(geocoder):
     result = geocoder.batch_geocode_contacts()
@@ -174,6 +179,7 @@ def test_batch_id(geocoder):
 # FACILITIES
 # =========================================
 
+
 def test_get_all_facilities(geocoder):
     facilities = geocoder.get_facilities()
     assert len(facilities) >= 50
@@ -209,6 +215,7 @@ def test_get_regions(geocoder):
 # GEOPOINT
 # =========================================
 
+
 def test_geopoint_to_dict(geocoder):
     geo = geocoder.geocode("Pentagon")
     d = geo.to_dict()
@@ -222,6 +229,7 @@ def test_geopoint_to_dict(geocoder):
 # STATS
 # =========================================
 
+
 def test_stats(geocoder):
     geocoder.geocode("Pentagon")
     stats = geocoder.get_stats()
@@ -233,6 +241,7 @@ def test_stats(geocoder):
 # =========================================
 # SINGLETON
 # =========================================
+
 
 def test_singleton():
     g1 = get_geocoding_engine()

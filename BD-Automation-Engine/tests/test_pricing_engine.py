@@ -19,6 +19,7 @@ from src.proposals.pricing_engine import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def engine():
     return PricingEngine()
@@ -37,6 +38,7 @@ def sample_categories(engine):
 # GSA RATES
 # =========================================
 
+
 class TestGSARates:
     def test_has_entries(self):
         assert len(GSA_SCHEDULE_RATES) >= 10
@@ -53,6 +55,7 @@ class TestGSARates:
 # =========================================
 # LABOR CATEGORY BUILDING
 # =========================================
+
 
 class TestLaborCategory:
     def test_build_known_title(self, engine):
@@ -95,6 +98,7 @@ class TestLaborCategory:
 # RATE CARD
 # =========================================
 
+
 class TestRateCard:
     def test_generate_rate_card(self, engine, sample_categories):
         card = engine.generate_rate_card("DCGS Rate Card", sample_categories)
@@ -120,16 +124,25 @@ class TestRateCard:
 # PRICING TEMPLATE
 # =========================================
 
+
 class TestPricingTemplate:
     def test_generate_template(self, engine, sample_categories):
         card = engine.generate_rate_card("Test", sample_categories, option_years=4)
-        labor_mix = {"Senior Systems Engineer": 2, "Intelligence Analyst": 5, "Software Engineer": 3}
+        labor_mix = {
+            "Senior Systems Engineer": 2,
+            "Intelligence Analyst": 5,
+            "Software Engineer": 3,
+        }
         template = engine.generate_pricing_template(card, labor_mix)
         assert isinstance(template, PricingTemplate)
 
     def test_total_value_positive(self, engine, sample_categories):
         card = engine.generate_rate_card("Test", sample_categories, option_years=4)
-        labor_mix = {"Senior Systems Engineer": 2, "Intelligence Analyst": 5, "Software Engineer": 3}
+        labor_mix = {
+            "Senior Systems Engineer": 2,
+            "Intelligence Analyst": 5,
+            "Software Engineer": 3,
+        }
         template = engine.generate_pricing_template(card, labor_mix)
         assert template.total_value > 0
         assert template.base_year_value > 0
@@ -141,7 +154,9 @@ class TestPricingTemplate:
         assert len(template.year_values) == 5  # Base + 4 options
 
     def test_escalation_applied(self, engine, sample_categories):
-        card = engine.generate_rate_card("Test", sample_categories, option_years=1, escalation_rate=10.0)
+        card = engine.generate_rate_card(
+            "Test", sample_categories, option_years=1, escalation_rate=10.0
+        )
         labor_mix = {"Senior Systems Engineer": 1}
         template = engine.generate_pricing_template(card, labor_mix)
         base = template.year_values[0]["total"]
@@ -153,6 +168,7 @@ class TestPricingTemplate:
 # COMPETITIVE ANALYSIS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestCompetitiveAnalysis:
     async def test_analyze_returns_result(self, engine, sample_categories):
@@ -161,7 +177,11 @@ class TestCompetitiveAnalysis:
 
     async def test_position_valid(self, engine, sample_categories):
         analysis = await engine.analyze_competitive_pricing("DCGS", sample_categories)
-        assert analysis.competitive_position in ("below_market", "at_market", "above_market")
+        assert analysis.competitive_position in (
+            "below_market",
+            "at_market",
+            "above_market",
+        )
 
     async def test_has_recommendations(self, engine, sample_categories):
         analysis = await engine.analyze_competitive_pricing("DCGS", sample_categories)
@@ -176,6 +196,7 @@ class TestCompetitiveAnalysis:
 # EXPORT
 # =========================================
 
+
 class TestExport:
     def test_export_rate_card(self, engine, sample_categories):
         card = engine.generate_rate_card("Test", sample_categories)
@@ -188,6 +209,7 @@ class TestExport:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_engine_returns_instance(self):

@@ -23,6 +23,7 @@ from Engine8_Knowledge.workflows.checkpoint_store import (
 # Fixtures
 # ---------------------------------------------------------------------------
 
+
 @pytest.fixture
 def store(tmp_path):
     """Create a CheckpointStore backed by DictMetaStore (in-memory fallback)."""
@@ -35,6 +36,7 @@ def store(tmp_path):
 # ---------------------------------------------------------------------------
 # TestInit
 # ---------------------------------------------------------------------------
+
 
 class TestInit:
     """Test CheckpointStore initialization."""
@@ -60,6 +62,7 @@ class TestInit:
 # TestThreadManagement
 # ---------------------------------------------------------------------------
 
+
 class TestThreadManagement:
     """Test thread create, update, list, delete."""
 
@@ -82,7 +85,9 @@ class TestThreadManagement:
     @pytest.mark.asyncio
     async def test_update_thread_status(self, store):
         tid = await store.create_thread("test_workflow")
-        await store.update_thread_status(tid, "completed", current_node="end", step_count=5)
+        await store.update_thread_status(
+            tid, "completed", current_node="end", step_count=5
+        )
         threads = await store.list_threads()
         t = threads[0]
         assert t.status == "completed"
@@ -132,6 +137,7 @@ class TestThreadManagement:
 # ---------------------------------------------------------------------------
 # TestSnapshots
 # ---------------------------------------------------------------------------
+
 
 class TestSnapshots:
     """Test snapshot save, history, checkpoint-at."""
@@ -185,6 +191,7 @@ class TestSnapshots:
 # ---------------------------------------------------------------------------
 # TestMaintenance
 # ---------------------------------------------------------------------------
+
 
 class TestMaintenance:
     """Test cleanup, export, import."""
@@ -243,6 +250,7 @@ class TestMaintenance:
 # TestStats
 # ---------------------------------------------------------------------------
 
+
 class TestStats:
     """Test stats and health check."""
 
@@ -277,11 +285,13 @@ class TestStats:
 # TestSingleton
 # ---------------------------------------------------------------------------
 
+
 class TestSingleton:
     """Test singleton factory."""
 
     def test_singleton(self):
         import Engine8_Knowledge.workflows.checkpoint_store as mod
+
         original = mod._checkpoint_store
         mod._checkpoint_store = None
         try:

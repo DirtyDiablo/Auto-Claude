@@ -40,6 +40,7 @@ TOTP_WINDOW = 1  # Allow +/- 1 period
 # ENUMS
 # =========================================
 
+
 class AuthProvider(str, Enum):
     LOCAL = "local"
     SAML = "saml"
@@ -69,9 +70,11 @@ class AuthEventType(str, Enum):
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class User:
     """User account."""
+
     id: str
     email: str
     tenant_id: str
@@ -92,6 +95,7 @@ class User:
 @dataclass
 class Session:
     """Active session / token record."""
+
     id: str
     user_id: str
     tenant_id: str
@@ -108,6 +112,7 @@ class Session:
 @dataclass
 class AuditEntry:
     """Authentication audit log entry."""
+
     id: str
     timestamp: str
     tenant_id: str
@@ -122,15 +127,16 @@ class AuditEntry:
 @dataclass
 class SSOConfig:
     """SSO provider configuration for a tenant."""
+
     tenant_id: str
     provider: AuthProvider
-    entity_id: str = ""       # SAML entity ID
-    sso_url: str = ""         # SAML SSO URL / OAuth authorize URL
-    certificate: str = ""     # SAML IdP certificate
-    client_id: str = ""       # OAuth/OIDC client ID
-    client_secret: str = ""   # OAuth/OIDC client secret
-    token_url: str = ""       # OAuth/OIDC token URL
-    userinfo_url: str = ""    # OIDC userinfo URL
+    entity_id: str = ""  # SAML entity ID
+    sso_url: str = ""  # SAML SSO URL / OAuth authorize URL
+    certificate: str = ""  # SAML IdP certificate
+    client_id: str = ""  # OAuth/OIDC client ID
+    client_secret: str = ""  # OAuth/OIDC client secret
+    token_url: str = ""  # OAuth/OIDC token URL
+    userinfo_url: str = ""  # OIDC userinfo URL
     redirect_uri: str = ""
     enabled: bool = True
 
@@ -139,15 +145,16 @@ class SSOConfig:
 # AUTH SERVICE
 # =========================================
 
+
 class AuthService:
     """Authentication, session management, and audit logging."""
 
     def __init__(self):
-        self._users: Dict[str, User] = {}              # user_id -> User
-        self._sessions: Dict[str, Session] = {}         # session_id -> Session
+        self._users: Dict[str, User] = {}  # user_id -> User
+        self._sessions: Dict[str, Session] = {}  # session_id -> Session
         self._audit_log: List[AuditEntry] = []
-        self._sso_configs: Dict[str, SSOConfig] = {}    # tenant_id -> SSOConfig
-        self._token_index: Dict[str, str] = {}          # access_token -> session_id
+        self._sso_configs: Dict[str, SSOConfig] = {}  # tenant_id -> SSOConfig
+        self._token_index: Dict[str, str] = {}  # access_token -> session_id
 
     # -----------------------------------------
     # Password hashing
@@ -188,7 +195,9 @@ class AuthService:
         # Check for duplicate email in tenant
         for u in self._users.values():
             if u.email == email and u.tenant_id == tenant_id:
-                raise ValueError(f"User with email {email} already exists in tenant {tenant_id}")
+                raise ValueError(
+                    f"User with email {email} already exists in tenant {tenant_id}"
+                )
 
         user_id = uuid.uuid4().hex[:12]
         now = datetime.now(timezone.utc).isoformat()
@@ -244,7 +253,9 @@ class AuthService:
         self._log_event(user.tenant_id, user_id, AuthEventType.USER_DEACTIVATED)
         return True
 
-    def change_password(self, user_id: str, old_password: str, new_password: str) -> bool:
+    def change_password(
+        self, user_id: str, old_password: str, new_password: str
+    ) -> bool:
         """Change user password."""
         user = self._users.get(user_id)
         if not user or user.auth_provider != AuthProvider.LOCAL:
@@ -270,27 +281,42 @@ class AuthService:
         """Authenticate user and create session."""
         user = self.get_user_by_email(email, tenant_id)
         if not user:
-            self._log_event(tenant_id, "", AuthEventType.LOGIN_FAILED,
-                            ip=ip_address, ua=user_agent,
-                            details={"reason": "user_not_found", "email": email})
+            self._log_event(
+                tenant_id,
+                "",
+                AuthEventType.LOGIN_FAILED,
+                ip=ip_address,
+                ua=user_agent,
+                details={"reason": "user_not_found", "email": email},
+            )
             return None
 
         # Check lockout
         if user.locked_until:
             lock_time = datetime.fromisoformat(user.locked_until)
             if datetime.now(timezone.utc) < lock_time:
-                self._log_event(tenant_id, user.id, AuthEventType.LOGIN_FAILED,
-                                ip=ip_address, ua=user_agent,
-                                details={"reason": "account_locked"})
+                self._log_event(
+                    tenant_id,
+                    user.id,
+                    AuthEventType.LOGIN_FAILED,
+                    ip=ip_address,
+                    ua=user_agent,
+                    details={"reason": "account_locked"},
+                )
                 return None
             # Lockout expired — reset
             user.locked_until = ""
             user.failed_login_attempts = 0
 
         if not user.active:
-            self._log_event(tenant_id, user.id, AuthEventType.LOGIN_FAILED,
-                            ip=ip_address, ua=user_agent,
-                            details={"reason": "account_deactivated"})
+            self._log_event(
+                tenant_id,
+                user.id,
+                AuthEventType.LOGIN_FAILED,
+                ip=ip_address,
+                ua=user_agent,
+                details={"reason": "account_deactivated"},
+            )
             return None
 
         # Verify password
@@ -300,12 +326,24 @@ class AuthService:
                 user.locked_until = (
                     datetime.now(timezone.utc) + timedelta(minutes=LOCKOUT_MINUTES)
                 ).isoformat()
-                self._log_event(tenant_id, user.id, AuthEventType.ACCOUNT_LOCKED,
-                                ip=ip_address, ua=user_agent)
-            self._log_event(tenant_id, user.id, AuthEventType.LOGIN_FAILED,
-                            ip=ip_address, ua=user_agent,
-                            details={"reason": "bad_password",
-                                     "attempts": user.failed_login_attempts})
+                self._log_event(
+                    tenant_id,
+                    user.id,
+                    AuthEventType.ACCOUNT_LOCKED,
+                    ip=ip_address,
+                    ua=user_agent,
+                )
+            self._log_event(
+                tenant_id,
+                user.id,
+                AuthEventType.LOGIN_FAILED,
+                ip=ip_address,
+                ua=user_agent,
+                details={
+                    "reason": "bad_password",
+                    "attempts": user.failed_login_attempts,
+                },
+            )
             return None
 
         # Reset failed attempts
@@ -319,8 +357,9 @@ class AuthService:
         session = self._create_session(user, ip_address, user_agent)
         user.last_login = datetime.now(timezone.utc).isoformat()
 
-        self._log_event(tenant_id, user.id, AuthEventType.LOGIN,
-                        ip=ip_address, ua=user_agent)
+        self._log_event(
+            tenant_id, user.id, AuthEventType.LOGIN, ip=ip_address, ua=user_agent
+        )
         return session
 
     def login_sso(
@@ -362,9 +401,14 @@ class AuthService:
         session = self._create_session(user, ip_address, user_agent)
         user.last_login = datetime.now(timezone.utc).isoformat()
 
-        self._log_event(tenant_id, user.id, AuthEventType.LOGIN,
-                        ip=ip_address, ua=user_agent,
-                        details={"provider": sso_config.provider.value})
+        self._log_event(
+            tenant_id,
+            user.id,
+            AuthEventType.LOGIN,
+            ip=ip_address,
+            ua=user_agent,
+            details={"provider": sso_config.provider.value},
+        )
         return session
 
     # -----------------------------------------
@@ -384,8 +428,9 @@ class AuthService:
         expires = datetime.fromisoformat(session.expires_at)
         if datetime.now(timezone.utc) > expires:
             session.active = False
-            self._log_event(session.tenant_id, session.user_id,
-                            AuthEventType.SESSION_EXPIRED)
+            self._log_event(
+                session.tenant_id, session.user_id, AuthEventType.SESSION_EXPIRED
+            )
             return None
 
         return session
@@ -420,12 +465,13 @@ class AuthService:
         session.access_token = new_access
         session.refresh_token = new_refresh
         session.expires_at = (now + timedelta(hours=TOKEN_EXPIRY_HOURS)).isoformat()
-        session.refresh_expires_at = (now + timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)).isoformat()
+        session.refresh_expires_at = (
+            now + timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)
+        ).isoformat()
 
         self._token_index[new_access] = session.id
 
-        self._log_event(session.tenant_id, session.user_id,
-                        AuthEventType.TOKEN_REFRESH)
+        self._log_event(session.tenant_id, session.user_id, AuthEventType.TOKEN_REFRESH)
         return session
 
     def revoke_session(self, session_id: str) -> bool:
@@ -436,8 +482,7 @@ class AuthService:
         session.active = False
         if session.access_token in self._token_index:
             del self._token_index[session.access_token]
-        self._log_event(session.tenant_id, session.user_id,
-                        AuthEventType.TOKEN_REVOKED)
+        self._log_event(session.tenant_id, session.user_id, AuthEventType.TOKEN_REVOKED)
         return True
 
     def logout(self, access_token: str) -> bool:
@@ -449,17 +494,13 @@ class AuthService:
         if session:
             session.active = False
             del self._token_index[access_token]
-            self._log_event(session.tenant_id, session.user_id,
-                            AuthEventType.LOGOUT)
+            self._log_event(session.tenant_id, session.user_id, AuthEventType.LOGOUT)
             return True
         return False
 
     def get_user_sessions(self, user_id: str) -> List[Session]:
         """Get all active sessions for a user."""
-        return [
-            s for s in self._sessions.values()
-            if s.user_id == user_id and s.active
-        ]
+        return [s for s in self._sessions.values() if s.user_id == user_id and s.active]
 
     # -----------------------------------------
     # MFA (TOTP)
@@ -494,6 +535,7 @@ class AuthService:
 
         # Simplified TOTP: hash(secret + time_period) truncated to 6 digits
         import time
+
         period = int(time.time()) // 30
         for offset in range(-TOTP_WINDOW, TOTP_WINDOW + 1):
             expected = self._generate_totp(user.mfa_secret, period + offset)
@@ -554,7 +596,9 @@ class AuthService:
         entries = [e for e in self._audit_log if e.tenant_id == tenant_id]
         event_counts: Dict[str, int] = {}
         for e in entries:
-            event_counts[e.event_type.value] = event_counts.get(e.event_type.value, 0) + 1
+            event_counts[e.event_type.value] = (
+                event_counts.get(e.event_type.value, 0) + 1
+            )
 
         failed = sum(1 for e in entries if not e.success)
         return {
@@ -583,7 +627,9 @@ class AuthService:
             refresh_token=refresh_token,
             created_at=now.isoformat(),
             expires_at=(now + timedelta(hours=TOKEN_EXPIRY_HOURS)).isoformat(),
-            refresh_expires_at=(now + timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)).isoformat(),
+            refresh_expires_at=(
+                now + timedelta(days=REFRESH_TOKEN_EXPIRY_DAYS)
+            ).isoformat(),
             ip_address=ip_address,
             user_agent=user_agent,
             active=True,

@@ -14,18 +14,21 @@ logger = logging.getLogger(__name__)
 
 try:
     import numpy as np
+
     NP_AVAILABLE = True
 except ImportError:
     NP_AVAILABLE = False
 
 try:
     import xgboost as xgb
+
     XGB_AVAILABLE = True
 except ImportError:
     XGB_AVAILABLE = False
 
 try:
     import shap
+
     SHAP_AVAILABLE = True
 except ImportError:
     SHAP_AVAILABLE = False
@@ -34,6 +37,7 @@ except ImportError:
 # =========================================
 # DATA CLASSES
 # =========================================
+
 
 @dataclass
 class WinPrediction:
@@ -83,8 +87,8 @@ RELATIONSHIP_FEATURES = [
 ]
 
 PROGRAM_FEATURES = [
-    "pts_involvement",       # 0=none, 1=target, 2=past, 3=current
-    "program_value_log",     # log10 of contract value
+    "pts_involvement",  # 0=none, 1=target, 2=past, 3=current
+    "program_value_log",  # log10 of contract value
     "days_to_pop_end",
     "past_placements_on_program",
     "competitor_density",
@@ -196,10 +200,13 @@ class WinProbabilityModel:
             results.append(await self.predict(opp))
         return results
 
-    async def train(self, training_data: Any = None,
-                    features: Optional[List] = None,
-                    labels: Optional[List] = None,
-                    n_synthetic: int = 500) -> TrainResult:
+    async def train(
+        self,
+        training_data: Any = None,
+        features: Optional[List] = None,
+        labels: Optional[List] = None,
+        n_synthetic: int = 500,
+    ) -> TrainResult:
         """Train on historical placement data. Generates synthetic data if none provided."""
         if not XGB_AVAILABLE or not NP_AVAILABLE:
             logger.warning("xgboost_not_installed", extra={"fallback": "heuristic"})
@@ -241,14 +248,22 @@ class WinProbabilityModel:
         fn = float(np.sum((y_pred == 0) & (y_test == 1)))
         precision = tp / (tp + fp) if (tp + fp) > 0 else 0.0
         recall = tp / (tp + fn) if (tp + fn) > 0 else 0.0
-        f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0.0
+        f1 = (
+            2 * precision * recall / (precision + recall)
+            if (precision + recall) > 0
+            else 0.0
+        )
 
         # Feature importance
         importances = self.model.feature_importances_
         self._feature_importance = sorted(
             [
-                {"feature": self.feature_names[i] if i < len(self.feature_names) else f"f{i}",
-                 "importance": float(importances[i])}
+                {
+                    "feature": self.feature_names[i]
+                    if i < len(self.feature_names)
+                    else f"f{i}",
+                    "importance": float(importances[i]),
+                }
                 for i in range(len(importances))
             ],
             key=lambda x: x["importance"],
@@ -273,7 +288,9 @@ class WinProbabilityModel:
             trained_at=self._trained_at,
         )
         self._train_metrics = result
-        logger.info("win_model_trained", extra={"accuracy": accuracy, "samples": len(features)})
+        logger.info(
+            "win_model_trained", extra={"accuracy": accuracy, "samples": len(features)}
+        )
         return result
 
     async def retrain_incremental(self, new_outcomes: List[dict]) -> TrainResult:
@@ -299,19 +316,23 @@ class WinProbabilityModel:
                 X = np.array([feature_vector])
                 shap_values = self._explainer.shap_values(X)
                 if isinstance(shap_values, list):
-                    sv = shap_values[1][0] if len(shap_values) > 1 else shap_values[0][0]
+                    sv = (
+                        shap_values[1][0] if len(shap_values) > 1 else shap_values[0][0]
+                    )
                 else:
                     sv = shap_values[0]
 
                 explanations = []
                 for i, name in enumerate(self.feature_names):
                     if i < len(sv):
-                        explanations.append({
-                            "feature": name,
-                            "shap_value": float(sv[i]),
-                            "feature_value": feature_vector[i],
-                            "direction": "positive" if sv[i] > 0 else "negative",
-                        })
+                        explanations.append(
+                            {
+                                "feature": name,
+                                "shap_value": float(sv[i]),
+                                "feature_value": feature_vector[i],
+                                "direction": "positive" if sv[i] > 0 else "negative",
+                            }
+                        )
 
                 explanations.sort(key=lambda x: abs(x["shap_value"]), reverse=True)
                 return {
@@ -330,7 +351,9 @@ class WinProbabilityModel:
                     "feature": fi["feature"],
                     "importance": fi["importance"],
                     "feature_value": opportunity.get(fi["feature"], 0),
-                    "direction": "positive" if opportunity.get(fi["feature"], 0) > 0 else "neutral",
+                    "direction": "positive"
+                    if opportunity.get(fi["feature"], 0) > 0
+                    else "neutral",
                 }
                 for fi in self._feature_importance[:10]
             ],
@@ -345,7 +368,9 @@ class WinProbabilityModel:
             precision=self._train_metrics.precision if self._train_metrics else 0.0,
             recall=self._train_metrics.recall if self._train_metrics else 0.0,
             f1=self._train_metrics.f1 if self._train_metrics else 0.0,
-            total_samples=self._train_metrics.training_samples if self._train_metrics else 0,
+            total_samples=self._train_metrics.training_samples
+            if self._train_metrics
+            else 0,
             trained=self._trained,
             feature_count=len(self.feature_names),
             trained_at=self._trained_at or "",
@@ -405,15 +430,21 @@ class WinProbabilityModel:
             val = feature_vector[i] if i < len(feature_vector) else 0
             if val != 0:
                 imp = next(
-                    (fi["importance"] for fi in self._feature_importance if fi["feature"] == name),
+                    (
+                        fi["importance"]
+                        for fi in self._feature_importance
+                        if fi["feature"] == name
+                    ),
                     0.05,
                 )
-                factors.append({
-                    "feature": name,
-                    "importance": imp,
-                    "value": val,
-                    "direction": "positive" if val > 0 else "negative",
-                })
+                factors.append(
+                    {
+                        "feature": name,
+                        "importance": imp,
+                        "value": val,
+                        "direction": "positive" if val > 0 else "negative",
+                    }
+                )
         factors.sort(key=lambda x: abs(x.get("importance", 0)), reverse=True)
         return factors[:5]
 
@@ -432,11 +463,17 @@ class WinProbabilityModel:
         if opp.get("channels_used", 0) < 2:
             actions.append("Try multi-channel approach: use email + LinkedIn")
         if opp.get("mutual_connections", 0) > 0:
-            actions.append(f"Leverage {opp['mutual_connections']} mutual connections for warm intro")
+            actions.append(
+                f"Leverage {opp['mutual_connections']} mutual connections for warm intro"
+            )
         if prob > 0.7:
-            actions.append("High probability: accelerate engagement and submit candidates")
+            actions.append(
+                "High probability: accelerate engagement and submit candidates"
+            )
         elif prob < 0.3:
-            actions.append("Low probability: consider deprioritizing or changing approach")
+            actions.append(
+                "Low probability: consider deprioritizing or changing approach"
+            )
         if opp.get("fiscal_quarter") == 4:
             actions.append("Q4 urgency: budget use-or-lose window, act fast")
 
@@ -496,11 +533,28 @@ class WinProbabilityModel:
             sim_win = rng.uniform(0, 1)
 
             row = [
-                tier, depth, days_since, mutual, response_rate,
-                involvement, prog_value, days_pop, past_placements, competitors,
-                clearance, role_match, loc_fam, days_open, salary_comp,
-                fq, days_fy, option_yr, seasonal,
-                attempts, channels, sim_win,
+                tier,
+                depth,
+                days_since,
+                mutual,
+                response_rate,
+                involvement,
+                prog_value,
+                days_pop,
+                past_placements,
+                competitors,
+                clearance,
+                role_match,
+                loc_fam,
+                days_open,
+                salary_comp,
+                fq,
+                days_fy,
+                option_yr,
+                seasonal,
+                attempts,
+                channels,
+                sim_win,
             ]
             features.append(row)
 

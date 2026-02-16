@@ -14,6 +14,7 @@ router = APIRouter(prefix="/integrations", tags=["Integrations"])
 
 # ─── Request Models ─────────────────────────────────────────────────────────
 
+
 class SlackNotifyRequest(BaseModel):
     channel: str = "#bd-alerts"
     message: str
@@ -32,6 +33,7 @@ class ContactUpdateRequest(BaseModel):
 
 
 # ─── Slack Endpoints ────────────────────────────────────────────────────────
+
 
 @router.post("/slack/notify")
 async def slack_notify(request: SlackNotifyRequest):
@@ -96,7 +98,9 @@ async def slack_command(request: SlackCommandRequest):
 
 
 @router.get("/slack/notifications")
-async def slack_notifications(limit: int = Query(50, description="Max entries to return")):
+async def slack_notifications(
+    limit: int = Query(50, description="Max entries to return"),
+):
     """Get recent notifications from the JSONL fallback log."""
     from Engine8_Knowledge.integrations.slack_integration import get_slack_bot
 
@@ -105,6 +109,7 @@ async def slack_notifications(limit: int = Query(50, description="Max entries to
 
 
 # ─── CRM Sync Endpoints ─────────────────────────────────────────────────────
+
 
 @router.post("/crm/sync")
 async def crm_sync():
@@ -163,7 +168,11 @@ async def crm_pull_placements():
     manager = get_crm_sync_manager()
     result = manager.pull_new_placements()
     # Don't send full placement data, just count
-    return {"success": result["success"], "count": result["count"], "error": result.get("error")}
+    return {
+        "success": result["success"],
+        "count": result["count"],
+        "error": result.get("error"),
+    }
 
 
 @router.post("/crm/pull-activities")
@@ -173,4 +182,8 @@ async def crm_pull_activities():
 
     manager = get_crm_sync_manager()
     result = manager.pull_activity_updates()
-    return {"success": result["success"], "count": result["count"], "error": result.get("error")}
+    return {
+        "success": result["success"],
+        "count": result["count"],
+        "error": result.get("error"),
+    }

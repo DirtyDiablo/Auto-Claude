@@ -22,19 +22,21 @@ logger = structlog.get_logger(__name__)
 
 class ChunkMethod(str, Enum):
     """Document chunking methods supported by RAGflow."""
-    NAIVE = "naive"           # Simple text splitting
-    QA = "qa"                 # Q&A format extraction
-    TABLE = "table"           # Table-aware parsing
-    PAPER = "paper"           # Academic paper structure
-    BOOK = "book"             # Book/chapter structure
-    LAWS = "laws"             # Legal document structure
+
+    NAIVE = "naive"  # Simple text splitting
+    QA = "qa"  # Q&A format extraction
+    TABLE = "table"  # Table-aware parsing
+    PAPER = "paper"  # Academic paper structure
+    BOOK = "book"  # Book/chapter structure
+    LAWS = "laws"  # Legal document structure
     PRESENTATION = "presentation"  # Slide-based content
-    MANUAL = "manual"         # Technical manual format
-    ONE = "one"               # Single chunk (small docs)
+    MANUAL = "manual"  # Technical manual format
+    ONE = "one"  # Single chunk (small docs)
 
 
 class DocumentStatus(str, Enum):
     """Document processing status in RAGflow."""
+
     PENDING = "pending"
     PARSING = "parsing"
     PARSED = "parsed"
@@ -45,6 +47,7 @@ class DocumentStatus(str, Enum):
 @dataclass
 class RAGflowConfig:
     """Configuration for RAGflow client."""
+
     api_key: str
     base_url: str = "http://localhost"
     llm_model: str = "gpt-4o"
@@ -59,13 +62,16 @@ class RAGflowConfig:
             api_key=os.getenv("RAGFLOW_API_KEY", ""),
             base_url=os.getenv("RAGFLOW_BASE_URL", "http://localhost"),
             llm_model=os.getenv("RAGFLOW_LLM_MODEL", "gpt-4o"),
-            embedding_model=os.getenv("RAGFLOW_EMBEDDING_MODEL", "BAAI/bge-large-en-v1.5"),
+            embedding_model=os.getenv(
+                "RAGFLOW_EMBEDDING_MODEL", "BAAI/bge-large-en-v1.5"
+            ),
         )
 
 
 @dataclass
 class QueryResult:
     """Result from a RAGflow query."""
+
     chunks: List[Dict[str, Any]] = field(default_factory=list)
     answer: Optional[str] = None
     citations: List[Dict[str, Any]] = field(default_factory=list)
@@ -76,7 +82,7 @@ class QueryResult:
             "chunks": self.chunks,
             "answer": self.answer,
             "citations": self.citations,
-            "query_time_ms": self.query_time_ms
+            "query_time_ms": self.query_time_ms,
         }
 
 
@@ -122,9 +128,9 @@ class RAGflowClient:
             timeout=self.config.timeout,
             headers={
                 "Authorization": f"Bearer {self.config.api_key}",
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
             },
-            base_url=f"{self.config.base_url}/api/v1"
+            base_url=f"{self.config.base_url}/api/v1",
         )
         self._initialized = True
         logger.info("ragflow_client_initialized", base_url=self.config.base_url)
@@ -146,7 +152,9 @@ class RAGflowClient:
     def _ensure_initialized(self) -> None:
         """Ensure client is initialized."""
         if not self._initialized or not self._client:
-            raise RuntimeError("RAGflow client not initialized. Call initialize() first.")
+            raise RuntimeError(
+                "RAGflow client not initialized. Call initialize() first."
+            )
 
     # =========================================================================
     # Health & Status
@@ -175,7 +183,7 @@ class RAGflowClient:
         embedding_model: Optional[str] = None,
         permission: str = "me",
         chunk_method: ChunkMethod = ChunkMethod.NAIVE,
-        parser_config: Optional[Dict] = None
+        parser_config: Optional[Dict] = None,
     ) -> str:
         """
         Create a new knowledge base.
@@ -241,15 +249,16 @@ class RAGflowClient:
         if success:
             logger.info("knowledge_base_deleted", kb_id=kb_id)
         else:
-            logger.warning("knowledge_base_delete_failed", kb_id=kb_id, status_code=response.status_code)
+            logger.warning(
+                "knowledge_base_delete_failed",
+                kb_id=kb_id,
+                status_code=response.status_code,
+            )
 
         return success
 
     async def get_or_create_knowledge_base(
-        self,
-        name: str,
-        description: str = "",
-        **kwargs
+        self, name: str, description: str = "", **kwargs
     ) -> str:
         """Get existing KB by name or create if not exists."""
         kbs = await self.list_knowledge_bases()
@@ -269,7 +278,7 @@ class RAGflowClient:
         kb_id: str,
         file_path: str,
         chunk_method: Optional[ChunkMethod] = None,
-        run_immediately: bool = True
+        run_immediately: bool = True,
     ) -> str:
         """
         Upload a document to a knowledge base.
@@ -301,7 +310,9 @@ class RAGflowClient:
             ".html": "text/html",
             ".json": "application/json",
         }
-        content_type = content_types.get(path.suffix.lower(), "application/octet-stream")
+        content_type = content_types.get(
+            path.suffix.lower(), "application/octet-stream"
+        )
 
         # Build multipart form
         with open(file_path, "rb") as f:
@@ -317,10 +328,7 @@ class RAGflowClient:
             headers = {"Authorization": f"Bearer {self.config.api_key}"}
 
             response = await self._client.post(
-                f"/datasets/{kb_id}/documents",
-                files=files,
-                data=data,
-                headers=headers
+                f"/datasets/{kb_id}/documents", files=files, data=data, headers=headers
             )
 
         response.raise_for_status()
@@ -335,7 +343,7 @@ class RAGflowClient:
         kb_id: str,
         file_paths: List[str],
         chunk_method: Optional[ChunkMethod] = None,
-        max_concurrent: int = 5
+        max_concurrent: int = 5,
     ) -> List[Dict[str, Any]]:
         """
         Batch upload documents with parallel processing.
@@ -348,28 +356,30 @@ class RAGflowClient:
         async def upload_one(file_path: str) -> Dict[str, Any]:
             async with semaphore:
                 try:
-                    doc_id = await self.upload_document(
-                        kb_id, file_path, chunk_method
-                    )
+                    doc_id = await self.upload_document(kb_id, file_path, chunk_method)
                     return {
                         "file_path": file_path,
                         "doc_id": doc_id,
-                        "status": "uploaded"
+                        "status": "uploaded",
                     }
                 except Exception as e:
-                    logger.error("document_upload_failed", file_path=file_path, error=str(e))
+                    logger.error(
+                        "document_upload_failed", file_path=file_path, error=str(e)
+                    )
                     return {
                         "file_path": file_path,
                         "doc_id": None,
                         "status": "failed",
-                        "error": str(e)
+                        "error": str(e),
                     }
 
         tasks = [upload_one(fp) for fp in file_paths]
         results = await asyncio.gather(*tasks)
 
         success_count = sum(1 for r in results if r["status"] == "uploaded")
-        logger.info("batch_upload_complete", succeeded=success_count, total=len(file_paths))
+        logger.info(
+            "batch_upload_complete", succeeded=success_count, total=len(file_paths)
+        )
 
         return list(results)
 
@@ -400,16 +410,21 @@ class RAGflowClient:
         kb_id: str,
         doc_id: str,
         timeout: float = 600.0,
-        poll_interval: float = 5.0
+        poll_interval: float = 5.0,
     ) -> DocumentStatus:
         """Wait for document parsing to complete."""
         import time
+
         start = time.time()
 
         while time.time() - start < timeout:
             status = await self.get_document_status(kb_id, doc_id)
 
-            if status in (DocumentStatus.PARSED, DocumentStatus.FAILED, DocumentStatus.CANCELED):
+            if status in (
+                DocumentStatus.PARSED,
+                DocumentStatus.FAILED,
+                DocumentStatus.CANCELED,
+            ):
                 return status
 
             await asyncio.sleep(poll_interval)
@@ -418,18 +433,14 @@ class RAGflowClient:
         return DocumentStatus.PENDING
 
     async def get_document_chunks(
-        self,
-        kb_id: str,
-        doc_id: str,
-        page: int = 1,
-        page_size: int = 100
+        self, kb_id: str, doc_id: str, page: int = 1, page_size: int = 100
     ) -> List[Dict[str, Any]]:
         """Get parsed chunks for a document."""
         self._ensure_initialized()
 
         response = await self._client.get(
             f"/datasets/{kb_id}/documents/{doc_id}/chunks",
-            params={"page": page, "page_size": page_size}
+            params={"page": page, "page_size": page_size},
         )
         response.raise_for_status()
 
@@ -439,9 +450,7 @@ class RAGflowClient:
         """Delete a document from a knowledge base."""
         self._ensure_initialized()
 
-        response = await self._client.delete(
-            f"/datasets/{kb_id}/documents/{doc_id}"
-        )
+        response = await self._client.delete(f"/datasets/{kb_id}/documents/{doc_id}")
         return response.status_code in (200, 204)
 
     # =========================================================================
@@ -455,7 +464,7 @@ class RAGflowClient:
         top_k: int = 5,
         similarity_threshold: float = 0.5,
         rerank: bool = True,
-        with_answer: bool = True
+        with_answer: bool = True,
     ) -> QueryResult:
         """
         Query knowledge bases with optional LLM answer generation.
@@ -473,6 +482,7 @@ class RAGflowClient:
         """
         self._ensure_initialized()
         import time
+
         start = time.time()
 
         payload = {
@@ -509,17 +519,19 @@ class RAGflowClient:
 
             # Build citation
             if chunk.get("document_name"):
-                citations.append({
-                    "doc_name": chunk.get("document_name"),
-                    "page": chunk.get("page_number"),
-                    "text": chunk.get("content", "")[:200] + "..."
-                })
+                citations.append(
+                    {
+                        "doc_name": chunk.get("document_name"),
+                        "page": chunk.get("page_number"),
+                        "text": chunk.get("content", "")[:200] + "...",
+                    }
+                )
 
         return QueryResult(
             chunks=chunks,
             answer=data.get("answer"),
             citations=citations,
-            query_time_ms=elapsed
+            query_time_ms=elapsed,
         )
 
     async def hybrid_search(
@@ -528,7 +540,7 @@ class RAGflowClient:
         question: str,
         top_k: int = 5,
         keyword_weight: float = 0.3,
-        similarity_threshold: float = 0.3
+        similarity_threshold: float = 0.3,
     ) -> QueryResult:
         """
         Hybrid vector + BM25 keyword search.
@@ -542,6 +554,7 @@ class RAGflowClient:
         """
         self._ensure_initialized()
         import time
+
         start = time.time()
 
         payload = {
@@ -561,24 +574,19 @@ class RAGflowClient:
 
         chunks = []
         for chunk in data.get("chunks", []):
-            chunks.append({
-                "text": chunk.get("content", ""),
-                "score": chunk.get("score", 0.0),
-                "source_doc": chunk.get("document_name", ""),
-                "search_type": "hybrid"
-            })
+            chunks.append(
+                {
+                    "text": chunk.get("content", ""),
+                    "score": chunk.get("score", 0.0),
+                    "source_doc": chunk.get("document_name", ""),
+                    "search_type": "hybrid",
+                }
+            )
 
-        return QueryResult(
-            chunks=chunks,
-            query_time_ms=elapsed
-        )
+        return QueryResult(chunks=chunks, query_time_ms=elapsed)
 
     async def query_with_graph(
-        self,
-        kb_ids: List[str],
-        question: str,
-        top_k: int = 5,
-        graph_depth: int = 2
+        self, kb_ids: List[str], question: str, top_k: int = 5, graph_depth: int = 2
     ) -> QueryResult:
         """
         GraphRAG query for relationship-aware retrieval.
@@ -588,6 +596,7 @@ class RAGflowClient:
         """
         self._ensure_initialized()
         import time
+
         start = time.time()
 
         payload = {
@@ -606,19 +615,21 @@ class RAGflowClient:
 
         chunks = []
         for chunk in data.get("chunks", []):
-            chunks.append({
-                "text": chunk.get("content", ""),
-                "score": chunk.get("score", 0.0),
-                "source_doc": chunk.get("document_name", ""),
-                "entities": chunk.get("entities", []),
-                "relationships": chunk.get("relationships", [])
-            })
+            chunks.append(
+                {
+                    "text": chunk.get("content", ""),
+                    "score": chunk.get("score", 0.0),
+                    "source_doc": chunk.get("document_name", ""),
+                    "entities": chunk.get("entities", []),
+                    "relationships": chunk.get("relationships", []),
+                }
+            )
 
         return QueryResult(
             chunks=chunks,
             answer=data.get("answer"),
             citations=data.get("citations", []),
-            query_time_ms=elapsed
+            query_time_ms=elapsed,
         )
 
     # =========================================================================
@@ -631,7 +642,7 @@ class RAGflowClient:
         kb_ids: List[str],
         llm_model: Optional[str] = None,
         system_prompt: str = "",
-        top_k: int = 5
+        top_k: int = 5,
     ) -> str:
         """
         Create a chat assistant linked to knowledge bases.
@@ -661,7 +672,7 @@ class RAGflowClient:
         chat_id: str,
         message: str,
         conversation_id: Optional[str] = None,
-        stream: bool = False
+        stream: bool = False,
     ) -> Dict[str, Any]:
         """
         Send a message to a chat assistant.
@@ -686,8 +697,7 @@ class RAGflowClient:
             payload["conversation_id"] = conversation_id
 
         response = await self._client.post(
-            f"/chats/{chat_id}/completions",
-            json=payload
+            f"/chats/{chat_id}/completions", json=payload
         )
         response.raise_for_status()
 
@@ -697,14 +707,11 @@ class RAGflowClient:
             "answer": data.get("answer", ""),
             "citations": data.get("citations", []),
             "conversation_id": data.get("conversation_id"),
-            "chunks_used": data.get("chunks", [])
+            "chunks_used": data.get("chunks", []),
         }
 
     async def stream_message(
-        self,
-        chat_id: str,
-        message: str,
-        conversation_id: Optional[str] = None
+        self, chat_id: str, message: str, conversation_id: Optional[str] = None
     ) -> AsyncGenerator[str, None]:
         """Stream a chat response token by token."""
         self._ensure_initialized()
@@ -718,9 +725,7 @@ class RAGflowClient:
             payload["conversation_id"] = conversation_id
 
         async with self._client.stream(
-            "POST",
-            f"/chats/{chat_id}/completions",
-            json=payload
+            "POST", f"/chats/{chat_id}/completions", json=payload
         ) as response:
             async for line in response.aiter_lines():
                 if line.startswith("data:"):
@@ -757,11 +762,7 @@ class RAGflowClient:
 
         return response.json().get("data", {})
 
-    async def query_graph(
-        self,
-        kb_id: str,
-        entity: str
-    ) -> Dict[str, Any]:
+    async def query_graph(self, kb_id: str, entity: str) -> Dict[str, Any]:
         """
         Query the knowledge graph for entity relationships.
 
@@ -770,24 +771,20 @@ class RAGflowClient:
         self._ensure_initialized()
 
         response = await self._client.get(
-            f"/datasets/{kb_id}/knowledge_graph/query",
-            params={"entity": entity}
+            f"/datasets/{kb_id}/knowledge_graph/query", params={"entity": entity}
         )
         response.raise_for_status()
 
         return response.json().get("data", {})
 
     async def get_graph_entities(
-        self,
-        kb_id: str,
-        limit: int = 100
+        self, kb_id: str, limit: int = 100
     ) -> List[Dict[str, Any]]:
         """Get all entities in the knowledge graph."""
         self._ensure_initialized()
 
         response = await self._client.get(
-            f"/datasets/{kb_id}/knowledge_graph/entities",
-            params={"limit": limit}
+            f"/datasets/{kb_id}/knowledge_graph/entities", params={"limit": limit}
         )
         response.raise_for_status()
 

@@ -18,6 +18,7 @@ def mgr():
 # PRE-REGISTERED LAYERS
 # =========================================
 
+
 def test_default_layers(mgr):
     layers = mgr.list_layers()
     assert len(layers) == 4
@@ -44,6 +45,7 @@ def test_cdn_static(mgr):
 # =========================================
 # PUT / GET
 # =========================================
+
 
 def test_put_and_get(mgr):
     mgr.put("key1", "value1", ttl=60)
@@ -91,6 +93,7 @@ def test_miss_tracking(mgr):
 # INVALIDATE
 # =========================================
 
+
 def test_invalidate(mgr):
     mgr.put("del_key", "del_val")
     mgr.invalidate("del_key")
@@ -109,6 +112,7 @@ def test_invalidate_specific_layer(mgr):
 # HIT RATES
 # =========================================
 
+
 def test_hit_rates(mgr):
     mgr.put("hr_key", "val")
     mgr.get("hr_key")
@@ -119,6 +123,7 @@ def test_hit_rates(mgr):
 # =========================================
 # WARM CACHE
 # =========================================
+
 
 def test_warm_cache(mgr):
     count = mgr.warm_cache(["warm1", "warm2", "warm3"])
@@ -133,6 +138,7 @@ def test_warm_cache_empty(mgr):
 # =========================================
 # TO_DICT & STATS
 # =========================================
+
 
 def test_layer_to_dict(mgr):
     layer = mgr.get_layer("l1_hot")
@@ -152,8 +158,10 @@ def test_stats(mgr):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.scaling.cache_layer as mod
+
     mod._instance = None
     a1 = get_cache_manager()
     a2 = get_cache_manager()

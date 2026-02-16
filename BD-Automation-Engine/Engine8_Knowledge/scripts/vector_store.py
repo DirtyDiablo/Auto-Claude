@@ -19,9 +19,15 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 try:
     from qdrant_client import QdrantClient
     from qdrant_client.models import (
-        Distance, VectorParams, PointStruct,
-        Filter, FieldCondition, MatchValue, MatchAny
+        Distance,
+        VectorParams,
+        PointStruct,
+        Filter,
+        FieldCondition,
+        MatchValue,
+        MatchAny,
     )
+
     QDRANT_AVAILABLE = True
 except ImportError:
     QDRANT_AVAILABLE = False
@@ -29,17 +35,19 @@ except ImportError:
 
 try:
     import openai
+
     EMBEDDINGS_AVAILABLE = True
 except ImportError:
     EMBEDDINGS_AVAILABLE = False
     print("Warning: openai not installed. Run: pip install openai")
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDKnowledgeStore')
+logger = logging.getLogger("BDKnowledgeStore")
 
 # =========================================
 # CONFIGURATION
@@ -54,6 +62,7 @@ EMBEDDING_DIMENSION = 1536
 @dataclass
 class CollectionConfig:
     """Configuration for a Qdrant collection."""
+
     name: str
     description: str
     vector_size: int = EMBEDDING_DIMENSION
@@ -68,59 +77,78 @@ class CollectionConfig:
 
 # Collection definitions for BD data types
 COLLECTION_CONFIGS = {
-    'jobs': CollectionConfig(
-        name='jobs',
-        description='Job postings with program mappings and BD scores',
-        text_fields=['title', 'company', 'location', 'program_name', 'clearance'],
-        indexed_fields=['company', 'program_name', 'clearance', 'bd_priority', 'source']
+    "jobs": CollectionConfig(
+        name="jobs",
+        description="Job postings with program mappings and BD scores",
+        text_fields=["title", "company", "location", "program_name", "clearance"],
+        indexed_fields=[
+            "company",
+            "program_name",
+            "clearance",
+            "bd_priority",
+            "source",
+        ],
     ),
-    'contacts': CollectionConfig(
-        name='contacts',
-        description='Contacts with tier classification and company affiliation',
-        text_fields=['name', 'first_name', 'last_name', 'title', 'company', 'program', 'notes'],
-        indexed_fields=['company', 'tier', 'program', 'bd_priority', 'source_db']
+    "contacts": CollectionConfig(
+        name="contacts",
+        description="Contacts with tier classification and company affiliation",
+        text_fields=[
+            "name",
+            "first_name",
+            "last_name",
+            "title",
+            "company",
+            "program",
+            "notes",
+        ],
+        indexed_fields=["company", "tier", "program", "bd_priority", "source_db"],
     ),
-    'programs': CollectionConfig(
-        name='programs',
-        description='Federal programs and contracts',
-        text_fields=['name', 'prime_contractor', 'location', 'mission_area', 'notes'],
-        indexed_fields=['prime_contractor', 'status', 'contract_vehicle', 'bd_priority']
+    "programs": CollectionConfig(
+        name="programs",
+        description="Federal programs and contracts",
+        text_fields=["name", "prime_contractor", "location", "mission_area", "notes"],
+        indexed_fields=[
+            "prime_contractor",
+            "status",
+            "contract_vehicle",
+            "bd_priority",
+        ],
     ),
-    'documents': CollectionConfig(
-        name='documents',
-        description='Processed documents, briefings, and exports',
-        text_fields=['content', 'title', 'summary'],
-        indexed_fields=['doc_type', 'source_file', 'tags', 'created_date']
+    "documents": CollectionConfig(
+        name="documents",
+        description="Processed documents, briefings, and exports",
+        text_fields=["content", "title", "summary"],
+        indexed_fields=["doc_type", "source_file", "tags", "created_date"],
     ),
-    'activities': CollectionConfig(
-        name='activities',
-        description='Bullhorn call notes, activities, and interactions',
-        text_fields=['content', 'subject', 'contact_name', 'company_name'],
-        indexed_fields=['activity_type', 'contact_id', 'company', 'date']
+    "activities": CollectionConfig(
+        name="activities",
+        description="Bullhorn call notes, activities, and interactions",
+        text_fields=["content", "subject", "contact_name", "company_name"],
+        indexed_fields=["activity_type", "contact_id", "company", "date"],
     ),
-    'bullhorn_notes': CollectionConfig(
-        name='bullhorn_notes',
-        description='Bullhorn CRM call notes with hybrid (dense + sparse) vectors',
-        text_fields=['note_body', 'comments', 'about', 'action'],
-        indexed_fields=['note_type', 'noteType', 'personReference', '_source']
+    "bullhorn_notes": CollectionConfig(
+        name="bullhorn_notes",
+        description="Bullhorn CRM call notes with hybrid (dense + sparse) vectors",
+        text_fields=["note_body", "comments", "about", "action"],
+        indexed_fields=["note_type", "noteType", "personReference", "_source"],
     ),
-    'federal_contracts': CollectionConfig(
-        name='federal_contracts',
-        description='Federal contract awards, vehicles, and modifications',
-        text_fields=['title', 'description', 'agency', 'contractor'],
-        indexed_fields=['agency', 'contractor', 'contract_vehicle', 'status']
+    "federal_contracts": CollectionConfig(
+        name="federal_contracts",
+        description="Federal contract awards, vehicles, and modifications",
+        text_fields=["title", "description", "agency", "contractor"],
+        indexed_fields=["agency", "contractor", "contract_vehicle", "status"],
     ),
-    'intelligence_reports': CollectionConfig(
-        name='intelligence_reports',
-        description='BD intelligence reports, HUMINT briefings, analysis docs',
-        text_fields=['content', 'title', 'summary', 'source'],
-        indexed_fields=['report_type', 'classification', 'source', 'date']
+    "intelligence_reports": CollectionConfig(
+        name="intelligence_reports",
+        description="BD intelligence reports, HUMINT briefings, analysis docs",
+        text_fields=["content", "title", "summary", "source"],
+        indexed_fields=["report_type", "classification", "source", "date"],
     ),
-    'opportunities': CollectionConfig(
-        name='opportunities',
-        description='BD pipeline opportunities and capture tracking',
-        text_fields=['title', 'description', 'program', 'agency', 'prime'],
-        indexed_fields=['status', 'priority', 'agency', 'program']
+    "opportunities": CollectionConfig(
+        name="opportunities",
+        description="BD pipeline opportunities and capture tracking",
+        text_fields=["title", "description", "program", "agency", "prime"],
+        indexed_fields=["status", "priority", "agency", "program"],
     ),
 }
 
@@ -128,6 +156,7 @@ COLLECTION_CONFIGS = {
 @dataclass
 class SearchResult:
     """Result from a semantic search."""
+
     id: str
     score: float
     payload: Dict[str, Any]
@@ -135,16 +164,17 @@ class SearchResult:
 
     def to_dict(self) -> Dict:
         return {
-            'id': self.id,
-            'score': self.score,
-            'payload': self.payload,
-            'collection': self.collection
+            "id": self.id,
+            "score": self.score,
+            "payload": self.payload,
+            "collection": self.collection,
         }
 
 
 # =========================================
 # KNOWLEDGE STORE CLASS
 # =========================================
+
 
 class BDKnowledgeStore:
     """
@@ -159,7 +189,7 @@ class BDKnowledgeStore:
         path: Optional[str] = None,
         model_name: str = DEFAULT_MODEL,
         in_memory: bool = False,
-        url: Optional[str] = None
+        url: Optional[str] = None,
     ):
         """
         Initialize the knowledge store.
@@ -171,7 +201,9 @@ class BDKnowledgeStore:
             url: Qdrant server URL (e.g., http://localhost:6333). If set, uses server mode.
         """
         if not QDRANT_AVAILABLE:
-            raise ImportError("qdrant-client is required. Install with: pip install qdrant-client")
+            raise ImportError(
+                "qdrant-client is required. Install with: pip install qdrant-client"
+            )
 
         if not EMBEDDINGS_AVAILABLE:
             raise ImportError("openai is required. Install with: pip install openai")
@@ -230,9 +262,8 @@ class BDKnowledgeStore:
                     self.client.create_collection(
                         collection_name=name,
                         vectors_config=VectorParams(
-                            size=config.vector_size,
-                            distance=Distance.COSINE
-                        )
+                            size=config.vector_size, distance=Distance.COSINE
+                        ),
                     )
                     logger.info(f"Created collection: {name} ({config.description})")
                     results[name] = True
@@ -254,19 +285,23 @@ class BDKnowledgeStore:
             try:
                 info = self.client.get_collection(name)
                 # Handle different qdrant-client versions
-                points_count = getattr(info, 'points_count', 0)
-                vectors_count = getattr(info, 'vectors_count', points_count)
-                indexed_count = getattr(info, 'indexed_vectors_count', vectors_count)
-                status = getattr(info.status, 'name', str(info.status)) if hasattr(info, 'status') else 'unknown'
+                points_count = getattr(info, "points_count", 0)
+                vectors_count = getattr(info, "vectors_count", points_count)
+                indexed_count = getattr(info, "indexed_vectors_count", vectors_count)
+                status = (
+                    getattr(info.status, "name", str(info.status))
+                    if hasattr(info, "status")
+                    else "unknown"
+                )
 
                 stats[name] = {
-                    'vectors_count': vectors_count,
-                    'indexed_vectors_count': indexed_count,
-                    'points_count': points_count,
-                    'status': status
+                    "vectors_count": vectors_count,
+                    "indexed_vectors_count": indexed_count,
+                    "points_count": points_count,
+                    "status": status,
                 }
             except Exception as e:
-                stats[name] = {'error': str(e)}
+                stats[name] = {"error": str(e)}
 
         return stats
 
@@ -285,6 +320,7 @@ class BDKnowledgeStore:
         """Lazy-load tenacity decorator."""
         try:
             from config.resilience import with_embedding_retry
+
             return with_embedding_retry
         except ImportError:
             return lambda f: f  # no-op if tenacity missing
@@ -307,18 +343,18 @@ class BDKnowledgeStore:
         """Generate concatenated text for embedding from data fields."""
         parts = []
         for field in config.text_fields:
-            value = data.get(field, '')
+            value = data.get(field, "")
             if value and isinstance(value, str):
                 parts.append(value)
             elif value and isinstance(value, list):
-                parts.append(' '.join(str(v) for v in value))
-        return ' '.join(parts)
+                parts.append(" ".join(str(v) for v in value))
+        return " ".join(parts)
 
     def _generate_point_id(self, data: Dict, collection: str) -> str:
         """Generate a unique point ID (UUID format) from data."""
         # Use existing ID if available and it's a valid UUID
-        if 'id' in data:
-            existing_id = str(data['id'])
+        if "id" in data:
+            existing_id = str(data["id"])
             try:
                 # Try to parse as UUID - if valid, use it
                 uuid.UUID(existing_id)
@@ -329,7 +365,9 @@ class BDKnowledgeStore:
 
         # Generate deterministic UUID from content
         # Use UUID5 with a namespace based on collection name
-        namespace = uuid.UUID('6ba7b810-9dad-11d1-80b4-00c04fd430c8')  # Standard namespace
+        namespace = uuid.UUID(
+            "6ba7b810-9dad-11d1-80b4-00c04fd430c8"
+        )  # Standard namespace
         content = f"{collection}:{json.dumps(data, sort_keys=True)}"
         return str(uuid.uuid5(namespace, content))
 
@@ -348,9 +386,11 @@ class BDKnowledgeStore:
         Returns:
             Tuple of (indexed_count, error_count).
         """
-        return self._index_data('jobs', jobs, batch_size)
+        return self._index_data("jobs", jobs, batch_size)
 
-    def index_contacts(self, contacts: List[Dict], batch_size: int = 100) -> Tuple[int, int]:
+    def index_contacts(
+        self, contacts: List[Dict], batch_size: int = 100
+    ) -> Tuple[int, int]:
         """
         Index contacts with embeddings.
 
@@ -361,9 +401,11 @@ class BDKnowledgeStore:
         Returns:
             Tuple of (indexed_count, error_count).
         """
-        return self._index_data('contacts', contacts, batch_size)
+        return self._index_data("contacts", contacts, batch_size)
 
-    def index_programs(self, programs: List[Dict], batch_size: int = 100) -> Tuple[int, int]:
+    def index_programs(
+        self, programs: List[Dict], batch_size: int = 100
+    ) -> Tuple[int, int]:
         """
         Index federal programs with embeddings.
 
@@ -374,9 +416,11 @@ class BDKnowledgeStore:
         Returns:
             Tuple of (indexed_count, error_count).
         """
-        return self._index_data('programs', programs, batch_size)
+        return self._index_data("programs", programs, batch_size)
 
-    def index_documents(self, documents: List[Dict], batch_size: int = 50) -> Tuple[int, int]:
+    def index_documents(
+        self, documents: List[Dict], batch_size: int = 50
+    ) -> Tuple[int, int]:
         """
         Index documents with embeddings.
 
@@ -387,9 +431,11 @@ class BDKnowledgeStore:
         Returns:
             Tuple of (indexed_count, error_count).
         """
-        return self._index_data('documents', documents, batch_size)
+        return self._index_data("documents", documents, batch_size)
 
-    def index_activities(self, activities: List[Dict], batch_size: int = 100) -> Tuple[int, int]:
+    def index_activities(
+        self, activities: List[Dict], batch_size: int = 100
+    ) -> Tuple[int, int]:
         """
         Index activities (call notes, interactions) with embeddings.
 
@@ -400,7 +446,7 @@ class BDKnowledgeStore:
         Returns:
             Tuple of (indexed_count, error_count).
         """
-        return self._index_data('activities', activities, batch_size)
+        return self._index_data("activities", activities, batch_size)
 
     def bulk_upsert_from_scraper(
         self,
@@ -432,22 +478,46 @@ class BDKnowledgeStore:
             # Contact field normalization
             if collection == "contacts":
                 item.setdefault("name", item.pop("Name", item.get("name", "")))
-                item.setdefault("company", item.pop("Company", item.pop("prime_name", item.get("company", ""))))
-                item.setdefault("title", item.pop("Title", item.pop("occupation", item.get("title", ""))))
-                item.setdefault("tier", item.pop("hierarchy_tier_num", item.get("tier")))
+                item.setdefault(
+                    "company",
+                    item.pop(
+                        "Company", item.pop("prime_name", item.get("company", ""))
+                    ),
+                )
+                item.setdefault(
+                    "title",
+                    item.pop("Title", item.pop("occupation", item.get("title", ""))),
+                )
+                item.setdefault(
+                    "tier", item.pop("hierarchy_tier_num", item.get("tier"))
+                )
                 item.setdefault("bd_priority", item.pop("bd_priority", None))
 
             # Program field normalization
             elif collection == "programs":
-                item.setdefault("name", item.pop("Name", item.pop("program_name", item.get("name", ""))))
-                item.setdefault("prime_contractor", item.pop("Prime", item.pop("primes", item.get("prime_contractor", ""))))
+                item.setdefault(
+                    "name",
+                    item.pop("Name", item.pop("program_name", item.get("name", ""))),
+                )
+                item.setdefault(
+                    "prime_contractor",
+                    item.pop(
+                        "Prime", item.pop("primes", item.get("prime_contractor", ""))
+                    ),
+                )
                 item.setdefault("agency", item.pop("Agency", item.get("agency", "")))
 
             # Job field normalization
             elif collection == "jobs":
                 item.setdefault("title", item.pop("Title", item.get("title", "")))
                 item.setdefault("company", item.pop("Company", item.get("company", "")))
-                item.setdefault("program_name", item.pop("Program", item.pop("mapped_program", item.get("program_name", ""))))
+                item.setdefault(
+                    "program_name",
+                    item.pop(
+                        "Program",
+                        item.pop("mapped_program", item.get("program_name", "")),
+                    ),
+                )
 
             # Tag with source
             item["_source"] = source_tag
@@ -458,10 +528,7 @@ class BDKnowledgeStore:
         return self._index_data(collection, normalized, batch_size)
 
     def _index_data(
-        self,
-        collection: str,
-        data: List[Dict],
-        batch_size: int = 100
+        self, collection: str, data: List[Dict], batch_size: int = 100
     ) -> Tuple[int, int]:
         """
         Generic indexing method for any collection.
@@ -483,7 +550,7 @@ class BDKnowledgeStore:
 
         # Process in batches
         for i in range(0, len(data), batch_size):
-            batch = data[i:i + batch_size]
+            batch = data[i : i + batch_size]
             points = []
 
             for item in batch:
@@ -500,16 +567,12 @@ class BDKnowledgeStore:
                     # Create payload (include all data plus metadata)
                     payload = {
                         **item,
-                        '_indexed_at': datetime.now().isoformat(),
-                        '_embedding_model': self.model_name
+                        "_indexed_at": datetime.now().isoformat(),
+                        "_embedding_model": self.model_name,
                     }
 
                     # Create point
-                    point = PointStruct(
-                        id=point_id,
-                        vector=embedding,
-                        payload=payload
-                    )
+                    point = PointStruct(id=point_id, vector=embedding, payload=payload)
                     points.append(point)
 
                 except Exception as e:
@@ -519,17 +582,16 @@ class BDKnowledgeStore:
             # Upsert batch
             if points:
                 try:
-                    self.client.upsert(
-                        collection_name=collection,
-                        points=points
-                    )
+                    self.client.upsert(collection_name=collection, points=points)
                     indexed += len(points)
                     logger.info(f"Indexed {indexed}/{len(data)} to {collection}")
                 except Exception as e:
                     logger.error(f"Failed to upsert batch: {e}")
                     errors += len(points)
 
-        logger.info(f"Completed indexing {collection}: {indexed} indexed, {errors} errors")
+        logger.info(
+            f"Completed indexing {collection}: {indexed} indexed, {errors} errors"
+        )
         return indexed, errors
 
     # =========================================
@@ -542,7 +604,7 @@ class BDKnowledgeStore:
         collection: str,
         limit: int = 10,
         score_threshold: float = 0.0,
-        filters: Optional[Dict] = None
+        filters: Optional[Dict] = None,
     ) -> List[SearchResult]:
         """
         Semantic search across a collection.
@@ -569,15 +631,13 @@ class BDKnowledgeStore:
             conditions = []
             for field, value in filters.items():
                 if isinstance(value, list):
-                    conditions.append(FieldCondition(
-                        key=field,
-                        match=MatchAny(any=value)
-                    ))
+                    conditions.append(
+                        FieldCondition(key=field, match=MatchAny(any=value))
+                    )
                 else:
-                    conditions.append(FieldCondition(
-                        key=field,
-                        match=MatchValue(value=value)
-                    ))
+                    conditions.append(
+                        FieldCondition(key=field, match=MatchValue(value=value))
+                    )
             qdrant_filter = Filter(must=conditions)
 
         # Execute search using query_points (newer API)
@@ -586,16 +646,13 @@ class BDKnowledgeStore:
             query=query_embedding,
             query_filter=qdrant_filter,
             limit=limit,
-            score_threshold=score_threshold if score_threshold > 0 else None
+            score_threshold=score_threshold if score_threshold > 0 else None,
         )
 
         # Convert to SearchResult objects
         return [
             SearchResult(
-                id=str(r.id),
-                score=r.score,
-                payload=r.payload,
-                collection=collection
+                id=str(r.id), score=r.score, payload=r.payload, collection=collection
             )
             for r in results.points
         ]
@@ -605,7 +662,7 @@ class BDKnowledgeStore:
         query: str,
         limit_per_collection: int = 5,
         score_threshold: float = 0.3,
-        collections: Optional[List[str]] = None
+        collections: Optional[List[str]] = None,
     ) -> Dict[str, List[SearchResult]]:
         """
         Search across all (or specified) collections.
@@ -628,7 +685,7 @@ class BDKnowledgeStore:
                     query=query,
                     collection=collection,
                     limit=limit_per_collection,
-                    score_threshold=score_threshold
+                    score_threshold=score_threshold,
                 )
             except Exception as e:
                 logger.warning(f"Search failed for {collection}: {e}")
@@ -641,7 +698,7 @@ class BDKnowledgeStore:
         item_id: str,
         collection: str,
         limit: int = 10,
-        score_threshold: float = 0.5
+        score_threshold: float = 0.5,
     ) -> List[SearchResult]:
         """
         Find similar items to a given item.
@@ -657,9 +714,7 @@ class BDKnowledgeStore:
         """
         # Get the original item
         items = self.client.retrieve(
-            collection_name=collection,
-            ids=[item_id],
-            with_vectors=True
+            collection_name=collection, ids=[item_id], with_vectors=True
         )
 
         if not items:
@@ -671,26 +726,20 @@ class BDKnowledgeStore:
             collection_name=collection,
             query=items[0].vector,
             limit=limit + 1,  # +1 to exclude self
-            score_threshold=score_threshold if score_threshold > 0 else None
+            score_threshold=score_threshold if score_threshold > 0 else None,
         )
 
         # Filter out the source item
         return [
             SearchResult(
-                id=str(r.id),
-                score=r.score,
-                payload=r.payload,
-                collection=collection
+                id=str(r.id), score=r.score, payload=r.payload, collection=collection
             )
             for r in results.points
             if str(r.id) != item_id
         ][:limit]
 
     def get_all(
-        self,
-        collection: str,
-        limit: int = 10000,
-        offset: int = 0
+        self, collection: str, limit: int = 10000, offset: int = 0
     ) -> List[SearchResult]:
         """
         Retrieve all items from a collection.
@@ -712,7 +761,7 @@ class BDKnowledgeStore:
             limit=limit,
             offset=offset,
             with_payload=True,
-            with_vectors=False
+            with_vectors=False,
         )
 
         points = scroll_result[0]  # First element is the list of points
@@ -722,7 +771,7 @@ class BDKnowledgeStore:
                 id=str(p.id),
                 score=1.0,  # No score for direct retrieval
                 payload=p.payload,
-                collection=collection
+                collection=collection,
             )
             for p in points
         ]
@@ -732,48 +781,32 @@ class BDKnowledgeStore:
     # =========================================
 
     def find_contacts_for_program(
-        self,
-        program_name: str,
-        limit: int = 20
+        self, program_name: str, limit: int = 20
     ) -> List[SearchResult]:
         """Find contacts associated with a program."""
         return self.search(
-            query=program_name,
-            collection='contacts',
-            limit=limit,
-            score_threshold=0.3
+            query=program_name, collection="contacts", limit=limit, score_threshold=0.3
         )
 
     def find_jobs_for_program(
-        self,
-        program_name: str,
-        limit: int = 20
+        self, program_name: str, limit: int = 20
     ) -> List[SearchResult]:
         """Find job postings associated with a program."""
         return self.search(
-            query=program_name,
-            collection='jobs',
-            limit=limit,
-            score_threshold=0.3
+            query=program_name, collection="jobs", limit=limit, score_threshold=0.3
         )
 
     def find_contacts_at_company(
-        self,
-        company_name: str,
-        limit: int = 20
+        self, company_name: str, limit: int = 20
     ) -> List[SearchResult]:
         """Find contacts at a specific company."""
         # Use both semantic search and filter
         return self.search(
-            query=company_name,
-            collection='contacts',
-            limit=limit,
-            score_threshold=0.2
+            query=company_name, collection="contacts", limit=limit, score_threshold=0.2
         )
 
     def get_program_intelligence(
-        self,
-        program_name: str
+        self, program_name: str
     ) -> Dict[str, List[SearchResult]]:
         """
         Get comprehensive intelligence for a program.
@@ -781,10 +814,10 @@ class BDKnowledgeStore:
         Returns related jobs, contacts, and documents.
         """
         return {
-            'program': self.search('programs', program_name, limit=3),
-            'jobs': self.find_jobs_for_program(program_name),
-            'contacts': self.find_contacts_for_program(program_name),
-            'documents': self.search('documents', program_name, limit=10)
+            "program": self.search("programs", program_name, limit=3),
+            "jobs": self.find_jobs_for_program(program_name),
+            "contacts": self.find_contacts_for_program(program_name),
+            "documents": self.search("documents", program_name, limit=10),
         }
 
 
@@ -792,17 +825,24 @@ class BDKnowledgeStore:
 # CLI INTERFACE
 # =========================================
 
+
 def main():
     """CLI for testing the knowledge store."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD Knowledge Store CLI')
-    parser.add_argument('--init', action='store_true', help='Initialize collections')
-    parser.add_argument('--stats', action='store_true', help='Show collection statistics')
-    parser.add_argument('--search', type=str, help='Search query')
-    parser.add_argument('--collection', type=str, default='all', help='Collection to search')
-    parser.add_argument('--limit', type=int, default=5, help='Max results')
-    parser.add_argument('--in-memory', action='store_true', help='Use in-memory storage')
+    parser = argparse.ArgumentParser(description="BD Knowledge Store CLI")
+    parser.add_argument("--init", action="store_true", help="Initialize collections")
+    parser.add_argument(
+        "--stats", action="store_true", help="Show collection statistics"
+    )
+    parser.add_argument("--search", type=str, help="Search query")
+    parser.add_argument(
+        "--collection", type=str, default="all", help="Collection to search"
+    )
+    parser.add_argument("--limit", type=int, default=5, help="Max results")
+    parser.add_argument(
+        "--in-memory", action="store_true", help="Use in-memory storage"
+    )
 
     args = parser.parse_args()
 
@@ -820,26 +860,32 @@ def main():
         print("\nCollection Statistics:")
         stats = store.get_collection_stats()
         for name, stat in stats.items():
-            if 'error' in stat:
+            if "error" in stat:
                 print(f"  {name}: ERROR - {stat['error']}")
             else:
-                print(f"  {name}: {stat['points_count']} points, status={stat['status']}")
+                print(
+                    f"  {name}: {stat['points_count']} points, status={stat['status']}"
+                )
 
     if args.search:
         print(f"\nSearching for: {args.search}")
-        if args.collection == 'all':
+        if args.collection == "all":
             results = store.search_all(args.search, limit_per_collection=args.limit)
             for collection, items in results.items():
                 if items:
                     print(f"\n  {collection.upper()} ({len(items)} results):")
                     for r in items:
-                        print(f"    [{r.score:.3f}] {r.payload.get('name', r.payload.get('title', r.id))}")
+                        print(
+                            f"    [{r.score:.3f}] {r.payload.get('name', r.payload.get('title', r.id))}"
+                        )
         else:
             results = store.search(args.search, args.collection, limit=args.limit)
             print(f"\n  {args.collection.upper()} ({len(results)} results):")
             for r in results:
-                print(f"    [{r.score:.3f}] {r.payload.get('name', r.payload.get('title', r.id))}")
+                print(
+                    f"    [{r.score:.3f}] {r.payload.get('name', r.payload.get('title', r.id))}"
+                )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

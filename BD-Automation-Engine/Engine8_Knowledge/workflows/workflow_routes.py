@@ -27,6 +27,7 @@ router = APIRouter(prefix="/workflows", tags=["Workflows v2"])
 # Pydantic models
 # ---------------------------------------------------------------------------
 
+
 class StartWorkflowRequest(BaseModel):
     workflow_name: str
     input_state: Dict[str, Any] = {}
@@ -63,24 +64,29 @@ class ApprovalDecisionRequest(BaseModel):
 # Lazy imports
 # ---------------------------------------------------------------------------
 
+
 def _get_orchestrator():
     from Engine8_Knowledge.workflows.orchestrator_v2 import get_workflow_orchestrator
+
     return get_workflow_orchestrator()
 
 
 def _get_debugger():
     from Engine8_Knowledge.workflows.time_travel import get_time_travel_debugger
+
     return get_time_travel_debugger()
 
 
 def _get_hitl():
     from Engine8_Knowledge.workflows.human_loop import get_hitl_manager
+
     return get_hitl_manager()
 
 
 # ---------------------------------------------------------------------------
 # Execution endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.post("/start")
 async def start_workflow(req: StartWorkflowRequest):
@@ -127,6 +133,7 @@ async def cancel_workflow(thread_id: str, req: CancelWorkflowRequest):
 # Monitoring endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.get("/active")
 async def get_active_workflows():
     """List all active workflow executions."""
@@ -159,6 +166,7 @@ async def get_execution_status(thread_id: str):
 # ---------------------------------------------------------------------------
 # Time-travel endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("/{thread_id}/timeline")
 async def get_execution_timeline(thread_id: str):
@@ -203,7 +211,11 @@ async def replay_from_step(thread_id: str, step: int, req: ReplayRequest):
     try:
         debugger = _get_debugger()
         new_tid = await debugger.replay_from(thread_id, step, req.modified_state)
-        return {"forked_thread_id": new_tid, "original_thread_id": thread_id, "from_step": step}
+        return {
+            "forked_thread_id": new_tid,
+            "original_thread_id": thread_id,
+            "from_step": step,
+        }
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
 
@@ -211,6 +223,7 @@ async def replay_from_step(thread_id: str, step: int, req: ReplayRequest):
 # ---------------------------------------------------------------------------
 # Streaming endpoint
 # ---------------------------------------------------------------------------
+
 
 @router.get("/{thread_id}/stream")
 async def stream_workflow_events(thread_id: str):
@@ -235,6 +248,7 @@ async def stream_workflow_events(thread_id: str):
 # Registry endpoint
 # ---------------------------------------------------------------------------
 
+
 @router.get("/registry")
 async def list_registered_workflows():
     """List all registered workflow definitions."""
@@ -249,6 +263,7 @@ async def list_registered_workflows():
 # ---------------------------------------------------------------------------
 # Schedule endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("/schedules")
 async def list_schedules():
@@ -287,6 +302,7 @@ async def toggle_schedule(schedule_id: str, enabled: bool = Query(...)):
 # ---------------------------------------------------------------------------
 # Human-in-the-loop endpoints
 # ---------------------------------------------------------------------------
+
 
 @router.get("/approvals")
 async def list_pending_approvals(
@@ -327,6 +343,7 @@ async def get_approval_stats():
 # ---------------------------------------------------------------------------
 # Stats endpoint
 # ---------------------------------------------------------------------------
+
 
 @router.get("/stats")
 async def get_workflow_stats():

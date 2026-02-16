@@ -19,9 +19,11 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class TaskDAG:
     """Directed acyclic graph of sub-tasks."""
+
     dag_id: str = ""
     root_task: str = ""
     nodes: List[SubTask] = field(default_factory=list)
@@ -35,13 +37,16 @@ class TaskDAG:
 @dataclass
 class CostEstimate:
     """Cost and time estimate for executing a DAG."""
+
     total_tokens: int = 0
     total_api_cost_usd: float = 0.0
     estimated_time_seconds: float = 0.0
     critical_path_seconds: float = 0.0
     num_workers: int = 0
     num_parallel_groups: int = 0
-    worker_breakdown: Dict[str, int] = field(default_factory=dict)  # worker_type → token estimate
+    worker_breakdown: Dict[str, int] = field(
+        default_factory=dict
+    )  # worker_type → token estimate
 
 
 # =========================================
@@ -53,54 +58,158 @@ class CostEstimate:
 
 TASK_TEMPLATES: Dict[str, List[Dict[str, Any]]] = {
     "campaign_build": [
-        {"name": "Research program/contract details", "worker": "research", "depends": []},
-        {"name": "Discover and validate contacts", "worker": "contact_discovery", "depends": []},
+        {
+            "name": "Research program/contract details",
+            "worker": "research",
+            "depends": [],
+        },
+        {
+            "name": "Discover and validate contacts",
+            "worker": "contact_discovery",
+            "depends": [],
+        },
         {"name": "Analyze current job openings", "worker": "job_intel", "depends": []},
-        {"name": "Find relevant past performance", "worker": "past_performance", "depends": []},
-        {"name": "Classify contacts by tier and priority", "worker": "analytics", "depends": [1]},
-        {"name": "Match jobs to contacts and programs", "worker": "analytics", "depends": [1, 2]},
-        {"name": "Identify pain points from HUMINT data", "worker": "knowledge", "depends": [0]},
-        {"name": "Craft personalized outreach messages", "worker": "outreach_crafter", "depends": [3, 4, 5, 6]},
-        {"name": "Generate call sheet", "worker": "document_generator", "depends": [4, 7]},
-        {"name": "Generate BD playbook", "worker": "document_generator", "depends": [0, 1, 2, 3, 4, 5, 6, 7]},
+        {
+            "name": "Find relevant past performance",
+            "worker": "past_performance",
+            "depends": [],
+        },
+        {
+            "name": "Classify contacts by tier and priority",
+            "worker": "analytics",
+            "depends": [1],
+        },
+        {
+            "name": "Match jobs to contacts and programs",
+            "worker": "analytics",
+            "depends": [1, 2],
+        },
+        {
+            "name": "Identify pain points from HUMINT data",
+            "worker": "knowledge",
+            "depends": [0],
+        },
+        {
+            "name": "Craft personalized outreach messages",
+            "worker": "outreach_crafter",
+            "depends": [3, 4, 5, 6],
+        },
+        {
+            "name": "Generate call sheet",
+            "worker": "document_generator",
+            "depends": [4, 7],
+        },
+        {
+            "name": "Generate BD playbook",
+            "worker": "document_generator",
+            "depends": [0, 1, 2, 3, 4, 5, 6, 7],
+        },
     ],
     "contact_enrichment": [
-        {"name": "Discover contacts from multiple sources", "worker": "contact_discovery", "depends": []},
-        {"name": "Validate contact information", "worker": "contact_discovery", "depends": [0]},
+        {
+            "name": "Discover contacts from multiple sources",
+            "worker": "contact_discovery",
+            "depends": [],
+        },
+        {
+            "name": "Validate contact information",
+            "worker": "contact_discovery",
+            "depends": [0],
+        },
         {"name": "Classify contacts by tier", "worker": "analytics", "depends": [1]},
-        {"name": "Enrich with knowledge graph data", "worker": "knowledge", "depends": [1]},
-        {"name": "Update CRM records", "worker": "document_generator", "depends": [2, 3]},
+        {
+            "name": "Enrich with knowledge graph data",
+            "worker": "knowledge",
+            "depends": [1],
+        },
+        {
+            "name": "Update CRM records",
+            "worker": "document_generator",
+            "depends": [2, 3],
+        },
     ],
     "program_analysis": [
-        {"name": "Research program details and timeline", "worker": "research", "depends": []},
+        {
+            "name": "Research program details and timeline",
+            "worker": "research",
+            "depends": [],
+        },
         {"name": "Analyze contracts and funding", "worker": "research", "depends": []},
         {"name": "Find program contacts", "worker": "contact_discovery", "depends": []},
         {"name": "Analyze related job postings", "worker": "job_intel", "depends": []},
-        {"name": "Gather competitor intelligence", "worker": "research", "depends": [0]},
-        {"name": "Generate analysis report", "worker": "document_generator", "depends": [0, 1, 2, 3, 4]},
+        {
+            "name": "Gather competitor intelligence",
+            "worker": "research",
+            "depends": [0],
+        },
+        {
+            "name": "Generate analysis report",
+            "worker": "document_generator",
+            "depends": [0, 1, 2, 3, 4],
+        },
     ],
     "weekly_briefing": [
         {"name": "Scan for new job postings", "worker": "job_intel", "depends": []},
-        {"name": "Check for contact changes", "worker": "contact_discovery", "depends": []},
+        {
+            "name": "Check for contact changes",
+            "worker": "contact_discovery",
+            "depends": [],
+        },
         {"name": "Review contract updates", "worker": "research", "depends": []},
         {"name": "Summarize HUMINT data", "worker": "knowledge", "depends": []},
-        {"name": "Generate weekly briefing document", "worker": "document_generator", "depends": [0, 1, 2, 3]},
+        {
+            "name": "Generate weekly briefing document",
+            "worker": "document_generator",
+            "depends": [0, 1, 2, 3],
+        },
     ],
     "competitive_analysis": [
         {"name": "Research target competitor", "worker": "research", "depends": []},
         {"name": "Find competitor contracts", "worker": "research", "depends": [0]},
-        {"name": "Identify competitor personnel", "worker": "contact_discovery", "depends": [0]},
-        {"name": "Analyze competitor job postings", "worker": "job_intel", "depends": [0]},
-        {"name": "Compare with our capabilities", "worker": "analytics", "depends": [1, 3]},
-        {"name": "Generate competitive intel report", "worker": "document_generator", "depends": [0, 1, 2, 3, 4]},
+        {
+            "name": "Identify competitor personnel",
+            "worker": "contact_discovery",
+            "depends": [0],
+        },
+        {
+            "name": "Analyze competitor job postings",
+            "worker": "job_intel",
+            "depends": [0],
+        },
+        {
+            "name": "Compare with our capabilities",
+            "worker": "analytics",
+            "depends": [1, 3],
+        },
+        {
+            "name": "Generate competitive intel report",
+            "worker": "document_generator",
+            "depends": [0, 1, 2, 3, 4],
+        },
     ],
 }
 
 # Keyword-to-template mapping
 TEMPLATE_KEYWORDS: Dict[str, List[str]] = {
-    "campaign_build": ["campaign", "playbook", "outreach", "bd campaign", "business development"],
-    "contact_enrichment": ["enrich", "contact enrichment", "update contacts", "validate contacts"],
-    "program_analysis": ["program analysis", "analyze program", "program intel", "contract analysis"],
+    "campaign_build": [
+        "campaign",
+        "playbook",
+        "outreach",
+        "bd campaign",
+        "business development",
+    ],
+    "contact_enrichment": [
+        "enrich",
+        "contact enrichment",
+        "update contacts",
+        "validate contacts",
+    ],
+    "program_analysis": [
+        "program analysis",
+        "analyze program",
+        "program intel",
+        "contract analysis",
+    ],
     "weekly_briefing": ["weekly", "briefing", "weekly update", "status report"],
     "competitive_analysis": ["competitor", "competitive", "compete", "rival"],
 }
@@ -109,6 +218,7 @@ TEMPLATE_KEYWORDS: Dict[str, List[str]] = {
 # =========================================
 # TASK DECOMPOSER
 # =========================================
+
 
 class TaskDecomposer:
     """Breaks high-level BD tasks into dependency-ordered sub-task DAGs."""
@@ -136,24 +246,27 @@ class TaskDecomposer:
 
         # Program names
         programs = re.findall(
-            r'\b(DCGS|DCGS-[A-Z]|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b',
-            description, re.IGNORECASE,
+            r"\b(DCGS|DCGS-[A-Z]|GBSD|NGEN|DEOS|CES|JADC2|ABMS|ODIN|TITAN)\b",
+            description,
+            re.IGNORECASE,
         )
         if programs:
             params["program"] = programs[0].upper()
 
         # Organization names
         orgs = re.findall(
-            r'\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton|Navy|Army|Air Force)\b',
-            description, re.IGNORECASE,
+            r"\b(GDIT|Leidos|SAIC|Northrop|Raytheon|Lockheed|BAE|CACI|ManTech|Peraton|Navy|Army|Air Force)\b",
+            description,
+            re.IGNORECASE,
         )
         if orgs:
             params["organization"] = orgs[0]
 
         # Locations
         locations = re.findall(
-            r'\b(Norfolk|Langley|PACAF|Wright-Patterson|San Diego|Fort Meade|Huntsville)\b',
-            description, re.IGNORECASE,
+            r"\b(Norfolk|Langley|PACAF|Wright-Patterson|San Diego|Fort Meade|Huntsville)\b",
+            description,
+            re.IGNORECASE,
         )
         if locations:
             params["location"] = locations[0]
@@ -165,7 +278,11 @@ class TaskDecomposer:
         dag_id = uuid.uuid4().hex[:10]
 
         # Detect template
-        template_name = task_type if task_type in TASK_TEMPLATES else self._detect_template(task_description)
+        template_name = (
+            task_type
+            if task_type in TASK_TEMPLATES
+            else self._detect_template(task_description)
+        )
         template = TASK_TEMPLATES.get(template_name, TASK_TEMPLATES["campaign_build"])
 
         # Extract parameters
@@ -179,14 +296,16 @@ class TaskDecomposer:
             task_id = uuid.uuid4().hex[:8]
             id_map[i] = task_id
 
-            nodes.append(SubTask(
-                id=task_id,
-                description=tmpl["name"],
-                worker_type=tmpl["worker"],
-                parameters=dict(params),
-                depends_on=[],
-                priority=1 if not tmpl["depends"] else 2,
-            ))
+            nodes.append(
+                SubTask(
+                    id=task_id,
+                    description=tmpl["name"],
+                    worker_type=tmpl["worker"],
+                    parameters=dict(params),
+                    depends_on=[],
+                    priority=1 if not tmpl["depends"] else 2,
+                )
+            )
 
         # Resolve dependency references (index → actual ID)
         edges: List[Tuple[str, str]] = []
@@ -243,7 +362,9 @@ class TaskDecomposer:
             cap = DEFAULT_CAPABILITIES.get(node.worker_type)
             tokens = cap.avg_tokens if cap else 2000
             total_tokens += tokens
-            worker_breakdown[node.worker_type] = worker_breakdown.get(node.worker_type, 0) + tokens
+            worker_breakdown[node.worker_type] = (
+                worker_breakdown.get(node.worker_type, 0) + tokens
+            )
 
         # Cost estimate: ~$0.003 per 1K input tokens (Claude Sonnet pricing approximation)
         api_cost = (total_tokens / 1000) * 0.003
@@ -296,14 +417,20 @@ class TaskDecomposer:
         return layers
 
     def _compute_critical_path(
-        self, nodes: List[SubTask], edges: List[Tuple[str, str]],
+        self,
+        nodes: List[SubTask],
+        edges: List[Tuple[str, str]],
     ) -> float:
         """Compute the critical path duration (longest path through DAG)."""
         node_map = {n.id: n for n in nodes}
         time_map: Dict[str, float] = {}
 
         def get_time(nid: str) -> float:
-            cap = DEFAULT_CAPABILITIES.get(node_map[nid].worker_type) if nid in node_map else None
+            cap = (
+                DEFAULT_CAPABILITIES.get(node_map[nid].worker_type)
+                if nid in node_map
+                else None
+            )
             return cap.avg_time_seconds if cap else 30.0
 
         # Build adjacency for reverse traversal

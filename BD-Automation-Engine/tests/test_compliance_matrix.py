@@ -17,6 +17,7 @@ from src.proposals.compliance_matrix import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def generator():
     return ComplianceMatrixGenerator()
@@ -37,15 +38,31 @@ L.7.1: The offeror shall maintain cybersecurity compliance per NIST 800-171.
 @pytest.fixture
 def sample_requirements():
     return [
-        {"id": "REQ-001", "text": "Contractor shall provide TS/SCI cleared intelligence analysts", "section_ref": "L.5.1", "type": "clearance"},
-        {"id": "REQ-002", "text": "Contractor shall provide staffing for ISR mission support", "section_ref": "L.5.2", "type": "staffing"},
-        {"id": "REQ-003", "text": "Contractor must implement a quantum photonics array for satellite uplink", "section_ref": "L.6.1", "type": "technical"},
+        {
+            "id": "REQ-001",
+            "text": "Contractor shall provide TS/SCI cleared intelligence analysts",
+            "section_ref": "L.5.1",
+            "type": "clearance",
+        },
+        {
+            "id": "REQ-002",
+            "text": "Contractor shall provide staffing for ISR mission support",
+            "section_ref": "L.5.2",
+            "type": "staffing",
+        },
+        {
+            "id": "REQ-003",
+            "text": "Contractor must implement a quantum photonics array for satellite uplink",
+            "section_ref": "L.6.1",
+            "type": "technical",
+        },
     ]
 
 
 # =========================================
 # CAPABILITIES MAP
 # =========================================
+
 
 class TestCapabilitiesMap:
     def test_has_staffing(self):
@@ -67,6 +84,7 @@ class TestCapabilitiesMap:
 # =========================================
 # REQUIREMENT EXTRACTION
 # =========================================
+
 
 class TestRequirementExtraction:
     def test_extracts_from_text(self, sample_rfp_text):
@@ -97,6 +115,7 @@ class TestRequirementExtraction:
 # =========================================
 # COMPLIANCE GENERATION FROM TEXT
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestComplianceFromText:
@@ -130,22 +149,32 @@ class TestComplianceFromText:
 # COMPLIANCE FROM REQUIREMENTS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestComplianceFromRequirements:
     async def test_generates_from_list(self, generator, sample_requirements):
-        matrix = await generator.generate_from_requirements("Test RFP", sample_requirements)
+        matrix = await generator.generate_from_requirements(
+            "Test RFP", sample_requirements
+        )
         assert matrix.total_requirements == 3
 
-    async def test_clearance_requirement_compliant(self, generator, sample_requirements):
-        matrix = await generator.generate_from_requirements("Test RFP", sample_requirements)
+    async def test_clearance_requirement_compliant(
+        self, generator, sample_requirements
+    ):
+        matrix = await generator.generate_from_requirements(
+            "Test RFP", sample_requirements
+        )
         clearance_row = [r for r in matrix.rows if r.requirement_id == "REQ-001"][0]
         # TS/SCI + intelligence analysts = strong match
         assert clearance_row.compliance_status in (
-            ComplianceStatus.COMPLIANT, ComplianceStatus.PARTIALLY_COMPLIANT
+            ComplianceStatus.COMPLIANT,
+            ComplianceStatus.PARTIALLY_COMPLIANT,
         )
 
     async def test_quantum_non_compliant(self, generator, sample_requirements):
-        matrix = await generator.generate_from_requirements("Test RFP", sample_requirements)
+        matrix = await generator.generate_from_requirements(
+            "Test RFP", sample_requirements
+        )
         quantum_row = [r for r in matrix.rows if r.requirement_id == "REQ-003"][0]
         assert quantum_row.compliance_status == ComplianceStatus.NON_COMPLIANT
 
@@ -153,6 +182,7 @@ class TestComplianceFromRequirements:
 # =========================================
 # SECTION L/M MAPPING
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestSectionMapping:
@@ -168,11 +198,14 @@ class TestSectionMapping:
 # TEAMING RECOMMENDATIONS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestTeamingRecommendations:
     async def test_teaming_for_gaps(self, generator, sample_rfp_text):
         matrix = await generator.generate_from_text("Test RFP", sample_rfp_text)
-        non_compliant_gaps = [g for g in matrix.gaps if g.severity in ("critical", "high")]
+        non_compliant_gaps = [
+            g for g in matrix.gaps if g.severity in ("critical", "high")
+        ]
         if non_compliant_gaps:
             assert len(matrix.teaming_recommendations) > 0
 
@@ -180,6 +213,7 @@ class TestTeamingRecommendations:
 # =========================================
 # EXPORT
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestExport:
@@ -194,6 +228,7 @@ class TestExport:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_generator_returns_instance(self):

@@ -16,18 +16,20 @@ from dataclasses import dataclass
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv()
 
 from utils.llm_retry import anthropic_retry
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger('BDAutoTagger')
+logger = logging.getLogger("BDAutoTagger")
 
 # Check for optional dependencies
 ANTHROPIC_AVAILABLE = False
 try:
     import anthropic
+
     ANTHROPIC_AVAILABLE = True
 except ImportError:
     logger.warning("anthropic not installed. Using rule-based tagging only.")
@@ -38,65 +40,138 @@ except ImportError:
 
 # BD-specific taxonomy for classification
 TAXONOMY = {
-    'program': [
-        'DCGS', 'DCGS-A', 'DCGS-N', 'DCGS-MC',
-        'GBSD', 'Sentinel',
-        'NGI', 'Next Generation Interceptor',
-        'Defense Enclave Services', 'DES',
-        'JADC2',
-        'ABMS',
-        'Space Force',
-        'MDA', 'Missile Defense Agency',
-        'DISA',
-        'Navy', 'Air Force', 'Army', 'SOCOM',
-        'DIA', 'NGA', 'NSA', 'CIA',
-        'PAC-3', 'THAAD', 'Aegis',
+    "program": [
+        "DCGS",
+        "DCGS-A",
+        "DCGS-N",
+        "DCGS-MC",
+        "GBSD",
+        "Sentinel",
+        "NGI",
+        "Next Generation Interceptor",
+        "Defense Enclave Services",
+        "DES",
+        "JADC2",
+        "ABMS",
+        "Space Force",
+        "MDA",
+        "Missile Defense Agency",
+        "DISA",
+        "Navy",
+        "Air Force",
+        "Army",
+        "SOCOM",
+        "DIA",
+        "NGA",
+        "NSA",
+        "CIA",
+        "PAC-3",
+        "THAAD",
+        "Aegis",
     ],
-    'contractor': [
-        'Leidos', 'GDIT', 'General Dynamics',
-        'CACI', 'Peraton', 'Northrop Grumman', 'Northrop',
-        'Lockheed Martin', 'Lockheed',
-        'Raytheon', 'RTX',
-        'Boeing', 'BAE Systems', 'BAE',
-        'SAIC', 'ManTech', 'Booz Allen', 'BAH',
-        'L3Harris', 'L3',
-        'Parsons', 'Jacobs', 'KBR',
-        'Accenture Federal', 'Deloitte',
-        'Microsoft', 'Amazon', 'AWS', 'Google', 'Oracle',
+    "contractor": [
+        "Leidos",
+        "GDIT",
+        "General Dynamics",
+        "CACI",
+        "Peraton",
+        "Northrop Grumman",
+        "Northrop",
+        "Lockheed Martin",
+        "Lockheed",
+        "Raytheon",
+        "RTX",
+        "Boeing",
+        "BAE Systems",
+        "BAE",
+        "SAIC",
+        "ManTech",
+        "Booz Allen",
+        "BAH",
+        "L3Harris",
+        "L3",
+        "Parsons",
+        "Jacobs",
+        "KBR",
+        "Accenture Federal",
+        "Deloitte",
+        "Microsoft",
+        "Amazon",
+        "AWS",
+        "Google",
+        "Oracle",
     ],
-    'data_type': [
-        'job_posting', 'contact', 'contract',
-        'past_performance', 'briefing', 'playbook',
-        'call_note', 'activity', 'proposal',
-        'org_chart', 'intelligence_report',
+    "data_type": [
+        "job_posting",
+        "contact",
+        "contract",
+        "past_performance",
+        "briefing",
+        "playbook",
+        "call_note",
+        "activity",
+        "proposal",
+        "org_chart",
+        "intelligence_report",
     ],
-    'clearance': [
-        'TS/SCI', 'TS/SCI CI Poly', 'TS/SCI Full Scope',
-        'Top Secret', 'TS',
-        'Secret',
-        'Public Trust',
-        'None', 'Unclassified',
+    "clearance": [
+        "TS/SCI",
+        "TS/SCI CI Poly",
+        "TS/SCI Full Scope",
+        "Top Secret",
+        "TS",
+        "Secret",
+        "Public Trust",
+        "None",
+        "Unclassified",
     ],
-    'priority': [
-        'hot', 'high',
-        'warm', 'medium',
-        'cold', 'low',
+    "priority": [
+        "hot",
+        "high",
+        "warm",
+        "medium",
+        "cold",
+        "low",
     ],
-    'location': [
-        'Washington DC', 'DC Metro', 'Northern Virginia', 'NoVA',
-        'Arlington', 'McLean', 'Reston', 'Tysons',
-        'Fort Belvoir', 'Fort Meade', 'Pentagon',
-        'San Diego', 'Colorado Springs', 'Huntsville',
-        'Remote', 'Hybrid',
+    "location": [
+        "Washington DC",
+        "DC Metro",
+        "Northern Virginia",
+        "NoVA",
+        "Arlington",
+        "McLean",
+        "Reston",
+        "Tysons",
+        "Fort Belvoir",
+        "Fort Meade",
+        "Pentagon",
+        "San Diego",
+        "Colorado Springs",
+        "Huntsville",
+        "Remote",
+        "Hybrid",
     ],
-    'skill': [
-        'Cloud', 'AWS', 'Azure', 'DevOps', 'DevSecOps',
-        'Cybersecurity', 'SIEM', 'SOC',
-        'Data Analytics', 'Machine Learning', 'AI',
-        'Software Development', 'Full Stack',
-        'Systems Engineering', 'Integration',
-        'Program Management', 'Capture Management',
-        'Intelligence Analysis', 'SIGINT', 'GEOINT',
+    "skill": [
+        "Cloud",
+        "AWS",
+        "Azure",
+        "DevOps",
+        "DevSecOps",
+        "Cybersecurity",
+        "SIEM",
+        "SOC",
+        "Data Analytics",
+        "Machine Learning",
+        "AI",
+        "Software Development",
+        "Full Stack",
+        "Systems Engineering",
+        "Integration",
+        "Program Management",
+        "Capture Management",
+        "Intelligence Analysis",
+        "SIGINT",
+        "GEOINT",
     ],
 }
 
@@ -107,24 +182,21 @@ for category, terms in TAXONOMY.items():
     for term in terms:
         # Escape special characters and create word boundary pattern
         escaped = re.escape(term)
-        patterns.append(rf'\b{escaped}\b')
-    TAXONOMY_PATTERNS[category] = re.compile('|'.join(patterns), re.IGNORECASE)
+        patterns.append(rf"\b{escaped}\b")
+    TAXONOMY_PATTERNS[category] = re.compile("|".join(patterns), re.IGNORECASE)
 
 
 @dataclass
 class TagResult:
     """Result of auto-tagging operation."""
+
     tags: Dict[str, List[str]]
     confidence: float
     method: str  # 'llm' or 'rules'
     raw_text_sample: str = ""
 
     def to_dict(self) -> Dict:
-        return {
-            'tags': self.tags,
-            'confidence': self.confidence,
-            'method': self.method
-        }
+        return {"tags": self.tags, "confidence": self.confidence, "method": self.method}
 
     def all_tags(self) -> List[str]:
         """Get flattened list of all tags."""
@@ -137,6 +209,7 @@ class TagResult:
 # =========================================
 # RULE-BASED TAGGER
 # =========================================
+
 
 class RuleBasedTagger:
     """
@@ -187,10 +260,7 @@ class RuleBasedTagger:
         confidence = min(1.0, match_counts / max(1, len(text.split()) / 100))
 
         return TagResult(
-            tags=tags,
-            confidence=confidence,
-            method='rules',
-            raw_text_sample=text[:200]
+            tags=tags, confidence=confidence, method="rules", raw_text_sample=text[:200]
         )
 
     def _normalize_matches(self, category: str, matches: Set[str]) -> List[str]:
@@ -221,6 +291,7 @@ class RuleBasedTagger:
 # LLM-BASED TAGGER
 # =========================================
 
+
 class LLMTagger:
     """
     LLM-powered document tagger using Claude.
@@ -228,12 +299,10 @@ class LLMTagger:
     """
 
     def __init__(
-        self,
-        model: str = "claude-sonnet-4-20250514",
-        api_key: Optional[str] = None
+        self, model: str = "claude-sonnet-4-20250514", api_key: Optional[str] = None
     ):
         self.model = model
-        self.api_key = api_key or os.getenv('ANTHROPIC_API_KEY')
+        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
 
         if ANTHROPIC_AVAILABLE and self.api_key:
             self.client = anthropic.Anthropic(api_key=self.api_key)
@@ -287,9 +356,7 @@ JSON:"""
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=500,
-                messages=[
-                    {"role": "user", "content": prompt}
-                ]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             response_text = response.content[0].text.strip()
@@ -300,8 +367,8 @@ JSON:"""
             return TagResult(
                 tags=tags,
                 confidence=0.85,  # LLM generally higher confidence
-                method='llm',
-                raw_text_sample=text[:200]
+                method="llm",
+                raw_text_sample=text[:200],
             )
 
         except Exception as e:
@@ -314,7 +381,7 @@ JSON:"""
         # Try to find JSON in response
         try:
             # Look for JSON object
-            match = re.search(r'\{[^{}]*\}', text, re.DOTALL)
+            match = re.search(r"\{[^{}]*\}", text, re.DOTALL)
             if match:
                 return json.loads(match.group())
         except json.JSONDecodeError:
@@ -334,6 +401,7 @@ JSON:"""
 # AUTO TAGGER (COMBINED)
 # =========================================
 
+
 class AutoTagger:
     """
     Combined auto-tagger using both rules and LLM.
@@ -344,7 +412,7 @@ class AutoTagger:
         self,
         use_llm: bool = True,
         llm_threshold: float = 0.5,
-        model: str = "claude-sonnet-4-20250514"
+        model: str = "claude-sonnet-4-20250514",
     ):
         """
         Initialize auto-tagger.
@@ -359,10 +427,7 @@ class AutoTagger:
         self.llm_threshold = llm_threshold
 
     def classify(
-        self,
-        text: str,
-        metadata: Optional[Dict] = None,
-        force_llm: bool = False
+        self, text: str, metadata: Optional[Dict] = None, force_llm: bool = False
     ) -> TagResult:
         """
         Classify document, using LLM if rules are uncertain.
@@ -379,7 +444,9 @@ class AutoTagger:
         rule_result = self.rule_tagger.classify(text, metadata)
 
         # Use LLM if rules uncertain or forced
-        if force_llm or (self.llm_tagger and rule_result.confidence < self.llm_threshold):
+        if force_llm or (
+            self.llm_tagger and rule_result.confidence < self.llm_threshold
+        ):
             llm_result = self.llm_tagger.classify(text, metadata)
 
             # Merge results (LLM takes precedence for overlapping categories)
@@ -394,8 +461,8 @@ class AutoTagger:
             return TagResult(
                 tags=merged_tags,
                 confidence=max(rule_result.confidence, llm_result.confidence),
-                method='hybrid',
-                raw_text_sample=text[:200]
+                method="hybrid",
+                raw_text_sample=text[:200],
             )
 
         return rule_result
@@ -406,9 +473,7 @@ class AutoTagger:
         return result.all_tags()
 
     def batch_classify(
-        self,
-        documents: List[Dict],
-        text_field: str = 'content'
+        self, documents: List[Dict], text_field: str = "content"
     ) -> List[Tuple[Dict, TagResult]]:
         """
         Classify multiple documents.
@@ -423,7 +488,7 @@ class AutoTagger:
         results = []
 
         for doc in documents:
-            text = doc.get(text_field, '')
+            text = doc.get(text_field, "")
 
             # Use other fields as metadata
             metadata = {k: v for k, v in doc.items() if k != text_field}
@@ -437,6 +502,7 @@ class AutoTagger:
 # =========================================
 # INTEGRATION WITH INDEXER
 # =========================================
+
 
 def enrich_with_tags(data: Dict, tagger: Optional[AutoTagger] = None) -> Dict:
     """
@@ -453,19 +519,19 @@ def enrich_with_tags(data: Dict, tagger: Optional[AutoTagger] = None) -> Dict:
 
     # Build text from common fields
     text_parts = []
-    for field in ['title', 'name', 'content', 'summary', 'notes', 'description']:
+    for field in ["title", "name", "content", "summary", "notes", "description"]:
         if field in data and data[field]:
             text_parts.append(str(data[field]))
 
-    text = ' '.join(text_parts)
+    text = " ".join(text_parts)
 
     # Classify
     result = tagger.classify(text, data)
 
     # Add tags to data
     enriched = {**data}
-    enriched['auto_tags'] = result.all_tags()
-    enriched['auto_tags_detail'] = result.tags
+    enriched["auto_tags"] = result.all_tags()
+    enriched["auto_tags_detail"] = result.tags
 
     return enriched
 
@@ -474,22 +540,25 @@ def enrich_with_tags(data: Dict, tagger: Optional[AutoTagger] = None) -> Dict:
 # CLI INTERFACE
 # =========================================
 
+
 def main():
     """CLI for the BD Auto Tagger."""
     import argparse
 
-    parser = argparse.ArgumentParser(description='BD Auto Tagger')
-    parser.add_argument('text', nargs='?', help='Text to classify')
-    parser.add_argument('--file', '-f', help='File to classify')
-    parser.add_argument('--llm', action='store_true', help='Force LLM classification')
-    parser.add_argument('--rules-only', action='store_true', help='Use only rule-based tagging')
-    parser.add_argument('--json', action='store_true', help='Output as JSON')
+    parser = argparse.ArgumentParser(description="BD Auto Tagger")
+    parser.add_argument("text", nargs="?", help="Text to classify")
+    parser.add_argument("--file", "-f", help="File to classify")
+    parser.add_argument("--llm", action="store_true", help="Force LLM classification")
+    parser.add_argument(
+        "--rules-only", action="store_true", help="Use only rule-based tagging"
+    )
+    parser.add_argument("--json", action="store_true", help="Output as JSON")
 
     args = parser.parse_args()
 
     # Get text to classify
     if args.file:
-        with open(args.file, 'r', encoding='utf-8') as f:
+        with open(args.file, "r", encoding="utf-8") as f:
             text = f.read()
     elif args.text:
         text = args.text
@@ -507,7 +576,9 @@ def main():
     if args.json:
         print(json.dumps(result.to_dict(), indent=2))
     else:
-        print(f"\nClassification Result (method: {result.method}, confidence: {result.confidence:.2f})")
+        print(
+            f"\nClassification Result (method: {result.method}, confidence: {result.confidence:.2f})"
+        )
         print("=" * 50)
 
         for category, tags in sorted(result.tags.items()):
@@ -518,5 +589,5 @@ def main():
         print(f"\nAll tags: {', '.join(result.all_tags())}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -149,7 +149,10 @@ class TestEnsureMCP:
     def test_ensure_mcp_no_fastmcp(self, server):
         """When FastMCP is not installed, _mcp stays None."""
         with patch.dict("sys.modules", {"fastmcp": None}):
-            with patch("builtins.__import__", side_effect=ImportError("No module named 'fastmcp'")):
+            with patch(
+                "builtins.__import__",
+                side_effect=ImportError("No module named 'fastmcp'"),
+            ):
                 result = server._ensure_mcp()
         # Should not crash, just return None
         assert result is None or server._mcp is None
@@ -167,9 +170,17 @@ class TestRegisterTools:
         mock_mcp._tools = {}
         server._mcp = mock_mcp
 
-        with patch("Engine8_Knowledge.mcp.contact_tools.register_contact_tools", return_value=5):
-            with patch("Engine8_Knowledge.mcp.program_tools.register_program_tools", return_value=6):
-                with patch("Engine8_Knowledge.mcp.memory_tools.register_memory_tools", return_value=5):
+        with patch(
+            "Engine8_Knowledge.mcp.contact_tools.register_contact_tools", return_value=5
+        ):
+            with patch(
+                "Engine8_Knowledge.mcp.program_tools.register_program_tools",
+                return_value=6,
+            ):
+                with patch(
+                    "Engine8_Knowledge.mcp.memory_tools.register_memory_tools",
+                    return_value=5,
+                ):
                     server._register_tools()
 
         assert server._tools_registered == 16
@@ -180,9 +191,17 @@ class TestRegisterTools:
         mock_mcp._tools = {}
         server._mcp = mock_mcp
 
-        with patch("Engine8_Knowledge.mcp.contact_tools.register_contact_tools", return_value=5):
-            with patch("Engine8_Knowledge.mcp.program_tools.register_program_tools", return_value=6):
-                with patch("Engine8_Knowledge.mcp.memory_tools.register_memory_tools", return_value=5):
+        with patch(
+            "Engine8_Knowledge.mcp.contact_tools.register_contact_tools", return_value=5
+        ):
+            with patch(
+                "Engine8_Knowledge.mcp.program_tools.register_program_tools",
+                return_value=6,
+            ):
+                with patch(
+                    "Engine8_Knowledge.mcp.memory_tools.register_memory_tools",
+                    return_value=5,
+                ):
                     server._register_tools()
 
         stats = server.get_stats()
@@ -197,6 +216,7 @@ class TestRegisterTools:
 class TestSingleton:
     def test_singleton(self):
         import Engine8_Knowledge.mcp.mcp_server as mod
+
         original = mod._server
         mod._server = None
         s1 = mod.get_mcp_server(hub_url="http://localhost:8100")

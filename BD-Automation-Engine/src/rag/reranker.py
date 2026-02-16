@@ -18,9 +18,11 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class ScoredDoc:
     """A document with a relevance score."""
+
     doc_id: str = ""
     text: str = ""
     score: float = 0.0
@@ -31,6 +33,7 @@ class ScoredDoc:
 @dataclass
 class RerankResult:
     """Result of the full reranking pipeline."""
+
     docs: List[ScoredDoc] = field(default_factory=list)
     stages_applied: List[str] = field(default_factory=list)
     latency_ms: float = 0.0
@@ -41,6 +44,7 @@ class RerankResult:
 # =========================================
 # SIMILARITY HELPERS
 # =========================================
+
 
 def _cosine_similarity(a: List[float], b: List[float]) -> float:
     """Compute cosine similarity between two vectors."""
@@ -60,7 +64,7 @@ def _token_embeddings(text: str) -> List[List[float]]:
     This is a fast fallback when no real embedding model is available.
     In production, this would use ColBERT or sentence-transformers.
     """
-    tokens = re.findall(r'\b\w+\b', text.lower())
+    tokens = re.findall(r"\b\w+\b", text.lower())
     embeddings = []
     for token in tokens[:50]:  # Limit tokens
         # Simple character-based hash → 32-dim vector
@@ -77,7 +81,7 @@ def _token_embeddings(text: str) -> List[List[float]]:
 def _text_embedding(text: str) -> List[float]:
     """Simple bag-of-characters embedding for text (fallback)."""
     vec = [0.0] * 32
-    tokens = re.findall(r'\b\w+\b', text.lower())
+    tokens = re.findall(r"\b\w+\b", text.lower())
     for token in tokens:
         for i, ch in enumerate(token):
             vec[ord(ch) % 32] += 1.0 / (i + 1)
@@ -87,10 +91,29 @@ def _text_embedding(text: str) -> List[float]:
 
 def _token_overlap_score(query: str, doc: str) -> float:
     """Compute token overlap relevance."""
-    q_tokens = set(re.findall(r'\b\w+\b', query.lower()))
-    d_tokens = set(re.findall(r'\b\w+\b', doc.lower()))
-    stopwords = {"the", "a", "an", "is", "are", "was", "in", "on", "at", "to",
-                 "for", "of", "and", "or", "but", "not", "this", "that", "it"}
+    q_tokens = set(re.findall(r"\b\w+\b", query.lower()))
+    d_tokens = set(re.findall(r"\b\w+\b", doc.lower()))
+    stopwords = {
+        "the",
+        "a",
+        "an",
+        "is",
+        "are",
+        "was",
+        "in",
+        "on",
+        "at",
+        "to",
+        "for",
+        "of",
+        "and",
+        "or",
+        "but",
+        "not",
+        "this",
+        "that",
+        "it",
+    }
     q_tokens -= stopwords
     d_tokens -= stopwords
     if not q_tokens:
@@ -101,6 +124,7 @@ def _token_overlap_score(query: str, doc: str) -> float:
 # =========================================
 # ADVANCED RERANKER
 # =========================================
+
 
 class AdvancedReranker:
     """Multi-stage reranking pipeline: RRF → Cross-encoder → ColBERT → MMR."""
@@ -120,7 +144,9 @@ class AdvancedReranker:
         self._embedding_fn = embedding_fn
         self.rrf_k = rrf_k
         self.mmr_lambda = mmr_lambda
-        self.cross_encoder_available = cross_encoder_available or (cross_encoder_fn is not None)
+        self.cross_encoder_available = cross_encoder_available or (
+            cross_encoder_fn is not None
+        )
         self.colbert_available = colbert_available or (colbert_fn is not None)
 
     # -----------------------------------------
@@ -128,7 +154,8 @@ class AdvancedReranker:
     # -----------------------------------------
 
     async def fuse_rankings(
-        self, channel_results: Dict[str, List[ScoredDoc]],
+        self,
+        channel_results: Dict[str, List[ScoredDoc]],
     ) -> List[ScoredDoc]:
         """Reciprocal Rank Fusion across multiple retrieval channels.
 
@@ -174,7 +201,9 @@ class AdvancedReranker:
     # -----------------------------------------
 
     async def cross_encode(
-        self, query: str, docs: List[str],
+        self,
+        query: str,
+        docs: List[str],
     ) -> List[float]:
         """Cross-encoder scoring (BGE-reranker-v2-m3 or fallback).
 
@@ -203,7 +232,9 @@ class AdvancedReranker:
     # -----------------------------------------
 
     async def colbert_rerank(
-        self, query: str, docs: List[str],
+        self,
+        query: str,
+        docs: List[str],
     ) -> List[float]:
         """ColBERT late interaction reranking.
 
@@ -246,7 +277,9 @@ class AdvancedReranker:
     # -----------------------------------------
 
     async def diversify(
-        self, docs: List[ScoredDoc], lambda_param: Optional[float] = None,
+        self,
+        docs: List[ScoredDoc],
+        lambda_param: Optional[float] = None,
     ) -> List[ScoredDoc]:
         """Maximal Marginal Relevance for result diversity.
 
@@ -339,7 +372,7 @@ class AdvancedReranker:
             stages.append("colbert")
 
         # Stage 4: MMR diversity
-        diversified = await self.diversify(fused[:top_k * 2])
+        diversified = await self.diversify(fused[: top_k * 2])
         stages.append("mmr_diversity")
 
         elapsed = (time.time() - start) * 1000

@@ -43,6 +43,7 @@ router = APIRouter(prefix="/proposals", tags=["proposals"])
 # REQUEST / RESPONSE MODELS
 # =========================================
 
+
 class CapabilityRequest(BaseModel):
     program: str
     agency: str = ""
@@ -134,6 +135,7 @@ def _get_pricing() -> PricingEngine:
 # =========================================
 # ENDPOINTS
 # =========================================
+
 
 @router.post("/capability-statement")
 async def generate_capability_statement(req: CapabilityRequest):
@@ -253,13 +255,17 @@ async def competitive_pricing_analysis(req: PricingAnalysisRequest):
     """Run competitive pricing analysis."""
     engine = _get_pricing()
 
-    categories = [
-        engine.build_labor_category(
-            title=c.get("title", ""),
-            clearance=c.get("clearance", "Secret"),
-        )
-        for c in req.categories
-    ] if req.categories else []
+    categories = (
+        [
+            engine.build_labor_category(
+                title=c.get("title", ""),
+                clearance=c.get("clearance", "Secret"),
+            )
+            for c in req.categories
+        ]
+        if req.categories
+        else []
+    )
 
     analysis = await engine.analyze_competitive_pricing(
         program=req.program,
@@ -300,7 +306,9 @@ async def generate_full_package(req: FullPackageRequest):
     # 3. Compliance matrix (if RFP text provided)
     if req.rfp_text:
         comp_gen = _get_comp_gen()
-        compliance = await comp_gen.generate_from_text(f"{req.program} RFP", req.rfp_text)
+        compliance = await comp_gen.generate_from_text(
+            f"{req.program} RFP", req.rfp_text
+        )
         results["compliance_matrix"] = comp_gen.export_to_dict(compliance)
 
     # 4. Labor categories & rate card
@@ -405,6 +413,7 @@ async def export_proposal(proposal_id: str, req: ExportRequest):
 # =========================================
 # INTEGRATION
 # =========================================
+
 
 def configure_proposals(app_instance: FastAPI) -> None:
     """Configure proposal routes on an existing FastAPI app."""

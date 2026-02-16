@@ -78,7 +78,9 @@ class PathwayConfig:
     def get_postgres_settings(self) -> Dict[str, Any]:
         """Get PostgreSQL connection settings."""
         return {
-            "host": self.postgres_connection.split("://")[1].split(":")[0] if "://" in self.postgres_connection else "localhost",
+            "host": self.postgres_connection.split("://")[1].split(":")[0]
+            if "://" in self.postgres_connection
+            else "localhost",
             "port": 5432,
             "user": self.postgres_user,
             "password": self.postgres_password,
@@ -100,7 +102,9 @@ def load_config_from_env() -> PathwayConfig:
     return PathwayConfig(
         kafka_bootstrap_servers=os.getenv("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"),
         kafka_security_protocol=os.getenv("KAFKA_SECURITY_PROTOCOL", "PLAINTEXT"),
-        postgres_connection=os.getenv("POSTGRES_CONNECTION", "postgresql://localhost:5432/bd_intelligence"),
+        postgres_connection=os.getenv(
+            "POSTGRES_CONNECTION", "postgresql://localhost:5432/bd_intelligence"
+        ),
         postgres_user=os.getenv("POSTGRES_USER", "postgres"),
         postgres_password=os.getenv("POSTGRES_PASSWORD", ""),
         postgres_database=os.getenv("POSTGRES_DATABASE", "bd_intelligence"),
@@ -109,6 +113,8 @@ def load_config_from_env() -> PathwayConfig:
         openai_api_key=os.getenv("OPENAI_API_KEY"),
         embedding_model=os.getenv("EMBEDDING_MODEL", "text-embedding-3-small"),
         batch_size=int(os.getenv("PATHWAY_BATCH_SIZE", "100")),
-        checkpoint_interval_ms=int(os.getenv("PATHWAY_CHECKPOINT_INTERVAL_MS", "30000")),
+        checkpoint_interval_ms=int(
+            os.getenv("PATHWAY_CHECKPOINT_INTERVAL_MS", "30000")
+        ),
         webhook_url=os.getenv("BD_ALERT_WEBHOOK_URL"),
     )

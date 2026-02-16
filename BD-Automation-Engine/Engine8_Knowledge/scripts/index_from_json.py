@@ -1,6 +1,7 @@
 """
 Index data from JSON files into Qdrant with OpenAI embeddings.
 """
+
 import os
 import sys
 import json
@@ -9,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from dotenv import load_dotenv
+
 load_dotenv(Path(__file__).parent.parent.parent / ".env")
 
 import openai
@@ -29,15 +31,17 @@ EMBEDDING_DIM = 1536
 
 DATA_DIR = Path(__file__).parent.parent.parent / "engine_data" / "dashboard_public"
 
+
 @openai_retry
 def generate_embedding(text: str) -> list:
     """Generate embedding using OpenAI API."""
     client = openai.OpenAI(api_key=OPENAI_API_KEY)
     response = client.embeddings.create(
         model=EMBEDDING_MODEL,
-        input=text[:8000]  # Limit text length
+        input=text[:8000],  # Limit text length
     )
     return response.data[0].embedding
+
 
 def create_collection(client: QdrantClient, name: str):
     """Create collection if it doesn't exist."""
@@ -45,29 +49,48 @@ def create_collection(client: QdrantClient, name: str):
     if name not in collections:
         client.create_collection(
             collection_name=name,
-            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
         logger.info(f"Created collection: {name}")
     else:
         logger.info(f"Collection exists: {name}")
 
+
 def build_contact_text(record: dict) -> str:
     """Build searchable text from contact record."""
     parts = []
-    for field in ["name", "first_name", "last_name", "title", "company", "program", "notes", "email"]:
+    for field in [
+        "name",
+        "first_name",
+        "last_name",
+        "title",
+        "company",
+        "program",
+        "notes",
+        "email",
+    ]:
         val = record.get(field, "")
         if val and isinstance(val, str):
             parts.append(val)
     return " | ".join(parts) if parts else ""
 
+
 def build_program_text(record: dict) -> str:
     """Build searchable text from program record."""
     parts = []
-    for field in ["name", "prime_contractor", "location", "mission_area", "notes", "description"]:
+    for field in [
+        "name",
+        "prime_contractor",
+        "location",
+        "mission_area",
+        "notes",
+        "description",
+    ]:
         val = record.get(field, "")
         if val and isinstance(val, str):
             parts.append(val)
     return " | ".join(parts) if parts else ""
+
 
 def index_contacts(client: QdrantClient, limit: int = None):
     """Index contacts from JSON."""
@@ -102,7 +125,7 @@ def index_contacts(client: QdrantClient, limit: int = None):
 
             client.upsert(
                 collection_name="contacts",
-                points=[PointStruct(id=point_id, vector=embedding, payload=record)]
+                points=[PointStruct(id=point_id, vector=embedding, payload=record)],
             )
             indexed += 1
             if indexed % 10 == 0:
@@ -112,6 +135,7 @@ def index_contacts(client: QdrantClient, limit: int = None):
 
     logger.info(f"Indexed {indexed} contacts")
     return indexed
+
 
 def index_programs(client: QdrantClient, limit: int = None):
     """Index programs from JSON."""
@@ -145,7 +169,7 @@ def index_programs(client: QdrantClient, limit: int = None):
 
             client.upsert(
                 collection_name="programs",
-                points=[PointStruct(id=point_id, vector=embedding, payload=record)]
+                points=[PointStruct(id=point_id, vector=embedding, payload=record)],
             )
             indexed += 1
             if indexed % 10 == 0:
@@ -156,11 +180,17 @@ def index_programs(client: QdrantClient, limit: int = None):
     logger.info(f"Indexed {indexed} programs")
     return indexed
 
+
 if __name__ == "__main__":
     import argparse
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("--collection", default="contacts", choices=["contacts", "programs", "all"])
-    parser.add_argument("--limit", type=int, default=None, help="Limit records (for testing)")
+    parser.add_argument(
+        "--collection", default="contacts", choices=["contacts", "programs", "all"]
+    )
+    parser.add_argument(
+        "--limit", type=int, default=None, help="Limit records (for testing)"
+    )
     args = parser.parse_args()
 
     if not OPENAI_API_KEY:

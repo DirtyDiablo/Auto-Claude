@@ -11,6 +11,7 @@ from src.memory.agent_mixin_v2 import MemoryAwareAgentV2
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def cortex():
     return MemoryCortex()
@@ -25,29 +26,36 @@ def agent(cortex):
 async def agent_with_context(cortex):
     """Agent with pre-loaded memory context."""
     # Pre-load some memories
-    await cortex.store(Memory(
-        content="Called John Smith at Leidos about DCGS program status",
-        memory_type="episodic",
-        programs=["DCGS"],
-        contacts=["John Smith"],
-    ))
-    await cortex.store(Memory(
-        content="DCGS-A is a $450M intelligence program",
-        memory_type="semantic",
-        programs=["DCGS"],
-        confidence=0.9,
-    ))
-    await cortex.store(Memory(
-        content="Phone outreach to Tier 3+ contacts has high response rate",
-        memory_type="procedural",
-        importance=0.8,
-    ))
+    await cortex.store(
+        Memory(
+            content="Called John Smith at Leidos about DCGS program status",
+            memory_type="episodic",
+            programs=["DCGS"],
+            contacts=["John Smith"],
+        )
+    )
+    await cortex.store(
+        Memory(
+            content="DCGS-A is a $450M intelligence program",
+            memory_type="semantic",
+            programs=["DCGS"],
+            confidence=0.9,
+        )
+    )
+    await cortex.store(
+        Memory(
+            content="Phone outreach to Tier 3+ contacts has high response rate",
+            memory_type="procedural",
+            importance=0.8,
+        )
+    )
     return MemoryAwareAgentV2(agent_type="outreach", cortex=cortex)
 
 
 # =========================================
 # BEFORE TASK
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_before_task_returns_context(agent_with_context):
@@ -69,6 +77,7 @@ async def test_before_task_empty_context(agent):
 # =========================================
 # AFTER TASK
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_after_task_stores_episode(agent, cortex):
@@ -111,6 +120,7 @@ async def test_after_task_with_notes(agent, cortex):
 # ON DISCOVERY
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_on_discovery(agent, cortex):
     mem_id = await agent.on_discovery(
@@ -137,6 +147,7 @@ async def test_on_discovery_low_confidence(agent, cortex):
 # =========================================
 # ON STRATEGY OUTCOME
 # =========================================
+
 
 @pytest.mark.asyncio
 async def test_on_strategy_success(agent, cortex):
@@ -168,6 +179,7 @@ async def test_on_strategy_failure(agent, cortex):
 # SESSION TRACKING
 # =========================================
 
+
 @pytest.mark.asyncio
 async def test_session_memories(agent):
     await agent.after_task("Task 1", {"status": "ok"})
@@ -184,6 +196,7 @@ def test_session_id(agent):
 # =========================================
 # AGENT TYPE
 # =========================================
+
 
 def test_agent_type():
     agent = MemoryAwareAgentV2(agent_type="outreach_crafter")

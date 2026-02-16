@@ -12,8 +12,12 @@ from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
 from src.geographic.geocoding_engine import (
-    GeocodingEngine, get_geocoding_engine, _FACILITIES,
-    _CONTACTS, _PROGRAM_LOCATIONS, _JOB_LOCATIONS,
+    GeocodingEngine,
+    get_geocoding_engine,
+    _FACILITIES,
+    _CONTACTS,
+    _PROGRAM_LOCATIONS,
+    _JOB_LOCATIONS,
 )
 
 
@@ -28,6 +32,7 @@ EARTH_RADIUS_KM = 6371.0
 # =========================================
 # DATA CLASSES
 # =========================================
+
 
 @dataclass
 class RadiusResult:
@@ -78,6 +83,7 @@ class CompetitiveDensity:
 # SPATIAL QUERY PROCESSOR
 # =========================================
 
+
 class SpatialQueryProcessor:
     """Processes geographic queries: radius, clusters, overlap, commute, density."""
 
@@ -94,7 +100,10 @@ class SpatialQueryProcessor:
         lat1_r, lat2_r = math.radians(lat1), math.radians(lat2)
         dlat = math.radians(lat2 - lat1)
         dlng = math.radians(lng2 - lng1)
-        a = math.sin(dlat / 2) ** 2 + math.cos(lat1_r) * math.cos(lat2_r) * math.sin(dlng / 2) ** 2
+        a = (
+            math.sin(dlat / 2) ** 2
+            + math.cos(lat1_r) * math.cos(lat2_r) * math.sin(dlng / 2) ** 2
+        )
         c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
         return EARTH_RADIUS_MILES * c
 
@@ -120,12 +129,18 @@ class SpatialQueryProcessor:
             for fac in _FACILITIES:
                 dist = self.haversine(center_lat, center_lng, fac["lat"], fac["lng"])
                 if dist <= radius_miles:
-                    entities.append({
-                        "entity_type": "facility", "entity_id": fac["name"],
-                        "name": fac["name"], "lat": fac["lat"], "lng": fac["lng"],
-                        "distance_miles": round(dist, 2),
-                        "facility_type": fac["type"], "state": fac["state"],
-                    })
+                    entities.append(
+                        {
+                            "entity_type": "facility",
+                            "entity_id": fac["name"],
+                            "name": fac["name"],
+                            "lat": fac["lat"],
+                            "lng": fac["lng"],
+                            "distance_miles": round(dist, 2),
+                            "facility_type": fac["type"],
+                            "state": fac["state"],
+                        }
+                    )
 
         # Contacts
         if "contact" in entity_types:
@@ -134,12 +149,18 @@ class SpatialQueryProcessor:
                 if geo:
                     dist = self.haversine(center_lat, center_lng, geo.lat, geo.lng)
                     if dist <= radius_miles:
-                        entities.append({
-                            "entity_type": "contact", "entity_id": c["id"],
-                            "name": c["name"], "lat": geo.lat, "lng": geo.lng,
-                            "distance_miles": round(dist, 2),
-                            "company": c["company"], "program": c["program"],
-                        })
+                        entities.append(
+                            {
+                                "entity_type": "contact",
+                                "entity_id": c["id"],
+                                "name": c["name"],
+                                "lat": geo.lat,
+                                "lng": geo.lng,
+                                "distance_miles": round(dist, 2),
+                                "company": c["company"],
+                                "program": c["program"],
+                            }
+                        )
 
         # Jobs
         if "job" in entity_types:
@@ -148,12 +169,17 @@ class SpatialQueryProcessor:
                 if geo:
                     dist = self.haversine(center_lat, center_lng, geo.lat, geo.lng)
                     if dist <= radius_miles:
-                        entities.append({
-                            "entity_type": "job", "entity_id": j["id"],
-                            "name": j["title"], "lat": geo.lat, "lng": geo.lng,
-                            "distance_miles": round(dist, 2),
-                            "program": j["program"],
-                        })
+                        entities.append(
+                            {
+                                "entity_type": "job",
+                                "entity_id": j["id"],
+                                "name": j["title"],
+                                "lat": geo.lat,
+                                "lng": geo.lng,
+                                "distance_miles": round(dist, 2),
+                                "program": j["program"],
+                            }
+                        )
 
         # Programs
         if "program" in entity_types:
@@ -163,12 +189,17 @@ class SpatialQueryProcessor:
                     if geo:
                         dist = self.haversine(center_lat, center_lng, geo.lat, geo.lng)
                         if dist <= radius_miles:
-                            entities.append({
-                                "entity_type": "program", "entity_id": prog["id"],
-                                "name": prog["name"], "lat": geo.lat, "lng": geo.lng,
-                                "distance_miles": round(dist, 2),
-                                "location": loc,
-                            })
+                            entities.append(
+                                {
+                                    "entity_type": "program",
+                                    "entity_id": prog["id"],
+                                    "name": prog["name"],
+                                    "lat": geo.lat,
+                                    "lng": geo.lng,
+                                    "distance_miles": round(dist, 2),
+                                    "location": loc,
+                                }
+                            )
                             break  # one match per program
 
         # Sort by distance
@@ -193,37 +224,54 @@ class SpatialQueryProcessor:
             for c in _CONTACTS:
                 geo = self._geocoder.geocode(c["location"])
                 if geo:
-                    clusters_map[geo.region].append({
-                        "entity_id": c["id"], "name": c["name"],
-                        "lat": geo.lat, "lng": geo.lng,
-                        "company": c["company"], "program": c["program"],
-                    })
+                    clusters_map[geo.region].append(
+                        {
+                            "entity_id": c["id"],
+                            "name": c["name"],
+                            "lat": geo.lat,
+                            "lng": geo.lng,
+                            "company": c["company"],
+                            "program": c["program"],
+                        }
+                    )
         elif entity_type == "job":
             for j in _JOB_LOCATIONS:
                 geo = self._geocoder.geocode(j["location"])
                 if geo:
-                    clusters_map[geo.region].append({
-                        "entity_id": j["id"], "name": j["title"],
-                        "lat": geo.lat, "lng": geo.lng,
-                        "program": j["program"],
-                    })
+                    clusters_map[geo.region].append(
+                        {
+                            "entity_id": j["id"],
+                            "name": j["title"],
+                            "lat": geo.lat,
+                            "lng": geo.lng,
+                            "program": j["program"],
+                        }
+                    )
         elif entity_type == "facility":
             for fac in _FACILITIES:
-                clusters_map[fac["region"]].append({
-                    "entity_id": fac["name"], "name": fac["name"],
-                    "lat": fac["lat"], "lng": fac["lng"],
-                    "facility_type": fac["type"],
-                })
+                clusters_map[fac["region"]].append(
+                    {
+                        "entity_id": fac["name"],
+                        "name": fac["name"],
+                        "lat": fac["lat"],
+                        "lng": fac["lng"],
+                        "facility_type": fac["type"],
+                    }
+                )
         elif entity_type == "program":
             for prog in _PROGRAM_LOCATIONS:
                 for loc in prog["locations"]:
                     geo = self._geocoder.geocode(loc)
                     if geo:
-                        clusters_map[geo.region].append({
-                            "entity_id": prog["id"], "name": prog["name"],
-                            "lat": geo.lat, "lng": geo.lng,
-                            "location": loc,
-                        })
+                        clusters_map[geo.region].append(
+                            {
+                                "entity_id": prog["id"],
+                                "name": prog["name"],
+                                "lat": geo.lat,
+                                "lng": geo.lng,
+                                "location": loc,
+                            }
+                        )
 
         clusters: List[GeoCluster] = []
         for region, entities in sorted(clusters_map.items()):
@@ -244,19 +292,25 @@ class SpatialQueryProcessor:
             for c in companies:
                 comp_counts[c] = comp_counts.get(c, 0) + 1
 
-            top_progs = sorted(prog_counts.keys(), key=lambda p: prog_counts[p], reverse=True)[:3]
-            top_comps = sorted(comp_counts.keys(), key=lambda c: comp_counts[c], reverse=True)[:3]
+            top_progs = sorted(
+                prog_counts.keys(), key=lambda p: prog_counts[p], reverse=True
+            )[:3]
+            top_comps = sorted(
+                comp_counts.keys(), key=lambda c: comp_counts[c], reverse=True
+            )[:3]
 
-            clusters.append(GeoCluster(
-                id=f"cluster_{region}",
-                center_lat=round(avg_lat, 4),
-                center_lng=round(avg_lng, 4),
-                region=region,
-                entities=entities,
-                total=len(entities),
-                dominant_programs=top_progs,
-                dominant_companies=top_comps,
-            ))
+            clusters.append(
+                GeoCluster(
+                    id=f"cluster_{region}",
+                    center_lat=round(avg_lat, 4),
+                    center_lng=round(avg_lng, 4),
+                    region=region,
+                    entities=entities,
+                    total=len(entities),
+                    dominant_programs=top_progs,
+                    dominant_companies=top_comps,
+                )
+            )
 
         return clusters
 
@@ -264,8 +318,9 @@ class SpatialQueryProcessor:
     # OVERLAP ANALYSIS
     # --------------------------------------------------
 
-    def overlap_analysis(self, program_a: str, program_b: str,
-                         proximity_threshold_miles: float = 50.0) -> OverlapResult:
+    def overlap_analysis(
+        self, program_a: str, program_b: str, proximity_threshold_miles: float = 50.0
+    ) -> OverlapResult:
         """Analyze geographic overlap between two programs."""
         prog_a = next((p for p in _PROGRAM_LOCATIONS if p["name"] == program_a), None)
         prog_b = next((p for p in _PROGRAM_LOCATIONS if p["name"] == program_b), None)
@@ -290,17 +345,23 @@ class SpatialQueryProcessor:
                     continue
                 dist = self.haversine(geo_a.lat, geo_a.lng, geo_b.lat, geo_b.lng)
                 if dist <= proximity_threshold_miles:
-                    proximity_pairs.append({
-                        "location_a": loc_a, "location_b": loc_b,
-                        "distance_miles": round(dist, 2),
-                    })
+                    proximity_pairs.append(
+                        {
+                            "location_a": loc_a,
+                            "location_b": loc_b,
+                            "distance_miles": round(dist, 2),
+                        }
+                    )
 
         # Overlap score: shared locations + proximity pairs weighted
         total_locations = len(set(prog_a["locations"]) | set(prog_b["locations"]))
-        overlap_score = (len(shared) + len(proximity_pairs) * 0.5) / max(total_locations, 1)
+        overlap_score = (len(shared) + len(proximity_pairs) * 0.5) / max(
+            total_locations, 1
+        )
 
         return OverlapResult(
-            program_a=program_a, program_b=program_b,
+            program_a=program_a,
+            program_b=program_b,
             shared_locations=shared,
             proximity_pairs=proximity_pairs,
             overlap_score=round(min(overlap_score, 1.0), 4),
@@ -310,8 +371,9 @@ class SpatialQueryProcessor:
     # COMMUTE ANALYSIS
     # --------------------------------------------------
 
-    def commute_analysis(self, origin_lat: float, origin_lng: float,
-                         max_commute_miles: float = 50.0) -> CommuteResult:
+    def commute_analysis(
+        self, origin_lat: float, origin_lng: float, max_commute_miles: float = 50.0
+    ) -> CommuteResult:
         """Find jobs within commute distance of an origin."""
         jobs_in_range: List[Dict[str, Any]] = []
 
@@ -321,13 +383,18 @@ class SpatialQueryProcessor:
                 continue
             dist = self.haversine(origin_lat, origin_lng, geo.lat, geo.lng)
             if dist <= max_commute_miles:
-                jobs_in_range.append({
-                    "job_id": j["id"], "title": j["title"],
-                    "program": j["program"], "location": j["location"],
-                    "lat": geo.lat, "lng": geo.lng,
-                    "distance_miles": round(dist, 2),
-                    "estimated_commute_min": round(dist * 2.0, 0),  # rough estimate
-                })
+                jobs_in_range.append(
+                    {
+                        "job_id": j["id"],
+                        "title": j["title"],
+                        "program": j["program"],
+                        "location": j["location"],
+                        "lat": geo.lat,
+                        "lng": geo.lng,
+                        "distance_miles": round(dist, 2),
+                        "estimated_commute_min": round(dist * 2.0, 0),  # rough estimate
+                    }
+                )
 
         jobs_in_range.sort(key=lambda j: j["distance_miles"])
 
@@ -353,11 +420,24 @@ class SpatialQueryProcessor:
             if fac["type"] == "hq":
                 name = fac["name"]
                 # Map to company
-                for comp in ["Northrop", "Raytheon", "BAE", "Booz Allen",
-                             "SAIC", "Peraton", "ManTech", "GDIT", "Leidos",
-                             "Lockheed", "L3Harris", "Boeing"]:
+                for comp in [
+                    "Northrop",
+                    "Raytheon",
+                    "BAE",
+                    "Booz Allen",
+                    "SAIC",
+                    "Peraton",
+                    "ManTech",
+                    "GDIT",
+                    "Leidos",
+                    "Lockheed",
+                    "L3Harris",
+                    "Boeing",
+                ]:
                     if comp.lower() in name.lower():
-                        competitor_facilities[comp] = competitor_facilities.get(comp, 0) + 1
+                        competitor_facilities[comp] = (
+                            competitor_facilities.get(comp, 0) + 1
+                        )
                         break
 
         # Count contacts by company in region
@@ -372,21 +452,31 @@ class SpatialQueryProcessor:
             competitor_contacts[company] = competitor_contacts.get(company, 0) + 1
 
         # Merge into competitor list
-        all_comps = set(list(competitor_facilities.keys()) + list(competitor_contacts.keys()))
+        all_comps = set(
+            list(competitor_facilities.keys()) + list(competitor_contacts.keys())
+        )
         competitors: List[Dict[str, Any]] = []
         for comp in sorted(all_comps):
-            competitors.append({
-                "company": comp,
-                "facilities": competitor_facilities.get(comp, 0),
-                "contacts": competitor_contacts.get(comp, 0),
-                "presence_score": round(
-                    (competitor_facilities.get(comp, 0) * 2 + competitor_contacts.get(comp, 0)) / max(total_facilities + total_contacts, 1),
-                    4,
-                ),
-            })
+            competitors.append(
+                {
+                    "company": comp,
+                    "facilities": competitor_facilities.get(comp, 0),
+                    "contacts": competitor_contacts.get(comp, 0),
+                    "presence_score": round(
+                        (
+                            competitor_facilities.get(comp, 0) * 2
+                            + competitor_contacts.get(comp, 0)
+                        )
+                        / max(total_facilities + total_contacts, 1),
+                        4,
+                    ),
+                }
+            )
 
         # Overall density score
-        density = len(all_comps) / max(total_facilities, 1) if total_facilities > 0 else 0
+        density = (
+            len(all_comps) / max(total_facilities, 1) if total_facilities > 0 else 0
+        )
 
         return CompetitiveDensity(
             region=region,
@@ -408,37 +498,55 @@ class SpatialQueryProcessor:
             for c in _CONTACTS:
                 geo = self._geocoder.geocode(c["location"])
                 if geo:
-                    points.append({
-                        "lat": geo.lat, "lng": geo.lng,
-                        "weight": 1.0, "name": c["name"],
-                        "company": c["company"], "program": c["program"],
-                    })
+                    points.append(
+                        {
+                            "lat": geo.lat,
+                            "lng": geo.lng,
+                            "weight": 1.0,
+                            "name": c["name"],
+                            "company": c["company"],
+                            "program": c["program"],
+                        }
+                    )
         elif entity_type == "job":
             for j in _JOB_LOCATIONS:
                 geo = self._geocoder.geocode(j["location"])
                 if geo:
-                    points.append({
-                        "lat": geo.lat, "lng": geo.lng,
-                        "weight": 1.0, "name": j["title"],
-                        "program": j["program"],
-                    })
+                    points.append(
+                        {
+                            "lat": geo.lat,
+                            "lng": geo.lng,
+                            "weight": 1.0,
+                            "name": j["title"],
+                            "program": j["program"],
+                        }
+                    )
         elif entity_type == "facility":
             for fac in _FACILITIES:
-                points.append({
-                    "lat": fac["lat"], "lng": fac["lng"],
-                    "weight": 1.0, "name": fac["name"],
-                    "facility_type": fac["type"], "region": fac["region"],
-                })
+                points.append(
+                    {
+                        "lat": fac["lat"],
+                        "lng": fac["lng"],
+                        "weight": 1.0,
+                        "name": fac["name"],
+                        "facility_type": fac["type"],
+                        "region": fac["region"],
+                    }
+                )
         elif entity_type == "program":
             for prog in _PROGRAM_LOCATIONS:
                 for loc in prog["locations"]:
                     geo = self._geocoder.geocode(loc)
                     if geo:
-                        points.append({
-                            "lat": geo.lat, "lng": geo.lng,
-                            "weight": 1.0, "name": prog["name"],
-                            "location": loc,
-                        })
+                        points.append(
+                            {
+                                "lat": geo.lat,
+                                "lng": geo.lng,
+                                "weight": 1.0,
+                                "name": prog["name"],
+                                "location": loc,
+                            }
+                        )
 
         return points
 

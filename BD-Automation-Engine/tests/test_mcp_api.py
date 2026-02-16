@@ -24,6 +24,7 @@ def client(app):
 # REGISTRY — SERVERS
 # =========================================
 
+
 def test_list_servers(client):
     resp = client.get("/api/mcp/registry/servers")
     assert resp.status_code == 200
@@ -39,14 +40,17 @@ def test_list_servers_by_capability(client):
 
 
 def test_register_server(client):
-    resp = client.post("/api/mcp/registry/servers", json={
-        "name": "Test MCP",
-        "url": "http://test.example.com",
-        "transport": "http",
-        "capabilities": ["test_capability"],
-        "priority": 5,
-        "cost_tier": "free",
-    })
+    resp = client.post(
+        "/api/mcp/registry/servers",
+        json={
+            "name": "Test MCP",
+            "url": "http://test.example.com",
+            "transport": "http",
+            "capabilities": ["test_capability"],
+            "priority": 5,
+            "cost_tier": "free",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["server_id"] != ""
@@ -56,6 +60,7 @@ def test_register_server(client):
 # =========================================
 # REGISTRY — TOOLS
 # =========================================
+
 
 def test_list_tools(client):
     resp = client.get("/api/mcp/registry/tools")
@@ -80,6 +85,7 @@ def test_discover_nonexistent(client):
 # HEALTH
 # =========================================
 
+
 def test_health_all(client):
     resp = client.get("/api/mcp/registry/health")
     assert resp.status_code == 200
@@ -92,10 +98,14 @@ def test_health_all(client):
 # ROUTING
 # =========================================
 
+
 def test_route_email(client):
-    resp = client.post("/api/mcp/route", json={
-        "intent": "send email to Craig Lindahl",
-    })
+    resp = client.post(
+        "/api/mcp/route",
+        json={
+            "intent": "send email to Craig Lindahl",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["selected_server"] == "mcp_google_workspace"
@@ -103,18 +113,24 @@ def test_route_email(client):
 
 
 def test_route_slack(client):
-    resp = client.post("/api/mcp/route", json={
-        "intent": "post update in slack channel",
-    })
+    resp = client.post(
+        "/api/mcp/route",
+        json={
+            "intent": "post update in slack channel",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["selected_server"] == "mcp_slack"
 
 
 def test_route_maps(client):
-    resp = client.post("/api/mcp/route", json={
-        "intent": "find distance from Norfolk to Langley",
-    })
+    resp = client.post(
+        "/api/mcp/route",
+        json={
+            "intent": "find distance from Norfolk to Langley",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["selected_server"] == "mcp_google_maps"
@@ -124,11 +140,20 @@ def test_route_maps(client):
 # APPS — RENDER
 # =========================================
 
+
 def test_render_app(client):
-    resp = client.post("/api/mcp/apps/render", json={
-        "template_id": "contact_card",
-        "data": {"name": "Craig Lindahl", "title": "VP", "company": "GDIT", "tier": "1"},
-    })
+    resp = client.post(
+        "/api/mcp/apps/render",
+        json={
+            "template_id": "contact_card",
+            "data": {
+                "name": "Craig Lindahl",
+                "title": "VP",
+                "company": "GDIT",
+                "tier": "1",
+            },
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "rendered"
@@ -136,23 +161,33 @@ def test_render_app(client):
 
 
 def test_render_not_found(client):
-    resp = client.post("/api/mcp/apps/render", json={
-        "template_id": "nonexistent",
-        "data": {},
-    })
+    resp = client.post(
+        "/api/mcp/apps/render",
+        json={
+            "template_id": "nonexistent",
+            "data": {},
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["status"] == "template_not_found"
 
 
 def test_render_with_actions(client):
-    resp = client.post("/api/mcp/apps/render", json={
-        "template_id": "contact_card",
-        "data": {"name": "Test"},
-        "actions": [
-            {"action_id": "a1", "tool_call": "send_email", "requires_approval": True},
-        ],
-    })
+    resp = client.post(
+        "/api/mcp/apps/render",
+        json={
+            "template_id": "contact_card",
+            "data": {"name": "Test"},
+            "actions": [
+                {
+                    "action_id": "a1",
+                    "tool_call": "send_email",
+                    "requires_approval": True,
+                },
+            ],
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert len(data["actions"]) == 1
@@ -163,14 +198,18 @@ def test_render_with_actions(client):
 # APPS — TEMPLATES
 # =========================================
 
+
 def test_register_template(client):
-    resp = client.post("/api/mcp/apps/templates", json={
-        "template_id": "custom_test",
-        "name": "Custom Test",
-        "html": "<div>{{content}}</div>",
-        "permissions": ["display"],
-        "description": "Test template",
-    })
+    resp = client.post(
+        "/api/mcp/apps/templates",
+        json={
+            "template_id": "custom_test",
+            "name": "Custom Test",
+            "html": "<div>{{content}}</div>",
+            "permissions": ["display"],
+            "description": "Test template",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["template_id"] == "custom_test"
@@ -180,10 +219,14 @@ def test_register_template(client):
 # ORCHESTRATE
 # =========================================
 
+
 def test_generate_plan(client):
-    resp = client.post("/api/mcp/orchestrate/plan", json={
-        "intent": "Prepare outreach for Navy DCGS-N contacts",
-    })
+    resp = client.post(
+        "/api/mcp/orchestrate/plan",
+        json={
+            "intent": "Prepare outreach for Navy DCGS-N contacts",
+        },
+    )
     assert resp.status_code == 200
     data = resp.json()
     assert data["total_steps"] >= 3
@@ -193,9 +236,12 @@ def test_generate_plan(client):
 
 def test_execute_plan(client):
     # First generate a plan
-    resp = client.post("/api/mcp/orchestrate/plan", json={
-        "intent": "Prepare outreach for contacts",
-    })
+    resp = client.post(
+        "/api/mcp/orchestrate/plan",
+        json={
+            "intent": "Prepare outreach for contacts",
+        },
+    )
     plan_id = resp.json()["plan_id"]
 
     # Then execute it

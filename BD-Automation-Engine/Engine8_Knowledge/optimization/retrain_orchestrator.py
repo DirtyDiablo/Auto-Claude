@@ -1,10 +1,13 @@
 """Phase 29A — Auto-Retrain Orchestrator"""
+
 import structlog
 from dataclasses import dataclass
 from typing import Dict, List
 from datetime import datetime
 import json
+
 logger = structlog.get_logger(__name__)
+
 
 @dataclass
 class ModelDriftReport:
@@ -16,6 +19,7 @@ class ModelDriftReport:
     last_trained: str = ""
     last_checked: str = ""
 
+
 @dataclass
 class RetrainResult:
     model_name: str
@@ -26,6 +30,7 @@ class RetrainResult:
     duration_seconds: float = 0.0
     status: str = "completed"  # completed, failed, pending_approval, rejected
 
+
 REGISTERED_MODELS = {
     "defense_ner": {"metric": "f1", "baseline": 0.78, "threshold": 0.05},
     "placement_predictor": {"metric": "auc", "baseline": 0.82, "threshold": 0.05},
@@ -33,6 +38,7 @@ REGISTERED_MODELS = {
     "domain_adapter": {"metric": "mrr", "baseline": 0.75, "threshold": 0.05},
     "response_predictor": {"metric": "accuracy", "baseline": 0.70, "threshold": 0.05},
 }
+
 
 class RetrainOrchestrator:
     def __init__(self, storage_path: str = None):
@@ -45,6 +51,7 @@ class RetrainOrchestrator:
         if self._storage_path:
             try:
                 import os
+
                 path = os.path.join(self._storage_path, "retrain_history.json")
                 if os.path.exists(path):
                     with open(path) as f:
@@ -57,8 +64,10 @@ class RetrainOrchestrator:
         if self._storage_path:
             try:
                 import os
+
                 os.makedirs(self._storage_path, exist_ok=True)
                 from dataclasses import asdict
+
                 path = os.path.join(self._storage_path, "retrain_history.json")
                 with open(path, "w") as f:
                     json.dump([asdict(r) for r in self._retrain_history], f)
@@ -72,14 +81,16 @@ class RetrainOrchestrator:
             # Simulated current metric (in production: query actual model)
             current = baseline * 0.97  # Simulate slight degradation
             drift = (baseline - current) / baseline if baseline > 0 else 0.0
-            reports.append(ModelDriftReport(
-                model_name=name,
-                current_metric=current,
-                baseline_metric=baseline,
-                drift_pct=drift,
-                needs_retrain=drift > config["threshold"],
-                last_checked=datetime.utcnow().isoformat(),
-            ))
+            reports.append(
+                ModelDriftReport(
+                    model_name=name,
+                    current_metric=current,
+                    baseline_metric=baseline,
+                    drift_pct=drift,
+                    needs_retrain=drift > config["threshold"],
+                    last_checked=datetime.utcnow().isoformat(),
+                )
+            )
         return reports
 
     async def orchestrate_retrain(self, model_name: str) -> RetrainResult:
@@ -124,7 +135,10 @@ class RetrainOrchestrator:
     def get_registered_models(self) -> Dict:
         return dict(self._models)
 
+
 _orchestrator = None
+
+
 def get_retrain_orchestrator():
     global _orchestrator
     if _orchestrator is None:

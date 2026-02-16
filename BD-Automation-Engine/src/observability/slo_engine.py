@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class SLOType(str, Enum):
     AVAILABILITY = "availability"
     LATENCY = "latency"
@@ -39,6 +40,7 @@ class SLOStatus(str, Enum):
 @dataclass
 class SLODefinition:
     """A Service Level Objective definition."""
+
     slo_id: str
     name: str
     slo_type: SLOType
@@ -70,6 +72,7 @@ class SLODefinition:
 @dataclass
 class SLOMeasurement:
     """A single SLO measurement."""
+
     timestamp: float
     good_events: int
     total_events: int
@@ -79,6 +82,7 @@ class SLOMeasurement:
 @dataclass
 class SLOReport:
     """Current state of an SLO."""
+
     slo_id: str
     name: str
     slo_type: str
@@ -173,6 +177,7 @@ _BUILTIN_SLOS = [
 # SLO ENGINE
 # =========================================
 
+
 class SLOEngine:
     """Service Level Objective monitoring and error budget tracking.
 
@@ -182,7 +187,9 @@ class SLOEngine:
 
     def __init__(self):
         self._slos: Dict[str, SLODefinition] = {}
-        self._measurements: Dict[str, List[SLOMeasurement]] = {}  # slo_id → measurements
+        self._measurements: Dict[
+            str, List[SLOMeasurement]
+        ] = {}  # slo_id → measurements
 
         for slo in _BUILTIN_SLOS:
             self._slos[slo.slo_id] = slo
@@ -237,12 +244,14 @@ class SLOEngine:
                 m.good_events += 1
             m.value = value
         else:
-            measurements.append(SLOMeasurement(
-                timestamp=now,
-                good_events=1 if good else 0,
-                total_events=1,
-                value=value,
-            ))
+            measurements.append(
+                SLOMeasurement(
+                    timestamp=now,
+                    good_events=1 if good else 0,
+                    total_events=1,
+                    value=value,
+                )
+            )
 
     def record_batch(
         self,
@@ -254,12 +263,14 @@ class SLOEngine:
         """Record a batch of events."""
         if slo_id not in self._slos:
             return
-        self._measurements[slo_id].append(SLOMeasurement(
-            timestamp=time.time(),
-            good_events=good_events,
-            total_events=total_events,
-            value=value,
-        ))
+        self._measurements[slo_id].append(
+            SLOMeasurement(
+                timestamp=time.time(),
+                good_events=good_events,
+                total_events=total_events,
+                value=value,
+            )
+        )
 
     # ----- reporting -----
 
@@ -302,13 +313,21 @@ class SLOEngine:
             error_budget_remaining = max(0, error_budget_total - bad_events)
         else:
             error_budget_total = slo.target
-            error_budget_remaining = max(0, slo.target - current_value) if slo.slo_type == SLOType.LATENCY else slo.target
+            error_budget_remaining = (
+                max(0, slo.target - current_value)
+                if slo.slo_type == SLOType.LATENCY
+                else slo.target
+            )
 
         budget_pct = (error_budget_remaining / max(error_budget_total, 0.001)) * 100
 
         # Burn rate (how fast budget is being consumed relative to expected)
         if error_budget_total > 0 and total_events > 0:
-            expected_bad_per_event = (100.0 - slo.target) / 100.0 if slo.slo_type == SLOType.AVAILABILITY else slo.target / 100.0
+            expected_bad_per_event = (
+                (100.0 - slo.target) / 100.0
+                if slo.slo_type == SLOType.AVAILABILITY
+                else slo.target / 100.0
+            )
             actual_bad_rate = bad_events / total_events if total_events > 0 else 0
             burn_rate = actual_bad_rate / max(expected_bad_per_event, 0.0001)
         else:
@@ -361,7 +380,9 @@ class SLOEngine:
         return {
             "total_slos": len(reports),
             "by_status": by_status,
-            "overall_health": "healthy" if not by_status.get("breached", 0) and not by_status.get("critical", 0) else "degraded",
+            "overall_health": "healthy"
+            if not by_status.get("breached", 0) and not by_status.get("critical", 0)
+            else "degraded",
             "slos": [r.to_dict() for r in reports],
         }
 

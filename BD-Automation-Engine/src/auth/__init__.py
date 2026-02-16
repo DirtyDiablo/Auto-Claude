@@ -19,7 +19,17 @@ from src.auth.auth_service import (
 )
 
 __all__ = [
-    "Role", "Permission", "Action", "Resource", "Scope",
-    "RBACManager", "has_permission", "get_rbac_manager",
-    "AuthService", "User", "Session", "AuditEntry", "get_auth_service",
+    "Role",
+    "Permission",
+    "Action",
+    "Resource",
+    "Scope",
+    "RBACManager",
+    "has_permission",
+    "get_rbac_manager",
+    "AuthService",
+    "User",
+    "Session",
+    "AuditEntry",
+    "get_auth_service",
 ]

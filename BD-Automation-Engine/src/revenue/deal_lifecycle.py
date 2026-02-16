@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DEAL STAGES
 # =========================================
 
+
 class DealStage(IntEnum):
     DISCOVERY = 1
     QUALIFICATION = 2
@@ -58,20 +59,22 @@ STALE_THRESHOLDS = {
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Deal:
     """Single deal in the pipeline."""
+
     id: str
     title: str
     program: str = ""
     contact_tier: int = 0
-    channel: str = ""               # referral, cold_outreach, inbound, event
+    channel: str = ""  # referral, cold_outreach, inbound, event
     rep: str = ""
     role_type: str = ""
-    estimated_value: float = 0.0    # Projected annual revenue
+    estimated_value: float = 0.0  # Projected annual revenue
     current_stage: DealStage = DealStage.DISCOVERY
     stage_history: List[Dict[str, Any]] = field(default_factory=list)
-    outcome: str = "open"           # open, won, lost, stale
+    outcome: str = "open"  # open, won, lost, stale
     created_at: str = ""
     closed_at: str = ""
     lost_reason: str = ""
@@ -80,6 +83,7 @@ class Deal:
 @dataclass
 class StageVelocity:
     """Average time spent in each stage."""
+
     stage: str
     avg_days: float = 0.0
     median_days: float = 0.0
@@ -91,6 +95,7 @@ class StageVelocity:
 @dataclass
 class DropOffAnalysis:
     """Where deals drop out of the pipeline."""
+
     stage: str
     lost_count: int = 0
     total_entered: int = 0
@@ -101,7 +106,8 @@ class DropOffAnalysis:
 @dataclass
 class WinRateAnalysis:
     """Win rate analysis."""
-    dimension: str                  # program, tier, channel, rep, role_type
+
+    dimension: str  # program, tier, channel, rep, role_type
     breakdown: List[Dict[str, Any]] = field(default_factory=list)
     overall_win_rate: float = 0.0
 
@@ -109,6 +115,7 @@ class WinRateAnalysis:
 @dataclass
 class StaleDeal:
     """A deal that's stuck in a stage too long."""
+
     deal_id: str
     title: str
     stage: str
@@ -122,6 +129,7 @@ class StaleDeal:
 # ENGINE
 # =========================================
 
+
 class DealLifecycleEngine:
     """Track and analyze deal lifecycle."""
 
@@ -133,10 +141,12 @@ class DealLifecycleEngine:
         if not deal.created_at:
             deal.created_at = datetime.now(timezone.utc).isoformat()
         if not deal.stage_history:
-            deal.stage_history = [{
-                "stage": STAGE_NAMES[deal.current_stage],
-                "entered_at": deal.created_at,
-            }]
+            deal.stage_history = [
+                {
+                    "stage": STAGE_NAMES[deal.current_stage],
+                    "entered_at": deal.created_at,
+                }
+            ]
         self._deals[deal.id] = deal
 
     def set_deals(self, deals: List[Deal]) -> None:
@@ -148,10 +158,12 @@ class DealLifecycleEngine:
         if not deal:
             return False
         now = datetime.now(timezone.utc).isoformat()
-        deal.stage_history.append({
-            "stage": STAGE_NAMES[new_stage],
-            "entered_at": now,
-        })
+        deal.stage_history.append(
+            {
+                "stage": STAGE_NAMES[new_stage],
+                "entered_at": now,
+            }
+        )
         deal.current_stage = new_stage
         if new_stage == DealStage.REVENUE:
             deal.outcome = "won"
@@ -220,14 +232,16 @@ class DealLifecycleEngine:
                     if len(durations_sorted) % 2 == 1
                     else (durations_sorted[mid - 1] + durations_sorted[mid]) / 2
                 )
-                results.append(StageVelocity(
-                    stage=name,
-                    avg_days=round(sum(durations) / len(durations), 1),
-                    median_days=round(median, 1),
-                    min_days=round(min(durations), 1),
-                    max_days=round(max(durations), 1),
-                    deal_count=len(durations),
-                ))
+                results.append(
+                    StageVelocity(
+                        stage=name,
+                        avg_days=round(sum(durations) / len(durations), 1),
+                        median_days=round(median, 1),
+                        min_days=round(min(durations), 1),
+                        max_days=round(max(durations), 1),
+                        deal_count=len(durations),
+                    )
+                )
             else:
                 results.append(StageVelocity(stage=name, deal_count=0))
 
@@ -266,13 +280,15 @@ class DealLifecycleEngine:
                 reason_counts[r] += 1
             top_reasons = sorted(reason_counts, key=reason_counts.get, reverse=True)[:3]
 
-            results.append(DropOffAnalysis(
-                stage=name,
-                lost_count=lost_count,
-                total_entered=total,
-                drop_rate=round(rate, 1),
-                top_reasons=top_reasons,
-            ))
+            results.append(
+                DropOffAnalysis(
+                    stage=name,
+                    lost_count=lost_count,
+                    total_entered=total,
+                    drop_rate=round(rate, 1),
+                    top_reasons=top_reasons,
+                )
+            )
 
         return results
 
@@ -300,14 +316,18 @@ class DealLifecycleEngine:
                 groups[key]["won"] += 1
 
         breakdown = []
-        for key, counts in sorted(groups.items(), key=lambda x: x[1]["won"], reverse=True):
+        for key, counts in sorted(
+            groups.items(), key=lambda x: x[1]["won"], reverse=True
+        ):
             rate = (counts["won"] / counts["total"] * 100) if counts["total"] > 0 else 0
-            breakdown.append({
-                "value": key,
-                "won": counts["won"],
-                "total": counts["total"],
-                "win_rate": round(rate, 1),
-            })
+            breakdown.append(
+                {
+                    "value": key,
+                    "won": counts["won"],
+                    "total": counts["total"],
+                    "win_rate": round(rate, 1),
+                }
+            )
 
         return WinRateAnalysis(
             dimension=dimension,
@@ -344,15 +364,17 @@ class DealLifecycleEngine:
             if days_in > threshold:
                 overdue = days_in - threshold
                 action = _recommend_action(deal.current_stage, overdue)
-                stale.append(StaleDeal(
-                    deal_id=deal.id,
-                    title=deal.title,
-                    stage=STAGE_NAMES[deal.current_stage],
-                    days_in_stage=days_in,
-                    threshold_days=threshold,
-                    overdue_by=overdue,
-                    recommended_action=action,
-                ))
+                stale.append(
+                    StaleDeal(
+                        deal_id=deal.id,
+                        title=deal.title,
+                        stage=STAGE_NAMES[deal.current_stage],
+                        days_in_stage=days_in,
+                        threshold_days=threshold,
+                        overdue_by=overdue,
+                        recommended_action=action,
+                    )
+                )
 
         stale.sort(key=lambda s: s.overdue_by, reverse=True)
         return stale
@@ -383,10 +405,16 @@ class DealLifecycleEngine:
         weighted_value = deal.estimated_value * prob
 
         # Adjust based on historical win rate for this program
-        won_deals = [d for d in self._deals.values()
-                     if d.outcome == "won" and d.program == deal.program]
-        closed_deals = [d for d in self._deals.values()
-                        if d.outcome in ("won", "lost") and d.program == deal.program]
+        won_deals = [
+            d
+            for d in self._deals.values()
+            if d.outcome == "won" and d.program == deal.program
+        ]
+        closed_deals = [
+            d
+            for d in self._deals.values()
+            if d.outcome in ("won", "lost") and d.program == deal.program
+        ]
 
         historical_rate = (len(won_deals) / len(closed_deals)) if closed_deals else prob
         blended_prob = (prob + historical_rate) / 2
@@ -419,7 +447,16 @@ class DealLifecycleEngine:
 
         # Weighted pipeline
         weighted = 0.0
-        stage_probs = {1: 0.1, 2: 0.2, 3: 0.35, 4: 0.5, 5: 0.65, 6: 0.8, 7: 0.95, 8: 1.0}
+        stage_probs = {
+            1: 0.1,
+            2: 0.2,
+            3: 0.35,
+            4: 0.5,
+            5: 0.65,
+            6: 0.8,
+            7: 0.95,
+            8: 1.0,
+        }
         for d in self.get_open_deals():
             p = stage_probs.get(int(d.current_stage), 0.1)
             weighted += d.estimated_value * p
@@ -439,6 +476,7 @@ class DealLifecycleEngine:
 # =========================================
 # HELPERS
 # =========================================
+
 
 def _recommend_action(stage: DealStage, overdue_days: int) -> str:
     actions = {

@@ -15,7 +15,6 @@ import sys
 import json
 import argparse
 from pathlib import Path
-from datetime import datetime
 
 # Project root
 PROJECT_ROOT = Path(__file__).parent
@@ -24,9 +23,9 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 def print_header(title: str):
     """Print a formatted header."""
-    print(f"\n{'='*60}")
+    print(f"\n{'=' * 60}")
     print(f" {title}")
-    print(f"{'='*60}\n")
+    print(f"{'=' * 60}\n")
 
 
 def print_status(name: str, status: bool, details: str = ""):
@@ -46,10 +45,18 @@ def check_environment():
     checks_total += 1
     py_version = sys.version_info
     if py_version >= (3, 10):
-        print_status("Python Version", True, f"{py_version.major}.{py_version.minor}.{py_version.micro}")
+        print_status(
+            "Python Version",
+            True,
+            f"{py_version.major}.{py_version.minor}.{py_version.micro}",
+        )
         checks_passed += 1
     else:
-        print_status("Python Version", False, f"{py_version.major}.{py_version.minor} (3.10+ required)")
+        print_status(
+            "Python Version",
+            False,
+            f"{py_version.major}.{py_version.minor} (3.10+ required)",
+        )
 
     # Check .env file
     checks_total += 1
@@ -62,18 +69,19 @@ def check_environment():
 
     # Check API keys
     from dotenv import load_dotenv
+
     load_dotenv()
 
     checks_total += 1
-    anthropic_key = os.getenv('ANTHROPIC_API_KEY', '')
-    if anthropic_key and anthropic_key.startswith('sk-'):
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY", "")
+    if anthropic_key and anthropic_key.startswith("sk-"):
         print_status("Anthropic API Key", True, "Configured")
         checks_passed += 1
     else:
         print_status("Anthropic API Key", False, "Not configured or invalid")
 
     checks_total += 1
-    notion_token = os.getenv('NOTION_TOKEN', '')
+    notion_token = os.getenv("NOTION_TOKEN", "")
     if notion_token:
         print_status("Notion Token", True, "Configured")
         checks_passed += 1
@@ -81,7 +89,7 @@ def check_environment():
         print_status("Notion Token", False, "Not configured (optional)")
 
     checks_total += 1
-    n8n_url = os.getenv('N8N_WEBHOOK_URL', '')
+    n8n_url = os.getenv("N8N_WEBHOOK_URL", "")
     if n8n_url:
         print_status("n8n Webhook URL", True, "Configured")
         checks_passed += 1
@@ -90,7 +98,7 @@ def check_environment():
 
     # Check required directories
     print("\n  Data Directories:")
-    for dir_name in ['Engine1_Scraper/data', 'Engine2_ProgramMapping/data', 'outputs']:
+    for dir_name in ["Engine1_Scraper/data", "Engine2_ProgramMapping/data", "outputs"]:
         checks_total += 1
         dir_path = PROJECT_ROOT / dir_name
         if dir_path.exists():
@@ -114,7 +122,9 @@ def check_environment():
         print_status("Sample_Jobs.json", False, "Not found")
 
     checks_total += 1
-    federal_programs = PROJECT_ROOT / "Engine2_ProgramMapping" / "data" / "Federal Programs.csv"
+    federal_programs = (
+        PROJECT_ROOT / "Engine2_ProgramMapping" / "data" / "Federal Programs.csv"
+    )
     if federal_programs.exists():
         print_status("Federal Programs.csv", True, "Found")
         checks_passed += 1
@@ -185,7 +195,7 @@ def run_test_pipeline():
             }
         ]
         sample_jobs.parent.mkdir(parents=True, exist_ok=True)
-        with open(sample_jobs, 'w') as f:
+        with open(sample_jobs, "w") as f:
             json.dump(sample_data, f, indent=2)
         print("  Created sample data with 1 job")
 
@@ -251,8 +261,8 @@ def run_full_pipeline(input_file: str = None):
         config = OrchestratorConfig(
             input_path=str(input_path),
             test_mode=False,
-            send_email=bool(os.getenv('SMTP_USER')),
-            send_webhook=bool(os.getenv('N8N_WEBHOOK_URL')),
+            send_email=bool(os.getenv("SMTP_USER")),
+            send_webhook=bool(os.getenv("N8N_WEBHOOK_URL")),
         )
 
         orchestrator = BDOrchestrator(config)
@@ -275,8 +285,8 @@ def start_scheduler():
         config = SchedulerConfig(
             interval_hours=6,
             test_mode=False,
-            send_email=bool(os.getenv('SMTP_USER')),
-            send_webhook=bool(os.getenv('N8N_WEBHOOK_URL')),
+            send_email=bool(os.getenv("SMTP_USER")),
+            send_webhook=bool(os.getenv("N8N_WEBHOOK_URL")),
         )
 
         scheduler = SchedulerService(config)
@@ -290,7 +300,7 @@ def start_scheduler():
 
 def main():
     parser = argparse.ArgumentParser(
-        description='BD Automation Engine - Quick Start',
+        description="BD Automation Engine - Quick Start",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
@@ -299,14 +309,14 @@ Examples:
   python quickstart.py --full      # Run full pipeline
   python quickstart.py --full --input data/jobs.json  # Custom input
   python quickstart.py --schedule  # Start scheduler
-        """
+        """,
     )
 
-    parser.add_argument('--check', action='store_true', help='Check environment setup')
-    parser.add_argument('--test', action='store_true', help='Run test pipeline')
-    parser.add_argument('--full', action='store_true', help='Run full pipeline')
-    parser.add_argument('--schedule', action='store_true', help='Start scheduler')
-    parser.add_argument('--input', '-i', help='Input file for pipeline')
+    parser.add_argument("--check", action="store_true", help="Check environment setup")
+    parser.add_argument("--test", action="store_true", help="Run test pipeline")
+    parser.add_argument("--full", action="store_true", help="Run full pipeline")
+    parser.add_argument("--schedule", action="store_true", help="Start scheduler")
+    parser.add_argument("--input", "-i", help="Input file for pipeline")
 
     args = parser.parse_args()
 
@@ -341,5 +351,5 @@ Examples:
         start_scheduler()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

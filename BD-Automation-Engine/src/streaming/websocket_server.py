@@ -75,10 +75,26 @@ class EventTransformer:
     }
 
     ACTION_MAP = {
-        "contact.high_tier_discovered": ["acknowledge", "add_to_campaign", "view_profile"],
-        "contract.competitor_win": ["acknowledge", "create_counter_strategy", "view_details"],
-        "contract.pts_opportunity": ["acknowledge", "assign_bd_lead", "create_action_plan"],
-        "campaign.positive_response": ["acknowledge", "view_contact", "schedule_followup"],
+        "contact.high_tier_discovered": [
+            "acknowledge",
+            "add_to_campaign",
+            "view_profile",
+        ],
+        "contract.competitor_win": [
+            "acknowledge",
+            "create_counter_strategy",
+            "view_details",
+        ],
+        "contract.pts_opportunity": [
+            "acknowledge",
+            "assign_bd_lead",
+            "create_action_plan",
+        ],
+        "campaign.positive_response": [
+            "acknowledge",
+            "view_contact",
+            "schedule_followup",
+        ],
         "anomaly.priority_program": ["acknowledge", "investigate", "escalate"],
         "system.consecutive_failures": ["acknowledge", "restart_service", "view_logs"],
     }
@@ -157,20 +173,28 @@ class EventTransformer:
 # Channel-to-stream mapping — which streams feed each WebSocket channel
 CHANNEL_STREAMS = {
     "dashboard": [
-        "jobs:scraped", "jobs:enriched",
-        "contracts:awards", "contracts:opps",
-        "contacts:discovered", "contacts:updated",
-        "intel:alerts", "intel:signals",
+        "jobs:scraped",
+        "jobs:enriched",
+        "contracts:awards",
+        "contracts:opps",
+        "contacts:discovered",
+        "contacts:updated",
+        "intel:alerts",
+        "intel:signals",
     ],
     "campaigns": [
-        "campaigns:events", "campaigns:responses",
+        "campaigns:events",
+        "campaigns:responses",
         "intel:signals",
     ],
     "alerts": [
-        "intel:alerts", "intel:signals", "intel:anomalies",
+        "intel:alerts",
+        "intel:signals",
+        "intel:anomalies",
     ],
     "system": [
-        "system:health", "intel:anomalies",
+        "system:health",
+        "intel:anomalies",
     ],
 }
 
@@ -199,9 +223,7 @@ class RealtimeServer:
         for streams in CHANNEL_STREAMS.values():
             all_streams.update(streams)
 
-        self._bridge_task = asyncio.create_task(
-            self._bridge_events(list(all_streams))
-        )
+        self._bridge_task = asyncio.create_task(self._bridge_events(list(all_streams)))
         logger.info("RealtimeServer started")
 
     async def stop(self) -> None:
@@ -219,6 +241,7 @@ class RealtimeServer:
 
     async def _bridge_events(self, streams: List[str]) -> None:
         """Bridge events from Redis Streams to WebSocket clients."""
+
         async def forward_event(event: Event):
             await self.send_filtered(event)
 
@@ -266,37 +289,44 @@ class RealtimeServer:
                 self.connections[channel].remove(sub)
             logger.info(
                 "WebSocket disconnected",
-                extra={"channel": channel, "total": len(self.connections.get(channel, []))},
+                extra={
+                    "channel": channel,
+                    "total": len(self.connections.get(channel, [])),
+                },
             )
 
-    async def _handle_client_message(
-        self, sub: ClientSubscription, msg: dict
-    ) -> None:
+    async def _handle_client_message(self, sub: ClientSubscription, msg: dict) -> None:
         """Process client subscription/filter messages."""
         if "subscribe" in msg:
             streams = msg["subscribe"]
             if isinstance(streams, list):
                 sub.subscribed_streams.update(streams)
-                await sub.websocket.send_json({
-                    "status": "subscribed",
-                    "streams": list(sub.subscribed_streams),
-                })
+                await sub.websocket.send_json(
+                    {
+                        "status": "subscribed",
+                        "streams": list(sub.subscribed_streams),
+                    }
+                )
 
         if "unsubscribe" in msg:
             streams = msg["unsubscribe"]
             if isinstance(streams, list):
                 sub.subscribed_streams -= set(streams)
-                await sub.websocket.send_json({
-                    "status": "unsubscribed",
-                    "streams": list(sub.subscribed_streams),
-                })
+                await sub.websocket.send_json(
+                    {
+                        "status": "unsubscribed",
+                        "streams": list(sub.subscribed_streams),
+                    }
+                )
 
         if "filter" in msg:
             sub.filters = msg["filter"]
-            await sub.websocket.send_json({
-                "status": "filter_applied",
-                "filters": sub.filters,
-            })
+            await sub.websocket.send_json(
+                {
+                    "status": "filter_applied",
+                    "filters": sub.filters,
+                }
+            )
 
     async def broadcast(self, channel: str, event: Event) -> None:
         """Send event to all connections on a channel."""
@@ -347,8 +377,7 @@ class RealtimeServer:
 
                 # Check stream subscription
                 if sub.subscribed_streams and not any(
-                    s in sub.subscribed_streams
-                    for s in channel_streams
+                    s in sub.subscribed_streams for s in channel_streams
                 ):
                     continue
 

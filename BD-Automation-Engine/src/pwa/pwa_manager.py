@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class CacheStrategy(Enum):
     CACHE_FIRST = "cache_first"
     NETWORK_FIRST = "network_first"
@@ -40,6 +41,7 @@ class SyncStatus(Enum):
 @dataclass
 class OfflineResource:
     """A resource cached for offline use."""
+
     resource_id: str
     url: str
     cache_strategy: CacheStrategy = CacheStrategy.CACHE_FIRST
@@ -63,6 +65,7 @@ class OfflineResource:
 @dataclass
 class SyncQueueItem:
     """An offline action queued for sync when back online."""
+
     item_id: str
     action: str  # e.g., "create_contact", "update_program"
     payload: Dict[str, Any] = field(default_factory=dict)
@@ -86,6 +89,7 @@ class SyncQueueItem:
 @dataclass
 class AppManifest:
     """PWA Web App Manifest."""
+
     name: str = "BD Intelligence Hub"
     short_name: str = "BD Hub"
     description: str = "PTS BD Intelligence System for federal defense programs"
@@ -121,6 +125,7 @@ class AppManifest:
 # PWA MANAGER
 # =========================================
 
+
 class PWAManager:
     """Manages PWA lifecycle including service worker registration,
     offline caching, sync queue, and manifest generation.
@@ -133,16 +138,48 @@ class PWAManager:
         self._sw_version = "1.0.0"
         self._is_online = True
         self._register_default_resources()
-        logger.info("PWAManager initialized with %d cached resources", len(self._resources))
+        logger.info(
+            "PWAManager initialized with %d cached resources", len(self._resources)
+        )
 
     def _register_default_resources(self) -> None:
         defaults = [
-            OfflineResource(resource_id="app_shell", url="/", cache_strategy=CacheStrategy.CACHE_FIRST, size_bytes=15000),
-            OfflineResource(resource_id="api_contacts", url="/api/v2/contacts", cache_strategy=CacheStrategy.NETWORK_FIRST, size_bytes=50000),
-            OfflineResource(resource_id="api_programs", url="/api/v2/programs", cache_strategy=CacheStrategy.STALE_WHILE_REVALIDATE, size_bytes=30000),
-            OfflineResource(resource_id="static_css", url="/assets/app.css", cache_strategy=CacheStrategy.CACHE_FIRST, size_bytes=8000),
-            OfflineResource(resource_id="static_js", url="/assets/app.js", cache_strategy=CacheStrategy.CACHE_FIRST, size_bytes=120000),
-            OfflineResource(resource_id="search_index", url="/api/search/index", cache_strategy=CacheStrategy.STALE_WHILE_REVALIDATE, size_bytes=200000),
+            OfflineResource(
+                resource_id="app_shell",
+                url="/",
+                cache_strategy=CacheStrategy.CACHE_FIRST,
+                size_bytes=15000,
+            ),
+            OfflineResource(
+                resource_id="api_contacts",
+                url="/api/v2/contacts",
+                cache_strategy=CacheStrategy.NETWORK_FIRST,
+                size_bytes=50000,
+            ),
+            OfflineResource(
+                resource_id="api_programs",
+                url="/api/v2/programs",
+                cache_strategy=CacheStrategy.STALE_WHILE_REVALIDATE,
+                size_bytes=30000,
+            ),
+            OfflineResource(
+                resource_id="static_css",
+                url="/assets/app.css",
+                cache_strategy=CacheStrategy.CACHE_FIRST,
+                size_bytes=8000,
+            ),
+            OfflineResource(
+                resource_id="static_js",
+                url="/assets/app.js",
+                cache_strategy=CacheStrategy.CACHE_FIRST,
+                size_bytes=120000,
+            ),
+            OfflineResource(
+                resource_id="search_index",
+                url="/api/search/index",
+                cache_strategy=CacheStrategy.STALE_WHILE_REVALIDATE,
+                size_bytes=200000,
+            ),
         ]
         for r in defaults:
             self._resources[r.resource_id] = r
@@ -155,9 +192,16 @@ class PWAManager:
     def list_resources(self) -> List[OfflineResource]:
         return list(self._resources.values())
 
-    def add_resource(self, url: str, strategy: CacheStrategy = CacheStrategy.CACHE_FIRST, size_bytes: int = 0) -> OfflineResource:
+    def add_resource(
+        self,
+        url: str,
+        strategy: CacheStrategy = CacheStrategy.CACHE_FIRST,
+        size_bytes: int = 0,
+    ) -> OfflineResource:
         rid = f"res_{hashlib.md5(url.encode()).hexdigest()[:12]}"
-        resource = OfflineResource(resource_id=rid, url=url, cache_strategy=strategy, size_bytes=size_bytes)
+        resource = OfflineResource(
+            resource_id=rid, url=url, cache_strategy=strategy, size_bytes=size_bytes
+        )
         self._resources[rid] = resource
         return resource
 
@@ -189,7 +233,11 @@ class PWAManager:
                 item.status = SyncStatus.SYNCED
                 item.synced_at = time.time()
                 synced += 1
-        return {"synced": synced, "failed": failed, "remaining": self.pending_sync_count()}
+        return {
+            "synced": synced,
+            "failed": failed,
+            "remaining": self.pending_sync_count(),
+        }
 
     def pending_sync_count(self) -> int:
         return sum(1 for item in self._sync_queue if item.status == SyncStatus.PENDING)

@@ -1,4 +1,5 @@
 """Tests for Phase 29A - Self-Assessment Engine."""
+
 import sys
 import json
 import pytest
@@ -21,6 +22,7 @@ from Engine8_Knowledge.optimization.self_assessment import (
 # Fixtures
 # =============================================================================
 
+
 @pytest.fixture
 def assessment(tmp_path):
     """Create SelfAssessment with temp storage."""
@@ -36,6 +38,7 @@ def assessment_no_storage():
 # =============================================================================
 # SubsystemStatus Dataclass Tests
 # =============================================================================
+
 
 class TestSubsystemStatus:
     """Tests for the SubsystemStatus dataclass."""
@@ -65,6 +68,7 @@ class TestSubsystemStatus:
 # =============================================================================
 # AssessmentReport Dataclass Tests
 # =============================================================================
+
 
 class TestAssessmentReport:
     """Tests for the AssessmentReport dataclass."""
@@ -99,6 +103,7 @@ class TestAssessmentReport:
 # =============================================================================
 # SelfAssessment Core Tests
 # =============================================================================
+
 
 class TestSelfAssessment:
     """Tests for the SelfAssessment engine."""
@@ -152,9 +157,14 @@ class TestSelfAssessment:
     @pytest.mark.asyncio
     async def test_overall_status_red_when_any_red(self, assessment):
         """Test overall_status is red when any subsystem is red."""
+
         async def fake_check_api_latency():
-            return SubsystemStatus(name="api_latency", status="red", score=30.0,
-                                   issues=["API latency critical"])
+            return SubsystemStatus(
+                name="api_latency",
+                status="red",
+                score=30.0,
+                issues=["API latency critical"],
+            )
 
         assessment._check_api_latency = fake_check_api_latency
         report = await assessment.run_full_assessment()
@@ -163,6 +173,7 @@ class TestSelfAssessment:
     @pytest.mark.asyncio
     async def test_overall_status_yellow_when_multiple_yellow(self, assessment):
         """Test overall_status is yellow when more than one subsystem is yellow."""
+
         async def fake_check_search():
             return SubsystemStatus(name="search_quality", status="yellow", score=60.0)
 
@@ -227,12 +238,14 @@ class TestSelfAssessment:
 # Singleton Tests
 # =============================================================================
 
+
 class TestGetSelfAssessment:
     """Tests for the get_self_assessment singleton factory."""
 
     def test_get_self_assessment_returns_instance(self):
         """Test get_self_assessment returns a SelfAssessment instance."""
         import Engine8_Knowledge.optimization.self_assessment as mod
+
         original = mod._assessment
         try:
             mod._assessment = None
@@ -244,6 +257,7 @@ class TestGetSelfAssessment:
     def test_get_self_assessment_returns_same_instance(self):
         """Test get_self_assessment returns the same singleton."""
         import Engine8_Knowledge.optimization.self_assessment as mod
+
         original = mod._assessment
         try:
             mod._assessment = None

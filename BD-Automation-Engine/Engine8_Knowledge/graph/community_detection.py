@@ -24,15 +24,19 @@ logger = logging.getLogger(__name__)
 try:
     import networkx as nx
     import community as community_louvain  # python-louvain
+
     LOUVAIN_AVAILABLE = True
 except ImportError:
     LOUVAIN_AVAILABLE = False
-    logger.warning("python-louvain or networkx not installed. pip install python-louvain networkx")
+    logger.warning(
+        "python-louvain or networkx not installed. pip install python-louvain networkx"
+    )
 
 
 @dataclass
 class Community:
     """A detected community/cluster in the graph."""
+
     id: int
     entities: List[Dict] = field(default_factory=list)
     size: int = 0
@@ -59,7 +63,9 @@ class CommunityDetector:
     def _build_networkx_graph(self) -> "nx.Graph":
         """Build a NetworkX graph from the BD knowledge graph."""
         if not LOUVAIN_AVAILABLE:
-            raise RuntimeError("python-louvain and networkx are required for community detection")
+            raise RuntimeError(
+                "python-louvain and networkx are required for community detection"
+            )
 
         G = nx.Graph()
 
@@ -72,7 +78,10 @@ class CommunityDetector:
             "SELECT from_entity_id, to_entity_id, type, confidence FROM relationships"
         )
         for from_id, to_id, rel_type, confidence in cursor:
-            if from_id in self.graph._entity_cache and to_id in self.graph._entity_cache:
+            if (
+                from_id in self.graph._entity_cache
+                and to_id in self.graph._entity_cache
+            ):
                 G.add_edge(from_id, to_id, type=rel_type, weight=confidence or 1.0)
 
         self._nx_graph = G
@@ -101,7 +110,9 @@ class CommunityDetector:
         # Run Louvain
         partition = community_louvain.best_partition(G, resolution=resolution)
         modularity = community_louvain.modularity(partition, G)
-        logger.info(f"Louvain detected {len(set(partition.values()))} communities (modularity={modularity:.3f})")
+        logger.info(
+            f"Louvain detected {len(set(partition.values()))} communities (modularity={modularity:.3f})"
+        )
 
         # Store entity-to-community mapping
         self._entity_to_community = partition
@@ -121,11 +132,13 @@ class CommunityDetector:
                 entity = self.graph.get_entity(eid)
                 if entity:
                     type_dist[entity.type] += 1
-                    entities_list.append({
-                        "id": entity.id,
-                        "name": entity.name,
-                        "type": entity.type,
-                    })
+                    entities_list.append(
+                        {
+                            "id": entity.id,
+                            "name": entity.name,
+                            "type": entity.type,
+                        }
+                    )
 
             # Dominant type
             dominant = max(type_dist, key=type_dist.get) if type_dist else "Unknown"
@@ -180,7 +193,9 @@ class CommunityDetector:
                     "key_entities": c.key_entities,
                     "density": c.density,
                 }
-                for c in sorted(communities.values(), key=lambda c: c.size, reverse=True)
+                for c in sorted(
+                    communities.values(), key=lambda c: c.size, reverse=True
+                )
             ],
         }
 
@@ -235,9 +250,7 @@ class CommunityDetector:
             "community_id": comm_id,
             "community_label": comm.label,
             "community_size": comm.size,
-            "co_members": [
-                e for e in comm.entities if e["id"] != entity.id
-            ][:20],
+            "co_members": [e for e in comm.entities if e["id"] != entity.id][:20],
         }
 
     def get_cross_community_bridges(self, limit: int = 20) -> List[Dict]:
@@ -277,7 +290,9 @@ class CommunityDetector:
                     }
 
         # Sort by number of cross-community connections
-        bridges = sorted(bridge_scores.values(), key=lambda b: b["bridge_count"], reverse=True)
+        bridges = sorted(
+            bridge_scores.values(), key=lambda b: b["bridge_count"], reverse=True
+        )
         return bridges[:limit]
 
     def get_community_graph(self) -> Dict:

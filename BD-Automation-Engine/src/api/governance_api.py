@@ -11,13 +11,17 @@ from pydantic import BaseModel, Field
 
 from src.governance.catalog import DataAsset, get_data_catalog
 from src.governance.schema_registry import (
-    DataSchema, get_schema_registry,
+    DataSchema,
+    get_schema_registry,
 )
 from src.governance.contracts import (
-    DataContract, get_contracts_engine,
+    DataContract,
+    get_contracts_engine,
 )
 from src.governance.sla_engine import (
-    QualitySLA, SLAAlert, get_sla_engine,
+    QualitySLA,
+    SLAAlert,
+    get_sla_engine,
 )
 
 logger = logging.getLogger(__name__)
@@ -26,6 +30,7 @@ logger = logging.getLogger(__name__)
 # =========================================
 # REQUEST MODELS
 # =========================================
+
 
 class ValidateRequest(BaseModel):
     schema_name: str
@@ -52,6 +57,7 @@ class CheckAllRequest(BaseModel):
 # =========================================
 # ROUTE SETUP
 # =========================================
+
 
 def include_governance_router(app: FastAPI) -> None:
     """Register all governance endpoints on the FastAPI app."""
@@ -165,7 +171,10 @@ def include_governance_router(app: FastAPI) -> None:
     async def governance_contract_check(req: ContractCheckRequest):
         """Check whether a contract's terms are met."""
         result = contracts.check_contract(
-            req.contract_id, req.metrics, req.record_count, req.staleness_hours,
+            req.contract_id,
+            req.metrics,
+            req.record_count,
+            req.staleness_hours,
         )
         return {
             "contract_id": result.contract_id,
@@ -257,12 +266,19 @@ def include_governance_router(app: FastAPI) -> None:
 # SERIALIZATION HELPERS
 # =========================================
 
+
 def _serialize_asset(a: DataAsset) -> Dict[str, Any]:
     return {
-        "id": a.id, "name": a.name, "description": a.description,
-        "asset_type": a.asset_type, "status": a.status,
-        "owner": a.owner, "domain": a.domain, "schema_id": a.schema_id,
-        "tags": a.tags, "record_count": a.record_count,
+        "id": a.id,
+        "name": a.name,
+        "description": a.description,
+        "asset_type": a.asset_type,
+        "status": a.status,
+        "owner": a.owner,
+        "domain": a.domain,
+        "schema_id": a.schema_id,
+        "tags": a.tags,
+        "record_count": a.record_count,
         "quality": {
             "completeness": a.quality.completeness,
             "accuracy": a.quality.accuracy,
@@ -274,18 +290,26 @@ def _serialize_asset(a: DataAsset) -> Dict[str, Any]:
             "total_writes": a.usage.total_writes,
             "popularity_score": a.usage.popularity_score,
         },
-        "created_at": a.created_at, "updated_at": a.updated_at,
+        "created_at": a.created_at,
+        "updated_at": a.updated_at,
     }
 
 
 def _serialize_schema(s: DataSchema) -> Dict[str, Any]:
     return {
-        "id": s.id, "name": s.name, "version": s.version,
-        "domain": s.domain, "description": s.description,
+        "id": s.id,
+        "name": s.name,
+        "version": s.version,
+        "domain": s.domain,
+        "description": s.description,
         "status": s.status,
         "fields": [
-            {"name": f.name, "type": f.field_type, "required": f.required,
-             "description": f.description}
+            {
+                "name": f.name,
+                "type": f.field_type,
+                "required": f.required,
+                "description": f.description,
+            }
             for f in s.fields
         ],
         "compatibility": s.compatibility,
@@ -295,10 +319,15 @@ def _serialize_schema(s: DataSchema) -> Dict[str, Any]:
 
 def _serialize_contract(c: DataContract) -> Dict[str, Any]:
     return {
-        "id": c.id, "name": c.name, "version": c.version,
-        "producer": c.producer, "consumer": c.consumer,
-        "asset_id": c.asset_id, "schema_name": c.schema_name,
-        "description": c.description, "status": c.status,
+        "id": c.id,
+        "name": c.name,
+        "version": c.version,
+        "producer": c.producer,
+        "consumer": c.consumer,
+        "asset_id": c.asset_id,
+        "schema_name": c.schema_name,
+        "description": c.description,
+        "status": c.status,
         "refresh_schedule": c.refresh_schedule,
         "max_staleness_hours": c.max_staleness_hours,
         "quality_terms": [
@@ -311,21 +340,31 @@ def _serialize_contract(c: DataContract) -> Dict[str, Any]:
 
 def _serialize_breach(b) -> Dict[str, Any]:
     return {
-        "id": b.id, "severity": b.severity,
+        "id": b.id,
+        "severity": b.severity,
         "term_violated": b.term_violated,
-        "expected": b.expected, "actual": b.actual,
-        "message": b.message, "detected_at": b.detected_at,
+        "expected": b.expected,
+        "actual": b.actual,
+        "message": b.message,
+        "detected_at": b.detected_at,
     }
 
 
 def _serialize_sla(s: QualitySLA) -> Dict[str, Any]:
     return {
-        "id": s.id, "name": s.name, "asset_id": s.asset_id,
-        "owner": s.owner, "description": s.description,
+        "id": s.id,
+        "name": s.name,
+        "asset_id": s.asset_id,
+        "owner": s.owner,
+        "description": s.description,
         "status": s.status,
         "targets": [
-            {"metric": t.metric, "target_value": t.target_value,
-             "operator": t.operator, "window": t.window}
+            {
+                "metric": t.metric,
+                "target_value": t.target_value,
+                "operator": t.operator,
+                "window": t.window,
+            }
             for t in s.targets
         ],
         "created_at": s.created_at,
@@ -334,8 +373,11 @@ def _serialize_sla(s: QualitySLA) -> Dict[str, Any]:
 
 def _serialize_alert(a: SLAAlert) -> Dict[str, Any]:
     return {
-        "id": a.id, "level": a.level,
+        "id": a.id,
+        "level": a.level,
         "target_metric": a.target_metric,
-        "expected": a.expected, "actual": a.actual,
-        "message": a.message, "created_at": a.created_at,
+        "expected": a.expected,
+        "actual": a.actual,
+        "message": a.message,
+        "created_at": a.created_at,
     }

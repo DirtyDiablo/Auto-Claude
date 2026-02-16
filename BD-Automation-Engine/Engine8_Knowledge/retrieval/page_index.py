@@ -2,6 +2,7 @@
 PageIndex - Vectorless RAG with Page-Level Indexing
 Provides explainable retrieval with exact source citations.
 """
+
 import sqlite3
 import json
 from pathlib import Path
@@ -17,6 +18,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class PageRecord:
     """Represents a single page from a document."""
+
     page_id: str
     document_id: str
     document_name: str
@@ -29,6 +31,7 @@ class PageRecord:
 @dataclass
 class RetrievalResult:
     """Explainable retrieval result with source citation."""
+
     page_id: str
     document_name: str
     page_number: int
@@ -91,12 +94,14 @@ class PageIndex:
         corpus = []
 
         for row in cursor:
-            self.page_cache.append({
-                "page_id": row[0],
-                "document_name": row[1],
-                "page_number": row[2],
-                "content": row[3]
-            })
+            self.page_cache.append(
+                {
+                    "page_id": row[0],
+                    "document_name": row[1],
+                    "page_number": row[2],
+                    "content": row[3],
+                }
+            )
             # Tokenize for BM25
             corpus.append(row[3].lower().split())
 
@@ -105,11 +110,13 @@ class PageIndex:
         else:
             self.bm25_index = None
 
-    def index_document(self,
-                       document_id: str,
-                       document_name: str,
-                       pages: List[Dict[str, any]],
-                       metadata: Optional[Dict] = None) -> int:
+    def index_document(
+        self,
+        document_id: str,
+        document_name: str,
+        pages: List[Dict[str, any]],
+        metadata: Optional[Dict] = None,
+    ) -> int:
         """
         Index a document by its pages.
 
@@ -126,18 +133,21 @@ class PageIndex:
         for page in pages:
             page_id = f"{document_id}_p{page['page_number']}"
             try:
-                self.conn.execute("""
+                self.conn.execute(
+                    """
                     INSERT OR REPLACE INTO pages
                     (page_id, document_id, document_name, page_number, content, metadata)
                     VALUES (?, ?, ?, ?, ?, ?)
-                """, (
-                    page_id,
-                    document_id,
-                    document_name,
-                    page['page_number'],
-                    page['content'],
-                    json.dumps(metadata or {})
-                ))
+                """,
+                    (
+                        page_id,
+                        document_id,
+                        document_name,
+                        page["page_number"],
+                        page["content"],
+                        json.dumps(metadata or {}),
+                    ),
+                )
                 indexed += 1
             except Exception as e:
                 logger.error("page_indexing_failed", page_id=page_id, error=str(e))
@@ -146,11 +156,13 @@ class PageIndex:
         self._rebuild_bm25_index()
         return indexed
 
-    def search(self,
-               query: str,
-               top_k: int = 5,
-               document_filter: Optional[str] = None,
-               min_score: float = -100.0) -> List[RetrievalResult]:
+    def search(
+        self,
+        query: str,
+        top_k: int = 5,
+        document_filter: Optional[str] = None,
+        min_score: float = -100.0,
+    ) -> List[RetrievalResult]:
         """
         Search for pages matching the query.
 
@@ -187,22 +199,23 @@ class PageIndex:
 
             # Find matched terms for explainability
             matched_terms = [
-                term for term in query_tokens
-                if term in page["content"].lower()
+                term for term in query_tokens if term in page["content"].lower()
             ]
 
             # Generate citation
             citation = f"{page['document_name']}, Page {page['page_number']}"
 
-            results.append(RetrievalResult(
-                page_id=page["page_id"],
-                document_name=page["document_name"],
-                page_number=page["page_number"],
-                content=page["content"][:2000],  # Truncate for response
-                score=float(score),
-                matched_terms=matched_terms,
-                citation=citation
-            ))
+            results.append(
+                RetrievalResult(
+                    page_id=page["page_id"],
+                    document_name=page["document_name"],
+                    page_number=page["page_number"],
+                    content=page["content"][:2000],  # Truncate for response
+                    score=float(score),
+                    matched_terms=matched_terms,
+                    citation=citation,
+                )
+            )
 
         # Sort by score and return top_k
         results.sort(key=lambda x: x.score, reverse=True)
@@ -212,7 +225,7 @@ class PageIndex:
         """Get all pages for a specific document."""
         cursor = self.conn.execute(
             "SELECT page_id, page_number, content FROM pages WHERE document_id = ? ORDER BY page_number",
-            (document_id,)
+            (document_id,),
         )
         return [{"page_id": r[0], "page_number": r[1], "content": r[2]} for r in cursor]
 
@@ -230,7 +243,7 @@ class PageIndex:
         # Get the target page
         cursor = self.conn.execute(
             "SELECT document_id, page_number, content, document_name FROM pages WHERE page_id = ?",
-            (page_id,)
+            (page_id,),
         )
         row = cursor.fetchone()
         if not row:
@@ -239,11 +252,14 @@ class PageIndex:
         document_id, page_number, content, doc_name = row
 
         # Get surrounding pages
-        cursor = self.conn.execute("""
+        cursor = self.conn.execute(
+            """
             SELECT page_number, content FROM pages
             WHERE document_id = ? AND page_number BETWEEN ? AND ?
             ORDER BY page_number
-        """, (document_id, page_number - context_pages, page_number + context_pages))
+        """,
+            (document_id, page_number - context_pages, page_number + context_pages),
+        )
 
         context = [{"page_number": r[0], "content": r[1]} for r in cursor]
 
@@ -251,14 +267,13 @@ class PageIndex:
             "document_name": doc_name,
             "target_page": page_number,
             "citation": f"{doc_name}, Page {page_number}",
-            "context": context
+            "context": context,
         }
 
     def delete_document(self, document_id: str) -> int:
         """Delete a document and all its pages from the index."""
         cursor = self.conn.execute(
-            "DELETE FROM pages WHERE document_id = ?",
-            (document_id,)
+            "DELETE FROM pages WHERE document_id = ?", (document_id,)
         )
         self.conn.commit()
         deleted = cursor.rowcount
@@ -273,14 +288,16 @@ class PageIndex:
         cursor = self.conn.execute("SELECT COUNT(DISTINCT document_id) FROM pages")
         total_docs = cursor.fetchone()[0]
 
-        cursor = self.conn.execute("SELECT document_name, COUNT(*) FROM pages GROUP BY document_name")
+        cursor = self.conn.execute(
+            "SELECT document_name, COUNT(*) FROM pages GROUP BY document_name"
+        )
         docs = [{"name": r[0], "pages": r[1]} for r in cursor]
 
         return {
             "total_pages": total_pages,
             "total_documents": total_docs,
             "documents": docs,
-            "bm25_ready": self.bm25_index is not None
+            "bm25_ready": self.bm25_index is not None,
         }
 
 
@@ -293,9 +310,7 @@ class PageIndexRAG:
         self.index = page_index
         self.llm = llm_client  # Anthropic or OpenAI client
 
-    def answer_with_citations(self,
-                              question: str,
-                              top_k: int = 5) -> Dict:
+    def answer_with_citations(self, question: str, top_k: int = 5) -> Dict:
         """
         Answer a question using PageIndex retrieval with full citations.
 
@@ -313,7 +328,7 @@ class PageIndexRAG:
             return {
                 "answer": "No relevant information found in the indexed documents.",
                 "citations": [],
-                "confidence": 0.0
+                "confidence": 0.0,
             }
 
         # Build context from results
@@ -321,14 +336,18 @@ class PageIndexRAG:
         citations = []
 
         for i, result in enumerate(results):
-            context_parts.append(f"[Source {i+1}: {result.citation}]\n{result.content}")
-            citations.append({
-                "citation": result.citation,
-                "excerpt": result.content[:500],
-                "page_id": result.page_id,
-                "score": result.score,
-                "matched_terms": result.matched_terms
-            })
+            context_parts.append(
+                f"[Source {i + 1}: {result.citation}]\n{result.content}"
+            )
+            citations.append(
+                {
+                    "citation": result.citation,
+                    "excerpt": result.content[:500],
+                    "page_id": result.page_id,
+                    "score": result.score,
+                    "matched_terms": result.matched_terms,
+                }
+            )
 
         context = "\n\n---\n\n".join(context_parts)
 
@@ -337,7 +356,7 @@ class PageIndexRAG:
             return {
                 "answer": f"Found {len(results)} relevant pages. Top result from {results[0].citation}",
                 "citations": citations,
-                "confidence": min(results[0].score / 10.0, 1.0)  # Normalize
+                "confidence": min(results[0].score / 10.0, 1.0),  # Normalize
             }
 
         # Generate answer with LLM
@@ -357,5 +376,5 @@ Provide a clear, factual answer with citations:"""
         return {
             "answer": "LLM answer would go here",
             "citations": citations,
-            "confidence": sum(r.score for r in results) / len(results) / 10.0
+            "confidence": sum(r.score for r in results) / len(results) / 10.0,
         }

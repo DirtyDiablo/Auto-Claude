@@ -15,6 +15,7 @@ from src.ml.opportunity_scorer import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def scorer():
     return OpportunityScorer()
@@ -71,25 +72,49 @@ def weak_opportunity():
 def sample_pipeline():
     return [
         {
-            "id": "opp-1", "title": "Sr Analyst", "company": "Leidos",
-            "program": "AF DCGS", "contact_tier": 2, "relationship_depth": 5,
-            "days_since_last_contact": 5, "estimated_value": 500000,
-            "days_job_open": 10, "fiscal_quarter": 3, "clearance_match": 1,
-            "pts_involvement": 2, "competitor_density": 3,
+            "id": "opp-1",
+            "title": "Sr Analyst",
+            "company": "Leidos",
+            "program": "AF DCGS",
+            "contact_tier": 2,
+            "relationship_depth": 5,
+            "days_since_last_contact": 5,
+            "estimated_value": 500000,
+            "days_job_open": 10,
+            "fiscal_quarter": 3,
+            "clearance_match": 1,
+            "pts_involvement": 2,
+            "competitor_density": 3,
         },
         {
-            "id": "opp-2", "title": "Cyber Engineer", "company": "GDIT",
-            "program": "NGEN", "contact_tier": 4, "relationship_depth": 1,
-            "days_since_last_contact": 30, "estimated_value": 200000,
-            "days_job_open": 25, "fiscal_quarter": 2, "clearance_match": 0,
-            "pts_involvement": 0, "competitor_density": 7,
+            "id": "opp-2",
+            "title": "Cyber Engineer",
+            "company": "GDIT",
+            "program": "NGEN",
+            "contact_tier": 4,
+            "relationship_depth": 1,
+            "days_since_last_contact": 30,
+            "estimated_value": 200000,
+            "days_job_open": 25,
+            "fiscal_quarter": 2,
+            "clearance_match": 0,
+            "pts_involvement": 0,
+            "competitor_density": 7,
         },
         {
-            "id": "opp-3", "title": "Systems Engineer", "company": "NGC",
-            "program": "GBSD", "contact_tier": 5, "relationship_depth": 0,
-            "days_since_last_contact": 50, "estimated_value": 100000,
-            "days_job_open": 45, "fiscal_quarter": 1, "clearance_match": 0,
-            "pts_involvement": 0, "competitor_density": 9,
+            "id": "opp-3",
+            "title": "Systems Engineer",
+            "company": "NGC",
+            "program": "GBSD",
+            "contact_tier": 5,
+            "relationship_depth": 0,
+            "days_since_last_contact": 50,
+            "estimated_value": 100000,
+            "days_job_open": 45,
+            "fiscal_quarter": 1,
+            "clearance_match": 0,
+            "pts_involvement": 0,
+            "competitor_density": 9,
         },
     ]
 
@@ -97,6 +122,7 @@ def sample_pipeline():
 # =========================================
 # DIMENSION WEIGHTS
 # =========================================
+
 
 class TestDimensionWeights:
     def test_weights_sum_to_one(self):
@@ -118,6 +144,7 @@ class TestDimensionWeights:
 # SINGLE SCORING
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestSingleScoring:
     async def test_score_returns_scored_opp(self, scorer, strong_opportunity):
@@ -137,7 +164,9 @@ class TestSingleScoring:
         names = {d.name for d in result.dimensions}
         assert names == set(DIMENSION_WEIGHTS.keys())
 
-    async def test_strong_scores_higher(self, scorer, strong_opportunity, weak_opportunity):
+    async def test_strong_scores_higher(
+        self, scorer, strong_opportunity, weak_opportunity
+    ):
         strong = await scorer.score_opportunity(strong_opportunity)
         weak = await scorer.score_opportunity(weak_opportunity)
         assert strong.composite_score > weak.composite_score
@@ -155,6 +184,7 @@ class TestSingleScoring:
 # =========================================
 # PIPELINE RANKING
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestPipelineRanking:
@@ -182,6 +212,7 @@ class TestPipelineRanking:
 # PIPELINE REVIEW
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestPipelineReview:
     async def test_review_returns_pipeline_review(self, scorer, sample_pipeline):
@@ -205,6 +236,7 @@ class TestPipelineReview:
 # =========================================
 # WHAT-IF ANALYSIS
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestWhatIfAnalysis:
@@ -231,6 +263,7 @@ class TestWhatIfAnalysis:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_scorer_returns_instance(self):

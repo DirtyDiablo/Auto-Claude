@@ -19,16 +19,26 @@ router = APIRouter(prefix="/automation", tags=["automation"])
 # Request models
 # ---------------------------------------------------------------------------
 
+
 class WorkflowRunRequest(BaseModel):
     workflow: str = Field(..., description="Workflow name to execute")
-    params: dict = Field(default_factory=dict, description="Parameters for the workflow")
+    params: dict = Field(
+        default_factory=dict, description="Parameters for the workflow"
+    )
 
 
 class ClaudeTaskRequest(BaseModel):
-    task_type: str = Field(..., description="Task type: deep_research, contact_analysis, competitive_brief, proposal_section, data_reconciliation")
+    task_type: str = Field(
+        ...,
+        description="Task type: deep_research, contact_analysis, competitive_brief, proposal_section, data_reconciliation",
+    )
     prompt: str = Field(..., description="The research prompt/question")
-    context_documents: list[str] = Field(default_factory=list, description="Paths to context files")
-    context_data: dict = Field(default_factory=dict, description="Structured context data")
+    context_documents: list[str] = Field(
+        default_factory=list, description="Paths to context files"
+    )
+    context_data: dict = Field(
+        default_factory=dict, description="Structured context data"
+    )
     priority: str = Field("normal", description="Priority: low, normal, high, urgent")
 
 
@@ -36,10 +46,12 @@ class ClaudeTaskRequest(BaseModel):
 # Scheduled Tasks Endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.get("/schedule")
 async def get_schedule():
     """Get all scheduled tasks with next run times."""
     from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
     scheduler = get_task_scheduler()
     return {
         "tasks": scheduler.get_schedule(),
@@ -51,6 +63,7 @@ async def get_schedule():
 async def run_task_now(name: str):
     """Trigger a scheduled task immediately."""
     from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
     scheduler = get_task_scheduler()
     result = await scheduler.run_now(name)
     if "error" in result:
@@ -62,6 +75,7 @@ async def run_task_now(name: str):
 async def toggle_task(name: str, enabled: bool = Query(True)):
     """Enable or disable a scheduled task."""
     from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
     scheduler = get_task_scheduler()
     if enabled:
         ok = scheduler.enable_task(name)
@@ -79,6 +93,7 @@ async def get_task_history(
 ):
     """Get execution history for scheduled tasks."""
     from Engine8_Knowledge.automation.task_scheduler import get_task_scheduler
+
     scheduler = get_task_scheduler()
     history = scheduler.get_execution_history(name=name, days=days)
     return {"history": history, "total": len(history)}
@@ -88,10 +103,12 @@ async def get_task_history(
 # Multi-Agent Workflow Endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.get("/workflows/definitions")
 async def get_workflow_definitions():
     """List available workflow definitions."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     return {
         "workflows": coordinator.get_workflow_definitions(),
@@ -103,6 +120,7 @@ async def get_workflow_definitions():
 async def start_workflow(req: WorkflowRunRequest):
     """Start a multi-agent workflow."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     result = await coordinator.run_workflow(req.workflow, req.params)
     if "error" in result:
@@ -114,6 +132,7 @@ async def start_workflow(req: WorkflowRunRequest):
 async def get_active_workflows():
     """Get all currently active workflow runs."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     active = coordinator.get_active_workflows()
     return {"active": active, "total": len(active)}
@@ -123,6 +142,7 @@ async def get_active_workflows():
 async def get_workflow_run(run_id: str):
     """Get details of a specific workflow run."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     run = coordinator.get_workflow_run(run_id)
     if not run:
@@ -134,6 +154,7 @@ async def get_workflow_run(run_id: str):
 async def approve_workflow_gate(run_id: str):
     """Approve a human gate in a paused workflow."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     result = await coordinator.approve_human_gate(run_id)
     if "error" in result:
@@ -145,6 +166,7 @@ async def approve_workflow_gate(run_id: str):
 async def cancel_workflow(run_id: str):
     """Cancel an active workflow."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     result = coordinator.cancel_workflow(run_id)
     if "error" in result:
@@ -156,6 +178,7 @@ async def cancel_workflow(run_id: str):
 async def get_workflow_history(limit: int = Query(50)):
     """Get completed workflow history."""
     from Engine8_Knowledge.automation.agent_coordinator import get_agent_coordinator
+
     coordinator = get_agent_coordinator()
     history = coordinator.get_workflow_history(limit=limit)
     return {"history": history, "total": len(history)}
@@ -165,10 +188,12 @@ async def get_workflow_history(limit: int = Query(50)):
 # Auto Claude Task Endpoints
 # ---------------------------------------------------------------------------
 
+
 @router.post("/claude/submit")
 async def submit_claude_task(req: ClaudeTaskRequest):
     """Submit a research task for Claude."""
     from Engine8_Knowledge.automation.auto_claude_tasks import get_claude_task_manager
+
     mgr = get_claude_task_manager()
     result = mgr.submit_task(
         task_type=req.task_type,
@@ -186,6 +211,7 @@ async def submit_claude_task(req: ClaudeTaskRequest):
 async def get_claude_queue():
     """Get pending Claude tasks."""
     from Engine8_Knowledge.automation.auto_claude_tasks import get_claude_task_manager
+
     mgr = get_claude_task_manager()
     return {
         "pending": mgr.list_pending_tasks(),
@@ -197,6 +223,7 @@ async def get_claude_queue():
 async def list_all_claude_tasks():
     """List all Claude tasks across all statuses."""
     from Engine8_Knowledge.automation.auto_claude_tasks import get_claude_task_manager
+
     mgr = get_claude_task_manager()
     return {
         "tasks": mgr.list_all_tasks(),
@@ -208,6 +235,7 @@ async def list_all_claude_tasks():
 async def get_claude_results(task_id: str):
     """Get results for a completed Claude task."""
     from Engine8_Knowledge.automation.auto_claude_tasks import get_claude_task_manager
+
     mgr = get_claude_task_manager()
     status = mgr.get_task_status(task_id)
     if not status:
@@ -220,6 +248,7 @@ async def get_claude_results(task_id: str):
 async def build_claude_prompt(task_id: str):
     """Build the full Claude API prompt for a task (for debugging/preview)."""
     from Engine8_Knowledge.automation.auto_claude_tasks import get_claude_task_manager
+
     mgr = get_claude_task_manager()
     prompt = mgr.build_claude_prompt(task_id)
     if not prompt:

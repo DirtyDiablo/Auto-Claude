@@ -37,43 +37,39 @@ ENTITY_TYPES = {
 
 RELATIONSHIP_TYPES = {
     # Contractor relationships
-    "PRIMES_ON": ("Contractor", "Program"),       # GDIT primes on DCGS-A
-    "SUBS_TO": ("Contractor", "Contractor"),      # PTS subs to GDIT
-    "COMPETES_WITH": ("Contractor", "Contractor"), # GDIT competes with Leidos
-    "PARTNERS_WITH": ("Contractor", "Contractor"), # Strategic partnership
-    "HAS_PAST_PERF": ("Contractor", "Program"),   # PTS has past perf on BICES
-
+    "PRIMES_ON": ("Contractor", "Program"),  # GDIT primes on DCGS-A
+    "SUBS_TO": ("Contractor", "Contractor"),  # PTS subs to GDIT
+    "COMPETES_WITH": ("Contractor", "Contractor"),  # GDIT competes with Leidos
+    "PARTNERS_WITH": ("Contractor", "Contractor"),  # Strategic partnership
+    "HAS_PAST_PERF": ("Contractor", "Program"),  # PTS has past perf on BICES
     # Contact relationships
-    "WORKS_ON": ("Contact", "Program"),           # John works on AF DCGS
-    "WORKS_FOR": ("Contact", "Contractor"),       # John works for GDIT
-    "MANAGES": ("Contact", "Contact"),            # Mary manages John
-    "KNOWS": ("Contact", "Contact"),              # Professional connection
-    "DECISION_MAKER_FOR": ("Contact", "Program"), # Key decision maker
-
+    "WORKS_ON": ("Contact", "Program"),  # John works on AF DCGS
+    "WORKS_FOR": ("Contact", "Contractor"),  # John works for GDIT
+    "MANAGES": ("Contact", "Contact"),  # Mary manages John
+    "KNOWS": ("Contact", "Contact"),  # Professional connection
+    "DECISION_MAKER_FOR": ("Contact", "Program"),  # Key decision maker
     # Job relationships
-    "HAS_OPENING": ("Program", "Job"),            # AF DCGS has network engineer opening
-    "POSTED_BY": ("Contractor", "Job"),           # GDIT posted job
-    "REQUIRES": ("Job", "Skill"),                 # Job requires TS/SCI
-
+    "HAS_OPENING": ("Program", "Job"),  # AF DCGS has network engineer opening
+    "POSTED_BY": ("Contractor", "Job"),  # GDIT posted job
+    "REQUIRES": ("Job", "Skill"),  # Job requires TS/SCI
     # Location relationships
-    "LOCATED_AT": ("Program", "Location"),        # AF DCGS located at Langley
-    "HEADQUARTERED_AT": ("Contractor", "Location"), # GDIT HQ in Falls Church
-    "WORKS_AT": ("Contact", "Location"),          # Contact works at Langley
-
+    "LOCATED_AT": ("Program", "Location"),  # AF DCGS located at Langley
+    "HEADQUARTERED_AT": ("Contractor", "Location"),  # GDIT HQ in Falls Church
+    "WORKS_AT": ("Contact", "Location"),  # Contact works at Langley
     # Skill relationships
-    "REQUIRES_SKILL": ("Program", "Skill"),       # Program requires skill
-    "HAS_SKILL": ("Contact", "Skill"),            # Contact has skill
-
+    "REQUIRES_SKILL": ("Program", "Skill"),  # Program requires skill
+    "HAS_SKILL": ("Contact", "Skill"),  # Contact has skill
     # Placement & Meeting relationships
-    "PLACED_BY_PTS": ("Placement", "Contractor"), # PTS placed candidate at contractor
-    "ATTENDED": ("Contact", "Meeting"),           # Contact attended meeting
-    "ABOUT_PROGRAM": ("Meeting", "Program"),      # Meeting was about a program
+    "PLACED_BY_PTS": ("Placement", "Contractor"),  # PTS placed candidate at contractor
+    "ATTENDED": ("Contact", "Meeting"),  # Contact attended meeting
+    "ABOUT_PROGRAM": ("Meeting", "Program"),  # Meeting was about a program
 }
 
 
 @dataclass
 class Entity:
     """Represents a node in the knowledge graph."""
+
     id: str
     type: str
     name: str
@@ -86,13 +82,14 @@ class Entity:
             "type": self.type,
             "name": self.name,
             "properties": self.properties,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }
 
 
 @dataclass
 class Relationship:
     """Represents an edge in the knowledge graph."""
+
     id: str
     type: str
     from_entity_id: str
@@ -111,13 +108,14 @@ class Relationship:
             "properties": self.properties,
             "confidence": self.confidence,
             "source": self.source,
-            "created_at": self.created_at
+            "created_at": self.created_at,
         }
 
 
 # =========================================
 # KNOWLEDGE GRAPH IMPLEMENTATION
 # =========================================
+
 
 class BDKnowledgeGraph:
     """
@@ -128,8 +126,7 @@ class BDKnowledgeGraph:
     def __init__(self, db_path: str = None):
         if db_path is None:
             db_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "data", "bd_graph.db"
+                os.path.dirname(os.path.dirname(__file__)), "data", "bd_graph.db"
             )
 
         self.db_path = db_path
@@ -137,7 +134,9 @@ class BDKnowledgeGraph:
 
         self.conn = None
         self._entity_cache: Dict[str, Entity] = {}
-        self._adjacency: Dict[str, Set[str]] = {}  # entity_id -> set of connected entity_ids
+        self._adjacency: Dict[
+            str, Set[str]
+        ] = {}  # entity_id -> set of connected entity_ids
 
         self._init_database()
         self._load_cache()
@@ -176,29 +175,43 @@ class BDKnowledgeGraph:
         """)
 
         # Indexes for common queries
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(type)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(name)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rel_type ON relationships(type)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rel_from ON relationships(from_entity_id)")
-        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_rel_to ON relationships(to_entity_id)")
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_entities_type ON entities(type)"
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_entities_name ON entities(name)"
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_rel_type ON relationships(type)"
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_rel_from ON relationships(from_entity_id)"
+        )
+        self.conn.execute(
+            "CREATE INDEX IF NOT EXISTS idx_rel_to ON relationships(to_entity_id)"
+        )
 
         self.conn.commit()
 
     def _load_cache(self):
         """Load entities into cache for fast lookup."""
-        cursor = self.conn.execute("SELECT id, type, name, properties, created_at FROM entities")
+        cursor = self.conn.execute(
+            "SELECT id, type, name, properties, created_at FROM entities"
+        )
         for row in cursor:
             entity = Entity(
                 id=row[0],
                 type=row[1],
                 name=row[2],
                 properties=json.loads(row[3]) if row[3] else {},
-                created_at=row[4]
+                created_at=row[4],
             )
             self._entity_cache[entity.id] = entity
 
         # Build adjacency list
-        cursor = self.conn.execute("SELECT from_entity_id, to_entity_id FROM relationships")
+        cursor = self.conn.execute(
+            "SELECT from_entity_id, to_entity_id FROM relationships"
+        )
         for row in cursor:
             if row[0] not in self._adjacency:
                 self._adjacency[row[0]] = set()
@@ -213,11 +226,13 @@ class BDKnowledgeGraph:
     # ENTITY OPERATIONS
     # =========================================
 
-    def add_entity(self,
-                   entity_type: str,
-                   name: str,
-                   properties: Dict = None,
-                   entity_id: str = None) -> Entity:
+    def add_entity(
+        self,
+        entity_type: str,
+        name: str,
+        properties: Dict = None,
+        entity_id: str = None,
+    ) -> Entity:
         """
         Add an entity to the graph.
 
@@ -231,11 +246,14 @@ class BDKnowledgeGraph:
             Created Entity
         """
         if entity_type not in ENTITY_TYPES:
-            raise ValueError(f"Unknown entity type: {entity_type}. Valid: {list(ENTITY_TYPES.keys())}")
+            raise ValueError(
+                f"Unknown entity type: {entity_type}. Valid: {list(ENTITY_TYPES.keys())}"
+            )
 
         # Generate ID if not provided
         if not entity_id:
             import hashlib
+
             hash_input = f"{entity_type}:{name}".lower()
             entity_id = hashlib.md5(hash_input.encode()).hexdigest()[:12]
 
@@ -247,21 +265,24 @@ class BDKnowledgeGraph:
                 existing.properties.update(properties)
                 self.conn.execute(
                     "UPDATE entities SET properties = ? WHERE id = ?",
-                    (json.dumps(existing.properties), entity_id)
+                    (json.dumps(existing.properties), entity_id),
                 )
                 self.conn.commit()
             return existing
 
         entity = Entity(
-            id=entity_id,
-            type=entity_type,
-            name=name,
-            properties=properties or {}
+            id=entity_id, type=entity_type, name=name, properties=properties or {}
         )
 
         self.conn.execute(
             "INSERT INTO entities (id, type, name, properties, created_at) VALUES (?, ?, ?, ?, ?)",
-            (entity.id, entity.type, entity.name, json.dumps(entity.properties), entity.created_at)
+            (
+                entity.id,
+                entity.type,
+                entity.name,
+                json.dumps(entity.properties),
+                entity.created_at,
+            ),
         )
         self.conn.commit()
 
@@ -281,10 +302,9 @@ class BDKnowledgeGraph:
                     return entity
         return None
 
-    def search_entities(self,
-                        query: str,
-                        entity_type: str = None,
-                        limit: int = 10) -> List[Entity]:
+    def search_entities(
+        self, query: str, entity_type: str = None, limit: int = 10
+    ) -> List[Entity]:
         """Search entities by name (partial match)."""
         query_lower = query.lower()
         results = []
@@ -306,13 +326,15 @@ class BDKnowledgeGraph:
     # RELATIONSHIP OPERATIONS
     # =========================================
 
-    def add_relationship(self,
-                         from_entity: str,
-                         rel_type: str,
-                         to_entity: str,
-                         properties: Dict = None,
-                         confidence: float = 1.0,
-                         source: str = "manual") -> Relationship:
+    def add_relationship(
+        self,
+        from_entity: str,
+        rel_type: str,
+        to_entity: str,
+        properties: Dict = None,
+        confidence: float = 1.0,
+        source: str = "manual",
+    ) -> Relationship:
         """
         Add a relationship between entities.
 
@@ -335,22 +357,24 @@ class BDKnowledgeGraph:
         to_id = self._resolve_entity_id(to_entity)
 
         if not from_id or not to_id:
-            raise ValueError(f"Could not resolve entities: {from_entity} -> {to_entity}")
+            raise ValueError(
+                f"Could not resolve entities: {from_entity} -> {to_entity}"
+            )
 
         # Generate relationship ID
         import hashlib
+
         rel_id = hashlib.md5(f"{from_id}:{rel_type}:{to_id}".encode()).hexdigest()[:12]
 
         # Check if exists
         cursor = self.conn.execute(
-            "SELECT id FROM relationships WHERE id = ?",
-            (rel_id,)
+            "SELECT id FROM relationships WHERE id = ?", (rel_id,)
         )
         if cursor.fetchone():
             # Update confidence
             self.conn.execute(
                 "UPDATE relationships SET confidence = ?, properties = ? WHERE id = ?",
-                (confidence, json.dumps(properties or {}), rel_id)
+                (confidence, json.dumps(properties or {}), rel_id),
             )
             self.conn.commit()
             return Relationship(
@@ -360,7 +384,7 @@ class BDKnowledgeGraph:
                 to_entity_id=to_id,
                 properties=properties or {},
                 confidence=confidence,
-                source=source
+                source=source,
             )
 
         rel = Relationship(
@@ -370,15 +394,23 @@ class BDKnowledgeGraph:
             to_entity_id=to_id,
             properties=properties or {},
             confidence=confidence,
-            source=source
+            source=source,
         )
 
         self.conn.execute(
             """INSERT INTO relationships
                (id, type, from_entity_id, to_entity_id, properties, confidence, source, created_at)
                VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
-            (rel.id, rel.type, rel.from_entity_id, rel.to_entity_id,
-             json.dumps(rel.properties), rel.confidence, rel.source, rel.created_at)
+            (
+                rel.id,
+                rel.type,
+                rel.from_entity_id,
+                rel.to_entity_id,
+                json.dumps(rel.properties),
+                rel.confidence,
+                rel.source,
+                rel.created_at,
+            ),
         )
         self.conn.commit()
 
@@ -400,10 +432,9 @@ class BDKnowledgeGraph:
         entity = self.find_entity(entity_ref)
         return entity.id if entity else None
 
-    def get_relationships(self,
-                          entity_id: str,
-                          rel_type: str = None,
-                          direction: str = "both") -> List[Relationship]:
+    def get_relationships(
+        self, entity_id: str, rel_type: str = None, direction: str = "both"
+    ) -> List[Relationship]:
         """
         Get relationships for an entity.
 
@@ -448,7 +479,7 @@ class BDKnowledgeGraph:
                 properties=json.loads(row[4]) if row[4] else {},
                 confidence=row[5],
                 source=row[6],
-                created_at=row[7]
+                created_at=row[7],
             )
             relationships.append(rel)
 
@@ -471,7 +502,9 @@ class BDKnowledgeGraph:
             return self.get_program_contacts(program_name)
 
         # Pattern: "What programs does <contractor> prime on?"
-        if "programs" in query_lower and ("prime" in query_lower or "work" in query_lower):
+        if "programs" in query_lower and (
+            "prime" in query_lower or "work" in query_lower
+        ):
             for entity in self._entity_cache.values():
                 if entity.type == "Contractor" and entity.name.lower() in query_lower:
                     return self.get_contractor_programs(entity.name)
@@ -484,8 +517,11 @@ class BDKnowledgeGraph:
 
         # Pattern: "<contractor> teaming with <contractor>"
         if "teaming" in query_lower or "partner" in query_lower:
-            contractors = [e for e in self._entity_cache.values()
-                          if e.type == "Contractor" and e.name.lower() in query_lower]
+            contractors = [
+                e
+                for e in self._entity_cache.values()
+                if e.type == "Contractor" and e.name.lower() in query_lower
+            ]
             if len(contractors) >= 2:
                 return self.find_teaming_path(contractors[0].name, contractors[1].name)
 
@@ -510,11 +546,15 @@ class BDKnowledgeGraph:
             "contacts": [],
             "jobs": [],
             "locations": [],
-            "skills_required": []
+            "skills_required": [],
         }
 
         for rel in relationships:
-            other_id = rel.to_entity_id if rel.from_entity_id == program.id else rel.from_entity_id
+            other_id = (
+                rel.to_entity_id
+                if rel.from_entity_id == program.id
+                else rel.from_entity_id
+            )
             other = self.get_entity(other_id)
             if not other:
                 continue
@@ -534,10 +574,9 @@ class BDKnowledgeGraph:
 
         return ecosystem
 
-    def find_teaming_path(self,
-                          from_contractor: str,
-                          to_program: str,
-                          max_depth: int = 4) -> List[Dict]:
+    def find_teaming_path(
+        self, from_contractor: str, to_program: str, max_depth: int = 4
+    ) -> List[Dict]:
         """
         Find a path from a contractor to a program through teaming relationships.
         Uses BFS to find shortest path.
@@ -567,16 +606,19 @@ class BDKnowledgeGraph:
 
             # Get all connected entities
             for rel in self.get_relationships(current_id):
-                next_id = rel.to_entity_id if rel.from_entity_id == current_id else rel.from_entity_id
+                next_id = (
+                    rel.to_entity_id
+                    if rel.from_entity_id == current_id
+                    else rel.from_entity_id
+                )
 
                 if next_id not in visited:
                     visited.add(next_id)
                     next_entity = self.get_entity(next_id)
                     if next_entity:
-                        new_path = path + [{
-                            "relationship": rel.type,
-                            "entity": next_entity.to_dict()
-                        }]
+                        new_path = path + [
+                            {"relationship": rel.type, "entity": next_entity.to_dict()}
+                        ]
                         queue.append((next_id, new_path))
 
         return [{"error": "No path found", "from": from_contractor, "to": to_program}]
@@ -599,11 +641,15 @@ class BDKnowledgeGraph:
             "manages": [],
             "managed_by": [],
             "connections": [],
-            "skills": []
+            "skills": [],
         }
 
         for rel in relationships:
-            other_id = rel.to_entity_id if rel.from_entity_id == contact.id else rel.from_entity_id
+            other_id = (
+                rel.to_entity_id
+                if rel.from_entity_id == contact.id
+                else rel.from_entity_id
+            )
             other = self.get_entity(other_id)
             if not other:
                 continue
@@ -637,11 +683,13 @@ class BDKnowledgeGraph:
             contact_id = rel.from_entity_id  # WORKS_ON: Contact -> Program
             contact = self.get_entity(contact_id)
             if contact and contact.type == "Contact":
-                contacts.append({
-                    "contact": contact.to_dict(),
-                    "role": rel.properties.get("role", "Unknown"),
-                    "confidence": rel.confidence
-                })
+                contacts.append(
+                    {
+                        "contact": contact.to_dict(),
+                        "role": rel.properties.get("role", "Unknown"),
+                        "confidence": rel.confidence,
+                    }
+                )
 
         return contacts
 
@@ -658,11 +706,13 @@ class BDKnowledgeGraph:
                 program_id = rel.to_entity_id
                 program = self.get_entity(program_id)
                 if program and program.type == "Program":
-                    programs.append({
-                        "program": program.to_dict(),
-                        "relationship": rel.type,
-                        "confidence": rel.confidence
-                    })
+                    programs.append(
+                        {
+                            "program": program.to_dict(),
+                            "relationship": rel.type,
+                            "confidence": rel.confidence,
+                        }
+                    )
 
         return programs
 
@@ -678,10 +728,9 @@ class BDKnowledgeGraph:
         for rel in relationships:
             contractor = self.get_entity(rel.from_entity_id)
             if contractor and contractor.type == "Contractor":
-                primes.append({
-                    "contractor": contractor.to_dict(),
-                    "confidence": rel.confidence
-                })
+                primes.append(
+                    {"contractor": contractor.to_dict(), "confidence": rel.confidence}
+                )
 
         return primes
 
@@ -700,7 +749,7 @@ class BDKnowledgeGraph:
         try:
             programs = vector_store.get_all("programs", limit=500)
             for p in programs:
-                payload = p.payload if hasattr(p, 'payload') else p
+                payload = p.payload if hasattr(p, "payload") else p
                 self.add_entity(
                     "Program",
                     payload.get("name", payload.get("program_name", "Unknown")),
@@ -708,10 +757,12 @@ class BDKnowledgeGraph:
                         "acronym": payload.get("acronym", ""),
                         "agency": payload.get("agency", ""),
                         "prime": payload.get("prime", ""),
-                        "value": payload.get("value", payload.get("contract_value", "")),
+                        "value": payload.get(
+                            "value", payload.get("contract_value", "")
+                        ),
                         "status": payload.get("status", ""),
-                        "clearance": payload.get("clearance", "")
-                    }
+                        "clearance": payload.get("clearance", ""),
+                    },
                 )
             logger.info(f"Added {len(programs)} programs")
         except Exception as e:
@@ -721,7 +772,7 @@ class BDKnowledgeGraph:
         try:
             contacts = vector_store.get_all("contacts", limit=8000)
             for c in contacts:
-                payload = c.payload if hasattr(c, 'payload') else c
+                payload = c.payload if hasattr(c, "payload") else c
                 name = payload.get("name", payload.get("full_name", "Unknown"))
                 company = payload.get("company", payload.get("employer", ""))
 
@@ -734,16 +785,20 @@ class BDKnowledgeGraph:
                         "tier": payload.get("tier", ""),
                         "priority": payload.get("priority", 0),
                         "clearance": payload.get("clearance", ""),
-                        "email": payload.get("email", "")
-                    }
+                        "email": payload.get("email", ""),
+                    },
                 )
 
                 # Create relationship to company
                 if company:
                     contractor = self.find_entity(company, "Contractor")
                     if not contractor:
-                        contractor = self.add_entity("Contractor", company, {"type": "unknown"})
-                    self.add_relationship(contact.id, "WORKS_FOR", contractor.id, source="inferred")
+                        contractor = self.add_entity(
+                            "Contractor", company, {"type": "unknown"}
+                        )
+                    self.add_relationship(
+                        contact.id, "WORKS_FOR", contractor.id, source="inferred"
+                    )
 
             logger.info(f"Added {len(contacts)} contacts")
         except Exception as e:
@@ -753,7 +808,7 @@ class BDKnowledgeGraph:
         try:
             jobs = vector_store.get_all("jobs", limit=1000)
             for j in jobs:
-                payload = j.payload if hasattr(j, 'payload') else j
+                payload = j.payload if hasattr(j, "payload") else j
                 company = payload.get("company", "")
                 program = payload.get("mapped_program", "")
 
@@ -762,25 +817,33 @@ class BDKnowledgeGraph:
                     payload.get("title", "Unknown Position"),
                     {
                         "location": payload.get("location", ""),
-                        "clearance": payload.get("clearance", payload.get("clearance_required", "")),
+                        "clearance": payload.get(
+                            "clearance", payload.get("clearance_required", "")
+                        ),
                         "program": program,
                         "company": company,
-                        "bd_score": payload.get("bd_priority_score", 0)
-                    }
+                        "bd_score": payload.get("bd_priority_score", 0),
+                    },
                 )
 
                 # Link job to contractor
                 if company:
                     contractor = self.find_entity(company, "Contractor")
                     if not contractor:
-                        contractor = self.add_entity("Contractor", company, {"type": "prime"})
-                    self.add_relationship(contractor.id, "POSTED_BY", job.id, source="inferred")
+                        contractor = self.add_entity(
+                            "Contractor", company, {"type": "prime"}
+                        )
+                    self.add_relationship(
+                        contractor.id, "POSTED_BY", job.id, source="inferred"
+                    )
 
                 # Link job to program
                 if program:
                     prog_entity = self.find_entity(program, "Program")
                     if prog_entity:
-                        self.add_relationship(prog_entity.id, "HAS_OPENING", job.id, source="inferred")
+                        self.add_relationship(
+                            prog_entity.id, "HAS_OPENING", job.id, source="inferred"
+                        )
 
             logger.info(f"Added {len(jobs)} jobs")
         except Exception as e:
@@ -800,10 +863,15 @@ class BDKnowledgeGraph:
             if prime_name:
                 contractor = self.find_entity(prime_name, "Contractor")
                 if not contractor:
-                    contractor = self.add_entity("Contractor", prime_name, {"type": "prime"})
+                    contractor = self.add_entity(
+                        "Contractor", prime_name, {"type": "prime"}
+                    )
                 self.add_relationship(
-                    contractor.id, "PRIMES_ON", program.id,
-                    source="inferred", confidence=0.9
+                    contractor.id,
+                    "PRIMES_ON",
+                    program.id,
+                    source="inferred",
+                    confidence=0.9,
                 )
 
     # =========================================
@@ -816,37 +884,41 @@ class BDKnowledgeGraph:
         for entity in self._entity_cache.values():
             entity_counts[entity.type] = entity_counts.get(entity.type, 0) + 1
 
-        cursor = self.conn.execute("SELECT type, COUNT(*) FROM relationships GROUP BY type")
+        cursor = self.conn.execute(
+            "SELECT type, COUNT(*) FROM relationships GROUP BY type"
+        )
         rel_counts = {row[0]: row[1] for row in cursor}
 
         return {
             "total_entities": len(self._entity_cache),
             "entities_by_type": entity_counts,
             "total_relationships": sum(rel_counts.values()),
-            "relationships_by_type": rel_counts
+            "relationships_by_type": rel_counts,
         }
 
     def export_to_json(self, file_path: str):
         """Export graph to JSON file."""
         data = {
             "entities": [e.to_dict() for e in self._entity_cache.values()],
-            "relationships": []
+            "relationships": [],
         }
 
         cursor = self.conn.execute("SELECT * FROM relationships")
         for row in cursor:
-            data["relationships"].append({
-                "id": row[0],
-                "type": row[1],
-                "from_entity_id": row[2],
-                "to_entity_id": row[3],
-                "properties": json.loads(row[4]) if row[4] else {},
-                "confidence": row[5],
-                "source": row[6],
-                "created_at": row[7]
-            })
+            data["relationships"].append(
+                {
+                    "id": row[0],
+                    "type": row[1],
+                    "from_entity_id": row[2],
+                    "to_entity_id": row[3],
+                    "properties": json.loads(row[4]) if row[4] else {},
+                    "confidence": row[5],
+                    "source": row[6],
+                    "created_at": row[7],
+                }
+            )
 
-        with open(file_path, 'w') as f:
+        with open(file_path, "w") as f:
             json.dump(data, f, indent=2)
 
         logger.info(f"Exported graph to {file_path}")

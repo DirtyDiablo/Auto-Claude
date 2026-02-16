@@ -16,6 +16,7 @@ from src.graph.network_analysis import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def analyzer_with_data():
     a = NetworkAnalyzer()
@@ -47,6 +48,7 @@ def empty_analyzer():
 # =========================================
 # COMMUNITY DETECTION
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestCommunityDetection:
@@ -83,6 +85,7 @@ class TestCommunityDetection:
 # BRIDGE CONTACTS
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestBridgeContacts:
     async def test_finds_bridges(self, analyzer_with_data):
@@ -103,6 +106,7 @@ class TestBridgeContacts:
 # =========================================
 # NETWORK DENSITY
 # =========================================
+
 
 @pytest.mark.asyncio
 class TestNetworkDensity:
@@ -140,6 +144,7 @@ class TestNetworkDensity:
 # NETWORK GROWTH
 # =========================================
 
+
 @pytest.mark.asyncio
 class TestNetworkGrowth:
     async def test_returns_report(self, analyzer_with_data):
@@ -167,6 +172,7 @@ class TestNetworkGrowth:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_analyzer_returns_instance(self):

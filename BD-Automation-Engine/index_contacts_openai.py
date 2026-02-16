@@ -25,7 +25,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 
 # Fix Windows encoding
-sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Change to project directory
 os.chdir(r"C:\Users\gtmar\Projects\Auto-Claude\BD-Automation-Engine")
@@ -49,7 +49,8 @@ PROGRESS_FILE = "index_contacts_progress.json"  # Track progress for resume
 client_openai = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # UUID namespace for deterministic ID generation
-NAMESPACE_CONTACTS = uuid.UUID('87654321-4321-8765-4321-876543218765')
+NAMESPACE_CONTACTS = uuid.UUID("87654321-4321-8765-4321-876543218765")
+
 
 def id_to_uuid(record_id: int) -> str:
     """Convert integer ID to deterministic UUID."""
@@ -61,15 +62,12 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
     all_embeddings = []
 
     for i in range(0, len(texts), EMBED_BATCH_SIZE):
-        batch = texts[i:i + EMBED_BATCH_SIZE]
+        batch = texts[i : i + EMBED_BATCH_SIZE]
         # Clean texts - OpenAI doesn't like empty strings
         batch = [t if t.strip() else "empty" for t in batch]
 
         try:
-            response = client_openai.embeddings.create(
-                model=OPENAI_MODEL,
-                input=batch
-            )
+            response = client_openai.embeddings.create(model=OPENAI_MODEL, input=batch)
             embeddings = [item.embedding for item in response.data]
             all_embeddings.extend(embeddings)
         except Exception as e:
@@ -83,62 +81,87 @@ def get_embeddings(texts: list[str]) -> list[list[float]]:
 def create_text_for_embedding(contact: dict) -> str:
     """Create searchable text from contact fields."""
     parts = [
-        contact.get('name', ''),
-        contact.get('title', ''),
-        contact.get('company', ''),
-        contact.get('program', ''),
-        contact.get('notes', ''),
-        contact.get('city', ''),
-        contact.get('state', ''),
+        contact.get("name", ""),
+        contact.get("title", ""),
+        contact.get("company", ""),
+        contact.get("program", ""),
+        contact.get("notes", ""),
+        contact.get("city", ""),
+        contact.get("state", ""),
     ]
-    return ' '.join(p for p in parts if p)
+    return " ".join(p for p in parts if p)
 
 
 def classify_tier(row) -> str:
     """Classify contact into tier based on title."""
-    title = (row['title'] or '').lower()
+    title = (row["title"] or "").lower()
 
-    tier1 = ['ceo', 'cto', 'cio', 'cfo', 'president', 'vice president', 'vp',
-             'director', 'chief', 'partner', 'owner', 'founder', 'general manager']
+    tier1 = [
+        "ceo",
+        "cto",
+        "cio",
+        "cfo",
+        "president",
+        "vice president",
+        "vp",
+        "director",
+        "chief",
+        "partner",
+        "owner",
+        "founder",
+        "general manager",
+    ]
     for kw in tier1:
         if kw in title:
-            return 'Tier 1'
+            return "Tier 1"
 
-    tier2 = ['senior', 'manager', 'lead', 'head', 'principal', 'supervisor']
+    tier2 = ["senior", "manager", "lead", "head", "principal", "supervisor"]
     for kw in tier2:
         if kw in title:
-            return 'Tier 2'
+            return "Tier 2"
 
-    tier3 = ['engineer', 'analyst', 'specialist', 'consultant', 'developer', 'architect']
+    tier3 = [
+        "engineer",
+        "analyst",
+        "specialist",
+        "consultant",
+        "developer",
+        "architect",
+    ]
     for kw in tier3:
         if kw in title:
-            return 'Tier 3'
+            return "Tier 3"
 
-    return 'Tier 4'
+    return "Tier 4"
 
 
 def save_progress(last_id: int, indexed: int):
     """Save progress to file for resume capability."""
-    with open(PROGRESS_FILE, 'w') as f:
-        json.dump({
-            'last_id': last_id,
-            'indexed': indexed,
-            'timestamp': datetime.now().isoformat()
-        }, f)
+    with open(PROGRESS_FILE, "w") as f:
+        json.dump(
+            {
+                "last_id": last_id,
+                "indexed": indexed,
+                "timestamp": datetime.now().isoformat(),
+            },
+            f,
+        )
 
 
 def load_progress() -> dict:
     """Load progress from file."""
     if os.path.exists(PROGRESS_FILE):
-        with open(PROGRESS_FILE, 'r') as f:
+        with open(PROGRESS_FILE, "r") as f:
             return json.load(f)
-    return {'last_id': 0, 'indexed': 0}
+    return {"last_id": 0, "indexed": 0}
 
 
 def main():
     # Parse arguments
-    parser = argparse.ArgumentParser(description='Index contacts to Qdrant')
-    parser.add_argument('--resume', action='store_true', help='Resume from last checkpoint')
+    parser = argparse.ArgumentParser(description="Index contacts to Qdrant")
+    parser.add_argument(
+        "--resume", action="store_true", help="Resume from last checkpoint"
+    )
     args = parser.parse_args()
 
     print("=" * 70)
@@ -152,7 +175,9 @@ def main():
 
     # Connect to Qdrant
     print(f"\n[1/5] Connecting to Qdrant at {QDRANT_URL}...")
-    qdrant = QdrantClient(url=QDRANT_URL, timeout=600)  # 10 min timeout for slow operations
+    qdrant = QdrantClient(
+        url=QDRANT_URL, timeout=600
+    )  # 10 min timeout for slow operations
     print("  Connected.")
 
     # Handle collection based on mode
@@ -166,18 +191,24 @@ def main():
             info = qdrant.get_collection(COLLECTION_NAME)
             already_indexed = info.points_count
             progress = load_progress()
-            start_from_id = progress.get('last_id', 0)
+            start_from_id = progress.get("last_id", 0)
             print(f"  RESUMING: Collection has {already_indexed:,} points")
             print(f"  Will skip records with id <= {start_from_id}")
         except Exception as e:
-            print(f"\n[2/5] No existing collection found ({type(e).__name__}), starting fresh...")
+            print(
+                f"\n[2/5] No existing collection found ({type(e).__name__}), starting fresh..."
+            )
             qdrant.create_collection(
                 collection_name=COLLECTION_NAME,
-                vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+                vectors_config=VectorParams(
+                    size=EMBEDDING_DIM, distance=Distance.COSINE
+                ),
             )
     else:
         # Fresh start - delete and recreate
-        print(f"\n[2/5] Recreating '{COLLECTION_NAME}' collection with OpenAI dimensions...")
+        print(
+            f"\n[2/5] Recreating '{COLLECTION_NAME}' collection with OpenAI dimensions..."
+        )
         try:
             qdrant.delete_collection(COLLECTION_NAME)
             print(f"  Deleted existing collection.")
@@ -187,7 +218,7 @@ def main():
 
         qdrant.create_collection(
             collection_name=COLLECTION_NAME,
-            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE)
+            vectors_config=VectorParams(size=EMBEDDING_DIM, distance=Distance.COSINE),
         )
         print(f"  Created collection: {COLLECTION_NAME} ({EMBEDDING_DIM} dimensions)")
 
@@ -214,7 +245,8 @@ def main():
 
     # Fetch candidates starting from resume point
     print(f"\n[4/5] Fetching candidates (id > {start_from_id})...")
-    cursor = conn.execute("""
+    cursor = conn.execute(
+        """
         SELECT
             id,
             first_name,
@@ -237,7 +269,9 @@ def main():
         FROM candidates
         WHERE id > ?
         ORDER BY id
-    """, (start_from_id,))
+    """,
+        (start_from_id,),
+    )
 
     # Process in batches
     print(f"\n[5/5] Indexing with OpenAI embeddings (batch size: {BATCH_SIZE})...")
@@ -252,34 +286,34 @@ def main():
 
     for row in cursor:
         contact = {
-            'id': str(row['id']),
-            'first_name': row['first_name'] or '',
-            'last_name': row['last_name'] or '',
-            'name': row['name'] or '',
-            'title': row['title'] or '',
-            'company': row['company'] or '',
-            'email': row['email'] or '',
-            'phone': row['phone'] or '',
-            'address': row['address'] or '',
-            'city': row['city'] or '',
-            'state': row['state'] or '',
-            'status': row['status'] or '',
-            'source': row['source'] or '',
-            'source_db': 'bullhorn_master',
-            'date_added': row['date_added'] or '',
-            'date_modified': row['date_modified'] or '',
-            'notes': row['notes'] or '',
-            'clearance': row['clearance'] or '',
-            'program': row['program'] or '',
-            'tier': classify_tier(row),
-            '_indexed_at': datetime.now().isoformat(),
-            '_embedding_model': OPENAI_MODEL
+            "id": str(row["id"]),
+            "first_name": row["first_name"] or "",
+            "last_name": row["last_name"] or "",
+            "name": row["name"] or "",
+            "title": row["title"] or "",
+            "company": row["company"] or "",
+            "email": row["email"] or "",
+            "phone": row["phone"] or "",
+            "address": row["address"] or "",
+            "city": row["city"] or "",
+            "state": row["state"] or "",
+            "status": row["status"] or "",
+            "source": row["source"] or "",
+            "source_db": "bullhorn_master",
+            "date_added": row["date_added"] or "",
+            "date_modified": row["date_modified"] or "",
+            "notes": row["notes"] or "",
+            "clearance": row["clearance"] or "",
+            "program": row["program"] or "",
+            "tier": classify_tier(row),
+            "_indexed_at": datetime.now().isoformat(),
+            "_embedding_model": OPENAI_MODEL,
         }
 
         text = create_text_for_embedding(contact)
         batch_contacts.append(contact)
         batch_texts.append(text)
-        last_id = row['id']
+        last_id = row["id"]
 
         # Process batch
         if len(batch_contacts) >= BATCH_SIZE:
@@ -290,9 +324,9 @@ def main():
                 # Create points
                 points = [
                     PointStruct(
-                        id=id_to_uuid(int(contact['id'])),
+                        id=id_to_uuid(int(contact["id"])),
                         vector=embedding,
-                        payload=contact
+                        payload=contact,
                     )
                     for contact, embedding in zip(batch_contacts, embeddings)
                 ]
@@ -319,8 +353,12 @@ def main():
             remaining = remaining_count - session_indexed
             eta = remaining / rate if rate > 0 else 0
 
-            print(f"  Progress: {total_indexed:,}/{total_count:,} ({100*total_indexed/total_count:.1f}%)")
-            print(f"  This session: {session_indexed:,} | Rate: {rate:.0f}/sec | ETA: {eta/60:.1f} min")
+            print(
+                f"  Progress: {total_indexed:,}/{total_count:,} ({100 * total_indexed / total_count:.1f}%)"
+            )
+            print(
+                f"  This session: {session_indexed:,} | Rate: {rate:.0f}/sec | ETA: {eta / 60:.1f} min"
+            )
             print("-" * 70)
 
     # Process remaining batch
@@ -328,7 +366,7 @@ def main():
         try:
             embeddings = get_embeddings(batch_texts)
             points = [
-                PointStruct(id=id_to_uuid(int(c['id'])), vector=e, payload=c)
+                PointStruct(id=id_to_uuid(int(c["id"])), vector=e, payload=c)
                 for c, e in zip(batch_contacts, embeddings)
             ]
             qdrant.upsert(collection_name=COLLECTION_NAME, points=points)
@@ -351,9 +389,9 @@ def main():
     print(f"  Previously indexed: {already_indexed:,}")
     print(f"  Total in Qdrant: {final_count:,}")
     print(f"  Total errors: {total_errors:,}")
-    print(f"  Time elapsed: {elapsed/60:.1f} minutes")
+    print(f"  Time elapsed: {elapsed / 60:.1f} minutes")
     if session_indexed > 0:
-        print(f"  Rate: {session_indexed/elapsed:.0f} records/sec")
+        print(f"  Rate: {session_indexed / elapsed:.0f} records/sec")
     print("=" * 70)
     print("\nTo resume later: python index_contacts_openai.py --resume")
     print("=" * 70)

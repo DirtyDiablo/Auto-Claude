@@ -19,6 +19,7 @@ def mgr():
 # DEFAULT RESOURCES
 # =========================================
 
+
 def test_default_resources(mgr):
     resources = mgr.list_resources()
     assert len(resources) == 6
@@ -40,6 +41,7 @@ def test_api_contacts_resource(mgr):
 # RESOURCE MANAGEMENT
 # =========================================
 
+
 def test_add_resource(mgr):
     r = mgr.add_resource("/api/v2/jobs", CacheStrategy.STALE_WHILE_REVALIDATE, 5000)
     assert r.resource_id.startswith("res_")
@@ -60,6 +62,7 @@ def test_remove_not_found(mgr):
 # =========================================
 # SYNC QUEUE
 # =========================================
+
 
 def test_queue_sync(mgr):
     item = mgr.queue_sync("create_contact", {"name": "Test User"})
@@ -99,6 +102,7 @@ def test_sync_item_to_dict(mgr):
 # MANIFEST
 # =========================================
 
+
 def test_manifest(mgr):
     m = mgr.get_manifest()
     assert m.name == "BD Intelligence Hub"
@@ -120,6 +124,7 @@ def test_update_manifest(mgr):
 # ONLINE STATUS
 # =========================================
 
+
 def test_is_online(mgr):
     assert mgr.is_online() is True
 
@@ -132,6 +137,7 @@ def test_set_offline(mgr):
 # =========================================
 # STATS & SINGLETON
 # =========================================
+
 
 def test_stats(mgr):
     stats = mgr.get_stats()
@@ -148,6 +154,7 @@ def test_resource_to_dict(mgr):
 
 def test_singleton():
     import src.pwa.pwa_manager as mod
+
     mod._instance = None
     a1 = get_pwa_manager()
     a2 = get_pwa_manager()

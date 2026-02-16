@@ -2,6 +2,7 @@
 LightRAG wrapper for BD Intelligence Hub.
 Provides graph-based reasoning on top of existing Qdrant vectors.
 """
+
 import os
 import asyncio
 from enum import Enum
@@ -18,15 +19,17 @@ logger = structlog.get_logger(__name__)
 
 class QueryMode(str, Enum):
     """Query modes for LightRAG."""
-    LOCAL = "local"      # Focus on specific entities
-    GLOBAL = "global"    # High-level summaries
-    HYBRID = "hybrid"    # Combined local + global
-    NAIVE = "naive"      # Simple vector search
+
+    LOCAL = "local"  # Focus on specific entities
+    GLOBAL = "global"  # High-level summaries
+    HYBRID = "hybrid"  # Combined local + global
+    NAIVE = "naive"  # Simple vector search
 
 
 @dataclass
 class QueryResult:
     """Result from a LightRAG query."""
+
     query: str
     mode: QueryMode
     answer: str
@@ -51,7 +54,7 @@ class BDGraphRAG:
         neo4j_user: str = "neo4j",
         neo4j_password: str = None,
         llm_provider: str = "openai",  # "openai", "anthropic", or "ollama"
-        embedding_model: str = "all-MiniLM-L6-v2"
+        embedding_model: str = "all-MiniLM-L6-v2",
     ):
         """
         Initialize BDGraphRAG.
@@ -76,13 +79,12 @@ class BDGraphRAG:
         Path(working_dir).mkdir(parents=True, exist_ok=True)
 
         # Configure vector storage
-        vector_storage = "QdrantVectorDBStorage" if use_qdrant else "NanoVectorDBStorage"
+        vector_storage = (
+            "QdrantVectorDBStorage" if use_qdrant else "NanoVectorDBStorage"
+        )
         vector_db_kwargs = {}
         if use_qdrant:
-            vector_db_kwargs = {
-                "url": qdrant_url,
-                "collection_name": "bd_lightrag"
-            }
+            vector_db_kwargs = {"url": qdrant_url, "collection_name": "bd_lightrag"}
 
         # Configure graph storage (Neo4j or default NetworkX)
         graph_storage = "NetworkXStorage"
@@ -90,6 +92,7 @@ class BDGraphRAG:
         if use_neo4j:
             try:
                 from lightrag.kg.neo4j_impl import Neo4JStorage  # noqa: F401
+
                 graph_storage = "Neo4JStorage"
                 graph_db_kwargs = {
                     "uri": neo4j_uri,
@@ -101,7 +104,7 @@ class BDGraphRAG:
                 logger.warning(
                     "lightrag_neo4j_not_available",
                     msg="Neo4JStorage not found in lightrag. Falling back to NetworkX. "
-                        "Install with: pip install 'lightrag-hku[neo4j]'"
+                    "Install with: pip install 'lightrag-hku[neo4j]'",
                 )
 
         # Get LLM and embedding functions
@@ -138,25 +141,33 @@ class BDGraphRAG:
         """Initialize async storages. Must be called before use."""
         # Debug to file
         import os
+
         debug_file = os.path.join(self.working_dir, "debug_init.log")
         with open(debug_file, "a") as f:
-            f.write(f"[{__import__('datetime').datetime.now()}] initialize() called, _storage_initialized: {self._storage_initialized}\n")
+            f.write(
+                f"[{__import__('datetime').datetime.now()}] initialize() called, _storage_initialized: {self._storage_initialized}\n"
+            )
 
         if not self._storage_initialized:
             try:
                 with open(debug_file, "a") as f:
-                    f.write(f"[{__import__('datetime').datetime.now()}] Calling rag.initialize_storages()...\n")
+                    f.write(
+                        f"[{__import__('datetime').datetime.now()}] Calling rag.initialize_storages()...\n"
+                    )
 
                 await self.rag.initialize_storages()
                 self._storage_initialized = True
                 self._initialized = True
 
                 with open(debug_file, "a") as f:
-                    f.write(f"[{__import__('datetime').datetime.now()}] LightRAG storages initialized OK\n")
+                    f.write(
+                        f"[{__import__('datetime').datetime.now()}] LightRAG storages initialized OK\n"
+                    )
             except Exception as e:
                 with open(debug_file, "a") as f:
                     f.write(f"[{__import__('datetime').datetime.now()}] ERROR: {e}\n")
                     import traceback
+
                     f.write(traceback.format_exc())
                 raise
 
@@ -166,6 +177,7 @@ class BDGraphRAG:
 
         if provider == "openai":
             from lightrag.llm.openai import openai_complete_if_cache
+
             # Must use partial to pre-bind model name
             return partial(openai_complete_if_cache, "gpt-4o-mini")
         elif provider == "anthropic":
@@ -173,10 +185,12 @@ class BDGraphRAG:
             return self._anthropic_complete
         elif provider == "ollama":
             from lightrag.llm.ollama import ollama_model_complete
+
             return partial(ollama_model_complete, "llama3.2")
         else:
             # Fallback to OpenAI
             from lightrag.llm.openai import openai_complete_if_cache
+
             return partial(openai_complete_if_cache, "gpt-4o-mini")
 
     def _get_embedding_func(self, model_name: str):
@@ -197,7 +211,7 @@ class BDGraphRAG:
                 embedding_dim=embedding_dim,
                 func=embed_texts,
                 max_token_size=8192,
-                model_name=model_name
+                model_name=model_name,
             )
         except Exception as e:
             logger.warning("embedding_function_creation_failed", error=str(e))
@@ -210,11 +224,12 @@ class BDGraphRAG:
         prompt: str,
         system_prompt: str = None,
         history_messages: List = None,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Anthropic completion function for LightRAG."""
         try:
             import anthropic
+
             client = anthropic.Anthropic()
 
             messages = []
@@ -225,15 +240,18 @@ class BDGraphRAG:
             response = client.messages.create(
                 model="claude-3-haiku-20240307",
                 max_tokens=2000,
-                system=system_prompt or "You are a helpful assistant for knowledge extraction.",
-                messages=messages
+                system=system_prompt
+                or "You are a helpful assistant for knowledge extraction.",
+                messages=messages,
             )
             return response.content[0].text
         except Exception as e:
             logger.warning("anthropic_completion_failed", error=str(e))
             return ""
 
-    async def insert_documents(self, documents: List[str], metadata: List[Dict] = None) -> Dict:
+    async def insert_documents(
+        self, documents: List[str], metadata: List[Dict] = None
+    ) -> Dict:
         """
         Incrementally add documents with entity extraction.
 
@@ -246,17 +264,24 @@ class BDGraphRAG:
         """
         # Debug to file
         import os
+
         debug_file = os.path.join(self.working_dir, "debug_insert.log")
         with open(debug_file, "a") as f:
-            f.write(f"[{__import__('datetime').datetime.now()}] insert_documents called, _storage_initialized: {self._storage_initialized}\n")
+            f.write(
+                f"[{__import__('datetime').datetime.now()}] insert_documents called, _storage_initialized: {self._storage_initialized}\n"
+            )
 
         # Ensure storages are initialized before inserting
         if not self._storage_initialized:
             with open(debug_file, "a") as f:
-                f.write(f"[{__import__('datetime').datetime.now()}] Calling initialize from insert_documents...\n")
+                f.write(
+                    f"[{__import__('datetime').datetime.now()}] Calling initialize from insert_documents...\n"
+                )
             await self.initialize()
             with open(debug_file, "a") as f:
-                f.write(f"[{__import__('datetime').datetime.now()}] After initialize, _storage_initialized: {self._storage_initialized}\n")
+                f.write(
+                    f"[{__import__('datetime').datetime.now()}] After initialize, _storage_initialized: {self._storage_initialized}\n"
+                )
 
         inserted = 0
         errors = []
@@ -267,9 +292,9 @@ class BDGraphRAG:
                 if metadata and i < len(metadata):
                     meta = metadata[i]
                     prefix = f"[Source: {meta.get('source', 'unknown')}] "
-                    if meta.get('program'):
+                    if meta.get("program"):
                         prefix += f"[Program: {meta['program']}] "
-                    if meta.get('contractor'):
+                    if meta.get("contractor"):
                         prefix += f"[Contractor: {meta['contractor']}] "
                     doc = prefix + doc
 
@@ -281,25 +306,34 @@ class BDGraphRAG:
         return {
             "documents_inserted": inserted,
             "errors": errors,
-            "total_submitted": len(documents)
+            "total_submitted": len(documents),
         }
 
-    def insert_documents_sync(self, documents: List[str], metadata: List[Dict] = None) -> Dict:
+    def insert_documents_sync(
+        self, documents: List[str], metadata: List[Dict] = None
+    ) -> Dict:
         """Synchronous wrapper for insert_documents."""
         try:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 # Running in async context, use nest_asyncio or run in thread
                 import concurrent.futures
+
                 with concurrent.futures.ThreadPoolExecutor() as executor:
-                    future = executor.submit(asyncio.run, self.insert_documents(documents, metadata))
+                    future = executor.submit(
+                        asyncio.run, self.insert_documents(documents, metadata)
+                    )
                     return future.result()
             else:
-                return loop.run_until_complete(self.insert_documents(documents, metadata))
+                return loop.run_until_complete(
+                    self.insert_documents(documents, metadata)
+                )
         except RuntimeError:
             return asyncio.run(self.insert_documents(documents, metadata))
 
-    async def query(self, query: str, mode: QueryMode = QueryMode.HYBRID) -> QueryResult:
+    async def query(
+        self, query: str, mode: QueryMode = QueryMode.HYBRID
+    ) -> QueryResult:
         """
         Query the graph RAG with specified mode.
 
@@ -325,7 +359,7 @@ class BDGraphRAG:
                 answer=result,
                 entities_found=entities,
                 relationships=relationships,
-                sources=sources
+                sources=sources,
             )
         except Exception as e:
             return QueryResult(
@@ -334,7 +368,7 @@ class BDGraphRAG:
                 answer=f"Query failed: {str(e)}",
                 entities_found=[],
                 relationships=[],
-                sources=[]
+                sources=[],
             )
 
     def query_sync(self, query: str, mode: QueryMode = QueryMode.HYBRID) -> QueryResult:
@@ -343,6 +377,7 @@ class BDGraphRAG:
             loop = asyncio.get_event_loop()
             if loop.is_running():
                 import concurrent.futures
+
                 with concurrent.futures.ThreadPoolExecutor() as executor:
                     future = executor.submit(asyncio.run, self.query(query, mode))
                     return future.result()
@@ -378,33 +413,44 @@ class BDGraphRAG:
         """
         try:
             # Access the graph storage directly
-            if hasattr(self.rag, '_graph_storage') and self.rag._graph_storage:
+            if hasattr(self.rag, "_graph_storage") and self.rag._graph_storage:
                 graph = self.rag._graph_storage
                 # Get entity data
-                entity_data = graph.get_node(entity_name) if hasattr(graph, 'get_node') else None
+                entity_data = (
+                    graph.get_node(entity_name) if hasattr(graph, "get_node") else None
+                )
 
                 # Get relationships
                 relationships = []
-                if hasattr(graph, 'get_edges'):
+                if hasattr(graph, "get_edges"):
                     edges = graph.get_edges(entity_name)
-                    relationships = [{"source": e[0], "target": e[1], "type": e.get("type", "related")} for e in edges]
+                    relationships = [
+                        {
+                            "source": e[0],
+                            "target": e[1],
+                            "type": e.get("type", "related"),
+                        }
+                        for e in edges
+                    ]
 
                 return {
                     "entity": entity_name,
                     "data": entity_data,
                     "relationships": relationships,
-                    "found": entity_data is not None
+                    "found": entity_data is not None,
                 }
-        except Exception as e:
+        except Exception:
             pass
 
         # Fallback: query for entity info
-        query_result = self.query_sync(f"What do we know about {entity_name}?", QueryMode.LOCAL)
+        query_result = self.query_sync(
+            f"What do we know about {entity_name}?", QueryMode.LOCAL
+        )
         return {
             "entity": entity_name,
             "data": {"description": query_result.answer},
             "relationships": query_result.relationships,
-            "found": len(query_result.answer) > 0
+            "found": len(query_result.answer) > 0,
         }
 
     def get_contractor_relationships(self, contractor_name: str = None) -> List[Dict]:
@@ -418,7 +464,9 @@ class BDGraphRAG:
             List of contractor relationships
         """
         if contractor_name:
-            query = f"What programs and teaming relationships does {contractor_name} have?"
+            query = (
+                f"What programs and teaming relationships does {contractor_name} have?"
+            )
         else:
             query = "What are the major contractor teaming relationships in defense programs?"
 
@@ -437,13 +485,13 @@ class BDGraphRAG:
         """
         result = self.query_sync(
             f"Who are the contractors working on {program_name}? Include prime and subcontractors.",
-            QueryMode.HYBRID
+            QueryMode.HYBRID,
         )
         return {
             "program": program_name,
             "answer": result.answer,
             "contractors": result.entities_found,
-            "relationships": result.relationships
+            "relationships": result.relationships,
         }
 
     def find_teaming_path(self, contractor1: str, contractor2: str) -> Dict:
@@ -459,25 +507,43 @@ class BDGraphRAG:
         """
         result = self.query_sync(
             f"How are {contractor1} and {contractor2} connected? What programs do they work on together?",
-            QueryMode.HYBRID
+            QueryMode.HYBRID,
         )
         return {
             "from": contractor1,
             "to": contractor2,
             "answer": result.answer,
             "shared_programs": result.entities_found,
-            "relationships": result.relationships
+            "relationships": result.relationships,
         }
 
     def _extract_entities_from_result(self, result: str) -> List[str]:
         """Extract entity names mentioned in result."""
         # Known BD entities to look for
         bd_entities = [
-            "GDIT", "General Dynamics", "Leidos", "SAIC", "Northrop Grumman",
-            "Raytheon", "Lockheed Martin", "BAE Systems", "Booz Allen",
-            "AF DCGS", "DCGS", "BICES", "GSM-O", "GBSD", "ABMS",
-            "Langley", "San Diego", "Norfolk", "Fort Meade",
-            "ISR", "SIGINT", "Cyber", "C4ISR"
+            "GDIT",
+            "General Dynamics",
+            "Leidos",
+            "SAIC",
+            "Northrop Grumman",
+            "Raytheon",
+            "Lockheed Martin",
+            "BAE Systems",
+            "Booz Allen",
+            "AF DCGS",
+            "DCGS",
+            "BICES",
+            "GSM-O",
+            "GBSD",
+            "ABMS",
+            "Langley",
+            "San Diego",
+            "Norfolk",
+            "Fort Meade",
+            "ISR",
+            "SIGINT",
+            "Cyber",
+            "C4ISR",
         ]
 
         found = []
@@ -497,7 +563,7 @@ class BDGraphRAG:
             ("teaming", "teams_with"),
             ("partner", "partners_with"),
             ("works on", "works_on"),
-            ("supports", "supports")
+            ("supports", "supports"),
         ]
 
         for pattern, rel_type in patterns:
@@ -512,7 +578,8 @@ class BDGraphRAG:
         # Look for source markers
         if "[Source:" in result:
             import re
-            matches = re.findall(r'\[Source:\s*([^\]]+)\]', result)
+
+            matches = re.findall(r"\[Source:\s*([^\]]+)\]", result)
             sources.extend(matches)
         return sources
 
@@ -523,12 +590,12 @@ class BDGraphRAG:
                 "working_dir": self.working_dir,
                 "llm_provider": self.llm_provider,
                 "graph_storage": self.graph_storage_type,
-                "initialized": self._initialized
+                "initialized": self._initialized,
             }
 
             # Try to get storage stats
-            if hasattr(self.rag, '_graph_storage') and self.rag._graph_storage:
-                if hasattr(self.rag._graph_storage, 'get_statistics'):
+            if hasattr(self.rag, "_graph_storage") and self.rag._graph_storage:
+                if hasattr(self.rag._graph_storage, "get_statistics"):
                     stats["graph"] = self.rag._graph_storage.get_statistics()
 
             return stats

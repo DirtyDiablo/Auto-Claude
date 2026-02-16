@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class ExperimentStatus(Enum):
     DRAFT = "draft"
     RUNNING = "running"
@@ -34,6 +35,7 @@ class ExperimentStatus(Enum):
 @dataclass
 class Variant:
     """A single variant (arm) in an A/B experiment."""
+
     variant_id: str
     name: str
     description: str = ""
@@ -61,6 +63,7 @@ class Variant:
 @dataclass
 class Experiment:
     """An A/B experiment with multiple variants."""
+
     experiment_id: str
     name: str
     description: str = ""
@@ -102,6 +105,7 @@ class Experiment:
 # =========================================
 # A/B TESTING FRAMEWORK
 # =========================================
+
 
 class ABTestingFramework:
     """Manages A/B experiments with weighted random assignment,
@@ -149,13 +153,15 @@ class ABTestingFramework:
 
         for idx, vdef in enumerate(variant_defs):
             vid = f"var_{hashlib.md5(f'{exp_id}:v:{idx}'.encode()).hexdigest()[:8]}"
-            variant_objects.append(Variant(
-                variant_id=vid,
-                name=vdef.get("name", f"variant_{idx}"),
-                description=vdef.get("description", ""),
-                is_control=(idx == 0),
-                weight=vdef.get("weight", 50.0),
-            ))
+            variant_objects.append(
+                Variant(
+                    variant_id=vid,
+                    name=vdef.get("name", f"variant_{idx}"),
+                    description=vdef.get("description", ""),
+                    is_control=(idx == 0),
+                    weight=vdef.get("weight", 50.0),
+                )
+            )
 
         experiment = Experiment(
             experiment_id=exp_id,
@@ -167,8 +173,12 @@ class ABTestingFramework:
             confidence_level=confidence_level,
         )
         self._experiments[exp_id] = experiment
-        logger.info("Created experiment %s (%s) with %d variants",
-                     exp_id, name, len(variant_objects))
+        logger.info(
+            "Created experiment %s (%s) with %d variants",
+            exp_id,
+            name,
+            len(variant_objects),
+        )
         return experiment
 
     def start_experiment(self, experiment_id: str) -> Experiment:
@@ -223,8 +233,12 @@ class ABTestingFramework:
                 best = v
 
         if best:
-            logger.info("Graduated experiment %s — winner: %s (%.2f%% conversion)",
-                         experiment_id, best.name, best_rate * 100)
+            logger.info(
+                "Graduated experiment %s — winner: %s (%.2f%% conversion)",
+                experiment_id,
+                best.name,
+                best_rate * 100,
+            )
         return exp
 
     def get_experiment(self, experiment_id: str) -> Optional[Experiment]:
@@ -256,7 +270,9 @@ class ABTestingFramework:
             raise ValueError(f"Experiment not found: {experiment_id}")
 
         if exp.status != ExperimentStatus.RUNNING:
-            raise ValueError(f"Experiment {experiment_id} is not running (status={exp.status.value})")
+            raise ValueError(
+                f"Experiment {experiment_id} is not running (status={exp.status.value})"
+            )
 
         # Sticky assignment
         if user_id in exp._user_assignments:
@@ -268,7 +284,9 @@ class ABTestingFramework:
             raise ValueError("Total variant weight must be positive")
 
         # Deterministic: seed from experiment + user for reproducibility
-        seed = int(hashlib.md5(f"{experiment_id}:{user_id}".encode()).hexdigest()[:8], 16)
+        seed = int(
+            hashlib.md5(f"{experiment_id}:{user_id}".encode()).hexdigest()[:8], 16
+        )
         rng = random.Random(seed)
         roll = rng.uniform(0, total_weight)
 
@@ -282,8 +300,12 @@ class ABTestingFramework:
 
         chosen.assignments += 1
         exp._user_assignments[user_id] = chosen.variant_id
-        logger.debug("Assigned user %s to variant %s in experiment %s",
-                      user_id, chosen.name, experiment_id)
+        logger.debug(
+            "Assigned user %s to variant %s in experiment %s",
+            user_id,
+            chosen.name,
+            experiment_id,
+        )
         return chosen.variant_id
 
     def record_conversion(
@@ -305,11 +327,17 @@ class ABTestingFramework:
             if v.variant_id == variant_id:
                 v.conversions += 1
                 v.revenue += value
-                logger.debug("Recorded conversion for variant %s in experiment %s (value=%.2f)",
-                              variant_id, experiment_id, value)
+                logger.debug(
+                    "Recorded conversion for variant %s in experiment %s (value=%.2f)",
+                    variant_id,
+                    experiment_id,
+                    value,
+                )
                 return
 
-        raise ValueError(f"Variant {variant_id} not found in experiment {experiment_id}")
+        raise ValueError(
+            f"Variant {variant_id} not found in experiment {experiment_id}"
+        )
 
     # ----- results and statistics -----
 
@@ -336,48 +364,58 @@ class ABTestingFramework:
         variant_results = []
         comparisons = []
 
-        control_rate = control.conversions / max(control.assignments, 1) if control else 0.0
+        control_rate = (
+            control.conversions / max(control.assignments, 1) if control else 0.0
+        )
 
         for v in exp.variants:
             rate = v.conversions / max(v.assignments, 1)
-            variant_results.append({
-                "variant_id": v.variant_id,
-                "name": v.name,
-                "is_control": v.is_control,
-                "assignments": v.assignments,
-                "conversions": v.conversions,
-                "conversion_rate": round(rate, 4),
-                "revenue": round(v.revenue, 2),
-                "revenue_per_user": round(v.revenue / max(v.assignments, 1), 2),
-            })
+            variant_results.append(
+                {
+                    "variant_id": v.variant_id,
+                    "name": v.name,
+                    "is_control": v.is_control,
+                    "assignments": v.assignments,
+                    "conversions": v.conversions,
+                    "conversion_rate": round(rate, 4),
+                    "revenue": round(v.revenue, 2),
+                    "revenue_per_user": round(v.revenue / max(v.assignments, 1), 2),
+                }
+            )
 
             # Compare non-control variants against control
             if not v.is_control and control:
                 uplift = (rate - control_rate) / max(control_rate, 0.0001)
                 z_score, p_value = self._z_test(
-                    control.conversions, control.assignments,
-                    v.conversions, v.assignments,
+                    control.conversions,
+                    control.assignments,
+                    v.conversions,
+                    v.assignments,
                 )
                 significant = p_value < (1.0 - exp.confidence_level)
 
-                comparisons.append({
-                    "variant": v.name,
-                    "variant_id": v.variant_id,
-                    "control_rate": round(control_rate, 4),
-                    "variant_rate": round(rate, 4),
-                    "uplift": round(uplift, 4),
-                    "uplift_pct": round(uplift * 100, 2),
-                    "z_score": round(z_score, 4),
-                    "p_value": round(p_value, 4),
-                    "significant": significant,
-                    "confidence_level": exp.confidence_level,
-                })
+                comparisons.append(
+                    {
+                        "variant": v.name,
+                        "variant_id": v.variant_id,
+                        "control_rate": round(control_rate, 4),
+                        "variant_rate": round(rate, 4),
+                        "uplift": round(uplift, 4),
+                        "uplift_pct": round(uplift * 100, 2),
+                        "z_score": round(z_score, 4),
+                        "p_value": round(p_value, 4),
+                        "significant": significant,
+                        "confidence_level": exp.confidence_level,
+                    }
+                )
 
         # Overall recommendation
         has_enough_data = all(
             v.assignments >= exp.min_sample_size for v in exp.variants
         )
-        significant_winners = [c for c in comparisons if c["significant"] and c["uplift"] > 0]
+        significant_winners = [
+            c for c in comparisons if c["significant"] and c["uplift"] > 0
+        ]
 
         if not has_enough_data:
             recommendation = "Insufficient sample size — continue collecting data"

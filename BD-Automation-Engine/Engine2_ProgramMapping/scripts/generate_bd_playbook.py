@@ -6,6 +6,7 @@ Each sheet has: Table 1 (Jobs), Table 2 (Program-Matched Contacts), Table 3 (All
 
 Usage: python generate_bd_playbook.py
 """
+
 import os
 import sys
 import json
@@ -21,7 +22,10 @@ try:
 except ImportError:
     print("Installing openpyxl...")
     import subprocess
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "openpyxl", "--quiet"])
+
+    subprocess.check_call(
+        [sys.executable, "-m", "pip", "install", "openpyxl", "--quiet"]
+    )
     from openpyxl import Workbook
     from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
     from openpyxl.utils import get_column_letter
@@ -31,7 +35,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 PROJECT_DIR = os.path.dirname(BASE_DIR)
 DASHBOARD_DATA = os.path.join(PROJECT_DIR, "dashboard", "dist", "data")
 ENGINE2_DATA = os.path.join(BASE_DIR, "data")
-BULLHORN_ANALYSIS = os.path.join(PROJECT_DIR, "Engine7_BullhornETL", "colton_scurry_analysis")
+BULLHORN_ANALYSIS = os.path.join(
+    PROJECT_DIR, "Engine7_BullhornETL", "colton_scurry_analysis"
+)
 
 # === PRIME INFERENCE MAP ===
 # Location + Program signals -> likely prime contractor
@@ -71,7 +77,11 @@ LOCATION_PRIME_MAP = {
     },
     "redondo beach": {"default": "Northrop Grumman"},
     "aurora": {"default": "Lockheed Martin", "NRO": "Lockheed Martin"},
-    "fort meade": {"default": "General Dynamics", "NSA": "Multiple", "Cyber": "General Dynamics"},
+    "fort meade": {
+        "default": "General Dynamics",
+        "NSA": "Multiple",
+        "Cyber": "General Dynamics",
+    },
     "annapolis junction": {"default": "General Dynamics", "NSA": "Multiple"},
     "reston": {"default": "Leidos"},
     "mclean": {"default": "Booz Allen"},
@@ -84,7 +94,11 @@ LOCATION_PRIME_MAP = {
     "dallas": {"default": "Raytheon"},
     "fort worth": {"default": "Lockheed Martin", "F-35": "Lockheed Martin"},
     "montgomery": {"default": "General Dynamics", "Maxwell": "ManTech"},
-    "warren afb": {"default": "Northrop Grumman", "ICBM": "Northrop Grumman", "Sentinel": "Northrop Grumman"},
+    "warren afb": {
+        "default": "Northrop Grumman",
+        "ICBM": "Northrop Grumman",
+        "Sentinel": "Northrop Grumman",
+    },
     "cheyenne": {"default": "Northrop Grumman"},
     "hill afb": {"default": "Northrop Grumman"},
     "clearfield": {"default": "Northrop Grumman"},
@@ -127,14 +141,14 @@ CATEGORY_PRIME_MAP = {
 def load_json(filepath):
     if not os.path.exists(filepath):
         return []
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
         return json.load(f)
 
 
 def load_csv(filepath):
     if not os.path.exists(filepath):
         return []
-    with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
+    with open(filepath, "r", encoding="utf-8", errors="replace") as f:
         return list(csv.DictReader(f))
 
 
@@ -225,7 +239,9 @@ def build_contact_database(dashboard_contacts, bullhorn_contacts, timeline):
             continue
         companies_str = bc.get("companies", "[]")
         try:
-            companies = eval(companies_str) if companies_str and companies_str != "[]" else []
+            companies = (
+                eval(companies_str) if companies_str and companies_str != "[]" else []
+            )
         except:
             companies = []
         if not companies:
@@ -234,8 +250,8 @@ def build_contact_database(dashboard_contacts, bullhorn_contacts, timeline):
         agg_notes = aggregate_contact_notes(name, timeline)
 
         # Extract any emails/phones from notes
-        email_match = re.findall(r'[\w.+-]+@[\w.-]+\.\w+', agg_notes)
-        phone_match = re.findall(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', agg_notes)
+        email_match = re.findall(r"[\w.+-]+@[\w.-]+\.\w+", agg_notes)
+        phone_match = re.findall(r"\b\d{3}[-.]?\d{3}[-.]?\d{4}\b", agg_notes)
 
         for company in companies:
             key = f"{name}|{company}".lower()
@@ -283,12 +299,46 @@ def build_contact_database(dashboard_contacts, bullhorn_contacts, timeline):
         # Check which programs are mentioned in their notes
         programs_mentioned = set()
         program_keywords = [
-            "MDA", "THAAD", "Patriot", "IBCS", "Aegis", "Sentinel", "GBSD",
-            "F-35", "F-22", "F-15", "F-16", "F-47", "B-21", "B-52",
-            "SLS", "NASA", "Space Force", "DCGS", "DISA", "NGA", "NSA", "NRO",
-            "ABMS", "JADC2", "Cyber", "SDA", "GPS", "SBIRS", "AEHF",
-            "BOA", "IDIQ", "OASIS", "DDG", "BICES", "PMS", "OPIR",
-            "C2BMC", "Cloud", "DevSecOps", "PEO",
+            "MDA",
+            "THAAD",
+            "Patriot",
+            "IBCS",
+            "Aegis",
+            "Sentinel",
+            "GBSD",
+            "F-35",
+            "F-22",
+            "F-15",
+            "F-16",
+            "F-47",
+            "B-21",
+            "B-52",
+            "SLS",
+            "NASA",
+            "Space Force",
+            "DCGS",
+            "DISA",
+            "NGA",
+            "NSA",
+            "NRO",
+            "ABMS",
+            "JADC2",
+            "Cyber",
+            "SDA",
+            "GPS",
+            "SBIRS",
+            "AEHF",
+            "BOA",
+            "IDIQ",
+            "OASIS",
+            "DDG",
+            "BICES",
+            "PMS",
+            "OPIR",
+            "C2BMC",
+            "Cloud",
+            "DevSecOps",
+            "PEO",
         ]
         for prog in program_keywords:
             if prog.lower() in notes:
@@ -325,12 +375,24 @@ def find_contacts_for_sheet(prime, program, company_index, program_contact_index
 
 # === EXCEL STYLING ===
 
-HEADER_FILL_JOBS = PatternFill(start_color="1F4E79", end_color="1F4E79", fill_type="solid")
-HEADER_FILL_CONTACTS_MATCHED = PatternFill(start_color="2E7D32", end_color="2E7D32", fill_type="solid")
-HEADER_FILL_CONTACTS_ALL = PatternFill(start_color="5D4037", end_color="5D4037", fill_type="solid")
-SECTION_LABEL_FILL = PatternFill(start_color="E3F2FD", end_color="E3F2FD", fill_type="solid")
-SECTION_LABEL_FILL_GREEN = PatternFill(start_color="E8F5E9", end_color="E8F5E9", fill_type="solid")
-SECTION_LABEL_FILL_BROWN = PatternFill(start_color="EFEBE9", end_color="EFEBE9", fill_type="solid")
+HEADER_FILL_JOBS = PatternFill(
+    start_color="1F4E79", end_color="1F4E79", fill_type="solid"
+)
+HEADER_FILL_CONTACTS_MATCHED = PatternFill(
+    start_color="2E7D32", end_color="2E7D32", fill_type="solid"
+)
+HEADER_FILL_CONTACTS_ALL = PatternFill(
+    start_color="5D4037", end_color="5D4037", fill_type="solid"
+)
+SECTION_LABEL_FILL = PatternFill(
+    start_color="E3F2FD", end_color="E3F2FD", fill_type="solid"
+)
+SECTION_LABEL_FILL_GREEN = PatternFill(
+    start_color="E8F5E9", end_color="E8F5E9", fill_type="solid"
+)
+SECTION_LABEL_FILL_BROWN = PatternFill(
+    start_color="EFEBE9", end_color="EFEBE9", fill_type="solid"
+)
 
 HEADER_FONT = Font(bold=True, color="FFFFFF", size=11)
 SECTION_FONT = Font(bold=True, size=12, color="1F4E79")
@@ -338,17 +400,19 @@ NORMAL_FONT = Font(size=10)
 LINK_FONT = Font(size=10, color="0563C1", underline="single")
 
 THIN_BORDER = Border(
-    left=Side(style='thin', color='D0D0D0'),
-    right=Side(style='thin', color='D0D0D0'),
-    top=Side(style='thin', color='D0D0D0'),
-    bottom=Side(style='thin', color='D0D0D0'),
+    left=Side(style="thin", color="D0D0D0"),
+    right=Side(style="thin", color="D0D0D0"),
+    top=Side(style="thin", color="D0D0D0"),
+    bottom=Side(style="thin", color="D0D0D0"),
 )
 
-WRAP_ALIGNMENT = Alignment(wrap_text=True, vertical='top')
-TOP_ALIGNMENT = Alignment(vertical='top')
+WRAP_ALIGNMENT = Alignment(wrap_text=True, vertical="top")
+TOP_ALIGNMENT = Alignment(vertical="top")
 
 
-def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_contacts, is_inferred):
+def write_sheet(
+    ws, sheet_name, prime, program, jobs, program_contacts, other_contacts, is_inferred
+):
     """Write a complete sheet with jobs and contacts tables."""
     row = 1
 
@@ -368,7 +432,16 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
     section_cell.fill = SECTION_LABEL_FILL
     row += 1
 
-    job_headers = ["Job Title", "Location", "Clearance", "Pay Rate", "Emp Type", "Category", "BD Score", "Job URL"]
+    job_headers = [
+        "Job Title",
+        "Location",
+        "Clearance",
+        "Pay Rate",
+        "Emp Type",
+        "Category",
+        "BD Score",
+        "Job URL",
+    ]
     for col, header in enumerate(job_headers, 1):
         cell = ws.cell(row=row, column=col, value=header)
         cell.font = HEADER_FONT
@@ -379,9 +452,13 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
     for job in jobs:
         ws.cell(row=row, column=1, value=job.get("job_title", "")).font = NORMAL_FONT
         ws.cell(row=row, column=2, value=job.get("location", "")).font = NORMAL_FONT
-        ws.cell(row=row, column=3, value=job.get("security_clearance", "")).font = NORMAL_FONT
+        ws.cell(
+            row=row, column=3, value=job.get("security_clearance", "")
+        ).font = NORMAL_FONT
         ws.cell(row=row, column=4, value=job.get("pay_rate", "")).font = NORMAL_FONT
-        ws.cell(row=row, column=5, value=job.get("employment_type", "")).font = NORMAL_FONT
+        ws.cell(
+            row=row, column=5, value=job.get("employment_type", "")
+        ).font = NORMAL_FONT
         ws.cell(row=row, column=6, value=job.get("category", "")).font = NORMAL_FONT
         ws.cell(row=row, column=7, value=job.get("bd_score", "")).font = NORMAL_FONT
         url_cell = ws.cell(row=row, column=8)
@@ -400,12 +477,23 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
     # === TABLE 2: PROGRAM-MATCHED CONTACTS ===
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=8)
     section_cell = ws.cell(row=row, column=1)
-    section_cell.value = f"PROGRAM CONTACTS - Matched to {program} ({len(program_contacts)} contacts)"
+    section_cell.value = (
+        f"PROGRAM CONTACTS - Matched to {program} ({len(program_contacts)} contacts)"
+    )
     section_cell.font = SECTION_FONT
     section_cell.fill = SECTION_LABEL_FILL_GREEN
     row += 1
 
-    contact_headers = ["Contact Name", "Job Title", "Company", "Phone", "Email", "Location", "Tier", "Aggregated Notes"]
+    contact_headers = [
+        "Contact Name",
+        "Job Title",
+        "Company",
+        "Phone",
+        "Email",
+        "Location",
+        "Tier",
+        "Aggregated Notes",
+    ]
     for col, header in enumerate(contact_headers, 1):
         cell = ws.cell(row=row, column=col, value=header)
         cell.font = HEADER_FONT
@@ -417,13 +505,23 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
         for contact in program_contacts:
             loc = f"{contact.get('city', '')}, {contact.get('state', '')}".strip(", ")
             ws.cell(row=row, column=1, value=contact.get("name", "")).font = NORMAL_FONT
-            ws.cell(row=row, column=2, value=contact.get("job_title", "")).font = NORMAL_FONT
-            ws.cell(row=row, column=3, value=contact.get("company", "")).font = NORMAL_FONT
-            ws.cell(row=row, column=4, value=contact.get("phone", "")).font = NORMAL_FONT
-            ws.cell(row=row, column=5, value=contact.get("email", "")).font = NORMAL_FONT
+            ws.cell(
+                row=row, column=2, value=contact.get("job_title", "")
+            ).font = NORMAL_FONT
+            ws.cell(
+                row=row, column=3, value=contact.get("company", "")
+            ).font = NORMAL_FONT
+            ws.cell(
+                row=row, column=4, value=contact.get("phone", "")
+            ).font = NORMAL_FONT
+            ws.cell(
+                row=row, column=5, value=contact.get("email", "")
+            ).font = NORMAL_FONT
             ws.cell(row=row, column=6, value=loc).font = NORMAL_FONT
             ws.cell(row=row, column=7, value=contact.get("tier", "")).font = NORMAL_FONT
-            notes_cell = ws.cell(row=row, column=8, value=contact.get("aggregated_notes", ""))
+            notes_cell = ws.cell(
+                row=row, column=8, value=contact.get("aggregated_notes", "")
+            )
             notes_cell.font = NORMAL_FONT
             notes_cell.alignment = WRAP_ALIGNMENT
             for col in range(1, 9):
@@ -431,7 +529,9 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
                 ws.cell(row=row, column=col).alignment = TOP_ALIGNMENT
             row += 1
     else:
-        ws.cell(row=row, column=1, value="No program-specific contacts found").font = Font(italic=True, size=10, color="999999")
+        ws.cell(
+            row=row, column=1, value="No program-specific contacts found"
+        ).font = Font(italic=True, size=10, color="999999")
         row += 1
 
     row += 1  # Spacer
@@ -439,7 +539,9 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
     # === TABLE 3: ALL PRIME CONTACTS ===
     ws.merge_cells(start_row=row, start_column=1, end_row=row, end_column=8)
     section_cell = ws.cell(row=row, column=1)
-    section_cell.value = f"ALL {prime.upper()} CONTACTS ({len(other_contacts)} additional)"
+    section_cell.value = (
+        f"ALL {prime.upper()} CONTACTS ({len(other_contacts)} additional)"
+    )
     section_cell.font = SECTION_FONT
     section_cell.fill = SECTION_LABEL_FILL_BROWN
     row += 1
@@ -455,13 +557,17 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
     for contact in other_contacts[:200]:
         loc = f"{contact.get('city', '')}, {contact.get('state', '')}".strip(", ")
         ws.cell(row=row, column=1, value=contact.get("name", "")).font = NORMAL_FONT
-        ws.cell(row=row, column=2, value=contact.get("job_title", "")).font = NORMAL_FONT
+        ws.cell(
+            row=row, column=2, value=contact.get("job_title", "")
+        ).font = NORMAL_FONT
         ws.cell(row=row, column=3, value=contact.get("company", "")).font = NORMAL_FONT
         ws.cell(row=row, column=4, value=contact.get("phone", "")).font = NORMAL_FONT
         ws.cell(row=row, column=5, value=contact.get("email", "")).font = NORMAL_FONT
         ws.cell(row=row, column=6, value=loc).font = NORMAL_FONT
         ws.cell(row=row, column=7, value=contact.get("tier", "")).font = NORMAL_FONT
-        notes_cell = ws.cell(row=row, column=8, value=contact.get("aggregated_notes", ""))
+        notes_cell = ws.cell(
+            row=row, column=8, value=contact.get("aggregated_notes", "")
+        )
         notes_cell.font = NORMAL_FONT
         notes_cell.alignment = WRAP_ALIGNMENT
         for col in range(1, 9):
@@ -470,7 +576,9 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
         row += 1
 
     if not other_contacts:
-        ws.cell(row=row, column=1, value="No additional contacts found").font = Font(italic=True, size=10, color="999999")
+        ws.cell(row=row, column=1, value="No additional contacts found").font = Font(
+            italic=True, size=10, color="999999"
+        )
 
     # Set column widths
     widths = [25, 25, 20, 18, 30, 22, 6, 80]
@@ -481,7 +589,7 @@ def write_sheet(ws, sheet_name, prime, program, jobs, program_contacts, other_co
 def sanitize_sheet_name(name):
     """Sanitize sheet name for Excel (max 31 chars, no special chars)."""
     # Remove invalid characters
-    name = re.sub(r'[\\/*?\[\]:]', '-', name)
+    name = re.sub(r"[\\/*?\[\]:]", "-", name)
     # Truncate to 31 chars
     if len(name) > 31:
         name = name[:31]
@@ -493,12 +601,22 @@ def main():
     print()
 
     # Load enriched jobs
-    enriched_path = os.path.join(ENGINE2_DATA, "Insight_Global_Jobs_DataMapped_Enriched_2026-02-16.json")
+    enriched_path = os.path.join(
+        ENGINE2_DATA, "Insight_Global_Jobs_DataMapped_Enriched_2026-02-16.json"
+    )
     if not os.path.exists(enriched_path):
         # Try to find any enriched file
         import glob
-        files = sorted(glob.glob(os.path.join(ENGINE2_DATA, "Insight_Global_Jobs_DataMapped_Enriched_*.json")),
-                        key=os.path.getmtime, reverse=True)
+
+        files = sorted(
+            glob.glob(
+                os.path.join(
+                    ENGINE2_DATA, "Insight_Global_Jobs_DataMapped_Enriched_*.json"
+                )
+            ),
+            key=os.path.getmtime,
+            reverse=True,
+        )
         if files:
             enriched_path = files[0]
         else:
@@ -549,7 +667,12 @@ def main():
     # Sort keys: confirmed primes first, then by job count
     sorted_keys = sorted(
         prime_program_jobs.keys(),
-        key=lambda k: (prime_inferred.get(k, True), -len(prime_program_jobs[k]), k[0], k[1])
+        key=lambda k: (
+            prime_inferred.get(k, True),
+            -len(prime_program_jobs[k]),
+            k[0],
+            k[1],
+        ),
     )
 
     print(f"  {len(sorted_keys)} Prime+Program combinations")
@@ -565,11 +688,27 @@ def main():
 
     # Create index/summary sheet
     ws_index = wb.create_sheet("INDEX")
-    ws_index.cell(row=1, column=1, value="BD Playbook - Insight Global Jobs").font = Font(bold=True, size=16, color="1F4E79")
-    ws_index.cell(row=2, column=1, value=f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}").font = Font(size=11)
-    ws_index.cell(row=3, column=1, value=f"Total Jobs: {len(jobs)} | Total Sheets: {len(sorted_keys)}").font = Font(size=11)
+    ws_index.cell(
+        row=1, column=1, value="BD Playbook - Insight Global Jobs"
+    ).font = Font(bold=True, size=16, color="1F4E79")
+    ws_index.cell(
+        row=2, column=1, value=f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+    ).font = Font(size=11)
+    ws_index.cell(
+        row=3,
+        column=1,
+        value=f"Total Jobs: {len(jobs)} | Total Sheets: {len(sorted_keys)}",
+    ).font = Font(size=11)
     idx_row = 5
-    idx_headers = ["Sheet", "Prime", "Program", "Jobs", "Program Contacts", "Other Contacts", "Inferred?"]
+    idx_headers = [
+        "Sheet",
+        "Prime",
+        "Program",
+        "Jobs",
+        "Program Contacts",
+        "Other Contacts",
+        "Inferred?",
+    ]
     for col, h in enumerate(idx_headers, 1):
         cell = ws_index.cell(row=idx_row, column=col, value=h)
         cell.font = HEADER_FONT
@@ -594,25 +733,45 @@ def main():
         sheet_name = sanitize_sheet_name(f"{prime[:15]} - {program[:13]}")
         # Ensure unique sheet names
         if sheet_name in [ws.title for ws in wb.worksheets]:
-            sheet_name = sanitize_sheet_name(f"{prime[:12]} - {program[:10]} {sheet_count}")
+            sheet_name = sanitize_sheet_name(
+                f"{prime[:12]} - {program[:10]} {sheet_count}"
+            )
         ws = wb.create_sheet(sheet_name)
-        write_sheet(ws, sheet_name, prime, program, jobs_for_sheet,
-                    program_contacts, other_contacts, is_inferred)
+        write_sheet(
+            ws,
+            sheet_name,
+            prime,
+            program,
+            jobs_for_sheet,
+            program_contacts,
+            other_contacts,
+            is_inferred,
+        )
 
         # Update index
         ws_index.cell(row=idx_row, column=1, value=sheet_name).font = NORMAL_FONT
         ws_index.cell(row=idx_row, column=2, value=prime).font = NORMAL_FONT
         ws_index.cell(row=idx_row, column=3, value=program).font = NORMAL_FONT
-        ws_index.cell(row=idx_row, column=4, value=len(jobs_for_sheet)).font = NORMAL_FONT
-        ws_index.cell(row=idx_row, column=5, value=len(program_contacts)).font = NORMAL_FONT
-        ws_index.cell(row=idx_row, column=6, value=len(other_contacts)).font = NORMAL_FONT
-        ws_index.cell(row=idx_row, column=7, value="Yes" if is_inferred else "No").font = NORMAL_FONT
+        ws_index.cell(
+            row=idx_row, column=4, value=len(jobs_for_sheet)
+        ).font = NORMAL_FONT
+        ws_index.cell(
+            row=idx_row, column=5, value=len(program_contacts)
+        ).font = NORMAL_FONT
+        ws_index.cell(
+            row=idx_row, column=6, value=len(other_contacts)
+        ).font = NORMAL_FONT
+        ws_index.cell(
+            row=idx_row, column=7, value="Yes" if is_inferred else "No"
+        ).font = NORMAL_FONT
         for col in range(1, 8):
             ws_index.cell(row=idx_row, column=col).border = THIN_BORDER
         idx_row += 1
         sheet_count += 1
 
-        print(f"  Created: {sheet_name} ({len(jobs_for_sheet)} jobs, {len(program_contacts)} prog contacts, {len(other_contacts)} other)")
+        print(
+            f"  Created: {sheet_name} ({len(jobs_for_sheet)} jobs, {len(program_contacts)} prog contacts, {len(other_contacts)} other)"
+        )
 
     # Set index column widths
     idx_widths = [30, 25, 20, 8, 18, 18, 10]
@@ -620,7 +779,10 @@ def main():
         ws_index.column_dimensions[get_column_letter(i)].width = w
 
     # Save
-    output_path = os.path.join(ENGINE2_DATA, f"Insight_Global_BD_Playbook_Master_{datetime.now().strftime('%Y-%m-%d')}.xlsx")
+    output_path = os.path.join(
+        ENGINE2_DATA,
+        f"Insight_Global_BD_Playbook_Master_{datetime.now().strftime('%Y-%m-%d')}.xlsx",
+    )
     wb.save(output_path)
     print(f"\n=== COMPLETE ===")
     print(f"Output: {output_path}")

@@ -26,6 +26,7 @@ logger = structlog.get_logger(__name__)
 @dataclass
 class SourceConfig:
     """Configuration for a scraping source."""
+
     source_id: str = ""
     name: str = ""
     source_type: str = ""  # career_page, sam_gov, federal_docs, news
@@ -41,6 +42,7 @@ class SourceConfig:
 @dataclass
 class SourceStatus:
     """Runtime status for a configured source."""
+
     config: Optional[SourceConfig] = None
     status: str = "never_run"  # active, paused, errored, never_run
     last_run: Optional[str] = None
@@ -54,6 +56,7 @@ class SourceStatus:
 @dataclass
 class SourceHealth:
     """Detailed health metrics for a source."""
+
     source_id: str = ""
     status: str = "unknown"
     success_rate: float = 0.0
@@ -67,6 +70,7 @@ class SourceHealth:
 @dataclass
 class OrchestratorReport:
     """Report from a complete scrape cycle."""
+
     cycle_id: str = ""
     started_at: Optional[str] = None
     completed_at: Optional[str] = None
@@ -83,6 +87,7 @@ class OrchestratorReport:
 @dataclass
 class OrchestratorStats:
     """Aggregate orchestrator statistics."""
+
     total_sources: int = 0
     active_sources: int = 0
     paused_sources: int = 0
@@ -153,6 +158,7 @@ class ScrapeOrchestratorV2:
 
     def _save_sources(self):
         from dataclasses import asdict
+
         data = [asdict(cfg) for cfg in self._sources.values()]
         self._sources_path.write_text(json.dumps(data, indent=2, default=str))
 
@@ -210,13 +216,11 @@ class ScrapeOrchestratorV2:
             status.total_runs += 1
             status.status = "active"
             status.avg_items_per_run = (
-                (status.avg_items_per_run * (status.total_runs - 1) + result)
-                / status.total_runs
-            )
+                status.avg_items_per_run * (status.total_runs - 1) + result
+            ) / status.total_runs
             status.success_rate = (
-                (status.success_rate * (status.total_runs - 1) + 1.0)
-                / status.total_runs
-            )
+                status.success_rate * (status.total_runs - 1) + 1.0
+            ) / status.total_runs
         except Exception as exc:
             status = self._statuses[source_id]
             status.last_run = datetime.utcnow().isoformat()
@@ -224,9 +228,8 @@ class ScrapeOrchestratorV2:
             status.total_runs += 1
             status.status = "errored"
             status.success_rate = (
-                (status.success_rate * (status.total_runs - 1))
-                / status.total_runs
-            )
+                status.success_rate * (status.total_runs - 1)
+            ) / status.total_runs
 
         return run_id
 
@@ -279,10 +282,12 @@ class ScrapeOrchestratorV2:
                 report.jobs_found += items
                 report.sources_scraped += 1
             except Exception as exc:
-                report.errors.append({
-                    "source": config.name,
-                    "error": str(exc),
-                })
+                report.errors.append(
+                    {
+                        "source": config.name,
+                        "error": str(exc),
+                    }
+                )
 
         # Phase 2: SAM.gov monitoring
         if self.sam_sync:
@@ -300,21 +305,25 @@ class ScrapeOrchestratorV2:
                     continue
                 try:
                     docs = await self.doc_pipeline.discover_documents(
-                        "sam_gov", {"keywords": config.url.split() if config.url else []}
+                        "sam_gov",
+                        {"keywords": config.url.split() if config.url else []},
                     )
                     if docs:
                         batch = await self.doc_pipeline.process_batch(docs[:5])
                         report.documents_processed += batch.processed
                 except Exception as exc:
-                    report.errors.append({
-                        "source": config.name,
-                        "error": str(exc),
-                    })
+                    report.errors.append(
+                        {
+                            "source": config.name,
+                            "error": str(exc),
+                        }
+                    )
 
         # Phase 4: Route to enrichment via Data-Scraper
         if self.scraper_client and report.jobs_found > 0:
             try:
                 import httpx
+
                 async with httpx.AsyncClient(timeout=30.0) as client:
                     resp = await client.post(
                         f"{self.scraper_client}/api/enrich",
@@ -380,6 +389,7 @@ class ScrapeOrchestratorV2:
 
         elif config.source_type == "sam_gov" and self.sam_sync:
             from Engine8_Knowledge.scrapers.sam_gov_sync import SearchQuery
+
             query = SearchQuery(
                 keywords=config.url.split() if config.url else [],
                 limit=20,
@@ -397,6 +407,7 @@ class ScrapeOrchestratorV2:
 
     def _save_report(self, report: OrchestratorReport):
         from dataclasses import asdict
+
         history = []
         if self._history_path.exists():
             try:

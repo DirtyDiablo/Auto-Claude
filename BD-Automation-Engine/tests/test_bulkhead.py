@@ -26,6 +26,7 @@ def deg():
 # DEFAULT BULKHEADS
 # =========================================
 
+
 def test_default_bulkheads(mgr):
     bulkheads = mgr.list_bulkheads()
     assert len(bulkheads) == 5
@@ -47,6 +48,7 @@ def test_export_queue(mgr):
 # =========================================
 # ACQUIRE / RELEASE
 # =========================================
+
 
 def test_acquire(mgr):
     assert mgr.acquire("search_pool") is True
@@ -91,6 +93,7 @@ def test_acquire_unknown_allows(mgr):
 # UTILIZATION
 # =========================================
 
+
 def test_utilization_empty(mgr):
     assert mgr.get_utilization("search_pool") == 0.0
 
@@ -111,6 +114,7 @@ def test_utilization_full(mgr):
 # REGISTER
 # =========================================
 
+
 def test_register_new(mgr):
     b = mgr.register("custom", BulkheadType.SEMAPHORE, 20, 5)
     assert b.name == "custom"
@@ -125,6 +129,7 @@ def test_register_existing_returns_same(mgr):
 # =========================================
 # BULKHEAD TO_DICT & STATS
 # =========================================
+
 
 def test_bulkhead_to_dict(mgr):
     b = mgr.get_bulkhead("search_pool")
@@ -144,6 +149,7 @@ def test_stats(mgr):
 # =========================================
 # GRACEFUL DEGRADATION
 # =========================================
+
 
 def test_initial_level(deg):
     assert deg.current_level == DegradationLevel.NORMAL
@@ -192,8 +198,10 @@ def test_degradation_plan_degraded(deg):
 # SINGLETONS
 # =========================================
 
+
 def test_bulkhead_singleton():
     import src.resilience.bulkhead as mod
+
     mod._bulkhead_instance = None
     m1 = get_bulkhead_manager()
     m2 = get_bulkhead_manager()
@@ -203,6 +211,7 @@ def test_bulkhead_singleton():
 
 def test_degradation_singleton():
     import src.resilience.bulkhead as mod
+
     mod._degradation_instance = None
     d1 = get_degradation()
     d2 = get_degradation()

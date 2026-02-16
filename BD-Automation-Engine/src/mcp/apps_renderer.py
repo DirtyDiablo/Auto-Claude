@@ -18,6 +18,7 @@ from typing import Any, Dict, List, Optional
 # ENUMS & DATA CLASSES
 # =========================================
 
+
 class RenderStatus(str, Enum):
     RENDERED = "rendered"
     TEMPLATE_NOT_FOUND = "template_not_found"
@@ -66,7 +67,9 @@ class MCPAppEvent:
 
     def __post_init__(self):
         if not self.event_id:
-            raw = f"{self.event_type}:{self.template_id}:{datetime.utcnow().isoformat()}"
+            raw = (
+                f"{self.event_type}:{self.template_id}:{datetime.utcnow().isoformat()}"
+            )
             self.event_id = f"evt_{hashlib.md5(raw.encode()).hexdigest()[:10]}"
         if not self.timestamp:
             self.timestamp = datetime.utcnow().isoformat()
@@ -155,6 +158,7 @@ _BUILTIN_TEMPLATES: List[MCPAppTemplate] = [
 # MCP APPS RENDERER
 # =========================================
 
+
 class MCPAppsRenderer:
     """Renders interactive UI elements from MCP servers."""
 
@@ -172,9 +176,14 @@ class MCPAppsRenderer:
     # TEMPLATES
     # --------------------------------------------------
 
-    def register_template(self, template_id: str, name: str, html: str,
-                          permissions: Optional[List[str]] = None,
-                          description: str = "") -> MCPAppTemplate:
+    def register_template(
+        self,
+        template_id: str,
+        name: str,
+        html: str,
+        permissions: Optional[List[str]] = None,
+        description: str = "",
+    ) -> MCPAppTemplate:
         """Pre-declare an HTML template for MCP Apps."""
         template = MCPAppTemplate(
             template_id=template_id,
@@ -269,13 +278,18 @@ class MCPAppsRenderer:
         }
 
         # Relax based on permissions
-        if "action:email" in template.permissions or "action:call" in template.permissions:
+        if (
+            "action:email" in template.permissions
+            or "action:call" in template.permissions
+        ):
             sandbox["allow_scripts"] = True
         if "drag_drop" in template.permissions:
             sandbox["allow_scripts"] = True
         if "chart" in template.permissions:
             sandbox["allow_scripts"] = True
-            sandbox["csp"] = "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:"
+            sandbox["csp"] = (
+                "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:"
+            )
         if "geolocation" in template.permissions:
             sandbox["allow_scripts"] = True
 
@@ -328,18 +342,22 @@ class MCPAppsRenderer:
                         return result
         return None
 
-    def _log_action_event(self, template_id: str, action: MCPAppAction, event_type: str) -> None:
+    def _log_action_event(
+        self, template_id: str, action: MCPAppAction, event_type: str
+    ) -> None:
         event = MCPAppEvent(
             event_type=f"action_{event_type}",
             template_id=template_id,
             details={"action_id": action.action_id, "tool_call": action.tool_call},
         )
         self._events.append(event)
-        self._action_log.append({
-            "action_id": action.action_id,
-            "event": event_type,
-            "timestamp": event.timestamp,
-        })
+        self._action_log.append(
+            {
+                "action_id": action.action_id,
+                "event": event_type,
+                "timestamp": event.timestamp,
+            }
+        )
 
     # --------------------------------------------------
     # QUERIES

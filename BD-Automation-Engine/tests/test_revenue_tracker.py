@@ -17,6 +17,7 @@ from src.revenue.revenue_tracker import (
 # FIXTURES
 # =========================================
 
+
 @pytest.fixture
 def tracker():
     return RevenueTracker()
@@ -25,35 +26,110 @@ def tracker():
 @pytest.fixture
 def sample_placements():
     return [
-        Placement(id="p1", contractor_name="Alice", client="Leidos", program="DCGS",
-                  role_title="Intelligence Analyst", bill_rate=120, pay_rate=75,
-                  start_date="2025-01-15", rep="Rep-A", contact_id="c1", status="active"),
-        Placement(id="p2", contractor_name="Bob", client="Northrop", program="DCGS",
-                  role_title="Systems Engineer", bill_rate=150, pay_rate=95,
-                  start_date="2025-02-01", rep="Rep-A", contact_id="c2", status="active"),
-        Placement(id="p3", contractor_name="Carol", client="SAIC", program="NGEN",
-                  role_title="Network Engineer", bill_rate=130, pay_rate=80,
-                  start_date="2025-03-01", rep="Rep-B", contact_id="c3", status="active"),
-        Placement(id="p4", contractor_name="Dave", client="BAH", program="GBSD",
-                  role_title="Software Engineer", bill_rate=140, pay_rate=90,
-                  start_date="2025-01-01", end_date="2025-06-30", rep="Rep-B",
-                  contact_id="c4", status="completed"),
+        Placement(
+            id="p1",
+            contractor_name="Alice",
+            client="Leidos",
+            program="DCGS",
+            role_title="Intelligence Analyst",
+            bill_rate=120,
+            pay_rate=75,
+            start_date="2025-01-15",
+            rep="Rep-A",
+            contact_id="c1",
+            status="active",
+        ),
+        Placement(
+            id="p2",
+            contractor_name="Bob",
+            client="Northrop",
+            program="DCGS",
+            role_title="Systems Engineer",
+            bill_rate=150,
+            pay_rate=95,
+            start_date="2025-02-01",
+            rep="Rep-A",
+            contact_id="c2",
+            status="active",
+        ),
+        Placement(
+            id="p3",
+            contractor_name="Carol",
+            client="SAIC",
+            program="NGEN",
+            role_title="Network Engineer",
+            bill_rate=130,
+            pay_rate=80,
+            start_date="2025-03-01",
+            rep="Rep-B",
+            contact_id="c3",
+            status="active",
+        ),
+        Placement(
+            id="p4",
+            contractor_name="Dave",
+            client="BAH",
+            program="GBSD",
+            role_title="Software Engineer",
+            bill_rate=140,
+            pay_rate=90,
+            start_date="2025-01-01",
+            end_date="2025-06-30",
+            rep="Rep-B",
+            contact_id="c4",
+            status="completed",
+        ),
     ]
 
 
 @pytest.fixture
 def sample_records():
     return [
-        RevenueRecord(placement_id="p1", period="2025-01", billed_hours=160,
-                      bill_amount=19200, pay_amount=12000, margin=7200, margin_pct=37.5),
-        RevenueRecord(placement_id="p2", period="2025-01", billed_hours=160,
-                      bill_amount=24000, pay_amount=15200, margin=8800, margin_pct=36.7),
-        RevenueRecord(placement_id="p1", period="2025-02", billed_hours=160,
-                      bill_amount=19200, pay_amount=12000, margin=7200, margin_pct=37.5),
-        RevenueRecord(placement_id="p3", period="2025-02", billed_hours=160,
-                      bill_amount=20800, pay_amount=12800, margin=8000, margin_pct=38.5),
-        RevenueRecord(placement_id="p4", period="2025-01", billed_hours=160,
-                      bill_amount=22400, pay_amount=14400, margin=8000, margin_pct=35.7),
+        RevenueRecord(
+            placement_id="p1",
+            period="2025-01",
+            billed_hours=160,
+            bill_amount=19200,
+            pay_amount=12000,
+            margin=7200,
+            margin_pct=37.5,
+        ),
+        RevenueRecord(
+            placement_id="p2",
+            period="2025-01",
+            billed_hours=160,
+            bill_amount=24000,
+            pay_amount=15200,
+            margin=8800,
+            margin_pct=36.7,
+        ),
+        RevenueRecord(
+            placement_id="p1",
+            period="2025-02",
+            billed_hours=160,
+            bill_amount=19200,
+            pay_amount=12000,
+            margin=7200,
+            margin_pct=37.5,
+        ),
+        RevenueRecord(
+            placement_id="p3",
+            period="2025-02",
+            billed_hours=160,
+            bill_amount=20800,
+            pay_amount=12800,
+            margin=8000,
+            margin_pct=38.5,
+        ),
+        RevenueRecord(
+            placement_id="p4",
+            period="2025-01",
+            billed_hours=160,
+            bill_amount=22400,
+            pay_amount=14400,
+            margin=8000,
+            margin_pct=35.7,
+        ),
     ]
 
 
@@ -69,6 +145,7 @@ def loaded_tracker(tracker, sample_placements, sample_records):
 # PLACEMENT MANAGEMENT
 # =========================================
 
+
 class TestPlacementManagement:
     def test_add_placement(self, tracker, sample_placements):
         tracker.add_placement(sample_placements[0])
@@ -82,6 +159,7 @@ class TestPlacementManagement:
 # =========================================
 # REVENUE SUMMARY
 # =========================================
+
 
 class TestRevenueSummary:
     def test_overall_summary(self, loaded_tracker):
@@ -106,6 +184,7 @@ class TestRevenueSummary:
 # =========================================
 # REVENUE BY DIMENSION
 # =========================================
+
 
 class TestRevenueByDimension:
     def test_by_program(self, loaded_tracker):
@@ -133,6 +212,7 @@ class TestRevenueByDimension:
 # FORECAST
 # =========================================
 
+
 class TestForecast:
     def test_forecast_returns_list(self, loaded_tracker):
         forecast = loaded_tracker.forecast_revenue(6)
@@ -148,6 +228,7 @@ class TestForecast:
 # =========================================
 # MARGIN ANALYSIS
 # =========================================
+
 
 class TestMarginAnalysis:
     def test_margin_analysis(self, loaded_tracker):
@@ -177,6 +258,7 @@ class TestMarginAnalysis:
 # CONCENTRATION RISK
 # =========================================
 
+
 class TestConcentrationRisk:
     def test_concentration_risk(self, loaded_tracker):
         risk = loaded_tracker.get_concentration_risk()
@@ -203,6 +285,7 @@ class TestConcentrationRisk:
 # =========================================
 # SINGLETON
 # =========================================
+
 
 class TestSingleton:
     def test_get_tracker_returns_instance(self):

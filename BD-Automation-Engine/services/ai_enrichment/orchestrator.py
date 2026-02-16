@@ -2,6 +2,7 @@
 Enrichment Orchestrator - Manages the enrichment pipeline
 Handles polling, batch processing, and logging
 """
+
 import time
 from typing import Dict, List, Optional, Callable
 from datetime import datetime
@@ -21,6 +22,7 @@ class EnrichmentType(Enum):
 @dataclass
 class EnrichmentResult:
     """Result of a single enrichment operation"""
+
     page_id: str
     success: bool
     enrichment_type: EnrichmentType
@@ -32,6 +34,7 @@ class EnrichmentResult:
 @dataclass
 class RunSummary:
     """Summary of an enrichment run"""
+
     run_id: str
     start_time: datetime
     end_time: Optional[datetime] = None
@@ -54,9 +57,7 @@ class EnrichmentOrchestrator:
     """
 
     def __init__(
-        self,
-        notion_token: Optional[str] = None,
-        anthropic_key: Optional[str] = None
+        self, notion_token: Optional[str] = None, anthropic_key: Optional[str] = None
     ):
         self.notion = NotionClient(token=notion_token)
         self.engine = EnrichmentEngine(anthropic_key=anthropic_key)
@@ -67,7 +68,7 @@ class EnrichmentOrchestrator:
         enrich_jobs: bool = True,
         enrich_contacts: bool = True,
         enrich_opportunities: bool = True,
-        dry_run: bool = False
+        dry_run: bool = False,
     ) -> RunSummary:
         """
         Run the full enrichment pipeline on all pending records.
@@ -80,29 +81,27 @@ class EnrichmentOrchestrator:
         """
         run_id = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.run_summary = RunSummary(
-            run_id=run_id,
-            start_time=datetime.now(),
-            data_sources=[]
+            run_id=run_id, start_time=datetime.now(), data_sources=[]
         )
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"ENRICHMENT RUN: {run_id}")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
 
         try:
             # 1. Enrich Jobs
             if enrich_jobs:
                 self._enrich_database(
-                    database_id=self.notion.DATABASES['PROGRAM_MAPPING_HUB'],
+                    database_id=self.notion.DATABASES["PROGRAM_MAPPING_HUB"],
                     enrichment_type=EnrichmentType.JOB,
                     enrichment_func=self.engine.enrich_job,
-                    status_filter='pending_enrichment',
-                    dry_run=dry_run
+                    status_filter="pending_enrichment",
+                    dry_run=dry_run,
                 )
 
             # 2. Enrich Contacts
             if enrich_contacts:
-                for db_key in ['DCGS_CONTACTS', 'GDIT_CONTACTS', 'GDIT_PTS_CONTACTS']:
+                for db_key in ["DCGS_CONTACTS", "GDIT_CONTACTS", "GDIT_PTS_CONTACTS"]:
                     db_id = self.notion.DATABASES.get(db_key)
                     if db_id:
                         self._enrich_database(
@@ -110,17 +109,17 @@ class EnrichmentOrchestrator:
                             enrichment_type=EnrichmentType.CONTACT,
                             enrichment_func=self.engine.enrich_contact,
                             status_filter=None,  # No status filter for contacts
-                            dry_run=dry_run
+                            dry_run=dry_run,
                         )
 
             # 3. Enrich Opportunities
             if enrich_opportunities:
                 self._enrich_database(
-                    database_id=self.notion.DATABASES['BD_OPPORTUNITIES'],
+                    database_id=self.notion.DATABASES["BD_OPPORTUNITIES"],
                     enrichment_type=EnrichmentType.OPPORTUNITY,
                     enrichment_func=self.engine.enrich_opportunity,
                     status_filter=None,
-                    dry_run=dry_run
+                    dry_run=dry_run,
                 )
 
         except Exception as e:
@@ -130,7 +129,8 @@ class EnrichmentOrchestrator:
         # Finalize run
         self.run_summary.end_time = datetime.now()
         self.run_summary.total_duration_ms = int(
-            (self.run_summary.end_time - self.run_summary.start_time).total_seconds() * 1000
+            (self.run_summary.end_time - self.run_summary.start_time).total_seconds()
+            * 1000
         )
 
         # Log to Notion
@@ -141,22 +141,19 @@ class EnrichmentOrchestrator:
         return self.run_summary
 
     def enrich_single_record(
-        self,
-        page_id: str,
-        enrichment_type: EnrichmentType,
-        dry_run: bool = False
+        self, page_id: str, enrichment_type: EnrichmentType, dry_run: bool = False
     ) -> EnrichmentResult:
         """Enrich a single record by page ID"""
         start_time = time.time()
 
         # Get the page
         page = self.notion.get_page(page_id)
-        if page.get('error'):
+        if page.get("error"):
             return EnrichmentResult(
                 page_id=page_id,
                 success=False,
                 enrichment_type=enrichment_type,
-                error=page.get('message', 'Failed to fetch page')
+                error=page.get("message", "Failed to fetch page"),
             )
 
         # Run enrichment
@@ -171,19 +168,19 @@ class EnrichmentOrchestrator:
                 page_id=page_id,
                 success=False,
                 enrichment_type=enrichment_type,
-                error=f"Unknown enrichment type: {enrichment_type}"
+                error=f"Unknown enrichment type: {enrichment_type}",
             )
 
         # Write back to Notion
         if not dry_run and enriched:
             result = self.notion.update_page(page_id, enriched)
-            if result.get('error'):
+            if result.get("error"):
                 return EnrichmentResult(
                     page_id=page_id,
                     success=False,
                     enrichment_type=enrichment_type,
-                    error=result.get('message', 'Failed to update page'),
-                    duration_ms=int((time.time() - start_time) * 1000)
+                    error=result.get("message", "Failed to update page"),
+                    duration_ms=int((time.time() - start_time) * 1000),
                 )
 
         return EnrichmentResult(
@@ -191,13 +188,11 @@ class EnrichmentOrchestrator:
             success=True,
             enrichment_type=enrichment_type,
             fields_updated=list(enriched.keys()) if enriched else [],
-            duration_ms=int((time.time() - start_time) * 1000)
+            duration_ms=int((time.time() - start_time) * 1000),
         )
 
     def poll_and_enrich(
-        self,
-        interval_seconds: int = 300,
-        max_iterations: Optional[int] = None
+        self, interval_seconds: int = 300, max_iterations: Optional[int] = None
     ):
         """
         Continuously poll for new records and enrich them.
@@ -213,7 +208,9 @@ class EnrichmentOrchestrator:
         try:
             while max_iterations is None or iteration < max_iterations:
                 iteration += 1
-                print(f"\n--- Poll iteration {iteration} at {datetime.now().strftime('%H:%M:%S')} ---")
+                print(
+                    f"\n--- Poll iteration {iteration} at {datetime.now().strftime('%H:%M:%S')} ---"
+                )
 
                 self.run_full_pipeline()
 
@@ -225,44 +222,52 @@ class EnrichmentOrchestrator:
             print("\nEnrichment polling stopped by user.")
 
     def generate_call_sheet(
-        self,
-        database_id: Optional[str] = None,
-        min_score: int = 60,
-        limit: int = 20
+        self, database_id: Optional[str] = None, min_score: int = 60, limit: int = 20
     ) -> List[Dict]:
         """
         Generate a prioritized call sheet from enriched jobs.
 
         Returns list of high-priority opportunities with contact info.
         """
-        db_id = database_id or self.notion.DATABASES['PROGRAM_MAPPING_HUB']
+        db_id = database_id or self.notion.DATABASES["PROGRAM_MAPPING_HUB"]
 
         # Query for high-scoring enriched jobs
         filter = {
             "and": [
                 {"property": "Status", "select": {"equals": "enriched"}},
-                {"property": "BD Score", "number": {"greater_than_or_equal_to": min_score}}
+                {
+                    "property": "BD Score",
+                    "number": {"greater_than_or_equal_to": min_score},
+                },
             ]
         }
 
-        sorts = [
-            {"property": "BD Score", "direction": "descending"}
-        ]
+        sorts = [{"property": "BD Score", "direction": "descending"}]
 
         pages = self.notion.query_all_pages(db_id, filter=filter, sorts=sorts)
 
         call_sheet = []
         for page in pages[:limit]:
-            props = page.get('properties', {})
-            call_sheet.append({
-                'id': page.get('id'),
-                'title': self.notion.extract_title(props.get('Job Title', props.get('Name', {}))),
-                'company': self.notion.extract_rich_text(props.get('Company', {})),
-                'location': self.notion.extract_rich_text(props.get('Location', {})),
-                'bd_score': self.notion.extract_number(props.get('BD Score', {})),
-                'priority': self.notion.extract_select(props.get('BD Priority', {})),
-                'mapped_programs': self.notion.extract_rich_text(props.get('Mapped Programs', {})),
-            })
+            props = page.get("properties", {})
+            call_sheet.append(
+                {
+                    "id": page.get("id"),
+                    "title": self.notion.extract_title(
+                        props.get("Job Title", props.get("Name", {}))
+                    ),
+                    "company": self.notion.extract_rich_text(props.get("Company", {})),
+                    "location": self.notion.extract_rich_text(
+                        props.get("Location", {})
+                    ),
+                    "bd_score": self.notion.extract_number(props.get("BD Score", {})),
+                    "priority": self.notion.extract_select(
+                        props.get("BD Priority", {})
+                    ),
+                    "mapped_programs": self.notion.extract_rich_text(
+                        props.get("Mapped Programs", {})
+                    ),
+                }
+            )
 
         return call_sheet
 
@@ -274,7 +279,7 @@ class EnrichmentOrchestrator:
         enrichment_type: EnrichmentType,
         enrichment_func: Callable,
         status_filter: Optional[str] = None,
-        dry_run: bool = False
+        dry_run: bool = False,
     ):
         """Enrich all pending records in a database"""
         print(f"\nProcessing {enrichment_type.value}s from database...")
@@ -294,7 +299,7 @@ class EnrichmentOrchestrator:
         self.run_summary.data_sources.append(enrichment_type.value)
 
         for i, page in enumerate(pages):
-            page_id = page.get('id')
+            page_id = page.get("id")
             self.run_summary.jobs_processed += 1
 
             try:
@@ -304,34 +309,42 @@ class EnrichmentOrchestrator:
                 duration = int((time.time() - start_time) * 1000)
 
                 if not enriched:
-                    print(f"  [{i+1}/{len(pages)}] Skipped (no enrichment)")
+                    print(f"  [{i + 1}/{len(pages)}] Skipped (no enrichment)")
                     continue
 
                 # Write back
                 if not dry_run:
                     result = self.notion.update_page(page_id, enriched)
-                    if result.get('error'):
+                    if result.get("error"):
                         self.run_summary.failed += 1
-                        self.run_summary.errors.append(f"Page {page_id}: {result.get('message')}")
-                        print(f"  [{i+1}/{len(pages)}] FAILED: {result.get('message')}")
+                        self.run_summary.errors.append(
+                            f"Page {page_id}: {result.get('message')}"
+                        )
+                        print(
+                            f"  [{i + 1}/{len(pages)}] FAILED: {result.get('message')}"
+                        )
                     else:
                         self.run_summary.successful += 1
-                        print(f"  [{i+1}/{len(pages)}] Enriched ({len(enriched)} fields, {duration}ms)")
+                        print(
+                            f"  [{i + 1}/{len(pages)}] Enriched ({len(enriched)} fields, {duration}ms)"
+                        )
                 else:
                     self.run_summary.successful += 1
-                    print(f"  [{i+1}/{len(pages)}] [DRY RUN] Would enrich {len(enriched)} fields")
+                    print(
+                        f"  [{i + 1}/{len(pages)}] [DRY RUN] Would enrich {len(enriched)} fields"
+                    )
 
             except Exception as e:
                 self.run_summary.failed += 1
                 self.run_summary.errors.append(f"Page {page_id}: {str(e)}")
-                print(f"  [{i+1}/{len(pages)}] ERROR: {e}")
+                print(f"  [{i + 1}/{len(pages)}] ERROR: {e}")
 
     def _log_run_to_notion(self):
         """Log run statistics to the Enrichment Runs Log database"""
         if not self.run_summary:
             return
 
-        log_db_id = self.notion.DATABASES.get('ENRICHMENT_LOG')
+        log_db_id = self.notion.DATABASES.get("ENRICHMENT_LOG")
         if not log_db_id:
             print("Warning: Enrichment log database not configured")
             return
@@ -345,7 +358,9 @@ class EnrichmentOrchestrator:
             "Run ID": self.notion.build_title(self.run_summary.run_id),
             "Run Date": self.notion.build_date(self.run_summary.start_time.isoformat()),
             "Jobs Processed": self.notion.build_number(self.run_summary.jobs_processed),
-            "Successful Enrichments": self.notion.build_number(self.run_summary.successful),
+            "Successful Enrichments": self.notion.build_number(
+                self.run_summary.successful
+            ),
             "Failed Enrichments": self.notion.build_number(self.run_summary.failed),
             "Success Rate": self.notion.build_number(round(success_rate, 1)),
             "Duration Minutes": self.notion.build_number(
@@ -364,7 +379,7 @@ class EnrichmentOrchestrator:
 
         # Create log entry
         result = self.notion.create_page(log_db_id, properties)
-        if result.get('error'):
+        if result.get("error"):
             print(f"Warning: Failed to log run: {result.get('message')}")
         else:
             print(f"Run logged to Notion: {self.run_summary.run_id}")
@@ -374,9 +389,9 @@ class EnrichmentOrchestrator:
         if not self.run_summary:
             return
 
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print("RUN SUMMARY")
-        print(f"{'='*60}")
+        print(f"{'=' * 60}")
         print(f"Run ID:       {self.run_summary.run_id}")
         print(f"Duration:     {self.run_summary.total_duration_ms / 1000:.1f} seconds")
         print(f"Processed:    {self.run_summary.jobs_processed}")
@@ -390,4 +405,4 @@ class EnrichmentOrchestrator:
             if len(self.run_summary.errors) > 5:
                 print(f"  ... and {len(self.run_summary.errors) - 5} more")
 
-        print(f"{'='*60}\n")
+        print(f"{'=' * 60}\n")

@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 # DATA CLASSES
 # =========================================
 
+
 @dataclass
 class Suggestion:
     text: str
@@ -92,26 +93,61 @@ _QUERY_TEMPLATES: Dict[str, List[str]] = {
 
 # Known entities for direct matching
 _KNOWN_COMPANIES = [
-    "Leidos", "GDIT", "Booz Allen", "Northrop Grumman", "Raytheon",
-    "Lockheed Martin", "BAE Systems", "SAIC", "CACI", "ManTech",
-    "L3Harris", "General Dynamics", "Parsons",
+    "Leidos",
+    "GDIT",
+    "Booz Allen",
+    "Northrop Grumman",
+    "Raytheon",
+    "Lockheed Martin",
+    "BAE Systems",
+    "SAIC",
+    "CACI",
+    "ManTech",
+    "L3Harris",
+    "General Dynamics",
+    "Parsons",
 ]
 
 _KNOWN_PROGRAMS = [
-    "AF DCGS", "PACAF", "GBSD", "NGEN", "F-35", "Sentinel",
-    "JADC2", "ABMS", "Navy ISR", "DCGS-N",
+    "AF DCGS",
+    "PACAF",
+    "GBSD",
+    "NGEN",
+    "F-35",
+    "Sentinel",
+    "JADC2",
+    "ABMS",
+    "Navy ISR",
+    "DCGS-N",
 ]
 
 _KNOWN_LOCATIONS = [
-    "San Diego", "Langley", "Fort Meade", "Colorado Springs",
-    "Hickam AFB", "Beale AFB", "Ramstein", "Wright-Patterson",
-    "San Antonio", "Huntsville", "Tampa", "Norfolk",
+    "San Diego",
+    "Langley",
+    "Fort Meade",
+    "Colorado Springs",
+    "Hickam AFB",
+    "Beale AFB",
+    "Ramstein",
+    "Wright-Patterson",
+    "San Antonio",
+    "Huntsville",
+    "Tampa",
+    "Norfolk",
 ]
 
 _PLATFORM_CONCEPTS = [
-    "pipeline", "win probability", "forecast", "campaign",
-    "outreach", "recompete", "budget cycle", "ramp signal",
-    "composite score", "hiring trend", "daily digest",
+    "pipeline",
+    "win probability",
+    "forecast",
+    "campaign",
+    "outreach",
+    "recompete",
+    "budget cycle",
+    "ramp signal",
+    "composite score",
+    "hiring trend",
+    "daily digest",
 ]
 
 
@@ -176,49 +212,59 @@ class SmartAutocomplete:
 
         # Add companies
         for company in _KNOWN_COMPANIES:
-            self._index.append(Suggestion(
-                text=company,
-                category="entity",
-                score=0.8,
-                metadata={"type": "company"},
-            ))
+            self._index.append(
+                Suggestion(
+                    text=company,
+                    category="entity",
+                    score=0.8,
+                    metadata={"type": "company"},
+                )
+            )
 
         # Add programs
         for program in _KNOWN_PROGRAMS:
-            self._index.append(Suggestion(
-                text=program,
-                category="entity",
-                score=0.8,
-                metadata={"type": "program"},
-            ))
+            self._index.append(
+                Suggestion(
+                    text=program,
+                    category="entity",
+                    score=0.8,
+                    metadata={"type": "program"},
+                )
+            )
 
         # Add locations
         for loc in _KNOWN_LOCATIONS:
-            self._index.append(Suggestion(
-                text=loc,
-                category="entity",
-                score=0.7,
-                metadata={"type": "location"},
-            ))
+            self._index.append(
+                Suggestion(
+                    text=loc,
+                    category="entity",
+                    score=0.7,
+                    metadata={"type": "location"},
+                )
+            )
 
         # Add concepts
         for concept in _PLATFORM_CONCEPTS:
-            self._index.append(Suggestion(
-                text=concept,
-                category="concept",
-                score=0.6,
-                metadata={"type": "concept"},
-            ))
+            self._index.append(
+                Suggestion(
+                    text=concept,
+                    category="concept",
+                    score=0.6,
+                    metadata={"type": "concept"},
+                )
+            )
 
         # Add custom entities
         for category, entities in self._custom_entities.items():
             for entity in entities:
-                self._index.append(Suggestion(
-                    text=entity,
-                    category="entity",
-                    score=0.7,
-                    metadata={"type": category},
-                ))
+                self._index.append(
+                    Suggestion(
+                        text=entity,
+                        category="entity",
+                        score=0.7,
+                        metadata={"type": category},
+                    )
+                )
 
         self._index_built = True
         logger.info(f"Autocomplete index built with {len(self._index)} entries")
@@ -243,16 +289,26 @@ class SmartAutocomplete:
         suggestions = []
         for starter, completions in _QUERY_TEMPLATES.items():
             if partial.startswith(starter) or starter.startswith(partial):
-                remainder = partial[len(starter):].strip() if partial.startswith(starter) else ""
+                remainder = (
+                    partial[len(starter) :].strip()
+                    if partial.startswith(starter)
+                    else ""
+                )
                 for completion in completions:
                     if not remainder or remainder in completion.lower():
-                        full = f"{starter} {completion}" if partial.startswith(starter) else f"{starter} {completion}"
-                        suggestions.append(Suggestion(
-                            text=full,
-                            category="query",
-                            score=0.9,
-                            metadata={"template": starter},
-                        ))
+                        full = (
+                            f"{starter} {completion}"
+                            if partial.startswith(starter)
+                            else f"{starter} {completion}"
+                        )
+                        suggestions.append(
+                            Suggestion(
+                                text=full,
+                                category="query",
+                                score=0.9,
+                                metadata={"template": starter},
+                            )
+                        )
         return suggestions
 
     def _match_entities(self, partial: str) -> List[Suggestion]:
@@ -267,12 +323,14 @@ class SmartAutocomplete:
                 # Complete the current entity
                 prefix = " ".join(words[:-1])
                 full = f"{prefix} {entity}".strip() if prefix else entity
-                suggestions.append(Suggestion(
-                    text=full,
-                    category="entity",
-                    score=0.85,
-                    metadata={"entity": entity},
-                ))
+                suggestions.append(
+                    Suggestion(
+                        text=full,
+                        category="entity",
+                        score=0.85,
+                        metadata={"entity": entity},
+                    )
+                )
         return suggestions
 
     def _match_recent(self, partial: str) -> List[Suggestion]:
@@ -280,12 +338,14 @@ class SmartAutocomplete:
         suggestions = []
         for query in self._recent_queries[:20]:
             if query.lower().startswith(partial) and query.lower() != partial:
-                suggestions.append(Suggestion(
-                    text=query,
-                    category="recent",
-                    score=0.7,
-                    metadata={"source": "recent"},
-                ))
+                suggestions.append(
+                    Suggestion(
+                        text=query,
+                        category="recent",
+                        score=0.7,
+                        metadata={"source": "recent"},
+                    )
+                )
         return suggestions
 
     def _match_index(self, partial: str) -> List[Suggestion]:
@@ -293,24 +353,32 @@ class SmartAutocomplete:
         suggestions = []
         for item in self._index:
             if partial in item.text.lower():
-                suggestions.append(Suggestion(
-                    text=item.text,
-                    category=item.category,
-                    score=item.score * 0.8,  # Slightly lower for index matches
-                    metadata=item.metadata,
-                ))
+                suggestions.append(
+                    Suggestion(
+                        text=item.text,
+                        category=item.category,
+                        score=item.score * 0.8,  # Slightly lower for index matches
+                        metadata=item.metadata,
+                    )
+                )
         return suggestions
 
     def _default_suggestions(self, limit: int) -> List[Suggestion]:
         """Default suggestions when no input."""
         defaults = [
             Suggestion(text="Show me today's digest", category="query", score=0.9),
-            Suggestion(text="Find Tier 1 contacts at Leidos", category="query", score=0.85),
+            Suggestion(
+                text="Find Tier 1 contacts at Leidos", category="query", score=0.85
+            ),
             Suggestion(text="What's our pipeline worth?", category="query", score=0.85),
-            Suggestion(text="Show TS/SCI jobs in San Diego", category="query", score=0.8),
+            Suggestion(
+                text="Show TS/SCI jobs in San Diego", category="query", score=0.8
+            ),
             Suggestion(text="Forecast hiring for DCGS", category="query", score=0.8),
             Suggestion(text="Compare GDIT vs Leidos", category="query", score=0.75),
-            Suggestion(text="Who are the PACAF decision makers?", category="query", score=0.75),
+            Suggestion(
+                text="Who are the PACAF decision makers?", category="query", score=0.75
+            ),
             Suggestion(text="Generate outreach email", category="query", score=0.7),
         ]
         # Mix in recent queries

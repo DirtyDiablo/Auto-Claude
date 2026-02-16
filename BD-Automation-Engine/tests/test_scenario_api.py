@@ -20,6 +20,7 @@ def api():
 # NL SCENARIO ANALYSIS
 # =========================================
 
+
 def test_analyze_hire_reps(api):
     result = api.analyze_scenario("What if we hire 3 more BD reps?")
     assert isinstance(result, ScenarioAnalysis)
@@ -92,6 +93,7 @@ def test_analyze_unique_id(api):
 # SENSITIVITY ANALYSIS
 # =========================================
 
+
 def test_sensitivity_team_size(api):
     result = api.sensitivity_analysis("team_size")
     assert isinstance(result, SensitivityResult)
@@ -137,6 +139,7 @@ def test_sensitivity_to_dict(api):
 # PRESETS
 # =========================================
 
+
 def test_get_presets(api):
     presets = api.get_presets()
     assert len(presets) == 8
@@ -179,6 +182,7 @@ def test_preset_to_dict(api):
 # QUERIES
 # =========================================
 
+
 def test_get_analysis(api):
     result = api.analyze_scenario("Hire 2 reps")
     fetched = api.get_analysis(result.analysis_id)
@@ -200,6 +204,7 @@ def test_list_analyses(api):
 # TO DICT
 # =========================================
 
+
 def test_analysis_to_dict(api):
     result = api.analyze_scenario("Hire 2 more reps")
     d = result.to_dict()
@@ -212,6 +217,7 @@ def test_analysis_to_dict(api):
 # =========================================
 # STATS
 # =========================================
+
 
 def test_stats(api):
     api.analyze_scenario("Hire 2 reps")
@@ -226,8 +232,10 @@ def test_stats(api):
 # SINGLETON
 # =========================================
 
+
 def test_singleton():
     import src.simulation.scenario_api as mod
+
     mod._instance = None
     s1 = get_scenario_api()
     s2 = get_scenario_api()

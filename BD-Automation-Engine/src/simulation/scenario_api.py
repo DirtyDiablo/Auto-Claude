@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 # DATA MODELS
 # =========================================
 
+
 class ScenarioMethod(str, Enum):
     CAUSAL_EFFECT = "causal_effect"
     COUNTERFACTUAL = "counterfactual"
@@ -33,6 +34,7 @@ class ScenarioMethod(str, Enum):
 @dataclass
 class ScenarioAnalysis:
     """Result of a natural language scenario analysis."""
+
     analysis_id: str
     question: str
     method: ScenarioMethod
@@ -62,6 +64,7 @@ class ScenarioAnalysis:
 @dataclass
 class SensitivityResult:
     """Result of sensitivity analysis for a single variable."""
+
     result_id: str
     variable: str
     baseline_value: float
@@ -91,6 +94,7 @@ class SensitivityResult:
 @dataclass
 class ScenarioPreset:
     """A pre-built scenario template."""
+
     preset_id: str
     name: str
     description: str
@@ -115,61 +119,73 @@ class ScenarioPreset:
 
 _PRESETS = [
     ScenarioPreset(
-        "preset_hire_reps", "Hire BD Reps",
+        "preset_hire_reps",
+        "Hire BD Reps",
         "What if we hire 2 additional BD representatives?",
         "team",
         {"team_size": {"action": "increase", "value": 2}},
         ScenarioMethod.SIMULATION,
     ),
     ScenarioPreset(
-        "preset_double_outreach", "Double Outreach",
+        "preset_double_outreach",
+        "Double Outreach",
         "What if we double our outreach volume?",
         "outreach",
         {"avg_calls_per_rep": {"action": "multiply", "value": 2.0}},
         ScenarioMethod.SIMULATION,
     ),
     ScenarioPreset(
-        "preset_improve_win_rate", "Improve Win Rate",
+        "preset_improve_win_rate",
+        "Improve Win Rate",
         "What if we improve proposal win rate by 5 percentage points?",
         "pipeline",
         {"proposal_win_rate": {"action": "increase", "value": 0.05}},
         ScenarioMethod.SIMULATION,
     ),
     ScenarioPreset(
-        "preset_competitor_exits", "Competitor Exit",
+        "preset_competitor_exits",
+        "Competitor Exit",
         "What if a major competitor exits the market?",
         "market",
         {"competitor_count": {"action": "decrease", "value": 1}},
         ScenarioMethod.SIMULATION,
     ),
     ScenarioPreset(
-        "preset_clearance_delay", "Clearance Delay",
+        "preset_clearance_delay",
+        "Clearance Delay",
         "What if clearance processing time increases by 4 weeks?",
         "risk",
         {"clearance_processing_weeks": {"action": "increase", "value": 4}},
         ScenarioMethod.SENSITIVITY,
     ),
     ScenarioPreset(
-        "preset_navy_pivot", "Navy DCGS Pivot",
+        "preset_navy_pivot",
+        "Navy DCGS Pivot",
         "What if we shift 50% of resources to Navy DCGS-N?",
         "strategy",
-        {"active_contacts": {"action": "multiply", "value": 0.5},
-         "meeting_conversion_rate": {"action": "increase", "value": 0.05}},
+        {
+            "active_contacts": {"action": "multiply", "value": 0.5},
+            "meeting_conversion_rate": {"action": "increase", "value": 0.05},
+        },
         ScenarioMethod.COMPARISON,
     ),
     ScenarioPreset(
-        "preset_budget_cut", "Budget Cut Impact",
+        "preset_budget_cut",
+        "Budget Cut Impact",
         "What if the DoD budget is cut by 10%?",
         "risk",
         {"pipeline_value_m": {"action": "multiply", "value": 0.9}},
         ScenarioMethod.SIMULATION,
     ),
     ScenarioPreset(
-        "preset_aggressive_growth", "Aggressive Growth",
+        "preset_aggressive_growth",
+        "Aggressive Growth",
         "Hire 4 reps, double outreach, invest in past performance",
         "strategy",
-        {"team_size": {"action": "increase", "value": 4},
-         "avg_calls_per_rep": {"action": "multiply", "value": 1.5}},
+        {
+            "team_size": {"action": "increase", "value": 4},
+            "avg_calls_per_rep": {"action": "multiply", "value": 1.5},
+        },
         ScenarioMethod.SIMULATION,
     ),
 ]
@@ -181,37 +197,75 @@ _PRESETS = [
 
 _SCENARIO_PATTERNS: List[Tuple[str, ScenarioMethod, Dict[str, Any]]] = [
     # Hiring
-    (r"hire\s+(\d+)\s+(?:more\s+)?(?:bd\s+)?reps?", ScenarioMethod.SIMULATION,
-     lambda m: {"team_size": {"action": "increase", "value": int(m.group(1))}}),
-    (r"double\s+(?:our\s+)?(?:outreach|calls)", ScenarioMethod.SIMULATION,
-     lambda m: {"avg_calls_per_rep": {"action": "multiply", "value": 2.0}}),
-    (r"improve\s+win\s+rate\s+by\s+(\d+)", ScenarioMethod.SIMULATION,
-     lambda m: {"proposal_win_rate": {"action": "increase", "value": int(m.group(1)) / 100.0}}),
+    (
+        r"hire\s+(\d+)\s+(?:more\s+)?(?:bd\s+)?reps?",
+        ScenarioMethod.SIMULATION,
+        lambda m: {"team_size": {"action": "increase", "value": int(m.group(1))}},
+    ),
+    (
+        r"double\s+(?:our\s+)?(?:outreach|calls)",
+        ScenarioMethod.SIMULATION,
+        lambda m: {"avg_calls_per_rep": {"action": "multiply", "value": 2.0}},
+    ),
+    (
+        r"improve\s+win\s+rate\s+by\s+(\d+)",
+        ScenarioMethod.SIMULATION,
+        lambda m: {
+            "proposal_win_rate": {
+                "action": "increase",
+                "value": int(m.group(1)) / 100.0,
+            }
+        },
+    ),
     # Competition
-    (r"competitor\s+(?:exits?|leaves?|drops?)", ScenarioMethod.SIMULATION,
-     lambda m: {"competitor_count": {"action": "decrease", "value": 1}}),
-    (r"(?:undercuts?|cuts?)\s+(?:rates?|prices?)\s+by\s+(\d+)", ScenarioMethod.SIMULATION,
-     lambda m: {"proposal_win_rate": {"action": "decrease", "value": int(m.group(1)) / 100.0}}),
+    (
+        r"competitor\s+(?:exits?|leaves?|drops?)",
+        ScenarioMethod.SIMULATION,
+        lambda m: {"competitor_count": {"action": "decrease", "value": 1}},
+    ),
+    (
+        r"(?:undercuts?|cuts?)\s+(?:rates?|prices?)\s+by\s+(\d+)",
+        ScenarioMethod.SIMULATION,
+        lambda m: {
+            "proposal_win_rate": {
+                "action": "decrease",
+                "value": int(m.group(1)) / 100.0,
+            }
+        },
+    ),
     # Sensitivity
-    (r"sensitive\s+(?:is|to)\s+(\w+)", ScenarioMethod.SENSITIVITY,
-     lambda m: {"variable": m.group(1)}),
-    (r"clearance\s+(?:processing\s+)?delays?", ScenarioMethod.SENSITIVITY,
-     lambda m: {"variable": "clearance_processing_weeks"}),
+    (
+        r"sensitive\s+(?:is|to)\s+(\w+)",
+        ScenarioMethod.SENSITIVITY,
+        lambda m: {"variable": m.group(1)},
+    ),
+    (
+        r"clearance\s+(?:processing\s+)?delays?",
+        ScenarioMethod.SENSITIVITY,
+        lambda m: {"variable": "clearance_processing_weeks"},
+    ),
     # Budget
-    (r"budget\s+(?:cut|decrease|reduction)\s+(?:by\s+)?(\d+)", ScenarioMethod.SIMULATION,
-     lambda m: {"pipeline_value_m": {"action": "multiply", "value": 1 - int(m.group(1)) / 100.0}}),
+    (
+        r"budget\s+(?:cut|decrease|reduction)\s+(?:by\s+)?(\d+)",
+        ScenarioMethod.SIMULATION,
+        lambda m: {
+            "pipeline_value_m": {
+                "action": "multiply",
+                "value": 1 - int(m.group(1)) / 100.0,
+            }
+        },
+    ),
     # What caused
-    (r"what\s+caused", ScenarioMethod.COUNTERFACTUAL,
-     lambda m: {}),
+    (r"what\s+caused", ScenarioMethod.COUNTERFACTUAL, lambda m: {}),
     # Compare / should we
-    (r"should\s+we\s+focus", ScenarioMethod.COMPARISON,
-     lambda m: {}),
+    (r"should\s+we\s+focus", ScenarioMethod.COMPARISON, lambda m: {}),
 ]
 
 
 # =========================================
 # STRATEGIC SCENARIO API
 # =========================================
+
 
 class StrategicScenarioAPI:
     """Translates business questions into causal/simulation queries.
@@ -275,7 +329,9 @@ class StrategicScenarioAPI:
         # Default: simulation with no specific variables
         return ScenarioMethod.SIMULATION, {}
 
-    def _run_simulation_analysis(self, variables: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+    def _run_simulation_analysis(
+        self, variables: Dict[str, Any]
+    ) -> Tuple[str, Dict[str, Any]]:
         """Generate simulation analysis result."""
         # Compute estimated impact
         pipeline_delta = 0.0
@@ -292,8 +348,12 @@ class StrategicScenarioAPI:
                     pipeline_delta += 5.0 if action == "multiply" else 0
                     revenue_delta += 3.5 if action == "multiply" else 0
                 elif var == "proposal_win_rate":
-                    pipeline_delta += value * 20.0 if action == "increase" else -value * 20.0
-                    revenue_delta += value * 15.0 if action == "increase" else -value * 15.0
+                    pipeline_delta += (
+                        value * 20.0 if action == "increase" else -value * 20.0
+                    )
+                    revenue_delta += (
+                        value * 15.0 if action == "increase" else -value * 15.0
+                    )
                 elif var == "competitor_count":
                     pipeline_delta += 2.0 if action == "decrease" else -2.0
                     revenue_delta += 1.5 if action == "decrease" else -1.0
@@ -312,7 +372,9 @@ class StrategicScenarioAPI:
             "variables_modified": list(variables.keys()),
         }
 
-    def _run_sensitivity_analysis(self, variables: Dict[str, Any]) -> Tuple[str, Dict[str, Any]]:
+    def _run_sensitivity_analysis(
+        self, variables: Dict[str, Any]
+    ) -> Tuple[str, Dict[str, Any]]:
         """Generate sensitivity analysis result."""
         var_name = variables.get("variable", "team_size")
 
@@ -332,15 +394,17 @@ class StrategicScenarioAPI:
         for pct in range(-30, 35, 5):
             val = baseline * (1 + pct / 100.0)
             impact = pct * 0.08  # ~8% pipeline impact per 1% variable change
-            sweep.append({
-                "variable_value": round(val, 2),
-                "pct_change": pct,
-                "pipeline_impact_pct": round(impact, 2),
-            })
+            sweep.append(
+                {
+                    "variable_value": round(val, 2),
+                    "pct_change": pct,
+                    "pipeline_impact_pct": round(impact, 2),
+                }
+            )
 
         elasticity = 0.08  # 8% change in outcome per 1% change in variable
         summary = (
-            f"Each 1% change in {var_name} corresponds to ~{elasticity*100:.0f}% "
+            f"Each 1% change in {var_name} corresponds to ~{elasticity * 100:.0f}% "
             f"change in pipeline outcome. "
             f"Variable is {'highly' if elasticity > 0.05 else 'moderately'} sensitive."
         )
@@ -353,7 +417,9 @@ class StrategicScenarioAPI:
         }
 
     def _run_counterfactual_analysis(
-        self, question: str, variables: Dict[str, Any],
+        self,
+        question: str,
+        variables: Dict[str, Any],
     ) -> Tuple[str, Dict[str, Any]]:
         """Generate counterfactual analysis result."""
         summary = (
@@ -371,7 +437,9 @@ class StrategicScenarioAPI:
         }
 
     def _run_comparison_analysis(
-        self, question: str, variables: Dict[str, Any],
+        self,
+        question: str,
+        variables: Dict[str, Any],
     ) -> Tuple[str, Dict[str, Any]]:
         """Generate scenario comparison result."""
         summary = (
@@ -391,7 +459,9 @@ class StrategicScenarioAPI:
     # ----- sensitivity -----
 
     def sensitivity_analysis(
-        self, variable: str, range_pct: float = 30.0,
+        self,
+        variable: str,
+        range_pct: float = 30.0,
     ) -> SensitivityResult:
         """How sensitive is pipeline outcome to changes in this variable?"""
         self._sens_counter += 1
@@ -431,13 +501,19 @@ class StrategicScenarioAPI:
                 inflection = val
             prev_sign = sign
 
-            sweep.append({
-                "variable_value": round(val, 2),
-                "pct_change": pct,
-                "pipeline_impact_pct": round(impact, 2),
-            })
+            sweep.append(
+                {
+                    "variable_value": round(val, 2),
+                    "pct_change": pct,
+                    "pipeline_impact_pct": round(impact, 2),
+                }
+            )
 
-        elasticity = 0.08 if variable not in ("clearance_processing_weeks", "competitor_count") else -0.12
+        elasticity = (
+            0.08
+            if variable not in ("clearance_processing_weeks", "competitor_count")
+            else -0.12
+        )
 
         result = SensitivityResult(
             result_id=result_id,
@@ -465,7 +541,9 @@ class StrategicScenarioAPI:
         return self._analyses.get(analysis_id)
 
     def list_analyses(self, limit: int = 50) -> List[ScenarioAnalysis]:
-        analyses = sorted(self._analyses.values(), key=lambda a: a.created_at, reverse=True)
+        analyses = sorted(
+            self._analyses.values(), key=lambda a: a.created_at, reverse=True
+        )
         return analyses[:limit]
 
     # ----- stats -----

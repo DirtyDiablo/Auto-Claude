@@ -13,13 +13,15 @@ import sys
 sys.path.insert(0, str(Path(__file__).parent.parent.parent.parent))
 
 from Engine8_Knowledge.search.graph_retriever import (
-    GraphRetriever, GraphResult,
+    GraphRetriever,
+    GraphResult,
 )
 
 
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture
 def mock_mgr():
@@ -38,12 +40,17 @@ def retriever(mock_mgr):
 # TestEntityLookup
 # ---------------------------------------------------------------------------
 
+
 class TestEntityLookup:
     """Test entity lookup."""
 
     def test_lookup_by_name(self, retriever, mock_mgr):
         mock_mgr.run_query.return_value = [
-            {"name": "Alice Smith", "type": "Person", "props": {"title": "PM", "company": "Leidos"}},
+            {
+                "name": "Alice Smith",
+                "type": "Person",
+                "props": {"title": "PM", "company": "Leidos"},
+            },
         ]
         results = retriever.entity_lookup("Alice")
         assert len(results) == 1
@@ -71,6 +78,7 @@ class TestEntityLookup:
 # ---------------------------------------------------------------------------
 # TestExpandContext
 # ---------------------------------------------------------------------------
+
 
 class TestExpandContext:
     """Test context expansion."""
@@ -104,13 +112,18 @@ class TestExpandContext:
 # TestProgramContext
 # ---------------------------------------------------------------------------
 
+
 class TestProgramContext:
     """Test program context retrieval."""
 
     def test_program_found(self, retriever, mock_mgr):
         mock_mgr.run_single.return_value = {
-            "name": "DCGS", "acronym": "DCGS", "value": "$950M",
-            "agency": "Army", "primes": ["Northrop"], "managers": [],
+            "name": "DCGS",
+            "acronym": "DCGS",
+            "value": "$950M",
+            "agency": "Army",
+            "primes": ["Northrop"],
+            "managers": [],
             "job_count": 15,
         }
         result = retriever.program_context("DCGS")
@@ -127,14 +140,19 @@ class TestProgramContext:
 # TestContactContext
 # ---------------------------------------------------------------------------
 
+
 class TestContactContext:
     """Test contact context retrieval."""
 
     def test_contact_found(self, retriever, mock_mgr):
         mock_mgr.run_single.return_value = {
-            "name": "Alice", "title": "PM", "tier": 1,
-            "email": "a@b.com", "company": "Leidos",
-            "programs": ["DCGS"], "interaction_count": 5,
+            "name": "Alice",
+            "title": "PM",
+            "tier": 1,
+            "email": "a@b.com",
+            "company": "Leidos",
+            "programs": ["DCGS"],
+            "interaction_count": 5,
             "connections": [],
         }
         result = retriever.contact_context("Alice")
@@ -149,6 +167,7 @@ class TestContactContext:
 # ---------------------------------------------------------------------------
 # TestRelationshipContext
 # ---------------------------------------------------------------------------
+
 
 class TestRelationshipContext:
     """Test relationship path retrieval."""
@@ -173,6 +192,7 @@ class TestRelationshipContext:
 # TestRetrieve
 # ---------------------------------------------------------------------------
 
+
 class TestRetrieve:
     """Test main retrieve method."""
 
@@ -182,7 +202,14 @@ class TestRetrieve:
             # entity lookup
             [{"name": "Alice Smith", "type": "Person", "props": {"title": "PM"}}],
             # expand context
-            [{"connected_name": "Leidos", "connected_type": "Company", "rel_types": ["WORKS_AT"], "props": {}}],
+            [
+                {
+                    "connected_name": "Leidos",
+                    "connected_type": "Company",
+                    "rel_types": ["WORKS_AT"],
+                    "props": {},
+                }
+            ],
         ]
         results = retriever.retrieve("Tell me about Alice Smith")
         assert len(results) >= 1
@@ -199,6 +226,7 @@ class TestRetrieve:
 # ---------------------------------------------------------------------------
 # TestEntityExtraction
 # ---------------------------------------------------------------------------
+
 
 class TestEntityExtraction:
     """Test entity extraction heuristics."""
@@ -225,14 +253,18 @@ class TestEntityExtraction:
 # TestFormatting
 # ---------------------------------------------------------------------------
 
+
 class TestFormatting:
     """Test context text formatting."""
 
     def test_format_person(self, retriever):
         entity = {"name": "Alice", "type": "Person", "title": "PM", "company": "Leidos"}
-        context = {"relationships": [
-            {"target": "DCGS", "target_type": "Program", "relationship": "MANAGES"},
-        ], "connected": []}
+        context = {
+            "relationships": [
+                {"target": "DCGS", "target_type": "Program", "relationship": "MANAGES"},
+            ],
+            "connected": [],
+        }
         text = retriever._format_context_text(entity, context)
         assert "Alice" in text
         assert "PM" in text
@@ -250,13 +282,17 @@ class TestFormatting:
 # TestSingleton
 # ---------------------------------------------------------------------------
 
+
 class TestSingleton:
     """Test singleton factory."""
 
     def test_get_instance(self):
         import Engine8_Knowledge.search.graph_retriever as mod
+
         mod._instance = None
-        with patch("Engine8_Knowledge.search.graph_retriever.get_neo4j_manager") as mock_get:
+        with patch(
+            "Engine8_Knowledge.search.graph_retriever.get_neo4j_manager"
+        ) as mock_get:
             mock_get.return_value = MagicMock()
             r = mod.get_graph_retriever()
             assert r is not None
