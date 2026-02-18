@@ -31,12 +31,12 @@ def load_contacts(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: contacts_classified.json (primary - 7,339 contacts)
-    classified = BASE_DIR / "outputs" / "bd_dashboard" / "contacts_classified.json"
+    classified = BASE_DIR / "data" / "dashboard" / "contacts_classified.json"
     if classified.exists():
         loaded += _load_classified(cursor, classified, dedup, verbose)
 
     # Source 2: Prime_Contacts_Enriched/*.csv (26 files, enrichment)
-    contacts_dir = BASE_DIR / "Engine3_OrgChart" / "data" / "Prime_Contacts_Enriched"
+    contacts_dir = BASE_DIR / "data" / "enriched" / "contacts" / "by_company"
     if contacts_dir.exists():
         loaded += _load_prime_contacts(cursor, contacts_dir, dedup, verbose)
 

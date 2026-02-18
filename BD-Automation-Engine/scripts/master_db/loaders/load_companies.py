@@ -30,7 +30,7 @@ def load_companies(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: Contractors Database.csv (richest per-company data)
-    contractors_csv = BASE_DIR / "Engine2_ProgramMapping" / "data" / "Contractors Database.csv"
+    contractors_csv = BASE_DIR / "data" / "raw" / "notion_exports" / "contractors" / "Contractors_Database.csv"
     if contractors_csv.exists():
         loaded += _load_contractors_db(cursor, contractors_csv, dedup, verbose)
 

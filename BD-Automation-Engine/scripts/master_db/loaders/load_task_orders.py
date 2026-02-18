@@ -27,12 +27,12 @@ def load_task_orders(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: db2_subawards_tango.csv (5,531 rows - primary)
-    subawards = BASE_DIR / "data" / "from_data_scraper" / "db2_subawards_tango.csv"
+    subawards = BASE_DIR / "data" / "raw" / "federal_apis" / "subawards" / "db2_subawards_tango.csv"
     if subawards.exists():
         loaded += _load_subawards_tango(cursor, subawards, dedup, verbose)
 
     # Source 2: PHASE3_IDV_TASK_ORDERS.csv
-    phase3 = BASE_DIR / "data" / "from_data_scraper" / "PHASE3_IDV_TASK_ORDERS.csv"
+    phase3 = BASE_DIR / "data" / "enriched" / "intelligence" / "PHASE3_IDV_TASK_ORDERS.csv"
     if phase3.exists():
         loaded += _load_phase3_task_orders(cursor, phase3, dedup, verbose)
 

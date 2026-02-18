@@ -34,7 +34,7 @@ def load_contracts(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: phase1_tango_contracts.csv (highest quality, priority)
-    tango = BASE_DIR / "data" / "enriched" / "contracts" / "phase1_tango_contracts.csv"
+    tango = BASE_DIR / "data" / "enriched" / "intelligence" / "phase1_tango_contracts.csv"
     if tango.exists():
         loaded += _load_csv(cursor, tango, "tango", dedup, program_lookup, company_lookup, verbose)
 

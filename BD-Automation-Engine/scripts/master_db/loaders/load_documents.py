@@ -22,7 +22,7 @@ def load_documents(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: BD Briefings markdown files
-    briefings_dir = BASE_DIR / "outputs" / "BD_Briefings"
+    briefings_dir = BASE_DIR / "data" / "deliverables" / "briefings"
     if briefings_dir.exists():
         loaded += _load_briefings(cursor, briefings_dir, dedup, verbose)
 

@@ -32,7 +32,7 @@ def load_jobs(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: all_jobs_fully_enriched.json (primary)
-    enriched = BASE_DIR / "outputs" / "all_jobs_fully_enriched.json"
+    enriched = BASE_DIR / "data" / "archive" / "engine1_iterations" / "all_jobs_fully_enriched.json"
     if enriched.exists():
         loaded += _load_enriched_json(cursor, enriched, dedup, program_lookup, verbose)
 
