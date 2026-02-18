@@ -46,7 +46,7 @@ def load_intelligence(conn: sqlite3.Connection, verbose: bool = False) -> int:
     ]
 
     for filename, loader_fn in sources:
-        csv_path = BASE_DIR / "data" / "from_data_scraper" / filename
+        csv_path = BASE_DIR / "data" / "enriched" / "targets" / filename
         if csv_path.exists():
             loaded += loader_fn(cursor, csv_path, dedup, program_lookup, verbose)
 

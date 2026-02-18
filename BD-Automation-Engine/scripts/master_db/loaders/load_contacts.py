@@ -46,7 +46,7 @@ def load_contacts(conn: sqlite3.Connection, verbose: bool = False) -> int:
         _enrich_contact_scores(cursor, bullhorn_db, verbose)
 
     # Source 4: CONTACT_INTELLIGENCE_DETAILED.csv (enrichment)
-    intel_csv = BASE_DIR / "data" / "from_data_scraper" / "CONTACT_INTELLIGENCE_DETAILED.csv"
+    intel_csv = BASE_DIR / "data" / "enriched" / "intelligence" / "CONTACT_INTELLIGENCE_DETAILED.csv"
     if intel_csv.exists():
         _enrich_contact_intel(cursor, intel_csv, verbose)
 

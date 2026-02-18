@@ -369,7 +369,7 @@ if __name__ == "__main__":
     import json
 
     # Test with enriched jobs
-    with open("outputs/all_jobs_with_hiring_leaders.json", "r") as f:
+    with open("data/enriched/jobs/all_jobs_with_hiring_leaders.json", "r") as f:
         jobs = json.load(f)
 
     print(f"Finding PTS past performance for {len(jobs)} jobs...")

@@ -42,7 +42,7 @@ def load_jobs(conn: sqlite3.Connection, verbose: bool = False) -> int:
         loaded += _load_bullhorn_jobs(cursor, bullhorn_db, dedup, program_lookup, verbose)
 
     # Source 3: JOBS_ENRICHED.csv
-    jobs_csv = BASE_DIR / "data" / "from_data_scraper" / "JOBS_ENRICHED.csv"
+    jobs_csv = BASE_DIR / "data" / "enriched" / "jobs" / "JOBS_ENRICHED.csv"
     if jobs_csv.exists():
         _enrich_jobs_csv(cursor, jobs_csv, verbose)
 

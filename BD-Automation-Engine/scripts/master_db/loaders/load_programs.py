@@ -35,12 +35,12 @@ def load_programs(conn: sqlite3.Connection, verbose: bool = False) -> int:
         loaded += _load_master_enriched(cursor, master_csv, dedup, verbose)
 
     # Source 2: MASTER_PROGRAMS_ENRICHED (enrichment - more programs, lighter data)
-    programs_enriched = BASE_DIR / "data" / "from_data_scraper" / "MASTER_PROGRAMS_ENRICHED.csv"
+    programs_enriched = BASE_DIR / "data" / "enriched" / "programs" / "MASTER_PROGRAMS_ENRICHED.csv"
     if programs_enriched.exists():
         loaded += _load_programs_enriched(cursor, programs_enriched, dedup, verbose)
 
     # Source 3: PROGRAM_INTELLIGENCE_DETAILED (enrichment)
-    intel_csv = BASE_DIR / "data" / "from_data_scraper" / "PROGRAM_INTELLIGENCE_DETAILED.csv"
+    intel_csv = BASE_DIR / "data" / "enriched" / "intelligence" / "PROGRAM_INTELLIGENCE_DETAILED.csv"
     if intel_csv.exists():
         _enrich_from_intel(cursor, intel_csv, verbose)
 

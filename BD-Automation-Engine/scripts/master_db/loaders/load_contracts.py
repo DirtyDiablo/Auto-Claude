@@ -34,27 +34,27 @@ def load_contracts(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded = 0
 
     # Source 1: phase1_tango_contracts.csv (highest quality, priority)
-    tango = BASE_DIR / "data" / "from_data_scraper" / "phase1_tango_contracts.csv"
+    tango = BASE_DIR / "data" / "enriched" / "contracts" / "phase1_tango_contracts.csv"
     if tango.exists():
         loaded += _load_csv(cursor, tango, "tango", dedup, program_lookup, company_lookup, verbose)
 
     # Source 2: MASTER_CONTRACTS_COMBINED.csv (2,282 rows)
-    master = BASE_DIR / "data" / "from_data_scraper" / "MASTER_CONTRACTS_COMBINED.csv"
+    master = BASE_DIR / "data" / "enriched" / "contracts" / "MASTER_CONTRACTS_COMBINED.csv"
     if master.exists():
         loaded += _load_master_contracts(cursor, master, dedup, program_lookup, company_lookup, verbose)
 
     # Source 3: db1_dod_prime_contracts_100m.csv (1,932 rows)
-    dod = BASE_DIR / "data" / "from_data_scraper" / "db1_dod_prime_contracts_100m.csv"
+    dod = BASE_DIR / "data" / "raw" / "federal_apis" / "contracts" / "db1_dod_prime_contracts_100m.csv"
     if dod.exists():
         loaded += _load_dod_contracts(cursor, dod, dedup, program_lookup, company_lookup, verbose)
 
     # Source 4: FULL_PROGRAM_CONTRACTS.csv (1,510 rows)
-    full = BASE_DIR / "data" / "from_data_scraper" / "FULL_PROGRAM_CONTRACTS.csv"
+    full = BASE_DIR / "data" / "enriched" / "contracts" / "FULL_PROGRAM_CONTRACTS.csv"
     if full.exists():
         loaded += _load_program_contracts(cursor, full, dedup, program_lookup, company_lookup, verbose)
 
     # Source 5: PHASE3_ALL_PROGRAM_CONTRACTS.csv
-    phase3 = BASE_DIR / "data" / "from_data_scraper" / "PHASE3_ALL_PROGRAM_CONTRACTS.csv"
+    phase3 = BASE_DIR / "data" / "enriched" / "contracts" / "PHASE3_ALL_PROGRAM_CONTRACTS.csv"
     if phase3.exists():
         loaded += _load_phase3_contracts(cursor, phase3, dedup, program_lookup, company_lookup, verbose)
 

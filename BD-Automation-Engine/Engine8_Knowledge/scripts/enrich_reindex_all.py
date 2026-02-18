@@ -74,8 +74,10 @@ EMBED_BATCH_SIZE = 200
 UPSERT_BATCH_SIZE = 500
 BATCH_SLEEP = 3
 
-DS_DIR = PROJECT_ROOT / "data" / "from_data_scraper"
-N8N_OUTPUTS_DIR = PROJECT_ROOT / "data" / "from_n8n_builder" / "analytical_outputs"
+# Post-reorganization: data is now under data/enriched/, data/reference/, etc.
+# Keep backward-compat aliases for any remaining references
+DS_DIR = PROJECT_ROOT / "data" / "enriched" / "intelligence"
+N8N_OUTPUTS_DIR = PROJECT_ROOT / "data" / "reference" / "mcp_extracts"
 REGISTRY_PATH = (
     PROJECT_ROOT / "Engine8_Knowledge" / "data" / "bd_file_metadata_registry.json"
 )

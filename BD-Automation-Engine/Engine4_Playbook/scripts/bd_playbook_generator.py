@@ -837,7 +837,7 @@ def generate_playbook(
 
 def generate_playbooks_batch(
     jobs: List[Dict[str, Any]],
-    output_dir: str = "outputs/BD_Briefings",
+    output_dir: str = "data/deliverables/briefings",
     min_score: int = 80,
     include_contacts: bool = True,
     output_formats: List[str] = None,
@@ -927,7 +927,7 @@ if __name__ == "__main__":
         "--input", "-i", required=True, help="Input JSON file with enriched jobs"
     )
     parser.add_argument(
-        "--output", "-o", default="outputs/BD_Briefings", help="Output directory"
+        "--output", "-o", default="data/deliverables/briefings", help="Output directory"
     )
     parser.add_argument(
         "--min-score", type=int, default=80, help="Minimum BD score (default: 80)"

@@ -72,7 +72,7 @@ class DomainCorpusBuilder:
                 "name": "federal_programs",
                 "type": "csv",
                 "path": str(
-                    DATA_DIR / "from_data_scraper" / "Federal_Programs_Enriched.csv"
+                    DATA_DIR / "archive" / "federal_programs_versions" / "Federal_Programs_Enriched.csv"
                 ),
             },
             {
@@ -241,11 +241,8 @@ class DomainCorpusBuilder:
         """Extract program descriptions from Federal Programs CSV."""
         docs = []
         candidates = [
-            DATA_DIR / "from_data_scraper" / "Federal_Programs_Enriched.csv",
-            DATA_DIR
-            / "from_n8n_builder"
-            / "analytical_outputs"
-            / "Federal_Programs_Enriched.csv",
+            DATA_DIR / "archive" / "federal_programs_versions" / "Federal_Programs_Enriched.csv",
+            DATA_DIR / "enriched" / "programs" / "Federal_Programs_MASTER_V4.csv",
         ]
 
         path = None

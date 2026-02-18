@@ -31,13 +31,16 @@ nul
 *.sqlite
 *.sqlite3
 
-# Duplicate data directories (canonical locations are in Engine dirs)
-# Canonical qdrant: Engine8_Knowledge/data/qdrant/
-# These are stale copies:
+# Reorganized data hierarchy
+# Archive contains old versions and duplicates - no need to track
+/data/archive/
+# State files are runtime-generated
+/data/state/
+# Qdrant vector stores (binary, regenerable)
 /data/qdrant/
 /qdrant/
-# Canonical bullhorn: Engine7_BullhornETL/data/bullhorn_master.db
-# This is a stale copy:
+Engine8_Knowledge/data/qdrant/
+# Legacy stale copies (should be empty after migration)
 /data/bullhorn_master.db
 
 # Qdrant lock files

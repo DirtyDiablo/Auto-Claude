@@ -3084,7 +3084,7 @@ def _build_databases() -> dict:
         },
         "csv_sources": [
             {
-                "path": "engine_data/Engine2_ProgramMapping/Federal Programs MASTER V4.csv",
+                "path": "data/enriched/programs/Federal Programs MASTER V4.csv",
                 "columns": [
                     "Program Name",
                     "Acronym",
@@ -3098,7 +3098,7 @@ def _build_databases() -> dict:
                 ],
             },
             {
-                "path": "engine_data/Engine3_OrgChart/Contact_Search_List_MASTER.csv",
+                "path": "data/enriched/contacts/cross_cutting/Contact_Search_List_MASTER.csv",
                 "columns": [
                     "Job Source",
                     "Job Number",
@@ -3116,7 +3116,7 @@ def _build_databases() -> dict:
                 ],
             },
             {
-                "path": "engine_data/Engine3_OrgChart/Contacts_TEMPLATE.csv",
+                "path": "data/reference/templates/Contacts_TEMPLATE.csv",
                 "columns": [
                     "Name",
                     "Job Title",
@@ -3137,7 +3137,7 @@ def _build_databases() -> dict:
                 ],
             },
             {
-                "path": "engine_data/Engine2_ProgramMapping/Programs_KB_TEMPLATE.csv",
+                "path": "data/reference/templates/Programs_KB_TEMPLATE.csv",
                 "columns": [
                     "Program Name",
                     "Acronym",
@@ -3157,7 +3157,7 @@ def _build_databases() -> dict:
                 ],
             },
             {
-                "path": "engine_data/Engine1_Scraper/Jobs_Mapped_to_Programs_MASTER.csv",
+                "path": "data/enriched/jobs/Jobs_Mapped_to_Programs_MASTER.csv",
                 "columns": [
                     "Job Source",
                     "Job Number",

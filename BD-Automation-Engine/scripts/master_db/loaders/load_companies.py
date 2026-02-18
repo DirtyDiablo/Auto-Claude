@@ -40,17 +40,17 @@ def load_companies(conn: sqlite3.Connection, verbose: bool = False) -> int:
         loaded += _load_bullhorn_primes(cursor, bullhorn_db, dedup, verbose)
 
     # Source 3: MASTER_PRIMES_ENRICHED.csv (6,090 rows - largest source)
-    primes_enriched = BASE_DIR / "data" / "from_data_scraper" / "MASTER_PRIMES_ENRICHED.csv"
+    primes_enriched = BASE_DIR / "data" / "enriched" / "primes" / "MASTER_PRIMES_ENRICHED.csv"
     if primes_enriched.exists():
         loaded += _load_primes_enriched(cursor, primes_enriched, dedup, verbose)
 
     # Source 4: primes_usaspending_enriched.csv (enrichment)
-    usaspending = BASE_DIR / "data" / "from_data_scraper" / "primes_usaspending_enriched.csv"
+    usaspending = BASE_DIR / "data" / "enriched" / "primes" / "primes_usaspending_enriched.csv"
     if usaspending.exists():
         _enrich_usaspending(cursor, usaspending, verbose)
 
     # Source 5: COMBINED_INTELLIGENCE_REPORT.csv (relationship tier enrichment)
-    intel_report = BASE_DIR / "data" / "from_data_scraper" / "COMBINED_INTELLIGENCE_REPORT.csv"
+    intel_report = BASE_DIR / "data" / "enriched" / "intelligence" / "COMBINED_INTELLIGENCE_REPORT.csv"
     if intel_report.exists():
         _enrich_intel_report(cursor, intel_report, verbose)
 

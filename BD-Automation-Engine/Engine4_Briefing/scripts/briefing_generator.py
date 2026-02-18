@@ -129,7 +129,7 @@ def generate_briefing(job, include_contacts=True):
 
 
 def generate_briefings_batch(
-    jobs, output_dir="outputs/BD_Briefings", min_score=0, include_contacts=True
+    jobs, output_dir="data/deliverables/briefings", min_score=0, include_contacts=True
 ):
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     results = []

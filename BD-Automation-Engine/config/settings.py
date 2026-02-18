@@ -156,7 +156,7 @@ class Settings(BaseSettings):
         default="INFO", description="Logging level (DEBUG, INFO, WARNING, ERROR)"
     )
     log_file: str = Field(
-        default="outputs/Logs/bd_automation.log", description="Log file path"
+        default="data/state/logs/bd_automation.log", description="Log file path"
     )
 
     # ===========================================

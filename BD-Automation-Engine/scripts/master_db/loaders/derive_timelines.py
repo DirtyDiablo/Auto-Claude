@@ -31,12 +31,12 @@ def derive_timelines(conn: sqlite3.Connection, verbose: bool = False) -> int:
     loaded += _from_contracts(cursor, dedup, verbose)
 
     # From PHASE4_RECOMPETE_PIPELINE.csv
-    recompete = BASE_DIR / "data" / "from_data_scraper" / "PHASE4_RECOMPETE_PIPELINE.csv"
+    recompete = BASE_DIR / "data" / "enriched" / "intelligence" / "PHASE4_RECOMPETE_PIPELINE.csv"
     if recompete.exists():
         loaded += _from_recompete_pipeline(cursor, recompete, dedup, verbose)
 
     # From PHASE2_RECOMPETE_OPPORTUNITIES.csv
-    recompete2 = BASE_DIR / "data" / "from_data_scraper" / "PHASE2_RECOMPETE_OPPORTUNITIES.csv"
+    recompete2 = BASE_DIR / "data" / "enriched" / "intelligence" / "PHASE2_RECOMPETE_OPPORTUNITIES.csv"
     if recompete2.exists():
         loaded += _from_recompete_opportunities(cursor, recompete2, dedup, verbose)
 

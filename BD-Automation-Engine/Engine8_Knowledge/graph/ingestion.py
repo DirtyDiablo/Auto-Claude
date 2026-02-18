@@ -26,10 +26,10 @@ MASTER_NOTES = (
     PROJECT_ROOT / "Engine7_BullhornETL" / "colton_scurry_analysis" / "master_notes.csv"
 )
 CONTACTS_CSV = (
-    PROJECT_ROOT / "Engine7_BullhornETL" / "colton_scurry_analysis" / "contacts.csv"
+    PROJECT_ROOT / "data" / "bullhorn_analysis" / "source_csvs" / "contacts.csv"
 )
 FEDERAL_PROGRAMS = (
-    PROJECT_ROOT / "data" / "from_data_scraper" / "Federal_Programs_Enriched.csv"
+    PROJECT_ROOT / "data" / "archive" / "federal_programs_versions" / "Federal_Programs_Enriched.csv"
 )
 
 BATCH_SIZE = 500
