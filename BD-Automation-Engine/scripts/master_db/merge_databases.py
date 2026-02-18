@@ -241,7 +241,7 @@ def merge_databases(
                 total_records += count
             except sqlite3.OperationalError:
                 pass
-        print(f"  {'─'*25} {'─'*10}")
+        print(f"  {'-'*25} {'-'*10}")
         print(f"  {'TOTAL':<25} {total_records:>10,}")
 
     target_conn.close()
