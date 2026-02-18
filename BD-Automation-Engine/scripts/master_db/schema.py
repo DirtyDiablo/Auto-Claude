@@ -118,6 +118,9 @@ def create_database(db_path: Path = None) -> Path:
             roles_needed TEXT,
             parent_organization TEXT,
             source_files TEXT,
+            domain_tags TEXT,
+            data_quality_score REAL,
+            community_id INTEGER,
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now'))
         )
@@ -169,6 +172,8 @@ def create_database(db_path: Path = None) -> Path:
             first_seen TEXT,
             last_seen TEXT,
             source_files TEXT,
+            data_quality_score REAL,
+            community_id INTEGER,
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now'))
         )
@@ -294,6 +299,8 @@ def create_database(db_path: Path = None) -> Path:
             matched_program_id TEXT,
             matched_jobs TEXT,
             source_files TEXT,
+            data_quality_score REAL,
+            community_id INTEGER,
             created_at TEXT DEFAULT (datetime('now')),
             updated_at TEXT DEFAULT (datetime('now'))
         )
@@ -401,6 +408,9 @@ def create_database(db_path: Path = None) -> Path:
             primes_mentioned TEXT,
             locations TEXT,
             source_file TEXT,
+            sentiment_score REAL,
+            has_hiring_signal INTEGER DEFAULT 0,
+            priority TEXT,
             created_at TEXT DEFAULT (datetime('now'))
         )
     """)
@@ -445,6 +455,7 @@ def create_database(db_path: Path = None) -> Path:
             entity_properties TEXT,
             source TEXT,
             source_file TEXT,
+            data_quality_score REAL,
             created_at TEXT DEFAULT (datetime('now'))
         )
     """)

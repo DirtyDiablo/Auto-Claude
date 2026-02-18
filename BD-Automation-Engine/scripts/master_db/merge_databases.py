@@ -274,6 +274,17 @@ def main():
         verbose=args.verbose,
     )
 
+    # Post-merge hook: run incremental update to re-index changed records
+    if args.verbose:
+        print("\nRunning post-merge incremental update...")
+    try:
+        from scripts.intelligent_db.incremental_update import run as incremental_update
+        incremental_update(Path(args.output))
+    except ImportError:
+        print("  Note: intelligent_db not available, skipping post-merge enrichment")
+    except Exception as e:
+        print(f"  Post-merge enrichment warning: {e}")
+
 
 if __name__ == "__main__":
     main()

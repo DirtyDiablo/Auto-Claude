@@ -103,6 +103,7 @@ def _score_programs(cursor, verbose: bool) -> int:
             recompete_score * 0.20 +
             min(engagement, 100) * 0.10
         )
+        composite = min(composite, 100.0)
 
         # Determine tier
         if composite >= 70:
