@@ -239,7 +239,15 @@ function useG6Graph(
         concentric: { type: 'concentric', preventOverlap: true, nodeSpacing: 15, sortBy: 'degree' },
       };
 
-      const g6Nodes = filteredData.nodes.map(n => ({
+      // Deduplicate nodes by ID (API may return duplicates from unified DB)
+      const seenIds = new Set<string>();
+      const uniqueNodes = filteredData.nodes.filter(n => {
+        if (!n.id || seenIds.has(n.id)) return false;
+        seenIds.add(n.id);
+        return true;
+      });
+
+      const g6Nodes = uniqueNodes.map(n => ({
         id: n.id,
         data: { ...n },
         style: {
@@ -255,19 +263,21 @@ function useG6Graph(
         },
       }));
 
-      const g6Edges = filteredData.edges.map((e, i) => {
-        const isCompete = e.type === 'COMPETES_WITH';
-        return {
-          id: `edge-${i}`,
-          source: e.source,
-          target: e.target,
-          style: {
-            stroke: isCompete ? '#f97316' : '#cbd5e1',
-            lineWidth: isCompete ? Math.max(1, (e.shared_programs || 1) * 0.8) : 0.8,
-            opacity: isCompete ? 0.8 : 0.5,
-          },
-        };
-      });
+      const g6Edges = filteredData.edges
+        .filter(e => seenIds.has(e.source) && seenIds.has(e.target))
+        .map((e, i) => {
+          const isCompete = e.type === 'COMPETES_WITH';
+          return {
+            id: `edge-${i}`,
+            source: e.source,
+            target: e.target,
+            style: {
+              stroke: isCompete ? '#f97316' : '#cbd5e1',
+              lineWidth: isCompete ? Math.max(1, (e.shared_programs || 1) * 0.8) : 0.8,
+              opacity: isCompete ? 0.8 : 0.5,
+            },
+          };
+        });
 
       const graph = new G6.Graph({
         container,
