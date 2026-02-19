@@ -21,6 +21,9 @@ import {
   type BDInsight,
   type CacheStats,
   type GraphStats,
+  type CompetitionGraphData,
+  type DomainTagSummary,
+  type QualityStats,
 } from '../services/hubApi';
 
 // =============================================================================
@@ -543,6 +546,99 @@ export function useHubConnection(): {
   return { isConnected, isChecking, checkConnection };
 }
 
+// =============================================================================
+// HOOK: useCompetitionGraph (V6)
+// =============================================================================
+
+export function useCompetitionGraph(): UseHubMutationState<CompetitionGraphData, [programFilter?: string, limit?: number]> {
+  const [data, setData] = useState<CompetitionGraphData | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const execute = useCallback(async (programFilter?: string, limit?: number) => {
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await hubApiClient.getCompetitionGraph(programFilter, limit);
+      setData(result);
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to fetch competition graph';
+      setError(message);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const reset = useCallback(() => {
+    setData(null);
+    setError(null);
+  }, []);
+
+  return { data, loading, error, execute, reset };
+}
+
+// =============================================================================
+// HOOK: useDomainTags (V6)
+// =============================================================================
+
+export function useDomainTags(): UseHubQueryState<DomainTagSummary> {
+  const [data, setData] = useState<DomainTagSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchTags = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const tags = await hubApiClient.getDomainTagSummary();
+      setData(tags);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch domain tags');
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchTags();
+  }, [fetchTags]);
+
+  return { data, loading, error, refetch: fetchTags };
+}
+
+// =============================================================================
+// HOOK: useQualityStats (V6)
+// =============================================================================
+
+export function useQualityStats(): UseHubQueryState<QualityStats> {
+  const [data, setData] = useState<QualityStats | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchStats = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const stats = await hubApiClient.getQualityStats();
+      setData(stats);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to fetch quality stats');
+      setData(null);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
+
+  return { data, loading, error, refetch: fetchStats };
+}
+
 export default {
   useHubHealth,
   useHubStats,
@@ -558,4 +654,7 @@ export default {
   useEntityFacts,
   useBDInsights,
   useHubConnection,
+  useCompetitionGraph,
+  useDomainTags,
+  useQualityStats,
 };

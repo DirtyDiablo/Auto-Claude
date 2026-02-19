@@ -8,6 +8,7 @@ import sys
 import json
 import asyncio
 import logging
+import sqlite3
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
@@ -3979,32 +3980,106 @@ async def ai_chat_stream(request: Request):
 
 
 # =========================================
-# GRAPH DATA ENDPOINT
+# GRAPH DATA ENDPOINT (V6 — enriched)
 # =========================================
 
 
+def _get_unified_db():
+    """Get a connection to the unified federal contracts DB."""
+    db_path = os.path.join(
+        os.path.dirname(os.path.dirname(__file__)), "data", "unified_federal_contracts.db"
+    )
+    if not os.path.exists(db_path):
+        return None
+    conn = sqlite3.connect(db_path)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
 @app.get("/graph/data")
-async def get_graph_data(limit: int = 500):
-    """Return graph-ready nodes and edges for the frontend Graph Explorer."""
+async def get_graph_data(
+    limit: int = 800,
+    node_types: Optional[str] = None,
+    domain_filter: Optional[str] = None,
+    min_quality: Optional[float] = None,
+    include_quality: bool = False,
+    include_domain_tags: bool = False,
+):
+    """Return graph-ready nodes and edges for the frontend Graph Explorer (V6).
+
+    Supports 4 node types: contact, program, contractor, job.
+    Optionally includes data_quality_score and domain_tags from the intelligent DB.
+    """
     if not store:
         raise HTTPException(status_code=503, detail="Knowledge store not initialized")
+
+    requested_types = set()
+    if node_types:
+        requested_types = set(t.strip() for t in node_types.split(","))
+    else:
+        requested_types = {"contact", "program", "contractor", "job"}
+
+    domain_filters = set()
+    if domain_filter:
+        domain_filters = set(t.strip() for t in domain_filter.split(","))
 
     nodes = []
     edges = []
     program_ids = set()
+    node_id_set = set()
+
+    # Load quality scores and domain tags from unified DB if requested
+    quality_map = {}  # name -> score
+    domain_map = {}   # program_name -> tags list
+    if include_quality or include_domain_tags or min_quality is not None or domain_filters:
+        udb = _get_unified_db()
+        if udb:
+            try:
+                if include_quality or min_quality is not None:
+                    for table in ["contacts", "programs", "companies"]:
+                        try:
+                            cursor = udb.execute(
+                                f"SELECT full_name, data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
+                                if table == "contacts" else
+                                f"SELECT name, data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
+                            )
+                            for row in cursor:
+                                quality_map[row[0]] = row[1]
+                        except Exception:
+                            pass
+                if include_domain_tags or domain_filters:
+                    try:
+                        cursor = udb.execute(
+                            "SELECT name, domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
+                        )
+                        for row in cursor:
+                            try:
+                                tags = json.loads(row[1]) if isinstance(row[1], str) else row[1]
+                                domain_map[row[0]] = tags
+                            except (json.JSONDecodeError, TypeError):
+                                pass
+                    except Exception:
+                        pass
+            finally:
+                udb.close()
 
     try:
-        # Get contacts
-        contacts, _ = store.client.scroll(
-            collection_name="contacts", limit=limit, with_payload=True
-        )
+        # ── Contacts ──
+        if "contact" in requested_types:
+            contacts, _ = store.client.scroll(
+                collection_name="contacts", limit=limit, with_payload=True
+            )
+            for c in contacts:
+                p = c.payload or {}
+                name = p.get("\ufeffContact Name", p.get("Contact Name", p.get("name", "")))
 
-        for c in contacts:
-            p = c.payload or {}
-            name = p.get("\ufeffContact Name", p.get("Contact Name", p.get("name", "")))
-            node_id = f"contact_{c.id}"
-            nodes.append(
-                {
+                # Quality filter
+                q_score = quality_map.get(name)
+                if min_quality is not None and (q_score is None or q_score < min_quality):
+                    continue
+
+                node_id = f"contact_{c.id}"
+                node = {
                     "id": node_id,
                     "type": "contact",
                     "name": name,
@@ -4018,28 +4093,41 @@ async def get_graph_data(limit: int = 500):
                     "phone": p.get("phone", ""),
                     "linkedin": p.get("linkedin", ""),
                 }
+                if include_quality and q_score is not None:
+                    node["data_quality_score"] = round(q_score, 1)
+                nodes.append(node)
+                node_id_set.add(node_id)
+
+                # Edges to programs
+                programs_str = p.get("Programs", p.get("program", ""))
+                if programs_str:
+                    for prog in str(programs_str).split(","):
+                        prog = prog.strip()
+                        if prog:
+                            prog_id = f"program_{prog}"
+                            program_ids.add(prog)
+                            edges.append({"source": node_id, "target": prog_id, "type": "WORKS_ON"})
+
+        # ── Programs ──
+        if "program" in requested_types:
+            programs, _ = store.client.scroll(
+                collection_name="programs", limit=200, with_payload=True
             )
-            # Create edges to programs
-            programs_str = p.get("Programs", p.get("program", ""))
-            if programs_str:
-                for prog in str(programs_str).split(","):
-                    prog = prog.strip()
-                    if prog:
-                        prog_id = f"program_{prog}"
-                        program_ids.add(prog)
-                        edges.append({"source": node_id, "target": prog_id})
+            for pr in programs:
+                p = pr.payload or {}
+                name = p.get("Program Name", p.get("name", ""))
+                prime = p.get("Prime Contractor", p.get("prime", ""))
+                tags = domain_map.get(name, [])
 
-        # Get programs
-        programs, _ = store.client.scroll(
-            collection_name="programs", limit=100, with_payload=True
-        )
+                # Domain filter
+                if domain_filters and not any(t in domain_filters for t in tags):
+                    continue
 
-        for pr in programs:
-            p = pr.payload or {}
-            name = p.get("Program Name", p.get("name", ""))
-            prime = p.get("Prime Contractor", p.get("prime", ""))
-            nodes.append(
-                {
+                q_score = quality_map.get(name)
+                if min_quality is not None and (q_score is None or q_score < min_quality):
+                    continue
+
+                node = {
                     "id": f"program_{name}",
                     "type": "program",
                     "name": name,
@@ -4048,14 +4136,20 @@ async def get_graph_data(limit: int = 500):
                     "agency": p.get("Agency Owner", p.get("agency", "")),
                     "acronym": p.get("Acronym", ""),
                 }
-            )
-            # Remove from missing set
-            program_ids.discard(name)
+                if include_quality and q_score is not None:
+                    node["data_quality_score"] = round(q_score, 1)
+                if include_domain_tags and tags:
+                    node["domain_tags"] = tags
+                nodes.append(node)
+                node_id_set.add(f"program_{name}")
+                program_ids.discard(name)
 
-        # Create placeholder program nodes for any referenced but not in collection
-        for prog_name in program_ids:
-            nodes.append(
-                {
+            # Placeholder program nodes for referenced but not in collection
+            for prog_name in program_ids:
+                tags = domain_map.get(prog_name, [])
+                if domain_filters and not any(t in domain_filters for t in tags):
+                    continue
+                node = {
                     "id": f"program_{prog_name}",
                     "type": "program",
                     "name": prog_name,
@@ -4064,7 +4158,69 @@ async def get_graph_data(limit: int = 500):
                     "agency": "",
                     "acronym": "",
                 }
-            )
+                if include_domain_tags and tags:
+                    node["domain_tags"] = tags
+                nodes.append(node)
+                node_id_set.add(f"program_{prog_name}")
+
+        # ── Contractors & Jobs from BD Knowledge Graph ──
+        bg = get_bd_knowledge_graph()
+        if bg:
+            if "contractor" in requested_types:
+                contractor_entities = bg.get_entities_by_type("Contractor")
+                for e in contractor_entities[:min(limit, 300)]:
+                    nid = f"contractor_{e.id}"
+                    q_score = quality_map.get(e.name)
+                    if min_quality is not None and (q_score is None or q_score < min_quality):
+                        continue
+                    node = {
+                        "id": nid,
+                        "type": "contractor",
+                        "name": e.name,
+                        "headquarters": e.properties.get("headquarters", ""),
+                        "company_type": e.properties.get("type", ""),
+                    }
+                    if include_quality and q_score is not None:
+                        node["data_quality_score"] = round(q_score, 1)
+                    nodes.append(node)
+                    node_id_set.add(nid)
+
+            if "job" in requested_types:
+                job_entities = bg.get_entities_by_type("Job")
+                for e in job_entities[:min(limit, 200)]:
+                    nid = f"job_{e.id}"
+                    node = {
+                        "id": nid,
+                        "type": "job",
+                        "name": e.name,
+                        "location": e.properties.get("location", ""),
+                        "clearance": e.properties.get("clearance", ""),
+                        "bd_score": e.properties.get("bd_score"),
+                        "company": e.properties.get("company", ""),
+                    }
+                    nodes.append(node)
+                    node_id_set.add(nid)
+
+            # Add graph-based edges (PRIMES_ON, COMPETES_WITH, HAS_OPENING, etc.)
+            for rel_type in ["PRIMES_ON", "COMPETES_WITH", "HAS_OPENING", "POSTED_BY", "SUBS_TO"]:
+                try:
+                    cursor = bg.conn.execute(
+                        "SELECT from_entity_id, to_entity_id FROM relationships WHERE type = ?",
+                        (rel_type,)
+                    )
+                    for row in cursor:
+                        from_e = bg._entity_cache.get(row[0])
+                        to_e = bg._entity_cache.get(row[1])
+                        if not from_e or not to_e:
+                            continue
+                        prefix_from = from_e.type.lower() if from_e.type.lower() in ("contractor", "program", "contact", "job") else "entity"
+                        prefix_to = to_e.type.lower() if to_e.type.lower() in ("contractor", "program", "contact", "job") else "entity"
+                        src = f"{prefix_from}_{from_e.id}"
+                        tgt = f"{prefix_to}_{to_e.id}"
+                        if src in node_id_set and tgt in node_id_set:
+                            edges.append({"source": src, "target": tgt, "type": rel_type})
+                except Exception:
+                    pass
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error building graph: {str(e)}")
@@ -4075,6 +4231,227 @@ async def get_graph_data(limit: int = 500):
         "total_nodes": len(nodes),
         "total_edges": len(edges),
     }
+
+
+# =========================================
+# COMPETITION GRAPH ENDPOINT (V6)
+# =========================================
+
+
+@app.get("/graph/competition")
+async def get_competition_graph(
+    program_filter: Optional[str] = None,
+    limit: int = 200,
+):
+    """Competition network: contractors competing on shared programs."""
+    bg = get_bd_knowledge_graph()
+    if not bg:
+        raise HTTPException(status_code=503, detail="Knowledge graph not available")
+
+    nodes = []
+    edges = []
+    contractor_nodes = {}  # id -> node dict
+    program_nodes = {}     # id -> node dict
+
+    try:
+        # Get all PRIMES_ON relationships to build the competition network
+        cursor = bg.conn.execute(
+            "SELECT from_entity_id, to_entity_id FROM relationships WHERE type = 'PRIMES_ON'"
+        )
+        # Map: program_id -> [contractor_ids]
+        program_contractors = {}
+        for row in cursor:
+            contractor_id, program_id = row[0], row[1]
+            program_contractors.setdefault(program_id, []).append(contractor_id)
+
+        # Get domain tags from unified DB for program filtering
+        domain_map = {}
+        udb = _get_unified_db()
+        if udb:
+            try:
+                cur = udb.execute(
+                    "SELECT name, domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
+                )
+                for r in cur:
+                    try:
+                        domain_map[r[0]] = json.loads(r[1]) if isinstance(r[1], str) else r[1]
+                    except (json.JSONDecodeError, TypeError):
+                        pass
+            finally:
+                udb.close()
+
+        # Build nodes and COMPETES_WITH edges
+        competition_pairs = {}  # (c1, c2) -> [shared_program_names]
+
+        for prog_id, c_ids in program_contractors.items():
+            prog_entity = bg._entity_cache.get(prog_id)
+            if not prog_entity:
+                continue
+
+            prog_name = prog_entity.name
+            prog_tags = domain_map.get(prog_name, [])
+
+            # Apply program filter
+            if program_filter and program_filter.lower() not in prog_name.lower():
+                continue
+
+            # Add program node
+            if prog_id not in program_nodes:
+                program_nodes[prog_id] = {
+                    "id": f"program_{prog_id}",
+                    "type": "program",
+                    "name": prog_name,
+                    "domain_tags": prog_tags,
+                    "agency": prog_entity.properties.get("agency", ""),
+                }
+
+            # Add contractor nodes and PRIMES_ON edges
+            for c_id in c_ids:
+                c_entity = bg._entity_cache.get(c_id)
+                if not c_entity:
+                    continue
+                if c_id not in contractor_nodes:
+                    contractor_nodes[c_id] = {
+                        "id": f"contractor_{c_id}",
+                        "type": "contractor",
+                        "name": c_entity.name,
+                        "program_count": 0,
+                    }
+                contractor_nodes[c_id]["program_count"] += 1
+
+                edges.append({
+                    "source": f"contractor_{c_id}",
+                    "target": f"program_{prog_id}",
+                    "type": "PRIMES_ON",
+                })
+
+            # Build competition pairs
+            for i, c1 in enumerate(c_ids):
+                for c2 in c_ids[i+1:]:
+                    pair = tuple(sorted([c1, c2]))
+                    competition_pairs.setdefault(pair, []).append(prog_name)
+
+        # Add COMPETES_WITH edges
+        for (c1, c2), shared_progs in competition_pairs.items():
+            if c1 in contractor_nodes and c2 in contractor_nodes:
+                edges.append({
+                    "source": f"contractor_{c1}",
+                    "target": f"contractor_{c2}",
+                    "type": "COMPETES_WITH",
+                    "shared_programs": len(shared_progs),
+                    "programs": shared_progs[:5],  # cap for payload size
+                })
+
+        nodes = list(contractor_nodes.values())[:limit] + list(program_nodes.values())
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error building competition graph: {str(e)}")
+
+    return {
+        "nodes": nodes,
+        "edges": edges,
+        "total_nodes": len(nodes),
+        "total_edges": len(edges),
+    }
+
+
+# =========================================
+# DOMAIN TAGS ENDPOINT (V6)
+# =========================================
+
+
+@app.get("/graph/domain-tags")
+async def get_domain_tag_summary():
+    """Return all available domain tags with program counts."""
+    udb = _get_unified_db()
+    if not udb:
+        return {"tags": []}
+
+    tag_counts = {}
+    try:
+        cursor = udb.execute(
+            "SELECT domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
+        )
+        for row in cursor:
+            try:
+                tags = json.loads(row[0]) if isinstance(row[0], str) else row[0]
+                for tag in (tags or []):
+                    tag_counts[tag] = tag_counts.get(tag, 0) + 1
+            except (json.JSONDecodeError, TypeError):
+                pass
+    finally:
+        udb.close()
+
+    sorted_tags = sorted(tag_counts.items(), key=lambda x: -x[1])
+    return {"tags": [{"tag": t, "count": c} for t, c in sorted_tags]}
+
+
+# =========================================
+# QUALITY STATS ENDPOINT (V6)
+# =========================================
+
+
+@app.get("/graph/quality-stats")
+async def get_quality_stats():
+    """Data quality score distribution across entity types."""
+    udb = _get_unified_db()
+    if not udb:
+        raise HTTPException(status_code=503, detail="Unified DB not available")
+
+    result = {
+        "overall": {"mean": 0, "median": 0, "p25": 0, "p75": 0, "total": 0},
+        "by_type": {},
+        "buckets": [],
+    }
+
+    try:
+        all_scores = []
+        for table, name_col in [("contacts", "full_name"), ("programs", "name"), ("companies", "name")]:
+            entity_type = table.rstrip("s").capitalize()  # contacts -> Contact
+            try:
+                cursor = udb.execute(
+                    f"SELECT data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
+                )
+                scores = [row[0] for row in cursor]
+                if scores:
+                    scores.sort()
+                    n = len(scores)
+                    result["by_type"][entity_type] = {
+                        "mean": round(sum(scores) / n, 1),
+                        "median": round(scores[n // 2], 1),
+                        "count": n,
+                        "p25": round(scores[n // 4], 1),
+                        "p75": round(scores[3 * n // 4], 1),
+                    }
+                    all_scores.extend(scores)
+            except Exception:
+                pass
+
+        if all_scores:
+            all_scores.sort()
+            n = len(all_scores)
+            result["overall"] = {
+                "mean": round(sum(all_scores) / n, 1),
+                "median": round(all_scores[n // 2], 1),
+                "p25": round(all_scores[n // 4], 1),
+                "p75": round(all_scores[3 * n // 4], 1),
+                "total": n,
+            }
+
+            # Build histogram buckets
+            bucket_ranges = [(0, 20), (20, 40), (40, 60), (60, 80), (80, 100)]
+            for low, high in bucket_ranges:
+                count = sum(1 for s in all_scores if low <= s < (high + 1 if high == 100 else high))
+                result["buckets"].append({
+                    "range": f"{low}-{high}",
+                    "count": count,
+                    "pct": round(count / n * 100, 1) if n > 0 else 0,
+                })
+
+    finally:
+        udb.close()
+
+    return result
 
 
 # =========================================

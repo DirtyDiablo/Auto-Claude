@@ -249,6 +249,85 @@ export interface GraphStats {
 
 export type SearchStrategy = 'auto' | 'semantic' | 'keyword' | 'hybrid' | 'lightrag';
 
+// V6: Enriched graph types
+export interface EnrichedGraphNode {
+  id: string;
+  type: 'contact' | 'program' | 'contractor' | 'job';
+  name: string;
+  // contact fields
+  title?: string;
+  tier?: string;
+  priority?: string;
+  program?: string;
+  company?: string;
+  location?: string;
+  email?: string;
+  phone?: string;
+  linkedin?: string;
+  // program fields
+  prime?: string;
+  value?: string;
+  agency?: string;
+  acronym?: string;
+  // contractor fields
+  headquarters?: string;
+  company_type?: string;
+  program_count?: number;
+  // job fields
+  bd_score?: number;
+  clearance?: string;
+  // intelligent DB fields
+  data_quality_score?: number;
+  domain_tags?: string[];
+}
+
+export interface EnrichedGraphEdge {
+  source: string;
+  target: string;
+  type?: string;
+  shared_programs?: number;
+  programs?: string[];
+}
+
+export interface EnrichedGraphData {
+  nodes: EnrichedGraphNode[];
+  edges: EnrichedGraphEdge[];
+  total_nodes: number;
+  total_edges: number;
+}
+
+export interface CompetitionGraphData {
+  nodes: Array<{
+    id: string;
+    type: 'contractor' | 'program';
+    name: string;
+    program_count?: number;
+    domain_tags?: string[];
+    agency?: string;
+    headquarters?: string;
+    company_type?: string;
+  }>;
+  edges: Array<{
+    source: string;
+    target: string;
+    type: 'COMPETES_WITH' | 'PRIMES_ON';
+    shared_programs?: number;
+    programs?: string[];
+  }>;
+  total_nodes: number;
+  total_edges: number;
+}
+
+export interface DomainTagSummary {
+  tags: Array<{ tag: string; count: number }>;
+}
+
+export interface QualityStats {
+  overall: { mean: number; median: number; p25: number; p75: number; total: number };
+  by_type: Record<string, { mean: number; median: number; count: number; p25: number; p75: number }>;
+  buckets: Array<{ range: string; count: number; pct: number }>;
+}
+
 // =============================================================================
 // HUB API CLIENT CLASS
 // =============================================================================
@@ -481,6 +560,39 @@ export class HubApiClient {
   async queryGraph(query: string): Promise<{ nodes: unknown[]; edges: unknown[] }> {
     const params = this.buildQueryString({ q: query });
     return this.fetch<{ nodes: unknown[]; edges: unknown[] }>(`/bdgraph/query${params}`);
+  }
+
+  // V6: Enriched graph data with domain tags, quality scores, 4 node types
+  async getEnrichedGraphData(params?: {
+    limit?: number;
+    nodeTypes?: string;
+    domainFilter?: string;
+    minQuality?: number;
+    includeQuality?: boolean;
+    includeDomainTags?: boolean;
+  }): Promise<EnrichedGraphData> {
+    const p = this.buildQueryString({
+      limit: params?.limit,
+      node_types: params?.nodeTypes,
+      domain_filter: params?.domainFilter,
+      min_quality: params?.minQuality,
+      include_quality: params?.includeQuality,
+      include_domain_tags: params?.includeDomainTags,
+    });
+    return this.fetch<EnrichedGraphData>(`/graph/data${p}`);
+  }
+
+  async getCompetitionGraph(programFilter?: string, limit?: number): Promise<CompetitionGraphData> {
+    const p = this.buildQueryString({ program_filter: programFilter, limit });
+    return this.fetch<CompetitionGraphData>(`/graph/competition${p}`);
+  }
+
+  async getDomainTagSummary(): Promise<DomainTagSummary> {
+    return this.fetch<DomainTagSummary>('/graph/domain-tags');
+  }
+
+  async getQualityStats(): Promise<QualityStats> {
+    return this.fetch<QualityStats>('/graph/quality-stats');
   }
 
   async getGraphStats(): Promise<GraphStats> {

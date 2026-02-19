@@ -412,7 +412,12 @@ function App() {
       case 'smartquery':
         return <SmartQuery loading={loading} />;
       case 'knowledgegraph':
-        return <KnowledgeGraph />;
+        return (
+          <RelationshipExplorer
+            onNavigateToContact={handleNavigateToContactDetail}
+            onNavigateToProgram={handleNavigateToProgramDetail}
+          />
+        );
       case 'agents':
         return <AgentPanel />;
       case 'memory':
