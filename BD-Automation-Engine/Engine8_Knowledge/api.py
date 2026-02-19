@@ -14,8 +14,13 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
 
-# Add parent to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# Add parent to path for imports and fix platform module shadowing
+_project_root = str(Path(__file__).parent.parent)
+_script_dir = str(Path(__file__).parent)
+sys.path.insert(0, _project_root)
+# Remove script dir from path to prevent Engine8_Knowledge/platform/ shadowing stdlib
+if _script_dir in sys.path:
+    sys.path.remove(_script_dir)
 
 from dotenv import load_dotenv
 
@@ -4036,12 +4041,12 @@ async def get_graph_data(
         if udb:
             try:
                 if include_quality or min_quality is not None:
+                    name_col_map = {"contacts": "full_name", "programs": "program_name", "companies": "name"}
                     for table in ["contacts", "programs", "companies"]:
                         try:
+                            name_col = name_col_map[table]
                             cursor = udb.execute(
-                                f"SELECT full_name, data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
-                                if table == "contacts" else
-                                f"SELECT name, data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
+                                f"SELECT {name_col}, data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
                             )
                             for row in cursor:
                                 quality_map[row[0]] = row[1]
@@ -4050,7 +4055,7 @@ async def get_graph_data(
                 if include_domain_tags or domain_filters:
                     try:
                         cursor = udb.execute(
-                            "SELECT name, domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
+                            "SELECT program_name, domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
                         )
                         for row in cursor:
                             try:
@@ -4270,7 +4275,7 @@ async def get_competition_graph(
         if udb:
             try:
                 cur = udb.execute(
-                    "SELECT name, domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
+                    "SELECT program_name, domain_tags FROM programs WHERE domain_tags IS NOT NULL AND domain_tags != ''"
                 )
                 for r in cur:
                     try:
