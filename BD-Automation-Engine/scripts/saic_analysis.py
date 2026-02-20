@@ -179,33 +179,93 @@ def run():
 
     # 5. SAIC ACTIVITY NOTES WITH HIRING SIGNALS
     print("\n" + "=" * 100)
-    print("SAIC ACTIVITY INTELLIGENCE")
+    print("SAIC ACTIVITY INTELLIGENCE (BACKFILLED)")
     print("=" * 100)
 
+    # Count by match type
+    c.execute("SELECT COUNT(*) FROM activities WHERE primes_mentioned LIKE '%SAIC%'")
+    primes_count = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM activities WHERE note_text LIKE '%SAIC%'")
+    text_count = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM activities WHERE about LIKE '%SAIC%'")
+    about_count = c.fetchone()[0]
     c.execute("""SELECT COUNT(*) FROM activities
-        WHERE about LIKE '%SAIC%' OR programs_mentioned LIKE '%SAIC%' OR primes_mentioned LIKE '%SAIC%'""")
-    print(f"\nTotal SAIC-related notes: {c.fetchone()[0]}")
+        WHERE primes_mentioned LIKE '%SAIC%' OR note_text LIKE '%SAIC%' OR about LIKE '%SAIC%'""")
+    total_saic = c.fetchone()[0]
+    print(f"\nTotal SAIC-related notes: {total_saic}")
+    print(f"  - primes_mentioned contains SAIC: {primes_count}")
+    print(f"  - note_text mentions SAIC: {text_count}")
+    print(f"  - about (contact) contains SAIC: {about_count}")
 
+    # Recruiter engagement with SAIC
+    print("\n--- RECRUITERS ENGAGING SAIC ---")
+    c.execute("""
+        SELECT actor, COUNT(*) as notes,
+               COUNT(CASE WHEN hiring_signal = 1 THEN 1 END) as hiring,
+               COUNT(CASE WHEN traction = 1 THEN 1 END) as traction,
+               COUNT(CASE WHEN positive_response = 1 THEN 1 END) as positive,
+               COUNT(DISTINCT about) as contacts,
+               MAX(activity_date) as last_date
+        FROM activities
+        WHERE primes_mentioned LIKE '%SAIC%' OR note_text LIKE '%SAIC%'
+        GROUP BY actor
+        ORDER BY notes DESC
+    """)
+    rows = c.fetchall()
+    print(f"  Recruiters with SAIC activity: {len(rows)}")
+    for r in rows:
+        actor = (r["actor"] or "Unknown")[:20]
+        last = (r["last_date"] or "")[:10]
+        print(f"  {actor:20s} | {r['notes']:4d} notes | hiring={r['hiring']:2d} traction={r['traction']:2d} positive={r['positive']:2d} | {r['contacts']:3d} contacts | last={last}")
+
+    # Notes with signals
+    print("\n--- SAIC NOTES WITH HIRING SIGNALS / TRACTION ---")
     c.execute("""
         SELECT activity_date, actor, about, note_text, hiring_signal, traction, positive_response
         FROM activities
-        WHERE (about LIKE '%SAIC%' OR primes_mentioned LIKE '%SAIC%')
+        WHERE (primes_mentioned LIKE '%SAIC%' OR note_text LIKE '%SAIC%')
         AND (hiring_signal = 1 OR traction = 1 OR positive_response = 1)
         ORDER BY activity_date DESC
-        LIMIT 15
+        LIMIT 30
     """)
     rows = c.fetchall()
-    print(f"Notes with hiring signals/traction: {len(rows)}")
+    print(f"  Notes with signals: {len(rows)}")
     for r in rows:
         date = (r["activity_date"] or "")[:10]
         actor = (r["actor"] or "")[:15]
         about = (r["about"] or "")[:25]
-        note = (r["note_text"] or "")[:100]
+        note = (r["note_text"] or "")[:200]
         signals = []
         if r["hiring_signal"]: signals.append("HIRING")
         if r["traction"]: signals.append("TRACTION")
         if r["positive_response"]: signals.append("POSITIVE")
-        print(f"  [{date}] {actor:15s} -> {about:25s} | {'/'.join(signals):20s} | {note}")
+        print(f"\n  [{date}] {actor:15s} -> {about:25s} | {'/'.join(signals)}")
+        print(f"    {note}")
+
+    # ALL SAIC notes (most recent)
+    print("\n--- ALL SAIC NOTES (most recent 40) ---")
+    c.execute("""
+        SELECT activity_date, actor, about, note_text, action,
+               hiring_signal, traction, positive_response
+        FROM activities
+        WHERE primes_mentioned LIKE '%SAIC%' OR note_text LIKE '%SAIC%'
+        ORDER BY activity_date DESC
+        LIMIT 40
+    """)
+    for r in c.fetchall():
+        date = (r["activity_date"] or "")[:10]
+        actor = (r["actor"] or "")[:15]
+        about = (r["about"] or "")[:25]
+        action = (r["action"] or "")[:15]
+        note = (r["note_text"] or "")[:150]
+        flags = []
+        if r["hiring_signal"]: flags.append("H")
+        if r["traction"]: flags.append("T")
+        if r["positive_response"]: flags.append("P")
+        flag_str = f" [{'/'.join(flags)}]" if flags else ""
+        print(f"  [{date}] {actor:15s} | {action:15s} | {about:25s}{flag_str}")
+        if note:
+            print(f"    {note}")
 
     # 6. SUBAWARDS TO/FROM SAIC
     print("\n" + "=" * 100)

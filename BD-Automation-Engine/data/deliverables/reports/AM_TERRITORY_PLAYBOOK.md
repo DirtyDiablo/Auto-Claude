@@ -2,6 +2,9 @@
 ## Claim Programs Before Your Competition
 ### Your Competitive Edge Guide
 
+**Last Updated:** 2026-02-20 14:21
+**Data through:** 2026-02-20 (includes Feb 16-20 Bullhorn import)
+
 ---
 
 # THE RULES OF THE GAME
@@ -15,38 +18,53 @@
 
 # YOUR CURRENT OPPORTUNITY
 
-Based on analysis of 50,710 notes over 6 months:
+Based on analysis of **51,524** notes (updated 2026-02-20 14:21):
 
 ## UNCLAIMED TERRITORY SUMMARY
 
 | Category | Count | Status |
 |----------|-------|--------|
-| **Hiring Managers with 0 conversions** | 432 | FAIR GAME |
-| **High-value "GRAB NOW" targets** | 102 | PRIORITY |
-| **Primes with unclaimed contacts** | 15 | OPEN |
-| **Programs being called but not won** | 5+ | AVAILABLE |
+| **Hiring Managers with 0 conversions** | 25+ | FAIR GAME |
+| **Active Recruiters** | 46 | TRACKED |
+| **Primes with activity** | 20 | IN PLAY |
+| **Programs being worked** | 30 | AVAILABLE |
 
 ---
 
 # PLAYBOOK 1: GRAB UNCLAIMED CONTACTS
 
 ## The Opportunity
-432 hiring managers have been called **3+ times** by other recruiters but **NO ONE has set a meeting**.
+25+ contacts have been called **3+ times** by other recruiters but **NO ONE has converted**.
 
-## Your Targets (Top 20)
+## Your Targets (Top 25)
 
 | Contact | Prime | Attempts by Others | Worked By |
 |---------|-------|-------------------|-----------|
-| Dan Liggins | Peraton | 8 | Drew Oxley |
-| Mike Glenn | Northrop | 7 | Ethan Dial |
-| Peter Engler | Northrop | 5 | Ethan Dial |
-| Michael Jester | Northrop | 16 | Ethan Dial |
-| Sean Sullivan | Northrop | 15 | Ethan Dial |
-| Linda Nichols | GDIT | 13 | Ethan Dial |
-| Bob Basinger | GDIT | 13 | Ethan Dial |
-| Erica Jenkins | Booz Allen | 4 | Drew Oxley |
-| Steve Roberts | SAIC | 10 | Ethan Dial |
-| Bernard Wawrzeniak | GDIT | 13 | Ethan Dial |
+| Matthew Holt |  | 21 | Vince Casey,Collier Cayce |
+| Ayana Koger | ,CACI | 16 | Brendan English,Garrett S |
+| Michael  Jester | NGC | 16 | Ethan Dial |
+| Charles Javier | CACI, | 15 | Vince Casey,Zach Adauto,R |
+| JASON FESSEL |  | 15 | Derek Todd,Vince Casey,Br |
+| Nolan Anderson | ,GDIT,Lockheed | 15 | Charlie Padilla,Ethan Dia |
+| Paul  Marotta | GDIT | 15 | Ethan Dial,Tanner Windom |
+| Sean  Sullivan | NGC | 15 | Ethan Dial |
+| Shannon  Makris | NGC | 15 | Ethan Dial |
+| Steven Page | ,CACI | 15 | Brad Glaser,Zach Adauto,J |
+| Adam Devine |  | 14 | Brendan English,Andreas R |
+| Amid Kasamani | GDIT | 14 | Ethan Dial,Tanner Windom |
+| Bernard Wawrzeniak | GDIT, | 14 | Ethan Dial,Tanner Windom |
+| Bill Hoss | GDIT | 14 | Ethan Dial,Tanner Windom |
+| Bob Basinger | GDIT, | 14 | Ethan Dial,Colton Scurry |
+| Daiven  Harper | ,NGC | 14 | Tanner Windom,Ethan Dial |
+| Steve Sauve | GDIT | 14 | Ethan Dial,Tanner Windom |
+| Todd  Moore | GDIT | 14 | Tanner Windom,Ethan Dial |
+| ganesh bhatt | NGC | 14 | Ethan Dial |
+| Adrian Lopez | ,CACI | 13 | Ben Moser,Ian Burnstine |
+| Alvin Collins | ,CACI | 13 | Josh Overley,Ben Moser,Br |
+| Andre Haynes | GDIT,SAIC | 13 | Ethan Dial,Tanner Windom |
+| Andrew Torelli | GDIT | 13 | Ethan Dial,Tanner Windom |
+| Anthony Walker | ,CACI | 13 | Brendan English,Ian Burns |
+| Chandler Kramer |  | 13 | Brendan English,Ian Burns |
 
 ## Your Approach
 
@@ -70,202 +88,125 @@ Based on analysis of 50,710 notes over 6 months:
 
 # PLAYBOOK 2: CLAIM BY PRIME
 
-## Primes with Most Unclaimed Territory
+## Primes with Most Activity
 
-| Prime | Unclaimed HMs | Being Worked By | Your Opportunity |
-|-------|---------------|-----------------|------------------|
-| **Northrop** | 120 | Ethan Dial (15% conversion) | HUGE |
-| **GDIT** | 90 | Ethan Dial (15% conversion) | HUGE |
-| **Lockheed** | 41 | Ethan/Tanner | HIGH |
-| **SAIC** | 12 | Ethan Dial | HIGH |
-| **Boeing** | 10 | Matt Catanzano | MEDIUM |
-| **CACI** | 9 | Various | MEDIUM |
-| **Leidos** | 8 | Will Apple | MEDIUM |
-| **Booz Allen** | 3 | Drew Oxley | HIGH VALUE |
-
-## Strategy by Prime
-
-### Northrop (120 unclaimed)
-- Ethan Dial has 193 Northrop contacts but only 15% conversion
-- These contacts are being called but NOT converted
-- **Your play**: Different approach, same contacts
-
-### GDIT (90 unclaimed)
-- Same situation as Northrop
-- Ethan has 149 contacts, low conversion
-- **Your play**: Email/LinkedIn outreach
-
-### Booz Allen (3 unclaimed but HIGH VALUE)
-- Drew Oxley working but low success
-- Booz Allen = high-margin programs
-- **Your play**: Worth the effort for fewer contacts
+| Prime | Total Notes | Hiring Signals | Traction | Worked By |
+|-------|------------|---------------|----------|-----------|
+| **CACI** | 4630 | 472 | 21 | Ben Moser,Brendan English,Collier Cayce, |
+| **GDIT** | 2330 | 186 | 28 | Ben Moser,Charlie Padilla,Clay Failor,Co |
+| **LMCO** | 1146 | 63 | 29 | Andy Wilson,Derek Todd,Jackson Buice,Jes |
+| **NGC** | 938 | 29 | 22 | Collier Cayce,Colton Scurry,Ethan Dial,J |
+| **Leidos** | 909 | 83 | 14 | Ben Moser,Brad Glaser,Drake Bieber,Ethan |
+| **AWS** | 580 | 67 | 1 | Ben Moser,Charlie Padilla,Derek Todd,Dra |
+| **Boeing** | 392 | 64 | 9 | Brendan English,Clay Failor,Collier Cayc |
+| **Raytheon** | 300 | 25 | 12 | Derek Todd,Emma Davis,Ethan Dial,Garrett |
+| **SAIC** | 232 | 43 | 3 | Brendan English,Collier Cayce,Derek Todd |
+| **Lockheed** | 201 | 34 | 3 | Ben Moser,Derek Todd,Drake Bieber,Ian Bu |
+| **RTX** | 199 | 17 | 7 | Andy Wilson,Ben Moser,Jesse Kane,Justin  |
+| **Palantir** | 195 | 37 | 2 | Emily Hoppe,Tony Kouloukas,Zach Adauto,C |
+| **palantir** | 162 | 50 | 4 | Tony Kouloukas,Emily Hoppe |
+| **BAE** | 150 | 9 | 3 | Ben Moser,Derek Todd,Drake Bieber,Ethan  |
+| **Peraton** | 122 | 25 | 7 | Clay Failor,Collier Cayce,Garrett Seckle |
 
 ---
 
-# PLAYBOOK 3: CLAIM BY PROGRAM
+# PLAYBOOK 3: RECRUITER LEADERBOARD
 
-## Programs Being Worked But Not Won
+## Who is Working What (Full Roster)
 
-| Program | Unclaimed Contacts | Total Attempts | Status |
-|---------|-------------------|----------------|--------|
-| **MDA** | 11 HMs | 58 attempts | OPEN - No one converted |
-| **I2TS** | 2 HMs | 15 attempts | OPEN |
-| **SPACE_FORCE** | 2 HMs | 10 attempts | OPEN |
-| **DISA** | 1 HM | 8 attempts | OPEN |
-| **INSCOM** | 1 HM | 6 attempts | OPEN |
-
-## Programs with HIGH Traction (Double Down)
-
-These are converting well - get in before others lock them:
-
-| Program | Traction Rate | Your Opportunity |
-|---------|---------------|------------------|
-| GSMO | 99% | Others converting - get contacts fast |
-| NGEN | 97% | Hot program - claim territory |
-| FAA | 100% | Every call converts - GET IN |
-| AFNCR | 100% | Fort Meade - valuable |
-| DES | 100% | Defense Enclave - hot |
-
-## Programs NO ONE is Working (Virgin Territory)
-
-Based on note analysis, these programs have LOW or ZERO activity:
-- Check for programs with <5 mentions in 6 months
-- These are completely untouched
-- First mover advantage is YOURS
-
----
-
-# PLAYBOOK 4: BEAT YOUR INTERNAL COMPETITION
-
-## Know Who's Working What
-
-| Recruiter | Territory | Conversion | Vulnerability |
-|-----------|-----------|------------|---------------|
-| **Ethan Dial** | Northrop, GDIT, Lockheed | 15% | Many calls, few wins |
-| **Drew Oxley** | SAIC, Booz Allen, Peraton | 11% | Struggling |
-| **Jesse Kane** | Lockheed, mixed | 41% | Best performer - avoid his wins |
-| **Will Apple** | Leidos | 13% | Leidos is open |
-| **Tanner Windom** | Lockheed, GDIT | 11% | Same as Ethan |
-
-## How to Win Against Low Converters
-
-Ethan Dial is working 413 hiring managers but only converting 15%. This means:
-- **350+ contacts** are being called but NOT won
-- These are YOUR opportunities
-- Different approach = you win
-
-**What Ethan is probably doing:**
-- Cold calling during business hours
-- Generic "any openings?" pitch
-- Leaving voicemails
-- Same contacts over and over
-
-**What you do:**
-- Email first, call second
-- Specific candidate/skill pitch
-- LinkedIn connection requests
-- Early/late calls
-- ONE solid conversation > 10 voicemails
+| Recruiter | Total Notes | Hiring Signals | Traction | Positive | Unique Contacts | Last Activity |
+|-----------|------------|---------------|----------|----------|----------------|---------------|
+| Ethan Dial | 3634 | 110 | 64 | 23 | 1699 | 2026-02-20 |
+| Drake Bieber | 3111 | 196 | 3 | 17 | 2112 | 2026-01-22 |
+| Vince Casey | 2908 | 114 | 0 | 40 | 1869 | 2026-01-22 |
+| Brendan English | 2754 | 158 | 5 | 29 | 1714 | 2026-01-22 |
+| Collier Cayce | 2457 | 142 | 20 | 11 | 1701 | 2026-01-22 |
+| Jackson Buice | 2409 | 135 | 4 | 4 | 1417 | 2026-01-22 |
+| Zach Adauto | 2283 | 67 | 0 | 53 | 1798 | 2026-01-22 |
+| Derek Todd | 2268 | 151 | 4 | 22 | 1189 | 2026-01-22 |
+| Ryan Whitmire | 1918 | 326 | 1 | 50 | 1211 | 2026-01-22 |
+| Garrett Seckler | 1901 | 103 | 5 | 11 | 1134 | 2026-01-22 |
+| Jay Watson | 1726 | 197 | 1 | 24 | 1355 | 2026-01-22 |
+| Brad Glaser | 1706 | 134 | 0 | 19 | 1218 | 2026-01-22 |
+| Charlie Padilla | 1676 | 134 | 4 | 12 | 1481 | 2026-01-22 |
+| Natasha Clark | 1604 | 83 | 22 | 19 | 1162 | 2026-01-22 |
+| Jackson Denson | 1518 | 173 | 15 | 25 | 1131 | 2026-01-22 |
+| Tanner Windom | 1461 | 147 | 5 | 6 | 1123 | 2026-01-22 |
+| Ben Moser | 1408 | 143 | 0 | 12 | 662 | 2026-01-22 |
+| Will Apple | 1126 | 21 | 7 | 5 | 523 | 2026-02-20 |
+| Drew Oxley | 1110 | 23 | 31 | 1 | 449 | 2026-02-20 |
+| Jesse Kane | 1092 | 63 | 28 | 1 | 548 | 2026-02-17 |
+| Tony Kouloukas | 1086 | 133 | 6 | 24 | 832 | 2026-01-22 |
+| Clay Failor | 1076 | 85 | 38 | 22 | 750 | 2026-02-20 |
+| George Maranville | 1019 | 33 | 5 | 4 | 649 | 2026-02-20 |
+| Josh Overley | 937 | 95 | 6 | 17 | 563 | 2026-01-22 |
+| Ian Burnstine | 888 | 159 | 9 | 27 | 697 | 2026-01-22 |
+| James Heltzer | 771 | 128 | 4 | 21 | 502 | 2026-01-22 |
+| Andreas Rodriguez | 718 | 15 | 15 | 6 | 603 | 2026-02-19 |
+| Trevor Newell | 641 | 25 | 8 | 2 | 607 | 2026-02-20 |
+| Nick Gainous | 598 | 89 | 4 | 7 | 511 | 2026-01-21 |
+| Trevor Watson | 537 | 23 | 8 | 0 | 442 | 2026-02-20 |
 
 ---
 
-# PLAYBOOK 5: DAILY TERRITORY HUNTING
+# PLAYBOOK 4: PROGRAM TERRITORY MAP
 
-## Morning Routine (15 min)
+## Programs Being Worked
 
-1. Check `opportunity_zones.csv` for new high-score contacts
-2. Review `unclaimed_hiring_managers.csv` for fresh targets
-3. Pick 5 "GRAB NOW" contacts to pursue today
-
-## Your Daily Targets
-
-| Time | Action | Target |
-|------|--------|--------|
-| 7:00 AM | Call unclaimed contacts | Catch them before meetings |
-| 9:00 AM | LinkedIn requests | 10 new connections |
-| 11:00 AM | Follow-up calls | Previous outreach |
-| 2:00 PM | Email campaign | Contacts who don't answer |
-| 4:30 PM | Call round 2 | End of day availability |
-
-## Weekly Territory Review
-
-Every Friday:
-1. Run `territory_grab_analysis.py` with fresh Bullhorn export
-2. Check which contacts are still unclaimed
-3. Identify new programs with no coverage
-4. Plan next week's targets
-
----
-
-# PLAYBOOK 6: LOCK IT DOWN
-
-## Once You Get a Meeting
-
-1. **Document immediately** in Bullhorn with "Meeting Set" note
-2. **Send calendar invite** - creates paper trail
-3. **Follow up same day** with email summary
-4. **This program is now YOURS** - no one else can touch it
-
-## What Counts as "Locked"
-
-| Activity | Locked? |
-|----------|---------|
-| Left voicemail | NO |
-| Sent email, no reply | NO |
-| Had conversation, no next step | MAYBE |
-| **Meeting scheduled** | YES |
-| **Recurring call set up** | YES |
-| **Placement made** | DEFINITELY |
+| Program | Mentions | Hiring Signals | Traction | Worked By |
+|---------|----------|---------------|----------|-----------|
+| **GSMO** | 446 | 42 | 2 | Brad Glaser,Brendan English,Collier Cayc |
+| **NSA** | 294 | 16 | 0 | Jay Watson,Andy Wilson,Charlie Padilla,D |
+| **Sentinel** | 121 | 10 | 4 | Derek Todd,Ethan Dial,Vince Casey,Brad G |
+| **IBCS** | 89 | 10 | 2 | Derek Todd,Ethan Dial,Vince Casey,Colton |
+| **DCGS** | 69 | 3 | 1 | Ethan Dial,George Maranville,Jay Watson, |
+| **DISA** | 61 | 15 | 3 | Ben Moser,Jackson Denson,Jay Watson,Vinc |
+| **NGEN** | 45 | 8 | 2 | Ben Moser,Garrett Seckler,Josh Overley,J |
+| **FBI** | 45 | 12 | 0 | Collier Cayce,Ethan Dial,Jay Watson,Ryan |
+| **EBS** | 43 | 5 | 0 | Garrett Seckler,Josh Overley,Drake Biebe |
+| **SLS** | 41 | 5 | 4 | Brendan English,Collier Cayce,Natasha Cl |
+| **F35** | 37 | 2 | 2 | Jesse Kane,Andy Wilson,Natasha Clark,Geo |
+| **CENTCOM** | 36 | 1 | 0 | Matt Catanzano,Tony Kouloukas,Mike Huerk |
+| **MDA** | 30 | 8 | 1 | Andy Wilson,Vince Casey,Drake Bieber,Der |
+| **sentinel** | 29 | 3 | 1 | Brendan English,Ethan Dial,Trevor Newell |
+| **INSCOM** | 29 | 2 | 1 | Ben Moser,Trey Kelly,Emily Hoppe,James H |
+| **DHS** | 28 | 10 | 0 | Brad Glaser,Nick Gainous,Will Apple,Char |
+| **Aegis** | 27 | 0 | 1 | Derek Todd,Jesse Kane,Jackson Buice,Jay  |
+| **THAAD** | 23 | 5 | 0 | Derek Todd,Drew Oxley,Emma Davis,Jesse K |
+| **DES** | 22 | 7 | 0 | Ben Moser,Garrett Seckler,Josh Overley,J |
+| **Cybercom** | 20 | 5 | 0 | Derek Todd,Emily Hoppe,Tony Kouloukas,Br |
+| **NGA** | 17 | 3 | 0 | Derek Todd,Tony Kouloukas,Nick Gainous,B |
+| **MCEN** | 15 | 7 | 1 | Ben Moser,Josh Overley,Matt Capelluto |
+| **ARCYBER** | 15 | 6 | 4 | Clay Failor,Trevor Newell |
+| **ISR** | 14 | 5 | 0 | Tony Kouloukas,Clay Failor,Emily Hoppe,G |
+| **Apache** | 12 | 0 | 1 | Jesse Kane,Matt Catanzano,Jackson Buice |
 
 ---
 
-# YOUR HIT LIST THIS WEEK
+# NEW INTELLIGENCE: FEB 16-20, 2026
 
-## Priority 1: GRAB NOW (Score 60+)
+## This Week's Activity (833 new notes ingested)
 
-1. Dan Liggins (Peraton) - 8 attempts, no conversion
-2. Mike Glenn (Northrop) - 7 attempts, no conversion
-3. Peter Engler (Northrop) - 5 attempts, no conversion
-4. Michael Jester (Northrop) - 16 attempts, no conversion
-5. Erica Jenkins (Booz Allen) - 4 attempts, no conversion
-
-## Priority 2: High-Value Primes
-
-6. Linda Nichols (GDIT) - 13 attempts
-7. Bob Basinger (GDIT) - 13 attempts
-8. Steve Roberts (SAIC) - 10 attempts
-9. Bernard Wawrzeniak (GDIT) - 13 attempts
-10. John Parrish (Lockheed/Northrop) - 8 attempts
-
-## Priority 3: Programs to Claim
-
-- MDA program contacts (11 unclaimed)
-- I2TS program contacts (2 unclaimed)
-- SPACE_FORCE contacts (2 unclaimed)
-
----
-
-# FILES TO USE DAILY
-
-| File | Location | Purpose |
-|------|----------|---------|
-| `opportunity_zones.csv` | territory_grab/ | Scored contact list |
-| `unclaimed_hiring_managers.csv` | territory_grab/ | All unclaimed HMs |
-| `unclaimed_by_prime.csv` | territory_grab/ | Breakdown by prime |
-| `recruiter_territory_map.csv` | territory_grab/ | Who's working what |
-| `program_traction_analysis.csv` | notes_deep_analysis/ | Hot vs cold programs |
-| `hiring_manager_activity.csv` | notes_deep_analysis/ | All HM engagement data |
+| Recruiter | Notes This Week | Hiring Signals | Traction |
+|-----------|----------------|---------------|----------|
+| Clay Failor | 190 | 9 | 22 |
+| Trevor Watson | 122 | 9 | 3 |
+| Will Apple | 92 | 4 | 3 |
+| George Maranville | 89 | 0 | 1 |
+| Ethan Dial | 59 | 5 | 2 |
+| Trevor Newell | 53 | 6 | 6 |
+| Drew Oxley | 51 | 0 | 6 |
+| Matt Capelluto | 46 | 8 | 6 |
+| Matt Catanzano | 30 | 3 | 6 |
+| Emma Davis | 17 | 3 | 3 |
+| Andy Wilson | 16 | 2 | 1 |
+| Kevin Chavez | 14 | 3 | 0 |
+| Andreas Rodriguez | 10 | 0 | 2 |
+| Steph Sullivan | 8 | 1 | 0 |
+| Justin Howard | 7 | 1 | 0 |
+| Jesse Kane | 6 | 2 | 0 |
+| Logan Hornback | 4 | 0 | 3 |
 
 ---
 
-# REMEMBER
-
-> **"If they're calling but not meeting, it's fair game."**
-> **"First meeting wins."**
-> **"Different approach beats more volume."**
-
-Go claim your territory.
-
----
-
-*Playbook generated from analysis of 50,710 notes, 6 months of activity*
+*Updated: 2026-02-20 14:21 | Source: master_federal_contracts.db (51,524 total activities)*

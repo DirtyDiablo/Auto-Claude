@@ -283,3 +283,77 @@ This is the best possible scenario. No internal competition. No territory disput
 | `data/deliverables/reports/AM_TERRITORY_PLAYBOOK.md` | Territory analysis | Active |
 
 > **ACTION NEEDED:** The 644 SAIC enriched contacts should be loaded into the master database for full cross-referencing with programs, contracts, and intelligence tables.
+
+
+
+
+---
+
+## UPDATED: SAIC INTELLIGENCE FROM FEB 16-20, 2026
+
+**332 total SAIC-related notes found in database**
+
+### Latest SAIC Activity Notes
+
+#### [2026-02-20] Drew Oxley -> Jeff  Burdett
+RTP: Angela is his EA. He was a CL in air force. He flew in the back seat of a strike eagle. was in Iraq. also his squadron was in fallujah RTB: Jeff is the Sr. VP over all of air force and navy at SAIC. SAIC has consolidated business units so that Navy and AF is under the same unit. He mentioned filling positions with the right people is very important to him. He will give his internal team 7-30 
+
+#### [2026-02-18] Drew Oxley -> Colton Herrold
+Badged over and is not full time SAIC, under ashely dasilva
+
+#### [2026-02-18] Drew Oxley -> ROGER TOMKINS
+Got fired from program and trespassed off the property. Tyler(no longer with SAIC) was the one to let him go, Ashley has since taken over. he mentioned another electrical lead named "malik" I will try and find
+
+#### [2026-02-18] Drew Oxley -> Rafael Da Luz Barbosa **[TRACTION/POSITIVE]**
+Still with SAIC on program. Converted over in August. Ashley DaSilva took over his team as manager two weeks ago, Tyler left SAIC(previous manager). He did not know his actual team size, but said he was happy with the work he was doing and not actively looking but if something amazing came up he would be interested in hearing about it.
+
+#### [2026-02-16] Will Apple -> Tammy Westmoreland
+Leidos- STOL -subcontracts manager -Rose Lucas referral from San Diego -son is firefighter -been with Leidos and SAIC last 18 years -transferred over to DOT last few years -Now support all DOT has 4 other programs under her; OPS 5, OPS 6, Public Safety R&D 5 and 6 -STOL is new other programs she has been on
+
+#### [2026-02-16] Clay Failor -> Dennis Gould **[HIRING]**
+Boeing - Dennis Gould - Chief Payload Engineer - Meeting to discuss Candidate Feedback from Interviews - Typed the notes as we discussed... Both take volumes of data and turn them into products Need someone who can be upfront and help with system architecture and requirements development of that new system Architecture and design up front – they’re bidding on t – lead design and development of a m
+
+#### [2026-01-21] Vince Casey -> Ryan Stewart
+Req : #Systems Engineer - NGI - Huntsville Current: SAIC Why: passively looking, thought they were going to lose coverage but are in a good spot now Role/Skills: Principal Systems Integration Engineer Compensation: making 116k Location: Huntsville, AL Onsite/Remote: Onsite Clearance: Secret Certs: N/A Availability (Interview/Start): No availability Follow Up: No longer actively looking to leave
+
+#### [2026-01-21] Tanner Windom -> Andre Haynes
+-Looks like he is a Sr Program manager at SAIC -LM
+
+#### [2026-01-18] Jackson Denson -> Logan Tiwari
+Following up here, he hasn't gone to work with us, yet he is still waiting for us to have an open spot for him on TO2 as an engineer in Japan and doesn't want to pivot anywhere else like on TO3 or stateside. He is located in CO Springs. Supporting SAIC with NORAB on the Night Contract. 10 years of experience as a network engineer Clearance: TS/SCI (confirmed) Certs: CCNA, Sec+ Current Comp: 120k F
+
+#### [2026-01-16] Vince Casey -> Joseph Kumi
+#CyberSecurity Specialist with SAIC currently, will not work here.
+
+#### [2026-01-16] Clay Failor -> Josh  Nass
+Hi Josh I just tried calling you. We connected several weeks ago, but I m reaching out this afternoon because Insight Global recruiters have been calling my contractors regarding a C++ Software Engineer contract-to-hire opportunity with Northrop Grumman in Redondo Beach requiring an active TS/SCI clearance. I did some research and believe that these roles may fall under your purview, which prompte
+
+#### [2026-01-16] Brendan English -> Philip Mitchell
+Req #Traveling Fiber Technician WHY IN JM- currently looking to leave Iraq at the end of may and hearing out opportunities too expensive for this Current Company/Leads- Field Engineer for SAIC Clearance- Secret Certifications- N/A Location- Baghdad, Iraq Compensation- $100k Skillset- 20 years exp in field service and field engineering likes to be overseas on travel roles has done fiber splicing an
+
+#### [2026-01-14] Vince Casey -> Jameson Willprecht **[HIRING]**
+Req : #FSE Current: Active Duty Why: getting ready to transition, starts terminal leave in April Role/Skills: Master Evaluator - heavy IBCS experience Compensation: willing to negotiable, would be looking for 125k+ when he gets out Location: Korea Onsite/Remote: Onsite Clearance: Secret Certs: willing to obtain Security+ , buddy who is a lead trainer at NG has already informed him most these posit
+
+#### [2026-01-14] Justin Howard -> Andy Sullivan **[HIRING]**
+SAIC - VP - Strategic Space Portfolio -Getting rporgram management plan out -waiting on gov shoe to drop on funded projects for 2026 - may have to de-staff versus staffing up but that could change -1st few weeks of 2026 - should know more -changes coming to him personally portfolio wise but could be/might be diff convo in the next few weeks
+
+#### [2026-01-14] Brendan English -> Tony Wilson
+Req #Software Integrator - STAFF 3825 & 3826 WHY IN JM- said he is passively looking interested in growth in his career Current Company/Leads-Cepeda subed on SAIC as a software engineer Clearance- secret Certifications- none Location- Huntsville, AL Compensation- $120k plus all benefits paid for Skillset- 5 years in software engineering with a Bach in computer science uses basha and python regular
+
+#### [2026-01-13] Josh Overley -> Zachary Gribas **[HIRING]**
+Req #Waterfront Communications Network Engineer WHY IN JM- Not looking for networking roles at this time, is in an ISSO role now Current Company/Leads- ISSO supporting US Dept. of AF Clearance- Secret Certifications- sec+ Location- Lynn Haven, FL Compensation- Did not discuss, also has another role as IT instructor with SAIC Skillset- ISSO/Information Technology Instructor / System Administrator /
+
+#### [2026-01-13] Drew Oxley -> David  Fuller
+Contract is up in March and he is not sure if he is staying with SAIC or not. We are touching base closer to mid March to discuss what he is doing.
+
+#### [2026-01-13] Drew Oxley -> Tyesia Alexander
+Left SAIC
+
+#### [2026-01-13] Derek Todd -> David Crawford
+Open to new opportunities? If yes, why? Not open to new opportunities Location: Colorado Springs, CO Clearance: Secret Certifications: None Furthest Completed Education: Associates Degree in Mechanical Drafting Current Company: SAIC Compensation: Didn't tell me exactly, but he said it's around 120k/yr Skillset: Mechanical Design / Drafter. Does a lot of technical documentation. Creates CAD drawing
+
+#### [2026-01-13] Collier Cayce -> JUSTIN GIBSON
+#NetOps Engineer- MacDill, FL- GSMO would've been great for position, however he is asking for 110-115 which we cannot pay. He is currently working as a Net engineer for SAIC. Still wanting to leave PCB, top choices are ATL, or central FL. 6. years exp. LAN/WAN/CAN. NOC exp, Sec+, CCNP eCore, taking 2nd half of CCNP in April, Interim TS (not checked) Is currently making 105k.
+
+
+*Section updated: 2026-02-20 14:21*

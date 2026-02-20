@@ -1,216 +1,81 @@
-# COLTON SCURRY ACCOUNT TAKEOVER - EXECUTIVE SUMMARY
-
-**Generated:** January 30, 2026
-**Purpose:** Complete BD intelligence for account acquisition
-**Data Range:** July 2024 - January 2026
+# EXECUTIVE TAKEOVER SUMMARY
+**Updated:** 2026-02-20 14:21
+**Data through:** 2026-02-20 (includes Feb 16-20 import of 833 notes)
 
 ---
 
-## PORTFOLIO AT A GLANCE
+## Key Metrics
 
-| Metric | Value | Priority |
-|--------|-------|----------|
-| **Weekly Spread at Risk** | $60,000 | PROTECT |
-| **Active Contractors** | 27 | RETAIN |
-| **Open Jobs** | 22 | PURSUE |
-| **Total Contacts** | 1,183 | LEVERAGE |
-| **Prime Contractors** | 16 | ENGAGE |
-| **Programs** | 45+ | CAPITALIZE |
+| Metric | Value |
+|--------|-------|
+| **Total Notes** | 51,524 |
+| **Unique Contacts** | 26,439 |
+| **Active Recruiters** | 46 |
 
----
+## Recruiter Activity Summary
 
-## IMMEDIATE REVENUE PROTECTION (27 Active Placements)
+| Recruiter | Notes | Hiring Signals | Traction | Unique Contacts |
+|-----------|-------|---------------|----------|----------------|
+| Ethan Dial | 3634 | 110 | 64 | 1699 |
+| Drake Bieber | 3111 | 196 | 3 | 2112 |
+| Vince Casey | 2908 | 114 | 0 | 1869 |
+| Brendan English | 2754 | 158 | 5 | 1714 |
+| Collier Cayce | 2457 | 142 | 20 | 1701 |
+| Jackson Buice | 2409 | 135 | 4 | 1417 |
+| Zach Adauto | 2283 | 67 | 0 | 1798 |
+| Derek Todd | 2268 | 151 | 4 | 1189 |
+| Ryan Whitmire | 1918 | 326 | 1 | 1211 |
+| Garrett Seckler | 1901 | 103 | 5 | 1134 |
+| Jay Watson | 1726 | 197 | 1 | 1355 |
+| Brad Glaser | 1706 | 134 | 0 | 1218 |
+| Charlie Padilla | 1676 | 134 | 4 | 1481 |
+| Natasha Clark | 1604 | 83 | 22 | 1162 |
+| Jackson Denson | 1518 | 173 | 15 | 1131 |
+| Tanner Windom | 1461 | 147 | 5 | 1123 |
+| Ben Moser | 1408 | 143 | 0 | 662 |
+| Will Apple | 1126 | 21 | 7 | 523 |
+| Drew Oxley | 1110 | 23 | 31 | 449 |
+| Jesse Kane | 1092 | 63 | 28 | 548 |
+| Tony Kouloukas | 1086 | 133 | 6 | 832 |
+| Clay Failor | 1076 | 85 | 38 | 750 |
+| George Maranville | 1019 | 33 | 5 | 649 |
+| Josh Overley | 937 | 95 | 6 | 563 |
+| Ian Burnstine | 888 | 159 | 9 | 697 |
 
-### Northrop Grumman - 15 Contractors (~$33-35K/week)
-| Contractor | Role | Job # | Start Date |
-|------------|------|-------|------------|
-| Joseph Luster | DevOps Engineer | #8376 | 01/26/2025 |
-| Daniel Chain | All Source Intel Analyst | #8513 | 02/25/2025 |
-| Brittany Barnes | All Source Intel Analyst | #8513 | 02/25/2025 |
-| Randy Gearhart | All Source Intel Analyst | #8513 | 06/05/2025 |
-| Andrew Miller | ESL Systems Engineer | #8680 | 08/04/2025 |
-| Jacob Grant | Systems Engineer | #8529 | 08/28/2025 |
-| Zachary Baird | All Source Intel Analyst | #8513 | 09/23/2025 |
-| Caleb Bischoff-Niese | ISSO | #9173 | 10/20/2025 |
-| Avery Howard | Full Stack Developer | #9213 | 10/10/2025 |
-| ROBERT BROTZ | All Source Intel Analyst | #8513 | 10/23/2025 |
-| Franklin Adae | Full Stack Developer | #9213 | 10/30/2025 |
-| BRETT NALEZINSKI | Systems Engineer | #9194 | 12/04/2025 |
-| Joshua Pyron | DevOps Engineer | #8544 | 12/16/2024 |
-| Elizabeth Snyder | Systems Engineer | #9194 | 01/05/2026 |
+## Top Contacts by Engagement
 
-### SAIC - 8 Contractors (~$18-20K/week)
-| Contractor | Role | Job # | Start Date |
-|------------|------|-------|------------|
-| Shaliek Tarpley | INFOSEC | #8575 | 01/22/2025 |
-| Colton Herrold | Electrical Engineer | #8407 | 04/30/2025 |
-| Rafael Da Luz Barbosa | Electrical Engineer | #8407 | 04/30/2025 |
-| WALTER MAYS | FSE | #8878 | 06/10/2025 |
-| ROYCE MORTON | INFOSEC | #8575 | 07/01/2025 |
-| Enrique Quinones | FSE | #8878 | 08/05/2025 |
-| Richard Lebenson | FSE | #8878 | 10/03/2025 |
-| ROGER TOMKINS | Electrical Engineer | #8407 | 10/30/2025 |
-
-**Pending Start:** Jason Mabon | SSR | #9192 | 01/26/2026
-
-### Other Primes - 6 Contractors (~$9-12K/week)
-- **Lockheed Martin (3):** Windows Systems Admins
-- **GDIT (2):** Community Engagement Specialists
-- **Vision Technologies (2):** Datacenter Technicians
-- **Leidos (1):** Firmware Engineer
-
----
-
-## FAIR GAME ACCOUNTS - NO ACTIVE CONTRACTORS
-
-These contacts/companies had engagement but NO active placements:
-
-### HIGH PRIORITY - Ready to Pursue
-
-| Company | Contacts | Status | Opportunity |
-|---------|----------|--------|-------------|
-| **Cisco Systems** | 16 submissions, 8 interviews, 0 placements | BROKEN | FIX PROCESS |
-| **Modern Technology Solutions** | Christopher Hazel | NEW | DEVELOP |
-| **Boeing - Commercial** | Daniel Blankinship, Ken McCormick | WARM | 2026 HIRING |
-| **RTX (Raytheon)** | Paul Moreno, Jack Allen, Mario Thomas | HOT | 100+ hires planned |
-| **BAH (Booz Allen)** | Adam Zavardino | HOT | 130-200 positions |
-| **CACI** | John Wall, Kenneth Hirlinger | WARM | BIM TO3, C-UAS |
-
-### MEDIUM PRIORITY - Warm Leads
-
-| Company | Contacts | Last Activity | Follow-Up |
-|---------|----------|---------------|-----------|
-| Peraton | Daron Weishaar, Bob Peters | 2025 | SITEC 3 - 7000 positions |
-| LMCO Aeronautics | Hector Escobar | Nov 2025 | 5000 engineers, 1000/year |
-| Boeing BDS | Michelle Parker, Nick Zilmer | Oct 2025 | $4B division |
-| Dell Technologies | Peter Gebauer | Dec 2025 | $500M Fed Civilian |
+| Contact | Notes | Primes | Hiring Signals |
+|---------|-------|--------|---------------|
+| Matthew Holt | 21 |  | 0 |
+| Ayana Koger | 16 | ,CACI | 0 |
+| Michael  Jester | 16 | NGC | 0 |
+| Nolan Anderson | 16 | ,GDIT,Lockheed | 1 |
+| Paul  Marotta | 16 | GDIT | 1 |
+| Shannon  Makris | 16 | NGC,NGC, Lockheed | 0 |
+| Charles Javier | 15 | CACI, | 0 |
+| JASON FESSEL | 15 |  | 0 |
+| LAUREN BROWN | 15 | ,LMCO,LMCO, SAIC,SAIC | 2 |
+| Sean  Sullivan | 15 | NGC | 0 |
+| Steven Page | 15 | ,CACI | 0 |
+| Adam Devine | 14 |  | 0 |
+| Adrian Lopez | 14 | ,CACI | 1 |
+| Alvin Collins | 14 | ,CACI | 1 |
+| Amid Kasamani | 14 | GDIT | 0 |
+| Bernard Wawrzeniak | 14 | GDIT, | 0 |
+| Bill Hoss | 14 | GDIT | 0 |
+| Bob Basinger | 14 | GDIT, | 0 |
+| Daiven  Harper | 14 | ,NGC | 0 |
+| Steve Sauve | 14 | GDIT | 0 |
+| Todd  Moore | 14 | GDIT | 0 |
+| ganesh bhatt | 14 | NGC | 0 |
+| Andre Haynes | 13 | GDIT,SAIC | 0 |
+| Andrew Torelli | 13 | GDIT | 0 |
+| Anthony Walker | 13 | ,CACI | 0 |
+| Chandler Kramer | 13 |  | 0 |
+| Christopher McKoy | 13 | CACI | 0 |
+| Dearo Yam | 13 |  | 0 |
+| Gabie Hong | 13 | NGC | 0 |
+| James Douglas | 13 | ,CACI,GDIT, CACI | 0 |
 
 ---
-
-## HOT JOBS - IMMEDIATE ACTION REQUIRED
-
-### Interview Stage - Follow Up TODAY
-
-| Job # | Role | Prime | Candidate | Interview Date |
-|-------|------|-------|-----------|----------------|
-| #9364 | Sys Admin | NGC | JOSEPH PORTER | 01/16/2026 |
-| #9196 | MBSE | NGC | Ethan Gaston | 01/14/2026 |
-| #9196 | MBSE | NGC | Zachary Wise | 01/06/2026 |
-| #8520 | Systems Engineer | NGC | Alex Santana | 12/18/2025 |
-| #8520 | Systems Engineer | NGC | William Carr | 12/15/2025 |
-
-### High Volume - Build Pipeline
-
-| Job # | Role | Prime | Submissions | Interviews |
-|-------|------|-------|-------------|------------|
-| #8513 | All Source Intel | NGC | 50+ | Ongoing |
-| #9213 | Full Stack Dev | NGC | 28 | 2 |
-| #8878 | FSE | SAIC | 28 | Ongoing |
-| #8535 | Sr Network Eng | Cisco | 16 | 8 |
-
----
-
-## KEY RELATIONSHIPS TO SECURE
-
-### Tier 1 - CRITICAL (Contact This Week)
-
-| Contact | Company | Program | Why Critical |
-|---------|---------|---------|--------------|
-| Rob Whitt | NGC | JTAGS | 70 FTE, +15 heads 2026 |
-| Joel Hawkins | NGC | JTAGS | On-site visits, relationship |
-| Tim Payne | NGC | BOA | 6x workload 2026 |
-| Mikeal Jacob | NGC | BOA | Converted, key decision maker |
-| Lauree Swihart | NGC | DAFCW | Help desk openings |
-| Tod Ostrander | NGC | inSITE | MBSE needs |
-| Neil Pennington | NGC | inSITE | Active engagement |
-| John Bagby | SAIC | IBCS | 20 spots coming |
-
-### Tier 2 - HIGH (Contact Week 2)
-
-| Contact | Company | Program | Opportunity |
-|---------|---------|---------|-------------|
-| Paul Moreno | RTX | Munitions | 100 hires planned |
-| Casey Thompson | Boeing | SLS | Exclusive, growing |
-| Ken McCormick | Boeing | SLS | 1200 engineers, 15 positions |
-| Adam Zavardino | BAH | SOFA | 130-200 positions |
-| John Wall | CACI | BIM TO3 | 3 openings now |
-
----
-
-## PROGRAM INTELLIGENCE - 2026 GROWTH TARGETS
-
-### Confirmed Expansion
-
-| Program | Prime | Growth | Key Contact |
-|---------|-------|--------|-------------|
-| **JTAGS** | NGC | +15 FTE | Rob Whitt, Joel Hawkins |
-| **BOA** | NGC | 6x workload | Tim Payne, Mikeal Jacob |
-| **Munitions Acceleration** | RTX | +100 people | Paul Moreno |
-| **SLS** | Boeing | 20-50 contractors | Ken McCormick, Casey Thompson |
-| **SOFA** | BAH | 130-200 positions | Adam Zavardino |
-
-### Programs with No Active Placements (Fair Game)
-
-| Program | Prime | Contacts | Status |
-|---------|-------|----------|--------|
-| DAFCW/CW | NGC | Lauree Swihart | Help desk openings |
-| Cisco Network | Cisco | Multiple | 0 placements, needs fix |
-| BIM TO3 | CACI | John Wall | 3 openings |
-| TARPIN | RTX | Jack Allen | Software Devs, TS/SCI |
-| Raspberry Core | RTX/Leidos | Mark Shay | 18 people, NSA |
-
----
-
-## COMPETITOR INTELLIGENCE
-
-### Watch For:
-- Competitor outreach during transition
-- SAIC may have protest on BAH SOFA contract
-- Boeing using Beeline VMS - process heavy
-- NGC Beeline system for some programs
-
-### Our Advantages:
-- Deep Intel Analyst pipeline at NGC
-- Established FSE relationship at SAIC
-- Exclusive on Boeing SLS Purchase Services
-- Strong GDIT JUSTIFIED relationship
-
----
-
-## NEXT STEPS - PRIORITY ORDER
-
-### Day 1-3
-1. [ ] Call all 27 active contractors
-2. [ ] Follow up on January interviews (#9364, #9196)
-3. [ ] Notify clients of transition (email templates in playbook)
-4. [ ] Brief Vince Casey (primary recruiter partner)
-
-### Week 1
-5. [ ] Jason Mabon start confirmation (01/26/2026)
-6. [ ] Contact Lauree Swihart, Rob Whitt, Neil Pennington
-7. [ ] Update Bullhorn ownership
-8. [ ] Review all pending submissions
-
-### Week 2
-9. [ ] Client introduction meetings (NGC, SAIC, GDIT)
-10. [ ] Cisco account analysis - why 0 placements?
-11. [ ] New contact reactivation (26 from 2025)
-12. [ ] Pipeline building for hot jobs
-
----
-
-## FILES IN THIS PACKAGE
-
-| File | Description |
-|------|-------------|
-| `00_EXECUTIVE_TAKEOVER_SUMMARY.md` | This document |
-| `01_BD_TAKEOVER_PLAYBOOK.md` | Complete strategy guide |
-| `02_FAIR_GAME_CONTACTS_LIST.md` | Contacts without active placements |
-| `03_AGGREGATED_NOTES_BY_CONTACT.md` | All notes organized by contact |
-| `04_PROGRAM_CONTACT_NOTES.md` | Programs with contacts and notes |
-| `05_PRIORITY_ACTION_CHECKLIST.md` | Day-by-day action items |
-| `06_CONTRACT_PROGRAM_INTEL.md` | Detailed program intelligence |
-
----
-
-*Generated from comprehensive Bullhorn CRM analysis of 2,687 notes, 1,183 contacts, 45 programs*
+*Updated: 2026-02-20 14:21*
