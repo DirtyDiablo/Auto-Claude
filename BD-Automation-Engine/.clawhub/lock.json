@@ -199,15 +199,15 @@
     },
     "rag-construction": {
       "version": "2.1.0",
-      "installedAt": 1771603453704
+      "installedAt": 1771616462599
     },
     "rag": {
       "version": "1.0.0",
-      "installedAt": 1771603462332
+      "installedAt": 1771616557022
     },
     "local-rag-search": {
       "version": "0.1.0",
-      "installedAt": 1771603470811
+      "installedAt": 1771616649600
     },
     "automation-workflows": {
       "version": "0.1.0",

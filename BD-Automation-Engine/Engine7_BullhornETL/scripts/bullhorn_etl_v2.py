@@ -212,8 +212,10 @@ class LeidosJobsProcessor:
                 if job:
                     self.jobs.append(job)
                     self.stats["records_parsed"] += 1
-            except Exception:
+            except Exception as e:
                 self.stats["records_skipped"] += 1
+                if self.stats["records_skipped"] <= 3:
+                    print(f"  WARN: Skipped record parse: {str(e)[:120]}")
 
         print(f"Records parsed: {self.stats['records_parsed']}")
         print(f"Records skipped: {self.stats['records_skipped']}")
@@ -815,6 +817,7 @@ class BullhornETLv2:
         # Load Jobs
         print(f"\nLoading {len(self.all_jobs)} jobs...")
         inserted_jobs = 0
+        skipped_jobs = 0
         for job in self.all_jobs:
             try:
                 cursor.execute(
@@ -843,13 +846,18 @@ class BullhornETLv2:
                     ),
                 )
                 inserted_jobs += 1
-            except Exception:
-                pass
+            except Exception as e:
+                skipped_jobs += 1
+                if skipped_jobs <= 3:
+                    print(f"  WARN: Skipped job insert: {str(e)[:120]}")
+        if skipped_jobs > 3:
+            print(f"  WARN: {skipped_jobs} total jobs skipped due to insert errors")
         print(f"  Inserted: {inserted_jobs}")
 
         # Load Placements
         print(f"\nLoading {len(self.all_placements)} placements...")
         inserted_placements = 0
+        skipped_placements = 0
         for plc in self.all_placements:
             try:
                 cursor.execute(
@@ -877,13 +885,18 @@ class BullhornETLv2:
                     ),
                 )
                 inserted_placements += 1
-            except Exception:
-                pass
+            except Exception as e:
+                skipped_placements += 1
+                if skipped_placements <= 3:
+                    print(f"  WARN: Skipped placement insert: {str(e)[:120]}")
+        if skipped_placements > 3:
+            print(f"  WARN: {skipped_placements} total placements skipped due to insert errors")
         print(f"  Inserted: {inserted_placements}")
 
         # Load Activities (Notes + Visits)
         print(f"\nLoading {len(self.all_notes) + len(self.all_visits)} activities...")
         inserted_activities = 0
+        skipped_activities = 0
 
         for note in self.all_notes:
             try:
@@ -903,8 +916,10 @@ class BullhornETLv2:
                     ),
                 )
                 inserted_activities += 1
-            except Exception:
-                pass
+            except Exception as e:
+                skipped_activities += 1
+                if skipped_activities <= 3:
+                    print(f"  WARN: Skipped note insert: {str(e)[:120]}")
 
         for visit in self.all_visits:
             try:
@@ -923,13 +938,18 @@ class BullhornETLv2:
                     ),
                 )
                 inserted_activities += 1
-            except Exception:
-                pass
+            except Exception as e:
+                skipped_activities += 1
+                if skipped_activities <= 3:
+                    print(f"  WARN: Skipped visit insert: {str(e)[:120]}")
 
+        if skipped_activities > 3:
+            print(f"  WARN: {skipped_activities} total activities skipped due to insert errors")
         print(f"  Inserted: {inserted_activities}")
 
         # Build Prime Contractors
         print("\nBuilding Prime Contractors...")
+        skipped_companies = 0
         for company in self.all_companies:
             if company:
                 try:
@@ -940,8 +960,12 @@ class BullhornETLv2:
                     """,
                         (company, company.lower()),
                     )
-                except Exception:
-                    pass
+                except Exception as e:
+                    skipped_companies += 1
+                    if skipped_companies <= 3:
+                        print(f"  WARN: Skipped company insert: {str(e)[:120]}")
+        if skipped_companies > 3:
+            print(f"  WARN: {skipped_companies} total companies skipped due to insert errors")
 
         # Also add Leidos (from jobs)
         cursor.execute("""
@@ -1063,6 +1087,7 @@ class BullhornETLv2:
         """Build comprehensive contacts database."""
         print("\nBuilding Contacts Database...")
         cursor = self.conn.cursor()
+        skipped_contacts = 0
 
         # Extract contacts from placements
         for plc in self.all_placements:
@@ -1094,8 +1119,10 @@ class BullhornETLv2:
                                     plc.get("source_file"),
                                 ),
                             )
-                        except Exception:
-                            pass
+                        except Exception as e:
+                            skipped_contacts += 1
+                            if skipped_contacts <= 3:
+                                print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
 
         # Extract contacts from notes
         for note in self.all_notes:
@@ -1116,8 +1143,10 @@ class BullhornETLv2:
                         """,
                             (name_str, first_name, last_name, note.get("source_file")),
                         )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        skipped_contacts += 1
+                        if skipped_contacts <= 3:
+                            print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
 
         # Extract contacts from visits
         for visit in self.all_visits:
@@ -1138,8 +1167,13 @@ class BullhornETLv2:
                         """,
                             (name_str, first_name, last_name, visit.get("source_file")),
                         )
-                    except Exception:
-                        pass
+                    except Exception as e:
+                        skipped_contacts += 1
+                        if skipped_contacts <= 3:
+                            print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
+
+        if skipped_contacts > 3:
+            print(f"  WARN: {skipped_contacts} total contacts skipped due to insert errors")
 
         self.conn.commit()
 

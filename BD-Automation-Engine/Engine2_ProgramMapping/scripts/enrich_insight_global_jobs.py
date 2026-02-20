@@ -7,6 +7,7 @@ maps to federal programs, matches PTS contacts & past performance.
 Usage: python enrich_insight_global_jobs.py <path_to_scraper_json>
 """
 
+import ast
 import sys
 import os
 import re
@@ -712,9 +713,9 @@ def build_contact_index(contacts, bullhorn_contacts, bullhorn_timeline):
         companies_str = bc.get("companies", "[]")
         try:
             companies = (
-                eval(companies_str) if companies_str and companies_str != "[]" else []
+                ast.literal_eval(companies_str) if companies_str and companies_str != "[]" else []
             )
-        except:
+        except (ValueError, SyntaxError):
             companies = []
         for company in companies:
             bh_company_contacts[company.lower()].append(bc)

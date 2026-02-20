@@ -7,6 +7,7 @@ Each sheet has: Table 1 (Jobs), Table 2 (Program-Matched Contacts), Table 3 (All
 Usage: python generate_bd_playbook.py
 """
 
+import ast
 import os
 import sys
 import json
@@ -240,9 +241,9 @@ def build_contact_database(dashboard_contacts, bullhorn_contacts, timeline):
         companies_str = bc.get("companies", "[]")
         try:
             companies = (
-                eval(companies_str) if companies_str and companies_str != "[]" else []
+                ast.literal_eval(companies_str) if companies_str and companies_str != "[]" else []
             )
-        except:
+        except (ValueError, SyntaxError):
             companies = []
         if not companies:
             continue

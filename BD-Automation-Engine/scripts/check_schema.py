@@ -1,9 +1,14 @@
 """Check Supabase table schemas via direct PostgreSQL connection."""
+import os
 import psycopg2
+from dotenv import load_dotenv
 
-conn = psycopg2.connect(
-    "postgresql://postgres:DodiroquNew007%3F@db.ctgegqikstoaafpgdkpt.supabase.co:5432/postgres"
-)
+load_dotenv()
+
+dsn = os.environ.get("DATABASE_URL_DIRECT") or os.environ.get("DATABASE_URL")
+if not dsn:
+    raise RuntimeError("Set DATABASE_URL_DIRECT or DATABASE_URL in .env")
+conn = psycopg2.connect(dsn)
 cur = conn.cursor()
 
 cur.execute("""

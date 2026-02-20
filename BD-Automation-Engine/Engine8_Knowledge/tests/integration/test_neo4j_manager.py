@@ -22,7 +22,7 @@ class TestNeo4jManagerInit:
             mgr = Neo4jManager()
             assert mgr._uri == "bolt://localhost:7687"
             assert mgr._user == "neo4j"
-            assert mgr._password == "pts_bd_2026"
+            assert mgr._password == ""
             assert mgr._database == "neo4j"
             assert mgr._max_pool == 50
 

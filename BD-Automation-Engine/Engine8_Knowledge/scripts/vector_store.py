@@ -312,8 +312,8 @@ class BDKnowledgeStore:
         try:
             return self._call_embedding_api(text)
         except Exception as e:
-            logger.error(f"OpenAI embedding error: {e}")
-            return [0.0] * EMBEDDING_DIMENSION
+            logger.error(f"OpenAI embedding error for text '{text[:80]}...': {e}")
+            raise
 
     @staticmethod
     def _init_embedding_retry():

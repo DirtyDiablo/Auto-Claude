@@ -129,7 +129,7 @@ class BDMemoryLayer:
                 "config": {
                     "url": os.getenv("NEO4J_URI", "bolt://localhost:7687"),
                     "username": "neo4j",
-                    "password": os.getenv("NEO4J_PASSWORD", "pts_bd_2026"),
+                    "password": os.getenv("NEO4J_PASSWORD", ""),
                 },
                 "custom_prompt": (
                     "Extract people, organizations, programs, contracts, "

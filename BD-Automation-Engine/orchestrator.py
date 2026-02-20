@@ -7,7 +7,7 @@ Engines:
 1. Engine1_Scraper - Job data collection (Apify integration)
 2. Engine2_ProgramMapping - Core pipeline (standardize, match, score, export)
 3. Engine3_OrgChart - Contact lookup and classification
-4. Engine4_Briefing - BD briefing document generation
+4. Engine4_Playbook - BD playbook generation
 5. Engine5_Scoring - BD priority scoring
 6. Engine6_QA - Quality assurance and feedback loop
 7. Engine7_BullhornETL - Bullhorn CRM ETL and dashboard data export

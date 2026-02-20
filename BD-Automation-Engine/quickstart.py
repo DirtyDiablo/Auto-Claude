@@ -146,7 +146,7 @@ def check_modules():
         ("Engine2_ProgramMapping.scripts.program_mapper", "Program Mapper"),
         ("Engine2_ProgramMapping.scripts.exporters", "Exporters"),
         ("Engine3_OrgChart.scripts.contact_lookup", "Contact Lookup"),
-        ("Engine4_Briefing.scripts.briefing_generator", "Briefing Generator"),
+        ("Engine4_Playbook.scripts.bd_playbook_generator", "BD Playbook Generator"),
         ("Engine5_Scoring.scripts.bd_scoring", "BD Scoring"),
         ("Engine6_QA.scripts.qa_feedback", "QA Feedback"),
         ("services.database", "Database Service"),

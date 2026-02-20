@@ -27,12 +27,11 @@ def _get_dsn() -> str:
     if not dsn:
         dsn = os.environ.get("DATABASE_URL_DIRECT")
     if not dsn:
-        # Fallback to constructed URL
-        url = os.environ.get("SUPABASE_URL", "")
-        project_id = os.environ.get("SUPABASE_PROJECT_ID", "")
-        if project_id:
-            dsn = f"postgresql://postgres.{project_id}:DodiroquNew007%3F@aws-1-us-east-1.pooler.supabase.com:6543/postgres"
-    return dsn or ""
+        raise RuntimeError(
+            "No database connection string configured. "
+            "Set DATABASE_URL, DATABASE_URL_SESSION, or DATABASE_URL_DIRECT in .env"
+        )
+    return dsn
 
 
 def get_pool() -> pool.ThreadedConnectionPool:

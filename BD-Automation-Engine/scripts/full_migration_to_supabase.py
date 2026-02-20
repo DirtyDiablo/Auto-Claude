@@ -35,7 +35,9 @@ UNIFIED_DB = BASE_DIR / "data" / "unified_federal_contracts.db"
 GRAPH_DB = BASE_DIR / "Engine8_Knowledge" / "data" / "bd_graph.db"
 PAST_PERF_DB = BASE_DIR / "data" / "state" / "bullhorn_past_performance.db"
 
-SUPABASE_DSN = "postgresql://postgres:DodiroquNew007%3F@db.ctgegqikstoaafpgdkpt.supabase.co:5432/postgres"
+SUPABASE_DSN = os.environ.get("DATABASE_URL_DIRECT") or os.environ.get("DATABASE_URL")
+if not SUPABASE_DSN:
+    raise RuntimeError("Set DATABASE_URL_DIRECT or DATABASE_URL in .env for migration")
 BATCH_SIZE = 500
 SOURCE_PROJECT = "bd_engine"
 

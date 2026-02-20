@@ -39,7 +39,7 @@ async def get_graphiti() -> Optional["Graphiti"]:
         return None
 
     neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-    neo4j_password = os.getenv("NEO4J_PASSWORD", "pts_bd_2026")
+    neo4j_password = os.getenv("NEO4J_PASSWORD", "")
 
     try:
         graphiti = Graphiti(neo4j_uri, "neo4j", neo4j_password)

@@ -7,7 +7,7 @@ for the BD Intelligence Knowledge Graph.
 Config from environment:
   NEO4J_URI (default: bolt://localhost:7687)
   NEO4J_USER (default: neo4j)
-  NEO4J_PASSWORD (default: pts_bd_2026)
+  NEO4J_PASSWORD (required)
 """
 
 import os
@@ -47,7 +47,7 @@ except ImportError:
 
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://localhost:7687")
 NEO4J_USER = os.getenv("NEO4J_USER", "neo4j")
-NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "pts_bd_2026")
+NEO4J_PASSWORD = os.getenv("NEO4J_PASSWORD", "")
 NEO4J_DATABASE = os.getenv("NEO4J_DATABASE", "neo4j")
 NEO4J_MAX_POOL = int(os.getenv("NEO4J_MAX_POOL", "50"))
 
