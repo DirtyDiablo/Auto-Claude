@@ -34,6 +34,25 @@ except ImportError:
 logger = structlog.get_logger(__name__)
 router = APIRouter(prefix="/api/v2", tags=["unified"])
 
+# Supabase client for primary data access
+_USE_SUPABASE = os.environ.get("USE_SUPABASE", "false").lower() == "true"
+try:
+    from Engine8_Knowledge.supabase_client import (
+        get_contacts as sb_get_contacts,
+        get_programs as sb_get_programs,
+        get_jobs as sb_get_jobs,
+        get_companies as sb_get_companies,
+        get_stats as sb_get_stats,
+        get_graph_data as sb_get_graph_data,
+        get_domain_tags as sb_get_domain_tags,
+        get_quality_stats as sb_get_quality_stats,
+        get_competition_graph as sb_get_competition_graph,
+        is_available as sb_is_available,
+    )
+    _SB_CLIENT = True
+except ImportError:
+    _SB_CLIENT = False
+
 # API Key security
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
 
@@ -128,11 +147,29 @@ async def list_contacts(
     tier: Optional[str] = None,
     priority: Optional[str] = None,
     location: Optional[str] = None,
-    limit: int = Query(50, ge=1, le=500),
+    search: Optional[str] = None,
+    company: Optional[str] = None,
+    min_score: Optional[float] = None,
+    sort_by: str = "bd_score",
+    sort_dir: str = "desc",
+    limit: int = Query(500, ge=1, le=5000),
     offset: int = Query(0, ge=0),
     _authenticated: bool = Depends(verify_api_key),
 ):
-    """List contacts with filtering."""
+    """List contacts with filtering. Uses Supabase when available, falls back to Qdrant."""
+    # Supabase fast-path
+    if _USE_SUPABASE and _SB_CLIENT:
+        try:
+            rows, total = sb_get_contacts(
+                limit=limit, offset=offset, search=search,
+                company=company, priority=priority, min_score=min_score,
+                sort_by=sort_by, sort_dir=sort_dir,
+            )
+            return {"contacts": rows, "total": total}
+        except Exception as e:
+            logger.warning("supabase_contacts_fallback", error=str(e))
+
+    # Qdrant fallback
     qdrant = get_qdrant()
 
     must_conditions = []
@@ -211,10 +248,30 @@ async def list_programs(
     prime: Optional[str] = None,
     pts_involvement: Optional[str] = None,
     priority: Optional[str] = None,
-    limit: int = Query(50, ge=1, le=500),
+    search: Optional[str] = None,
+    agency: Optional[str] = None,
+    domain: Optional[str] = None,
+    min_quality: Optional[float] = None,
+    sort_by: str = "data_quality_score",
+    sort_dir: str = "desc",
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
     _authenticated: bool = Depends(verify_api_key),
 ):
-    """List federal programs with filtering."""
+    """List federal programs with filtering. Uses Supabase when available."""
+    # Supabase fast-path
+    if _USE_SUPABASE and _SB_CLIENT:
+        try:
+            rows, total = sb_get_programs(
+                limit=limit, offset=offset, search=search,
+                agency=agency, domain=domain, min_quality=min_quality,
+                sort_by=sort_by, sort_dir=sort_dir,
+            )
+            return {"programs": rows, "total": total}
+        except Exception as e:
+            logger.warning("supabase_programs_fallback", error=str(e))
+
+    # Qdrant fallback
     qdrant = get_qdrant()
 
     must_conditions = []
@@ -260,10 +317,27 @@ async def list_jobs(
     status: Optional[str] = None,
     program: Optional[str] = None,
     clearance: Optional[str] = None,
-    limit: int = Query(50, ge=1, le=500),
+    search: Optional[str] = None,
+    company: Optional[str] = None,
+    sort_by: str = "bd_score",
+    sort_dir: str = "desc",
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
     _authenticated: bool = Depends(verify_api_key),
 ):
-    """List jobs with filtering."""
+    """List jobs with filtering. Uses Supabase when available."""
+    # Supabase fast-path
+    if _USE_SUPABASE and _SB_CLIENT:
+        try:
+            rows, total = sb_get_jobs(
+                limit=limit, offset=offset, search=search,
+                company=company, sort_by=sort_by, sort_dir=sort_dir,
+            )
+            return {"jobs": rows, "total": total}
+        except Exception as e:
+            logger.warning("supabase_jobs_fallback", error=str(e))
+
+    # Qdrant fallback
     qdrant = get_qdrant()
 
     must_conditions = []
@@ -441,4 +515,10 @@ async def trigger_notion_sync(
 @router.get("/health")
 async def health_check():
     """Health check endpoint (no auth required)."""
-    return {"status": "ok", "service": "bd-hub-api"}
+    sb_ok = _USE_SUPABASE and _SB_CLIENT and sb_is_available()
+    return {
+        "status": "ok",
+        "service": "bd-hub-api",
+        "supabase": "connected" if sb_ok else "unavailable",
+        "use_supabase": _USE_SUPABASE,
+    }

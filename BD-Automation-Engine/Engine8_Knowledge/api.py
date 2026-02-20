@@ -145,6 +145,25 @@ except ImportError as e:
     UNIFIED_API_AVAILABLE = False
     logger.warning(f"Unified API endpoints not available: {e}")
 
+# Import Supabase client
+try:
+    from Engine8_Knowledge.supabase_client import (
+        is_available as supabase_available,
+        get_contacts as sb_get_contacts,
+        get_programs as sb_get_programs,
+        get_jobs as sb_get_jobs,
+        get_companies as sb_get_companies,
+        get_graph_data as sb_get_graph_data,
+        get_stats as sb_get_stats,
+        get_domain_tags as sb_get_domain_tags,
+        get_quality_stats as sb_get_quality_stats,
+        get_competition_graph as sb_get_competition_graph,
+    )
+    SUPABASE_CLIENT_AVAILABLE = True
+except ImportError as e:
+    SUPABASE_CLIENT_AVAILABLE = False
+    logger.warning(f"Supabase client not available: {e}")
+
 # Logger already configured above
 
 # =========================================
@@ -4013,8 +4032,18 @@ async def get_graph_data(
     """Return graph-ready nodes and edges for the frontend Graph Explorer (V6).
 
     Supports 4 node types: contact, program, contractor, job.
-    Optionally includes data_quality_score and domain_tags from the intelligent DB.
+    Uses Supabase when USE_SUPABASE=true, falls back to Qdrant.
     """
+    # Supabase fast-path
+    if USE_SUPABASE and SUPABASE_CLIENT_AVAILABLE:
+        try:
+            types_list = None
+            if node_types:
+                types_list = [t.strip() for t in node_types.split(",")]
+            return sb_get_graph_data(limit, types_list, domain_filter, min_quality)
+        except Exception as e:
+            logger.warning(f"Supabase graph fallback to Qdrant: {e}")
+
     if not store:
         raise HTTPException(status_code=503, detail="Knowledge store not initialized")
 
@@ -4249,6 +4278,13 @@ async def get_competition_graph(
     limit: int = 200,
 ):
     """Competition network: contractors competing on shared programs."""
+    # Supabase fast-path
+    if USE_SUPABASE and SUPABASE_CLIENT_AVAILABLE:
+        try:
+            return sb_get_competition_graph(program_filter, limit)
+        except Exception as e:
+            logger.warning(f"Supabase competition fallback: {e}")
+
     bg = get_bd_knowledge_graph()
     if not bg:
         raise HTTPException(status_code=503, detail="Knowledge graph not available")
@@ -4368,6 +4404,13 @@ async def get_competition_graph(
 @app.get("/graph/domain-tags")
 async def get_domain_tag_summary():
     """Return all available domain tags with program counts."""
+    # Supabase fast-path
+    if USE_SUPABASE and SUPABASE_CLIENT_AVAILABLE:
+        try:
+            return {"tags": sb_get_domain_tags()}
+        except Exception as e:
+            logger.warning(f"Supabase domain-tags fallback: {e}")
+
     udb = _get_unified_db()
     if not udb:
         return {"tags": []}
@@ -4399,6 +4442,13 @@ async def get_domain_tag_summary():
 @app.get("/graph/quality-stats")
 async def get_quality_stats():
     """Data quality score distribution across entity types."""
+    # Supabase fast-path
+    if USE_SUPABASE and SUPABASE_CLIENT_AVAILABLE:
+        try:
+            return sb_get_quality_stats()
+        except Exception as e:
+            logger.warning(f"Supabase quality-stats fallback: {e}")
+
     udb = _get_unified_db()
     if not udb:
         raise HTTPException(status_code=503, detail="Unified DB not available")
@@ -4457,6 +4507,139 @@ async def get_quality_stats():
         udb.close()
 
     return result
+
+
+# =========================================
+# SUPABASE-BACKED V2 API ENDPOINTS
+# =========================================
+
+USE_SUPABASE = os.getenv("USE_SUPABASE", "false").lower() == "true"
+
+
+def _check_supabase():
+    if not SUPABASE_CLIENT_AVAILABLE:
+        raise HTTPException(status_code=503, detail="Supabase client not installed")
+    if not USE_SUPABASE:
+        raise HTTPException(status_code=503, detail="USE_SUPABASE not enabled in .env")
+
+
+@app.get("/api/v2/contacts")
+async def api_v2_contacts(
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+    search: Optional[str] = None,
+    company: Optional[str] = None,
+    priority: Optional[str] = None,
+    min_score: Optional[float] = None,
+    sort_by: str = "bd_score",
+    sort_dir: str = "desc",
+):
+    """Get contacts from Supabase with filtering/pagination."""
+    _check_supabase()
+    rows, total = sb_get_contacts(limit, offset, search, company, priority, min_score, sort_by, sort_dir)
+    return {"contacts": rows, "total": total}
+
+
+@app.get("/api/v2/programs")
+async def api_v2_programs(
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+    search: Optional[str] = None,
+    agency: Optional[str] = None,
+    domain: Optional[str] = None,
+    min_quality: Optional[float] = None,
+    sort_by: str = "data_quality_score",
+    sort_dir: str = "desc",
+):
+    """Get programs from Supabase with filtering/pagination."""
+    _check_supabase()
+    rows, total = sb_get_programs(limit, offset, search, agency, domain, min_quality, sort_by, sort_dir)
+    return {"programs": rows, "total": total}
+
+
+@app.get("/api/v2/jobs")
+async def api_v2_jobs(
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+    search: Optional[str] = None,
+    company: Optional[str] = None,
+    sort_by: str = "bd_score",
+    sort_dir: str = "desc",
+):
+    """Get jobs from Supabase with filtering/pagination."""
+    _check_supabase()
+    rows, total = sb_get_jobs(limit, offset, search, company, sort_by, sort_dir)
+    return {"jobs": rows, "total": total}
+
+
+@app.get("/api/v2/companies")
+async def api_v2_companies(
+    limit: int = Query(500, ge=1, le=5000),
+    offset: int = Query(0, ge=0),
+    search: Optional[str] = None,
+):
+    """Get companies from Supabase with filtering/pagination."""
+    _check_supabase()
+    rows, total = sb_get_companies(limit, offset, search)
+    return {"companies": rows, "total": total}
+
+
+@app.get("/api/v2/stats")
+async def api_v2_stats():
+    """Get collection statistics from Supabase (row counts per table)."""
+    _check_supabase()
+    return sb_get_stats()
+
+
+@app.get("/api/v2/graph/data")
+async def api_v2_graph_data(
+    limit: int = 800,
+    node_types: Optional[str] = None,
+    domain_filter: Optional[str] = None,
+    min_quality: Optional[float] = None,
+):
+    """Graph Explorer V6 data from Supabase: 4 node types + edges."""
+    _check_supabase()
+    types_list = None
+    if node_types:
+        types_list = [t.strip() for t in node_types.split(",")]
+    return sb_get_graph_data(limit, types_list, domain_filter, min_quality)
+
+
+@app.get("/api/v2/graph/competition")
+async def api_v2_competition_graph(
+    program_filter: Optional[str] = None,
+    limit: int = 200,
+):
+    """Competition network: contractors sharing programs."""
+    _check_supabase()
+    return sb_get_competition_graph(program_filter, limit)
+
+
+@app.get("/api/v2/graph/domain-tags")
+async def api_v2_domain_tags():
+    """Domain tag summary for filter dropdowns."""
+    _check_supabase()
+    return {"tags": sb_get_domain_tags()}
+
+
+@app.get("/api/v2/graph/quality-stats")
+async def api_v2_quality_stats():
+    """Data quality score distribution."""
+    _check_supabase()
+    return sb_get_quality_stats()
+
+
+@app.get("/api/v2/health")
+async def api_v2_health():
+    """Supabase connection health check."""
+    sb_ok = SUPABASE_CLIENT_AVAILABLE and USE_SUPABASE and supabase_available()
+    return {
+        "supabase": "connected" if sb_ok else "unavailable",
+        "use_supabase": USE_SUPABASE,
+        "client_available": SUPABASE_CLIENT_AVAILABLE,
+        "timestamp": datetime.now().isoformat(),
+    }
 
 
 # =========================================
