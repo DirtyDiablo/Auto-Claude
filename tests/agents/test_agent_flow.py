@@ -12,7 +12,6 @@ Tests for planner→coder→QA state transitions including:
 Note: Uses temp_git_repo fixture from conftest.py for proper git isolation.
 """
 
-import asyncio
 import json
 import subprocess
 import sys
@@ -22,7 +21,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent / "apps" / "backend"))
+sys.path.insert(0, str(Path(__file__).parent.parent.parent / "apps" / "backend"))
 
 
 # =============================================================================
@@ -190,7 +189,7 @@ class TestPlannerToCoderTransition:
 class TestPostSessionProcessing:
     """Tests for post_session_processing function."""
 
-    def test_completed_subtask_records_success(self, test_env):
+    async def test_completed_subtask_records_success(self, test_env):
         """Test that completed subtask is recorded as successful."""
         from recovery import RecoveryManager
         from agents.session import post_session_processing
@@ -212,20 +211,16 @@ class TestPostSessionProcessing:
             mock_insights.return_value = {"file_insights": [], "patterns_discovered": []}
             mock_memory.return_value = (True, "file")
 
-            # Run async function using asyncio.run()
-            async def run_test():
-                return await post_session_processing(
-                    spec_dir=spec_dir,
-                    project_dir=project_dir,
-                    subtask_id="subtask-1",
-                    session_num=1,
-                    commit_before=commit_before,
-                    commit_count_before=1,
-                    recovery_manager=recovery_manager,
-                    linear_enabled=False,
-                )
-
-            result = asyncio.run(run_test())
+            result = await post_session_processing(
+                spec_dir=spec_dir,
+                project_dir=project_dir,
+                subtask_id="subtask-1",
+                session_num=1,
+                commit_before=commit_before,
+                commit_count_before=1,
+                recovery_manager=recovery_manager,
+                linear_enabled=False,
+            )
 
         assert result is True, "Completed subtask should return True"
 
@@ -235,7 +230,7 @@ class TestPostSessionProcessing:
         assert history["attempts"][0]["success"] is True, "Attempt should be successful"
         assert history["status"] == "completed", "Status should be completed"
 
-    def test_in_progress_subtask_records_failure(self, test_env):
+    async def test_in_progress_subtask_records_failure(self, test_env):
         """Test that in_progress subtask is recorded as incomplete."""
         from recovery import RecoveryManager
         from agents.session import post_session_processing
@@ -258,20 +253,16 @@ class TestPostSessionProcessing:
             mock_insights.return_value = {"file_insights": [], "patterns_discovered": []}
             mock_memory.return_value = (True, "file")
 
-            # Run async function using asyncio.run()
-            async def run_test():
-                return await post_session_processing(
-                    spec_dir=spec_dir,
-                    project_dir=project_dir,
-                    subtask_id="subtask-1",
-                    session_num=1,
-                    commit_before=commit_before,
-                    commit_count_before=1,
-                    recovery_manager=recovery_manager,
-                    linear_enabled=False,
-                )
-
-            result = asyncio.run(run_test())
+            result = await post_session_processing(
+                spec_dir=spec_dir,
+                project_dir=project_dir,
+                subtask_id="subtask-1",
+                session_num=1,
+                commit_before=commit_before,
+                commit_count_before=1,
+                recovery_manager=recovery_manager,
+                linear_enabled=False,
+            )
 
         assert result is False, "In-progress subtask should return False"
 
@@ -280,7 +271,7 @@ class TestPostSessionProcessing:
         assert len(history["attempts"]) == 1, "Should have 1 attempt"
         assert history["attempts"][0]["success"] is False, "Attempt should be unsuccessful"
 
-    def test_pending_subtask_records_failure(self, test_env):
+    async def test_pending_subtask_records_failure(self, test_env):
         """Test that pending (no progress) subtask is recorded as failure."""
         from recovery import RecoveryManager
         from agents.session import post_session_processing
@@ -301,20 +292,16 @@ class TestPostSessionProcessing:
             mock_insights.return_value = {"file_insights": [], "patterns_discovered": []}
             mock_memory.return_value = (True, "file")
 
-            # Run async function using asyncio.run()
-            async def run_test():
-                return await post_session_processing(
-                    spec_dir=spec_dir,
-                    project_dir=project_dir,
-                    subtask_id="subtask-1",
-                    session_num=1,
-                    commit_before=commit_before,
-                    commit_count_before=1,
-                    recovery_manager=recovery_manager,
-                    linear_enabled=False,
-                )
-
-            result = asyncio.run(run_test())
+            result = await post_session_processing(
+                spec_dir=spec_dir,
+                project_dir=project_dir,
+                subtask_id="subtask-1",
+                session_num=1,
+                commit_before=commit_before,
+                commit_count_before=1,
+                recovery_manager=recovery_manager,
+                linear_enabled=False,
+            )
 
         assert result is False, "Pending subtask should return False"
 
@@ -935,8 +922,8 @@ class TestQALoopStateTransitions:
     def test_qa_not_required_when_build_incomplete(self, test_env):
         """QA should not run when build is incomplete."""
         from qa_loop import save_implementation_plan
-        # Import the real is_build_complete to patch at the right level
-        from core.progress import is_build_complete as real_is_build_complete
+        # Import the real is_build_ready_for_qa to patch at the right level
+        from core.progress import is_build_ready_for_qa as real_is_build_ready_for_qa
 
         temp_dir, spec_dir, project_dir = test_env
 
@@ -956,16 +943,16 @@ class TestQALoopStateTransitions:
         }
         save_implementation_plan(spec_dir, plan)
 
-        # Patch is_build_complete where it's used (qa.criteria) to use real implementation
+        # Patch is_build_ready_for_qa where it's used (qa.criteria) to use real implementation
         # This is needed because test_qa_criteria.py module-level mocks may pollute
-        with patch('qa.criteria.is_build_complete', side_effect=real_is_build_complete):
+        with patch('qa.criteria.is_build_ready_for_qa', side_effect=real_is_build_ready_for_qa):
             from qa.criteria import should_run_qa
             assert should_run_qa(spec_dir) is False, "QA should not run with pending subtasks"
 
     def test_qa_required_when_build_complete(self, test_env):
         """QA should run when build is complete and not yet approved."""
         from qa_loop import save_implementation_plan
-        from core.progress import is_build_complete as real_is_build_complete
+        from core.progress import is_build_ready_for_qa as real_is_build_ready_for_qa
 
         temp_dir, spec_dir, project_dir = test_env
 
@@ -985,15 +972,15 @@ class TestQALoopStateTransitions:
         }
         save_implementation_plan(spec_dir, plan)
 
-        # Patch is_build_complete where it's used (qa.criteria) to use real implementation
-        with patch('qa.criteria.is_build_complete', side_effect=real_is_build_complete):
+        # Patch is_build_ready_for_qa where it's used (qa.criteria) to use real implementation
+        with patch('qa.criteria.is_build_ready_for_qa', side_effect=real_is_build_ready_for_qa):
             from qa.criteria import should_run_qa
             assert should_run_qa(spec_dir) is True, "QA should run when build complete"
 
     def test_qa_not_required_when_already_approved(self, test_env):
         """QA should not run when build is already approved."""
         from qa_loop import save_implementation_plan
-        from core.progress import is_build_complete as real_is_build_complete
+        from core.progress import is_build_ready_for_qa as real_is_build_ready_for_qa
 
         temp_dir, spec_dir, project_dir = test_env
 
@@ -1016,8 +1003,8 @@ class TestQALoopStateTransitions:
         }
         save_implementation_plan(spec_dir, plan)
 
-        # Patch is_build_complete where it's used (qa.criteria) to use real implementation
-        with patch('qa.criteria.is_build_complete', side_effect=real_is_build_complete):
+        # Patch is_build_ready_for_qa where it's used (qa.criteria) to use real implementation
+        with patch('qa.criteria.is_build_ready_for_qa', side_effect=real_is_build_ready_for_qa):
             from qa.criteria import should_run_qa
             assert should_run_qa(spec_dir) is False, "QA should not run when already approved"
 

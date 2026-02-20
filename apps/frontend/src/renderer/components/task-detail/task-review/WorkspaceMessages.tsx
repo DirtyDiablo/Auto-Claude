@@ -198,7 +198,11 @@ export function StagedInProjectMessage({ task, projectPath, hasWorktree = false,
     setError(null);
 
     try {
-      await persistTaskStatus(task.id, 'done');
+      const result = await persistTaskStatus(task.id, 'done', { keepWorktree: true });
+      if (!result.success) {
+        setError(result.error || 'Failed to mark as done');
+        return;
+      }
       onClose?.();
     } catch (err) {
       console.error('Error marking task as done:', err);
@@ -210,14 +214,14 @@ export function StagedInProjectMessage({ task, projectPath, hasWorktree = false,
 
   const handleReviewAgain = async () => {
     if (!onReviewAgain) return;
-    
+
     setIsResetting(true);
     setError(null);
 
     try {
       // Clear the staged flag via IPC
       const result = await window.electronAPI.clearStagedState(task.id);
-      
+
       if (!result.success) {
         setError(result.error || 'Failed to reset staged state');
         return;
@@ -297,7 +301,7 @@ export function StagedInProjectMessage({ task, projectPath, hasWorktree = false,
             </Button>
           )}
         </div>
-        
+
         {/* Secondary actions row */}
         <div className="flex gap-2">
           {/* Mark Done Only (when worktree exists) - allows keeping worktree */}
@@ -322,7 +326,7 @@ export function StagedInProjectMessage({ task, projectPath, hasWorktree = false,
               )}
             </Button>
           )}
-          
+
           {/* Review Again button - only show if worktree exists and callback provided */}
           {hasWorktree && onReviewAgain && (
             <Button
@@ -346,11 +350,11 @@ export function StagedInProjectMessage({ task, projectPath, hasWorktree = false,
             </Button>
           )}
         </div>
-        
+
         {error && (
           <p className="text-xs text-destructive">{error}</p>
         )}
-        
+
         {hasWorktree && (
           <p className="text-xs text-muted-foreground">
             "Delete Worktree & Mark Done" cleans up the isolated workspace. "Mark Done Only" keeps it for reference.

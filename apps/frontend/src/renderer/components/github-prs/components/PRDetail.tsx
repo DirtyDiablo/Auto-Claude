@@ -35,6 +35,7 @@ import { PRLogs } from './PRLogs';
 
 import type { PRData, PRReviewResult, PRReviewProgress } from '../hooks/useGitHubPRs';
 import type { NewCommitsCheck, MergeReadiness, PRLogs as PRLogsType, WorkflowsAwaitingApprovalResult } from '../../../../preload/api/modules/github-api';
+import { usePRReviewStore } from '../../../stores/github';
 
 interface PRDetailProps {
   pr: PRData;
@@ -44,6 +45,8 @@ interface PRDetailProps {
   reviewProgress: PRReviewProgress | null;
   startedAt: string | null;
   isReviewing: boolean;
+  isExternalReview?: boolean;
+  reviewError?: string | null;
   initialNewCommitsCheck?: NewCommitsCheck | null;
   isActive?: boolean;
   isLoadingFiles?: boolean;
@@ -78,6 +81,8 @@ export function PRDetail({
   reviewProgress,
   startedAt,
   isReviewing,
+  isExternalReview = false,
+  reviewError: reviewErrorProp,
   initialNewCommitsCheck,
   isActive: _isActive = false,
   isLoadingFiles = false,
@@ -399,6 +404,64 @@ export function PRDetail({
   }, [isReviewing, onGetLogs]);
 
   /**
+   * Completion detection for external (in-progress) reviews
+   *
+   * When the backend reports overallStatus === 'in_progress', the store sets
+   * isExternalReview = true and isReviewing = true. This effect polls the
+   * review result file every 3 seconds to detect when the external review
+   * finishes. Once a completed result is found (overallStatus !== 'in_progress'),
+   * we update the store which will set isReviewing = false and display the result.
+   */
+  useEffect(() => {
+    if (!isReviewing || !isExternalReview) return;
+
+    const POLL_INTERVAL_MS = 3000;
+    const MAX_POLL_DURATION_MS = 30 * 60 * 1000; // 30 minutes
+    const pollStart = Date.now();
+
+    let notified = false;
+
+    const pollForCompletion = async () => {
+      // Skip if we already notified (prevents duplicate notifications before React cleanup)
+      if (notified) return;
+
+      // Timeout: stop polling after 30 minutes to avoid indefinite polling
+      if (Date.now() - pollStart > MAX_POLL_DURATION_MS) {
+        console.warn('[PRDetail] External review polling timed out after 30 minutes');
+        notified = true;
+        try {
+          // Notify main process so the XState actor transitions to error state
+          await window.electronAPI.github.notifyExternalReviewComplete(projectId, pr.number, null);
+        } catch {
+          // Non-critical — state manager timeout is a best-effort notification
+        }
+        return;
+      }
+
+      try {
+        const result = await window.electronAPI.github.getPRReview(projectId, pr.number);
+        if (result && result.overallStatus !== 'in_progress') {
+          // Only accept results that were produced AFTER we detected the external review.
+          // Otherwise this is a stale result from a previous review still on disk
+          // (in-progress results are intentionally NOT saved to disk).
+          if (startedAt && result.reviewedAt && new Date(result.reviewedAt) > new Date(startedAt)) {
+            notified = true;
+            // Notify main process so the XState actor transitions to completed state
+            await window.electronAPI.github.notifyExternalReviewComplete(projectId, pr.number, result);
+          }
+        }
+      } catch {
+        // Ignore errors — transient file read failures shouldn't stop polling
+      }
+    };
+
+    // Poll immediately, then every 3 seconds
+    pollForCompletion();
+    const interval = setInterval(pollForCompletion, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [isReviewing, isExternalReview, projectId, pr.number, startedAt]);
+
+  /**
    * Fallback mechanism: Load logs after review completes if not already loaded
    *
    * Why is this needed?
@@ -665,6 +728,16 @@ export function PRDetail({
       };
     }
 
+    if (reviewErrorProp && !reviewResult?.success) {
+      return {
+        status: 'not_reviewed',
+        label: t('prReview.reviewFailed'),
+        description: reviewErrorProp,
+        icon: <AlertCircle className="h-5 w-5" />,
+        color: 'bg-destructive/20 text-destructive border-destructive/50',
+      };
+    }
+
     if (!reviewResult || !reviewResult.success) {
       return {
         status: 'not_reviewed',
@@ -807,7 +880,7 @@ export function PRDetail({
       icon: <MessageSquare className="h-5 w-5" />,
       color: 'bg-primary/20 text-primary border-primary/50',
     };
-  }, [isReviewing, reviewProgress, reviewResult, postedFindingIds, isReadyToMerge, newCommitsCheck, t]);
+  }, [isReviewing, reviewProgress, reviewResult, reviewErrorProp, postedFindingIds, isReadyToMerge, newCommitsCheck, t]);
 
   const handlePostReview = async () => {
     const idsToPost = Array.from(selectedFindingIds);
@@ -1067,10 +1140,12 @@ ${t('prReview.blockedStatusMessageFooter')}`;
         <ReviewStatusTree
           status={prStatus.status}
           isReviewing={isReviewing}
+          isExternalReview={isExternalReview}
           startedAt={startedAt}
           reviewResult={reviewResult}
           previousReviewResult={previousReviewResult}
           postedCount={new Set([...postedFindingIds, ...(reviewResult?.postedFindingIds ?? [])]).size}
+          reviewError={reviewErrorProp}
           onRunReview={onRunReview}
           onRunFollowupReview={onRunFollowupReview}
           onCancelReview={onCancelReview}

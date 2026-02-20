@@ -7,6 +7,9 @@ import { useProjectStore } from './project-store';
 /** Default max parallel tasks when no project setting is configured */
 export const DEFAULT_MAX_PARALLEL_TASKS = 3;
 
+/** Maximum log entries stored per task to prevent renderer OOM */
+export const MAX_LOG_ENTRIES = 5000;
+
 interface TaskState {
   tasks: Task[];
   selectedTaskId: string | null;
@@ -306,6 +309,10 @@ export const useTaskStore = create<TaskState>((set, get) => ({
             // When starting a task and no phase is set yet, default to planning
             // This prevents the "no active phase" UI state during startup race condition
             executionProgress = { phase: 'planning' as ExecutionPhase, phaseProgress: 0, overallProgress: 0 };
+          } else if (['human_review', 'error', 'done', 'pr_created'].includes(status)) {
+            // Reset execution progress when task reaches terminal states
+            // This prevents stuck tasks from showing stale progress indicators
+            executionProgress = { phase: 'idle' as ExecutionPhase, phaseProgress: 0, overallProgress: 0 };
           }
 
           // Log status transitions to help diagnose flip-flop issues
@@ -475,7 +482,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       return {
         tasks: updateTaskAtIndex(state.tasks, index, (t) => ({
           ...t,
-          logs: [...(t.logs || []), log]
+          logs: [...(t.logs || []), log].slice(-MAX_LOG_ENTRIES)
         }))
       };
     }),
@@ -508,7 +515,7 @@ export const useTaskStore = create<TaskState>((set, get) => ({
       return {
         tasks: updateTaskAtIndex(state.tasks, index, (t) => ({
           ...t,
-          logs: [...(t.logs || []), ...logs]
+          logs: [...(t.logs || []), ...logs].slice(-MAX_LOG_ENTRIES)
         }))
       };
     });
@@ -789,7 +796,7 @@ export interface PersistStatusResult {
 export async function persistTaskStatus(
   taskId: string,
   status: TaskStatus,
-  options?: { forceCleanup?: boolean }
+  options?: { forceCleanup?: boolean; keepWorktree?: boolean }
 ): Promise<PersistStatusResult> {
   const store = useTaskStore.getState();
 

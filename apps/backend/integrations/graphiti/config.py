@@ -624,7 +624,10 @@ def get_graphiti_status() -> dict:
 
     # CRITICAL FIX: Actually verify packages are importable before reporting available
     # Don't just check config.is_valid() - actually try to import the module
-    if not config.is_valid():
+    # Note: This branch is currently unreachable because is_valid() returns True
+    # whenever enabled is True. Kept for defensive purposes in case is_valid()
+    # logic changes in the future.
+    if not config.is_valid():  # pragma: no cover
         status["reason"] = errors[0] if errors else "Configuration invalid"
         return status
 
@@ -632,9 +635,19 @@ def get_graphiti_status() -> dict:
     try:
         # Attempt to import the main graphiti_memory module
         import graphiti_core  # noqa: F401
-        from graphiti_core.driver.falkordb_driver import FalkorDriver  # noqa: F401
 
-        # If we got here, packages are importable
+        # Try LadybugDB first (preferred for Python 3.12+), fall back to kuzu
+        try:
+            import real_ladybug  # noqa: F401
+        except ImportError:
+            try:
+                import kuzu  # noqa: F401
+            except ImportError:
+                status["available"] = False
+                status["reason"] = (
+                    "Graph database backend not installed (need real_ladybug or kuzu)"
+                )
+                return status
         status["available"] = True
     except ImportError as e:
         status["available"] = False

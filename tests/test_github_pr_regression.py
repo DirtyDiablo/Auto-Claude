@@ -9,6 +9,7 @@ This test suite verifies that:
 5. Provider field is correctly set to "github"
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -27,6 +28,19 @@ from worktree import PullRequestResult, WorktreeInfo, WorktreeManager
 
 class TestGitHubProviderDetection:
     """Test that GitHub remotes are still detected correctly."""
+
+    @pytest.fixture(autouse=True)
+    def isolate_git_env(self):
+        """Clear GIT_* environment variables to prevent worktree interference."""
+        # Store original values
+        git_vars = {k: v for k, v in os.environ.items() if k.startswith('GIT_')}
+        # Clear GIT environment variables
+        for k in list(git_vars.keys()):
+            del os.environ[k]
+        yield
+        # Restore original values
+        for k, v in git_vars.items():
+            os.environ[k] = v
 
     def test_github_https_detection(self, tmp_path):
         """Test GitHub HTTPS URL detection."""
@@ -320,6 +334,136 @@ class TestGitHubCLIInvocation:
         # Verify --draft flag is present
         call_args = mock_run.call_args[0][0]
         assert "--draft" in call_args
+        assert result["success"] is True
+
+
+class TestGitHubOriginPrefixStripping:
+    """Test that origin/ prefix is stripped from target_branch in create_pull_request."""
+
+    def test_origin_prefix_stripped_from_target_branch(self, tmp_path):
+        """Test that 'origin/develop' becomes 'develop' in --base argument to gh CLI."""
+        # Setup
+        project_dir = tmp_path / "project"
+        project_dir.mkdir()
+        spec_dir = tmp_path / "spec"
+        spec_dir.mkdir()
+
+        # Create .auto-claude directories
+        auto_claude_dir = project_dir / ".auto-claude"
+        auto_claude_dir.mkdir(exist_ok=True)
+
+        # Create WorktreeManager
+        manager = WorktreeManager(
+            project_dir=project_dir,
+            base_branch="main",
+        )
+
+        # Mock get_worktree_info to return a valid WorktreeInfo
+        mock_worktree_info = WorktreeInfo(
+            path=spec_dir,
+            branch="auto-claude/001-test-spec",
+            spec_name="001-test-spec",
+            base_branch="main",
+            is_active=True,
+        )
+
+        # Mock subprocess result
+        mock_subprocess_result = MagicMock(
+            returncode=0,
+            stdout="https://github.com/user/repo/pull/123\n",
+            stderr="",
+        )
+
+        # Import the actual module to patch it directly
+        import core.worktree as worktree_module
+
+        with (
+            patch.object(manager, "get_worktree_info", return_value=mock_worktree_info),
+            patch.object(
+                worktree_module, "get_gh_executable", return_value="/usr/bin/gh"
+            ),
+            patch.object(
+                worktree_module.subprocess, "run", return_value=mock_subprocess_result
+            ) as mock_run,
+            patch.object(manager, "_extract_spec_summary", return_value="Test PR body"),
+        ):
+            result = manager.create_pull_request(
+                spec_name="001-test-spec",
+                target_branch="origin/develop",
+                title="Test PR Title",
+                draft=False,
+            )
+
+        # Verify gh CLI received "develop" (not "origin/develop") as --base
+        assert mock_run.called
+        call_args = mock_run.call_args[0][0]
+        base_idx = call_args.index("--base")
+        assert call_args[base_idx + 1] == "develop", (
+            f"Expected 'develop' after --base, got '{call_args[base_idx + 1]}'"
+        )
+        assert result["success"] is True
+
+    def test_target_branch_without_origin_prefix_unchanged(self, tmp_path):
+        """Test that 'develop' (no prefix) is passed through unchanged to gh CLI."""
+        # Setup
+        project_dir = tmp_path / "project"
+        project_dir.mkdir()
+        spec_dir = tmp_path / "spec"
+        spec_dir.mkdir()
+
+        # Create .auto-claude directories
+        auto_claude_dir = project_dir / ".auto-claude"
+        auto_claude_dir.mkdir(exist_ok=True)
+
+        # Create WorktreeManager
+        manager = WorktreeManager(
+            project_dir=project_dir,
+            base_branch="main",
+        )
+
+        # Mock get_worktree_info to return a valid WorktreeInfo
+        mock_worktree_info = WorktreeInfo(
+            path=spec_dir,
+            branch="auto-claude/001-test-spec",
+            spec_name="001-test-spec",
+            base_branch="main",
+            is_active=True,
+        )
+
+        # Mock subprocess result
+        mock_subprocess_result = MagicMock(
+            returncode=0,
+            stdout="https://github.com/user/repo/pull/123\n",
+            stderr="",
+        )
+
+        # Import the actual module to patch it directly
+        import core.worktree as worktree_module
+
+        with (
+            patch.object(manager, "get_worktree_info", return_value=mock_worktree_info),
+            patch.object(
+                worktree_module, "get_gh_executable", return_value="/usr/bin/gh"
+            ),
+            patch.object(
+                worktree_module.subprocess, "run", return_value=mock_subprocess_result
+            ) as mock_run,
+            patch.object(manager, "_extract_spec_summary", return_value="Test PR body"),
+        ):
+            result = manager.create_pull_request(
+                spec_name="001-test-spec",
+                target_branch="develop",
+                title="Test PR Title",
+                draft=False,
+            )
+
+        # Verify gh CLI received "develop" as --base
+        assert mock_run.called
+        call_args = mock_run.call_args[0][0]
+        base_idx = call_args.index("--base")
+        assert call_args[base_idx + 1] == "develop", (
+            f"Expected 'develop' after --base, got '{call_args[base_idx + 1]}'"
+        )
         assert result["success"] is True
 
 
