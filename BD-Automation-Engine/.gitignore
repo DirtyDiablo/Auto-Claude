@@ -54,3 +54,12 @@ repomix-*.xml
 !.claude/skills/pts-federal-intel/
 !.claude/skills/pts-contact-ops/
 !.claude/skills/pts-arch-migration/
+
+# Auto Claude generated files
+.auto-claude/
+.auto-claude-security.json
+.auto-claude-status
+.claude_settings.json
+.worktrees/
+.security-key
+logs/security/
