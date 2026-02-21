@@ -463,7 +463,11 @@ class BDKnowledgeGraph:
                 sql_parts.append("to_entity_id = ?")
                 params.append(entity_id)
 
-        sql = f"SELECT * FROM relationships WHERE {' AND '.join(sql_parts)}"
+        from Engine8_Knowledge.utils.security_validators import validate_table_name
+        
+        # Validate table name (hardcoded, but explicit validation for defense-in-depth)
+        table = validate_table_name("relationships", allowed_tables=["relationships"])
+        sql = f"SELECT * FROM {table} WHERE {' AND '.join(sql_parts)}"
 
         if rel_type:
             sql += " AND type = ?"

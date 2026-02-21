@@ -825,6 +825,7 @@ class BDOrchestrator:
         total_qa_approved = 0
         total_qa_needs_review = 0
         export_files = {}
+        pipeline_degraded = False  # Set True when critical stages (mapping/scoring) fail
 
         for batch_idx in range(total_batches):
             batch_start = batch_idx * batch_size
@@ -858,6 +859,12 @@ class BDOrchestrator:
                     elif result is not None:
                         errors.append("Mapping produced no results — using raw jobs")
                         logger.warning("Mapping stage returned no results; falling back to raw jobs")
+                        pipeline_degraded = True
+                    else:
+                        # _run_stage returned None = crash in quarantine mode
+                        pipeline_degraded = True
+                        errors.append("CRITICAL: Mapping engine crashed — downstream data is unreliable")
+                        logger.error("Mapping crash in quarantine mode — pipeline_degraded=True")
                 except Exception:
                     if self.config.fail_on_stage_error:
                         errors.append("ABORTING: Mapping engine crashed — cannot produce valid results")
@@ -944,6 +951,12 @@ class BDOrchestrator:
                     elif result is not None:
                         errors.append("Scoring produced no results — using unscored jobs")
                         logger.warning("Scoring stage returned no results; falling back to unscored jobs")
+                        pipeline_degraded = True
+                    else:
+                        # _run_stage returned None = crash in quarantine mode
+                        pipeline_degraded = True
+                        errors.append("CRITICAL: Scoring engine crashed — tier data is unreliable")
+                        logger.error("Scoring crash in quarantine mode — pipeline_degraded=True")
                 except Exception:
                     if self.config.fail_on_stage_error:
                         errors.append("ABORTING: Scoring engine crashed — cannot tier jobs correctly")
@@ -984,6 +997,7 @@ class BDOrchestrator:
                 )
                 errors.append(gate_msg)
                 logger.warning(gate_msg)
+                pipeline_degraded = True
                 if self.config.fail_on_stage_error:
                     errors.append("ABORTING: Zero leads categorized after scoring — pipeline output would be empty")
                     duration = (datetime.now() - start_time).total_seconds()
@@ -1045,7 +1059,17 @@ class BDOrchestrator:
 
             # Stage 8: Export
             print(f"\n[6/11] EXPORTING RESULTS...")
-            if "mapping" in self.engines:
+            if pipeline_degraded:
+                degrade_msg = (
+                    "EXPORT BLOCKED: Pipeline is degraded (mapping or scoring failed). "
+                    "Exporting corrupt data would produce misleading BD intelligence. "
+                    "Fix the failed stages and re-run, or use --fail-on-stage-error to abort early."
+                )
+                print(f"  {degrade_msg}")
+                errors.append(degrade_msg)
+                logger.error(degrade_msg)
+                stage_results.append(StageResult(name="export", status="blocked", error="pipeline_degraded"))
+            elif "mapping" in self.engines:
                 def _run_export():
                     return self.engines["mapping"]["export_batch"](
                         jobs, output_dir=self.config.output_dir, formats=["notion", "n8n"]
@@ -1067,7 +1091,10 @@ class BDOrchestrator:
 
             # Stage 7: Webhook Delivery
             print(f"\n[7/11] DELIVERING TO WEBHOOKS...")
-            if self.config.send_webhook:
+            if pipeline_degraded:
+                print("  Skipped (pipeline degraded — corrupt data not delivered)")
+                stage_results.append(StageResult(name="webhooks", status="blocked", error="pipeline_degraded"))
+            elif self.config.send_webhook:
                 def _run_webhooks():
                     delivered = []
                     job_result = self.webhook_delivery.deliver_jobs(jobs)
@@ -1096,7 +1123,10 @@ class BDOrchestrator:
 
             # Stage 8: Email Notifications
             print(f"\n[8/11] SENDING NOTIFICATIONS...")
-            if self.config.send_email and hot_leads:
+            if pipeline_degraded:
+                print("  Skipped (pipeline degraded — corrupt data not sent)")
+                stage_results.append(StageResult(name="notifications", status="blocked", error="pipeline_degraded"))
+            elif self.config.send_email and hot_leads:
                 self.email_notifier.send_hot_lead_alert(hot_leads, briefings)
                 stage_results.append(StageResult(name="notifications", status="passed"))
                 checkpoint.mark_completed("notifications")

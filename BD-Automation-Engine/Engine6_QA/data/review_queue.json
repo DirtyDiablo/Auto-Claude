@@ -884,5 +884,136 @@
       "recommended_fix": "Re-run program mapper with expanded search criteria",
       "auto_fixable": true
     }
+  },
+  {
+    "job_id": "1850634588224",
+    "added_at": "2026-02-21T00:26:21.261119",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "missing_data",
+      "severity": "medium",
+      "description": "Missing required fields: Security Clearance, Location, Prime Contractor",
+      "recommended_fix": "Data enrichment - fetch from source or request manual input",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1850645215168",
+    "added_at": "2026-02-21T00:26:21.264167",
+    "status": "needs_review",
+    "confidence": 0.0,
+    "review_reasons": [
+      "Low confidence 0%",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1878495106112",
+    "added_at": "2026-02-21T00:26:47.268421",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1877152563456",
+    "added_at": "2026-02-21T00:27:23.178254",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "missing_data",
+      "severity": "medium",
+      "description": "Missing required fields: Security Clearance, Location, Prime Contractor",
+      "recommended_fix": "Data enrichment - fetch from source or request manual input",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1877153622656",
+    "added_at": "2026-02-21T00:27:23.183380",
+    "status": "needs_review",
+    "confidence": 0.0,
+    "review_reasons": [
+      "Low confidence 0%",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1877165898624",
+    "added_at": "2026-02-21T00:27:24.283875",
+    "status": "needs_review",
+    "confidence": 0.0,
+    "review_reasons": [
+      "Low confidence 0%",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1877165501824",
+    "added_at": "2026-02-21T00:27:24.360305",
+    "status": "needs_review",
+    "confidence": 0.0,
+    "review_reasons": [
+      "Low confidence 0%",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
   }
 ]

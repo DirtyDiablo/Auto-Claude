@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "bd-db-layer"
+version = "0.1.0"
+description = "Database layer utilities for BD Automation Engine"
+requires-python = ">=3.10"
+dependencies = [
+    "sqlalchemy>=2.0.0",
+    "structlog>=24.1.0",
+]
+
+[tool.setuptools.packages.find]
+where = ["."]

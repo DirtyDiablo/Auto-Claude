@@ -126,6 +126,24 @@ class Settings(BaseSettings):
     dify_api_key: str = Field(default="", description="Dify API key")
 
     # ===========================================
+    # BULLHORN CRM (Engine 7)
+    # ===========================================
+    bullhorn_exports_dir: str = Field(
+        default="./docs/Bullhorn Exports",
+        description="Directory containing Bullhorn CSV exports"
+    )
+    bullhorn_db_path: str = Field(
+        default="./Engine7_BullhornETL/data/bullhorn.db",
+        description="Path to Bullhorn SQLite database"
+    )
+    bullhorn_client_id: str = Field(
+        default="", description="Bullhorn API client ID"
+    )
+    bullhorn_client_secret: str = Field(
+        default="", description="Bullhorn API client secret"
+    )
+
+    # ===========================================
     # BD SCORING THRESHOLDS
     # ===========================================
     high_confidence_threshold: float = Field(

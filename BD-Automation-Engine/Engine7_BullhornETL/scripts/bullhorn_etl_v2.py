@@ -35,9 +35,11 @@ from scripts.master_db.utils import COMPANY_NORMALIZATIONS, normalize_company_na
 # CONFIGURATION
 # =========================================
 
-BULLHORN_EXPORTS_DIR = Path(
-    "C:/Users/gtmar/Projects/Auto-Claude/BD-Automation-Engine/docs/Bullhorn Exports"
-)
+# Load configuration from centralized settings
+from config.settings import get_settings
+_settings = get_settings()
+
+BULLHORN_EXPORTS_DIR = Path(_settings.bullhorn_exports_dir)
 OUTPUT_DIR = Path(__file__).parent.parent / "outputs"
 STAGING_DIR = Path(__file__).parent.parent / "data" / "staging"
 

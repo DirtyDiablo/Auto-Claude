@@ -398,7 +398,8 @@ class TestWorkflowScheduler:
         assert status["enabled"] is True
         assert isinstance(status["jobs"], list)
 
-    def test_scheduler_start_stop(self):
+    @pytest.mark.asyncio
+    async def test_scheduler_start_stop(self):
         from workflows.scheduler import WorkflowScheduler, APSCHEDULER_AVAILABLE
         scheduler = WorkflowScheduler()
         result = scheduler.start()
@@ -412,7 +413,8 @@ class TestWorkflowScheduler:
         else:
             assert result is False
 
-    def test_scheduler_toggle(self):
+    @pytest.mark.asyncio
+    async def test_scheduler_toggle(self):
         from workflows.scheduler import WorkflowScheduler, APSCHEDULER_AVAILABLE
         scheduler = WorkflowScheduler()
         if APSCHEDULER_AVAILABLE:

@@ -126,42 +126,45 @@ class DomainCorpusBuilder:
             return docs
 
         try:
+            from Engine8_Knowledge.utils.security_validators import validate_table_name, validate_column_name, SecurityValidationError
+            
             conn = sqlite3.connect(str(db_path))
-            # Try call_notes table first, then activities
-            for table in ["call_notes", "activities"]:
+            # Try call_notes table first, then activities (validated whitelist)
+            ALLOWED_TABLES = ["call_notes", "activities"]
+            for table in ALLOWED_TABLES:
                 try:
-                    cursor = conn.execute(f"SELECT COUNT(*) FROM {table}")
+                    # Validate table name before using in query
+                    validated_table = validate_table_name(table, allowed_tables=ALLOWED_TABLES)
+                    
+                    cursor = conn.execute(f"SELECT COUNT(*) FROM {validated_table}")
                     count = cursor.fetchone()[0]
                     if count == 0:
                         continue
 
                     # Get text columns
-                    cols_cursor = conn.execute(f"PRAGMA table_info({table})")
+                    cols_cursor = conn.execute(f"PRAGMA table_info({validated_table})")
                     cols = [row[1] for row in cols_cursor]
 
-                    text_cols = [
-                        c
-                        for c in cols
-                        if c.lower()
-                        in (
-                            "comments",
-                            "notes",
-                            "note",
-                            "description",
-                            "action",
-                            "about",
-                            "subject",
-                            "body",
-                            "text",
-                            "comment",
-                        )
+                    # Validate and filter text columns
+                    text_col_candidates = [
+                        "comments", "notes", "note", "description", "action",
+                        "about", "subject", "body", "text", "comment"
                     ]
+                    text_cols = []
+                    for c in cols:
+                        if c.lower() in text_col_candidates:
+                            try:
+                                validated_col = validate_column_name(c)
+                                text_cols.append(validated_col)
+                            except SecurityValidationError:
+                                continue
 
                     if not text_cols:
                         continue
 
+                    # Build query with validated identifiers
                     select = ", ".join(text_cols)
-                    rows = conn.execute(f"SELECT {select} FROM {table} LIMIT 50000")
+                    rows = conn.execute(f"SELECT {select} FROM {validated_table} LIMIT 50000")
 
                     for row in rows:
                         parts = [

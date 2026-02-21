@@ -1,9 +1,9 @@
 # USER.md - About Your Human
 
-- **Name:** *(to be filled in)*
-- **What to call them:** *(to be filled in)*
-- **Pronouns:** *(optional)*
-- **Timezone:** *(to be determined)*
+- **Name:** DirtyDiablo
+- **What to call them:** DirtyDiablo
+- **Pronouns:** *(not specified)*
+- **Timezone:** EST (Eastern Standard Time)
 - **Notes:** 
 
 ## Context

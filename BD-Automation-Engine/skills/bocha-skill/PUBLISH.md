@@ -26,7 +26,7 @@ bocha-search/
 
 ```bash
 # 设置 API Key
-export BOCHA_API_KEY="sk-a2f0234180684fe0adcf6302c6027040"
+export BOCHA_API_KEY="your-bocha-api-key-here"
 
 # 测试搜索
 cd scripts

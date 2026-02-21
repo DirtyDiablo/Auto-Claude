@@ -609,6 +609,17 @@ try:
 except ImportError as e:
     logger.warning(f"Phase 25A memory routes not available: {e}")
 
+# Feature 16: Stable Mem0 Conversational Memory
+try:
+    from Engine8_Knowledge.routers.memory import router as stable_memory_router
+
+    app.include_router(stable_memory_router)
+    logger.info(
+        "Feature 16 stable memory routes enabled: /memory/add, /memory/search, /memory/context"
+    )
+except ImportError as e:
+    logger.warning(f"Feature 16 stable memory routes not available: {e}")
+
 # Phase 26A: MCP Server API (FastMCP tools, config generator)
 try:
     from Engine8_Knowledge.api_routers.mcp_api import router as mcp_router
@@ -926,6 +937,10 @@ from Engine8_Knowledge.routers.bdgraph import router as bdgraph_extracted_router
 app.include_router(bdgraph_extracted_router)
 logger.info("BD Knowledge Graph routes enabled: /bdgraph/* (12 endpoints)")
 
+from Engine8_Knowledge.routers.graph import router as graph_router
+app.include_router(graph_router)
+logger.info("Knowledge Graph API routes enabled: /graph/* (9 endpoints)")
+
 from Engine8_Knowledge.routers.ingest import router as ingest_extracted_router
 app.include_router(ingest_extracted_router)
 logger.info("Ingest routes enabled: /ingest/* (9 endpoints)")
@@ -944,6 +959,41 @@ try:
     logger.info("Workflow Orchestration routes enabled: /workflows/* (4 endpoints)")
 except ImportError as e:
     logger.warning(f"Workflow orchestration router not available: {e}")
+
+try:
+    from Engine8_Knowledge.routers.kpi import router as kpi_router
+    app.include_router(kpi_router)
+    logger.info("Feature 18 KPI routes enabled: /kpi/* (8 endpoints)")
+except Exception as e:
+    logger.warning(f"Feature 18 KPI routes not available: {e}")
+
+try:
+    from Engine8_Knowledge.routers.agents import router as agents_router
+    app.include_router(agents_router)
+    logger.info("Feature 19 BD agent routes enabled: /bd-agents/* (5 endpoints)")
+except Exception as e:
+    logger.warning(f"Feature 19 BD agent routes not available: {e}")
+
+try:
+    from Engine8_Knowledge.routers.portfolios import router as portfolios_router
+    app.include_router(portfolios_router)
+    logger.info("Feature 20 portfolio routes enabled: /portfolios/* (6 endpoints)")
+except Exception as e:
+    logger.warning(f"Feature 20 portfolio routes not available: {e}")
+
+try:
+    from Engine8_Knowledge.routers.mobile import router as mobile_router
+    app.include_router(mobile_router)
+    logger.info("Feature 22 mobile routes enabled: /mobile/* (7 endpoints)")
+except Exception as e:
+    logger.warning(f"Feature 22 mobile routes not available: {e}")
+
+try:
+    from Engine8_Knowledge.routers.briefs import router as briefs_router
+    app.include_router(briefs_router)
+    logger.info("Feature 23 intelligence briefs routes enabled: /briefs/* (8 endpoints)")
+except Exception as e:
+    logger.warning(f"Feature 23 intelligence briefs routes not available: {e}")
 
 
 # =========================================
@@ -2874,6 +2924,7 @@ async def trigger_pipeline(request: TriggerRequest):
     """Trigger a pipeline run as a background subprocess."""
     import subprocess as sp
     import uuid as _uuid
+    from Engine8_Knowledge.utils.security_validators import validate_file_path, SecurityValidationError
 
     run_id = str(_uuid.uuid4())[:8]
     python_exe = sys.executable
@@ -2881,7 +2932,18 @@ async def trigger_pipeline(request: TriggerRequest):
 
     cmd = [python_exe, str(orchestrator_path)]
     if request.input_file:
-        cmd.extend(["--input", request.input_file])
+        # SECURITY: Validate file path to prevent command injection and path traversal
+        try:
+            validated_path = validate_file_path(
+                request.input_file,
+                allowed_extensions=[".csv", ".json"]
+            )
+            cmd.extend(["--input", str(validated_path)])
+        except SecurityValidationError as e:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid input file path: {str(e)}"
+            )
     if request.test_mode:
         cmd.append("--test")
     if request.hot_leads_only:
@@ -3621,12 +3683,18 @@ async def get_graph_data(
         if udb:
             try:
                 if include_quality or min_quality is not None:
+                    from Engine8_Knowledge.utils.security_validators import validate_table_name, validate_column_name
+                    
                     name_col_map = {"contacts": "full_name", "programs": "program_name", "companies": "name"}
-                    for table in ["contacts", "programs", "companies"]:
+                    ALLOWED_TABLES = ["contacts", "programs", "companies"]
+                    for table in ALLOWED_TABLES:
                         try:
+                            validated_table = validate_table_name(table, allowed_tables=ALLOWED_TABLES)
                             name_col = name_col_map[table]
+                            validated_col = validate_column_name(name_col)
+                            
                             cursor = udb.execute(
-                                f"SELECT {name_col}, data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
+                                f"SELECT {validated_col}, data_quality_score FROM {validated_table} WHERE data_quality_score IS NOT NULL"
                             )
                             for row in cursor:
                                 quality_map[row[0]] = row[1]
@@ -4011,12 +4079,16 @@ async def get_quality_stats():
     }
 
     try:
+        from Engine8_Knowledge.utils.security_validators import validate_table_name, validate_column_name
+        
         all_scores = []
+        ALLOWED_TABLES = ["contacts", "programs", "companies"]
         for table, name_col in [("contacts", "full_name"), ("programs", "name"), ("companies", "name")]:
             entity_type = table.rstrip("s").capitalize()  # contacts -> Contact
             try:
+                validated_table = validate_table_name(table, allowed_tables=ALLOWED_TABLES)
                 cursor = udb.execute(
-                    f"SELECT data_quality_score FROM {table} WHERE data_quality_score IS NOT NULL"
+                    f"SELECT data_quality_score FROM {validated_table} WHERE data_quality_score IS NOT NULL"
                 )
                 scores = [row[0] for row in cursor]
                 if scores:

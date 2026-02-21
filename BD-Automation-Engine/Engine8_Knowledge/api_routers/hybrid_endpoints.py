@@ -547,15 +547,21 @@ async def index_bullhorn_notes(
     cursor = conn.cursor()
 
     # Detect table name (call_notes or notes)
+    from Engine8_Knowledge.utils.security_validators import validate_table_name, SecurityValidationError
+    
     cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
     tables = [r[0] for r in cursor.fetchall()]
 
-    # Try common table names for call notes
+    # Try common table names for call notes (validated whitelist)
+    ALLOWED_NOTES_TABLES = ["call_notes", "notes", "Note", "activity", "activities"]
     notes_table = None
-    for candidate in ["call_notes", "notes", "Note", "activity", "activities"]:
+    for candidate in ALLOWED_NOTES_TABLES:
         if candidate in tables:
-            notes_table = candidate
-            break
+            try:
+                notes_table = validate_table_name(candidate, allowed_tables=ALLOWED_NOTES_TABLES)
+                break
+            except SecurityValidationError:
+                continue
 
     if not notes_table:
         conn.close()
@@ -564,11 +570,15 @@ async def index_bullhorn_notes(
             detail=f"No notes table found. Available tables: {tables}",
         )
 
+    # Use parameterized query with validated table name
+    # Note: SQLite doesn't support table name parameters, but validation ensures safety
     query = f"SELECT * FROM {notes_table}"
     if limit > 0:
-        query += f" LIMIT {limit}"
-
-    cursor.execute(query)
+        query += " LIMIT ?"
+        cursor.execute(query, (limit,))
+    else:
+        cursor.execute(query)
+    
     rows = cursor.fetchall()
     columns = [desc[0] for desc in cursor.description]
     total_available = cursor.execute(f"SELECT COUNT(*) FROM {notes_table}").fetchone()[

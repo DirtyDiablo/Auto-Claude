@@ -599,12 +599,23 @@ class BDKnowledgeStore:
             if not texts:
                 continue
 
-            # Batch embed all texts in one API call
-            try:
-                embeddings = self._generate_embeddings_batch(texts)
-            except Exception as e:
-                logger.error(f"Batch embedding failed for {len(texts)} items: {e}")
-                errors += len(texts)
+            # Batch embed all texts in one API call (retry once on transient failure)
+            embeddings = None
+            for attempt in range(2):
+                try:
+                    embeddings = self._generate_embeddings_batch(texts)
+                    break
+                except Exception as e:
+                    if attempt == 0:
+                        import time
+                        logger.warning(f"Batch embedding attempt 1 failed ({e}), retrying in 2s...")
+                        time.sleep(2)
+                    else:
+                        logger.error(
+                            f"Batch embedding failed after 2 attempts for {len(texts)} items: {e}"
+                        )
+                        errors += len(texts)
+            if embeddings is None:
                 continue
 
             for (item, point_id), embedding in zip(valid_items, embeddings):
@@ -616,15 +627,22 @@ class BDKnowledgeStore:
                 point = PointStruct(id=point_id, vector=embedding, payload=payload)
                 points.append(point)
 
-            # Upsert batch
+            # Upsert batch (retry once on transient failure)
             if points:
-                try:
-                    self.client.upsert(collection_name=collection, points=points)
-                    indexed += len(points)
-                    logger.info(f"Indexed {indexed}/{len(data)} to {collection}")
-                except Exception as e:
-                    logger.error(f"Failed to upsert batch: {e}")
-                    errors += len(points)
+                for attempt in range(2):
+                    try:
+                        self.client.upsert(collection_name=collection, points=points)
+                        indexed += len(points)
+                        logger.info(f"Indexed {indexed}/{len(data)} to {collection}")
+                        break
+                    except Exception as e:
+                        if attempt == 0:
+                            import time
+                            logger.warning(f"Upsert attempt 1 failed ({e}), retrying in 2s...")
+                            time.sleep(2)
+                        else:
+                            logger.error(f"Failed to upsert batch after 2 attempts: {e}")
+                            errors += len(points)
 
         logger.info(
             f"Completed indexing {collection}: {indexed} indexed, {errors} errors"
