@@ -163,7 +163,8 @@ class PipelineCheckpoint:
             try:
                 with open(self.checkpoint_path, "r") as f:
                     self.data = json.load(f)
-            except (json.JSONDecodeError, OSError):
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning(f"Checkpoint file corrupted ({e}), starting fresh")
                 self.data = {}
         return self.data
 
@@ -349,6 +350,14 @@ def import_engines():
         logger.info("Engine8_Knowledge loaded successfully")
     except ImportError as e:
         logger.warning(f"Engine8_Knowledge not available: {e}")
+
+    all_engine_names = ["mapping", "contacts", "briefings", "scoring", "qa", "bullhorn", "knowledge"]
+    loaded = [e for e in all_engine_names if e in engines]
+    missing = [e for e in all_engine_names if e not in engines]
+    if missing:
+        logger.warning(f"Engine startup: {len(loaded)}/{len(all_engine_names)} loaded. Missing: {', '.join(missing)}")
+    else:
+        logger.info(f"Engine startup: all {len(loaded)} engines loaded successfully")
 
     return engines
 
