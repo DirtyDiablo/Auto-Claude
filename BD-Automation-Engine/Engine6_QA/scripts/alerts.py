@@ -135,7 +135,9 @@ class AlertEngine:
             from qdrant_client import QdrantClient
             from qdrant_client.models import Filter, FieldCondition, MatchValue
 
-            client = QdrantClient(url="http://localhost:6333", timeout=10)
+            _qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+            _qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+            client = QdrantClient(url=_qdrant_url, timeout=10, api_key=_qdrant_api_key)
             # Count Tier 1 contacts
             result = client.count(
                 collection_name="contacts",
@@ -175,7 +177,9 @@ class AlertEngine:
         try:
             from qdrant_client import QdrantClient
 
-            client = QdrantClient(url="http://localhost:6333", timeout=10)
+            _qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+            _qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+            client = QdrantClient(url=_qdrant_url, timeout=10, api_key=_qdrant_api_key)
             info = client.get_collection("jobs")
             current = info.points_count
 
@@ -233,7 +237,9 @@ class AlertEngine:
             from qdrant_client import QdrantClient
             from openai import OpenAI
 
-            client = QdrantClient(url="http://localhost:6333", timeout=10)
+            _qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+            _qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+            client = QdrantClient(url=_qdrant_url, timeout=10, api_key=_qdrant_api_key)
             oai = OpenAI()
 
             # Quick benchmark: one representative query

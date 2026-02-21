@@ -8,6 +8,7 @@ Provides:
 """
 
 import logging
+import os
 from dataclasses import dataclass, asdict
 from datetime import datetime
 from typing import Dict, List, Any
@@ -75,9 +76,11 @@ class QualityMonitor:
     """Live quality monitoring for all Qdrant collections."""
 
     def __init__(
-        self, qdrant_url: str = "http://localhost:6333", client: QdrantClient = None
+        self, qdrant_url: str = None, client: QdrantClient = None
     ):
-        self.client = client or QdrantClient(url=qdrant_url, timeout=15)
+        qdrant_url = qdrant_url or os.getenv("QDRANT_URL", "http://localhost:6333")
+        qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+        self.client = client or QdrantClient(url=qdrant_url, timeout=15, api_key=qdrant_api_key)
 
     def check_collection_health(self, name: str) -> CollectionHealth:
         """Check health of a single collection."""

@@ -16,7 +16,9 @@ def check_qdrant():
     try:
         from qdrant_client import QdrantClient
 
-        client = QdrantClient(host="localhost", port=6333)
+        qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+        qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+        client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
         collections = client.get_collections().collections
         results = {}
         total = 0
@@ -80,7 +82,9 @@ def check_mem0():
     try:
         from qdrant_client import QdrantClient
 
-        client = QdrantClient(host="localhost", port=6333)
+        qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+        qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+        client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
         info = client.get_collection("bd_memories")
         return {"status": "✅", "memories": info.points_count}
     except:

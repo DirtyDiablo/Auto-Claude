@@ -25,7 +25,8 @@ EMBEDDING_MODEL = "text-embedding-3-small"
 EMBEDDING_DIM = 1536
 
 # Initialize clients
-qdrant = QdrantClient(url=QDRANT_URL, timeout=300)
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY", "") or None
+qdrant = QdrantClient(url=QDRANT_URL, timeout=300, api_key=QDRANT_API_KEY)
 openai_client = openai.OpenAI(api_key=OPENAI_API_KEY)
 
 app = FastAPI(

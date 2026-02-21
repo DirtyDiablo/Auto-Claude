@@ -14,10 +14,11 @@ from datetime import datetime
 from typing import Dict, List, Optional, Any
 from contextlib import asynccontextmanager
 
-# Add parent to path for imports and fix platform module shadowing
+# Add parent to path for imports (fallback if not installed via `pip install -e .`)
 _project_root = str(Path(__file__).parent.parent)
 _script_dir = str(Path(__file__).parent)
-sys.path.insert(0, _project_root)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 # Remove script dir from path to prevent Engine8_Knowledge/platform/ shadowing stdlib
 if _script_dir in sys.path:
     sys.path.remove(_script_dir)
@@ -27,9 +28,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 try:
-    from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request
+    from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request, Depends
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import StreamingResponse
+    from fastapi.security import APIKeyHeader
     from pydantic import BaseModel, Field
     import uvicorn
     import asyncio
@@ -172,6 +174,26 @@ except ImportError as e:
 
 API_HOST = os.getenv("KNOWLEDGE_API_HOST", "127.0.0.1")
 API_PORT = int(os.getenv("KNOWLEDGE_API_PORT", "8100"))
+
+# API Key Authentication
+# Set BD_API_KEY in .env to enable auth. When unset, auth is skipped (dev mode).
+BD_API_KEY = os.getenv("BD_API_KEY", "")
+CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+
+_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+
+
+AUTH_EXEMPT_PATHS = {"/health", "/docs", "/openapi.json", "/redoc"}
+
+
+async def verify_api_key(request: Request, api_key: str = Depends(_api_key_header)):
+    """Validate API key if BD_API_KEY is configured. Exempts health/docs."""
+    if not BD_API_KEY:
+        return  # No key configured — dev mode, skip auth
+    if request.url.path in AUTH_EXEMPT_PATHS:
+        return  # Health checks and docs don't need auth
+    if api_key != BD_API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # =========================================
 # PYDANTIC MODELS
@@ -386,14 +408,15 @@ app = FastAPI(
     description="Comprehensive API for BD Intelligence operations: search, memory, graph, agents, and more",
     version="2.0.0",
     lifespan=lifespan,
+    dependencies=[Depends(verify_api_key)],
 )
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*", "X-API-Key"],
 )
 
 # Structlog request-ID middleware
@@ -2935,7 +2958,6 @@ async def api_weekly_intel():
 async def get_qa_stats():
     """Get QA review queue statistics."""
     try:
-        sys.path.insert(0, str(Path(__file__).parent.parent))
         from Engine6_QA.scripts.qa_feedback import ReviewQueue
 
         queue = ReviewQueue()
@@ -3098,7 +3120,6 @@ async def graphiti_search(
 def get_qa_report():
     """Full quality report: collection health, quality scores, alerts."""
     try:
-        sys.path.insert(0, str(Path(__file__).parent.parent))
         from Engine6_QA.quality_monitor import QualityMonitor
 
         qdrant_client = store.client if store else None
@@ -3120,7 +3141,6 @@ def get_qa_report():
 def check_alerts_now():
     """Manually trigger alert rule evaluation."""
     try:
-        sys.path.insert(0, str(Path(__file__).parent.parent))
         from Engine6_QA.scripts.alerts import AlertEngine
 
         engine = AlertEngine()

@@ -572,6 +572,19 @@ class BDOrchestrator:
         (Path(config.output_dir) / "notion").mkdir(exist_ok=True)
         (Path(config.output_dir) / "n8n").mkdir(exist_ok=True)
 
+    def _validate_stage_output(self, stage_name: str, data: list, min_count: int = 0) -> bool:
+        """Validate that a stage produced usable output before proceeding."""
+        if data is None:
+            logger.error(f"Stage '{stage_name}' returned None — downstream stages will skip")
+            return False
+        if not isinstance(data, list):
+            logger.error(f"Stage '{stage_name}' returned {type(data).__name__}, expected list")
+            return False
+        if len(data) < min_count:
+            logger.warning(f"Stage '{stage_name}' produced only {len(data)} results (expected >= {min_count})")
+            return len(data) > 0
+        return True
+
     def run_full_pipeline(self, input_path: str = None) -> PipelineResult:
         """
         Run the complete BD automation pipeline.
@@ -628,6 +641,10 @@ class BDOrchestrator:
             logger.error(f"Ingest error: {e}")
             return self._error_result(errors, start_time)
 
+        if not self._validate_stage_output("ingest", jobs, min_count=1):
+            errors.append("Ingest produced no jobs — aborting pipeline")
+            return self._error_result(errors, start_time)
+
         # Stage 2-4: Program Mapping Pipeline
         print(f"\n[2/11] RUNNING PROGRAM MAPPING PIPELINE...")
         if "mapping" in self.engines and self.config.run_mapping:
@@ -641,8 +658,12 @@ class BDOrchestrator:
 
                 # Process jobs through mapping
                 enriched_jobs = self.engines["mapping"]["process_jobs_batch"](jobs)
-                print(f"  Mapped {len(enriched_jobs)} jobs to programs")
-                jobs = enriched_jobs
+                if self._validate_stage_output("mapping", enriched_jobs, min_count=1):
+                    print(f"  Mapped {len(enriched_jobs)} jobs to programs")
+                    jobs = enriched_jobs
+                else:
+                    errors.append("Mapping produced no results — using raw jobs")
+                    logger.warning("Mapping stage returned no results; falling back to raw jobs")
             except Exception as e:
                 errors.append(f"Mapping error: {e}")
                 logger.error(f"Mapping error: {e}")
@@ -654,8 +675,12 @@ class BDOrchestrator:
         if "scoring" in self.engines and self.config.run_scoring:
             try:
                 scored_jobs = self.engines["scoring"]["score_batch"](jobs)
-                print(f"  Scored {len(scored_jobs)} jobs")
-                jobs = scored_jobs
+                if self._validate_stage_output("scoring", scored_jobs, min_count=1):
+                    print(f"  Scored {len(scored_jobs)} jobs")
+                    jobs = scored_jobs
+                else:
+                    errors.append("Scoring produced no results — using unscored jobs")
+                    logger.warning("Scoring stage returned no results; falling back to unscored jobs")
             except Exception as e:
                 errors.append(f"Scoring error: {e}")
                 logger.error(f"Scoring error: {e}")

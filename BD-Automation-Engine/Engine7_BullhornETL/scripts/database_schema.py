@@ -422,8 +422,10 @@ def create_database():
 
 
 def get_connection():
-    """Get database connection."""
-    return sqlite3.connect(DATABASE_PATH)
+    """Get database connection with WAL mode for concurrent read/write."""
+    conn = sqlite3.connect(DATABASE_PATH)
+    conn.execute("PRAGMA journal_mode=WAL")
+    return conn
 
 
 def get_table_counts():

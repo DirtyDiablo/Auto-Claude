@@ -71,16 +71,7 @@ RRF_K = 60  # RRF constant
 # ---------------------------------------------------------------------------
 
 
-@dataclass
-class SearchResult:
-    """A single search result from hybrid search."""
-
-    id: str
-    content: str
-    score: float
-    source: str
-    channel_scores: dict = field(default_factory=dict)
-    metadata: dict = field(default_factory=dict)
+from Engine8_Knowledge.schemas.search_result import SearchResult  # noqa: E402
 
 
 @dataclass
@@ -124,7 +115,8 @@ class HybridSearchEngine:
         if self._qdrant is None:
             if not QDRANT_AVAILABLE:
                 raise RuntimeError("qdrant_client not installed")
-            self._qdrant = QdrantClient(url=self._qdrant_url, timeout=30)
+            qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+            self._qdrant = QdrantClient(url=self._qdrant_url, timeout=30, api_key=qdrant_api_key)
         return self._qdrant
 
     @property

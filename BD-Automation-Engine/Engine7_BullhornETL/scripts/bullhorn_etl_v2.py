@@ -20,10 +20,16 @@ from datetime import datetime
 from typing import Dict, List, Optional, Tuple
 import pandas as pd
 
-# Add parent to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
+# Add parent dirs to path for imports
+_scripts_dir = str(Path(__file__).parent)
+_project_root = str(Path(__file__).parent.parent.parent)
+if _scripts_dir not in sys.path:
+    sys.path.insert(0, _scripts_dir)
+if _project_root not in sys.path:
+    sys.path.insert(0, _project_root)
 
 from database_schema import create_database, get_connection, DATABASE_PATH
+from scripts.master_db.utils import COMPANY_NORMALIZATIONS, normalize_company_name  # noqa: F811
 
 # =========================================
 # CONFIGURATION
@@ -35,48 +41,9 @@ BULLHORN_EXPORTS_DIR = Path(
 OUTPUT_DIR = Path(__file__).parent.parent / "outputs"
 STAGING_DIR = Path(__file__).parent.parent / "data" / "staging"
 
-# Company name normalization mappings
-COMPANY_NORMALIZATIONS = {
-    "Leidos - ONLY ONE YOU ARE TO USE": "Leidos",
-    "Boeing - ONLY ONE YOU ARE TO USE": "Boeing",
-    "BOEING": "Boeing",
-    "LEIDOS": "Leidos",
-    "Peraton": "Peraton",
-    "SAIC": "SAIC",
-    "Raytheon": "Raytheon",
-    "Lockheed Martin": "Lockheed Martin",
-    "CACI": "CACI",
-    "ManTech": "ManTech",
-    "General Dynamics": "General Dynamics IT",
-    "Northrop Grumman": "Northrop Grumman",
-    "Booz Allen Hamilton": "Booz Allen Hamilton",
-    "Accenture Federal": "Accenture Federal Services",
-    "Jacobs": "Jacobs",
-    "KBR": "KBR",
-    "AECOM": "AECOM",
-    "LMI": "LMI",
-}
-
 # =========================================
 # UTILITY FUNCTIONS
 # =========================================
-
-
-def normalize_company_name(name: str) -> str:
-    """Normalize company name for matching."""
-    if not name:
-        return ""
-
-    # Direct mapping first
-    for key, value in COMPANY_NORMALIZATIONS.items():
-        if key.lower() in name.lower():
-            return value
-
-    # Clean up
-    name = name.strip()
-    name = re.sub(r"\s*-\s*ONLY ONE.*$", "", name, flags=re.IGNORECASE)
-    name = re.sub(r"\s+", " ", name)
-    return name.strip()
 
 
 def extract_job_number(text: str) -> Optional[str]:

@@ -16,7 +16,10 @@ logger = logging.getLogger("BD-AgentTools")
 
 # Shared clients
 _oai = OpenAI()
-_qdrant = QdrantClient(url="http://localhost:6333")
+import os
+_qdrant_url = os.getenv("QDRANT_URL", "http://localhost:6333")
+_qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+_qdrant = QdrantClient(url=_qdrant_url, api_key=_qdrant_api_key)
 
 EMBEDDING_MODEL = "text-embedding-3-small"
 SCORE_THRESHOLD = 0.35

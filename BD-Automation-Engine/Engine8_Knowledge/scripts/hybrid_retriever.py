@@ -56,13 +56,7 @@ except ImportError:
         return fn
 
 
-@dataclass
-class SearchResult:
-    id: str
-    text: str
-    score: float
-    source: str  # semantic, keyword, hybrid
-    metadata: Dict[str, Any]
+from Engine8_Knowledge.schemas.search_result import SearchResult  # noqa: E402
 
 
 class HybridRetriever:
@@ -86,7 +80,8 @@ class HybridRetriever:
         # Qdrant client - connect to server
         if QDRANT_AVAILABLE:
             try:
-                self.qdrant = QdrantClient(url=qdrant_url, timeout=60)
+                qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+                self.qdrant = QdrantClient(url=qdrant_url, timeout=60, api_key=qdrant_api_key)
                 logger.info(f"HybridRetriever connected to Qdrant at: {qdrant_url}")
             except Exception as e:
                 logger.warning(f"Qdrant init failed: {e}")
@@ -218,7 +213,7 @@ class HybridRetriever:
             return [
                 SearchResult(
                     id=str(r.id),
-                    text=self._extract_text(r.payload),
+                    content=self._extract_text(r.payload),
                     score=r.score,
                     source="semantic",
                     metadata=r.payload,
@@ -254,7 +249,7 @@ class HybridRetriever:
         return [
             SearchResult(
                 id=docs[idx].get("id", str(idx)),
-                text=docs[idx].get("text", ""),
+                content=docs[idx].get("text", ""),
                 score=float(scores[idx]),
                 source="keyword",
                 metadata=docs[idx],
@@ -327,7 +322,7 @@ class HybridRetriever:
         if not self.use_reranker or not results or not self.reranker:
             return results[:top_k]
 
-        pairs = [(query, r.text) for r in results]
+        pairs = [(query, r.content) for r in results]
         scores = self.reranker.predict(pairs)
 
         scored = list(zip(results, scores))

@@ -1,3 +1,7 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "bd-automation-engine"
 version = "1.0.0"
@@ -14,6 +18,35 @@ dev = [
     "pytest-cov>=4.1.0",
     "pytest-asyncio>=0.23.0",
     "pre-commit>=3.6.0",
+    "detect-secrets>=1.5.0",
+]
+
+[tool.setuptools.packages.find]
+include = [
+    "Engine2_ProgramMapping*",
+    "Engine3_OrgChart*",
+    "Engine4_Playbook*",
+    "Engine5_Scoring*",
+    "Engine6_QA*",
+    "Engine7_BullhornETL*",
+    "Engine8_Knowledge*",
+    "api*",
+    "config*",
+    "services*",
+    "utils*",
+    "models*",
+    "streaming*",
+    "dify_integration*",
+    "memory*",
+    "src*",
+]
+exclude = [
+    "skills*",
+    "data*",
+    "outputs*",
+    "docs*",
+    "tests*",
+    ".auto-claude*",
 ]
 
 # ─── Ruff ─────────────────────────────────────────────────

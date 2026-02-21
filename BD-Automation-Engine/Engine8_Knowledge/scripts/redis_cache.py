@@ -75,6 +75,11 @@ class SemanticCache:
         ttl_hours: int = 24,
     ):
         redis_url = redis_url or os.getenv("REDIS_URL", "redis://localhost:6379")
+        # Support explicit password via env var (injected into URL if not already present)
+        redis_password = os.getenv("REDIS_PASSWORD", "")
+        if redis_password and "@" not in redis_url:
+            # Insert password into redis://host:port → redis://:password@host:port
+            redis_url = redis_url.replace("redis://", f"redis://:{redis_password}@", 1)
         self.similarity_threshold = similarity_threshold
         self.ttl = timedelta(hours=ttl_hours)
 

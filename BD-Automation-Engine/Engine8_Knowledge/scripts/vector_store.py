@@ -212,7 +212,8 @@ class BDKnowledgeStore:
         if url:
             # Server mode - connects to Qdrant server (supports concurrent writes)
             # Use longer timeout (600s) for large batch operations with slow servers
-            self.client = QdrantClient(url=url, timeout=600)
+            qdrant_api_key = os.getenv("QDRANT_API_KEY", "") or None
+            self.client = QdrantClient(url=url, timeout=600, api_key=qdrant_api_key)
             self.path = None
             logger.info(f"Connected to Qdrant server at: {url}")
         elif in_memory:
@@ -338,6 +339,25 @@ class BDKnowledgeStore:
             return response.data[0].embedding
 
         return _do_call()
+
+    def _generate_embeddings_batch(self, texts: List[str]) -> List[List[float]]:
+        """Generate embeddings for a batch of texts in a single API call.
+
+        OpenAI supports up to 2048 inputs per call. This is ~100x faster than
+        single-text calls for bulk indexing operations.
+        """
+        # Ensure no empty texts
+        sanitized = [t if t and t.strip() else "empty" for t in texts]
+        try:
+            response = self.openai_client.embeddings.create(
+                model=self.model_name,
+                input=sanitized,
+            )
+            # Response data is ordered by index
+            return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]
+        except Exception as e:
+            logger.error(f"Batch embedding error for {len(texts)} texts: {e}")
+            raise
 
     def _generate_text_for_embedding(self, data: Dict, config: CollectionConfig) -> str:
         """Generate concatenated text for embedding from data fields."""
@@ -548,36 +568,43 @@ class BDKnowledgeStore:
         indexed = 0
         errors = 0
 
-        # Process in batches
+        # Process in batches — batch embedding for ~100x speedup
         for i in range(0, len(data), batch_size):
             batch = data[i : i + batch_size]
             points = []
 
+            # Prepare texts and metadata for batch embedding
+            texts = []
+            valid_items = []
             for item in batch:
                 try:
-                    # Generate embedding text
                     text = self._generate_text_for_embedding(item, config)
-
-                    # Generate embedding
-                    embedding = self._generate_embedding(text)
-
-                    # Generate point ID
                     point_id = self._generate_point_id(item, collection)
-
-                    # Create payload (include all data plus metadata)
-                    payload = {
-                        **item,
-                        "_indexed_at": datetime.now().isoformat(),
-                        "_embedding_model": self.model_name,
-                    }
-
-                    # Create point
-                    point = PointStruct(id=point_id, vector=embedding, payload=payload)
-                    points.append(point)
-
+                    texts.append(text)
+                    valid_items.append((item, point_id))
                 except Exception as e:
-                    logger.warning(f"Failed to process item: {e}")
+                    logger.warning(f"Failed to prepare item: {e}")
                     errors += 1
+
+            if not texts:
+                continue
+
+            # Batch embed all texts in one API call
+            try:
+                embeddings = self._generate_embeddings_batch(texts)
+            except Exception as e:
+                logger.error(f"Batch embedding failed for {len(texts)} items: {e}")
+                errors += len(texts)
+                continue
+
+            for (item, point_id), embedding in zip(valid_items, embeddings):
+                payload = {
+                    **item,
+                    "_indexed_at": datetime.now().isoformat(),
+                    "_embedding_model": self.model_name,
+                }
+                point = PointStruct(id=point_id, vector=embedding, payload=payload)
+                points.append(point)
 
             # Upsert batch
             if points:
