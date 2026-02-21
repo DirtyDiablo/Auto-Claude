@@ -88,8 +88,8 @@ An 8-engine pipeline for Business Development automation:
 |---|---|
 | Total Python files | 250+ |
 | Total API endpoints | 50+ |
-| API routers | 13 |
-| AI agent types | 20+ |
+| API routers | 14 |
+| AI agent types | 23 files (12 specialist + 4 autonomous + 7 support) |
 | Vector collections | 8 (8,705+ vectors) |
 | SQLite databases | 8 |
 | CSV data files | 500+ |
@@ -145,6 +145,54 @@ An 8-engine pipeline for Business Development automation:
 - **Multiple `load_dotenv()` calls** — 5 Engine8 scripts load dotenv independently
 - **`print()` as logging** in Engine3 contact_lookup.py and orchestrator.py
 - **Notion DB IDs hardcoded** as defaults in `config/settings.py` (data leak risk if repo goes public)
+
+### Security Audit (Score: 52-72/100 — 23 findings across 2 audits)
+
+**P0 — CRITICAL (5 findings):**
+- **ROTATE ALL CREDENTIALS** — `.env` file on disk contains 12+ live production API keys (Anthropic, OpenAI, Notion, N8N, Supabase, Apify, Neo4j). Verify not in git history with `git log --all --full-history -- .env`
+- **Hardcoded API key in version control** — `skills/bocha-skill/PUBLISH.md` contains a real API key. Remove and rotate
+- **Unauthenticated parallel API** — `simple_knowledge_api.py` has zero auth + wildcard CORS with credentials, exposes all 7,337+ CRM contacts. Remove or gate behind auth
+- **Command injection via pipeline trigger** — `/pipeline/trigger` endpoint passes unsanitized `input_file` to subprocess, enabling arbitrary file read via path traversal. Add path validation
+- **SQL injection via f-string** — `hybrid_endpoints.py:555`, `api.py:3622`, `corpus_builder.py:133/164`, `bd_knowledge_graph.py:466` use f-string SQL. Create `_validate_table_name()` helper
+
+**P1 — HIGH (6 findings):**
+- **Dev mode = full admin** — When neither `BD_API_KEY` nor `BD_JWT_SECRET` is set (default), all requests get admin access. Add production-mode detection
+- **`.secrets.baseline` is empty** — detect-secrets has never scanned or baseline was reset. Run `detect-secrets scan`
+- **`pip-audit || true` in CI** — silently ignores vulnerabilities (remove `|| true`)
+- **Shell command for package install** — `Engine2_ProgramMapping/data/enrich-federal-programs-v3.py:26` runs shell pip install. Remove, add dependency to requirements.txt
+- **Error messages leak internals** — 196 occurrences of `detail=str(e)` across 44 files. Return generic errors
+- **Duplicate auth systems** — `unified_endpoints.py` uses timing-unsafe `!=` for key comparison (vs `hmac.compare_digest` in `auth.py`). Consolidate
+
+**P1 (continued):**
+- **PII exposure in API** — `/bdgraph/data` returns raw email, phone, linkedin for all contacts without role-based masking. Add field-level access control
+- **Rate limiting optional** — `slowapi` import fails silently; in-memory fallback has unbounded memory leak. Make rate limiting required
+- **Hardcoded Bullhorn path** — `bullhorn_etl_v2.py:39` has developer-specific absolute path. Use env var
+
+**P2 — MEDIUM (12 findings):**
+- Notion DB IDs hardcoded in `settings.py` and `.env.example` (use placeholders)
+- Broad dependency version ranges in `requirements.txt` (pin to minor versions)
+- CORS allows credentials with wildcard methods (restrict to needed methods)
+- Docker services bind to all interfaces (bind to `127.0.0.1` for dev, Redis has no password)
+- API key store is plaintext JSON with write-on-every-request race condition
+- File upload without size limits in `/ingest/scraper-batch` (memory exhaustion)
+- API key SHA-256 without salt — use `pbkdf2_hmac` or bcrypt
+- SSRF prevention incomplete (IPv6 mapped addresses, DNS rebinding not covered)
+- Webhook endpoints need HMAC signature verification
+- Custom JWT implementation instead of PyJWT library (missing `jti`, `nbf` claims)
+- OpenAPI/Swagger docs exposed without auth (`/docs`, `/openapi.json` in AUTH_EXEMPT_PATHS)
+- JWT lacks `jti` claim — no token revocation capability
+- Error messages leak internal details via `detail=str(e)` (return generic errors)
+- `.env.example` contains real resource identifiers
+
+**Security Strengths:**
+- SSRF protection with private IP blocklist (including cloud metadata `169.254.169.254`)
+- File path traversal prevention in `scrape_api_v2.py` with `_validate_file_path()`
+- RBAC with role hierarchy (`admin` > `bd_manager` > `bd_team`), permission scopes
+- Parameterized SQL in core ETL (`executemany` with `?` placeholders)
+- Multi-stage Docker build (non-root user, minimal runtime, health checks)
+- Secret detection in CI (Yelp/detect-secrets with baseline)
+- All secrets via env vars (Pydantic Settings), `.env` gitignored
+- JWT uses `hmac.compare_digest()` for timing-safe comparison
 
 ---
 
@@ -341,25 +389,43 @@ An 8-engine pipeline for Business Development automation:
 ```
 Engine8_Knowledge/
 ├── api.py                          # FastAPI server (3000+ lines, 50+ endpoints)
-├── api_routers/                    # 13 routers
+├── api_routers/                    # 14 routers
+│   ├── auth_api.py                 # Authentication endpoints (JWT, API key, RBAC)
 │   ├── hybrid_endpoints.py         # BM25 + semantic hybrid search
 │   ├── mcp_api.py                  # MCP server integration
 │   ├── memory_api.py               # Mem0 memory operations
 │   ├── ml_api.py                   # ML models (NER, topic, predictors)
 │   ├── monitoring_api.py           # Metrics and observability
+│   ├── optimizer_api.py            # Query and index optimization
 │   ├── org_chart_api.py            # Organization hierarchy queries
+│   ├── phase7_endpoints.py         # Phase 7 core knowledge endpoints
+│   ├── phase8a_pipeline.py         # Phase 8A pipeline management
+│   ├── phase9a_competitive.py      # Phase 9A competitive intelligence
+│   ├── phase10a_reports.py         # Phase 10A reporting and dashboards
 │   ├── scrape_api_v2.py            # Web scraping orchestration
-│   └── phase9a_competitive.py      # Competitive intelligence
-├── agents/                         # 20+ agent types
+│   └── __init__.py
+├── agents/                         # 23 agent files
+│   ├── base_agent.py               # Base agent class (shared LLM client)
+│   ├── bd_agents.py                # BD agent collection
 │   ├── bd_strategy_agent.py        # BD strategy formulation
-│   ├── company_research_agent.py   # Company deep-dive
+│   ├── company_research_agent.py   # Company deep-dive research
+│   ├── contact_classifier_agent.py # Contact tier classification
 │   ├── contact_finder_agent.py     # Contact discovery
 │   ├── program_intel_agent.py      # Program intelligence
-│   ├── crewai_orchestrator.py      # CrewAI multi-agent
+│   ├── analytics_agent.py          # Analytics and metrics
+│   ├── quality_assurance_agent.py  # Data quality checks
+│   ├── scraper_monitor_agent.py    # Scraping job monitoring
+│   ├── crewai_orchestrator.py      # CrewAI multi-agent coordination
+│   ├── crews.py                    # CrewAI crew definitions
+│   ├── tools.py                    # Agent tool definitions
+│   ├── workflows.py                # Agent workflow patterns
+│   ├── models.py                   # Agent data models
+│   ├── api_routes.py               # Agent API route registration
 │   └── autonomous/                 # Autonomous agents
 │       ├── morning_briefing.py     # Daily intel briefing
 │       ├── contact_enrichment.py   # Auto contact enrichment
-│       └── scheduler.py           # Cron-based execution
+│       ├── scheduler.py            # Cron-based execution
+│       └── routes.py               # Autonomous agent routes
 ├── graph/                          # Neo4j knowledge graph
 │   ├── bd_knowledge_graph.py       # BD-specific graph operations
 │   ├── community_detection.py      # Network community analysis

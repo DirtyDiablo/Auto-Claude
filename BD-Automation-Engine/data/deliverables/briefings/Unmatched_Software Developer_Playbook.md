@@ -1,7 +1,7 @@
 # BD Playbook: Software Developer
 ## Unmatched Opportunity
 
-**Generated:** 2026-02-11 01:40
+**Generated:** 2026-02-21 00:12
 **Priority:** 🟡 Warm (Score: 65/100)
 **Match Confidence:** 50% (inferred)
 
