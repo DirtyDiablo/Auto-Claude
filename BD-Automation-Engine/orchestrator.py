@@ -1329,7 +1329,8 @@ class BDOrchestrator:
             try:
                 with open(state_file, "r") as f:
                     state = json.load(f)
-            except (json.JSONDecodeError, OSError):
+            except (json.JSONDecodeError, OSError) as e:
+                logger.warning(f"Pipeline state file corrupted ({e}), resetting run history")
                 state = {}
 
         run_record = {
@@ -1372,7 +1373,7 @@ class BDOrchestrator:
                 engine.deliver_all(alerts)
                 logger.info(f"Delivered {len(alerts)} alert(s)")
         except ImportError:
-            logger.debug("Alert engine not available")
+            logger.warning("Alert engine not available (Engine6_QA.scripts.alerts not installed)")
         except Exception as e:
             logger.error(f"Alert check failed: {e}")
 

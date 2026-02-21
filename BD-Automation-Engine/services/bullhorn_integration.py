@@ -466,8 +466,15 @@ def get_bullhorn_client(use_mock: bool = False) -> BullhornClient:
     """Get Bullhorn client (real or mock)."""
     config = BullhornConfig()
 
-    if use_mock or not config.client_id:
-        logger.info("Using mock Bullhorn client (credentials not configured)")
+    if use_mock:
+        logger.info("Using mock Bullhorn client (explicitly requested)")
+        return MockBullhornClient(config)
+
+    if not config.client_id:
+        logger.warning(
+            "Bullhorn credentials not configured (BULLHORN_CLIENT_ID missing). "
+            "Using mock client — data will be synthetic. Set credentials for real CRM data."
+        )
         return MockBullhornClient(config)
 
     return BullhornClient(config)

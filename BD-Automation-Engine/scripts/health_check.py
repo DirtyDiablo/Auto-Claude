@@ -73,8 +73,8 @@ def check_vite():
 
         r = httpx.get("http://localhost:5173", timeout=3)
         return {"status": "✅", "code": r.status_code}
-    except Exception:
-        return {"status": "⏸️", "note": "Not running (start with: npm run dev)"}
+    except Exception as e:
+        return {"status": "⏸️", "note": f"Not running ({e})"}
 
 
 def check_mem0():
@@ -87,8 +87,8 @@ def check_mem0():
         client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
         info = client.get_collection("bd_memories")
         return {"status": "✅", "memories": info.points_count}
-    except Exception:
-        return {"status": "⚠️", "memories": 0}
+    except Exception as e:
+        return {"status": "⚠️", "memories": 0, "error": str(e)}
 
 
 def check_git():
@@ -110,8 +110,8 @@ def check_git():
             "last_commit": last_commit,
             "dirty_files": len(dirty.split("\n")) if dirty else 0,
         }
-    except Exception:
-        return {"branch": "unknown", "last_commit": "unknown", "dirty_files": "?"}
+    except Exception as e:
+        return {"branch": "unknown", "last_commit": "unknown", "dirty_files": "?", "error": str(e)}
 
 
 def format_report(qdrant, api, neo4j, vite, mem0, git):
