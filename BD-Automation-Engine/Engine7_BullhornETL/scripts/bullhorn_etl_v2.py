@@ -636,7 +636,7 @@ class BullhornETLv2:
             return "leidos_jobs"
 
         try:
-            df = pd.read_excel(file_path, engine="xlrd", header=None)
+            df = pd.read_excel(file_path, engine="xlrd", header=None, nrows=3)
 
             # Check for empty files
             if (
@@ -923,45 +923,48 @@ class BullhornETLv2:
         print("\nBuilding Past Performance Summary...")
         cursor = self.conn.cursor()
 
-        # Get all prime contractors
+        # Bulk job stats (1 query instead of N)
+        cursor.execute("""
+            SELECT
+                prime_contractor,
+                COUNT(*) as total_jobs,
+                SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as open_jobs,
+                SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as closed_jobs,
+                SUM(CASE WHEN status IN ('Filled', 'Placed') THEN 1 ELSE 0 END) as filled_jobs,
+                AVG(bill_rate) as avg_bill_rate,
+                AVG(pay_rate) as avg_pay_rate,
+                MIN(date_added) as first_job,
+                MAX(date_added) as last_job
+            FROM jobs
+            GROUP BY prime_contractor
+        """)
+        job_stats_map = {}
+        for row in cursor.fetchall():
+            job_stats_map[row[0]] = row[1:]  # key=prime_contractor, value=stats tuple
+
+        # Bulk placement stats (1 query instead of N)
+        cursor.execute("""
+            SELECT
+                client_name,
+                COUNT(*) as total_placements,
+                AVG(bill_rate) as avg_bill_rate,
+                AVG(pay_rate) as avg_pay_rate,
+                MIN(start_date) as first_placement,
+                MAX(start_date) as last_placement
+            FROM placements
+            GROUP BY client_name
+        """)
+        placement_stats_map = {}
+        for row in cursor.fetchall():
+            placement_stats_map[row[0]] = row[1:]
+
+        # Get all prime contractors and merge stats
         cursor.execute("SELECT id, name FROM prime_contractors")
         primes = cursor.fetchall()
 
         for prime_id, prime_name in primes:
-            # Get job stats
-            cursor.execute(
-                """
-                SELECT
-                    COUNT(*) as total_jobs,
-                    SUM(CASE WHEN status = 'Open' THEN 1 ELSE 0 END) as open_jobs,
-                    SUM(CASE WHEN status = 'Closed' THEN 1 ELSE 0 END) as closed_jobs,
-                    SUM(CASE WHEN status IN ('Filled', 'Placed') THEN 1 ELSE 0 END) as filled_jobs,
-                    AVG(bill_rate) as avg_bill_rate,
-                    AVG(pay_rate) as avg_pay_rate,
-                    MIN(date_added) as first_job,
-                    MAX(date_added) as last_job
-                FROM jobs
-                WHERE prime_contractor = ?
-            """,
-                (prime_name,),
-            )
-            job_stats = cursor.fetchone()
-
-            # Get placement stats
-            cursor.execute(
-                """
-                SELECT
-                    COUNT(*) as total_placements,
-                    AVG(bill_rate) as avg_bill_rate,
-                    AVG(pay_rate) as avg_pay_rate,
-                    MIN(start_date) as first_placement,
-                    MAX(start_date) as last_placement
-                FROM placements
-                WHERE client_name = ?
-            """,
-                (prime_name,),
-            )
-            placement_stats = cursor.fetchone()
+            job_stats = job_stats_map.get(prime_name, (0, 0, 0, 0, 0, 0, None, None))
+            placement_stats = placement_stats_map.get(prime_name, (0, 0, 0, None, None))
 
             # Calculate fill rate
             total_jobs = job_stats[0] or 0
@@ -1043,8 +1046,8 @@ class BullhornETLv2:
                             )
                         except Exception as e:
                             skipped_contacts += 1
-                            if skipped_contacts <= 3:
-                                print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
+                            if skipped_contacts <= 5:
+                                print(f"  WARN: Skipped contact insert ({skipped_contacts}): {e}")
 
         # Extract contacts from notes
         for note in self.all_notes:
@@ -1094,8 +1097,10 @@ class BullhornETLv2:
                         if skipped_contacts <= 3:
                             print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
 
-        if skipped_contacts > 3:
-            print(f"  WARN: {skipped_contacts} total contacts skipped due to insert errors")
+        if skipped_contacts > 5:
+            print(f"  WARN: {skipped_contacts} total contacts skipped due to insert errors (showing first 5)")
+        elif skipped_contacts > 0:
+            print(f"  WARN: {skipped_contacts} contacts skipped due to insert errors")
 
         self.conn.commit()
 

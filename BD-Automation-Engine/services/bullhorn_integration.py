@@ -63,8 +63,7 @@ class BullhornClient:
             return False
 
         try:
-            # Step 1: Get authorization code
-            f"{self.config.api_url}/oauth/authorize"
+            # Step 1: Build authorization parameters
             auth_params = {
                 "client_id": self.config.client_id,
                 "response_type": "code",
@@ -76,8 +75,7 @@ class BullhornClient:
             # Note: In production, this would be a proper OAuth flow
             # This is a simplified version for server-to-server auth
 
-            # Step 2: Exchange code for access token
-            f"{self.config.api_url}/oauth/token"
+            # Step 2: Exchange credentials for access token
             token_data = {
                 "grant_type": "password",
                 "client_id": self.config.client_id,
@@ -86,12 +84,42 @@ class BullhornClient:
                 "password": self.config.password,
             }
 
-            # In a real implementation, make the OAuth request
-            # response = requests.post(token_url, data=token_data)
+            # Execute OAuth token request
+            token_url = f"{self.config.api_url}/oauth/token"
+            response = requests.post(token_url, data=token_data, timeout=30)
+            if response.status_code != 200:
+                logger.error(f"Bullhorn OAuth failed: HTTP {response.status_code} — {response.text[:200]}")
+                self._authenticated = False
+                return False
 
-            logger.info("Bullhorn authentication not fully implemented - using mock")
+            token_response = response.json()
+            self.config.access_token = token_response.get("access_token", "")
+            self.config.refresh_token = token_response.get("refresh_token", "")
+
+            # Step 3: Get REST token
+            login_url = f"{self.config.api_url}/rest-services/login"
+            login_params = {
+                "version": "2.0",
+                "access_token": self.config.access_token,
+            }
+            login_response = requests.get(login_url, params=login_params, timeout=30)
+            if login_response.status_code != 200:
+                logger.error(f"Bullhorn REST login failed: HTTP {login_response.status_code}")
+                self._authenticated = False
+                return False
+
+            login_data = login_response.json()
+            self.config.rest_url = login_data.get("restUrl", "")
+            self.config.bh_rest_token = login_data.get("BhRestToken", "")
+
+            if not self.config.rest_url or not self.config.bh_rest_token:
+                logger.error("Bullhorn REST login returned empty restUrl or BhRestToken")
+                self._authenticated = False
+                return False
+
             self._authenticated = True
             self._token_expiry = datetime.now() + timedelta(hours=1)
+            logger.info("Bullhorn authentication successful")
             return True
 
         except Exception as e:

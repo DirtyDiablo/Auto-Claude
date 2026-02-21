@@ -11,10 +11,14 @@ Usage:
 """
 
 import os
+import sys
+from pathlib import Path
 from typing import List, Dict, Any, Optional
-from dataclasses import dataclass
 from collections import defaultdict
 from dotenv import load_dotenv
+
+# Add project root to path for canonical imports
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
 load_dotenv()
 
@@ -55,16 +59,21 @@ except ImportError:
     OPENAI_AVAILABLE = False
 
 
-@dataclass
-class SearchResult:
-    """Unified search result."""
+# Import canonical SearchResult
+try:
+    from Engine8_Knowledge.schemas.search_result import SearchResult
+except ImportError:
+    from dataclasses import dataclass, field
 
-    id: str
-    collection: str
-    payload: Dict[str, Any]
-    score: float
-    search_type: str  # "dense", "sparse", "graph"
-    rrf_score: float = 0.0
+    @dataclass
+    class SearchResult:
+        """Fallback if canonical import fails."""
+        id: str
+        score: float
+        collection: str = ""
+        payload: Dict[str, Any] = field(default_factory=dict)
+        search_type: str = ""
+        rrf_score: float = 0.0
 
 
 class HybridSearch:

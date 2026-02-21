@@ -153,22 +153,11 @@ COLLECTION_CONFIGS = {
 }
 
 
-@dataclass
-class SearchResult:
-    """Result from a semantic search."""
-
-    id: str
-    score: float
-    payload: Dict[str, Any]
-    collection: str
-
-    def to_dict(self) -> Dict:
-        return {
-            "id": self.id,
-            "score": self.score,
-            "payload": self.payload,
-            "collection": self.collection,
-        }
+# Import canonical SearchResult from schemas
+try:
+    from Engine8_Knowledge.schemas.search_result import SearchResult
+except ImportError:
+    from schemas.search_result import SearchResult
 
 
 # =========================================

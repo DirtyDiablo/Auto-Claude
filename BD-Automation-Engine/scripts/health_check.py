@@ -73,7 +73,7 @@ def check_vite():
 
         r = httpx.get("http://localhost:5173", timeout=3)
         return {"status": "✅", "code": r.status_code}
-    except:
+    except Exception:
         return {"status": "⏸️", "note": "Not running (start with: npm run dev)"}
 
 
@@ -87,7 +87,7 @@ def check_mem0():
         client = QdrantClient(url=qdrant_url, api_key=qdrant_api_key)
         info = client.get_collection("bd_memories")
         return {"status": "✅", "memories": info.points_count}
-    except:
+    except Exception:
         return {"status": "⚠️", "memories": 0}
 
 
@@ -110,7 +110,7 @@ def check_git():
             "last_commit": last_commit,
             "dirty_files": len(dirty.split("\n")) if dirty else 0,
         }
-    except:
+    except Exception:
         return {"branch": "unknown", "last_commit": "unknown", "dirty_files": "?"}
 
 

@@ -29,10 +29,15 @@ class SimilarRequest(BaseModel):
 
 
 class SearchResultModel(BaseModel):
+    """Pydantic API model aligned with canonical SearchResult dataclass."""
     id: str
     score: float
-    payload: Dict[str, Any]
-    collection: str
+    payload: Dict[str, Any] = Field(default_factory=dict)
+    collection: str = ""
+    content: str = ""
+    source: str = ""
+    search_type: str = ""
+    rrf_score: float = 0.0
 
 
 class SearchResponse(BaseModel):

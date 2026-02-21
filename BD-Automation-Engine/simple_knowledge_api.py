@@ -4,6 +4,8 @@ Minimal dependencies: fastapi, uvicorn, qdrant-client, openai
 """
 
 import os
+import sys
+from pathlib import Path
 from typing import List, Optional, Dict, Any
 from datetime import datetime
 
@@ -11,6 +13,9 @@ from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from dotenv import load_dotenv
+
+# Add project root for canonical imports
+sys.path.insert(0, str(Path(__file__).parent))
 
 load_dotenv()
 
@@ -52,10 +57,14 @@ class SearchRequest(BaseModel):
     filters: Optional[Dict[str, Any]] = None
 
 
-class SearchResult(BaseModel):
-    id: str
-    score: float
-    payload: Dict[str, Any]
+# Import unified Pydantic model from canonical models
+try:
+    from Engine8_Knowledge.models import SearchResultModel as SearchResult
+except ImportError:
+    class SearchResult(BaseModel):
+        id: str
+        score: float
+        payload: Dict[str, Any] = {}
 
 
 class SearchResponse(BaseModel):

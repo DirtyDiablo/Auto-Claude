@@ -13,6 +13,9 @@ import os
 import re
 import json
 import csv
+import logging
+
+logger = logging.getLogger(__name__)
 from datetime import datetime
 from collections import defaultdict
 
@@ -891,8 +894,8 @@ def find_past_performance(program_mapping, ref_data):
                 try:
                     results["avg_bill_rate"] = float(pp.get("avg_bill_rate", 0) or 0)
                     results["avg_margin"] = float(pp.get("avg_margin", 0) or 0)
-                except:
-                    pass
+                except (ValueError, TypeError) as e:
+                    logger.warning(f"Could not parse financial data for {prime_lower}: {e}")
 
         # Find relevant placements
         for pl in placements:

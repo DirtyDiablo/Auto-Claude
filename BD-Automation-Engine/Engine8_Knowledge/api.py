@@ -133,12 +133,6 @@ except ImportError as e:
     logger.warning(f"Streaming router not available: {e}")
 
 try:
-    MEMORY_AVAILABLE = True
-except ImportError as e:
-    MEMORY_AVAILABLE = False
-    logger.warning(f"Memory router not available: {e}")
-
-try:
     from dify_integration.dify_qdrant_bridge import create_dify_knowledge_router
     from dify_integration.dify_crewai_bridge import create_dify_agents_router
     from dify_integration.dify_n8n_bridge import create_dify_n8n_router
@@ -403,10 +397,7 @@ if STREAMING_AVAILABLE:
 
 # Supermemory router disabled - using local Mem0-based memory endpoints instead
 # The Supermemory API (api.supermemory.ai) returns 404 errors
-# if MEMORY_AVAILABLE:
-#     app.include_router(memory_router)
-#     logger.info("Memory routes enabled: /memory/*")
-logger.info("Using local Mem0 memory endpoints (Supermemory disabled)")
+logger.info("Using local Mem0 memory endpoints")
 
 if DIFY_INTEGRATION_AVAILABLE:
     app.include_router(create_dify_knowledge_router(), prefix="/dify")
