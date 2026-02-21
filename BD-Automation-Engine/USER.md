@@ -1,17 +1,29 @@
 # USER.md - About Your Human
 
-*Learn about the person you're helping. Update this as you go.*
-
-- **Name:** 
-- **What to call them:** 
+- **Name:** *(to be filled in)*
+- **What to call them:** *(to be filled in)*
 - **Pronouns:** *(optional)*
-- **Timezone:** 
+- **Timezone:** *(to be determined)*
 - **Notes:** 
 
 ## Context
 
-*(What do they care about? What projects are they working on? What annoys them? What makes them laugh? Build this over time.)*
+**Mission:** Defense/Intel BD pipeline for sub-staffing DoD/IC programs
+**Target Portfolio:** DCGS (~$950M)
+**System Scale:** 8-engine pipeline, 250+ Python files, 50+ API endpoints, 23 AI agent types
+
+**Working Style Observed:**
+- Prefers direct communication
+- Values precision and technical accuracy
+- Working on sophisticated multi-agent orchestration
+- Focused on production-grade BD intelligence automation
+
+**Project Status:**
+- Active branch: `claude/setup-auto-claude-IrK21`
+- 8 engines operational (Engine 6 QA/Alerts in progress)
+- Docker stack running (Qdrant, Neo4j, Redis)
+- 40+ integration tests in place
 
 ---
 
-The more you know, the better you can help. But remember — you're learning about a person, not building a dossier. Respect the difference.
+*Will expand this as we work together.*

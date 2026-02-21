@@ -1,0 +1,53 @@
+{
+  "last_completed_run": {
+    "run_id": "RUN_20260221_002430",
+    "timestamp": "2026-02-21T00:24:30.817038",
+    "success": true,
+    "duration_seconds": 23.612463,
+    "stats": {
+      "jobs_processed": 3,
+      "hot_leads": 2,
+      "warm_leads": 1,
+      "cold_leads": 0,
+      "briefings_generated": 3,
+      "qa_approved": 0,
+      "qa_needs_review": 3
+    },
+    "errors": []
+  },
+  "history": [
+    {
+      "run_id": "RUN_20260221_002027",
+      "timestamp": "2026-02-21T00:20:27.444159",
+      "success": true,
+      "duration_seconds": 22.504714,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
+    },
+    {
+      "run_id": "RUN_20260221_002430",
+      "timestamp": "2026-02-21T00:24:30.817038",
+      "success": true,
+      "duration_seconds": 23.612463,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
+    }
+  ],
+  "current_run": null
+}

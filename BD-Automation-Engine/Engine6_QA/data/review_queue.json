@@ -736,5 +736,153 @@
       "recommended_fix": "Manual review required - verify program match signals",
       "auto_fixable": false
     }
+  },
+  {
+    "job_id": "https://example.com/job1",
+    "added_at": "2026-02-21T00:20:04.972496",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "High clearance requires verification"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "data_quality",
+      "severity": "low",
+      "description": "Moderate confidence 50.0% - verification recommended",
+      "recommended_fix": "Quick review - validate program match makes sense",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job2",
+    "added_at": "2026-02-21T00:20:04.978003",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "AF DCGS - Langley",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job3",
+    "added_at": "2026-02-21T00:20:04.983586",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "Corporate HQ",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job1",
+    "added_at": "2026-02-21T00:24:07.215910",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "High clearance requires verification"
+    ],
+    "original_program": "Distributed Common Ground System (AF)",
+    "reviewed": false,
+    "root_cause": {
+      "type": "data_quality",
+      "severity": "low",
+      "description": "Moderate confidence 50.0% - verification recommended",
+      "recommended_fix": "Quick review - validate program match makes sense",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job2",
+    "added_at": "2026-02-21T00:24:07.218423",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "AF DCGS - Langley",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "https://example.com/job3",
+    "added_at": "2026-02-21T00:24:07.222951",
+    "status": "needs_review",
+    "confidence": 0.2,
+    "review_reasons": [
+      "Low confidence 20%"
+    ],
+    "original_program": "Corporate HQ",
+    "reviewed": false,
+    "root_cause": {
+      "type": "low_confidence",
+      "severity": "high",
+      "description": "Mapping confidence 20.0% below threshold (50%)",
+      "recommended_fix": "Manual review required - verify program match signals",
+      "auto_fixable": false
+    }
+  },
+  {
+    "job_id": "2529897497664",
+    "added_at": "2026-02-21T00:25:22.486487",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
+  },
+  {
+    "job_id": "1849834701568",
+    "added_at": "2026-02-21T00:25:44.086158",
+    "status": "needs_review",
+    "confidence": 0.5,
+    "review_reasons": [
+      "Confidence 50% below threshold",
+      "No program match found"
+    ],
+    "original_program": "Unmatched",
+    "reviewed": false,
+    "root_cause": {
+      "type": "invalid_mapping",
+      "severity": "critical",
+      "description": "No valid program match found",
+      "recommended_fix": "Re-run program mapper with expanded search criteria",
+      "auto_fixable": true
+    }
   }
 ]

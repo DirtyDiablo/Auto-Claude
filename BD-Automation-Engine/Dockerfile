@@ -1,6 +1,8 @@
 # BD Intelligence Hub API — Multi-stage Docker Build
-# Stage 1: Build dependencies with uv
-# Stage 2: Minimal runtime image
+# Feature 14: Production Deployment
+#
+# Stage 1: Install dependencies with uv (fast resolver)
+# Stage 2: Minimal runtime image with non-root user
 
 # ── Stage 1: Builder ─────────────────────────────────────
 FROM python:3.12-slim AS builder
@@ -25,7 +27,7 @@ RUN uv venv /build/.venv \
 FROM python:3.12-slim AS runtime
 
 # Non-root user
-RUN groupadd -r appuser && useradd -r -g appuser -d /app appuser
+RUN groupadd -r bduser && useradd -r -g bduser -d /app bduser
 
 # Minimal runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -38,7 +40,7 @@ WORKDIR /app
 COPY --from=builder /build/.venv /app/.venv
 ENV PATH="/app/.venv/bin:$PATH"
 
-# Copy application code (no gcc/g++ in runtime)
+# Copy application code
 COPY Engine8_Knowledge/ ./Engine8_Knowledge/
 COPY Engine2_ProgramMapping/ ./Engine2_ProgramMapping/
 COPY Engine3_OrgChart/ ./Engine3_OrgChart/
@@ -48,25 +50,35 @@ COPY api/ ./api/
 COPY config/ ./config/
 COPY services/ ./services/
 COPY utils/ ./utils/
+COPY workflows/ ./workflows/
+COPY migrations/ ./migrations/
+COPY orchestrator.py ./orchestrator.py
+
+# Copy entrypoint script
+COPY scripts/docker-entrypoint.sh /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
 
 # Create data directories
 RUN mkdir -p /app/Engine8_Knowledge/data/automation \
     /app/Engine8_Knowledge/data/embeddings \
     /app/Engine8_Knowledge/data/models \
     /app/data \
-    && chown -R appuser:appuser /app
+    /app/logs \
+    && chown -R bduser:bduser /app
 
 # Environment
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV API_HOST=0.0.0.0
 ENV API_PORT=8100
+ENV WORKERS=2
 
 EXPOSE 8100
 
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
     CMD curl -f http://localhost:8100/health || exit 1
 
-USER appuser
+USER bduser
 
-CMD ["python", "-m", "uvicorn", "Engine8_Knowledge.api:app", "--host", "0.0.0.0", "--port", "8100"]
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
+CMD ["serve"]

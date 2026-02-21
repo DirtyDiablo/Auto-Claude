@@ -1,0 +1,16 @@
+{
+  "timestamp": "2026-02-21T00:19:26.837624",
+  "sample_size": 0,
+  "manual_scoring": {
+    "accuracy": 0.0,
+    "mean_absolute_error": 0.0
+  },
+  "xgboost_scoring": {
+    "accuracy": 0.0,
+    "mean_absolute_error": 0.0
+  },
+  "feature_importance": {},
+  "recommendations": [
+    "No training data available. Populate Bullhorn database with placement records and re-run validation."
+  ]
+}

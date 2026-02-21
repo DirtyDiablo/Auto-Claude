@@ -188,20 +188,37 @@ class TestFallbackBehavior:
 class TestGetPlatformMetricsSingleton:
     """Tests for get_platform_metrics singleton function."""
 
-    def test_returns_platform_metrics_instance(self):
-        """get_platform_metrics should return a PlatformMetrics instance."""
+    def _reset_singleton(self):
+        """Reset the singleton safely, clearing Prometheus registry to avoid duplicates."""
         import Engine8_Knowledge.monitoring.metrics as mod
 
-        # Reset singleton for isolated test
+        try:
+            from prometheus_client import REGISTRY
+
+            # Unregister existing collectors to avoid duplicate timeseries errors
+            collectors_to_remove = []
+            for collector in list(REGISTRY._names_to_collectors.values()):
+                if hasattr(collector, '_name') and collector._name.startswith('pts_'):
+                    collectors_to_remove.append(collector)
+            for collector in collectors_to_remove:
+                try:
+                    REGISTRY.unregister(collector)
+                except Exception:
+                    pass
+        except ImportError:
+            pass
+
         mod._metrics = None
+
+    def test_returns_platform_metrics_instance(self):
+        """get_platform_metrics should return a PlatformMetrics instance."""
+        self._reset_singleton()
         m = get_platform_metrics()
         assert isinstance(m, PlatformMetrics)
 
     def test_returns_same_instance(self):
         """get_platform_metrics should return the same instance on subsequent calls."""
-        import Engine8_Knowledge.monitoring.metrics as mod
-
-        mod._metrics = None
+        # Don't reset — just verify singleton behavior
         m1 = get_platform_metrics()
         m2 = get_platform_metrics()
         assert m1 is m2

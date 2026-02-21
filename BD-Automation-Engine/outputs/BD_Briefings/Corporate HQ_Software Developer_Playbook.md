@@ -1,37 +1,41 @@
-# BD Playbook: Data Analyst
-## Unmatched Opportunity
+# BD Playbook: Software Developer
+## Corporate HQ Opportunity
 
 **Generated:** 2026-02-21 00:24
-**Priority:** 🟡 Warm (Score: 75/100)
-**Match Confidence:** 50% (inferred)
+**Priority:** 🟡 Warm (Score: 65/100)
+**Match Confidence:** 20% (inferred)
 
 ---
 
 ## 1. Program Intel
 
 ### Program Overview
-**Program:** Unmatched
+**Program:** Corporate HQ
 **Customer Agency:** DoD/IC
-**Prime Contractor:** CACI
-**Location:** Unknown Location
+**Prime Contractor:** Northrop Grumman
+**Location:** Falls Church, VA
 
 ### Opportunity Details
-**Position:** Data Analyst
-**Clearance Required:** Top Secret
-**Company:** CACI
+**Position:** Software Developer
+**Clearance Required:** Secret
+**Company:** Northrop Grumman
 
 ### Match Signals
-- No specific signals identified
+- Location match: Falls Church -> Corporate HQ
 
 ### Job Description
-No description available.
+Develop software applications...
 
 ---
 
 ## 2. Org Intel
 
 ### Key Contacts
-No contacts found in database. Manual research recommended.
+- **Nisa Moore** - Vice President, Business Area, Diplomacy (IC)
+- **Ronald Patterson** - Vice President, Information Technology (IC)
+- **Marguerite Gilliland** - Senior Vice President & President, Information Technology (IC)
+- **Luther Abernathy** - Program Manager (IC)
+- **Nabeela Barbari** - Vice President, Cyber, Law Enforcement, Intelligence & Citizenship Business Area (IC)
 
 ### Decision Makers
 No decision makers identified. Target Tier 1-3 contacts.
@@ -44,8 +48,8 @@ No decision makers identified. Target Tier 1-3 contacts.
 - Standard staffing need - competitive market
 
 ### Staffing Signals
-- **Clearance Level:** Top Secret (indicates significant clearance requirement, moderately competitive)
-- **Location:** Unknown Location (market conditions: regional market conditions apply)
+- **Clearance Level:** Secret (indicates standard DoD clearance, larger candidate pool)
+- **Location:** Falls Church, VA (market conditions: regional market conditions apply)
 - **Technologies:** Not specified
 
 ### Certification Requirements
@@ -56,15 +60,15 @@ No decision makers identified. Target Tier 1-3 contacts.
 ## 4. Competitive Landscape
 
 ### Current Landscape
-**Prime Contractor:** CACI
+**Prime Contractor:** Northrop Grumman
 **Our Position:** Potential subcontractor/teaming partner
 
 ### Win Themes
 - **Pain Point Solutions:** Address identified staffing challenges directly
-- **Local Presence:** Highlight Unknown Location capabilities or remote flexibility
+- **Local Presence:** Highlight Falls Church, VA capabilities or remote flexibility
 
 ### Competitive Differentiators
-- Active Top Secret candidate pipeline (vs. starting from scratch)
+- Active Secret candidate pipeline (vs. starting from scratch)
 - Past performance on DoD/IC programs
 - Retention-focused approach (reduces customer risk)
 - Rapid deployment capability (2-3 week typical)
@@ -77,7 +81,7 @@ No decision makers identified. Target Tier 1-3 contacts.
 1. Add to weekly follow-up queue
 2. Research additional contacts
 3. Monitor for priority changes
-4. Track Unmatched news and contract announcements
+4. Track Corporate HQ news and contract announcements
 5. Update CRM with opportunity details
 
 ### Recommended Outreach Sequence
@@ -88,15 +92,14 @@ No decision makers identified. Target Tier 1-3 contacts.
 - Week 4: Value-add content email
 
 ### BD Recommendations
-- Follow up based on priority tier
-- Research additional contacts
-- Prepare capability briefing
+- Add to weekly follow-up queue
+- Gather additional intelligence before outreach
 
 ---
 
 ## Source Information
 
-**Job URL:** N/A
+**Job URL:** https://example.com/job3
 **Date Posted:** N/A
 **Scraped:** N/A
 

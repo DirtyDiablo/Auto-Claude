@@ -60,26 +60,26 @@
       }
     ],
     "programs": [
-      "DTRA IT Support Services",
-      "Global Solutions Management \u2013 Operations II",
-      "DISA Global Service Mgmt \u2013 Ops II",
-      "DIA Infrastructure Services Ops",
+      "DTRA IT Modernization / Support Services",
+      "DHS Enterprise IT Services I",
       "Global Service Management \u2013 Operations II",
-      "Intelligence Systems Enterprise Operations",
-      "NGEN-R \u2014 Enterprise Network Program",
+      "Integrated Strategic & Expeditionary Operations (DIA ISEO variant)",
       "Defense Health Agency Modernization / MHS GENESIS",
-      "DIA IT Sustainment & Engineering Office",
-      "Global Command and Control System \u2013 Joint (Variant)",
-      "DIA IT Sustainment & Enterprise Ops (Task Order)",
-      "DIA IT Sustainment (ISEO)",
-      "Global Service Mgmt \u2013 Ops II (variant)",
-      "Navy Enterprise Service Desk",
-      "DIA ISEO",
-      "Defense Enclave Services (DoDNet)",
-      "SSA IT Support Services Contract",
+      "NGEN-R \u2014 Enterprise Network Program",
       "DTRA IT Support Modernization",
       "Information Technology Sustainment for Enhanced Ops",
-      "DIA Information Systems Engineering Office"
+      "DIA ISEO",
+      "Army ALTESS Cloud Hosting",
+      "Intelligence Systems Enterprise Operations",
+      "DIA Information Systems Engineering Office",
+      "SSA IT Support Services Contract",
+      "DIA IT Sustainment & Engineering Office",
+      "DIA Infrastructure Services Ops",
+      "DoD JSP \u2013 Pentagon IT & ICAM (AFNCR/ICAM)",
+      "DIA SITE III",
+      "DTRA Integrated IT Support Services",
+      "Integrated Base Defense Security System",
+      "NGEN-R SMIT \u2013 Navy Next Generation Enterprise Network (Service Management, Integration & Transport)"
     ],
     "program_count": 42,
     "is_defense_prime": true,
@@ -105,11 +105,6 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Dylan Jones",
-        "score": 62,
-        "tier": "B - High Value"
-      },
-      {
         "name": "DANIEL TUTTLE",
         "score": 57,
         "tier": "B - High Value"
@@ -125,13 +120,18 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Braulio Rivera Gonzalez",
+        "name": "Dylan Jones",
         "score": 57,
         "tier": "B - High Value"
       },
       {
         "name": "Manuel Hernandez",
         "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Braulio Rivera Gonzalez",
+        "score": 52,
         "tier": "B - High Value"
       },
       {
@@ -170,11 +170,6 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Dylan Jones",
-        "score": 62,
-        "tier": "B - High Value"
-      },
-      {
         "name": "DANIEL TUTTLE",
         "score": 57,
         "tier": "B - High Value"
@@ -190,13 +185,18 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Braulio Rivera Gonzalez",
+        "name": "Dylan Jones",
         "score": 57,
         "tier": "B - High Value"
       },
       {
         "name": "Manuel Hernandez",
         "score": 57,
+        "tier": "B - High Value"
+      },
+      {
+        "name": "Braulio Rivera Gonzalez",
+        "score": 52,
         "tier": "B - High Value"
       },
       {
@@ -260,41 +260,41 @@
         "tier": "B - High Value"
       },
       {
-        "name": "Saman Retta",
-        "score": 48,
-        "tier": "C - Engaged"
-      },
-      {
-        "name": "Daniel Amoh",
-        "score": 48,
-        "tier": "C - Engaged"
-      },
-      {
         "name": "ISREAL NTUNGFOR",
+        "score": 48,
+        "tier": "C - Engaged"
+      },
+      {
+        "name": "Tor Wyatt",
+        "score": 48,
+        "tier": "C - Engaged"
+      },
+      {
+        "name": "Antoine Canty",
         "score": 48,
         "tier": "C - Engaged"
       }
     ],
     "programs": [
-      "Peraton NARSIL \u2013 Advanced System Intelligence",
-      "DFAS Enterprise Support",
-      "DC3 Cyber Crime Center \u2013 Secondary Row",
-      "JGLASS II \u2013 Shared Services",
-      "SITEC III \u2013 Enterprise Operations & Maintenance",
-      "GRASP (Raytheon/Peraton)",
-      "CBP Enterprise IT Support",
-      "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
-      "Data Center & Cloud Optimization",
-      "Defense Cyber Crime Center",
-      "DC3 \u2013 Defense Cyber Crime Center",
+      "CMS Enterprise Cloud Infrastructure Services",
       "CAAC (Peraton)",
       "Peraton ARCYBER Information Advantage Enterprise",
       "ARCYBER Information Advantage / Mission Support (general)",
-      "DIMS (Peraton)",
-      "DFAS Enterprise IT Support \u2013 Secondary Row",
+      "CBP Enterprise IT Support",
+      "JGLASS II \u2013 Shared Services",
+      "Data Center & Cloud Optimization",
       "NASA SENSE (Space Comms & Tracking)",
+      "SITEC III \u2013 Enterprise Operations & Maintenance",
+      "Defense Cyber Crime Center",
+      "DC3 Cyber Crime Center \u2013 Secondary Row",
+      "DFAS Enterprise IT Support \u2013 Secondary Row",
+      "GRASP (Raytheon/Peraton)",
+      "NARSIL \u2013 Advanced Research for System Intelligence & Learning",
+      "DIMS (Peraton)",
+      "Peraton NARSIL \u2013 Advanced System Intelligence",
       "NASA Space Network Evolution",
-      "CMS Enterprise Cloud Infrastructure Services"
+      "DC3 \u2013 Defense Cyber Crime Center",
+      "DFAS Enterprise Support"
     ],
     "program_count": 19,
     "is_defense_prime": true,
@@ -503,37 +503,37 @@
       },
       {
         "name": "Michael Mckee",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "Gon Wang",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "TERESEA BRANSON",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "Timothy Sobczynski",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "TIM NGUYEN",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "Anthony Lane",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
         "name": "EVAN COFFIELD",
-        "score": 68,
+        "score": 63,
         "tier": "B - High Value"
       },
       {
@@ -673,7 +673,7 @@
     "top_contacts": [
       {
         "name": "Nathan Jacobi",
-        "score": 63,
+        "score": 58,
         "tier": "B - High Value"
       },
       {
@@ -879,26 +879,26 @@
     "total_contacts": 0,
     "top_contacts": [],
     "programs": [
-      "Sentinel GBSD (AFNWC Hill AFB Variant)",
-      "BOA (General Staff Augmentation)",
+      "Basic Ordering Agreement (NG Staff Augmentation)",
+      "Global Command and Control System \u2013 Joint",
+      "Army Integrated Battle Command System",
+      "Sentinel ICBM / GBSD",
+      "Integrated Digital Engineering Environment",
+      "GMD Weapon System Modernization",
       "Joint Tactical Ground Station System",
-      "Joint Tactical Ground Station",
-      "MDA Tactical Embedded Systems",
-      "Sentinel GBSD (LGM-35A)",
-      "NGOPIR / NGG / NGOPIR (already normalized \u2014 link row)",
+      "Next-Gen OPIR (Ground + Payload)",
+      "Sentinel GBSD (AFNWC Hill AFB Variant)",
+      "Ground Based Strategic Deterrent / Sentinel",
       "Sentinel Program Cybersecurity Core",
       "Basic Ordering Agreement \u2013 Surge Staffing",
-      "Blanket Order Agreement \u2013 Staff Augmentation",
-      "Next-Generation Overhead Persistent Infrared",
-      "Integrated Battle Command System",
-      "Sentinel / GBSD",
-      "Sentinel GBSD",
+      "NASA ETIS III",
+      "NGOPIR / NGG / NGOPIR (already normalized \u2014 link row)",
       "Business Operations & Analytics",
-      "Integrated Situational Awareness Environment",
-      "Basic Ordering Agreement (NG Staff Augmentation)",
-      "Integrated Situational Awareness / Cyber Program",
-      "NGI \u2013 Next Generation Interceptor",
-      "SMORS \u2013 STRATCOM Mission Readiness Sustainment"
+      "Sentinel GBSD (LGM-35A)",
+      "Integrated Battle Command System",
+      "Integrated Situational Awareness Tool Environment",
+      "Command and Control, Battle Management & Communications (MDA)",
+      "Integrated Situational Awareness Environment"
     ],
     "program_count": 43,
     "is_defense_prime": true,
@@ -1078,21 +1078,21 @@
     "total_contacts": 0,
     "top_contacts": [],
     "programs": [
-      "F-35 Sustainment",
-      "Air Force GIS Program (Lockheed Martin)",
-      "Command and Control, Battle Management, Communications",
-      "Conventional Prompt Strike",
-      "Next-Gen GEO OPIR",
-      "PAC-3 Missile Segment Enhancement (Deep Detail Variant)",
-      "Conventional Prompt Strike \u2013 Secondary Row",
-      "C2BMC (Command & Control, Battle Mgmt, Comms)",
-      "PAC-3 (Consolidated)",
-      "Multi-Mission Command & Control",
-      "Navy Aegis Combat System Modernization",
-      "PAC-3 MSE (Deep Detail Variant; Consolidated)",
+      "Aegis Ballistic Missile Defense / Aegis Program",
       "Basic Ordering Agreement (Lockheed Martin)",
       "Command & Control, Battle Mgmt & Comms",
-      "Aegis Ballistic Missile Defense / Aegis Program"
+      "Conventional Prompt Strike",
+      "Air Force GIS Program (Lockheed Martin)",
+      "Conventional Prompt Strike \u2013 Secondary Row",
+      "PAC-3 (Consolidated)",
+      "Multi-Mission Command & Control",
+      "F-35 Sustainment",
+      "C2BMC (Command & Control, Battle Mgmt, Comms)",
+      "Command and Control, Battle Management, Communications",
+      "Next-Gen GEO OPIR",
+      "PAC-3 MSE (Deep Detail Variant; Consolidated)",
+      "PAC-3 Missile Segment Enhancement (Deep Detail Variant)",
+      "Navy Aegis Combat System Modernization"
     ],
     "program_count": 15,
     "is_defense_prime": true,

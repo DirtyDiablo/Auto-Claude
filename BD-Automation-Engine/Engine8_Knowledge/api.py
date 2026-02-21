@@ -938,6 +938,13 @@ from Engine8_Knowledge.routers.sync_status import router as sync_status_router
 app.include_router(sync_status_router)
 logger.info("Sync Status routes enabled: /sync/* (6 endpoints)")
 
+try:
+    from Engine8_Knowledge.routers.workflows import router as workflow_orchestration_router
+    app.include_router(workflow_orchestration_router)
+    logger.info("Workflow Orchestration routes enabled: /workflows/* (4 endpoints)")
+except ImportError as e:
+    logger.warning(f"Workflow orchestration router not available: {e}")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS

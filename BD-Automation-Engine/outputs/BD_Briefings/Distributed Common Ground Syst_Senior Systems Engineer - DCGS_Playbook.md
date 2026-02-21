@@ -1,37 +1,41 @@
-# BD Playbook: Systems Engineer
-## Unmatched Opportunity
+# BD Playbook: Senior Systems Engineer - DCGS
+## Distributed Common Ground System (AF) Opportunity
 
 **Generated:** 2026-02-21 00:24
-**Priority:** 🔥 Hot (Score: 85/100)
-**Match Confidence:** 50% (inferred)
+**Priority:** 🔥 Hot (Score: 95/100)
+**Match Confidence:** 50% (fuzzy)
 
 ---
 
 ## 1. Program Intel
 
 ### Program Overview
-**Program:** Unmatched
+**Program:** Distributed Common Ground System (AF)
 **Customer Agency:** DoD/IC
-**Prime Contractor:** Leidos
-**Location:** Unknown Location
+**Prime Contractor:** GDIT
+**Location:** San Diego, CA
 
 ### Opportunity Details
-**Position:** Systems Engineer
+**Position:** Senior Systems Engineer - DCGS
 **Clearance Required:** TS/SCI
-**Company:** Leidos
+**Company:** GDIT
 
 ### Match Signals
-- No specific signals identified
+- Location match: San Diego -> AF DCGS - PACAF
+- 'dcgs' in title
+- 'ngi' in title
+- 'nee' in title
+- DCGS keyword: 'dcgs'
 
 ### Job Description
-No description available.
+Support AF DCGS PACAF mission...
 
 ---
 
 ## 2. Org Intel
 
 ### Key Contacts
-No contacts found in database. Manual research recommended.
+- **Francisco Noda** - Program Manager / Principal Cybersecurity Analyst (IC)
 
 ### Decision Makers
 No decision makers identified. Target Tier 1-3 contacts.
@@ -42,10 +46,11 @@ No decision makers identified. Target Tier 1-3 contacts.
 
 ### Identified Pain Points
 - TS/SCI requirement reduces available talent by ~90%
+- San Diego is understaffed for DCGS - critical hiring need
 
 ### Staffing Signals
 - **Clearance Level:** TS/SCI (indicates high-value cleared position, competitive market)
-- **Location:** Unknown Location (market conditions: regional market conditions apply)
+- **Location:** San Diego, CA (market conditions: understaffed DCGS site, high demand)
 - **Technologies:** Not specified
 
 ### Certification Requirements
@@ -56,13 +61,13 @@ No decision makers identified. Target Tier 1-3 contacts.
 ## 4. Competitive Landscape
 
 ### Current Landscape
-**Prime Contractor:** Leidos
+**Prime Contractor:** GDIT
 **Our Position:** Potential subcontractor/teaming partner
 
 ### Win Themes
 - **Cleared Talent Pipeline:** Emphasize active pool of high-clearance candidates
 - **Pain Point Solutions:** Address identified staffing challenges directly
-- **Local Presence:** Highlight Unknown Location capabilities or remote flexibility
+- **Local Presence:** Highlight San Diego, CA capabilities or remote flexibility
 
 ### Competitive Differentiators
 - Active TS/SCI candidate pipeline (vs. starting from scratch)
@@ -76,9 +81,9 @@ No decision makers identified. Target Tier 1-3 contacts.
 
 ### Immediate Actions
 1. **IMMEDIATE:** Reach out to identified contacts within 24 hours
-2. Research Leidos BD/capture team contacts
-3. Prepare Unmatched capabilities one-pager
-4. Track Unmatched news and contract announcements
+2. Research GDIT BD/capture team contacts
+3. Prepare Distributed Common Ground System (AF) capabilities one-pager
+4. Track Distributed Common Ground System (AF) news and contract announcements
 5. Update CRM with opportunity details
 
 ### Recommended Outreach Sequence
@@ -91,15 +96,16 @@ No decision makers identified. Target Tier 1-3 contacts.
 - Day 10: Final email with specific ask
 
 ### BD Recommendations
-- Follow up based on priority tier
-- Research additional contacts
-- Prepare capability briefing
+- Immediate outreach recommended - Hot opportunity
+- Escalate to BD leadership for review
+- High-value cleared position - prioritize
+- San Diego/PACAF - critical understaffed site
 
 ---
 
 ## Source Information
 
-**Job URL:** N/A
+**Job URL:** https://example.com/job1
 **Date Posted:** N/A
 **Scraped:** N/A
 
