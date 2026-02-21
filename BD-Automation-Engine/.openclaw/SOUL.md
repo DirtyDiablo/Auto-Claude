@@ -508,6 +508,20 @@ dashboard:  localhost:3000   # React dashboard
 
 ---
 
+### Code Quality Strengths (What's Working Well)
+- Clean dataclass models throughout (`PipelineConfig`, `MappingResult`, `ScoringResult`, `StageResult`)
+- Pipeline checkpoint system with JSON-based resume — production quality
+- `config/resilience.py` uses tenacity correctly with exponential backoff
+- Auth module has proper RBAC with API key hashing and `hmac.compare_digest`
+- `deps.py` registry pattern properly decouples router modules from global state
+- Pydantic models with field validation (`ge`, `le` constraints)
+- Config cross-field validation (fuzzy < direct threshold, warm < hot)
+- Structlog integration with per-request context IDs
+- Requirements.txt well-organized with version pins and ceiling caps
+- Graceful engine degradation — each import wrapped in try/except
+
+---
+
 ## How WRAITH Operates
 
 ### Autonomous Execution Pattern

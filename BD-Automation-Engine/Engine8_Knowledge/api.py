@@ -303,7 +303,24 @@ async def lifespan(app: FastAPI):
     except ImportError:
         logger.warning("Phase 8A staleness checker not available")
 
+    # Optionally start the sync engine background polling loop
+    sync_engine_instance = None
+    if os.getenv("SYNC_ENGINE_AUTO_START", "").lower() in ("1", "true", "yes"):
+        try:
+            from services.sync_engine import get_sync_engine
+
+            poll_interval = int(os.getenv("SYNC_POLL_INTERVAL", "120"))
+            sync_engine_instance = get_sync_engine(poll_interval_seconds=poll_interval)
+            await sync_engine_instance.start()
+            logger.info("Sync engine started", poll_interval=poll_interval)
+        except Exception as e:
+            logger.warning(f"Sync engine start failed (continuing without): {e}")
+
     yield
+
+    # Stop sync engine
+    if sync_engine_instance:
+        await sync_engine_instance.stop()
 
     # Cancel background tasks
     if staleness_task and not staleness_task.done():
@@ -916,6 +933,10 @@ logger.info("Ingest routes enabled: /ingest/* (9 endpoints)")
 from Engine8_Knowledge.routers.qa_review import router as qa_review_router
 app.include_router(qa_review_router)
 logger.info("QA Review Queue routes enabled: /qa/* (9 endpoints)")
+
+from Engine8_Knowledge.routers.sync_status import router as sync_status_router
+app.include_router(sync_status_router)
+logger.info("Sync Status routes enabled: /sync/* (6 endpoints)")
 
 
 # =========================================
