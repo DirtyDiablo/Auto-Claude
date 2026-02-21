@@ -685,12 +685,14 @@ class BDStreamingPipeline:
             def on_change(self, key, row, time, is_addition):
                 if is_addition:
                     try:
-                        requests.post(
+                        resp = requests.post(
                             self.webhook_url,
                             json=row,
                             headers={"Content-Type": "application/json"},
                             timeout=10,
                         )
+                        if resp.status_code >= 400:
+                            logger.error(f"Webhook returned {resp.status_code}: {resp.text[:200]}")
                     except Exception as e:
                         logger.error(f"Failed to send webhook: {e}")
 

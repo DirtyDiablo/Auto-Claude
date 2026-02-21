@@ -5,13 +5,51 @@ Phase 24A — Scrape API v2
 and federal document processing.
 """
 
+import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
+from urllib.parse import urlparse
 
 import structlog
 from fastapi import APIRouter, HTTPException, Query
 from pydantic import BaseModel
 
 logger = structlog.get_logger(__name__)
+
+# Allowed document root for file processing
+_ALLOWED_DOC_ROOT = Path(
+    os.getenv("FEDERAL_DOCS_DIR", str(Path(__file__).resolve().parent.parent / "data"))
+).resolve()
+
+# Blocked URL patterns for SSRF prevention
+_SSRF_BLOCKED_HOSTS = {
+    "localhost", "127.0.0.1", "0.0.0.0", "::1",
+    "169.254.169.254",  # AWS/GCP metadata
+    "metadata.google.internal",
+}
+_SSRF_BLOCKED_PREFIXES = ("10.", "172.16.", "172.17.", "172.18.", "172.19.",
+                          "172.20.", "172.21.", "172.22.", "172.23.", "172.24.",
+                          "172.25.", "172.26.", "172.27.", "172.28.", "172.29.",
+                          "172.30.", "172.31.", "192.168.")
+
+
+def _validate_url(url: str) -> str:
+    """Validate URL is not targeting internal/private networks."""
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        raise HTTPException(400, f"Only http/https URLs allowed, got: {parsed.scheme}")
+    host = parsed.hostname or ""
+    if host in _SSRF_BLOCKED_HOSTS or host.startswith(_SSRF_BLOCKED_PREFIXES):
+        raise HTTPException(400, "URLs targeting internal/private networks are not allowed")
+    return url
+
+
+def _validate_file_path(file_path: str) -> Path:
+    """Validate file path is within allowed document root."""
+    resolved = Path(file_path).resolve()
+    if not str(resolved).startswith(str(_ALLOWED_DOC_ROOT)):
+        raise HTTPException(400, f"File path must be within {_ALLOWED_DOC_ROOT}")
+    return resolved
 
 router = APIRouter(tags=["scrape-v2"])
 
@@ -149,6 +187,7 @@ def _get_orchestrator():
 @router.post("/scrape/crawl")
 async def crawl_url(req: CrawlUrlRequest):
     """Crawl a URL with Crawl4AI."""
+    _validate_url(req.url)
     engine = _get_crawl_engine()
     if not engine:
         raise HTTPException(503, "Crawl4AI engine not available")
@@ -161,6 +200,7 @@ async def crawl_url(req: CrawlUrlRequest):
 @router.post("/scrape/crawl-site")
 async def crawl_site(req: CrawlSiteRequest):
     """Crawl an entire site."""
+    _validate_url(req.base_url)
     engine = _get_crawl_engine()
     if not engine:
         raise HTTPException(503, "Crawl4AI engine not available")
@@ -411,16 +451,17 @@ async def discover_docs(req: DiscoverDocsRequest):
 @router.post("/federal-docs/process")
 async def process_doc(req: ProcessDocRequest):
     """Process a downloaded federal document."""
+    safe_path = _validate_file_path(req.file_path)
     pipeline = _get_doc_pipeline()
     if not pipeline:
         raise HTTPException(503, "Federal doc pipeline not available")
     from dataclasses import asdict
 
     try:
-        result = await pipeline.process_document(req.file_path)
+        result = await pipeline.process_document(str(safe_path))
         return asdict(result)
     except FileNotFoundError:
-        raise HTTPException(404, f"File not found: {req.file_path}")
+        raise HTTPException(404, "File not found")
 
 
 @router.post("/federal-docs/batch")

@@ -42,6 +42,24 @@ except ImportError:
     logging.error("FastAPI not installed. Install with: pip install fastapi uvicorn")
     sys.exit(1)
 
+try:
+    from slowapi import Limiter, _rate_limit_exceeded_handler
+    from slowapi.util import get_remote_address
+    from slowapi.errors import RateLimitExceeded
+
+    from slowapi.middleware import SlowAPIMiddleware
+
+    limiter = Limiter(
+        key_func=get_remote_address,
+        default_limits=["120/minute"],
+        application_limits=["600/minute"],
+    )
+    RATE_LIMITING_AVAILABLE = True
+except ImportError:
+    limiter = None
+    RATE_LIMITING_AVAILABLE = False
+    logging.warning("slowapi not installed. Rate limiting disabled. Install: pip install slowapi")
+
 # Import existing modules
 from Engine8_Knowledge.scripts.vector_store import BDKnowledgeStore
 from qdrant_client.models import Filter, FieldCondition, MatchValue, MatchText
@@ -196,123 +214,26 @@ async def verify_api_key(request: Request, api_key: str = Depends(_api_key_heade
         raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # =========================================
-# PYDANTIC MODELS
+# PYDANTIC MODELS (canonical source: Engine8_Knowledge/models.py)
 # =========================================
 
-
-class SearchRequest(BaseModel):
-    query: str = Field(..., description="Search query")
-    collection: Optional[str] = Field(None, description="Collection to search")
-    limit: int = Field(10, ge=1, le=50, description="Max results")
-    score_threshold: float = Field(
-        0.3, ge=0.0, le=1.0, description="Min relevance score"
-    )
-    filters: Optional[Dict[str, Any]] = Field(None, description="Filter conditions")
-    rerank: bool = Field(False, description="Apply cross-encoder reranking")
-
-
-class AskRequest(BaseModel):
-    question: str = Field(..., description="Natural language question")
-    collection: Optional[str] = Field(None, description="Collection to search")
-    limit: int = Field(5, ge=1, le=20, description="Max sources")
-    include_sources: bool = Field(True, description="Include source citations")
-
-
-class SimilarRequest(BaseModel):
-    item_id: str = Field(..., description="ID of source item")
-    collection: str = Field(..., description="Collection containing the item")
-    limit: int = Field(10, ge=1, le=50, description="Max similar items")
-
-
-class SearchResultModel(BaseModel):
-    id: str
-    score: float
-    payload: Dict[str, Any]
-    collection: str
-
-
-class SearchResponse(BaseModel):
-    query: str
-    collection: Optional[str]
-    results: List[SearchResultModel]
-    count: int
-    timestamp: str
-
-
-class AskResponse(BaseModel):
-    answer: str
-    sources: List[SearchResultModel]
-    query: str
-    confidence: float
-    collection_searched: Optional[str]
-    timestamp: str
-
-
-class StatsResponse(BaseModel):
-    collections: Dict[str, Dict[str, Any]]
-    total_vectors: int
-    timestamp: str
-
-
-class IndexResponse(BaseModel):
-    success: bool
-    message: str
-    indexed: int
-    errors: int
-    duration_seconds: float
-
-
-# New models for enhanced API
-class MemoryInput(BaseModel):
-    content: str
-    metadata: Optional[Dict[str, Any]] = None
-
-
-class InsightInput(BaseModel):
-    insight_type: str
-    insight: str
-    source: str = "user"
-    confidence: float = 0.8
-
-
-class DocumentInput(BaseModel):
-    text: str
-    metadata: Optional[Dict[str, Any]] = None
-
-
-class ProgramInput(BaseModel):
-    name: str
-    description: str = ""
-    agency: str = ""
-    primes: List[str] = []
-    value: str = ""
-    clearance: str = ""
-    technologies: List[str] = []
-
-
-class CompanyInput(BaseModel):
-    name: str
-    type: str = ""
-    capabilities: List[str] = []
-    programs: List[str] = []
-    partners: List[str] = []
-    locations: List[str] = []
-
-
-class ContactInput(BaseModel):
-    name: str
-    company: str = ""
-    title: str = ""
-    programs: List[str] = []
-    clearance: str = ""
-
-
-class JobInput(BaseModel):
-    title: str
-    company: str
-    location: str = ""
-    clearance: str = ""
-    description: str = ""
+from Engine8_Knowledge.models import (  # noqa: E402
+    SearchRequest,
+    AskRequest,
+    SimilarRequest,
+    SearchResultModel,
+    SearchResponse,
+    AskResponse,
+    StatsResponse,
+    IndexResponse,
+    MemoryInput,
+    InsightInput,
+    DocumentInput,
+    ProgramInput,
+    CompanyInput,
+    ContactInput,
+    JobInput,
+)
 
 
 # =========================================
@@ -376,6 +297,19 @@ async def lifespan(app: FastAPI):
     strategy_agent = BDStrategyAgent()
     orchestrator = get_orchestrator()
 
+    # Register globals in dependency registry for router modules
+    from Engine8_Knowledge import deps as _deps
+    _deps.register("store", store)
+    _deps.register("rag_engine", rag_engine)
+    _deps.register("indexer", indexer)
+    _deps.register("memory", memory)
+    _deps.register("graph", graph)
+    _deps.register("retriever", retriever)
+    _deps.register("router", router)
+    _deps.register("pageindex", pageindex)
+    _deps.register("cache", cache)
+    _deps.register("orchestrator", orchestrator)
+
     logger.info("BD Intelligence Hub API initialized with 50+ endpoints")
 
     # Start background staleness auto-alerts (Phase 8A)
@@ -418,6 +352,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*", "X-API-Key"],
 )
+
+# Rate limiting (optional - requires slowapi)
+if RATE_LIMITING_AVAILABLE:
+    app.state.limiter = limiter
+    app.add_middleware(SlowAPIMiddleware)
+    app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+    logger.info("Rate limiting enabled: 120 req/min per IP (default), 600 req/min total")
+
+    def rate_limit(limit_str):
+        """Create rate limit decorator."""
+        return limiter.limit(limit_str)
+else:
+    def rate_limit(limit_str):
+        """No-op decorator when slowapi not installed."""
+        return lambda f: f
 
 # Structlog request-ID middleware
 if STRUCTLOG_AVAILABLE:
@@ -969,6 +918,19 @@ except ImportError as e:
 
 
 # =========================================
+# EXTRACTED ROUTERS (from routers/ directory)
+# =========================================
+
+from Engine8_Knowledge.routers.bdgraph import router as bdgraph_extracted_router
+app.include_router(bdgraph_extracted_router)
+logger.info("BD Knowledge Graph routes enabled: /bdgraph/* (12 endpoints)")
+
+from Engine8_Knowledge.routers.ingest import router as ingest_extracted_router
+app.include_router(ingest_extracted_router)
+logger.info("Ingest routes enabled: /ingest/* (9 endpoints)")
+
+
+# =========================================
 # HEALTH & STATUS ENDPOINTS
 # =========================================
 
@@ -1054,8 +1016,9 @@ async def filter_contacts(request: FilterRequest):
                 field_map,
                 text_match_fields={"Programs", "Primes", "Clearances"},
             )
-            query_embedding = store._generate_embedding(request.query)
-            search_result = store.client.query_points(
+            query_embedding = await asyncio.to_thread(store._generate_embedding, request.query)
+            search_result = await asyncio.to_thread(
+                store.client.query_points,
                 collection_name="contacts",
                 query=query_embedding,
                 query_filter=qdrant_filter,
@@ -1077,7 +1040,8 @@ async def filter_contacts(request: FilterRequest):
                 field_map,
                 text_match_fields={"Programs", "Primes", "Clearances"},
             )
-            results, _next = store.client.scroll(
+            results, _next = await asyncio.to_thread(
+                store.client.scroll,
                 collection_name="contacts",
                 scroll_filter=qdrant_filter,
                 limit=request.limit,
@@ -1116,7 +1080,8 @@ async def filter_programs(request: FilterRequest):
                 if val:
                     filters[payload_field] = val
 
-            results = store.search(
+            results = await asyncio.to_thread(
+                store.search,
                 query=request.query,
                 collection="programs",
                 limit=request.limit,
@@ -1132,7 +1097,8 @@ async def filter_programs(request: FilterRequest):
             }
         else:
             qdrant_filter = _build_qdrant_filter(request, field_map)
-            results, _next = store.client.scroll(
+            results, _next = await asyncio.to_thread(
+                store.client.scroll,
                 collection_name="programs",
                 scroll_filter=qdrant_filter,
                 limit=request.limit,
@@ -1156,7 +1122,7 @@ async def dashboard_stats():
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
 
-    try:
+    def _compute_dashboard_stats():
         collection_stats = store.get_collection_stats()
 
         total_vectors = sum(
@@ -1210,6 +1176,9 @@ async def dashboard_stats():
             "field_distributions": field_distributions,
             "timestamp": datetime.now().isoformat(),
         }
+
+    try:
+        return await asyncio.to_thread(_compute_dashboard_stats)
     except Exception as e:
         logger.error(f"Dashboard stats error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -1275,7 +1244,8 @@ async def list_programs(
 ):
     """List programs from Qdrant programs collection (replaces /api/v2/programs)."""
     try:
-        results, _next = store.client.scroll(
+        results, _next = await asyncio.to_thread(
+            store.client.scroll,
             collection_name="programs",
             limit=limit,
             offset=offset if offset else None,
@@ -1296,7 +1266,8 @@ async def list_contacts(
 ):
     """List contacts from Qdrant contacts collection."""
     try:
-        results, _next = store.client.scroll(
+        results, _next = await asyncio.to_thread(
+            store.client.scroll,
             collection_name="contacts",
             limit=limit,
             offset=offset if offset else None,
@@ -1323,7 +1294,8 @@ async def search(request: SearchRequest):
 
     try:
         if request.collection:
-            results = store.search(
+            results = await asyncio.to_thread(
+                store.search,
                 query=request.query,
                 collection=request.collection,
                 limit=request.limit,
@@ -1331,7 +1303,8 @@ async def search(request: SearchRequest):
                 filters=request.filters,
             )
         else:
-            all_results = store.search_all(
+            all_results = await asyncio.to_thread(
+                store.search_all,
                 query=request.query,
                 limit_per_collection=request.limit,
                 score_threshold=request.score_threshold,
@@ -1355,7 +1328,7 @@ async def search(request: SearchRequest):
                 [request.query, r.payload.get("text", "") or str(r.payload)]
                 for r in results
             ]
-            scores = retriever.reranker.predict(pairs)
+            scores = await asyncio.to_thread(retriever.reranker.predict, pairs)
             ranked = sorted(zip(results, scores), key=lambda x: x[1], reverse=True)
             results = [r for r, _ in ranked[: request.limit]]
 
@@ -1394,7 +1367,7 @@ async def semantic_search(
     limit: int = Query(10, description="Max results"),
 ):
     """Semantic-only search."""
-    results = retriever._semantic_search(q, collection, limit)
+    results = await asyncio.to_thread(retriever._semantic_search, q, collection, limit)
     return {
         "results": [{"id": r.id, "text": r.text, "score": r.score} for r in results]
     }
@@ -1407,7 +1380,7 @@ async def keyword_search(
     limit: int = Query(10, description="Max results"),
 ):
     """BM25 keyword search."""
-    results = retriever._keyword_search(q, collection, limit)
+    results = await asyncio.to_thread(retriever._keyword_search, q, collection, limit)
     return {
         "results": [{"id": r.id, "text": r.text, "score": r.score} for r in results]
     }
@@ -1421,7 +1394,7 @@ async def hybrid_search(
     use_rerank: bool = Query(True, description="Apply reranking"),
 ):
     """Hybrid semantic + keyword search with reranking."""
-    results = retriever.search(q, collection, limit, True, use_rerank)
+    results = await asyncio.to_thread(retriever.search, q, collection, limit, True, use_rerank)
     return {
         "results": [
             {"id": r.id, "text": r.text, "score": r.score, "source": r.source}
@@ -1442,7 +1415,8 @@ async def ask_question(request: AskRequest):
         raise HTTPException(status_code=503, detail="RAG engine not initialized")
 
     try:
-        response = rag_engine.ask(
+        response = await asyncio.to_thread(
+            rag_engine.ask,
             question=request.question,
             collection=request.collection,
             limit=request.limit,
@@ -1511,10 +1485,12 @@ async def analyze_network(company: str = Query(..., description="Company name"))
 
 
 # =========================================
-# BD KNOWLEDGE GRAPH ENDPOINTS
+# BD KNOWLEDGE GRAPH ENDPOINTS — MOVED to routers/bdgraph.py
 # =========================================
 
-# Import BD Knowledge Graph
+# NOTE: BD Graph endpoints (/bdgraph/*) are now served by
+# Engine8_Knowledge.routers.bdgraph — included above.
+# The imports below are kept for any inline code that still references them.
 try:
     from Engine8_Knowledge.graph.bd_knowledge_graph import (
         get_knowledge_graph as get_bd_graph,
@@ -1538,253 +1514,7 @@ def get_bd_knowledge_graph():
     return _bd_graph
 
 
-@app.get("/bdgraph/program/{program_name}")
-async def bdgraph_program_ecosystem(program_name: str):
-    """
-    Get full ecosystem for a program.
-    Returns primes, subs, contacts, jobs, locations, required skills.
-    """
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    result = bg.get_program_ecosystem(program_name)
-    if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
-
-    return result
-
-
-@app.get("/bdgraph/contact/{contact_name}")
-async def bdgraph_contact_network(contact_name: str):
-    """
-    Get contact's professional network.
-    Returns employer, programs, manages, managed_by, connections.
-    """
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    result = bg.get_contact_network(contact_name)
-    if "error" in result:
-        raise HTTPException(status_code=404, detail=result["error"])
-
-    return result
-
-
-@app.get("/bdgraph/teaming/{from_contractor}/{to_program}")
-async def bdgraph_teaming_path(
-    from_contractor: str, to_program: str, max_depth: int = 4
-):
-    """
-    Find teaming path from a contractor to a program.
-    Uses BFS to find shortest relationship path.
-    """
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    path = bg.find_teaming_path(from_contractor, to_program, max_depth)
-    return {"from": from_contractor, "to": to_program, "path": path}
-
-
-@app.get("/bdgraph/query")
-async def bdgraph_query(q: str = Query(..., description="Natural language query")):
-    """
-    Natural language query against the BD knowledge graph.
-    Examples:
-    - "Who works on AF DCGS?"
-    - "What programs does GDIT prime on?"
-    - "Who is the prime on DCGS-A?"
-    """
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    results = bg.query(q)
-    return {"query": q, "results": results}
-
-
-@app.get("/bdgraph/search")
-async def bdgraph_search(
-    q: str = Query(..., description="Search query"),
-    entity_type: Optional[str] = Query(None, description="Filter by entity type"),
-    limit: int = Query(20, description="Max results"),
-):
-    """Search entities in the BD knowledge graph."""
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    results = bg.search_entities(q, entity_type, limit)
-    return {
-        "query": q,
-        "entity_type": entity_type,
-        "results": [e.to_dict() for e in results],
-    }
-
-
-@app.post("/bdgraph/entity")
-async def bdgraph_add_entity(
-    entity_type: str = Query(
-        ...,
-        description=f"Entity type: {list(ENTITY_TYPES.keys()) if BD_GRAPH_AVAILABLE else []}",
-    ),
-    name: str = Query(..., description="Entity name"),
-    properties: Optional[str] = Query(None, description="JSON properties"),
-):
-    """Add an entity to the BD knowledge graph."""
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    props = json.loads(properties) if properties else {}
-    entity = bg.add_entity(entity_type, name, props)
-    return {"success": True, "entity": entity.to_dict()}
-
-
-@app.post("/bdgraph/relationship")
-async def bdgraph_add_relationship(
-    from_entity: str = Query(..., description="Source entity (ID or name)"),
-    rel_type: str = Query(..., description=f"Relationship type"),
-    to_entity: str = Query(..., description="Target entity (ID or name)"),
-    confidence: float = Query(1.0, description="Confidence score 0-1"),
-):
-    """Add a relationship between entities."""
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    try:
-        rel = bg.add_relationship(
-            from_entity, rel_type, to_entity, confidence=confidence
-        )
-        return {"success": True, "relationship": rel.to_dict()}
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-@app.get("/bdgraph/stats")
-async def bdgraph_stats():
-    """Get BD knowledge graph statistics."""
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        return {"available": False, "error": "BD Knowledge Graph not available"}
-
-    stats = bg.get_stats()
-    stats["available"] = True
-    return stats
-
-
-@app.post("/bdgraph/populate")
-async def bdgraph_populate_from_store():
-    """
-    Populate the BD knowledge graph from the vector store.
-    Loads programs, contacts, jobs and infers relationships.
-    """
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    if not store:
-        raise HTTPException(status_code=503, detail="Vector store not initialized")
-
-    bg.populate_from_vector_store(store)
-    return {"success": True, "stats": bg.get_stats()}
-
-
-@app.get("/bdgraph/graph")
-async def bdgraph_full_graph(
-    limit: int = Query(500, description="Max entities to return"),
-):
-    """Return full graph as nodes + edges for visualization."""
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    # Export entities as nodes (limited)
-    all_entities = list(bg._entity_cache.values())[:limit]
-    nodes = []
-    entity_ids = set()
-    for e in all_entities:
-        nodes.append(
-            {
-                "id": e.id,
-                "type": e.type.lower(),
-                "name": e.name,
-                **e.properties,
-            }
-        )
-        entity_ids.add(e.id)
-
-    # Export relationships as edges (only between included nodes)
-    edges = []
-    cursor = bg.conn.execute(
-        "SELECT from_entity_id, to_entity_id, type FROM relationships"
-    )
-    for row in cursor:
-        if row[0] in entity_ids and row[1] in entity_ids:
-            edges.append(
-                {
-                    "source": row[0],
-                    "target": row[1],
-                    "type": row[2],
-                }
-            )
-
-    return {
-        "nodes": nodes,
-        "edges": edges,
-        "total_nodes": len(bg._entity_cache),
-        "total_edges": sum(
-            1 for _ in bg.conn.execute("SELECT COUNT(*) FROM relationships").fetchone()
-        ),
-    }
-
-
-@app.get("/bdgraph/introduction-path/{from_contact}/{to_contact}")
-async def bdgraph_introduction_path(
-    from_contact: str,
-    to_contact: str,
-    max_depth: int = Query(5, description="Max hops to search"),
-):
-    """Find shortest warm introduction path between two contacts."""
-    bg = get_bd_knowledge_graph()
-    if not bg:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    path = bg.find_teaming_path(from_contact, to_contact, max_depth)
-
-    # Check if path contains an error
-    if path and isinstance(path[0], dict) and "error" in path[0]:
-        return {
-            "from": from_contact,
-            "to": to_contact,
-            "path": [],
-            "hops": 0,
-            "error": path[0]["error"],
-        }
-
-    return {
-        "from": from_contact,
-        "to": to_contact,
-        "path": path,
-        "hops": max(0, len(path) - 1),
-    }
-
-
-@app.get("/bdgraph/types")
-async def bdgraph_list_types():
-    """List available entity and relationship types."""
-    if not BD_GRAPH_AVAILABLE:
-        raise HTTPException(status_code=503, detail="BD Knowledge Graph not available")
-
-    return {
-        "entity_types": ENTITY_TYPES,
-        "relationship_types": {
-            k: {"from": v[0], "to": v[1]} for k, v in RELATIONSHIP_TYPES.items()
-        },
-    }
+# bdgraph inline routes removed — now in routers/bdgraph.py
 
 
 # =========================================
@@ -1820,7 +1550,7 @@ async def add_insight(data: InsightInput):
 @app.get("/memory/search")
 async def search_memory(q: str = Query(...), limit: int = Query(10)):
     """Search memories."""
-    results = memory.get_context(q, limit)
+    results = await asyncio.to_thread(memory.get_context, q, limit)
     return {"results": results}
 
 
@@ -1853,7 +1583,7 @@ async def get_contact_context(contact_name: str):
         from Engine8_Knowledge.scripts.memory_system import get_memory_system
 
         system = get_memory_system()
-        return system.get_contact_context(contact_name)
+        return await asyncio.to_thread(system.get_contact_context, contact_name)
     except Exception:
         # Fallback to existing memory layer
         return {
@@ -1869,7 +1599,7 @@ async def get_program_context(program_name: str):
         from Engine8_Knowledge.scripts.memory_system import get_memory_system
 
         system = get_memory_system()
-        return system.get_program_context(program_name)
+        return await asyncio.to_thread(system.get_program_context, program_name)
     except Exception:
         # Fallback to existing memory layer
         return {
@@ -1931,349 +1661,13 @@ async def analyze_query_strategy(q: str = Query(..., description="Query to analy
 
 
 # =========================================
-# INGEST ENDPOINTS
+# INGEST ENDPOINTS — MOVED to routers/ingest.py
 # =========================================
+# NOTE: Ingest endpoints (/ingest/*) are now served by
+# Engine8_Knowledge.routers.ingest — included above.
 
 
-@app.post("/ingest/document")
-def ingest_document(data: DocumentInput):
-    """Ingest document to Qdrant documents collection via OpenAI embeddings."""
-    try:
-        doc = {
-            "content": data.text,
-            "indexed_at": datetime.now().isoformat(),
-            "_source": "api_ingest",
-        }
-        if data.metadata:
-            doc.update(data.metadata)
-        indexed, errors = store.index_documents([doc])
-        return {"success": True, "indexed": indexed, "errors": errors}
-    except Exception as e:
-        logger.error(f"Ingest document error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
-
-@app.post("/ingest/program")
-def ingest_program(data: ProgramInput):
-    """Ingest program to Qdrant programs collection via OpenAI embeddings."""
-    try:
-        program_dict = {
-            "Program Name": data.name,
-            "description": data.description,
-            "Agency": data.agency,
-            "Prime Contractor": ", ".join(data.primes) if data.primes else "",
-            "Contract Value": data.value,
-            "clearance": data.clearance,
-            "technologies": ", ".join(data.technologies) if data.technologies else "",
-            "indexed_at": datetime.now().isoformat(),
-            "_source": "api_ingest",
-        }
-        indexed, errors = store.index_programs([program_dict])
-        return {
-            "success": True,
-            "program": data.name,
-            "indexed": indexed,
-            "errors": errors,
-        }
-    except Exception as e:
-        logger.error(f"Ingest program error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/ingest/programs/batch")
-def ingest_programs_batch(programs: List[ProgramInput]):
-    """Batch ingest programs to Qdrant programs collection."""
-    try:
-        program_dicts = []
-        for p in programs:
-            program_dicts.append(
-                {
-                    "Program Name": p.name,
-                    "description": p.description,
-                    "Agency": p.agency,
-                    "Prime Contractor": ", ".join(p.primes) if p.primes else "",
-                    "Contract Value": p.value,
-                    "clearance": p.clearance,
-                    "technologies": ", ".join(p.technologies) if p.technologies else "",
-                    "indexed_at": datetime.now().isoformat(),
-                    "_source": "api_ingest_batch",
-                }
-            )
-        indexed, errors = store.index_programs(program_dicts)
-        return {
-            "success": True,
-            "inserted": indexed,
-            "updated": 0,
-            "errors": errors,
-            "total_submitted": len(programs),
-        }
-    except Exception as e:
-        logger.error(f"Batch ingest programs error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/ingest/company")
-def ingest_company(data: CompanyInput):
-    """Ingest company to Qdrant documents collection via OpenAI embeddings."""
-    try:
-        doc = {
-            "content": f"COMPANY: {data.name} | Type: {data.type} | Capabilities: {', '.join(data.capabilities)} | Programs: {', '.join(data.programs)}",
-            "name": data.name,
-            "type": data.type,
-            "capabilities": ", ".join(data.capabilities),
-            "programs": ", ".join(data.programs),
-            "partners": ", ".join(data.partners),
-            "locations": ", ".join(data.locations),
-            "indexed_at": datetime.now().isoformat(),
-            "_source": "api_ingest",
-        }
-        indexed, errors = store.index_documents([doc])
-        return {
-            "success": True,
-            "company": data.name,
-            "indexed": indexed,
-            "errors": errors,
-        }
-    except Exception as e:
-        logger.error(f"Ingest company error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/ingest/contact")
-def ingest_contact(data: ContactInput):
-    """Ingest contact to Qdrant contacts collection via OpenAI embeddings."""
-    try:
-        contact_dict = {
-            "name": data.name,
-            "company": data.company,
-            "title": data.title,
-            "programs": ", ".join(data.programs) if data.programs else "",
-            "clearance": data.clearance,
-            "indexed_at": datetime.now().isoformat(),
-            "_source": "api_ingest",
-        }
-        indexed, errors = store.index_contacts([contact_dict])
-        return {
-            "success": True,
-            "contact": data.name,
-            "indexed": indexed,
-            "errors": errors,
-        }
-    except Exception as e:
-        logger.error(f"Ingest contact error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/ingest/contacts/batch")
-def ingest_contacts_batch(contacts: List[ContactInput]):
-    """Batch ingest contacts to Qdrant contacts collection."""
-    try:
-        contact_dicts = []
-        for c in contacts:
-            contact_dicts.append(
-                {
-                    "name": c.name,
-                    "company": c.company,
-                    "title": c.title,
-                    "programs": ", ".join(c.programs) if c.programs else "",
-                    "clearance": c.clearance,
-                    "indexed_at": datetime.now().isoformat(),
-                    "_source": "api_ingest_batch",
-                }
-            )
-        indexed, errors = store.index_contacts(contact_dicts)
-        return {
-            "success": True,
-            "inserted": indexed,
-            "updated": 0,
-            "errors": errors,
-            "total_submitted": len(contacts),
-        }
-    except Exception as e:
-        logger.error(f"Batch ingest contacts error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/ingest/jobs")
-def ingest_jobs(jobs: List[JobInput]):
-    """Ingest multiple jobs (for Data-Scraper)."""
-    try:
-        job_dicts = []
-        for job in jobs:
-            job_dicts.append(
-                {
-                    "title": job.title,
-                    "company": job.company,
-                    "location": job.location,
-                    "clearance": job.clearance,
-                    "description": job.description[:2000] if job.description else "",
-                    "indexed_at": datetime.now().isoformat(),
-                    "_source": "api_ingest",
-                }
-            )
-        indexed, errors = store.index_jobs(job_dicts)
-        return {"success": True, "count": indexed, "errors": errors}
-    except Exception as e:
-        logger.error(f"Ingest jobs error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@app.post("/ingest/scraper-batch")
-async def ingest_scraper_batch(
-    jobs_json: UploadFile = File(None, description="standardized_jobs JSON file"),
-    intel_report: UploadFile = File(
-        None, description="BD Intelligence Report .md file"
-    ),
-    excel_file: UploadFile = File(None, description="BD Job Openings .xlsx file"),
-):
-    """
-    Batch ingest from Data-Scraper.
-    Accepts any combination of:
-    - standardized_jobs_*.json - Full job data
-    - BD_Intelligence_Report_*.md - Intel report
-    - BD_Job_Openings_*.xlsx - Excel workbook
-    """
-    results = {"success": True, "ingested": {}}
-
-    # Process JSON jobs file
-    if jobs_json:
-        try:
-            content = await jobs_json.read()
-            jobs = json.loads(content.decode("utf-8"))
-            # Convert to job dicts with all enriched fields
-            job_dicts = []
-            for job in jobs:
-                job_dicts.append(
-                    {
-                        "job_id": job.get("job_id", ""),
-                        "title": job.get("title", ""),
-                        "company": job.get("company", ""),
-                        "location": job.get("location", ""),
-                        "location_normalized": job.get("location_normalized", ""),
-                        "clearance": job.get("clearance_required", ""),
-                        "clearance_level": job.get("clearance_level", ""),
-                        "bd_priority_score": job.get("bd_priority_score", 0),
-                        "bd_priority_tier": job.get("bd_priority_tier", ""),
-                        "mapped_program": job.get("mapped_program", ""),
-                        "program_confidence": job.get("program_confidence", 0),
-                        "likely_prime": job.get("likely_prime", ""),
-                        "likely_agency": job.get("likely_agency", ""),
-                        "source_url": job.get("source_url", ""),
-                        "date_posted": job.get("date_posted", ""),
-                        "date_scraped": job.get("date_scraped", ""),
-                        "description": job.get("description", "")[:2000],
-                        "indexed_at": datetime.now().isoformat(),
-                    }
-                )
-            # Use vector store's index_jobs method
-            indexed, errors = store.index_jobs(job_dicts)
-            results["ingested"]["jobs"] = indexed
-            if errors:
-                results["ingested"]["job_errors"] = errors
-            logger.info(f"Ingested {indexed} jobs from JSON")
-            try:
-                memory.add_scrape_result(
-                    "jobs", f"Batch ingested {indexed} jobs", indexed
-                )
-            except Exception as me:
-                logger.warning(f"Memory logging failed: {me}")
-        except Exception as e:
-            results["ingested"]["jobs_error"] = str(e)
-            logger.error(f"Jobs JSON error: {e}")
-
-    # Process Intel Report (.md)
-    if intel_report:
-        try:
-            content = await intel_report.read()
-            report_text = content.decode("utf-8")
-            indexed, errors = store.index_documents(
-                [
-                    {
-                        "title": intel_report.filename,
-                        "type": "intel_report",
-                        "content": report_text[:10000],
-                        "indexed_at": datetime.now().isoformat(),
-                    }
-                ]
-            )
-            results["ingested"]["intel_report"] = intel_report.filename
-            logger.info(f"Ingested intel report: {intel_report.filename}")
-        except Exception as e:
-            results["ingested"]["intel_report_error"] = str(e)
-            logger.error(f"Intel report error: {e}")
-
-    # Process Excel file (.xlsx)
-    if excel_file:
-        try:
-            import pandas as pd
-            import io
-
-            content = await excel_file.read()
-            df = pd.read_excel(io.BytesIO(content))
-            # Store as document with summary
-            summary = f"Excel workbook: {excel_file.filename}\n"
-            summary += f"Rows: {len(df)}, Columns: {len(df.columns)}\n"
-            summary += f"Columns: {', '.join(df.columns.tolist())}\n"
-            indexed, errors = store.index_documents(
-                [
-                    {
-                        "title": excel_file.filename,
-                        "type": "excel_workbook",
-                        "content": summary,
-                        "row_count": len(df),
-                        "column_count": len(df.columns),
-                        "indexed_at": datetime.now().isoformat(),
-                    }
-                ]
-            )
-            results["ingested"]["excel"] = {
-                "filename": excel_file.filename,
-                "rows": len(df),
-            }
-            logger.info(f"Ingested Excel: {excel_file.filename} ({len(df)} rows)")
-        except Exception as e:
-            results["ingested"]["excel_error"] = str(e)
-            logger.error(f"Excel error: {e}")
-
-    return results
-
-
-@app.post("/ingest/scraper-bulk")
-async def ingest_scraper_bulk(request: Request):
-    """
-    Bulk ingest records from data-scraper via JSON.
-
-    Accepts: {"collection": "contacts|programs|jobs", "records": [...]}
-    Uses bulk_upsert_from_scraper() for field normalization.
-    """
-    try:
-        body = await request.json()
-        collection = body.get("collection")
-        records = body.get("records", [])
-
-        if not collection:
-            raise HTTPException(status_code=400, detail="collection is required")
-        if not records:
-            raise HTTPException(status_code=400, detail="records list is empty")
-
-        indexed, errors = store.bulk_upsert_from_scraper(
-            collection=collection,
-            records=records,
-            source_tag=body.get("source", "data_scraper"),
-        )
-
-        return {
-            "success": True,
-            "collection": collection,
-            "indexed": indexed,
-            "errors": errors,
-            "total_submitted": len(records),
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Scraper bulk ingest error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 # =========================================
@@ -2330,7 +1724,8 @@ async def get_daily_playbook(
     """Generate prioritized daily playbook with contact context and recompete alerts."""
     try:
         engine = _get_daily_engine()
-        playbook = engine.generate_daily_playbook(
+        playbook = await asyncio.to_thread(
+            engine.generate_daily_playbook,
             target_date=date,
             max_actions=max_actions,
         )
@@ -2338,7 +1733,8 @@ async def get_daily_playbook(
         # Inject recompete alerts into the playbook
         try:
             predictor = _get_recompete_predictor()
-            recompete_tasks = predictor.get_recompete_alerts_for_playbook(
+            recompete_tasks = await asyncio.to_thread(
+                predictor.get_recompete_alerts_for_playbook,
                 months=12,
                 max_alerts=5,
             )
@@ -2368,7 +1764,8 @@ async def get_call_prep(
     """Generate call preparation brief for a contact."""
     try:
         gen = _get_call_prep()
-        brief = gen.generate_brief(
+        brief = await asyncio.to_thread(
+            gen.generate_brief,
             contact_id=contact_id,
             program_name=program,
         )
@@ -2386,7 +1783,8 @@ async def get_call_prep_by_name(
     """Generate call preparation brief by contact name."""
     try:
         gen = _get_call_prep()
-        brief = gen.generate_brief(
+        brief = await asyncio.to_thread(
+            gen.generate_brief,
             contact_name=contact,
             program_name=program,
         )
@@ -2401,7 +1799,7 @@ async def get_claim_status():
     """Get claimed vs unclaimed contract status."""
     try:
         tracker = _get_claim_tracker()
-        return tracker.get_claim_status()
+        return await asyncio.to_thread(tracker.get_claim_status)
     except Exception as e:
         logger.error(f"Claim status failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -2414,7 +1812,7 @@ async def get_unclaimed_priority(
     """Get highest-priority unclaimed contracts."""
     try:
         tracker = _get_claim_tracker()
-        return {"unclaimed": tracker.get_unclaimed_priority(limit=limit)}
+        return {"unclaimed": await asyncio.to_thread(tracker.get_unclaimed_priority, limit=limit)}
     except Exception as e:
         logger.error(f"Unclaimed priority failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -2434,7 +1832,8 @@ async def log_outreach_activity(request: Request):
 
         body = await request.json()
         bh_logger = BullhornActivityLogger()
-        result = bh_logger.log_outreach(
+        result = await asyncio.to_thread(
+            bh_logger.log_outreach,
             contact_name=body.get("contact_name", ""),
             activity_type=body.get("activity_type", "note"),
             notes=body.get("notes", ""),
@@ -2463,9 +1862,8 @@ async def get_outreach_activity_log(
         )
 
         bh_logger = BullhornActivityLogger()
-        return {
-            "activities": bh_logger.get_activity_log(contact_name=contact, limit=limit)
-        }
+        activities = await asyncio.to_thread(bh_logger.get_activity_log, contact_name=contact, limit=limit)
+        return {"activities": activities}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -2479,7 +1877,7 @@ async def get_outreach_stats():
         )
 
         bh_logger = BullhornActivityLogger()
-        return bh_logger.get_stats()
+        return await asyncio.to_thread(bh_logger.get_stats)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -2491,7 +1889,7 @@ async def get_claim_velocity(
     """Get claim velocity metrics."""
     try:
         tracker = _get_claim_tracker()
-        return tracker.get_velocity(days=days)
+        return await asyncio.to_thread(tracker.get_velocity, days=days)
     except Exception as e:
         logger.error(f"Claim velocity failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -2599,7 +1997,7 @@ async def workflow_quick_intel(q: str = Query(..., description="Query")):
 @app.post("/pageindex/index")
 async def index_for_audit(doc_id: str = Query(...), content: str = Query(...)):
     """Index document for audit trail."""
-    success = pageindex.index_document(doc_id, content)
+    success = await asyncio.to_thread(pageindex.index_document, doc_id, content)
     return {"success": success, "doc_id": doc_id}
 
 
@@ -2650,7 +2048,7 @@ async def get_program_intel(program_name: str):
     """Get comprehensive intelligence about a program."""
     if not rag_engine:
         raise HTTPException(status_code=503, detail="RAG engine not initialized")
-    response = rag_engine.ask_about_program(program_name)
+    response = await asyncio.to_thread(rag_engine.ask_about_program, program_name)
     return response.to_dict()
 
 
@@ -2659,7 +2057,7 @@ async def get_company_intel(company_name: str):
     """Get intelligence about a company/contractor."""
     if not rag_engine:
         raise HTTPException(status_code=503, detail="RAG engine not initialized")
-    response = rag_engine.ask_about_company(company_name)
+    response = await asyncio.to_thread(rag_engine.ask_about_company, company_name)
     return response.to_dict()
 
 
@@ -2668,7 +2066,7 @@ async def get_contacts_at_company(company_name: str, limit: int = 20):
     """Find contacts at a specific company."""
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
-    results = store.find_contacts_at_company(company_name, limit=limit)
+    results = await asyncio.to_thread(store.find_contacts_at_company, company_name, limit)
     return {
         "company": company_name,
         "contacts": [r.to_dict() for r in results],
@@ -2681,7 +2079,7 @@ async def get_jobs_for_program(program_name: str, limit: int = 20):
     """Find jobs associated with a program."""
     if not store:
         raise HTTPException(status_code=503, detail="Store not initialized")
-    results = store.find_jobs_for_program(program_name, limit=limit)
+    results = await asyncio.to_thread(store.find_jobs_for_program, program_name, limit)
     return {
         "program": program_name,
         "jobs": [r.to_dict() for r in results],
@@ -2701,7 +2099,7 @@ async def index_all():
         raise HTTPException(status_code=503, detail="Indexer not initialized")
 
     try:
-        results = indexer.index_all()
+        results = await asyncio.to_thread(indexer.index_all)
         total_indexed = sum(r.indexed for r in results)
         total_errors = sum(r.errors for r in results)
         total_duration = sum(r.duration_seconds for r in results)
@@ -2725,20 +2123,20 @@ async def index_collection(collection: str):
         raise HTTPException(status_code=503, detail="Indexer not initialized")
 
     try:
-        if collection == "jobs":
-            result = indexer.index_jobs()
-        elif collection == "contacts":
-            result = indexer.index_contacts()
-        elif collection == "programs":
-            result = indexer.index_programs()
-        elif collection == "documents":
-            result = indexer.index_documents()
-        elif collection == "activities":
-            result = indexer.index_activities()
-        else:
+        index_methods = {
+            "jobs": indexer.index_jobs,
+            "contacts": indexer.index_contacts,
+            "programs": indexer.index_programs,
+            "documents": indexer.index_documents,
+            "activities": indexer.index_activities,
+        }
+        index_fn = index_methods.get(collection)
+        if not index_fn:
             raise HTTPException(
                 status_code=400, detail=f"Unknown collection: {collection}"
             )
+
+        result = await asyncio.to_thread(index_fn)
 
         return IndexResponse(
             success=result.errors == 0,
@@ -2961,7 +2359,7 @@ async def get_qa_stats():
         from Engine6_QA.scripts.qa_feedback import ReviewQueue
 
         queue = ReviewQueue()
-        stats = queue.get_stats()
+        stats = await asyncio.to_thread(queue.get_stats)
         return {
             "total_items": stats["total"],
             "pending": stats["pending"],
@@ -3029,8 +2427,8 @@ async def resolve_qa_item(item_id: str, request: ResolveRequest):
 # =========================================
 
 
-@app.post("/ingest/document")
-def ingest_document(
+@app.post("/ingest/docling")
+def ingest_docling_document(
     file: UploadFile = File(...),
     collection: str = Form("federal_contracts"),
     doc_type: str = Form("unknown"),

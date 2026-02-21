@@ -19,6 +19,7 @@ Output: outputs/open_contracts_UNASSIGNED.csv
 """
 
 import csv
+import logging
 import sqlite3
 import os
 import re
@@ -175,8 +176,9 @@ def parse_money(val):
         return num
     try:
         return float(val)
-    except:
-        return 0.0
+    except (ValueError, TypeError):
+        logging.warning(f"Could not parse dollar value: {val!r} — returning None")
+        return None
 
 
 def merge_opp(key, data):

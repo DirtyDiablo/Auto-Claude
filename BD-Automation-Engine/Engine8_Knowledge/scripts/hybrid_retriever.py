@@ -270,7 +270,7 @@ class HybridRetriever:
             while True:
                 results, offset = self.qdrant.scroll(
                     collection_name=collection,
-                    limit=100,
+                    limit=1000,
                     offset=offset,
                     with_payload=True,
                 )

@@ -232,6 +232,10 @@ class BDKnowledgeStore:
         self.openai_client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
         self.model_name = model_name
 
+        # Embedding cache: avoids redundant OpenAI API calls for repeated queries
+        self._embedding_cache: Dict[str, List[float]] = {}
+        self._embedding_cache_max = 256
+
         # Collection configs
         self.configs = COLLECTION_CONFIGS
 
@@ -307,11 +311,21 @@ class BDKnowledgeStore:
         return stats
 
     def _generate_embedding(self, text: str) -> List[float]:
-        """Generate embedding for text using OpenAI API with retry."""
+        """Generate embedding for text using OpenAI API with retry and caching."""
         if not text or not text.strip():
             text = "empty"
+
+        # Check embedding cache (saves ~$0.0001/call and ~200ms latency)
+        if text in self._embedding_cache:
+            return self._embedding_cache[text]
+
         try:
-            return self._call_embedding_api(text)
+            result = self._call_embedding_api(text)
+            # Evict oldest entry if cache is full
+            if len(self._embedding_cache) >= self._embedding_cache_max:
+                self._embedding_cache.pop(next(iter(self._embedding_cache)))
+            self._embedding_cache[text] = result
+            return result
         except Exception as e:
             logger.error(f"OpenAI embedding error for text '{text[:80]}...': {e}")
             raise
@@ -694,26 +708,29 @@ class BDKnowledgeStore:
         """
         Search across all (or specified) collections.
 
-        Args:
-            query: Natural language query.
-            limit_per_collection: Max results per collection.
-            score_threshold: Minimum similarity score.
-            collections: Specific collections to search (all if None).
-
-        Returns:
-            Dict mapping collection name to search results.
+        Generates the query embedding ONCE and reuses it across all
+        collections (avoids N redundant OpenAI API calls).
         """
         target_collections = collections or list(self.configs.keys())
         results = {}
 
+        # Generate embedding once for all collections
+        query_embedding = self._generate_embedding(query)
+
         for collection in target_collections:
             try:
-                results[collection] = self.search(
-                    query=query,
-                    collection=collection,
+                search_results = self.client.query_points(
+                    collection_name=collection,
+                    query=query_embedding,
                     limit=limit_per_collection,
-                    score_threshold=score_threshold,
+                    score_threshold=score_threshold if score_threshold > 0 else None,
                 )
+                results[collection] = [
+                    SearchResult(
+                        id=str(r.id), score=r.score, payload=r.payload, collection=collection
+                    )
+                    for r in search_results.points
+                ]
             except Exception as e:
                 logger.warning(f"Search failed for {collection}: {e}")
                 results[collection] = []
@@ -841,10 +858,10 @@ class BDKnowledgeStore:
         Returns related jobs, contacts, and documents.
         """
         return {
-            "program": self.search("programs", program_name, limit=3),
+            "program": self.search(query=program_name, collection="programs", limit=3),
             "jobs": self.find_jobs_for_program(program_name),
             "contacts": self.find_contacts_for_program(program_name),
-            "documents": self.search("documents", program_name, limit=10),
+            "documents": self.search(query=program_name, collection="documents", limit=10),
         }
 
 

@@ -109,6 +109,7 @@ class OrchestratorConfig:
     # Processing
     test_mode: bool = False
     batch_size: int = 10
+    fail_on_stage_error: bool = True  # Abort pipeline on critical stage failures
 
     # Scheduling
     schedule_enabled: bool = False
@@ -666,7 +667,10 @@ class BDOrchestrator:
                     logger.warning("Mapping stage returned no results; falling back to raw jobs")
             except Exception as e:
                 errors.append(f"Mapping error: {e}")
-                logger.error(f"Mapping error: {e}")
+                logger.error(f"Mapping CRASHED: {e}", exc_info=True)
+                if self.config.fail_on_stage_error:
+                    errors.append("ABORTING: Mapping engine crashed — cannot produce valid results")
+                    return self._error_result(errors, start_time)
         else:
             print("  Skipped (engine not available)")
 
@@ -683,7 +687,10 @@ class BDOrchestrator:
                     logger.warning("Scoring stage returned no results; falling back to unscored jobs")
             except Exception as e:
                 errors.append(f"Scoring error: {e}")
-                logger.error(f"Scoring error: {e}")
+                logger.error(f"Scoring CRASHED: {e}", exc_info=True)
+                if self.config.fail_on_stage_error:
+                    errors.append("ABORTING: Scoring engine crashed — cannot tier jobs correctly")
+                    return self._error_result(errors, start_time)
         else:
             print("  Skipped (engine not available)")
 
@@ -768,9 +775,27 @@ class BDOrchestrator:
         # Stage 7: Webhook Delivery
         print(f"\n[7/11] DELIVERING TO WEBHOOKS...")
         if self.config.send_webhook:
-            self.webhook_delivery.deliver_jobs(jobs)
+            try:
+                job_result = self.webhook_delivery.deliver_jobs(jobs)
+                if job_result:
+                    print(f"  Delivered {len(jobs)} jobs to webhook")
+                else:
+                    errors.append("Webhook delivery failed for jobs batch")
+                    logger.error("deliver_jobs() returned falsy result")
+            except Exception as e:
+                errors.append(f"Webhook job delivery error: {e}")
+                logger.error(f"Webhook job delivery error: {e}")
             if hot_leads:
-                self.webhook_delivery.deliver_hot_leads(hot_leads)
+                try:
+                    lead_result = self.webhook_delivery.deliver_hot_leads(hot_leads)
+                    if lead_result:
+                        print(f"  Delivered {len(hot_leads)} hot leads to webhook")
+                    else:
+                        errors.append("Webhook delivery failed for hot leads")
+                        logger.error("deliver_hot_leads() returned falsy result")
+                except Exception as e:
+                    errors.append(f"Webhook hot lead delivery error: {e}")
+                    logger.error(f"Webhook hot lead delivery error: {e}")
         else:
             print("  Skipped (webhooks disabled)")
 
@@ -781,66 +806,92 @@ class BDOrchestrator:
         else:
             print("  Skipped (email disabled or no hot leads)")
 
-        # Stage 9: Bullhorn ETL
-        print(f"\n[9/11] RUNNING BULLHORN ETL...")
-        if "bullhorn" in self.engines and self.config.run_bullhorn:
-            try:
-                self.engines["bullhorn"]["run_pipeline"]()
-                print(f"  Bullhorn ETL completed")
-            except Exception as e:
-                errors.append(f"Bullhorn ETL error: {e}")
-                logger.error(f"Bullhorn ETL error: {e}")
-        else:
-            print("  Skipped (engine not available or disabled)")
+        # Stages 9-11: Run Bullhorn+Dashboard and Knowledge indexing in parallel
+        # Stage 10 (dashboard) depends on Stage 9 (Bullhorn ETL), but Stage 11 is independent
+        from concurrent.futures import ThreadPoolExecutor, as_completed
 
-        # Stage 10: Dashboard Export with Verification
-        print(f"\n[10/11] EXPORTING DASHBOARD DATA...")
-        if "bullhorn" in self.engines and self.config.export_dashboard:
-            try:
-                self.engines["bullhorn"]["run_dashboard_export"]()
-                print(f"  Dashboard export completed")
+        def _run_bullhorn_and_dashboard():
+            """Stages 9-10: Bullhorn ETL then Dashboard Export (sequential)."""
+            stage_errors = []
+            # Stage 9: Bullhorn ETL
+            print(f"\n[9/11] RUNNING BULLHORN ETL...")
+            if "bullhorn" in self.engines and self.config.run_bullhorn:
+                try:
+                    self.engines["bullhorn"]["run_pipeline"]()
+                    print(f"  Bullhorn ETL completed")
+                except Exception as e:
+                    stage_errors.append(f"Bullhorn ETL error: {e}")
+                    logger.error(f"Bullhorn ETL error: {e}")
+            else:
+                print("  Skipped (engine not available or disabled)")
 
-                # VERIFICATION: Check all required files were created
-                dashboard_dir = PROJECT_ROOT / "dashboard" / "public" / "data"
-                required_files = [
-                    "past_performance.json",
-                    "prime_org_chart.json",
-                    "contact_org_chart.json",
-                    "program_org_chart.json",
-                    "placements.json",
-                    "correlation_summary_enriched.json",
-                ]
-                missing_files = [
-                    f for f in required_files if not (dashboard_dir / f).exists()
-                ]
-                if missing_files:
-                    error_msg = f"Dashboard export incomplete: missing {missing_files}"
-                    errors.append(error_msg)
-                    logger.warning(error_msg)
-                else:
-                    logger.info("Dashboard data verified: all 6 files present")
-                    print(
-                        f"  Verified: all {len(required_files)} dashboard files present"
-                    )
-            except Exception as e:
-                errors.append(f"Dashboard export error: {e}")
-                logger.error(f"Dashboard export error: {e}")
-        else:
-            print("  Skipped (engine not available or disabled)")
+            # Stage 10: Dashboard Export with Verification
+            print(f"\n[10/11] EXPORTING DASHBOARD DATA...")
+            if "bullhorn" in self.engines and self.config.export_dashboard:
+                try:
+                    self.engines["bullhorn"]["run_dashboard_export"]()
+                    print(f"  Dashboard export completed")
 
-        # Stage 11: Knowledge Indexing (Engine 8)
-        print(f"\n[11/11] INDEXING KNOWLEDGE BASE...")
-        if "knowledge" in self.engines and self.config.run_knowledge:
-            try:
-                indexer = self.engines["knowledge"]["BDIndexer"]()
-                indexer.index_all()
-                print(f"  Knowledge base indexed successfully")
-                logger.info("Engine8_Knowledge indexing completed")
-            except Exception as e:
-                errors.append(f"Knowledge indexing error: {e}")
-                logger.error(f"Knowledge indexing error: {e}")
-        else:
-            print("  Skipped (engine not available or disabled)")
+                    # VERIFICATION: Check all required files were created
+                    dashboard_dir = PROJECT_ROOT / "dashboard" / "public" / "data"
+                    required_files = [
+                        "past_performance.json",
+                        "prime_org_chart.json",
+                        "contact_org_chart.json",
+                        "program_org_chart.json",
+                        "placements.json",
+                        "correlation_summary_enriched.json",
+                    ]
+                    missing_files = [
+                        f for f in required_files if not (dashboard_dir / f).exists()
+                    ]
+                    if missing_files:
+                        error_msg = f"Dashboard export incomplete: missing {missing_files}"
+                        stage_errors.append(error_msg)
+                        logger.warning(error_msg)
+                    else:
+                        logger.info("Dashboard data verified: all 6 files present")
+                        print(
+                            f"  Verified: all {len(required_files)} dashboard files present"
+                        )
+                except Exception as e:
+                    stage_errors.append(f"Dashboard export error: {e}")
+                    logger.error(f"Dashboard export error: {e}")
+            else:
+                print("  Skipped (engine not available or disabled)")
+            return stage_errors
+
+        def _run_knowledge_indexing():
+            """Stage 11: Knowledge Indexing (independent of Bullhorn)."""
+            stage_errors = []
+            print(f"\n[11/11] INDEXING KNOWLEDGE BASE...")
+            if "knowledge" in self.engines and self.config.run_knowledge:
+                try:
+                    indexer = self.engines["knowledge"]["BDIndexer"]()
+                    indexer.index_all()
+                    print(f"  Knowledge base indexed successfully")
+                    logger.info("Engine8_Knowledge indexing completed")
+                except Exception as e:
+                    stage_errors.append(f"Knowledge indexing error: {e}")
+                    logger.error(f"Knowledge indexing error: {e}")
+            else:
+                print("  Skipped (engine not available or disabled)")
+            return stage_errors
+
+        # Execute stages 9+10 and 11 in parallel
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            futures = {
+                executor.submit(_run_bullhorn_and_dashboard): "bullhorn+dashboard",
+                executor.submit(_run_knowledge_indexing): "knowledge",
+            }
+            for future in as_completed(futures):
+                stage_name = futures[future]
+                try:
+                    stage_errors = future.result()
+                    errors.extend(stage_errors)
+                except Exception as e:
+                    errors.append(f"Parallel stage '{stage_name}' crashed: {e}")
+                    logger.error(f"Parallel stage '{stage_name}' crashed: {e}")
 
         # Calculate duration
         duration = (datetime.now() - start_time).total_seconds()

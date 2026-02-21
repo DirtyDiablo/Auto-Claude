@@ -783,156 +783,111 @@ class BullhornETLv2:
 
         # Load Jobs
         print(f"\nLoading {len(self.all_jobs)} jobs...")
-        inserted_jobs = 0
-        skipped_jobs = 0
-        for job in self.all_jobs:
-            try:
-                cursor.execute(
-                    """
-                    INSERT OR IGNORE INTO jobs
-                    (bullhorn_job_id, job_number, title, prime_contractor, employment_type,
-                     status, pay_rate, bill_rate, salary, perm_fee_percent, owner, contact,
-                     date_added, source_file)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                    (
-                        job.get("bullhorn_job_id"),
-                        job.get("job_number"),
-                        job.get("title"),
-                        job.get("prime_contractor"),
-                        job.get("employment_type"),
-                        job.get("status"),
-                        job.get("pay_rate"),
-                        job.get("bill_rate"),
-                        job.get("salary"),
-                        job.get("perm_fee_percent"),
-                        job.get("owner"),
-                        job.get("contact"),
-                        job.get("date_added"),
-                        job.get("source_file"),
-                    ),
-                )
-                inserted_jobs += 1
-            except Exception as e:
-                skipped_jobs += 1
-                if skipped_jobs <= 3:
-                    print(f"  WARN: Skipped job insert: {str(e)[:120]}")
-        if skipped_jobs > 3:
-            print(f"  WARN: {skipped_jobs} total jobs skipped due to insert errors")
-        print(f"  Inserted: {inserted_jobs}")
+        job_rows = [
+            (
+                job.get("bullhorn_job_id"), job.get("job_number"), job.get("title"),
+                job.get("prime_contractor"), job.get("employment_type"), job.get("status"),
+                job.get("pay_rate"), job.get("bill_rate"), job.get("salary"),
+                job.get("perm_fee_percent"), job.get("owner"), job.get("contact"),
+                job.get("date_added"), job.get("source_file"),
+            )
+            for job in self.all_jobs
+        ]
+        try:
+            cursor.executemany(
+                """INSERT OR IGNORE INTO jobs
+                (bullhorn_job_id, job_number, title, prime_contractor, employment_type,
+                 status, pay_rate, bill_rate, salary, perm_fee_percent, owner, contact,
+                 date_added, source_file)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                job_rows,
+            )
+            print(f"  Inserted: {cursor.rowcount} jobs")
+        except Exception as e:
+            print(f"  ERROR: Batch job insert failed: {e}")
+            logger.error(f"Batch job insert failed: {e}")
 
         # Load Placements
         print(f"\nLoading {len(self.all_placements)} placements...")
-        inserted_placements = 0
-        skipped_placements = 0
-        for plc in self.all_placements:
-            try:
-                cursor.execute(
-                    """
-                    INSERT OR IGNORE INTO placements
-                    (bullhorn_placement_id, bullhorn_job_id, status, client_name, job_title,
-                     candidate_name, owner, start_date, end_date, salary, pay_rate, bill_rate,
-                     source_file)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                    (
-                        plc.get("bullhorn_placement_id"),
-                        plc.get("job_number"),
-                        plc.get("status"),
-                        plc.get("company"),
-                        plc.get("job_title"),
-                        plc.get("candidate"),
-                        plc.get("owner"),
-                        plc.get("start_date"),
-                        plc.get("end_date"),
-                        plc.get("salary"),
-                        plc.get("pay_rate"),
-                        plc.get("bill_rate"),
-                        plc.get("source_file"),
-                    ),
-                )
-                inserted_placements += 1
-            except Exception as e:
-                skipped_placements += 1
-                if skipped_placements <= 3:
-                    print(f"  WARN: Skipped placement insert: {str(e)[:120]}")
-        if skipped_placements > 3:
-            print(f"  WARN: {skipped_placements} total placements skipped due to insert errors")
-        print(f"  Inserted: {inserted_placements}")
+        placement_rows = [
+            (
+                plc.get("bullhorn_placement_id"), plc.get("job_number"), plc.get("status"),
+                plc.get("company"), plc.get("job_title"), plc.get("candidate"),
+                plc.get("owner"), plc.get("start_date"), plc.get("end_date"),
+                plc.get("salary"), plc.get("pay_rate"), plc.get("bill_rate"),
+                plc.get("source_file"),
+            )
+            for plc in self.all_placements
+        ]
+        try:
+            cursor.executemany(
+                """INSERT OR IGNORE INTO placements
+                (bullhorn_placement_id, bullhorn_job_id, status, client_name, job_title,
+                 candidate_name, owner, start_date, end_date, salary, pay_rate, bill_rate,
+                 source_file)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                placement_rows,
+            )
+            print(f"  Inserted: {cursor.rowcount} placements")
+        except Exception as e:
+            print(f"  ERROR: Batch placement insert failed: {e}")
+            logger.error(f"Batch placement insert failed: {e}")
 
         # Load Activities (Notes + Visits)
         print(f"\nLoading {len(self.all_notes) + len(self.all_visits)} activities...")
-        inserted_activities = 0
-        skipped_activities = 0
-
-        for note in self.all_notes:
-            try:
-                cursor.execute(
-                    """
-                    INSERT INTO activities
-                    (activity_type, action, activity_date, actor, note_text, source_file)
-                    VALUES (?, ?, ?, ?, ?, ?)
-                """,
-                    (
-                        note.get("type"),
-                        note.get("note_action"),
-                        note.get("date_added"),
-                        note.get("note_author"),
-                        note.get("note_body"),
-                        note.get("source_file"),
-                    ),
-                )
-                inserted_activities += 1
-            except Exception as e:
-                skipped_activities += 1
-                if skipped_activities <= 3:
-                    print(f"  WARN: Skipped note insert: {str(e)[:120]}")
-
-        for visit in self.all_visits:
-            try:
-                cursor.execute(
-                    """
-                    INSERT INTO activities
-                    (activity_type, activity_date, actor, note_text, source_file)
-                    VALUES (?, ?, ?, ?, ?)
-                """,
-                    (
-                        "Client Visit",
-                        visit.get("date_added"),
-                        visit.get("salesperson"),
-                        f"Contact: {visit.get('contact_name')}",
-                        visit.get("source_file"),
-                    ),
-                )
-                inserted_activities += 1
-            except Exception as e:
-                skipped_activities += 1
-                if skipped_activities <= 3:
-                    print(f"  WARN: Skipped visit insert: {str(e)[:120]}")
-
-        if skipped_activities > 3:
-            print(f"  WARN: {skipped_activities} total activities skipped due to insert errors")
-        print(f"  Inserted: {inserted_activities}")
+        note_rows = [
+            (
+                note.get("type"), note.get("note_action"), note.get("date_added"),
+                note.get("note_author"), note.get("note_body"), note.get("source_file"),
+            )
+            for note in self.all_notes
+        ]
+        visit_rows = [
+            (
+                "Client Visit", visit.get("date_added"), visit.get("salesperson"),
+                f"Contact: {visit.get('contact_name')}", visit.get("source_file"),
+            )
+            for visit in self.all_visits
+        ]
+        try:
+            cursor.executemany(
+                """INSERT INTO activities
+                (activity_type, action, activity_date, actor, note_text, source_file)
+                VALUES (?, ?, ?, ?, ?, ?)""",
+                note_rows,
+            )
+            note_count = cursor.rowcount
+        except Exception as e:
+            note_count = 0
+            print(f"  ERROR: Batch note insert failed: {e}")
+            logger.error(f"Batch note insert failed: {e}")
+        try:
+            cursor.executemany(
+                """INSERT INTO activities
+                (activity_type, activity_date, actor, note_text, source_file)
+                VALUES (?, ?, ?, ?, ?)""",
+                visit_rows,
+            )
+            visit_count = cursor.rowcount
+        except Exception as e:
+            visit_count = 0
+            print(f"  ERROR: Batch visit insert failed: {e}")
+            logger.error(f"Batch visit insert failed: {e}")
+        print(f"  Inserted: {note_count} notes + {visit_count} visits")
 
         # Build Prime Contractors
         print("\nBuilding Prime Contractors...")
-        skipped_companies = 0
-        for company in self.all_companies:
-            if company:
-                try:
-                    cursor.execute(
-                        """
-                        INSERT OR IGNORE INTO prime_contractors (name, normalized_name)
-                        VALUES (?, ?)
-                    """,
-                        (company, company.lower()),
-                    )
-                except Exception as e:
-                    skipped_companies += 1
-                    if skipped_companies <= 3:
-                        print(f"  WARN: Skipped company insert: {str(e)[:120]}")
-        if skipped_companies > 3:
-            print(f"  WARN: {skipped_companies} total companies skipped due to insert errors")
+        company_rows = [(c, c.lower()) for c in self.all_companies if c]
+        try:
+            cursor.executemany(
+                """INSERT OR IGNORE INTO prime_contractors (name, normalized_name)
+                VALUES (?, ?)""",
+                company_rows,
+            )
+            print(f"  Inserted: {cursor.rowcount} prime contractors")
+        except Exception as e:
+            print(f"  ERROR: Batch company insert failed: {e}")
+            logger.error(f"Batch company insert failed: {e}")
 
         # Also add Leidos (from jobs)
         cursor.execute("""

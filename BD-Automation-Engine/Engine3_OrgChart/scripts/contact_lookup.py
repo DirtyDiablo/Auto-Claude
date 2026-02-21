@@ -100,9 +100,13 @@ class ContactDatabase:
             return []
         name = name.lower()
         r = list(self.by_program.get(name, []))
+        seen = {id(c) for c in r}
         for k, v in self.by_program.items():
             if name in k or k in name:
-                r.extend([c for c in v if c not in r])
+                for c in v:
+                    if id(c) not in seen:
+                        seen.add(id(c))
+                        r.append(c)
         return r
 
     def search_by_company(self, name):
@@ -110,13 +114,17 @@ class ContactDatabase:
             return []
         name = name.lower()
         r = []
+        seen = set()
         vars = [name]
         if "gdit" in name:
             vars.extend(["gdit", "general dynamics"])
         for v in vars:
             for k, cs in self.by_company.items():
                 if v in k or k in v:
-                    r.extend([c for c in cs if c not in r])
+                    for c in cs:
+                        if id(c) not in seen:
+                            seen.add(id(c))
+                            r.append(c)
         return r
 
 

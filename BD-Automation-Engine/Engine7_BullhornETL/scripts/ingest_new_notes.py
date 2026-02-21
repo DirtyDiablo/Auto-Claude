@@ -9,11 +9,31 @@ import os
 import re
 import json
 import csv
+import logging
 from datetime import datetime
 from collections import Counter, defaultdict
 from html.parser import HTMLParser
 
 import pandas as pd
+
+logger = logging.getLogger(__name__)
+
+
+def _safe_parse_list(value: str) -> list:
+    """Safely parse a string representation of a Python list.
+
+    Uses ast.literal_eval which ONLY parses literals (strings, numbers,
+    lists, dicts, booleans, None) — NO code execution. Returns empty list
+    on malformed input instead of crashing the ingestion pipeline.
+    """
+    if not value or not value.strip():
+        return []
+    try:
+        result = ast.literal_eval(value)
+        return result if isinstance(result, list) else [result]
+    except (ValueError, SyntaxError, TypeError):
+        logger.warning(f"Malformed list literal, using default: {value[:80]!r}")
+        return []
 
 # Paths
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -578,10 +598,10 @@ def update_contacts_csv(records):
             row["last_interaction"] = max(cd["dates"]).strftime("%m/%d/%Y")
             # Merge companies and programs
             old_companies = (
-                ast.literal_eval(row.get("companies", "[]") or "[]") if row.get("companies") else []
+                _safe_parse_list(row.get("companies", "[]") or "[]") if row.get("companies") else []
             )
             old_programs = (
-                ast.literal_eval(row.get("programs", "[]") or "[]") if row.get("programs") else []
+                _safe_parse_list(row.get("programs", "[]") or "[]") if row.get("programs") else []
             )
             merged_companies = list(set(old_companies) | cd["companies"])
             merged_programs = list(set(old_programs) | cd["programs"])
@@ -668,7 +688,7 @@ def update_companies_csv(records):
             row["total_mentions"] = str(old_mentions + cd["mentions"])
             # Merge contacts
             old_contacts = (
-                ast.literal_eval(row.get("contacts_list", "[]") or "[]")
+                _safe_parse_list(row.get("contacts_list", "[]") or "[]")
                 if row.get("contacts_list")
                 else []
             )
@@ -677,19 +697,19 @@ def update_companies_csv(records):
             row["unique_contacts"] = str(len(merged_contacts))
             # Merge programs
             old_programs = (
-                ast.literal_eval(row.get("programs", "[]") or "[]") if row.get("programs") else []
+                _safe_parse_list(row.get("programs", "[]") or "[]") if row.get("programs") else []
             )
             merged_programs = list(set(old_programs) | cd["programs"])
             row["programs"] = str(merged_programs)
             # Merge locations
             old_locations = (
-                ast.literal_eval(row.get("locations", "[]") or "[]") if row.get("locations") else []
+                _safe_parse_list(row.get("locations", "[]") or "[]") if row.get("locations") else []
             )
             merged_locations = list(set(old_locations) | cd["locations"])
             row["locations"] = str(merged_locations)
             # Merge roles
             old_roles = (
-                ast.literal_eval(row.get("roles_needed", "[]") or "[]")
+                _safe_parse_list(row.get("roles_needed", "[]") or "[]")
                 if row.get("roles_needed")
                 else []
             )
@@ -772,11 +792,11 @@ def update_programs_csv(records):
             row["total_mentions"] = str(old_mentions + pd_["mentions"])
             # Merge
             old_companies = (
-                ast.literal_eval(row.get("companies", "[]") or "[]") if row.get("companies") else []
+                _safe_parse_list(row.get("companies", "[]") or "[]") if row.get("companies") else []
             )
             row["companies"] = str(list(set(old_companies) | pd_["companies"]))
             old_contacts = (
-                ast.literal_eval(row.get("contacts_list", "[]") or "[]")
+                _safe_parse_list(row.get("contacts_list", "[]") or "[]")
                 if row.get("contacts_list")
                 else []
             )
@@ -784,11 +804,11 @@ def update_programs_csv(records):
             row["contacts_list"] = str(merged_contacts)
             row["unique_contacts"] = str(len(merged_contacts))
             old_locations = (
-                ast.literal_eval(row.get("locations", "[]") or "[]") if row.get("locations") else []
+                _safe_parse_list(row.get("locations", "[]") or "[]") if row.get("locations") else []
             )
             row["locations"] = str(list(set(old_locations) | pd_["locations"]))
             old_roles = (
-                ast.literal_eval(row.get("roles_mentioned", "[]") or "[]")
+                _safe_parse_list(row.get("roles_mentioned", "[]") or "[]")
                 if row.get("roles_mentioned")
                 else []
             )

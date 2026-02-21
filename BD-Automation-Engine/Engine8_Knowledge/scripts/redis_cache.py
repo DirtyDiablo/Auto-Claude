@@ -124,55 +124,66 @@ class SemanticCache:
         return hashlib.md5(query.encode()).hexdigest()
 
     def get(self, query: str) -> Optional[Dict]:
-        """Get cached result with semantic similarity."""
+        """Get cached result with semantic similarity (vectorized numpy)."""
         query_embedding = self._get_embedding(query)
+        if not query_embedding:
+            return None
 
-        # Get index
+        # Collect all cached keys and their embeddings
         if self.backend == "redis":
             index = self.redis.smembers(self.INDEX_KEY) or set()
         else:
             index = set(self.redis.cache.keys())
 
-        best_match = None
-        best_sim = 0.0
+        keys = []
+        embeddings = []
 
         for cached_key in index:
             if isinstance(cached_key, bytes):
                 cached_key = cached_key.decode()
 
-            # Get embedding
             if self.backend == "redis":
                 embed_data = self.redis.get(f"{self.EMBED_PREFIX}{cached_key}")
                 if embed_data:
-                    cached_embed = json.loads(embed_data)
-                else:
-                    continue
+                    embeddings.append(json.loads(embed_data))
+                    keys.append(cached_key)
             else:
                 entry = self.redis.get(cached_key)
                 if entry and "embedding" in entry:
-                    cached_embed = entry["embedding"]
-                else:
-                    continue
+                    embeddings.append(entry["embedding"])
+                    keys.append(cached_key)
 
-            sim = self._cosine_similarity(query_embedding, cached_embed)
-            if sim > best_sim and sim >= self.similarity_threshold:
-                best_sim = sim
-                best_match = cached_key
+        if not embeddings:
+            return None
 
-        if best_match:
-            if self.backend == "redis":
-                data = self.redis.get(f"{self.CACHE_PREFIX}{best_match}")
-                if data:
-                    result = json.loads(data)
-                    result["cache_hit"] = True
-                    result["similarity"] = best_sim
-                    return result
-            else:
-                entry = self.redis.get(best_match)
-                if entry:
-                    entry["cache_hit"] = True
-                    entry["similarity"] = best_sim
-                    return entry
+        # Vectorized cosine similarity: one matrix op instead of N individual ones
+        query_vec = np.array(query_embedding)
+        cache_matrix = np.array(embeddings)
+        dots = cache_matrix @ query_vec
+        norms = np.linalg.norm(cache_matrix, axis=1) * np.linalg.norm(query_vec)
+        norms[norms == 0] = 1e-10  # avoid division by zero
+        similarities = dots / norms
+
+        best_idx = int(np.argmax(similarities))
+        best_sim = float(similarities[best_idx])
+
+        if best_sim < self.similarity_threshold:
+            return None
+
+        best_match = keys[best_idx]
+        if self.backend == "redis":
+            data = self.redis.get(f"{self.CACHE_PREFIX}{best_match}")
+            if data:
+                result = json.loads(data)
+                result["cache_hit"] = True
+                result["similarity"] = best_sim
+                return result
+        else:
+            entry = self.redis.get(best_match)
+            if entry:
+                entry["cache_hit"] = True
+                entry["similarity"] = best_sim
+                return entry
 
         return None
 
