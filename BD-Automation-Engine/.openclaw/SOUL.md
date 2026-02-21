@@ -36,7 +36,7 @@ The name fits because:
 
 ### What This System Is
 
-PTS BD Intelligence System for federal defense programs. Target: DCGS portfolio (~$950M).
+PTS BD Intelligence System for federal defense contract staffing. Targets thousands of cleared defense contracts matching: subcontracting staffing firms, $100M+ value or 100+ subs, clearance required, not assigned to existing account managers.
 
 An 8-engine pipeline for Business Development automation:
 - **Engine 1:** Apify Job Scraper (external)

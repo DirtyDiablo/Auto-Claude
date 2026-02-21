@@ -21,32 +21,27 @@ This guide provides complete instructions for setting up the PTS BD Intelligence
 
 ### What This System Does
 
-The BD Automation Engine is a 5-engine pipeline that automates Business Development intelligence gathering for federal defense programs, specifically targeting the DCGS portfolio (~$950M).
+The BD Automation Engine is an 8-engine pipeline that automates Business Development intelligence gathering for federal defense contract staffing opportunities.
 
 **Daily Automated Workflow:**
 1. **Scrape** job postings from ClearanceJobs, LinkedIn, and competitor portals
-2. **Standardize** raw job data into 11-field schema
+2. **Standardize** raw job data into structured schema
 3. **Map** jobs to federal programs using location + keyword intelligence
 4. **Classify** contacts into 6-tier hierarchy with BD priority
 5. **Score** opportunities and generate actionable intelligence
 
-### Target Programs
+### Contract Targeting Criteria
 
-| Program | Value | Prime | GDIT Role |
-|---------|-------|-------|-----------|
-| AF DCGS | ~$500M | BAE Systems | Subcontractor |
-| Army DCGS-A | ~$300M | GDIT | Prime |
-| Navy DCGS-N | ~$150M | GDIT | Prime |
+| # | Criterion | Description |
+|---|-----------|-------------|
+| 1 | Subcontracting staffing firms | Contract must involve sub-staffing firms |
+| 2 | Scale | $100M+ contract value OR 100+ subcontractors |
+| 3 | Clearance required | Some level of security clearance needed |
+| 4 | Not assigned | Not already managed by an existing PTS account manager |
 
-### Key Locations
+### Example Target Portfolios
 
-| Priority | Location | Program |
-|----------|----------|---------|
-| Critical | San Diego | AF DCGS - PACAF |
-| High | Hampton Roads | AF DCGS - Langley |
-| High | Dayton | AF DCGS - Wright-Patt |
-| Medium | Norfolk | Navy DCGS-N |
-| Medium | Fort Belvoir | Army DCGS-A |
+Programs like DCGS, GBSD, JADC2, ABMS, MQ-25, and thousands of other cleared defense contracts.
 
 ---
 

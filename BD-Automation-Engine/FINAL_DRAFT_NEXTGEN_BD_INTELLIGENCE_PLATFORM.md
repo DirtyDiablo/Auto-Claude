@@ -9,7 +9,7 @@
 
 ## 1. Executive Summary
 
-The BD-Automation-Engine is an 8-engine pipeline targeting the DCGS portfolio (~$950M) for federal defense business development automation. The current system spans **~60,000-70,000 unique lines of Python**, **2.5+ GB of data**, **9 SQLite databases**, **10+ Qdrant vector collections**, **858 API route definitions**, and **48 distinct entity types**.
+The BD-Automation-Engine is an 8-engine pipeline for federal defense contract staffing BD automation, targeting thousands of cleared defense contracts ($100M+, subcontracting staffing firms, clearance-required). The current system spans **~60,000-70,000 unique lines of Python**, **2.5+ GB of data**, **9 SQLite databases**, **10+ Qdrant vector collections**, **858 API route definitions**, and **48 distinct entity types**.
 
 The next-gen rebuild consolidates this into a **2-repo monorepo** built on:
 - **uv v0.10.2 workspaces** (Python monorepo)

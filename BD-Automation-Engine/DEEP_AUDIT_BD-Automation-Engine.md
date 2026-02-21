@@ -2,7 +2,7 @@
 
 **Audit Date:** 2026-02-01
 **Project:** PTS BD Intelligence System - BD Automation Engine
-**Target:** DCGS Portfolio (~$950M)
+**Target:** Federal defense contract staffing — cleared contracts with subcontracting staffing firms
 
 ---
 

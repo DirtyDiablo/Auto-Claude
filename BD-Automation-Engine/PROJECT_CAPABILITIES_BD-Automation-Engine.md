@@ -2,7 +2,7 @@
 
 **Generated:** 2026-02-03
 **Project:** PTS BD Intelligence System
-**Target:** DCGS Portfolio (~$950M Federal Defense Programs)
+**Target:** Federal defense contract staffing — $100M+ cleared contracts with subcontracting staffing firms
 
 ---
 

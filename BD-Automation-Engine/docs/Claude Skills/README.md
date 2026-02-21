@@ -2,7 +2,7 @@
 
 ## Overview
 
-A comprehensive set of 10 custom skills designed to systematize the PTS Business Development intelligence system for federal defense programs, specifically optimized for DCGS (Distributed Common Ground System) campaigns.
+A comprehensive set of 10 custom skills designed to systematize the PTS Business Development intelligence system for federal defense contract staffing, targeting cleared defense contracts with subcontracting staffing firms.
 
 **Target:** Top 0.1% Claude/Claude Code proficiency for BD intelligence operations
 

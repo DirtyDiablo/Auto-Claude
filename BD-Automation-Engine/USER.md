@@ -8,8 +8,8 @@
 
 ## Context
 
-**Mission:** Defense/Intel BD pipeline for sub-staffing DoD/IC programs
-**Target Portfolio:** DCGS (~$950M)
+**Mission:** Defense/Intel BD pipeline for sub-staffing DoD/IC cleared defense contracts
+**Target Contracts:** Thousands of federal defense contracts matching: (1) subcontracting staffing firms, (2) $100M+ value or 100+ subcontractors, (3) clearance required, (4) not assigned to existing PTS account managers
 **System Scale:** 8-engine pipeline, 250+ Python files, 50+ API endpoints, 23 AI agent types
 
 **Working Style Observed:**

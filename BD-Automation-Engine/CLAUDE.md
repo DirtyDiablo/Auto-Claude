@@ -2,7 +2,7 @@
 
 ## Project Overview
 
-PTS BD Intelligence System for federal defense programs. Target: DCGS portfolio (~$950M).
+PTS BD Intelligence System for federal defense contract staffing. Targets thousands of federal defense contracts matching these criteria: (1) subcontracting staffing firms involved, (2) $100M+ contract value or 100+ subcontractors, (3) requires security clearance, (4) not already assigned to an existing PTS account manager.
 
 This is an 8-engine pipeline for Business Development automation:
 - **Engine 1:** Apify Job Scraper (external)
@@ -191,14 +191,15 @@ python Engine8_Knowledge/api.py
 - `get_company_contacts` - Find contacts at a company
 
 ### Example Queries
-- "Find Tier 1 contacts at Leidos working on DCGS"
+- "Find Tier 1 contacts at Leidos working on cleared programs"
 - "What programs does Northrop Grumman prime?"
 - "Who are the key decision makers for GBSD?"
 - "What past performance does GDIT have on ISR programs?"
+- "Show contracts with 100+ subcontractors requiring TS/SCI"
 
 ### CLI Search
 ```bash
-python Engine8_Knowledge/scripts/vector_store.py --search "DCGS analyst" --collection contacts
+python Engine8_Knowledge/scripts/vector_store.py --search "cleared defense analyst" --collection contacts
 ```
 
 ### Documentation

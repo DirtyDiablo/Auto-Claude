@@ -1,6 +1,6 @@
 # BD Automation Engine
 
-End-to-end Business Development automation pipeline for federal defense programs, specifically optimized for the DCGS portfolio (~$950M).
+End-to-end Business Development automation pipeline for federal defense contract staffing. Targets thousands of cleared defense contracts with subcontracting staffing firms, $100M+ value or 100+ subcontractors, and clearance requirements.
 
 ## Project Overview
 
@@ -15,13 +15,14 @@ This system provides a **complete, production-ready** BD intelligence pipeline t
 7. **Export** to Notion, n8n, and downstream systems
 8. **Notify** via email and webhooks for hot leads
 
-## Target Portfolio
+## Contract Targeting Criteria
 
-| Program | Value | Prime | GDIT Role |
-|---------|-------|-------|-----------|
-| AF DCGS | ~$500M | BAE Systems | Subcontractor |
-| Army DCGS-A | ~$300M | GDIT | Prime |
-| Navy DCGS-N | ~$150M | GDIT | Prime |
+| # | Criterion | Description |
+|---|-----------|-------------|
+| 1 | Subcontracting staffing firms | Contract must involve sub-staffing firms |
+| 2 | Scale | $100M+ contract value OR 100+ subcontractors |
+| 3 | Clearance required | Some level of security clearance needed |
+| 4 | Not assigned | Not already managed by an existing PTS account manager |
 
 ## Quick Start
 

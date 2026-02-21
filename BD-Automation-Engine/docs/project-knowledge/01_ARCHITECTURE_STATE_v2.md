@@ -9,7 +9,7 @@ Prime Technical Services (PTS) BD Intelligence Platform is a hub-and-spoke archi
 
 **Primary Objective**: Transform manual BD analysis (8-15 hours) into AI-powered sub-10-minute workflows for identifying federal defense staffing opportunities, building contact intelligence, and generating personalized outreach.
 
-**Target Market**: $950M DCGS portfolio (AF DCGS ~$500M BAE/GDIT, Army DCGS-A ~$300M GDIT, Navy DCGS-N ~$150M GDIT)
+**Target Market**: Thousands of federal defense contracts matching: subcontracting staffing firms, $100M+ value or 100+ subs, clearance required, not assigned to existing PTS account managers
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: federal-defense-programs
-description: Federal defense program intelligence including prime/sub relationships, contract vehicles, and DCGS portfolio details. Use when researching programs, identifying BD opportunities, mapping past performance, or understanding contract structures.
+description: Federal defense program intelligence including prime/sub relationships, contract vehicles, and cleared defense contract details. Use when researching programs, identifying BD opportunities, mapping past performance, or understanding contract structures.
 ---
 
 # Federal Defense Programs Intelligence
@@ -9,7 +9,7 @@ Comprehensive reference for federal defense programs, prime/sub relationships, c
 
 **Keywords**: federal programs, DCGS, prime contractor, subcontractor, GDIT, BAE Systems, contract vehicle, IDIQ, task order, DoD, intelligence community
 
-## DCGS Portfolio Overview (~$950M)
+## Example Portfolio: DCGS (~$950M)
 
 | Program | Value | Prime | GDIT Role | Status |
 |---------|-------|-------|-----------|--------|
