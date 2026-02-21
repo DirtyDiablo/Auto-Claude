@@ -1,7 +1,7 @@
 # BD Playbook: Data Analyst
 ## Unmatched Opportunity
 
-**Generated:** 2026-02-21 00:24
+**Generated:** 2026-02-21 01:20
 **Priority:** 🟡 Warm (Score: 75/100)
 **Match Confidence:** 50% (inferred)
 

@@ -298,6 +298,38 @@ AUTH_EXEMPT_PATHS = {"/health", "/ready", "/live", "/docs", "/openapi.json", "/r
 AUTH_EXEMPT_PREFIXES = ("/docs", "/redoc")
 
 
+def is_production_mode() -> bool:
+    """Check if running in production environment."""
+    env = os.getenv("ENV", "development").lower()
+    return env in ("production", "prod")
+
+
+def validate_auth_config():
+    """
+    Validate auth configuration on startup.
+    In production, require either BD_API_KEY or BD_JWT_SECRET.
+    Raises RuntimeError if production auth is not configured.
+    """
+    if is_production_mode():
+        has_api_key = bool(os.getenv("BD_API_KEY", ""))
+        has_jwt_secret = bool(_JWT_SECRET)
+        
+        if not has_api_key and not has_jwt_secret:
+            raise RuntimeError(
+                "PRODUCTION MODE: Authentication is required but not configured!\n"
+                "Set ENV=development for dev mode, OR\n"
+                "Set BD_API_KEY and/or BD_JWT_SECRET for production auth."
+            )
+        
+        logger.info(
+            f"Production auth validated: "
+            f"API_KEY={'configured' if has_api_key else 'not set'}, "
+            f"JWT_SECRET={'configured' if has_jwt_secret else 'not set'}"
+        )
+    else:
+        logger.info("Running in development mode (auth optional)")
+
+
 async def get_current_user(
     request: Request,
     api_key: Optional[str] = Depends(_api_key_header),
@@ -305,7 +337,8 @@ async def get_current_user(
 ) -> AuthUser:
     """
     Unified auth dependency. Resolves user from API key or JWT.
-    Returns DEV_USER when no auth is configured (BD_API_KEY unset and no JWT secret).
+    Returns DEV_USER in development mode when no auth is configured.
+    In production, authentication is REQUIRED (enforced at startup).
     """
     path = request.url.path
 
@@ -313,8 +346,8 @@ async def get_current_user(
     if path in AUTH_EXEMPT_PATHS or any(path.startswith(p) for p in AUTH_EXEMPT_PREFIXES):
         return DEV_USER
 
-    # Dev mode — no auth configured at all
-    if not os.getenv("BD_API_KEY", "") and not _JWT_SECRET:
+    # Dev mode — allow unauthenticated access only in development
+    if not is_production_mode() and not os.getenv("BD_API_KEY", "") and not _JWT_SECRET:
         return DEV_USER
 
     # Try API key first

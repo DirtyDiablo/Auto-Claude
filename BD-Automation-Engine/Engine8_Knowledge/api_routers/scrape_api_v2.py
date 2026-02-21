@@ -39,8 +39,18 @@ def _validate_url(url: str) -> str:
     if parsed.scheme not in ("http", "https"):
         raise HTTPException(400, f"Only http/https URLs allowed, got: {parsed.scheme}")
     host = parsed.hostname or ""
+    if not host:
+        raise HTTPException(400, "URL must contain a valid hostname")
     if host in _SSRF_BLOCKED_HOSTS or host.startswith(_SSRF_BLOCKED_PREFIXES):
         raise HTTPException(400, "URLs targeting internal/private networks are not allowed")
+    # Block numeric IP variants (hex, octal, decimal) that bypass string matching
+    import ipaddress
+    try:
+        addr = ipaddress.ip_address(host)
+        if addr.is_private or addr.is_loopback or addr.is_link_local or addr.is_reserved:
+            raise HTTPException(400, "URLs targeting internal/private networks are not allowed")
+    except ValueError:
+        pass  # Not an IP address (hostname) — that's fine
     return url
 
 

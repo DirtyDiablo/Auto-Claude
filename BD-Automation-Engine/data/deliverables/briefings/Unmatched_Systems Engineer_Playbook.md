@@ -1,7 +1,7 @@
 # BD Playbook: Systems Engineer
 ## Unmatched Opportunity
 
-**Generated:** 2026-02-21 00:24
+**Generated:** 2026-02-21 01:20
 **Priority:** 🔥 Hot (Score: 85/100)
 **Match Confidence:** 50% (inferred)
 

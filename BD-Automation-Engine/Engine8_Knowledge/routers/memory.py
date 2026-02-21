@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 logger = structlog.get_logger(__name__)
 
-router = APIRouter(prefix="/memory", tags=["memory-stable"])
+router = APIRouter(prefix="/memory/stable", tags=["memory-stable"])
 
 
 # ---------------------------------------------------------------------------

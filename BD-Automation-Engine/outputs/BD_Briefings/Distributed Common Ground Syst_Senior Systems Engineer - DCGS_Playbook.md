@@ -1,7 +1,7 @@
 # BD Playbook: Senior Systems Engineer - DCGS
 ## Distributed Common Ground System (AF) Opportunity
 
-**Generated:** 2026-02-21 00:24
+**Generated:** 2026-02-21 01:17
 **Priority:** 🔥 Hot (Score: 95/100)
 **Match Confidence:** 50% (fuzzy)
 

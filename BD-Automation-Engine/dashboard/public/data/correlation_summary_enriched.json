@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-02-21T00:24:30.505385",
+  "generated_at": "2026-02-21T01:17:29.724371",
   "data_sources": {
     "dashboard": {
       "jobs": 968,
@@ -24,8 +24,8 @@
     "total_scored_contacts": 5000,
     "tier_distribution": {
       "B - High Value": 63,
-      "C - Engaged": 2122,
-      "D - Developing": 2815
+      "C - Engaged": 2123,
+      "D - Developing": 2814
     },
     "avg_score": 28.1
   },

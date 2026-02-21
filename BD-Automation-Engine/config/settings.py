@@ -21,6 +21,22 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables."""
 
     # ===========================================
+    # ENVIRONMENT & SECURITY
+    # ===========================================
+    env: str = Field(
+        default="development",
+        description="Runtime environment: development, staging, production"
+    )
+    bd_api_key: str = Field(
+        default="",
+        description="Master API key for service authentication (required in production)"
+    )
+    bd_jwt_secret: str = Field(
+        default="",
+        description="JWT signing secret (required in production)"
+    )
+
+    # ===========================================
     # LLM API KEYS
     # ===========================================
     anthropic_api_key: str = Field(..., description="Anthropic Claude API key")

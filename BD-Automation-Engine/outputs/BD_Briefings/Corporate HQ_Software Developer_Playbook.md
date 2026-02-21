@@ -1,7 +1,7 @@
 # BD Playbook: Software Developer
 ## Corporate HQ Opportunity
 
-**Generated:** 2026-02-21 00:24
+**Generated:** 2026-02-21 01:17
 **Priority:** 🟡 Warm (Score: 65/100)
 **Match Confidence:** 20% (inferred)
 

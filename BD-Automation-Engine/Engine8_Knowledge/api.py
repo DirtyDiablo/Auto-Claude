@@ -190,7 +190,14 @@ API_PORT = int(os.getenv("KNOWLEDGE_API_PORT", "8100"))
 # See Engine8_Knowledge/auth.py for full auth module (JWT, API keys, RBAC)
 from Engine8_Knowledge.auth import get_current_user, require_permission, require_role, AuthUser, Role
 
-CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
+_raw_cors = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173")
+CORS_ORIGINS = [o.strip() for o in _raw_cors.split(",") if o.strip()]
+# Wildcard + credentials is a browser security violation; strip wildcard if credentials enabled
+if "*" in CORS_ORIGINS:
+    logger.warning("CORS_ORIGINS contains '*' — removing wildcard to prevent credential leakage")
+    CORS_ORIGINS = [o for o in CORS_ORIGINS if o != "*"]
+    if not CORS_ORIGINS:
+        CORS_ORIGINS = ["http://localhost:3000", "http://localhost:5173"]
 
 # =========================================
 # PYDANTIC MODELS (canonical source: Engine8_Knowledge/models.py)
@@ -244,6 +251,10 @@ async def lifespan(app: FastAPI):
     global strategy_agent, orchestrator
 
     logger.info("Initializing BD Intelligence Hub API...")
+    
+    # Validate auth configuration (fails fast in production if not configured)
+    from Engine8_Knowledge.auth import validate_auth_config
+    validate_auth_config()
 
     # Initialize existing components
     # Use Qdrant server if URL is set, otherwise use local storage

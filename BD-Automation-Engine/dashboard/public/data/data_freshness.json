@@ -1,6 +1,6 @@
 {
-  "last_updated": "2026-02-21T00:24:30.516423",
-  "pipeline_run_id": "20260221_002430",
+  "last_updated": "2026-02-21T01:17:29.726913",
+  "pipeline_run_id": "20260221_011729",
   "files": {
     "past_performance": {
       "filename": "past_performance.json",
@@ -9,12 +9,12 @@
     },
     "prime_org_chart": {
       "filename": "prime_org_chart.json",
-      "size_bytes": 28271,
+      "size_bytes": 28172,
       "record_count": 41
     },
     "contact_org_chart": {
       "filename": "contact_org_chart.json",
-      "size_bytes": 2390975,
+      "size_bytes": 2391010,
       "record_count": 5000
     },
     "program_org_chart": {
