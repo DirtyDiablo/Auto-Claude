@@ -347,19 +347,26 @@ class BDKnowledgeStore:
         """Generate embeddings for a batch of texts in a single API call.
 
         OpenAI supports up to 2048 inputs per call. This is ~100x faster than
-        single-text calls for bulk indexing operations.
+        single-text calls for bulk indexing operations. Retries up to 3 times
+        with exponential backoff on transient failures.
         """
         # Ensure no empty texts
         sanitized = [t if t and t.strip() else "empty" for t in texts]
-        try:
+        decorator = self._init_embedding_retry()
+
+        @decorator
+        def _do_batch_call():
             response = self.openai_client.embeddings.create(
                 model=self.model_name,
                 input=sanitized,
             )
             # Response data is ordered by index
             return [item.embedding for item in sorted(response.data, key=lambda x: x.index)]
+
+        try:
+            return _do_batch_call()
         except Exception as e:
-            logger.error(f"Batch embedding error for {len(texts)} texts: {e}")
+            logger.error(f"Batch embedding failed after retries for {len(texts)} texts: {e}")
             raise
 
     def _generate_text_for_embedding(self, data: Dict, config: CollectionConfig) -> str:

@@ -126,14 +126,6 @@ class Settings(BaseSettings):
     dify_api_key: str = Field(default="", description="Dify API key")
 
     # ===========================================
-    # RAGFLOW INTEGRATION
-    # ===========================================
-    ragflow_api_key: str = Field(default="", description="RAGflow API key")
-    ragflow_base_url: str = Field(
-        default="http://localhost", description="RAGflow base URL"
-    )
-
-    # ===========================================
     # BD SCORING THRESHOLDS
     # ===========================================
     high_confidence_threshold: float = Field(

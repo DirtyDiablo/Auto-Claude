@@ -7,6 +7,8 @@ import sqlite3
 import re
 from pathlib import Path
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 
 # Company name normalization rules
@@ -139,7 +141,7 @@ def run_cleanup():
     print(f"Database: {DATABASE_PATH}")
     print("=" * 80)
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
 
     # 1. Update placements with normalized company names

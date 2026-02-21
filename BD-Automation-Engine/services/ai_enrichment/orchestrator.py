@@ -88,9 +88,10 @@ class EnrichmentOrchestrator:
         print(f"ENRICHMENT RUN: {run_id}")
         print(f"{'=' * 60}")
 
-        try:
-            # 1. Enrich Jobs
-            if enrich_jobs:
+        # Each enrichment phase is isolated so one failure doesn't skip the rest
+        # 1. Enrich Jobs
+        if enrich_jobs:
+            try:
                 self._enrich_database(
                     database_id=self.notion.DATABASES["PROGRAM_MAPPING_HUB"],
                     enrichment_type=EnrichmentType.JOB,
@@ -98,22 +99,30 @@ class EnrichmentOrchestrator:
                     status_filter="pending_enrichment",
                     dry_run=dry_run,
                 )
+            except Exception as e:
+                self.run_summary.errors.append(f"Job enrichment error: {e}")
+                print(f"ERROR in job enrichment: {e}")
 
-            # 2. Enrich Contacts
-            if enrich_contacts:
-                for db_key in ["DCGS_CONTACTS", "GDIT_CONTACTS", "GDIT_PTS_CONTACTS"]:
-                    db_id = self.notion.DATABASES.get(db_key)
-                    if db_id:
+        # 2. Enrich Contacts
+        if enrich_contacts:
+            for db_key in ["DCGS_CONTACTS", "GDIT_CONTACTS", "GDIT_PTS_CONTACTS"]:
+                db_id = self.notion.DATABASES.get(db_key)
+                if db_id:
+                    try:
                         self._enrich_database(
                             database_id=db_id,
                             enrichment_type=EnrichmentType.CONTACT,
                             enrichment_func=self.engine.enrich_contact,
-                            status_filter=None,  # No status filter for contacts
+                            status_filter=None,
                             dry_run=dry_run,
                         )
+                    except Exception as e:
+                        self.run_summary.errors.append(f"Contact enrichment error ({db_key}): {e}")
+                        print(f"ERROR in contact enrichment ({db_key}): {e}")
 
-            # 3. Enrich Opportunities
-            if enrich_opportunities:
+        # 3. Enrich Opportunities
+        if enrich_opportunities:
+            try:
                 self._enrich_database(
                     database_id=self.notion.DATABASES["BD_OPPORTUNITIES"],
                     enrichment_type=EnrichmentType.OPPORTUNITY,
@@ -121,10 +130,9 @@ class EnrichmentOrchestrator:
                     status_filter=None,
                     dry_run=dry_run,
                 )
-
-        except Exception as e:
-            self.run_summary.errors.append(f"Pipeline error: {str(e)}")
-            print(f"ERROR: {e}")
+            except Exception as e:
+                self.run_summary.errors.append(f"Opportunity enrichment error: {e}")
+                print(f"ERROR in opportunity enrichment: {e}")
 
         # Finalize run
         self.run_summary.end_time = datetime.now()

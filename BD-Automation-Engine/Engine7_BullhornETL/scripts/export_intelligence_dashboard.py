@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 # Paths
 DB_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 DASHBOARD_DATA_DIR = (
@@ -261,7 +263,7 @@ def main():
 
     # Connect to database
     print(f"\nConnecting to database: {DB_PATH}")
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = get_connection()
 
     try:
         # Export prime mentions

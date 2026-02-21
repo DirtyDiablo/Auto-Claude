@@ -27,6 +27,8 @@ from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Optional, Any
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 logger = logging.getLogger(__name__)
 
 # Bullhorn REST API configuration
@@ -50,7 +52,7 @@ class BullhornActivityLogger:
     def _init_local_db(self):
         """Initialize local activity log database."""
         ACTIVITY_LOG_DB.parent.mkdir(parents=True, exist_ok=True)
-        conn = sqlite3.connect(str(ACTIVITY_LOG_DB))
+        conn = get_connection(str(ACTIVITY_LOG_DB))
         conn.execute("""
             CREATE TABLE IF NOT EXISTS outreach_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -152,7 +154,7 @@ class BullhornActivityLogger:
 
     def get_unsynced(self, limit: int = 100) -> List[Dict]:
         """Get activities that haven't been synced to Bullhorn yet."""
-        conn = sqlite3.connect(str(ACTIVITY_LOG_DB))
+        conn = get_connection(str(ACTIVITY_LOG_DB))
         conn.row_factory = sqlite3.Row
         cursor = conn.execute(
             "SELECT * FROM outreach_log WHERE bullhorn_synced = 0 ORDER BY created_at DESC LIMIT ?",
@@ -187,7 +189,7 @@ class BullhornActivityLogger:
 
     def get_activity_log(self, contact_name: str = None, limit: int = 50) -> List[Dict]:
         """Get activity log, optionally filtered by contact."""
-        conn = sqlite3.connect(str(ACTIVITY_LOG_DB))
+        conn = get_connection(str(ACTIVITY_LOG_DB))
         conn.row_factory = sqlite3.Row
 
         if contact_name:
@@ -207,7 +209,7 @@ class BullhornActivityLogger:
 
     def get_stats(self) -> Dict:
         """Get activity logging statistics."""
-        conn = sqlite3.connect(str(ACTIVITY_LOG_DB))
+        conn = get_connection(str(ACTIVITY_LOG_DB))
         cursor = conn.cursor()
 
         cursor.execute("SELECT COUNT(*) FROM outreach_log")
@@ -265,7 +267,7 @@ class BullhornActivityLogger:
 
     def _save_local(self, **kwargs) -> int:
         """Save activity to local SQLite database."""
-        conn = sqlite3.connect(str(ACTIVITY_LOG_DB))
+        conn = get_connection(str(ACTIVITY_LOG_DB))
         cursor = conn.execute(
             """INSERT INTO outreach_log
             (contact_name, contact_email, company, activity_type, channel, program, notes, outcome)
@@ -288,7 +290,7 @@ class BullhornActivityLogger:
 
     def _mark_synced(self, local_id: int, bullhorn_note_id: int = None):
         """Mark a local activity as synced to Bullhorn."""
-        conn = sqlite3.connect(str(ACTIVITY_LOG_DB))
+        conn = get_connection(str(ACTIVITY_LOG_DB))
         conn.execute(
             "UPDATE outreach_log SET bullhorn_synced = 1, bullhorn_note_id = ?, synced_at = ? WHERE id = ?",
             (bullhorn_note_id, datetime.now().isoformat(), local_id),
@@ -342,7 +344,7 @@ class BullhornActivityLogger:
             return None
 
         try:
-            conn = sqlite3.connect(str(BULLHORN_DB))
+            conn = get_connection(str(BULLHORN_DB))
             cursor = conn.execute(
                 "SELECT id FROM contacts WHERE name LIKE ? LIMIT 1",
                 (f"%{contact_name}%",),

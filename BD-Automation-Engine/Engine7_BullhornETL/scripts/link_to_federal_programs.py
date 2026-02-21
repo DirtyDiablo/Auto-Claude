@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 FEDERAL_PROGRAMS_CSV = (
     Path(__file__).parent.parent.parent
@@ -186,7 +188,7 @@ def run_linking():
     print(f"Loaded {len(programs)} programs")
 
     # Connect to Bullhorn database
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 

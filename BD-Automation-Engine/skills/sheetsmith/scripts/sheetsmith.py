@@ -120,7 +120,12 @@ def run_transform(args: argparse.Namespace) -> None:
     if not args.expr:
         raise SystemExit("At least one --expr is required for transform")
     for expr in args.expr:
-        df.eval(expr, inplace=True, engine="python")
+        try:
+            # Prefer numexpr engine (sandboxed, no arbitrary code execution)
+            df.eval(expr, inplace=True, engine="numexpr")
+        except (ImportError, TypeError):
+            # Fallback: numexpr unavailable or expression uses unsupported features
+            df.eval(expr, inplace=True, engine="python")
     if args.drop:
         df.drop(columns=args.drop, errors="ignore", inplace=True)
     if args.rename:

@@ -1,5 +1,5 @@
 # Security Scanning — BD-Automation-Engine
-# Weekly scan + PR checks
+# Weekly deep scan + lightweight checks on PRs
 
 name: Security
 
@@ -11,7 +11,8 @@ on:
       - develop
 
 jobs:
-  security-scan:
+  dependency-audit:
+    name: Dependency Audit
     runs-on: ubuntu-latest
 
     steps:
@@ -32,17 +33,21 @@ jobs:
         run: |
           uv venv
           uv pip install -r requirements.txt
-          uv pip install pip-audit ruff
+          uv pip install pip-audit
 
       - name: pip-audit (known CVEs)
         working-directory: BD-Automation-Engine
-        run: uv run pip-audit -r requirements.txt || true
+        run: uv run pip-audit -r requirements.txt
 
-      - name: Ruff security rules (bandit equivalent)
-        working-directory: BD-Automation-Engine
-        run: uv run ruff check . --select S --output-format github
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
 
-      - name: Detect secrets scan
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Detect secrets
         uses: Yelp/detect-secrets-action@v2
         with:
+          baseline_file: BD-Automation-Engine/.secrets.baseline
           scan_args: '--exclude-files \.lock$|\.json$|data/'

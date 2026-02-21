@@ -31,7 +31,6 @@ try:
     from fastapi import FastAPI, HTTPException, Query, UploadFile, File, Form, Request, Depends
     from fastapi.middleware.cors import CORSMiddleware
     from fastapi.responses import StreamingResponse
-    from fastapi.security import APIKeyHeader
     from pydantic import BaseModel, Field
     import uvicorn
     import asyncio
@@ -187,25 +186,11 @@ except ImportError as e:
 API_HOST = os.getenv("KNOWLEDGE_API_HOST", "127.0.0.1")
 API_PORT = int(os.getenv("KNOWLEDGE_API_PORT", "8100"))
 
-# API Key Authentication
-# Set BD_API_KEY in .env to enable auth. When unset, auth is skipped (dev mode).
-BD_API_KEY = os.getenv("BD_API_KEY", "")
+# Authentication & Authorization
+# See Engine8_Knowledge/auth.py for full auth module (JWT, API keys, RBAC)
+from Engine8_Knowledge.auth import get_current_user, require_permission, require_role, AuthUser, Role
+
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:3000,http://localhost:5173").split(",")
-
-_api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
-
-
-AUTH_EXEMPT_PATHS = {"/health", "/docs", "/openapi.json", "/redoc"}
-
-
-async def verify_api_key(request: Request, api_key: str = Depends(_api_key_header)):
-    """Validate API key if BD_API_KEY is configured. Exempts health/docs."""
-    if not BD_API_KEY:
-        return  # No key configured — dev mode, skip auth
-    if request.url.path in AUTH_EXEMPT_PATHS:
-        return  # Health checks and docs don't need auth
-    if api_key != BD_API_KEY:
-        raise HTTPException(status_code=401, detail="Invalid or missing API key")
 
 # =========================================
 # PYDANTIC MODELS (canonical source: Engine8_Knowledge/models.py)
@@ -268,7 +253,7 @@ async def lifespan(app: FastAPI):
     rag_engine = BDRAGEngine(vector_store=store)
     indexer = BDIndexer(store=store)
 
-    # Initialize new components (catch chromadb/mem0 Rust panic - PanicException is BaseException)
+    # Initialize new components (catch mem0 Rust panic - PanicException is BaseException)
     try:
         memory = get_memory()
     except BaseException as e:
@@ -336,7 +321,7 @@ app = FastAPI(
     description="Comprehensive API for BD Intelligence operations: search, memory, graph, agents, and more",
     version="2.0.0",
     lifespan=lifespan,
-    dependencies=[Depends(verify_api_key)],
+    dependencies=[Depends(get_current_user)],
 )
 
 app.add_middleware(
@@ -344,7 +329,7 @@ app.add_middleware(
     allow_origins=CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*", "X-API-Key"],
+    allow_headers=["*", "X-API-Key", "Authorization"],
 )
 
 # Rate limiting (optional - requires slowapi)
@@ -422,6 +407,14 @@ try:
     )
 except ImportError as e:
     logger.warning(f"Hybrid endpoints not available: {e}")
+
+try:
+    from Engine8_Knowledge.api_routers.auth_api import router as auth_router
+
+    app.include_router(auth_router)
+    logger.info("Auth management routes enabled: /auth/*")
+except ImportError as e:
+    logger.warning(f"Auth API not available: {e}")
 
 try:
     from Engine8_Knowledge.agents.api_routes import router as crewai_router
@@ -928,8 +921,48 @@ logger.info("Ingest routes enabled: /ingest/* (9 endpoints)")
 
 @app.get("/health")
 async def health_check():
-    """Health check endpoint."""
-    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+    """Health check endpoint with component status."""
+    components = {}
+
+    # Check Qdrant
+    try:
+        if store:
+            stats = await asyncio.to_thread(store.get_collection_stats)
+            components["qdrant"] = {"status": "healthy", "collections": len(stats) if isinstance(stats, dict) else 0}
+        else:
+            components["qdrant"] = {"status": "unavailable"}
+    except Exception as e:
+        components["qdrant"] = {"status": "unhealthy", "error": str(e)}
+
+    # Check memory layer
+    components["memory"] = {"status": "healthy" if memory else "unavailable"}
+
+    # Check knowledge graph
+    components["graph"] = {"status": "healthy" if graph else "unavailable"}
+
+    # Overall status
+    overall = "healthy" if components.get("qdrant", {}).get("status") == "healthy" else "degraded"
+
+    return {
+        "status": overall,
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0",
+        "components": components,
+    }
+
+
+@app.get("/ready")
+async def readiness_check():
+    """Readiness probe — returns 200 only when core dependencies are available."""
+    if store:
+        return {"ready": True}
+    return {"ready": False, "reason": "vector store not initialized"}
+
+
+@app.get("/live")
+async def liveness_check():
+    """Liveness probe — returns 200 if the process is alive."""
+    return {"live": True}
 
 
 @app.get("/stats")

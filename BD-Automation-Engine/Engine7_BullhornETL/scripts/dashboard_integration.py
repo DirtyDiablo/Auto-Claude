@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 # Paths
 ENGINE7_DB = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 ENGINE2_PROGRAMS = (
@@ -29,7 +31,7 @@ def load_bullhorn_data():
     """Load all data from Bullhorn database."""
     print("Loading Bullhorn database...")
 
-    conn = sqlite3.connect(ENGINE7_DB)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 

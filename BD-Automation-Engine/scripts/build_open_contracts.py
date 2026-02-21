@@ -558,7 +558,7 @@ def fmt_money(val):
             return f"${val/1_000:.0f}K"
         else:
             return f"${val:.0f}"
-    except:
+    except (ValueError, TypeError):
         return str(val)
 
 

@@ -345,6 +345,16 @@ export class HubApiClient {
   // PRIVATE HELPERS
   // ---------------------------------------------------------------------------
 
+  /** Build auth headers from stored credentials. */
+  private getAuthHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {};
+    const token = localStorage.getItem('bd_jwt_token');
+    const apiKey = localStorage.getItem('bd_api_key');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+    else if (apiKey) headers['X-API-Key'] = apiKey;
+    return headers;
+  }
+
   private async fetch<T>(
     endpoint: string,
     options: RequestInit = {}
@@ -358,6 +368,7 @@ export class HubApiClient {
         signal: controller.signal,
         headers: {
           'Content-Type': 'application/json',
+          ...this.getAuthHeaders(),
           ...options.headers,
         },
       });

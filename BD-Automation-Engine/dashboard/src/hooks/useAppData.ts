@@ -11,6 +11,17 @@ import type { DashboardData } from '../types'
 // Use relative URLs in dev (vite proxy) and allow override via env
 const API_BASE = import.meta.env.VITE_API_BASE || ''
 const STALE_TIME = 5 * 60 * 1000 // 5 minutes
+const REFETCH_INTERVAL = 5 * 60 * 1000 // Auto-refresh every 5 minutes
+
+/** Build fetch headers with optional auth token. */
+function getHeaders(): HeadersInit {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' }
+  const apiKey = localStorage.getItem('bd_api_key')
+  const token = localStorage.getItem('bd_jwt_token')
+  if (token) headers['Authorization'] = `Bearer ${token}`
+  else if (apiKey) headers['X-API-Key'] = apiKey
+  return headers
+}
 
 /**
  * Fetch local JSON data from public/data/ directory.
@@ -27,13 +38,14 @@ async function fetchLocalJson<T>(filename: string): Promise<T> {
 async function fetchDashboardData(): Promise<DashboardData> {
   // Try Hub API first
   try {
+    const headers = getHeaders()
     const healthRes = await fetch(`${API_BASE}/health`, { signal: AbortSignal.timeout(3000) })
     if (healthRes.ok) {
       const [contactsRes, programsRes, jobsRes, statsRes] = await Promise.all([
-        fetch(`${API_BASE}/api/v2/contacts?limit=500`).catch(() => null),
-        fetch(`${API_BASE}/api/v2/programs?limit=500`).catch(() => null),
-        fetch(`${API_BASE}/api/v2/jobs?limit=500`).catch(() => null),
-        fetch(`${API_BASE}/stats`).catch(() => null),
+        fetch(`${API_BASE}/api/v2/contacts?limit=500`, { headers }).catch(() => null),
+        fetch(`${API_BASE}/api/v2/programs?limit=500`, { headers }).catch(() => null),
+        fetch(`${API_BASE}/api/v2/jobs?limit=500`, { headers }).catch(() => null),
+        fetch(`${API_BASE}/stats`, { headers }).catch(() => null),
       ])
 
       // If Hub API has data, use it
@@ -55,6 +67,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
             contacts: groupContactsByTier(contactsList) as DashboardData['contacts'],
             contractors: [] as DashboardData['contractors'],
             summary: buildSummary(contactsList, programsList, jobsList, stats),
+            _source: 'api' as const,
           }
         }
       }
@@ -77,6 +90,7 @@ async function fetchDashboardData(): Promise<DashboardData> {
     contacts: (contacts ? groupContactsByTier(contacts as { tier?: number }[]) : {}) as DashboardData['contacts'],
     contractors: [],
     summary: summary as DashboardData['summary'],
+    _source: 'local' as const,
   }
 }
 
@@ -162,10 +176,12 @@ function buildSummary(
 export function useAppData() {
   const queryClient = useQueryClient()
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error, dataUpdatedAt } = useQuery({
     queryKey: ['dashboard-data'],
     queryFn: fetchDashboardData,
     staleTime: STALE_TIME,
+    refetchInterval: REFETCH_INTERVAL,
+    refetchIntervalInBackground: false,
     retry: 1,
   })
 
@@ -176,7 +192,8 @@ export function useAppData() {
     refresh: async () => {
       await queryClient.invalidateQueries({ queryKey: ['dashboard-data'] })
     },
-    lastUpdated: data ? new Date() : null,
+    lastUpdated: dataUpdatedAt ? new Date(dataUpdatedAt) : null,
     isConfigured: true, // Always true with local fallback
+    dataSource: data?._source as 'api' | 'local' | undefined,
   }
 }

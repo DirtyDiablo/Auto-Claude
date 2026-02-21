@@ -24,6 +24,7 @@ import sys
 import argparse
 import logging
 import smtplib
+import time as time_module
 import requests
 from datetime import datetime, timedelta
 from pathlib import Path
@@ -108,8 +109,9 @@ class OrchestratorConfig:
 
     # Processing
     test_mode: bool = False
-    batch_size: int = 10
-    fail_on_stage_error: bool = True  # Abort pipeline on critical stage failures
+    batch_size: int = 50
+    fail_on_stage_error: bool = False  # Quarantine failures by default; --strict enables fail-fast
+    resume: bool = False  # Resume from last checkpoint
 
     # Scheduling
     schedule_enabled: bool = False
@@ -132,6 +134,69 @@ class PipelineResult:
     errors: List[str]
     duration_seconds: float
     timestamp: str = field(default_factory=lambda: datetime.now().isoformat())
+
+
+@dataclass
+class StageResult:
+    """Result of a single pipeline stage execution."""
+
+    name: str
+    status: str  # "passed", "failed", "skipped"
+    duration_seconds: float = 0.0
+    record_count: int = 0
+    error: Optional[str] = None
+
+
+class PipelineCheckpoint:
+    """JSON-based checkpoint system for pipeline resume support."""
+
+    def __init__(self, output_dir: str):
+        self.checkpoint_path = Path(output_dir) / "pipeline_checkpoint.json"
+        self.data: Dict = {}
+
+    def load(self) -> Dict:
+        """Load existing checkpoint from disk."""
+        if self.checkpoint_path.exists():
+            try:
+                with open(self.checkpoint_path, "r") as f:
+                    self.data = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                self.data = {}
+        return self.data
+
+    def create(self, run_id: str) -> None:
+        """Initialize a new checkpoint for a fresh run."""
+        self.data = {
+            "run_id": run_id,
+            "stages_completed": [],
+            "stages_failed": {},
+            "started_at": datetime.now().isoformat(),
+            "last_updated": datetime.now().isoformat(),
+        }
+        self._save()
+
+    def mark_completed(self, stage_name: str) -> None:
+        """Record a stage as successfully completed."""
+        if stage_name not in self.data.get("stages_completed", []):
+            self.data.setdefault("stages_completed", []).append(stage_name)
+        self.data["last_updated"] = datetime.now().isoformat()
+        self._save()
+
+    def mark_failed(self, stage_name: str, error_msg: str) -> None:
+        """Record a stage as failed with its error message."""
+        self.data.setdefault("stages_failed", {})[stage_name] = error_msg
+        self.data["last_updated"] = datetime.now().isoformat()
+        self._save()
+
+    def is_completed(self, stage_name: str) -> bool:
+        """Check whether a stage was already completed in a previous run."""
+        return stage_name in self.data.get("stages_completed", [])
+
+    def _save(self) -> None:
+        """Write checkpoint data to disk."""
+        self.checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(self.checkpoint_path, "w") as f:
+            json.dump(self.data, f, indent=2, default=str)
 
 
 # ============================================
@@ -586,6 +651,76 @@ class BDOrchestrator:
             return len(data) > 0
         return True
 
+    def _run_stage(self, stage_name: str, stage_fn, checkpoint: PipelineCheckpoint,
+                   stage_results: List[StageResult], errors: List[str]) -> Optional[any]:
+        """Execute a single pipeline stage with checkpoint and quarantine support.
+
+        Returns the stage function's return value, or None if skipped/failed.
+        """
+        if self.config.resume and checkpoint.is_completed(stage_name):
+            stage_results.append(StageResult(
+                name=stage_name, status="skipped", record_count=0,
+            ))
+            print(f"  Skipped (completed in previous run)")
+            return None
+
+        stage_start = datetime.now()
+        try:
+            result = stage_fn()
+            duration = (datetime.now() - stage_start).total_seconds()
+            record_count = len(result) if isinstance(result, list) else 0
+            stage_results.append(StageResult(
+                name=stage_name, status="passed",
+                duration_seconds=duration, record_count=record_count,
+            ))
+            checkpoint.mark_completed(stage_name)
+            return result
+        except Exception as e:
+            duration = (datetime.now() - stage_start).total_seconds()
+            error_msg = f"{stage_name} error: {e}"
+            errors.append(error_msg)
+            logger.error(f"{stage_name} CRASHED: {e}", exc_info=True)
+            stage_results.append(StageResult(
+                name=stage_name, status="failed",
+                duration_seconds=duration, error=str(e),
+            ))
+            checkpoint.mark_failed(stage_name, str(e))
+
+            if self.config.fail_on_stage_error:
+                raise
+            return None
+
+    def _print_run_summary(self, stage_results: List[StageResult],
+                           total_duration: float, errors: List[str]) -> None:
+        """Print a formatted summary table of all stage results."""
+        print(f"\n{'=' * 75}")
+        print("RUN SUMMARY")
+        print(f"{'=' * 75}")
+        print(f"{'Stage':<25} {'Status':<10} {'Duration':>10} {'Records':>10}")
+        print(f"{'-' * 25} {'-' * 10} {'-' * 10} {'-' * 10}")
+
+        for sr in stage_results:
+            duration_str = f"{sr.duration_seconds:.1f}s" if sr.duration_seconds > 0 else "-"
+            records_str = str(sr.record_count) if sr.record_count > 0 else "-"
+            print(f"{sr.name:<25} {sr.status:<10} {duration_str:>10} {records_str:>10}")
+
+        print(f"{'-' * 25} {'-' * 10} {'-' * 10} {'-' * 10}")
+        print(f"{'TOTAL':<25} {'':10} {total_duration:.1f}s")
+        print()
+
+        failed_stages = [sr for sr in stage_results if sr.status == "failed"]
+        if failed_stages:
+            print(f"QUARANTINED ERRORS ({len(failed_stages)}):")
+            for sr in failed_stages:
+                print(f"  [{sr.name}] {sr.error}")
+            print()
+
+        if errors:
+            print(f"Total errors: {len(errors)}")
+        else:
+            print("No errors.")
+        print(f"{'=' * 75}")
+
     def run_full_pipeline(self, input_path: str = None) -> PipelineResult:
         """
         Run the complete BD automation pipeline.
@@ -601,7 +736,22 @@ class BDOrchestrator:
         8. Send notifications
         """
         start_time = datetime.now()
+        run_id = start_time.strftime("%Y-%m-%dT%H:%M:%S")
         errors = []
+        stage_results: List[StageResult] = []
+
+        # Initialize checkpoint
+        checkpoint = PipelineCheckpoint(self.config.output_dir)
+        if self.config.resume:
+            existing = checkpoint.load()
+            if existing.get("stages_completed"):
+                logger.info(f"Resuming run {existing.get('run_id')} — "
+                            f"{len(existing['stages_completed'])} stages already completed")
+                print(f"Resuming from checkpoint: {len(existing['stages_completed'])} stages done")
+            else:
+                checkpoint.create(run_id)
+        else:
+            checkpoint.create(run_id)
 
         input_file = input_path or self.config.input_path
         if not input_file:
@@ -625,186 +775,283 @@ class BDOrchestrator:
         print(f"{'=' * 60}")
         print(f"Input: {input_file}")
         print(f"Test Mode: {self.config.test_mode}")
+        print(f"Batch Size: {self.config.batch_size}")
+        if self.config.resume:
+            print(f"Mode: RESUME")
+        if not self.config.fail_on_stage_error:
+            print(f"Mode: QUARANTINE (non-strict)")
 
         # Stage 1: Ingest
         print(f"\n[1/11] INGESTING JOBS...")
         try:
             with open(input_file, "r", encoding="utf-8") as f:
-                jobs = json.load(f)
+                all_jobs = json.load(f)
 
             if self.config.test_mode:
-                jobs = jobs[:3]
-                print(f"  Test mode: limited to {len(jobs)} jobs")
+                all_jobs = all_jobs[:3]
+                print(f"  Test mode: limited to {len(all_jobs)} jobs")
 
-            print(f"  Loaded {len(jobs)} jobs")
+            print(f"  Loaded {len(all_jobs)} jobs")
         except Exception as e:
             errors.append(f"Ingest error: {e}")
             logger.error(f"Ingest error: {e}")
+            stage_results.append(StageResult(name="ingest", status="failed", error=str(e)))
             return self._error_result(errors, start_time)
 
-        if not self._validate_stage_output("ingest", jobs, min_count=1):
+        if not self._validate_stage_output("ingest", all_jobs, min_count=1):
             errors.append("Ingest produced no jobs — aborting pipeline")
+            stage_results.append(StageResult(name="ingest", status="failed", error="No jobs loaded"))
             return self._error_result(errors, start_time)
 
-        # Stage 2-4: Program Mapping Pipeline
-        print(f"\n[2/11] RUNNING PROGRAM MAPPING PIPELINE...")
-        if "mapping" in self.engines and self.config.run_mapping:
-            try:
-                pipeline_config = self.engines["mapping"]["PipelineConfig"](
-                    input_path=input_file,
-                    output_dir=self.config.output_dir,
-                    test_mode=self.config.test_mode,
-                    anthropic_api_key=self.config.anthropic_api_key,
-                )
+        stage_results.append(StageResult(
+            name="ingest", status="passed", record_count=len(all_jobs),
+        ))
+        checkpoint.mark_completed("ingest")
 
-                # Process jobs through mapping
-                enriched_jobs = self.engines["mapping"]["process_jobs_batch"](jobs)
-                if self._validate_stage_output("mapping", enriched_jobs, min_count=1):
-                    print(f"  Mapped {len(enriched_jobs)} jobs to programs")
-                    jobs = enriched_jobs
-                else:
-                    errors.append("Mapping produced no results — using raw jobs")
-                    logger.warning("Mapping stage returned no results; falling back to raw jobs")
-            except Exception as e:
-                errors.append(f"Mapping error: {e}")
-                logger.error(f"Mapping CRASHED: {e}", exc_info=True)
-                if self.config.fail_on_stage_error:
-                    errors.append("ABORTING: Mapping engine crashed — cannot produce valid results")
-                    return self._error_result(errors, start_time)
-        else:
-            print("  Skipped (engine not available)")
+        # Batch processing: chunk jobs and process each batch
+        batch_size = self.config.batch_size
+        total_batches = max(1, (len(all_jobs) + batch_size - 1) // batch_size)
+        if total_batches > 1:
+            print(f"\n  Processing in {total_batches} batches of up to {batch_size} jobs")
 
-        # Stage 5: BD Scoring
-        print(f"\n[3/11] CALCULATING BD SCORES...")
-        if "scoring" in self.engines and self.config.run_scoring:
-            try:
-                scored_jobs = self.engines["scoring"]["score_batch"](jobs)
-                if self._validate_stage_output("scoring", scored_jobs, min_count=1):
-                    print(f"  Scored {len(scored_jobs)} jobs")
-                    jobs = scored_jobs
-                else:
-                    errors.append("Scoring produced no results — using unscored jobs")
-                    logger.warning("Scoring stage returned no results; falling back to unscored jobs")
-            except Exception as e:
-                errors.append(f"Scoring error: {e}")
-                logger.error(f"Scoring CRASHED: {e}", exc_info=True)
-                if self.config.fail_on_stage_error:
-                    errors.append("ABORTING: Scoring engine crashed — cannot tier jobs correctly")
-                    return self._error_result(errors, start_time)
-        else:
-            print("  Skipped (engine not available)")
-
-        # Categorize by tier
-        hot_leads = [
-            j
-            for j in jobs
-            if "Hot" in str(j.get("_scoring", {}).get("Priority Tier", ""))
-        ]
-        warm_leads = [
-            j
-            for j in jobs
-            if "Warm" in str(j.get("_scoring", {}).get("Priority Tier", ""))
-        ]
-        cold_leads = [
-            j
-            for j in jobs
-            if "Cold" in str(j.get("_scoring", {}).get("Priority Tier", ""))
-        ]
-
-        print(
-            f"  Tiers: Hot={len(hot_leads)}, Warm={len(warm_leads)}, Cold={len(cold_leads)}"
-        )
-
-        # Stage 6: QA Evaluation
-        print(f"\n[4/11] RUNNING QA EVALUATION...")
-        qa_approved = 0
-        qa_needs_review = 0
-        if "qa" in self.engines and self.config.run_qa:
-            try:
-                qa_report, approved_jobs, review_jobs = self.engines["qa"][
-                    "run_qa_workflow"
-                ](jobs)
-                qa_approved = len(approved_jobs)
-                qa_needs_review = len(review_jobs)
-                print(f"  QA: {qa_approved} approved, {qa_needs_review} need review")
-            except Exception as e:
-                errors.append(f"QA error: {e}")
-                logger.error(f"QA error: {e}")
-        else:
-            print("  Skipped (engine not available)")
-
-        # Stage 7: Generate Briefings
-        print(f"\n[5/11] GENERATING BRIEFINGS...")
-        briefings = []
-        briefings_to_process = hot_leads if self.config.hot_leads_only else jobs
-        if (
-            "briefings" in self.engines
-            and self.config.run_briefings
-            and briefings_to_process
-        ):
-            try:
-                briefings = self.engines["briefings"]["generate_briefings_batch"](
-                    briefings_to_process,
-                    output_dir=str(Path(self.config.output_dir) / "BD_Briefings"),
-                    min_score=self.config.min_bd_score,
-                    include_contacts=self.config.run_contacts,
-                )
-                print(f"  Generated {len(briefings)} briefings")
-            except Exception as e:
-                errors.append(f"Briefing error: {e}")
-                logger.error(f"Briefing error: {e}")
-        else:
-            print("  Skipped (no hot leads or engine not available)")
-
-        # Stage 8: Export
-        print(f"\n[6/11] EXPORTING RESULTS...")
+        all_processed_jobs = []
+        all_hot_leads = []
+        all_warm_leads = []
+        all_cold_leads = []
+        all_briefings = []
+        total_qa_approved = 0
+        total_qa_needs_review = 0
         export_files = {}
-        if "mapping" in self.engines:
-            try:
-                export_results = self.engines["mapping"]["export_batch"](
-                    jobs, output_dir=self.config.output_dir, formats=["notion", "n8n"]
-                )
-                for fmt, result in export_results.items():
-                    if result.success:
-                        export_files[fmt] = result.file_path
-                        print(f"  {fmt.upper()}: {result.file_path}")
-            except Exception as e:
-                errors.append(f"Export error: {e}")
-                logger.error(f"Export error: {e}")
 
-        # Stage 7: Webhook Delivery
-        print(f"\n[7/11] DELIVERING TO WEBHOOKS...")
-        if self.config.send_webhook:
-            try:
-                job_result = self.webhook_delivery.deliver_jobs(jobs)
-                if job_result:
-                    print(f"  Delivered {len(jobs)} jobs to webhook")
-                else:
-                    errors.append("Webhook delivery failed for jobs batch")
-                    logger.error("deliver_jobs() returned falsy result")
-            except Exception as e:
-                errors.append(f"Webhook job delivery error: {e}")
-                logger.error(f"Webhook job delivery error: {e}")
-            if hot_leads:
+        for batch_idx in range(total_batches):
+            batch_start = batch_idx * batch_size
+            batch_end = min(batch_start + batch_size, len(all_jobs))
+            jobs = all_jobs[batch_start:batch_end]
+
+            if total_batches > 1:
+                print(f"\n{'~' * 40}")
+                print(f"  Batch {batch_idx + 1}/{total_batches} ({len(jobs)} jobs)")
+                print(f"{'~' * 40}")
+
+            # Stage 2-4: Program Mapping Pipeline
+            print(f"\n[2/11] RUNNING PROGRAM MAPPING PIPELINE...")
+            if "mapping" in self.engines and self.config.run_mapping:
+                def _run_mapping():
+                    self.engines["mapping"]["PipelineConfig"](
+                        input_path=input_file,
+                        output_dir=self.config.output_dir,
+                        test_mode=self.config.test_mode,
+                        anthropic_api_key=self.config.anthropic_api_key,
+                    )
+                    return self.engines["mapping"]["process_jobs_batch"](jobs)
+
                 try:
-                    lead_result = self.webhook_delivery.deliver_hot_leads(hot_leads)
-                    if lead_result:
-                        print(f"  Delivered {len(hot_leads)} hot leads to webhook")
-                    else:
-                        errors.append("Webhook delivery failed for hot leads")
-                        logger.error("deliver_hot_leads() returned falsy result")
-                except Exception as e:
-                    errors.append(f"Webhook hot lead delivery error: {e}")
-                    logger.error(f"Webhook hot lead delivery error: {e}")
-        else:
-            print("  Skipped (webhooks disabled)")
+                    result = self._run_stage(
+                        "mapping", _run_mapping, checkpoint, stage_results, errors,
+                    )
+                    if result is not None and self._validate_stage_output("mapping", result, min_count=1):
+                        print(f"  Mapped {len(result)} jobs to programs")
+                        jobs = result
+                    elif result is not None:
+                        errors.append("Mapping produced no results — using raw jobs")
+                        logger.warning("Mapping stage returned no results; falling back to raw jobs")
+                except Exception:
+                    if self.config.fail_on_stage_error:
+                        errors.append("ABORTING: Mapping engine crashed — cannot produce valid results")
+                        duration = (datetime.now() - start_time).total_seconds()
+                        self._print_run_summary(stage_results, duration, errors)
+                        return self._error_result(errors, start_time)
+            else:
+                print("  Skipped (engine not available)")
+                stage_results.append(StageResult(name="mapping", status="skipped"))
 
-        # Stage 8: Email Notifications
-        print(f"\n[8/11] SENDING NOTIFICATIONS...")
-        if self.config.send_email and hot_leads:
-            self.email_notifier.send_hot_lead_alert(hot_leads, briefings)
-        else:
-            print("  Skipped (email disabled or no hot leads)")
+            # Stage 5: BD Scoring
+            print(f"\n[3/11] CALCULATING BD SCORES...")
+            if "scoring" in self.engines and self.config.run_scoring:
+                def _run_scoring():
+                    return self.engines["scoring"]["score_batch"](jobs)
+
+                try:
+                    result = self._run_stage(
+                        "scoring", _run_scoring, checkpoint, stage_results, errors,
+                    )
+                    if result is not None and self._validate_stage_output("scoring", result, min_count=1):
+                        print(f"  Scored {len(result)} jobs")
+                        jobs = result
+                    elif result is not None:
+                        errors.append("Scoring produced no results — using unscored jobs")
+                        logger.warning("Scoring stage returned no results; falling back to unscored jobs")
+                except Exception:
+                    if self.config.fail_on_stage_error:
+                        errors.append("ABORTING: Scoring engine crashed — cannot tier jobs correctly")
+                        duration = (datetime.now() - start_time).total_seconds()
+                        self._print_run_summary(stage_results, duration, errors)
+                        return self._error_result(errors, start_time)
+            else:
+                print("  Skipped (engine not available)")
+                stage_results.append(StageResult(name="scoring", status="skipped"))
+
+            # Categorize by tier
+            hot_leads = [
+                j
+                for j in jobs
+                if "Hot" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+            ]
+            warm_leads = [
+                j
+                for j in jobs
+                if "Warm" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+            ]
+            cold_leads = [
+                j
+                for j in jobs
+                if "Cold" in str(j.get("_scoring", {}).get("Priority Tier", ""))
+            ]
+
+            print(
+                f"  Tiers: Hot={len(hot_leads)}, Warm={len(warm_leads)}, Cold={len(cold_leads)}"
+            )
+
+            # Data quality gate: if scoring ran but produced zero categorized leads, flag it
+            categorized = len(hot_leads) + len(warm_leads) + len(cold_leads)
+            if self.config.run_scoring and "scoring" in self.engines and categorized == 0 and len(jobs) > 0:
+                gate_msg = (
+                    f"DATA QUALITY WARNING: {len(jobs)} jobs processed but 0 categorized into tiers. "
+                    "Scoring may have failed silently — review _scoring fields in output."
+                )
+                errors.append(gate_msg)
+                logger.warning(gate_msg)
+                if self.config.fail_on_stage_error:
+                    errors.append("ABORTING: Zero leads categorized after scoring — pipeline output would be empty")
+                    duration = (datetime.now() - start_time).total_seconds()
+                    self._print_run_summary(stage_results, duration, errors)
+                    return self._error_result(errors, start_time)
+
+            # Stage 6: QA Evaluation
+            print(f"\n[4/11] RUNNING QA EVALUATION...")
+            qa_approved = 0
+            qa_needs_review = 0
+            if "qa" in self.engines and self.config.run_qa:
+                def _run_qa():
+                    return self.engines["qa"]["run_qa_workflow"](jobs)
+
+                try:
+                    qa_result = self._run_stage(
+                        "qa", _run_qa, checkpoint, stage_results, errors,
+                    )
+                    if qa_result is not None:
+                        qa_report, approved_jobs, review_jobs = qa_result
+                        qa_approved = len(approved_jobs)
+                        qa_needs_review = len(review_jobs)
+                        print(f"  QA: {qa_approved} approved, {qa_needs_review} need review")
+                except Exception:
+                    pass  # Error already recorded by _run_stage
+            else:
+                print("  Skipped (engine not available)")
+                stage_results.append(StageResult(name="qa", status="skipped"))
+
+            # Stage 7: Generate Briefings
+            print(f"\n[5/11] GENERATING BRIEFINGS...")
+            briefings = []
+            briefings_to_process = hot_leads if self.config.hot_leads_only else jobs
+            if (
+                "briefings" in self.engines
+                and self.config.run_briefings
+                and briefings_to_process
+            ):
+                def _run_briefings():
+                    return self.engines["briefings"]["generate_briefings_batch"](
+                        briefings_to_process,
+                        output_dir=str(Path(self.config.output_dir) / "BD_Briefings"),
+                        min_score=self.config.min_bd_score,
+                        include_contacts=self.config.run_contacts,
+                    )
+
+                try:
+                    result = self._run_stage(
+                        "briefings", _run_briefings, checkpoint, stage_results, errors,
+                    )
+                    if result is not None:
+                        briefings = result
+                        print(f"  Generated {len(briefings)} briefings")
+                except Exception:
+                    pass
+            else:
+                print("  Skipped (no hot leads or engine not available)")
+                stage_results.append(StageResult(name="briefings", status="skipped"))
+
+            # Stage 8: Export
+            print(f"\n[6/11] EXPORTING RESULTS...")
+            if "mapping" in self.engines:
+                def _run_export():
+                    return self.engines["mapping"]["export_batch"](
+                        jobs, output_dir=self.config.output_dir, formats=["notion", "n8n"]
+                    )
+
+                try:
+                    export_result = self._run_stage(
+                        "export", _run_export, checkpoint, stage_results, errors,
+                    )
+                    if export_result is not None:
+                        for fmt, res in export_result.items():
+                            if res.success:
+                                export_files[fmt] = res.file_path
+                                print(f"  {fmt.upper()}: {res.file_path}")
+                except Exception:
+                    pass
+            else:
+                stage_results.append(StageResult(name="export", status="skipped"))
+
+            # Stage 7: Webhook Delivery
+            print(f"\n[7/11] DELIVERING TO WEBHOOKS...")
+            if self.config.send_webhook:
+                def _run_webhooks():
+                    delivered = []
+                    job_result = self.webhook_delivery.deliver_jobs(jobs)
+                    if job_result:
+                        print(f"  Delivered {len(jobs)} jobs to webhook")
+                        delivered.extend(jobs)
+                    else:
+                        raise RuntimeError("Webhook delivery failed for jobs batch")
+                    if hot_leads:
+                        lead_result = self.webhook_delivery.deliver_hot_leads(hot_leads)
+                        if lead_result:
+                            print(f"  Delivered {len(hot_leads)} hot leads to webhook")
+                        else:
+                            raise RuntimeError("Webhook delivery failed for hot leads")
+                    return delivered
+
+                try:
+                    self._run_stage(
+                        "webhooks", _run_webhooks, checkpoint, stage_results, errors,
+                    )
+                except Exception:
+                    pass
+            else:
+                print("  Skipped (webhooks disabled)")
+                stage_results.append(StageResult(name="webhooks", status="skipped"))
+
+            # Stage 8: Email Notifications
+            print(f"\n[8/11] SENDING NOTIFICATIONS...")
+            if self.config.send_email and hot_leads:
+                self.email_notifier.send_hot_lead_alert(hot_leads, briefings)
+                stage_results.append(StageResult(name="notifications", status="passed"))
+                checkpoint.mark_completed("notifications")
+            else:
+                print("  Skipped (email disabled or no hot leads)")
+                stage_results.append(StageResult(name="notifications", status="skipped"))
+
+            # Accumulate batch results
+            all_processed_jobs.extend(jobs)
+            all_hot_leads.extend(hot_leads)
+            all_warm_leads.extend(warm_leads)
+            all_cold_leads.extend(cold_leads)
+            all_briefings.extend(briefings)
+            total_qa_approved += qa_approved
+            total_qa_needs_review += qa_needs_review
+
+            if total_batches > 1:
+                print(f"\n  Batch {batch_idx + 1}/{total_batches} complete")
 
         # Stages 9-11: Run Bullhorn+Dashboard and Knowledge indexing in parallel
         # Stage 10 (dashboard) depends on Stage 9 (Bullhorn ETL), but Stage 11 is independent
@@ -816,18 +1063,32 @@ class BDOrchestrator:
             # Stage 9: Bullhorn ETL
             print(f"\n[9/11] RUNNING BULLHORN ETL...")
             if "bullhorn" in self.engines and self.config.run_bullhorn:
+                bullhorn_start = datetime.now()
                 try:
                     self.engines["bullhorn"]["run_pipeline"]()
                     print(f"  Bullhorn ETL completed")
+                    stage_results.append(StageResult(
+                        name="bullhorn_etl", status="passed",
+                        duration_seconds=(datetime.now() - bullhorn_start).total_seconds(),
+                    ))
+                    checkpoint.mark_completed("bullhorn_etl")
                 except Exception as e:
                     stage_errors.append(f"Bullhorn ETL error: {e}")
                     logger.error(f"Bullhorn ETL error: {e}")
+                    stage_results.append(StageResult(
+                        name="bullhorn_etl", status="failed",
+                        duration_seconds=(datetime.now() - bullhorn_start).total_seconds(),
+                        error=str(e),
+                    ))
+                    checkpoint.mark_failed("bullhorn_etl", str(e))
             else:
                 print("  Skipped (engine not available or disabled)")
+                stage_results.append(StageResult(name="bullhorn_etl", status="skipped"))
 
             # Stage 10: Dashboard Export with Verification
             print(f"\n[10/11] EXPORTING DASHBOARD DATA...")
             if "bullhorn" in self.engines and self.config.export_dashboard:
+                dashboard_start = datetime.now()
                 try:
                     self.engines["bullhorn"]["run_dashboard_export"]()
                     print(f"  Dashboard export completed")
@@ -854,11 +1115,23 @@ class BDOrchestrator:
                         print(
                             f"  Verified: all {len(required_files)} dashboard files present"
                         )
+                    stage_results.append(StageResult(
+                        name="dashboard_export", status="passed",
+                        duration_seconds=(datetime.now() - dashboard_start).total_seconds(),
+                    ))
+                    checkpoint.mark_completed("dashboard_export")
                 except Exception as e:
                     stage_errors.append(f"Dashboard export error: {e}")
                     logger.error(f"Dashboard export error: {e}")
+                    stage_results.append(StageResult(
+                        name="dashboard_export", status="failed",
+                        duration_seconds=(datetime.now() - dashboard_start).total_seconds(),
+                        error=str(e),
+                    ))
+                    checkpoint.mark_failed("dashboard_export", str(e))
             else:
                 print("  Skipped (engine not available or disabled)")
+                stage_results.append(StageResult(name="dashboard_export", status="skipped"))
             return stage_errors
 
         def _run_knowledge_indexing():
@@ -866,16 +1139,29 @@ class BDOrchestrator:
             stage_errors = []
             print(f"\n[11/11] INDEXING KNOWLEDGE BASE...")
             if "knowledge" in self.engines and self.config.run_knowledge:
+                knowledge_start = datetime.now()
                 try:
                     indexer = self.engines["knowledge"]["BDIndexer"]()
                     indexer.index_all()
                     print(f"  Knowledge base indexed successfully")
                     logger.info("Engine8_Knowledge indexing completed")
+                    stage_results.append(StageResult(
+                        name="knowledge_indexing", status="passed",
+                        duration_seconds=(datetime.now() - knowledge_start).total_seconds(),
+                    ))
+                    checkpoint.mark_completed("knowledge_indexing")
                 except Exception as e:
                     stage_errors.append(f"Knowledge indexing error: {e}")
                     logger.error(f"Knowledge indexing error: {e}")
+                    stage_results.append(StageResult(
+                        name="knowledge_indexing", status="failed",
+                        duration_seconds=(datetime.now() - knowledge_start).total_seconds(),
+                        error=str(e),
+                    ))
+                    checkpoint.mark_failed("knowledge_indexing", str(e))
             else:
                 print("  Skipped (engine not available or disabled)")
+                stage_results.append(StageResult(name="knowledge_indexing", status="skipped"))
             return stage_errors
 
         # Execute stages 9+10 and 11 in parallel
@@ -899,19 +1185,22 @@ class BDOrchestrator:
         # Build result
         result = PipelineResult(
             success=len(errors) == 0,
-            jobs_processed=len(jobs),
-            hot_leads=len(hot_leads),
-            warm_leads=len(warm_leads),
-            cold_leads=len(cold_leads),
-            briefings_generated=len(briefings),
-            qa_approved=qa_approved,
-            qa_needs_review=qa_needs_review,
+            jobs_processed=len(all_processed_jobs),
+            hot_leads=len(all_hot_leads),
+            warm_leads=len(all_warm_leads),
+            cold_leads=len(all_cold_leads),
+            briefings_generated=len(all_briefings),
+            qa_approved=total_qa_approved,
+            qa_needs_review=total_qa_needs_review,
             export_files=export_files,
             errors=errors,
             duration_seconds=duration,
         )
 
-        # Print summary
+        # Print run summary table
+        self._print_run_summary(stage_results, duration, errors)
+
+        # Print legacy summary for backward compatibility
         print(f"\n{'=' * 60}")
         print("PIPELINE COMPLETE")
         print(f"{'=' * 60}")
@@ -1013,8 +1302,6 @@ class BDOrchestrator:
 
     def run_scheduled(self, interval_hours: int = 6):
         """Run the pipeline on a schedule."""
-        import time
-
         logger.info(f"Starting scheduled runs every {interval_hours} hours")
         print(f"\nScheduled mode: running every {interval_hours} hours")
         print("Press Ctrl+C to stop\n")
@@ -1037,14 +1324,14 @@ class BDOrchestrator:
                 # Sleep until next run
                 next_run = datetime.now() + timedelta(hours=interval_hours)
                 logger.info(f"Next run scheduled for: {next_run}")
-                time.sleep(interval_hours * 3600)
+                time_module.sleep(interval_hours * 3600)
 
             except KeyboardInterrupt:
                 logger.info("Scheduled runs stopped by user")
                 break
             except Exception as e:
                 logger.error(f"Scheduled run error: {e}")
-                time.sleep(300)  # Wait 5 minutes on error
+                time_module.sleep(300)  # Wait 5 minutes on error
 
 
 # ============================================
@@ -1072,6 +1359,18 @@ Examples:
 
   # Skip specific stages
   python orchestrator.py --input data/jobs.json --no-briefings --no-qa
+
+  # Resume a failed run from last checkpoint
+  python orchestrator.py --input data/jobs.json --resume
+
+  # Continue on stage failures (quarantine mode)
+  python orchestrator.py --input data/jobs.json
+
+  # Fail fast on any stage error (strict mode)
+  python orchestrator.py --input data/jobs.json --strict
+
+  # Process in batches of 25
+  python orchestrator.py --input data/jobs.json --batch-size 25
         """,
     )
 
@@ -1086,6 +1385,18 @@ Examples:
     )
     parser.add_argument(
         "--min-score", type=int, default=0, help="Minimum BD score to process"
+    )
+    parser.add_argument(
+        "--resume", action="store_true",
+        help="Resume from last checkpoint, skipping completed stages"
+    )
+    parser.add_argument(
+        "--strict", action="store_true",
+        help="Fail fast on any stage error (default: quarantine and continue)"
+    )
+    parser.add_argument(
+        "--batch-size", type=int, default=50,
+        help="Number of jobs per batch (default: 50)"
     )
 
     # Stage Control
@@ -1141,6 +1452,9 @@ Examples:
         send_webhook=not args.no_webhook,
         schedule_enabled=args.schedule,
         schedule_interval_hours=args.interval,
+        batch_size=args.batch_size,
+        fail_on_stage_error=args.strict,
+        resume=args.resume,
     )
 
     # Create and run orchestrator

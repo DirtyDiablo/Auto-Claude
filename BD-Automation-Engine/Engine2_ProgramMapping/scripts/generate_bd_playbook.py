@@ -1,4 +1,7 @@
 """
+DEPRECATED: This script is superseded by Engine4_Playbook/scripts/bd_playbook_generator.py
+which provides LLM-powered playbook generation with richer intelligence context.
+
 BD Playbook Generator - Insight Global Jobs
 ============================================
 Creates a master Excel workbook with one sheet per Prime+Program combo.

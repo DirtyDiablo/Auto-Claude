@@ -13,7 +13,7 @@ DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 
 def create_database():
     """Create the master Bullhorn database with all tables."""
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     cursor = conn.cursor()
 
     # =========================================
@@ -421,10 +421,19 @@ def create_database():
     return DATABASE_PATH
 
 
-def get_connection():
-    """Get database connection with WAL mode for concurrent read/write."""
-    conn = sqlite3.connect(DATABASE_PATH)
+def get_connection(db_path=None):
+    """Get database connection with WAL mode and performance PRAGMAs.
+
+    Args:
+        db_path: Optional path override. Defaults to DATABASE_PATH.
+
+    All Engine7 scripts should use this instead of sqlite3.connect() directly.
+    """
+    conn = sqlite3.connect(db_path or DATABASE_PATH)
     conn.execute("PRAGMA journal_mode=WAL")
+    conn.execute("PRAGMA synchronous=NORMAL")
+    conn.execute("PRAGMA cache_size=-64000")  # 64MB cache
+    conn.execute("PRAGMA busy_timeout=5000")  # 5s retry on lock
     return conn
 
 

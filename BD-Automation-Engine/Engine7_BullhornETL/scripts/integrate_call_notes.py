@@ -13,6 +13,8 @@ Takes the analyzed call notes data and integrates it into the Bullhorn master da
 import sqlite3
 import json
 from pathlib import Path
+
+from Engine7_BullhornETL.scripts.database_schema import get_connection
 from collections import defaultdict
 
 # Paths
@@ -533,7 +535,7 @@ def main():
 
     # Connect to database
     print(f"\nConnecting to database: {DB_PATH}")
-    conn = sqlite3.connect(str(DB_PATH))
+    conn = get_connection()
 
     try:
         # Create intelligence tables

@@ -1,4 +1,7 @@
 """
+DEPRECATED: This script is superseded by pipeline.py which provides the full
+7-stage enrichment pipeline with improved program mapping and scoring.
+
 Insight Global Jobs - Data Mapped & Enriched Pipeline
 =====================================================
 Takes raw Apify scraper output, parses each job into structured fields,

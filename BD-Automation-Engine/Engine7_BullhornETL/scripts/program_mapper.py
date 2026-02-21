@@ -11,6 +11,8 @@ from pathlib import Path
 from datetime import datetime
 from collections import defaultdict
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 OUTPUT_DIR = Path(__file__).parent.parent / "outputs"
 
@@ -278,7 +280,7 @@ def run_program_mapping():
     print("PROGRAM MAPPER")
     print("=" * 80)
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 

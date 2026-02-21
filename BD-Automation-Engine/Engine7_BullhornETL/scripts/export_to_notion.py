@@ -7,6 +7,8 @@ import sqlite3
 import csv
 from pathlib import Path
 
+from Engine7_BullhornETL.scripts.database_schema import get_connection
+
 DATABASE_PATH = Path(__file__).parent.parent / "data" / "bullhorn_master.db"
 OUTPUT_DIR = Path(__file__).parent.parent / "outputs"
 
@@ -15,7 +17,7 @@ def export_prime_contractors():
     """Export prime contractors to Notion-compatible CSV."""
     print("Exporting Prime Contractors...")
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -68,7 +70,7 @@ def export_placements():
     """Export placements to Notion-compatible CSV."""
     print("Exporting Placements...")
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -137,7 +139,7 @@ def export_jobs():
     """Export jobs to Notion-compatible CSV."""
     print("Exporting Jobs...")
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -205,7 +207,7 @@ def export_contacts():
     """Export contacts to Notion-compatible CSV."""
     print("Exporting Contacts...")
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
@@ -248,7 +250,7 @@ def export_past_performance_summary():
     """Export past performance summary to Notion-compatible CSV."""
     print("Exporting Past Performance Summary...")
 
-    conn = sqlite3.connect(DATABASE_PATH)
+    conn = get_connection()
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
 
