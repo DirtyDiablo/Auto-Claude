@@ -913,6 +913,10 @@ from Engine8_Knowledge.routers.ingest import router as ingest_extracted_router
 app.include_router(ingest_extracted_router)
 logger.info("Ingest routes enabled: /ingest/* (9 endpoints)")
 
+from Engine8_Knowledge.routers.qa_review import router as qa_review_router
+app.include_router(qa_review_router)
+logger.info("QA Review Queue routes enabled: /qa/* (9 endpoints)")
+
 
 # =========================================
 # HEALTH & STATUS ENDPOINTS
@@ -1424,6 +1428,83 @@ async def hybrid_search(
             {"id": r.id, "text": r.text, "score": r.score, "source": r.source}
             for r in results
         ]
+    }
+
+
+# =========================================
+# SAM.gov ENDPOINTS
+# =========================================
+
+
+@app.get("/sam/search")
+async def sam_search(
+    query: str = Query(..., description="Search keywords for federal opportunities"),
+    naics: Optional[str] = Query(None, description="NAICS code filter"),
+    limit: int = Query(20, ge=1, le=100, description="Max results"),
+):
+    """Search SAM.gov for active federal opportunities."""
+    from Engine8_Knowledge.scrapers.sam_gov_sync import SAMGovSync, OpportunityQuery
+
+    client = SAMGovSync()
+    opp_query = OpportunityQuery(
+        keywords=[query],
+        naics_codes=[naics] if naics else [],
+        limit=limit,
+    )
+    opportunities = await client.search_opportunities(opp_query)
+    return {
+        "query": query,
+        "total": len(opportunities),
+        "opportunities": [
+            {
+                "notice_id": opp.notice_id,
+                "title": opp.title,
+                "type": opp.type,
+                "agency": opp.agency,
+                "naics": opp.naics,
+                "set_aside": opp.set_aside,
+                "description": opp.description[:500] if opp.description else "",
+            }
+            for opp in opportunities
+        ],
+    }
+
+
+@app.get("/sam/awards")
+async def sam_awards(
+    query: str = Query("", description="Search keywords (optional)"),
+    company: Optional[str] = Query(None, description="Awardee company name"),
+    naics: Optional[str] = Query(None, description="NAICS code filter"),
+    limit: int = Query(20, ge=1, le=100, description="Max results"),
+):
+    """Search SAM.gov for recent contract awards."""
+    from Engine8_Knowledge.scrapers.sam_gov_sync import SAMGovSync, SearchQuery
+
+    client = SAMGovSync()
+    search_query = SearchQuery(
+        keywords=[query] if query else [],
+        naics_codes=[naics] if naics else [],
+        awardee=company,
+        limit=limit,
+    )
+    awards = await client.search_awards(search_query)
+    return {
+        "query": query,
+        "total": len(awards),
+        "awards": [
+            {
+                "award_id": award.award_id,
+                "title": award.title,
+                "awardee": award.awardee,
+                "value": award.value,
+                "naics": award.naics,
+                "agency": award.agency,
+                "set_aside": award.set_aside,
+                "description": award.description[:500] if award.description else "",
+                "contract_type": award.contract_type,
+            }
+            for award in awards
+        ],
     }
 
 
@@ -4082,6 +4163,51 @@ async def api_v2_health():
         "client_available": SUPABASE_CLIENT_AVAILABLE,
         "timestamp": datetime.now().isoformat(),
     }
+
+
+# =========================================
+# SCORING VALIDATION
+# =========================================
+
+
+@app.get("/scoring/validate")
+async def validate_scoring():
+    """Run BD score validation against Bullhorn placement outcomes.
+
+    Trains an XGBoost model on historical placements and compares
+    its predictive accuracy to the rule-based BD scoring engine.
+    Returns accuracy metrics, feature importances, and tuning recommendations.
+    """
+    try:
+        from Engine5_Scoring.scripts.score_validator import BDScoreValidator
+
+        validator = BDScoreValidator()
+        result = await asyncio.to_thread(validator.validate)
+        report_path = await asyncio.to_thread(validator.save_report, result)
+
+        return {
+            "timestamp": result.timestamp,
+            "sample_size": result.sample_size,
+            "manual_scoring": {
+                "accuracy": result.manual_accuracy,
+                "mean_absolute_error": result.manual_mae,
+            },
+            "xgboost_scoring": {
+                "accuracy": result.ml_accuracy,
+                "mean_absolute_error": result.ml_mae,
+            },
+            "feature_importance": result.feature_importance,
+            "recommendations": result.recommendations,
+            "report_path": report_path,
+        }
+    except ImportError as e:
+        raise HTTPException(
+            status_code=501,
+            detail=f"Score validator dependencies not available: {e}",
+        )
+    except Exception as e:
+        logger.error(f"Score validation failed: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # =========================================

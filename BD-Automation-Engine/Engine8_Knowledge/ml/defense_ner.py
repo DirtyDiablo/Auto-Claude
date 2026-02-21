@@ -54,16 +54,44 @@ class DefenseNER:
 
     # Pattern-based fallback patterns
     PATTERNS = {
+        "PROGRAM": [
+            "DCGS-A",
+            "DCGS-N",
+            "AF DCGS",
+            "DCGS",
+            "GBSD",
+            "JADC2",
+            "ABMS",
+            "MQ-25",
+            "MQ-9",
+            "F-35",
+            "F-22",
+            "JSTARS",
+            "AWACS",
+            "Global Hawk",
+            "Triton",
+            "Sentinel",
+            "ICBM",
+            "AESA",
+            "SIGINT",
+            "GEOINT",
+            "MASINT",
+            "ELINT",
+            "IMINT",
+        ],
         "CONTRACT": [
             r"[A-Z]{2}\d{4}-\d{2}-[A-Z]-\d{4}",
             r"W\d{5}-\d{2}-[A-Z]-\d{4}",
+            r"FA\d{4}-\d{2}-[A-Z]-\d{4}",
+            r"N\d{5}-\d{2}-[A-Z]-\d{4}",
         ],
         "CLEARANCE": [
+            "TS/SCI CI Poly",
             "TS/SCI",
             "CI Poly",
-            "Secret",
+            "Full Scope Poly",
             "Top Secret",
-            "TS/SCI CI Poly",
+            "Secret",
             "Public Trust",
         ],
         "NAICS": [r"\b54151[0-9]\b"],
@@ -72,6 +100,8 @@ class DefenseNER:
             "USAF",
             "US Army",
             "USN",
+            "US Navy",
+            "US Air Force",
             "DISA",
             "DIA",
             "NGA",
@@ -80,21 +110,58 @@ class DefenseNER:
             "DoD",
             "DARPA",
             "MDA",
+            "SOCOM",
+            "CENTCOM",
+            "INDOPACOM",
+            "Space Force",
+            "NRO",
         ],
         "VALUE": [r"\$[\d,.]+[MBK]", r"\$[\d,.]+\s*(million|billion)"],
         "COMPANY": [
+            "General Dynamics IT",
             "GDIT",
             "Leidos",
             "SAIC",
             "Northrop Grumman",
             "BAE Systems",
             "Raytheon",
+            "RTX",
             "L3Harris",
+            "Booz Allen Hamilton",
             "Booz Allen",
             "Perspecta",
             "ManTech",
             "CACI",
             "Lockheed Martin",
+            "Boeing",
+            "Palantir",
+            "Parsons",
+            "KBR",
+            "Jacobs",
+        ],
+        "INSTALLATION": [
+            "Fort Belvoir",
+            "Fort Meade",
+            "Fort Liberty",
+            "Fort Huachuca",
+            "Wright-Patterson AFB",
+            "Langley AFB",
+            "Beale AFB",
+            "Lackland AFB",
+            "Nellis AFB",
+            "Eglin AFB",
+            "Hanscom AFB",
+            "Joint Base San Antonio",
+            "Pentagon",
+            "Aberdeen Proving Ground",
+            "Redstone Arsenal",
+            "Camp Humphreys",
+        ],
+        "ROLE_TITLE": [
+            r"\b(Program Manager|Deputy PM|Chief Engineer|Technical Lead)\b",
+            r"\b(Systems Engineer|Software Engineer|DevOps Engineer)\b",
+            r"\b(Intelligence Analyst|SIGINT Analyst|GEOINT Analyst)\b",
+            r"\b(Contracting Officer|COR|COTR|KO)\b",
         ],
     }
 
@@ -173,8 +240,12 @@ class DefenseNER:
                             )
                         )
                 else:
-                    idx = text.find(pattern)
-                    if idx >= 0:
+                    # Find ALL occurrences of literal patterns
+                    start = 0
+                    while True:
+                        idx = text.find(pattern, start)
+                        if idx < 0:
+                            break
                         entities.append(
                             Entity(
                                 text=pattern,
@@ -184,6 +255,7 @@ class DefenseNER:
                                 confidence=0.9,
                             )
                         )
+                        start = idx + len(pattern)
         return entities
 
     def _deduplicate(self, entities: List[Entity]) -> List[Entity]:
@@ -325,6 +397,73 @@ class DefenseNER:
 
         logger.info("training_data_generated", examples=len(examples))
         return examples
+
+
+    def enrich_batch(self, records: List[Dict], text_fields: Optional[List[str]] = None) -> List[Dict]:
+        """Enrich a batch of records with extracted entities.
+
+        For each record, extracts entities from text fields and adds an
+        'entities' key with grouped results.
+
+        Args:
+            records: List of dicts (job postings, documents, etc.)
+            text_fields: Field names to extract from. Defaults to common fields.
+
+        Returns:
+            Records with 'entities' dict added to each.
+        """
+        if text_fields is None:
+            text_fields = ["description", "title", "text", "content", "notes"]
+
+        for record in records:
+            combined_text = " ".join(
+                str(record.get(f, "")) for f in text_fields if record.get(f)
+            )
+            if not combined_text.strip():
+                record["entities"] = {}
+                continue
+
+            entities = self.predict(combined_text)
+
+            # Group by label
+            grouped: Dict[str, List[str]] = {}
+            for e in entities:
+                if e.label not in grouped:
+                    grouped[e.label] = []
+                if e.text not in grouped[e.label]:
+                    grouped[e.label].append(e.text)
+
+            record["entities"] = grouped
+
+        return records
+
+    def get_stats(self) -> Dict:
+        """Return pattern coverage statistics."""
+        return {
+            "entity_types": len(self.ENTITY_TYPES),
+            "pattern_types": len(self.PATTERNS),
+            "total_patterns": sum(len(v) for v in self.PATTERNS.values()),
+            "spacy_available": self.nlp is not None,
+            "trained": self._trained,
+            "patterns_by_type": {k: len(v) for k, v in self.PATTERNS.items()},
+        }
+
+
+def run_ner_pipeline_stage(records: List[Dict], text_fields: Optional[List[str]] = None) -> List[Dict]:
+    """Pipeline stage wrapper — enriches records with NER entities.
+
+    Designed to be called from orchestrator.py as a pipeline stage.
+    Returns the enriched records.
+    """
+    ner = get_defense_ner()
+    logger.info("ner_pipeline_start", records=len(records))
+    enriched = ner.enrich_batch(records, text_fields)
+    entity_counts = {}
+    for r in enriched:
+        for label in r.get("entities", {}):
+            entity_counts[label] = entity_counts.get(label, 0) + len(r["entities"][label])
+    logger.info("ner_pipeline_complete", records=len(enriched), entity_counts=entity_counts)
+    return enriched
 
 
 # ---------------------------------------------------------------------------

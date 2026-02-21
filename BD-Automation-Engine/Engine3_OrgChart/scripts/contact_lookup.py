@@ -165,15 +165,20 @@ def rank_contacts(contacts, limit=5):
 def lookup_contacts(program_name=None, prime_contractor=None, location=None, limit=5):
     db = get_contact_database()
     all_c = []
+    seen_ids = set()
     method = []
     if program_name:
         pc = db.search_by_program(program_name)
         all_c.extend(pc)
+        seen_ids.update(id(c) for c in pc)
         if pc:
             method.append(f"program:{program_name}")
     if prime_contractor:
         cc = db.search_by_company(prime_contractor)
-        all_c.extend([c for c in cc if c not in all_c])
+        for c in cc:
+            if id(c) not in seen_ids:
+                seen_ids.add(id(c))
+                all_c.append(c)
         if cc:
             method.append(f"company:{prime_contractor}")
     ranked = rank_contacts(all_c, limit)

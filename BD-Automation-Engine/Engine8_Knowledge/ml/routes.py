@@ -158,6 +158,57 @@ async def hiring_signals_status():
     return detector.get_status()
 
 
+# ─── NER Entity Extraction ─────────────────────────────────────────────────
+
+
+class NERRequest(BaseModel):
+    text: str
+    text_fields: Optional[List[str]] = None
+
+
+class NERBatchRequest(BaseModel):
+    records: List[dict]
+    text_fields: Optional[List[str]] = None
+
+
+@router.post("/ner/extract")
+async def extract_entities(request: NERRequest):
+    """Extract defense-domain entities from text."""
+    from Engine8_Knowledge.ml.defense_ner import get_defense_ner
+
+    ner = get_defense_ner()
+    entities = ner.predict(request.text)
+    return {
+        "entities": [
+            {"text": e.text, "label": e.label, "start": e.start, "end": e.end, "confidence": e.confidence}
+            for e in entities
+        ],
+        "count": len(entities),
+    }
+
+
+@router.post("/ner/enrich")
+async def enrich_with_ner(request: NERBatchRequest):
+    """Enrich a batch of records with NER entities."""
+    from Engine8_Knowledge.ml.defense_ner import get_defense_ner
+
+    ner = get_defense_ner()
+    enriched = ner.enrich_batch(request.records, request.text_fields)
+    return {
+        "records": enriched,
+        "count": len(enriched),
+    }
+
+
+@router.get("/ner/stats")
+async def ner_stats():
+    """Get NER model stats and pattern coverage."""
+    from Engine8_Knowledge.ml.defense_ner import get_defense_ner
+
+    ner = get_defense_ner()
+    return ner.get_stats()
+
+
 # ─── Helper ─────────────────────────────────────────────────────────────────
 
 

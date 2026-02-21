@@ -1012,44 +1012,22 @@ class BullhornETLv2:
         """Build comprehensive contacts database."""
         print("\nBuilding Contacts Database...")
         cursor = self.conn.cursor()
-        skipped_contacts = 0
-
-        # Extract contacts from placements
+        # Build contact rows from placements, notes, and visits
+        placement_contact_rows = []
         for plc in self.all_placements:
-            contact_name = plc.get("contact")
-            candidate_name = plc.get("candidate")
             company = plc.get("company")
-
-            for name in [contact_name, candidate_name]:
+            for name in [plc.get("contact"), plc.get("candidate")]:
                 if name and pd.notna(name):
                     name_str = str(name).strip()
                     if name_str:
-                        # Parse name
                         parts = name_str.split()
                         first_name = parts[0] if parts else ""
                         last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+                        placement_contact_rows.append(
+                            (name_str, first_name, last_name, company, plc.get("source_file"))
+                        )
 
-                        try:
-                            cursor.execute(
-                                """
-                                INSERT OR IGNORE INTO candidates
-                                (full_name, first_name, last_name, company_name, source_file)
-                                VALUES (?, ?, ?, ?, ?)
-                            """,
-                                (
-                                    name_str,
-                                    first_name,
-                                    last_name,
-                                    company,
-                                    plc.get("source_file"),
-                                ),
-                            )
-                        except Exception as e:
-                            skipped_contacts += 1
-                            if skipped_contacts <= 5:
-                                print(f"  WARN: Skipped contact insert ({skipped_contacts}): {e}")
-
-        # Extract contacts from notes
+        note_contact_rows = []
         for note in self.all_notes:
             about = note.get("about")
             if about and pd.notna(about):
@@ -1058,22 +1036,11 @@ class BullhornETLv2:
                     parts = name_str.split()
                     first_name = parts[0] if parts else ""
                     last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+                    note_contact_rows.append(
+                        (name_str, first_name, last_name, None, note.get("source_file"))
+                    )
 
-                    try:
-                        cursor.execute(
-                            """
-                            INSERT OR IGNORE INTO candidates
-                            (full_name, first_name, last_name, source_file)
-                            VALUES (?, ?, ?, ?)
-                        """,
-                            (name_str, first_name, last_name, note.get("source_file")),
-                        )
-                    except Exception as e:
-                        skipped_contacts += 1
-                        if skipped_contacts <= 3:
-                            print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
-
-        # Extract contacts from visits
+        visit_contact_rows = []
         for visit in self.all_visits:
             contact_name = visit.get("contact_name")
             if contact_name and pd.notna(contact_name):
@@ -1082,25 +1049,28 @@ class BullhornETLv2:
                     parts = name_str.split()
                     first_name = parts[0] if parts else ""
                     last_name = " ".join(parts[1:]) if len(parts) > 1 else ""
+                    visit_contact_rows.append(
+                        (name_str, first_name, last_name, None, visit.get("source_file"))
+                    )
 
-                    try:
-                        cursor.execute(
-                            """
-                            INSERT OR IGNORE INTO candidates
-                            (full_name, first_name, last_name, source_file)
-                            VALUES (?, ?, ?, ?)
-                        """,
-                            (name_str, first_name, last_name, visit.get("source_file")),
-                        )
-                    except Exception as e:
-                        skipped_contacts += 1
-                        if skipped_contacts <= 3:
-                            print(f"  WARN: Skipped contact insert: {str(e)[:120]}")
-
-        if skipped_contacts > 5:
-            print(f"  WARN: {skipped_contacts} total contacts skipped due to insert errors (showing first 5)")
-        elif skipped_contacts > 0:
-            print(f"  WARN: {skipped_contacts} contacts skipped due to insert errors")
+        # Batch insert all contacts
+        all_contact_rows = placement_contact_rows + note_contact_rows + visit_contact_rows
+        inserted_count = 0
+        try:
+            cursor.executemany(
+                """INSERT OR IGNORE INTO candidates
+                (full_name, first_name, last_name, company_name, source_file)
+                VALUES (?, ?, ?, ?, ?)""",
+                all_contact_rows,
+            )
+            inserted_count = cursor.rowcount
+        except Exception as e:
+            print(f"  ERROR: Batch contact insert failed: {e}")
+            logger.error(f"Batch contact insert failed ({len(all_contact_rows)} rows): {e}")
+        print(f"  Prepared {len(all_contact_rows)} contacts "
+              f"(placements: {len(placement_contact_rows)}, "
+              f"notes: {len(note_contact_rows)}, "
+              f"visits: {len(visit_contact_rows)})")
 
         self.conn.commit()
 

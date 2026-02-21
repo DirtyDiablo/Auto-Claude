@@ -18,6 +18,7 @@ Usage:
     python orchestrator.py --schedule --interval 6h
 """
 
+import asyncio
 import json
 import os
 import sys
@@ -80,6 +81,8 @@ class OrchestratorConfig:
     run_bullhorn: bool = True
     export_dashboard: bool = True
     run_knowledge: bool = True  # Engine 8: Knowledge indexing
+    run_sam_sync: bool = False  # SAM.gov opportunity sync (requires SAM_API_KEY or TANGO_API_KEY)
+    run_ner: bool = True  # NER entity enrichment (pattern-based, no external deps)
 
     # Filters
     hot_leads_only: bool = False
@@ -865,6 +868,66 @@ class BDOrchestrator:
                 print("  Skipped (engine not available)")
                 stage_results.append(StageResult(name="mapping", status="skipped"))
 
+            # Stage 2b: SAM.gov Opportunity Sync (optional)
+            sam_results = []
+            if self.config.run_sam_sync:
+                print(f"\n[2b/11] SYNCING SAM.gov OPPORTUNITIES...")
+
+                def _run_sam_sync():
+                    from Engine8_Knowledge.scrapers.sam_gov_sync import SAMGovSync, OpportunityQuery
+                    client = SAMGovSync()
+
+                    async def _fetch():
+                        results = []
+                        # Extract program keywords from mapped jobs
+                        seen_keywords = set()
+                        for job in jobs[:20]:
+                            mapping = job.get("_mapping", {})
+                            program_name = mapping.get("program_name", "")
+                            if program_name and program_name not in seen_keywords:
+                                seen_keywords.add(program_name)
+                                query = OpportunityQuery(keywords=[program_name], limit=10)
+                                opps = await client.search_opportunities(query)
+                                results.extend(opps)
+                        return results
+
+                    return asyncio.run(_fetch())
+
+                try:
+                    result = self._run_stage(
+                        "sam_sync", _run_sam_sync, checkpoint, stage_results, errors,
+                    )
+                    if result is not None:
+                        sam_results = result
+                        print(f"  Found {len(sam_results)} SAM.gov opportunities")
+                except Exception:
+                    pass  # Error already recorded by _run_stage
+            else:
+                stage_results.append(StageResult(name="sam_sync", status="skipped"))
+
+            # Stage 2c: NER Entity Enrichment
+            if self.config.run_ner and jobs:
+                print(f"\n[2c/11] RUNNING NER ENTITY ENRICHMENT...")
+
+                def _run_ner():
+                    from Engine8_Knowledge.ml.defense_ner import run_ner_pipeline_stage
+                    return run_ner_pipeline_stage(jobs)
+
+                try:
+                    result = self._run_stage(
+                        "ner_enrichment", _run_ner, checkpoint, stage_results, errors,
+                    )
+                    if result is not None:
+                        jobs = result
+                        entity_count = sum(
+                            len(v) for j in jobs for v in j.get("entities", {}).values()
+                        )
+                        print(f"  Extracted {entity_count} entities from {len(jobs)} records")
+                except Exception:
+                    pass  # Error already recorded by _run_stage
+            else:
+                stage_results.append(StageResult(name="ner_enrichment", status="skipped"))
+
             # Stage 5: BD Scoring
             print(f"\n[3/11] CALCULATING BD SCORES...")
             if "scoring" in self.engines and self.config.run_scoring:
@@ -1418,11 +1481,21 @@ Examples:
     parser.add_argument(
         "--no-knowledge", action="store_true", help="Skip knowledge base indexing"
     )
+    parser.add_argument(
+        "--sam-sync", action="store_true",
+        help="Enable SAM.gov opportunity sync (requires SAM_API_KEY or TANGO_API_KEY)"
+    )
 
     # Notifications
     parser.add_argument("--email", action="store_true", help="Send email notifications")
     parser.add_argument(
         "--no-webhook", action="store_true", help="Disable webhook delivery"
+    )
+
+    # Validation
+    parser.add_argument(
+        "--validate-scores", action="store_true",
+        help="Run BD score validation against Bullhorn placement outcomes (XGBoost)"
     )
 
     # Scheduling
@@ -1448,6 +1521,7 @@ Examples:
         run_bullhorn=not args.no_bullhorn,
         export_dashboard=not args.no_dashboard_export,
         run_knowledge=not args.no_knowledge,
+        run_sam_sync=args.sam_sync,
         send_email=args.email,
         send_webhook=not args.no_webhook,
         schedule_enabled=args.schedule,
@@ -1460,15 +1534,56 @@ Examples:
     # Create and run orchestrator
     orchestrator = BDOrchestrator(config)
 
-    if args.schedule:
+    if args.validate_scores:
+        _run_score_validation()
+    elif args.schedule:
         orchestrator.run_scheduled(args.interval)
     elif args.input:
         result = orchestrator.run_full_pipeline(args.input)
         sys.exit(0 if result.success else 1)
     else:
         parser.print_help()
-        print("\nError: --input required unless using --schedule")
+        print("\nError: --input required unless using --schedule or --validate-scores")
         sys.exit(1)
+
+
+def _run_score_validation():
+    """Run BD score validation and print results."""
+    from Engine5_Scoring.scripts.score_validator import BDScoreValidator
+
+    print(f"\n{'=' * 60}")
+    print("BD SCORE VALIDATION (XGBoost vs Rule-Based)")
+    print(f"{'=' * 60}")
+
+    validator = BDScoreValidator()
+    result = validator.validate()
+
+    if result.sample_size == 0:
+        print("\nNo training data available.")
+        for rec in result.recommendations:
+            print(f"  - {rec}")
+        sys.exit(0)
+
+    print(f"\nSample Size: {result.sample_size} placements")
+    print(f"\n{'Rule-Based Scoring':>25}  {'XGBoost ML':>15}")
+    print(f"{'-' * 25}  {'-' * 15}")
+    print(f"{'Accuracy:':<25}  {result.manual_accuracy:>6.1%}         {result.ml_accuracy:>6.1%}")
+    print(f"{'MAE:':<25}  {result.manual_mae:>6.4f}         {result.ml_mae:>6.4f}")
+
+    print(f"\nFeature Importance (XGBoost):")
+    for feature, importance in sorted(
+        result.feature_importance.items(), key=lambda x: x[1], reverse=True
+    ):
+        bar = "#" * int(importance * 40)
+        print(f"  {feature:<20} {importance:.4f}  {bar}")
+
+    print(f"\nRecommendations:")
+    for rec in result.recommendations:
+        print(f"  - {rec}")
+
+    report_path = validator.save_report(result)
+    print(f"\nFull report saved: {report_path}")
+    print(f"{'=' * 60}")
 
 
 if __name__ == "__main__":

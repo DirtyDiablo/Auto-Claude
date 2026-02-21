@@ -314,3 +314,98 @@ class TestSingleton:
         a = get_defense_ner()
         b = get_defense_ner()
         assert a is b
+
+
+# =============================================================================
+# Batch enrichment tests
+# =============================================================================
+
+
+class TestBatchEnrichment:
+    """Tests for batch NER enrichment."""
+
+    def test_enrich_batch_adds_entities(self, ner):
+        """enrich_batch() should add 'entities' key to each record."""
+        records = [
+            {"description": "GDIT awarded $50M by DISA for DCGS"},
+            {"description": "Leidos TS/SCI cleared engineers needed"},
+        ]
+        enriched = ner.enrich_batch(records)
+        for r in enriched:
+            assert "entities" in r
+
+    def test_enrich_batch_extracts_correct_types(self, ner):
+        """enrich_batch() should extract entities grouped by label."""
+        records = [{"description": "GDIT was awarded by DISA for DCGS-A modernization"}]
+        enriched = ner.enrich_batch(records)
+        entities = enriched[0]["entities"]
+        assert "COMPANY" in entities
+        assert "GDIT" in entities["COMPANY"]
+        assert "AGENCY" in entities
+        assert "DISA" in entities["AGENCY"]
+        assert "PROGRAM" in entities
+        assert "DCGS-A" in entities["PROGRAM"]
+
+    def test_enrich_batch_empty_records(self, ner):
+        """enrich_batch() on empty records should return empty list."""
+        result = ner.enrich_batch([])
+        assert result == []
+
+    def test_enrich_batch_no_text_fields(self, ner):
+        """enrich_batch() with records lacking text fields gives empty entities."""
+        records = [{"id": 1, "score": 50}]
+        enriched = ner.enrich_batch(records)
+        assert enriched[0]["entities"] == {}
+
+    def test_enrich_batch_custom_text_fields(self, ner):
+        """enrich_batch() should use custom text fields when specified."""
+        records = [{"notes": "Leidos is the prime contractor"}]
+        enriched = ner.enrich_batch(records, text_fields=["notes"])
+        assert "COMPANY" in enriched[0]["entities"]
+
+    def test_enrich_batch_deduplicates_within_record(self, ner):
+        """enrich_batch() should not duplicate entity values within a record."""
+        records = [{"title": "GDIT DCGS", "description": "GDIT DCGS-A contract"}]
+        enriched = ner.enrich_batch(records, text_fields=["title", "description"])
+        # GDIT should appear only once in the COMPANY list
+        companies = enriched[0]["entities"].get("COMPANY", [])
+        assert companies.count("GDIT") == 1
+
+
+class TestGetStats:
+    """Tests for NER stats reporting."""
+
+    def test_get_stats_returns_dict(self, ner):
+        """get_stats() should return a dict with expected keys."""
+        stats = ner.get_stats()
+        assert "entity_types" in stats
+        assert "pattern_types" in stats
+        assert "total_patterns" in stats
+        assert "spacy_available" in stats
+        assert "trained" in stats
+        assert stats["entity_types"] == 10
+
+    def test_get_stats_pattern_counts(self, ner):
+        """get_stats() should report pattern counts per type."""
+        stats = ner.get_stats()
+        assert "PROGRAM" in stats["patterns_by_type"]
+        assert "COMPANY" in stats["patterns_by_type"]
+        assert stats["patterns_by_type"]["PROGRAM"] > 0
+
+
+class TestPipelineStage:
+    """Tests for the pipeline stage wrapper."""
+
+    def test_run_ner_pipeline_stage(self):
+        """run_ner_pipeline_stage() should enrich records."""
+        from Engine8_Knowledge.ml.defense_ner import run_ner_pipeline_stage
+
+        records = [
+            {"description": "GDIT TS/SCI DCGS-A at Fort Belvoir"},
+        ]
+        result = run_ner_pipeline_stage(records)
+        assert len(result) == 1
+        assert "entities" in result[0]
+        assert "COMPANY" in result[0]["entities"]
+        assert "PROGRAM" in result[0]["entities"]
+        assert "INSTALLATION" in result[0]["entities"]

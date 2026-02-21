@@ -87,10 +87,13 @@ class NotionClient:
             except (ValueError, AttributeError) as parse_err:
                 logger.debug("error_body_parse_failed: %s", parse_err)
                 message = str(e)
+            logger.warning("Notion API error: %s %s → HTTP %s: %s", method, endpoint, e.response.status_code, message)
             return {"error": True, "status": e.response.status_code, "message": message}
         except requests.exceptions.Timeout:
+            logger.warning("Notion API timeout: %s %s", method, endpoint)
             return {"error": True, "message": "Request timed out"}
         except Exception as e:
+            logger.warning("Notion API request failed: %s %s → %s", method, endpoint, e)
             return {"error": True, "message": str(e)}
 
     def get_database(self, database_id: str) -> Dict:

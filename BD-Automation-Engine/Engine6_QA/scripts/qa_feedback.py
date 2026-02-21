@@ -308,7 +308,108 @@ class ReviewQueue:
     def get_stats(self):
         total = len(self.items)
         pending = len(self.get_pending())
-        return {"total": total, "pending": pending, "reviewed": total - pending}
+        approved = sum(1 for i in self.items if i.get("status") == "approved")
+        rejected = sum(1 for i in self.items if i.get("status") == "rejected")
+        by_root_cause = {}
+        for item in self.items:
+            rc = item.get("root_cause")
+            if rc and isinstance(rc, dict):
+                rc_type = rc.get("type", "unknown")
+                by_root_cause[rc_type] = by_root_cause.get(rc_type, 0) + 1
+        return {
+            "total": total,
+            "pending": pending,
+            "reviewed": total - pending,
+            "approved": approved,
+            "rejected": rejected,
+            "by_root_cause": by_root_cause,
+        }
+
+    def get_item(self, job_id: str) -> Optional[Dict]:
+        """Get a single item by job_id."""
+        for item in self.items:
+            if item.get("job_id") == job_id:
+                return item
+        return None
+
+    def _add_audit_entry(self, item: Dict, action: str, reviewer: str, details: str = "") -> None:
+        """Append an audit log entry to an item."""
+        if "audit_log" not in item:
+            item["audit_log"] = []
+        item["audit_log"].append({
+            "action": action,
+            "reviewer": reviewer,
+            "timestamp": datetime.now().isoformat(),
+            "details": details,
+        })
+
+    def approve(self, job_id: str, reviewer: str = "system") -> bool:
+        """Mark an item as approved."""
+        item = self.get_item(job_id)
+        if item is None:
+            return False
+        item["status"] = "approved"
+        item["reviewed"] = True
+        item["reviewed_at"] = datetime.now().isoformat()
+        self._add_audit_entry(item, "approved", reviewer)
+        self._save()
+        return True
+
+    def reject(self, job_id: str, reviewer: str, reason: str = "") -> bool:
+        """Mark an item as rejected with a reason."""
+        item = self.get_item(job_id)
+        if item is None:
+            return False
+        item["status"] = "rejected"
+        item["reviewed"] = True
+        item["reviewed_at"] = datetime.now().isoformat()
+        item["rejection_reason"] = reason
+        self._add_audit_entry(item, "rejected", reviewer, details=reason)
+        self._save()
+        return True
+
+    def reclassify(self, job_id: str, new_program: str, reviewer: str) -> bool:
+        """Change the program mapping for an item."""
+        item = self.get_item(job_id)
+        if item is None:
+            return False
+        old_program = item.get("original_program", "")
+        item["original_program"] = new_program
+        item["reviewed"] = True
+        item["reviewed_at"] = datetime.now().isoformat()
+        item["status"] = "approved"
+        self._add_audit_entry(
+            item, "reclassified", reviewer,
+            details=f"Changed program from '{old_program}' to '{new_program}'",
+        )
+        self._save()
+        return True
+
+    def bulk_approve(self, job_ids: List[str], reviewer: str) -> Dict:
+        """Approve multiple items. Returns success/failure counts."""
+        success = 0
+        failed = 0
+        for job_id in job_ids:
+            if self.approve(job_id, reviewer):
+                success += 1
+            else:
+                failed += 1
+        return {"success": success, "failed": failed}
+
+    def bulk_reject(self, job_ids: List[str], reviewer: str, reason: str = "") -> Dict:
+        """Reject multiple items. Returns success/failure counts."""
+        success = 0
+        failed = 0
+        for job_id in job_ids:
+            if self.reject(job_id, reviewer, reason):
+                success += 1
+            else:
+                failed += 1
+        return {"success": success, "failed": failed}
+
+    def get_review_history(self) -> List[Dict]:
+        """Return all reviewed items with timestamps."""
+        return [i for i in self.items if i.get("reviewed", False)]
 
 
 def run_qa_workflow(jobs, config=None, auto_queue=True):
