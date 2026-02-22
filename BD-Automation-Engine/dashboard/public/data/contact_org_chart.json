@@ -269,8 +269,8 @@
           "placements": 1,
           "activities": 20,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-03-12",
@@ -291,8 +291,8 @@
           "placements": 1,
           "activities": 30,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-05-12",
@@ -607,8 +607,8 @@
           "placements": 1,
           "activities": 15,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-03-12",
@@ -629,8 +629,8 @@
           "placements": 1,
           "activities": 15,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-06-03",
@@ -651,8 +651,8 @@
           "placements": 1,
           "activities": 20,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-04-09",
@@ -672,8 +672,8 @@
           "placements": 1,
           "activities": 40,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-02-18",
@@ -693,8 +693,8 @@
           "placements": 1,
           "activities": 25,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-07-13",
@@ -1194,8 +1194,8 @@
           "placements": 1,
           "activities": 20,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-02-11",
@@ -1214,8 +1214,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "CACI",
-            "CACI International"
+            "CACI International",
+            "CACI"
           ],
           "prime_count": 2,
           "last_activity": "2024-09-30",
@@ -1235,8 +1235,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-02-15",
@@ -1256,8 +1256,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-04-22",
@@ -1277,8 +1277,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-01-19",
@@ -1298,8 +1298,8 @@
           "placements": 1,
           "activities": 25,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-12-27",
@@ -1964,8 +1964,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-01-27",
@@ -1984,8 +1984,8 @@
           "placements": 1,
           "activities": 5,
           "primes": [
-            "CACI",
-            "CACI International"
+            "CACI International",
+            "CACI"
           ],
           "prime_count": 2,
           "last_activity": "2024-09-23",
@@ -2005,8 +2005,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2024-04-15",
@@ -2025,8 +2025,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-12-05",
@@ -2045,8 +2045,8 @@
           "placements": 1,
           "activities": 5,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2025-04-22",
@@ -2066,8 +2066,8 @@
           "placements": 1,
           "activities": 10,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-06-05",
@@ -9392,26 +9392,6 @@
           ]
         },
         {
-          "id": "contact-dylan-brown",
-          "name": "Dylan Brown",
-          "score": 32,
-          "tier": "C - Engaged",
-          "tier_level": 3,
-          "placements": 2,
-          "activities": 0,
-          "primes": [
-            "GDIT",
-            "General Dynamics IT"
-          ],
-          "prime_count": 2,
-          "last_activity": "2024-08-13",
-          "scoring_factors": [
-            "Placements (2): +20",
-            "Prime diversity (2 primes): +7",
-            "Status (submitted): +5"
-          ]
-        },
-        {
           "id": "contact-anthony-evans",
           "name": "Anthony Evans",
           "score": 32,
@@ -9420,8 +9400,8 @@
           "placements": 2,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-02-18",
@@ -38652,7 +38632,7 @@
           ]
         }
       ],
-      "count": 2123
+      "count": 2122
     },
     "D - Developing": {
       "description": "Initial engagement, potential growth",
@@ -38775,8 +38755,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "CACI",
-            "CACI International"
+            "CACI International",
+            "CACI"
           ],
           "prime_count": 2,
           "last_activity": "2024-10-14",
@@ -38795,8 +38775,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "The Home Depot",
-            "Home Depot - SSC"
+            "Home Depot - SSC",
+            "The Home Depot"
           ],
           "prime_count": 2,
           "last_activity": "2024-05-29",
@@ -38804,6 +38784,25 @@
             "Placements (1): +15",
             "Prime diversity (2 primes): +7",
             "Status (submitted): +5"
+          ]
+        },
+        {
+          "id": "contact-dylan-brown",
+          "name": "Dylan Brown",
+          "score": 27,
+          "tier": "D - Developing",
+          "tier_level": 4,
+          "placements": 2,
+          "activities": 0,
+          "primes": [
+            "General Dynamics IT",
+            "GDIT"
+          ],
+          "prime_count": 2,
+          "last_activity": "2024-08-13",
+          "scoring_factors": [
+            "Placements (2): +20",
+            "Prime diversity (2 primes): +7"
           ]
         },
         {
@@ -38815,8 +38814,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2024-04-02",
@@ -38855,8 +38854,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2024-02-19",
@@ -38935,8 +38934,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "The Southern Company",
-            "Southern Company"
+            "Southern Company",
+            "The Southern Company"
           ],
           "prime_count": 2,
           "last_activity": "2023-07-10",
@@ -38955,8 +38954,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-05-15",
@@ -38975,8 +38974,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-06-13",
@@ -38995,8 +38994,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-18",
@@ -39015,8 +39014,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-12-02",
@@ -39035,8 +39034,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-02-15",
@@ -39055,8 +39054,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Amentum",
-            "AMENTUM THIS IS THE ONLY ONE TO USE"
+            "AMENTUM THIS IS THE ONLY ONE TO USE",
+            "Amentum"
           ],
           "prime_count": 2,
           "last_activity": "2023-05-08",
@@ -39075,8 +39074,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-02-28",
@@ -39095,8 +39094,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-04-10",
@@ -39115,8 +39114,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-03-27",
@@ -39135,8 +39134,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-01-14",
@@ -39155,8 +39154,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39175,8 +39174,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2023-01-30",
@@ -39195,8 +39194,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39215,8 +39214,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39235,8 +39234,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Georgia Power",
-            "Georgia Power Company"
+            "Georgia Power Company",
+            "Georgia Power"
           ],
           "prime_count": 2,
           "last_activity": "2023-01-05",
@@ -39255,8 +39254,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Georgia Power",
-            "Georgia Power Company"
+            "Georgia Power Company",
+            "Georgia Power"
           ],
           "prime_count": 2,
           "last_activity": "2023-01-05",
@@ -39275,8 +39274,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-09-05",
@@ -39295,8 +39294,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-12-27",
@@ -39315,8 +39314,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-12",
@@ -39335,8 +39334,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-11-14",
@@ -39355,8 +39354,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-02-04",
@@ -39375,8 +39374,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-17",
@@ -39395,8 +39394,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-31",
@@ -39435,8 +39434,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-24",
@@ -39455,8 +39454,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-31",
@@ -39475,8 +39474,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39495,8 +39494,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-08-04",
@@ -39515,8 +39514,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-31",
@@ -39535,8 +39534,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-10-24",
@@ -39555,8 +39554,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-09-05",
@@ -39575,8 +39574,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39595,8 +39594,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39615,8 +39614,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-01-18",
@@ -39635,8 +39634,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2020-12-21",
@@ -39655,8 +39654,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-04-25",
@@ -39675,8 +39674,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-09-30",
@@ -39695,8 +39694,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-03-14",
@@ -39715,8 +39714,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-03-03",
@@ -39735,8 +39734,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-02-23",
@@ -39755,8 +39754,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Georgia Tech Research Institute (GTRI)",
-            "GTRI"
+            "GTRI",
+            "Georgia Tech Research Institute (GTRI)"
           ],
           "prime_count": 2,
           "last_activity": "2021-09-13",
@@ -39775,8 +39774,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2020-04-06",
@@ -39795,8 +39794,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2020-06-22",
@@ -39815,8 +39814,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2020-06-08",
@@ -39835,8 +39834,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Georgia Tech Research Institute (GTRI)",
-            "GTRI"
+            "GTRI",
+            "Georgia Tech Research Institute (GTRI)"
           ],
           "prime_count": 2,
           "last_activity": "2021-03-24",
@@ -39855,8 +39854,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Georgia Power",
-            "Georgia Power Company"
+            "Georgia Power Company",
+            "Georgia Power"
           ],
           "prime_count": 2,
           "last_activity": "2019-03-11",
@@ -39896,8 +39895,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-07-26",
@@ -39916,8 +39915,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-05-19",
@@ -39936,8 +39935,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-05-24",
@@ -39956,8 +39955,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Georgia Tech Research Institute (GTRI)",
-            "GTRI"
+            "GTRI",
+            "Georgia Tech Research Institute (GTRI)"
           ],
           "prime_count": 2,
           "last_activity": "2021-05-18",
@@ -39976,8 +39975,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2021-04-09",
@@ -40017,9 +40016,9 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Lonza",
             "Lonza - Walkersville",
-            "MD"
+            "MD",
+            "Lonza"
           ],
           "prime_count": 2,
           "last_activity": "2020-09-16",
@@ -40038,8 +40037,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2020-07-07",
@@ -40058,9 +40057,9 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Lonza",
             "Lonza - Walkersville",
-            "MD"
+            "MD",
+            "Lonza"
           ],
           "prime_count": 2,
           "last_activity": "2020-09-16",
@@ -40079,8 +40078,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "Delta Air Lines",
-            "Delta Airlines"
+            "Delta Airlines",
+            "Delta Air Lines"
           ],
           "prime_count": 2,
           "last_activity": "2017-03-14",
@@ -40119,9 +40118,9 @@
           "placements": 1,
           "activities": 0,
           "primes": [
+            "Dell Federal Services",
             "DELL SERVICES FEDERAL GOVERNMENT",
-            "INC.",
-            "Dell Federal Services"
+            "INC."
           ],
           "prime_count": 2,
           "last_activity": "2015-01-19",
@@ -40140,9 +40139,9 @@
           "placements": 1,
           "activities": 0,
           "primes": [
+            "Dell Federal Services",
             "DELL SERVICES FEDERAL GOVERNMENT",
-            "INC.",
-            "Dell Federal Services"
+            "INC."
           ],
           "prime_count": 2,
           "last_activity": "2017-01-03",
@@ -40161,9 +40160,9 @@
           "placements": 1,
           "activities": 0,
           "primes": [
+            "Dell Federal Services",
             "DELL SERVICES FEDERAL GOVERNMENT",
-            "INC.",
-            "Dell Federal Services"
+            "INC."
           ],
           "prime_count": 2,
           "last_activity": "2016-11-01",
@@ -40182,8 +40181,8 @@
           "placements": 2,
           "activities": 0,
           "primes": [
-            "Home Depot",
-            "The Home Depot"
+            "The Home Depot",
+            "Home Depot"
           ],
           "prime_count": 2,
           "last_activity": "2016-08-17",
@@ -40201,8 +40200,8 @@
           "placements": 2,
           "activities": 0,
           "primes": [
-            "Home Depot",
-            "The Home Depot"
+            "The Home Depot",
+            "Home Depot"
           ],
           "prime_count": 2,
           "last_activity": "2016-07-19",
@@ -40220,9 +40219,9 @@
           "placements": 2,
           "activities": 0,
           "primes": [
+            "Dell Federal Services",
             "DELL SERVICES FEDERAL GOVERNMENT",
-            "INC.",
-            "Dell Federal Services"
+            "INC."
           ],
           "prime_count": 2,
           "last_activity": "2015-12-21",
@@ -40240,8 +40239,8 @@
           "placements": 1,
           "activities": 0,
           "primes": [
-            "GDIT",
-            "General Dynamics IT"
+            "General Dynamics IT",
+            "GDIT"
           ],
           "prime_count": 2,
           "last_activity": "2022-12-06",
@@ -88752,7 +88751,7 @@
           ]
         }
       ],
-      "count": 2814
+      "count": 2815
     },
     "E - New/Inactive": {
       "description": "New or dormant contacts",
@@ -88764,8 +88763,8 @@
     "total_contacts": 5000,
     "tier_distribution": {
       "B - High Value": 63,
-      "C - Engaged": 2123,
-      "D - Developing": 2814
+      "C - Engaged": 2122,
+      "D - Developing": 2815
     }
   }
 }

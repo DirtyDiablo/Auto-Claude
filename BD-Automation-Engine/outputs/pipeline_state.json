@@ -1,9 +1,9 @@
 {
   "last_completed_run": {
-    "run_id": "RUN_20260221_012051",
-    "timestamp": "2026-02-21T01:20:51.578547",
+    "run_id": "RUN_20260221_123430",
+    "timestamp": "2026-02-21T12:34:30.789614",
     "success": true,
-    "duration_seconds": 212.846846,
+    "duration_seconds": 213.774671,
     "stats": {
       "jobs_processed": 3,
       "hot_leads": 2,
@@ -53,6 +53,22 @@
       "timestamp": "2026-02-21T01:20:51.578547",
       "success": true,
       "duration_seconds": 212.846846,
+      "stats": {
+        "jobs_processed": 3,
+        "hot_leads": 2,
+        "warm_leads": 1,
+        "cold_leads": 0,
+        "briefings_generated": 3,
+        "qa_approved": 0,
+        "qa_needs_review": 3
+      },
+      "errors": []
+    },
+    {
+      "run_id": "RUN_20260221_123430",
+      "timestamp": "2026-02-21T12:34:30.789614",
+      "success": true,
+      "duration_seconds": 213.774671,
       "stats": {
         "jobs_processed": 3,
         "hot_leads": 2,

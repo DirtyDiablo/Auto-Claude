@@ -1,0 +1,385 @@
+I have made changes to the repo and project for the main context, this BD intelligence system targets qualified federal contracts (The contract targeting criteria are now consistently defined across all  
+  1. Subcontracting staffing firms involved
+  2. $100M+ contract value or 100+ subcontractors
+  3. Security clearance required
+  4. Not assigned to an existing PTS account manager)...
+
+I also want to add project audits across the 2 other project folder repos that i have - "C:\Auto-Claud\N8N-Builder" and "C:\Auto-Claud\data-scraper"   
+I also want to add in the Phase 1 a section on Data and Analysis - one of the biggest parts of this platform is a the databases , data architectures , data schemas, the V8 Data architecture explorer html has a great visualization of the cateogires, entitiies, relationshps, props, sources, storage,  file:///C:/Auto-Claud/Auto-Claude/BD-Automation-Engine/PTS_DATA_ARCHITECTURE_EXPLORER_V8.html   ...   We have large amounts of output files from data analysis and various tasks and file creatin output tasks etc , organizing them all from all three different projects, migrating them into a new intellignelty optimized structure and data schema that is most friendly to ai agents and can help the various ai agents and ai tools aand tech stacks that we are using for data retrieval and data manipulate and rag etc to be able to get all elevant information and give reports and anaylis statuses using the aggregated subfolder cateogiries that would have been merged and then auditied to leve the most up to date versions of files within each foler nd subfolder covering all of the data listed in the Data architure explorer v8. 
+
+Also im thinking about changing the directoy workspace folder structures, currently the 3 projects are split, but i want to move the 2 into the bd project folder that open claw sits in so it can control all of them  Moving N8N-Builder and data-scraper into BD-Automation-Engine — this is  
+  the pragmatic choice. Here's why:
+
+  Pros:
+  - Agent workspace stays focused (no Auto-Claude frontend/Electron noise  
+  eating context)
+  - All three repos are already part of the same BD pipeline (Engine 1 =   
+  scraper, Engine 8 uses N8N workflows)
+  - Single workspace = single agent can read/write across all three without
+   config changes
+  - Subagent routing becomes natural — one per engine/subdirectory
+
+  Cons:
+  - They're currently separate git repos — moving them in means either     
+  nested repos (messy) or absorbing their history
+  - If you ever want to push N8N-Builder or data-scraper independently, it 
+  gets awkward
+
+  What I'd actually do if starting fresh:
+
+  Move them in as subdirectories, but not as git submodules — just copy the
+   code in (their git history lives in their origin repos). The directory  
+  structure would become:
+
+  BD-Automation-Engine/
+  ├── Engine1_Scraper/
+  ├── Engine2_ProgramMapping/
+  ├── ...
+  ├── Engine8_Knowledge/
+  ├── n8n-builder/          ← moved here
+  ├── data-scraper/         ← moved here
+  ├── orchestrator.py
+  └── ...
+
+  Then the workspace path C:/Auto-Claud/Auto-Claude/BD-Automation-Engine   
+  covers everything, the main agent sees the full picture, and you can set 
+  up subagents per subdirectory for focused work.
+
+
+http://127.0.0.1:8321/PTS_BD_EXECUTION_STRATEGY_2026.html This is te main final output and below is the .md source and 6 supporting reports that are the substance behind it.  
+Here are all 14 files created in the same session (Feb 20, 14:11–14:33)    that make up the full BD Execution Strategy:                             
+                                                                             Core Strategy Document (3 formats)                                       
+                                                                             #: 1                                                                       File: data/deliverables/reports/PTS_BD_EXECUTION_STRATEGY_2026.md          Purpose: Master strategy (source)                                          ────────────────────────────────────────                                   #: 2                                                                     
+  File: data/deliverables/reports/PTS_BD_EXECUTION_STRATEGY_2026.docx
+  Purpose: Word export
+  ────────────────────────────────────────
+  #: 3
+  File: data/deliverables/reports/PTS_BD_EXECUTION_STRATEGY_2026.html      
+  Purpose: HTML presentation
+
+  Supporting Intelligence Reports
+
+  #: 4
+  File: data/deliverables/reports/ACTIONABLE_INSIGHTS_REPORT.md
+  Purpose: Prioritized BD actions
+  ────────────────────────────────────────
+  #: 5
+  File: data/deliverables/reports/NOTES_INTELLIGENCE_EXTRACT.md
+  Purpose: Intelligence extracted from CRM notes
+  ────────────────────────────────────────
+  #: 6
+  File: data/deliverables/reports/AGGREGATED_NOTES_BY_CONTACT.md
+  Purpose: All notes organized by contact
+  ────────────────────────────────────────
+  #: 7
+  File: data/deliverables/reports/CONTACT_PROGRAM_MATRIX.md
+  Purpose: Contact-to-program mapping
+  ────────────────────────────────────────
+  #: 8
+  File: data/deliverables/reports/SAIC_NAVY_AF_ARMY_OPPORTUNITY_REPORT.md  
+  Purpose: SAIC-specific opportunity analysis
+  ────────────────────────────────────────
+  #: 9
+  File: data/deliverables/reports/AM_TERRITORY_PLAYBOOK.md
+  Purpose: Account Manager territory assignments
+
+  Data / Matching Outputs
+
+  #: 10
+  File: data/deliverables/reports/MATCH_REPORT.txt
+  Purpose: Contract-to-program match results
+  ────────────────────────────────────────
+  #: 11
+  File: data/deliverables/reports/POSSIBLE_MATCHES_REVIEW.csv
+  Purpose: Matches needing human review
+  ────────────────────────────────────────
+  #: 12
+  File: data/deliverables/FINAL_OPEN_CONTRACTS_ENRICHED.csv
+  Purpose: All open contracts with enrichment
+  ────────────────────────────────────────
+  #: 13
+  File: data/deliverables/FINAL_TEAM_ASSIGNMENTS.csv
+  Purpose: AM team assignment roster
+
+  Tooling
+
+  #: 14
+  File: scripts/docx_to_html.py
+  Purpose: Converter script built to produce the HTML version
+
+  Session Workflow
+
+  The session followed this pipeline:
+  1. 14:11 — Contract matching & enrichment (MATCH_REPORT, enriched CSV,   
+  team assignments)
+  2. 14:20–14:22 — Strategy generation — master .md, 6 supporting
+  intelligence reports, .docx export
+  3. 14:32–14:33 — Built the HTML converter and generated the .html        
+  presentation
+
+  The HTML file you referenced is the final output. The .md source and 6   
+  supporting reports are the substance behind it.
+
+Best Practices Section ** Here below is attempt so far at acreating a best practies structure using the skills, agents, subagents etc that w hve in this projst. i WANT TO standardize and create supporting documentation across the project and into folders and subfolders that makes sure the AI Agents are not just looking at one small portion of the project when we are running tasks but that it has persistent memory and context across everything when we start up new sessions. Withut being hammered on the tokens at large amounts all the time. 
+
+ Insight ─────────────────────────────────────
+  The best practices doc is structured as a runtime reference, not just    
+  documentation. The post-completion framework (Section 1) is the key      
+  innovation — it standardizes what every agent produces after finishing,  
+  which solves the root problem of agents running without updating docs,   
+  memory, or audit trails. The chaining patterns (Section 6) encode        
+  institutional knowledge about which agents feed into which, preventing   
+  ad-hoc inconsistent chains.
+  ─────────────────────────────────────────────────
+
+  Here's a summary of what was created:
+
+  Files Created
+
+  File: docs/AGENT_BEST_PRACTICES.md
+  Lines: ~580
+  Description: Master reference — all 7 sections
+  ────────────────────────────────────────
+  File: docs/AGENT_AUDIT_LOG.md
+  Lines: ~25
+  Description: Empty audit log with format template
+
+  Files Modified
+
+  File: Auto-memory MEMORY.md
+  Change: Added "Reference Docs" section with links to both new files      
+
+  Verification Checklist
+
+  - 45+ subagent types covered — All organized into 6 categories (Research,
+   Code Quality, Security/QA, Planning, Development, Specialized)
+  - 8 BD agents documented — 4 core Claude-backed + 4 Phase 4 rule-based,  
+  each with file path, API endpoint, MCP tool, inputs/outputs, key methods,
+   data stores updated
+  - 5 CrewAI agents — All five from bd_agents.py with roles, LLMs, and     
+  tools
+
+    ✻
+    |
+   ▟█▙     Claude Code v2.1.50
+ ▐▛███▜▌   Opus 4.6 · Claude Max
+▝▜█████▛▘  C:\Auto-Claud\Auto-Claude\BD-Automation-Engine
+  ▘▘ ▝▝
+
+╭─────────────────────────────────────────────────────────────────────────╮
+│ Plan to implement                                                       │
+│                                                                         │
+│ Plan: Master Agent & Skill Best Practices Reference                     │
+│                                                                         │
+│ Context                                                                 │
+│                                                                         │
+│ The BD-Automation-Engine has an enormous ecosystem of agents,           │
+│ subagents, skills, and workflows (45+ subagent types, 8 BD agents, 44   │
+│ ClawhHub skills, 850+ Antigravity skills, 4 LangGraph workflows, 3      │
+│ CrewAI crews, 21 MCP tools) but no unified document defining:           │
+│ - How to invoke each one correctly                                      │
+│ - What outputs/artifacts each should produce when done                  │
+│ - What post-completion checklists to follow                             │
+│ - How to chain them consistently                                        │
+│                                                                         │
+│ This creates inconsistency — agents run but don't update docs, memory,  │
+│ or audit trails. The goal is a single master reference that             │
+│ standardizes behavior so every agent/skill follows the same framework   │
+│ every time.                                                             │
+│                                                                         │
+│ What Gets Created                                                       │
+│                                                                         │
+│ Single file: docs/AGENT_BEST_PRACTICES.md                               │
+│                                                                         │
+│ Document Structure                                                      │
+│                                                                         │
+│ Section 1: Universal Post-Completion Framework                          │
+│                                                                         │
+│ Every agent/skill/subagent MUST produce these artifacts after           │
+│ completing work:                                                        │
+│                                                                         │
+│ 1. Memory Updates — Append findings to MEMORY.md (patterns, decisions,  │
+│ key files)                                                              │
+│ 2. Audit Trail — Append to docs/AGENT_AUDIT_LOG.md (what ran, when,     │
+│ what changed, outcome)                                                  │
+│ 3. Architecture Doc Refresh — Update relevant architecture docs if      │
+│ structural changes occurred                                             │
+│ 4. File Manifest — List all files created/modified/deleted              │
+│                                                                         │
+│ Standard template for post-completion output block.                     │
+│                                                                         │
+│ Section 2: Subagent Types (45 types)                                    │
+│                                                                         │
+│ For each of the Task tool subagent types, organized by category:        │
+│                                                                         │
+│ Research & Exploration (7)                                              │
+│ - Explore, general-purpose, voltagent-research:* (6 types)              │
+│ - When to use, invocation pattern, expected outputs                     │
+│                                                                         │
+│ Code Quality & Review (10)                                              │
+│ - feature-dev:code-architect/explorer/reviewer, code-simplifier,        │
+│ pr-review-toolkit:* (5), coderabbit:code-reviewer                       │
+│ - When to invoke (proactively after code changes), chaining order       │
+│                                                                         │
+│ Security & QA (14)                                                      │
+│ - voltagent-qa-sec:* (13 types), posthog:error-analyzer                 │
+│ - Invocation patterns for audits, pentests, compliance checks           │
+│                                                                         │
+│ Planning & Architecture (3)                                             │
+│ - Plan, feature-dev:code-architect, voltagent-qa-sec:architect-reviewer │
+│ - When to plan vs. just build                                           │
+│                                                                         │
+│ Development & SDK (4)                                                   │
+│ - Bash, agent-sdk-dev:* (2), plugin-dev:* (3)                           │
+│ - Build/test/validate patterns                                          │
+│                                                                         │
+│ Specialized (7)                                                         │
+│ - hookify:conversation-analyzer, huggingface-skills:AGENTS,             │
+│ claude-code-guide, statusline-setup                                     │
+│                                                                         │
+│ Section 3: BD-Engine Agents (8 core + 5 CrewAI + 2 autonomous)          │
+│                                                                         │
+│ For each BD agent:                                                      │
+│ - Purpose, invocation (API endpoint + MCP tool), inputs/outputs         │
+│ - Post-completion: what data gets updated in Qdrant/Neo4j/memory        │
+│ - Chaining patterns (e.g., program_intel → contact_finder →             │
+│ bd_strategy)                                                            │
+│                                                                         │
+│ Section 4: Workflows & Orchestration                                    │
+│                                                                         │
+│ - 4 LangGraph temporal workflows                                        │
+│ - 3 CrewAI crews                                                        │
+│ - Natural language → workflow compiler                                  │
+│ - When to use workflow vs. single agent                                 │
+│                                                                         │
+│ Section 5: Key Skills by Category (~50 detailed)                        │
+│                                                                         │
+│ Grouped by use case with the top skills called out:                     │
+│                                                                         │
+│ Category: BD Pipeline                                                   │
+│ Key Skills: @pts-bd-pipeline, @crewai, @langgraph                       │
+│ Post-Completion: Update scoring, pipeline status                        │
+│ ────────────────────────────────────────                                │
+│ Category: Federal Intel                                                 │
+│ Key Skills: @pts-federal-intel, @deep-research                          │
+│ Post-Completion: Update program data, briefings                         │
+│ ────────────────────────────────────────                                │
+│ Category: Contact Ops                                                   │
+│ Key Skills: @pts-contact-ops, @salesforce-api, @hubspot                 │
+│ Post-Completion: Sync CRM, update tiers                                 │
+│ ────────────────────────────────────────                                │
+│ Category: Architecture                                                  │
+│ Key Skills: @pts-arch-migration, @senior-architect, @architecture       │
+│ Post-Completion: Update architecture docs                               │
+│ ────────────────────────────────────────                                │
+│ Category: Security                                                      │
+│ Key Skills: @security-auditor, @pentest, @vulnerability-scanner         │
+│ Post-Completion: Update audit findings                                  │
+│ ────────────────────────────────────────                                │
+│ Category: AI/ML                                                         │
+│ Key Skills: @rag-engineer, @embedding-strategies, @ai-engineer          │
+│ Post-Completion: Update model metrics                                   │
+│ ────────────────────────────────────────                                │
+│ Category: Frontend                                                      │
+│ Key Skills: @nextjs-best-practices, @react-patterns,                    │
+│   @tailwind-design-system                                               │
+│ Post-Completion: Update component docs                                  │
+│ ────────────────────────────────────────                                │
+│ Category: Backend                                                       │
+│ Key Skills: @fastapi-pro, @python-pro, @async-python-patterns           │
+│ Post-Completion: Update API docs                                        │
+│ ────────────────────────────────────────                                │
+│ Category: Testing                                                       │
+│ Key Skills: @tdd-workflow, @python-testing-patterns,                    │
+│ @e2e-testing-patterns                                                   │
+│ Post-Completion: Update test coverage                                   │
+│ ────────────────────────────────────────                                │
+│ Category: DevOps                                                        │
+│ Key Skills: @docker-expert, @github-actions-templates,                  │
+│   @terraform-specialist                                                 │
+│ Post-Completion: Update infra docs                                      │
+│ ────────────────────────────────────────                                │
+│ Category: Code Quality                                                  │
+│ Key Skills: @clean-code, @code-review-excellence,                       │
+│ @production-code-audit                                                  │
+│ Post-Completion: Update quality metrics                                 │
+│ ────────────────────────────────────────                                │
+│ Category: Data                                                          │
+│ Key Skills: @database-migration, @postgresql, @vector-database-engineer │
+│ Post-Completion: Update schema docs                                     │
+│ ────────────────────────────────────────                                │
+│ Category: Research                                                      │
+│ Key Skills: @deep-research, @mckinsey-research, @parallel-deep-research │
+│ Post-Completion: Update research findings                               │
+│ ────────────────────────────────────────                                │
+│ Category: Outreach                                                      │
+│ Key Skills: @abm-outbound, @cold-outreach, @email-marketing             │
+│ Post-Completion: Update campaign metrics                                │
+│                                                                         │
+│ Section 6: Chaining Patterns & Standard Workflows                       │
+│                                                                         │
+│ Common multi-agent chains:                                              │
+│                                                                         │
+│ 1. New Feature: Plan → code-architect → Coder → code-simplifier →       │
+│ code-reviewer → test-automator                                          │
+│ 2. Security Audit: security-auditor → penetration-tester →              │
+│ compliance-auditor → code-reviewer                                      │
+│ 3. BD Research: program_intel → contact_finder → company_research →     │
+│ bd_strategy                                                             │
+│ 4. Code Review: code-reviewer → silent-failure-hunter →                 │
+│ type-design-analyzer → comment-analyzer                                 │
+│ 5. Performance: performance-engineer → architect-reviewer →             │
+│ chaos-engineer                                                          │
+│ 6. Data Pipeline: data-researcher → database migration →                │
+│ vector-database-engineer → qa-expert                                    │
+│                                                                         │
+│ Section 7: Audit Log Format                                             │
+│                                                                         │
+│ Standard format for docs/AGENT_AUDIT_LOG.md:                            │
+│ ## [DATE] [AGENT_TYPE] [STATUS]                                         │
+│ - **Triggered by:** [user/automated/chained]                            │
+│ - **Files modified:** [list]                                            │
+│ - **Files created:** [list]                                             │
+│ - **Key findings:** [summary]                                           │
+│ - **Memory updated:** [yes/no, what]                                    │
+│ - **Docs refreshed:** [list]                                            │
+│ - **Next recommended action:** [suggestion]                             │
+│                                                                         │
+│ Files to Create/Modify                                                  │
+│                                                                         │
+│ File: docs/AGENT_BEST_PRACTICES.md                                      │
+│ Action: CREATE                                                          │
+│ Description: Master reference document (~2000 lines)                    │
+│ ────────────────────────────────────────                                │
+│ File: docs/AGENT_AUDIT_LOG.md                                           │
+│ Action: CREATE                                                          │
+│ Description: Empty audit log with header template                       │
+│ ────────────────────────────────────────                                │
+│ File: MEMORY.md (auto-memory)                                           │
+│ Action: UPDATE                                                          │
+│ Description: Add reference to new best practices doc                    │
+│                                                                         │
+│ Verification                                                            │
+│                                                                         │
+│ 1. Document is complete with all 45+ subagent types covered             │
+│ 2. All 8 BD agents documented with invocation patterns                  │
+│ 3. All 4 workflows and 3 crews documented                               │
+│ 4. ~50 key skills documented by category                                │
+│ 5. Universal post-completion framework is clear and actionable          │
+│ 6. Chaining patterns cover the major use cases                          │
+│ 7. Audit log template is ready for use                                  │
+│                                                                         │
+│ Execution Approach                                                      │
+│                                                                         │
+│ 1. Create docs/AGENT_AUDIT_LOG.md with header template                  │
+│ 2. Create docs/AGENT_BEST_PRACTICES.md with all 7 sections              │
+│ 3. Update auto-memory with reference to new doc                         │
+╰─────────────────────────────────────────────────────────────────────────╯
+
+● I'll start by gathering the information I need to write accurate
+  documentation, then create all three files. Let me explore the codebase  
+  in parallel to get the details right.
+
+● Explore(Explore BD agents and workflows) Sonnet 4.6
+  ⎿  Done (44 tool uses · 122.5k tokens · 3m 59s)
+  (ctrl+o to expand)
