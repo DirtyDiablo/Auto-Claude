@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: pts-bd
-  labels:
-    app.kubernetes.io/name: pts-bd
-    app.kubernetes.io/part-of: pts-bd-platform
