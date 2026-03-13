@@ -78,8 +78,8 @@ export default defineConfig({
           // spawned via `new Worker(path)` from WorkerBridge
           'ai/agent/worker': resolve(__dirname, 'src/main/ai/agent/worker.ts'),
         },
-        // Only node-pty needs to be external (native module rebuilt by electron-builder)
-        external: ['@lydell/node-pty']
+        // Native modules that must remain external (rebuilt by electron-builder, unpacked from ASAR)
+        external: ['@lydell/node-pty', '@libsql/client']
       }
     }
   },
