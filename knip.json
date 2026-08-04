@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.{js,cjs,mjs}"],
+      "project": ["scripts/**/*.{js,cjs,mjs}"]
+    },
+    "apps/frontend": {
+      "entry": [
+        "electron.vite.config.ts",
+        "src/main/index.ts",
+        "src/preload/index.ts",
+        "src/renderer/main.tsx",
+        "e2e/**/*.{ts,tsx}",
+        "scripts/*.{cjs,mjs}",
+        "**/*.test.{ts,tsx}"
+      ],
+      "project": ["src/**/*.{ts,tsx}", "scripts/**/*.{cjs,mjs}"],
+      "ignore": ["out/**", "dist/**"]
+    }
+  }
+}
