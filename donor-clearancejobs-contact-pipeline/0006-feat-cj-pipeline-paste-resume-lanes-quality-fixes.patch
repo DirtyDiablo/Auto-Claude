@@ -1,0 +1,1449 @@
+From 5177ff1c158cf4c96de35be3c69d4c7305624f17 Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:26:23 -0400
+Subject: [PATCH 06/10] feat(cj-pipeline): paste + resume lanes + quality fixes
+
+Lane 1 paste: deterministic block-split + regex classify (50 contacts/SEC paste). Lane 2 resume: liteparse(PDF)/mammoth(DOCX) + deterministic extract + optional Ollama; graceful .doc + OCR-off degrade. Fixes: company column shows canonical only (raw blob -> source_metadata); CJ-UI junk filter (pagination/sidebar); disable liteparse OCR (no Tesseract). 71 tests green; end-to-end 388 raw -> 334 contacts -> 251 matched, 0 errors, 15 call sheets.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ clearancejobs_pipeline/lanes/paste.py       | 341 +++++++++++++
+ clearancejobs_pipeline/lanes/resume.py      | 523 ++++++++++++++++++++
+ clearancejobs_pipeline/models.py            |   3 +-
+ clearancejobs_pipeline/run.py               |  20 +-
+ clearancejobs_pipeline/tests/test_paste.py  | 251 ++++++++++
+ clearancejobs_pipeline/tests/test_resume.py | 225 +++++++++
+ 6 files changed, 1361 insertions(+), 2 deletions(-)
+ create mode 100644 clearancejobs_pipeline/lanes/paste.py
+ create mode 100644 clearancejobs_pipeline/lanes/resume.py
+ create mode 100644 clearancejobs_pipeline/tests/test_paste.py
+ create mode 100644 clearancejobs_pipeline/tests/test_resume.py
+
+diff --git a/clearancejobs_pipeline/lanes/paste.py b/clearancejobs_pipeline/lanes/paste.py
+new file mode 100644
+index 000000000..cb63278e2
+--- /dev/null
++++ b/clearancejobs_pipeline/lanes/paste.py
+@@ -0,0 +1,341 @@
++"""ClearanceJobs result-list paste parser.
++
++Parses plain-text pastes exported from the ClearanceJobs candidate search results page.
++Each paste begins with a short header section and then a sequence of candidate blocks,
++each terminated by a lone uppercase initial letter OR the literal "user avatar".
++
++Public API
++----------
++parse_paste(path, program_hint=None)  -> list[RawContact]
++parse_paste_text(text, source_file="", program_hint=None) -> list[RawContact]
++"""
++from __future__ import annotations
++
++import re
++from typing import Optional
++
++from clearancejobs_pipeline.models import LANE_PASTE, RawContact
++from clearancejobs_pipeline.lib.companies import canonical_company
++
++# ---------------------------------------------------------------------------
++# Compiled patterns (module-level — compiled once)
++# ---------------------------------------------------------------------------
++
++# Header-sentinel: skip everything up to and including the sort-field line
++_RE_VIEWING = re.compile(r"^Viewing\s+\d", re.I)
++_RE_CANDIDATES = re.compile(r"^Candidates\s*$", re.I)
++_RE_SHOW = re.compile(r"^\d+\s+per\s+page\s*$", re.I)
++_RE_SORT_BY = re.compile(r"^Sort\s+by:\s*$", re.I)
++
++# Block terminator: a lone uppercase letter or "user avatar"
++_RE_AVATAR_TERM = re.compile(r"^user\s+avatar\s*$", re.I)
++_RE_INITIAL = re.compile(r"^[A-Z]$")
++
++# Classifier patterns
++_RE_CLEARANCE = re.compile(
++    r"TS/SCI(\s+w\s+Poly)?|Top\s+Secret|Secret|Public\s+Trust|Confidential", re.I
++)
++_RE_SENIORITY = re.compile(
++    r"^(\d+\+\s+yrs?\s+exp|Mgr/Director|Entry[- ]Level|Junior\b|Senior\b)\s*$", re.I
++)
++_RE_RELO = re.compile(r"^(Yes|No)\s+-\s+(Open\s+to\s+relo|Not\s+open\s+to\s+relo)\s*$", re.I)
++_RE_SALARY = re.compile(r"^\$[\d,]+\s*$")
++# Date-like: "Today", "Yesterday", "May 20", "Jun 19, 2025", "Mar 10", "Feb 24"
++_RE_DATE = re.compile(
++    r"^(Today|Yesterday|[A-Z][a-z]{2}\s+\d{1,2}(,\s*\d{4})?)\s*$"
++)
++# City/State: "Baltimore, MD"  "Port Huron Township, MI"
++_RE_CITY_STATE = re.compile(
++    r"^(?P<city>[A-Za-z][A-Za-z .,''\-]+),\s*(?P<state>[A-Z]{2})\s*$"
++)
++
++
++# ---------------------------------------------------------------------------
++# Header stripping
++# ---------------------------------------------------------------------------
++
++def _strip_header(lines: list[str]) -> list[str]:
++    """Remove the boilerplate header lines that precede the first candidate.
++
++    The header pattern is:
++        Viewing N - M of K
++        Candidates
++        Show:
++        N per page
++        Sort by:
++        <sort field value, e.g. "Last Login Date (Des)">
++
++    We walk forward and drop each matching line. Once we've seen the "Sort by:"
++    marker we also drop the very next line (the sort field value) then return
++    the rest. If no header markers are found the original list is returned
++    unchanged.
++    """
++    result = list(lines)
++    drop_next = False  # True after "Sort by:" line is consumed
++    out = []
++    header_done = False
++    saw_sort_by = False
++
++    for line in result:
++        stripped = line.strip()
++        if header_done:
++            out.append(line)
++            continue
++
++        if drop_next:
++            # This is the sort field value — drop it and close header
++            drop_next = False
++            header_done = True
++            continue
++
++        if _RE_VIEWING.match(stripped):
++            continue
++        if _RE_CANDIDATES.match(stripped):
++            continue
++        # "Show:" bare label — drop
++        if stripped.lower() == "show:":
++            continue
++        if _RE_SHOW.match(stripped):
++            continue
++        if _RE_SORT_BY.match(stripped):
++            saw_sort_by = True
++            drop_next = True
++            continue
++
++        # A line that doesn't match any header pattern and we haven't seen
++        # the Sort-by marker yet — treat header as absent, keep everything.
++        if not saw_sort_by:
++            return result  # no header detected; return full list unchanged
++        out.append(line)
++
++    if not header_done and not drop_next:
++        # Fell off the end without closing — return everything after removing
++        # the header lines we did match
++        return out
++    return out
++
++
++# ---------------------------------------------------------------------------
++# Block splitter
++# ---------------------------------------------------------------------------
++
++def _split_blocks(lines: list[str]) -> list[list[str]]:
++    """Split line list into candidate blocks.
++
++    A block ends when a TERMINATOR line is encountered (lone uppercase initial
++    OR "user avatar"). The terminator itself is not included in the block.
++    A trailing block (no terminator at EOF) is included.
++    """
++    blocks: list[list[str]] = []
++    current: list[str] = []
++
++    for line in lines:
++        stripped = line.strip()
++        if not stripped:
++            # blank lines inside a block are ignored
++            continue
++        if _RE_AVATAR_TERM.match(stripped) or _RE_INITIAL.match(stripped):
++            if current:
++                blocks.append(current)
++                current = []
++        else:
++            current.append(stripped)
++
++    if current:
++        blocks.append(current)
++
++    return blocks
++
++
++# ---------------------------------------------------------------------------
++# Per-block classifier
++# ---------------------------------------------------------------------------
++
++def _classify_line(line: str) -> str:
++    """Return the classifier label for a single line."""
++    if _RE_CLEARANCE.search(line):
++        return "clearance"
++    if _RE_SENIORITY.match(line):
++        return "seniority"
++    if _RE_RELO.match(line):
++        return "relo"
++    if _RE_SALARY.match(line):
++        return "salary"
++    if _RE_DATE.match(line):
++        return "date"
++    if _RE_CITY_STATE.match(line):
++        return "city_state"
++    return "text"
++
++
++def _parse_block(
++    block: list[str],
++    source_file: str,
++    program_hint: Optional[str],
++) -> Optional[RawContact]:
++    """Parse a single candidate block into a RawContact.
++
++    Returns None if the block is too short to produce a valid contact (no name).
++    Raises nothing — errors are logged by the caller; see parse_paste_text.
++    """
++    if len(block) < 1:
++        return None
++
++    name = block[0].strip()
++    if not name:
++        return None
++
++    title = block[1].strip() if len(block) > 1 else ""
++    rest = block[2:]
++
++    clearance_level = ""
++    clearances: list[str] = []
++    seniority_band = ""
++    relo: Optional[bool] = None
++    salary_expectation = ""
++    cj_last_login = ""
++    city = ""
++    state = ""
++    text_lines: list[str] = []
++
++    date_count = 0  # only first date line = cj_last_login; subsequent = profile updated
++
++    for line in rest:
++        label = _classify_line(line)
++
++        if label == "clearance":
++            # Grab the first clearance mention as clearance_level
++            m = _RE_CLEARANCE.search(line)
++            if m:
++                matched = m.group(0)
++                # Normalise partial-match fragments like "TS/SCI" (already good)
++                if not clearance_level:
++                    clearance_level = matched
++                clearances.append(matched)
++            # The whole line may also contain text; don't add to text_lines here
++            # since it might be a keyword-thumbnail line that ALSO has a clearance term —
++            # keep it as text if it's not a bare clearance-only line.
++            # Heuristic: if the line has > 6 tokens, treat it as a keyword-thumbnail
++            # too, otherwise classify as clearance-only.
++            if len(line.split()) > 4:
++                text_lines.append(line)
++
++        elif label == "seniority":
++            if not seniority_band:
++                seniority_band = line
++
++        elif label == "relo":
++            relo = line.lower().startswith("yes")
++
++        elif label == "salary":
++            if not salary_expectation:
++                salary_expectation = line.strip()
++
++        elif label == "date":
++            date_count += 1
++            if date_count == 1:
++                cj_last_login = line.strip()
++            # subsequent date lines are ignored
++
++        elif label == "city_state":
++            if not city:
++                m = _RE_CITY_STATE.match(line)
++                if m:
++                    city = m.group("city").strip()
++                    state = m.group("state").strip()
++
++        else:
++            # label == "text" — keyword/thumbnail freeform lines
++            text_lines.append(line)
++
++    keyword_thumbnail = " ".join(text_lines).strip()
++
++    # Employer canonicalization
++    company_raw = keyword_thumbnail
++    company = canonical_company(keyword_thumbnail) or ""
++
++    cj_last_login_hot = cj_last_login.lower() == "today"
++
++    return RawContact(
++        lane=LANE_PASTE,
++        source_file=source_file,
++        name=name,
++        title=title,
++        city=city,
++        state=state,
++        clearance_level=clearance_level,
++        clearances=clearances,
++        seniority_band=seniority_band,
++        relo=relo,
++        salary_expectation=salary_expectation,
++        cj_last_login=cj_last_login,
++        cj_last_login_hot=cj_last_login_hot,
++        keyword_thumbnail=keyword_thumbnail,
++        company_raw=company_raw,
++        company=company,
++        program_hint=program_hint,
++        confidence="C",
++        needs_review=True,
++    )
++
++
++# ---------------------------------------------------------------------------
++# Public API
++# ---------------------------------------------------------------------------
++
++def parse_paste_text(
++    text: str,
++    source_file: str = "",
++    program_hint: Optional[str] = None,
++) -> list[RawContact]:
++    """Parse raw paste text into a list of RawContact records.
++
++    Parameters
++    ----------
++    text:
++        Full text of a ClearanceJobs result-list paste.
++    source_file:
++        Filename/path to record in source_file field (no PII read here).
++    program_hint:
++        Optional contract PIID or program name sourced from the paste context.
++
++    Returns
++    -------
++    list[RawContact] — one per detected candidate block (empty on failure).
++    """
++    if not text or not text.strip():
++        return []
++
++    lines = text.splitlines()
++    lines = _strip_header(lines)
++    blocks = _split_blocks(lines)
++
++    contacts: list[RawContact] = []
++    for block in blocks:
++        try:
++            rc = _parse_block(block, source_file, program_hint)
++            if rc is not None:
++                contacts.append(rc)
++        except Exception:  # noqa: BLE001
++            # Malformed block: skip without crashing the whole parse
++            continue
++
++    return contacts
++
++
++def parse_paste(
++    path: str,
++    program_hint: Optional[str] = None,
++) -> list[RawContact]:
++    """Read a paste file and return parsed RawContacts.
++
++    Parameters
++    ----------
++    path:
++        Absolute or relative path to the .txt paste file.
++    program_hint:
++        Optional PIID / program hint forwarded to each RawContact.
++    """
++    with open(path, encoding="utf-8", errors="replace") as fh:
++        text = fh.read()
++    return parse_paste_text(text, source_file=path, program_hint=program_hint)
+diff --git a/clearancejobs_pipeline/lanes/resume.py b/clearancejobs_pipeline/lanes/resume.py
+new file mode 100644
+index 000000000..eb85fb5a1
+--- /dev/null
++++ b/clearancejobs_pipeline/lanes/resume.py
+@@ -0,0 +1,523 @@
++"""Resume lane — parse a resume file (PDF/DOCX/DOC) into a single RawContact.
++
++Privacy constraint: ALL parsing is 100% local. No cloud endpoints are called
++unless `use_ollama=True`, which routes to localhost:11434 only.
++
++Public API
++----------
++parse_resume(path, *, program_hint, use_ollama, ollama_model) -> RawContact
++extract_fields(text, filename) -> dict   # pure, testable without a real file
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++from typing import Optional
++
++from clearancejobs_pipeline.models import LANE_RESUME, RawContact
++from clearancejobs_pipeline.lib.cj_id import extract_cj_id, name_slug_from_filename
++from clearancejobs_pipeline.lib.companies import canonical_company, COMPANY_PATS
++
++# ---------------------------------------------------------------------------
++# Clearance hierarchy for ranking
++# ---------------------------------------------------------------------------
++_CLEARANCE_RANK = {
++    "TS/SCI w/ Poly": 5,
++    "TS/SCI w/Poly":  5,
++    "TS/SCI":         4,
++    "Top Secret":     3,
++    "Secret":         2,
++    "DoD Secret":     2,
++    "Interim Secret": 1,
++    "Public Trust":   0,
++}
++
++_CLEARANCE_RE = re.compile(
++    r"TS/SCI\s*(?:w/?[\s]?Poly|with\s+poly(?:graph)?)"
++    r"|TS/SCI"
++    r"|Top\s+Secret"
++    r"|DoD\s+Secret"
++    r"|Interim\s+Secret"
++    r"|Public\s+Trust"
++    r"|\bSecret\b",
++    re.I,
++)
++
++# Normalise matched text -> canonical label
++def _normalise_clearance(raw: str) -> str:
++    s = raw.strip()
++    if re.search(r"TS/SCI\s*(?:w/?[\s]?Poly|with\s+poly(?:graph)?)", s, re.I):
++        return "TS/SCI w/ Poly"
++    if re.search(r"TS/SCI", s, re.I):
++        return "TS/SCI"
++    if re.search(r"Top\s+Secret", s, re.I):
++        return "Top Secret"
++    if re.search(r"DoD\s+Secret", s, re.I):
++        return "DoD Secret"
++    if re.search(r"Interim\s+Secret", s, re.I):
++        return "Interim Secret"
++    if re.search(r"Public\s+Trust", s, re.I):
++        return "Public Trust"
++    if re.search(r"\bSecret\b", s, re.I):
++        return "Secret"
++    return s
++
++
++# ---------------------------------------------------------------------------
++# Local file → text
++# ---------------------------------------------------------------------------
++
++def _parse_pdf(path: str) -> tuple[str, str]:
++    """Return (text, engine_name). Tries liteparse → pdfplumber → fitz."""
++    text = ""
++
++    # 1. liteparse (preferred – Rust-based, fastest). OCR disabled: Tesseract is not
++    # installed here, so OCR would only spam stderr and add no text.
++    try:
++        from liteparse import LiteParse, ParseError
++        parser = LiteParse(quiet=True, ocr_enabled=False)
++        result = parser.parse(path)
++        text = result.text or ""
++        if text.strip():
++            return text, "liteparse"
++    except Exception:
++        pass
++
++    # 2. pdfplumber
++    try:
++        import pdfplumber
++        with pdfplumber.open(path) as pdf:
++            text = "\n".join(page.extract_text() or "" for page in pdf.pages)
++        if text.strip():
++            return text, "pdfplumber"
++    except Exception:
++        pass
++
++    # 3. fitz / PyMuPDF
++    try:
++        import fitz
++        doc = fitz.open(path)
++        text = "\n".join(page.get_text() for page in doc)
++        if text.strip():
++            return text, "fitz"
++    except Exception:
++        pass
++
++    return "", "none"
++
++
++def _parse_docx(path: str) -> tuple[str, str]:
++    """Return (text, engine_name). Tries mammoth → python-docx."""
++    # 1. mammoth
++    try:
++        import mammoth
++        with open(path, "rb") as fh:
++            result = mammoth.extract_raw_text(fh)
++        text = result.value or ""
++        if text.strip():
++            return text, "mammoth"
++    except Exception:
++        pass
++
++    # 2. python-docx
++    try:
++        import docx
++        doc = docx.Document(path)
++        text = "\n".join(p.text for p in doc.paragraphs)
++        if text.strip():
++            return text, "python-docx"
++    except Exception:
++        pass
++
++    return "", "none"
++
++
++def _parse_doc(path: str) -> tuple[str, str]:
++    """Return (text, engine_name) for old binary .doc files.
++
++    Tries liteparse (needs LibreOffice) only; on failure returns empty string
++    so the caller can build a minimal RawContact from the filename.
++    """
++    try:
++        from liteparse import LiteParse
++        parser = LiteParse(quiet=True, ocr_enabled=False)
++        result = parser.parse(path)
++        text = result.text or ""
++        if text.strip():
++            return text, "liteparse"
++    except Exception:
++        pass
++
++    return "", "unsupported"
++
++
++def _extract_text(path: str) -> tuple[str, str, str]:
++    """Return (text, engine, ext). Never raises — bad files return empty text."""
++    ext = os.path.splitext(path)[1].lower()
++    try:
++        if ext == ".pdf":
++            text, engine = _parse_pdf(path)
++        elif ext == ".docx":
++            text, engine = _parse_docx(path)
++        elif ext == ".doc":
++            text, engine = _parse_doc(path)
++        else:
++            # Unsupported extension — try PDF stack then docx stack
++            text, engine = _parse_pdf(path)
++            if not text.strip():
++                text, engine = _parse_docx(path)
++    except Exception:
++        text, engine = "", "error"
++    return text, engine, ext
++
++
++# ---------------------------------------------------------------------------
++# Deterministic field extraction (pure — testable on a string)
++# ---------------------------------------------------------------------------
++
++_EMAIL_RE = re.compile(r"[\w.+\-]+@[\w\-]+\.[\w.\-]+")
++_PHONE_RE = re.compile(
++    r"(?:\+?1[\s.\-]?)?"
++    r"(?:\(?\d{3}\)?[\s.\-]?)?"
++    r"\d{3}[\s.\-]\d{4}"
++)
++_LINKEDIN_RE = re.compile(
++    r"https?://(?:www\.)?linkedin\.com/in/[\w%\-/]+",
++    re.I,
++)
++_CITY_STATE_RE = re.compile(
++    r"\b([A-Z][A-Za-z .'\-]{1,30}),\s*([A-Z]{2})\b"
++)
++_SKILLS_SECTION_RE = re.compile(
++    r"(?:Technical\s+Skills?|Skills?|Core\s+Competencies|Expertise)"
++    r"\s*[:\n]+\s*([^\n]{10,}(?:\n[^\n]{5,}){0,8})",
++    re.I,
++)
++
++
++_NAME_STOPWORDS = frozenset({
++    "engineer", "engineer", "engineering", "developer", "analyst", "manager",
++    "director", "senior", "junior", "lead", "principal", "staff", "associate",
++    "specialist", "scientist", "architect", "consultant", "advisor", "contractor",
++    "professional", "coordinator", "technician", "administrator", "officer",
++    "software", "systems", "system", "network", "cyber", "security", "cloud",
++    "data", "information", "technical", "technology", "program", "project",
++    "experience", "summary", "objective", "education", "skills", "history",
++    "work", "employment", "profile", "overview", "qualifications",
++})
++
++
++def _best_name_from_text(text: str) -> str:
++    """Look for a capitalised 2-3 word person name in the first ~10 non-empty lines.
++
++    Rejects lines that contain job-title stopwords (e.g. 'Lead Software Engineer').
++    Only matches lines that look like personal names: capitalised words, no digits,
++    no slashes, no special chars.
++    """
++    lines = [l.strip() for l in text.splitlines() if l.strip()]
++    # Two or three capitalised words on a line by itself
++    name_re = re.compile(r"^([A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$")
++    for line in lines[:10]:
++        m = name_re.match(line)
++        if not m:
++            continue
++        # Reject if any word is a known title/role stopword
++        words_lower = set(line.lower().split())
++        if words_lower & _NAME_STOPWORDS:
++            continue
++        # Reject lines with digits or special chars beyond hyphens
++        if re.search(r"[0-9/\\@#$%^&*()+=\[\]{}<>]", line):
++            continue
++        return m.group(1)
++    return ""
++
++
++def extract_fields(text: str, filename: str) -> dict:
++    """Pure extraction from resume text + filename. No file I/O.
++
++    Returns a dict with keys matching RawContact fields. The caller assembles
++    the RawContact so unit tests can work on plain strings.
++    """
++    result: dict = {}
++
++    # --- identity from filename (reliable even for anonymised resumes) ---
++    cj_id = extract_cj_id(filename)
++    slug = name_slug_from_filename(filename)
++    # title-case slug parts as a fallback name
++    slug_name = " ".join(p.capitalize() for p in slug.split("-") if p and not p.isdigit())
++    slug_name = slug_name.strip()
++
++    # prefer explicit name from top of resume if not anonymised
++    doc_name = _best_name_from_text(text)
++    # suppress anonymous/generic slugs
++    if slug.startswith("anonymous") or not slug or slug in ("resume",):
++        name = doc_name or ""
++    else:
++        name = slug_name if slug_name else doc_name
++
++    result["cj_id"] = cj_id
++    result["name"] = name
++
++    # --- contact info ---
++    email_m = _EMAIL_RE.search(text)
++    result["email"] = email_m.group(0) if email_m else ""
++
++    phone_m = _PHONE_RE.search(text)
++    result["phone"] = phone_m.group(0).strip() if phone_m else ""
++
++    li_m = _LINKEDIN_RE.search(text)
++    result["linkedin_url"] = li_m.group(0).strip("/") if li_m else ""
++
++    # --- location (look for City, ST near top first, else anywhere) ---
++    city, state = "", ""
++    top_text = "\n".join(text.splitlines()[:30])
++    cs_m = _CITY_STATE_RE.search(top_text)
++    if not cs_m:
++        cs_m = _CITY_STATE_RE.search(text)
++    if cs_m:
++        city = cs_m.group(1).strip()
++        state = cs_m.group(2).strip()
++    result["city"] = city
++    result["state"] = state
++
++    # --- clearances ---
++    found_clearances = []
++    for m in _CLEARANCE_RE.finditer(text):
++        label = _normalise_clearance(m.group(0))
++        if label not in found_clearances:
++            found_clearances.append(label)
++
++    # pick highest ranked
++    clearance_level = ""
++    if found_clearances:
++        clearance_level = max(found_clearances, key=lambda c: _CLEARANCE_RANK.get(c, -1))
++
++    result["clearances"] = found_clearances
++    result["clearance_level"] = clearance_level
++
++    # --- employer / company ---
++    # Try canonical match across full text
++    canon = canonical_company(text)
++    # Also scan for all canonical hits to build prior_companies list
++    all_canon: list[str] = []
++    for cname in COMPANY_PATS:
++        pat = COMPANY_PATS[cname]
++        if pat.search(text):
++            all_canon.append(cname)
++
++    # Best raw employer from experience section (look for first job-header line)
++    # Pattern: lines like "Title – Company" or "Title, Company" or just "Company" near experience header
++    employer_raw = ""
++    exp_re = re.compile(
++        r"(?:experience|work\s+history|employment)",
++        re.I,
++    )
++    exp_m = exp_re.search(text)
++    if exp_m:
++        window = text[exp_m.end(): exp_m.end() + 800]
++        # Look for a line that looks like employer/title
++        for line in window.splitlines():
++            line = line.strip()
++            if len(line) > 5 and not re.match(r"^\d", line):
++                # skip bullet lines
++                if not line.startswith(("•", "-", "–", "*", "◆", "▸")):
++                    employer_raw = line
++                    break
++
++    company = canon if canon else ""
++    company_raw = employer_raw or canon or ""
++
++    # prior companies = all canonical hits except the primary
++    prior = [c for c in all_canon if c != canon]
++    if canon and canon not in all_canon:
++        pass  # canon came from general scan
++
++    result["company"] = company
++    result["company_raw"] = company_raw
++    result["prior_companies"] = prior
++
++    # --- skills (light keyword pull from Skills section) ---
++    skills: list[str] = []
++    sm = _SKILLS_SECTION_RE.search(text)
++    if sm:
++        raw_skills = sm.group(1)
++        # Split on commas, bullets, semicolons, newlines
++        items = re.split(r"[,\n;•\|]+", raw_skills)
++        for item in items:
++            s = item.strip().strip("-–•*▸◆").strip()
++            if 2 < len(s) < 50 and not re.match(r"^\d+$", s):
++                skills.append(s)
++                if len(skills) >= 20:
++                    break
++    result["skills"] = skills
++
++    # --- title (look for title/role near the top or in first experience entry) ---
++    title = ""
++    # first experience line after date pattern often contains Title – Company
++    title_re = re.compile(
++        r"(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*\d{4}"
++        r"|\d{4})\s*[-–]\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*\d{4}"
++        r"|present|current|now)",
++        re.I,
++    )
++    date_m = title_re.search(text)
++    if date_m:
++        # look at the line before/after the date for role
++        before_date = text[max(0, date_m.start() - 200): date_m.start()]
++        lines_before = [l.strip() for l in before_date.splitlines() if l.strip()]
++        if lines_before:
++            candidate = lines_before[-1]
++            if len(candidate) < 80 and not re.match(r"^\d", candidate):
++                title = candidate
++
++    result["title"] = title
++
++    # --- confidence ---
++    has_email = bool(result["email"])
++    has_phone_or_li = bool(result["phone"]) or bool(result["linkedin_url"])
++    has_company = bool(result["company"] or result["company_raw"])
++    confidence = "A" if (has_email and has_phone_or_li and has_company) else "B"
++    result["confidence"] = confidence
++    result["needs_review"] = (confidence != "A")
++
++    return result
++
++
++# ---------------------------------------------------------------------------
++# Optional Ollama enrichment
++# ---------------------------------------------------------------------------
++
++def _enrich_ollama(text: str, fields: dict, model: str) -> dict:
++    """Call local Ollama and merge results. Graceful degrade on any failure."""
++    import requests  # stdlib-like, safe
++
++    prompt = (
++        "You are a resume parser. Extract ONLY these fields from the resume text below.\n"
++        "Return STRICT JSON only (no markdown, no explanation):\n"
++        '{"normalized_title": "<job title>", "role_family": "<e.g. Software Engineer>", '
++        '"skills": ["<skill1>", ...], "summary": "<one sentence summary>"}\n\n'
++        f"RESUME TEXT (first 6000 chars):\n{text[:6000]}"
++    )
++
++    try:
++        resp = requests.post(
++            "http://localhost:11434/api/generate",
++            json={"model": model, "prompt": prompt, "stream": False},
++            timeout=120,
++        )
++        resp.raise_for_status()
++        raw = resp.json().get("response", "")
++        # Extract JSON block (model may wrap in text)
++        json_m = re.search(r"\{.*\}", raw, re.DOTALL)
++        if not json_m:
++            raise ValueError("no JSON in ollama response")
++        parsed = json.loads(json_m.group(0))
++    except Exception:
++        fields["extra"] = {**fields.get("extra", {}), "ollama": "unavailable"}
++        return fields
++
++    # Merge: prefer ollama title when deterministic title is weak/empty
++    if parsed.get("normalized_title") and not fields.get("title"):
++        fields["title"] = parsed["normalized_title"]
++
++    # Extend skills (deduplicated)
++    existing_skills = list(fields.get("skills", []))
++    for s in parsed.get("skills", []):
++        if s and s not in existing_skills:
++            existing_skills.append(s)
++    fields["skills"] = existing_skills[:30]
++
++    # Summary → extra["pain_points"]
++    summary = parsed.get("summary", "").strip()
++    if summary:
++        extra = fields.get("extra", {})
++        extra["pain_points"] = [summary]
++        fields["extra"] = extra
++
++    return fields
++
++
++# ---------------------------------------------------------------------------
++# Public entry-point
++# ---------------------------------------------------------------------------
++
++def parse_resume(
++    path: str,
++    *,
++    program_hint: Optional[str] = None,
++    use_ollama: bool = False,
++    ollama_model: str = "llama3.1:8b",
++) -> RawContact:
++    """Parse a resume file into a RawContact.
++
++    Parameters
++    ----------
++    path : str
++        Absolute or relative path to a PDF / DOCX / DOC file.
++    program_hint : str | None
++        Optional PIID / program the resume was sourced under.
++    use_ollama : bool
++        Whether to call local Ollama for LLM enrichment (title, skills, summary).
++    ollama_model : str
++        Ollama model tag (default: llama3.1:8b).
++    """
++    filename = os.path.basename(path)
++
++    # 1. Parse file to text
++    text, parse_engine, ext = _extract_text(path)
++
++    # Build base extra dict
++    extra: dict = {"parse_engine": parse_engine}
++
++    # DOC files that failed to parse → minimal RawContact from filename
++    if ext == ".doc" and not text.strip():
++        extra["parse_status"] = "doc_unsupported"
++        cj_id = extract_cj_id(filename)
++        slug = name_slug_from_filename(filename)
++        name = " ".join(p.capitalize() for p in slug.split("-") if p and not p.isdigit()).strip()
++        return RawContact(
++            lane=LANE_RESUME,
++            source_file=path,
++            cj_id=cj_id,
++            name=name,
++            program_hint=program_hint,
++            confidence="C",
++            needs_review=True,
++            extra=extra,
++        )
++
++    # 2. Deterministic extraction
++    fields = extract_fields(text, filename)
++    fields.setdefault("extra", {})
++    fields["extra"].update(extra)
++
++    # 3. Optional Ollama enrichment
++    if use_ollama and text.strip():
++        fields = _enrich_ollama(text, fields, ollama_model)
++
++    # 4. Assemble RawContact
++    name = fields.get("name", "")
++    rc = RawContact(
++        lane=LANE_RESUME,
++        source_file=path,
++        cj_id=fields.get("cj_id"),
++        name=name,
++        title=fields.get("title", ""),
++        company=fields.get("company", ""),
++        company_raw=fields.get("company_raw", ""),
++        city=fields.get("city", ""),
++        state=fields.get("state", ""),
++        clearance_level=fields.get("clearance_level", ""),
++        clearances=fields.get("clearances", []),
++        email=fields.get("email", ""),
++        phone=fields.get("phone", ""),
++        linkedin_url=fields.get("linkedin_url", ""),
++        prior_companies=fields.get("prior_companies", []),
++        skills=fields.get("skills", []),
++        program_hint=program_hint,
++        confidence=fields.get("confidence", "C"),
++        needs_review=fields.get("needs_review", True),
++        extra=fields.get("extra", {}),
++    )
++    return rc
+diff --git a/clearancejobs_pipeline/models.py b/clearancejobs_pipeline/models.py
+index ae732eb68..e01768126 100644
+--- a/clearancejobs_pipeline/models.py
++++ b/clearancejobs_pipeline/models.py
+@@ -118,7 +118,7 @@ def build_contact(raw: RawContact, contact_id: Optional[int] = None) -> dict:
+         "mobile": None,
+         "title": raw.title or None,
+         "occupation": None,
+-        "company": raw.company or raw.company_raw or None,
++        "company": raw.company or None,          # canonical only — raw blob stays in source_metadata
+         "company_name": raw.company or None,
+         "status": "new",
+         "address": None,
+@@ -156,6 +156,7 @@ def build_contact(raw: RawContact, contact_id: Optional[int] = None) -> dict:
+             "keyword_thumbnail": raw.keyword_thumbnail,
+             "skills": list(raw.skills),
+             "prior_companies": list(raw.prior_companies),
++            "company_raw": raw.company_raw or None,
+             "program_hint": raw.program_hint,
+             "lane": raw.lane,
+             **dict(raw.extra.get("source_metadata", {})),
+diff --git a/clearancejobs_pipeline/run.py b/clearancejobs_pipeline/run.py
+index 25128b9d3..4f8a46ac5 100644
+--- a/clearancejobs_pipeline/run.py
++++ b/clearancejobs_pipeline/run.py
+@@ -14,8 +14,24 @@ from __future__ import annotations
+ import argparse
+ import json
+ import os
++import re
+ from datetime import datetime, timezone
+ 
++# CJ result-list chrome that can leak into a block when a paste concatenates multiple
++# result pages or includes the left filter sidebar (pagination headers, "Boolean search",
++# clearance-filter labels, etc.). Checked against both the parsed name AND title.
++_JUNK_RE = re.compile(
++    r"viewing\s+\d+\s*-|\bshow:|sort by|^\s*candidates\s*$|\d+\s+per page"
++    r"|boolean search|last login date",
++    re.I,
++)
++
++
++def _is_junk_paste(rc) -> bool:
++    if not rc.name:
++        return True
++    return bool(_JUNK_RE.search(rc.name) or _JUNK_RE.search(rc.title or ""))
++
+ from .intake import INTAKE_ROOT, REPO, run_intake
+ from .spine.call_sheet import write_call_sheets
+ from .spine.map_contact import map_contacts
+@@ -37,7 +53,9 @@ def _collect_raws(manifest: list, use_ollama: bool):
+         hint = m.get("program_hint")
+         try:
+             if lane == "paste":
+-                raws.extend(parse_paste(dest, program_hint=hint) or [])
++                for rc in (parse_paste(dest, program_hint=hint) or []):
++                    if not _is_junk_paste(rc):
++                        raws.append(rc)
+             else:
+                 rc = parse_resume(dest, program_hint=hint, use_ollama=use_ollama)
+                 if rc:
+diff --git a/clearancejobs_pipeline/tests/test_paste.py b/clearancejobs_pipeline/tests/test_paste.py
+new file mode 100644
+index 000000000..4665a20ec
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_paste.py
+@@ -0,0 +1,251 @@
++"""Tests for clearancejobs_pipeline.lanes.paste.
++
++All fixtures are SYNTHETIC — no real PII files are read.
++"""
++from __future__ import annotations
++
++import textwrap
++
++import pytest
++
++from clearancejobs_pipeline.lanes.paste import parse_paste_text
++
++
++# ---------------------------------------------------------------------------
++# Synthetic fixture text
++# ---------------------------------------------------------------------------
++
++# A realistic-looking paste with 4 synthetic candidates:
++#   1. Alice Norwood — relo + salary, terminated by lone initial
++#   2. Bob Carver    — no relo/salary, terminated by lone initial
++#   3. Carol Brandt  — second date line present (should be ignored for cj_last_login), user-avatar terminator
++#   4. Dan Halloway  — Insight Global in thumbnail (employer canonicalization test), user-avatar terminator
++SYNTHETIC_PASTE = textwrap.dedent("""\
++    Viewing 1 - 50 of 200
++    Candidates
++    Show:
++    50 per page
++    Sort by:
++    Last Login Date (Des)
++    Alice Norwood
++    Systems Security Engineer
++    Arlington, VA
++    Today
++    TS/SCI
++    10+ yrs exp
++    Yes - Open to relo
++    $175,000
++    Experienced ISSO supporting RMF and NIST SP 800-53 controls
++    A
++    Bob Carver
++    Cybersecurity Analyst
++    San Diego, CA
++    Yesterday
++    Secret
++    5+ yrs exp
++    Worked on DISA STIG compliance and vulnerability management
++    B
++    Carol Brandt
++    Software Security Engineer
++    Herndon, VA
++    Today
++    TS/SCI w Poly
++    Mgr/Director
++    May 15
++    No - Not open to relo
++    $220,000
++    Provided cyber engineering support at NSA for 12 years
++    user avatar
++    Dan Halloway
++    Network Engineer
++    Chantilly, VA
++    May 20
++    TS/SCI
++    10+ yrs exp
++    Yes - Open to relo
++    INSIGHT GLOBAL, LLC - Senior Network Admin supporting DHS programs
++    Configured enterprise routers and switches
++    user avatar
++""")
++
++# Paste without any header section
++HEADERLESS_PASTE = textwrap.dedent("""\
++    Jane Smith
++    Senior ISSO
++    Bethesda, MD
++    Today
++    TS/SCI
++    10+ yrs exp
++    No - Not open to relo
++    $200,000
++    Supporting RMF across multiple DoD programs
++    J
++""")
++
++
++# ---------------------------------------------------------------------------
++# Tests
++# ---------------------------------------------------------------------------
++
++class TestSyntheticPaste:
++    """Multi-block fixture: correctness tests."""
++
++    def _contacts(self):
++        return parse_paste_text(SYNTHETIC_PASTE, source_file="test_synthetic.txt",
++                                program_hint="TEST-PIID-001")
++
++    def test_count(self):
++        contacts = self._contacts()
++        assert len(contacts) == 4, f"Expected 4 contacts, got {len(contacts)}"
++
++    def test_alice_norwood(self):
++        c = self._contacts()[0]
++        assert c.name == "Alice Norwood"
++        assert c.title == "Systems Security Engineer"
++        assert c.city == "Arlington"
++        assert c.state == "VA"
++        assert c.clearance_level.startswith("TS/SCI")
++        assert c.cj_last_login == "Today"
++        assert c.cj_last_login_hot is True
++        assert c.relo is True
++        assert c.salary_expectation == "$175,000"
++        assert c.seniority_band == "10+ yrs exp"
++
++    def test_bob_carver_no_relo_no_salary(self):
++        c = self._contacts()[1]
++        assert c.name == "Bob Carver"
++        assert c.city == "San Diego"
++        assert c.state == "CA"
++        assert c.clearance_level.lower().startswith("secret") or "Secret" in c.clearance_level
++        assert c.relo is None      # no relo line
++        assert c.salary_expectation == ""
++        assert c.cj_last_login == "Yesterday"
++        assert c.cj_last_login_hot is False
++
++    def test_carol_brandt_second_date_ignored(self):
++        """May 15 is a second date line; cj_last_login must be 'Today', not 'May 15'."""
++        c = self._contacts()[2]
++        assert c.name == "Carol Brandt"
++        assert c.cj_last_login == "Today"
++        assert c.cj_last_login_hot is True
++        assert c.relo is False
++        assert c.salary_expectation == "$220,000"
++        assert c.seniority_band in ("Mgr/Director",)
++
++    def test_dan_halloway_company_canonicalized(self):
++        """Insight Global in thumbnail → company canonicalized to 'Insight Global'."""
++        c = self._contacts()[3]
++        assert c.name == "Dan Halloway"
++        assert c.company == "Insight Global"
++        assert "INSIGHT GLOBAL" in c.company_raw.upper()
++
++    def test_lane_source_program_hint(self):
++        for c in self._contacts():
++            assert c.lane == "paste"
++            assert c.source_file == "test_synthetic.txt"
++            assert c.program_hint == "TEST-PIID-001"
++            assert c.confidence == "C"
++            assert c.needs_review is True
++
++    def test_clearances_list_populated(self):
++        """clearances list should contain at least one entry per contact."""
++        contacts = self._contacts()
++        for c in contacts:
++            assert len(c.clearances) >= 1, f"{c.name}: clearances list is empty"
++
++
++class TestHeaderlessAndEdgeCases:
++    """Edge-case robustness tests."""
++
++    def test_headerless_paste_parses(self):
++        contacts = parse_paste_text(HEADERLESS_PASTE, source_file="headerless.txt")
++        assert len(contacts) == 1
++        c = contacts[0]
++        assert c.name == "Jane Smith"
++        assert c.city == "Bethesda"
++        assert c.state == "MD"
++
++    def test_empty_string_returns_empty(self):
++        assert parse_paste_text("") == []
++
++    def test_whitespace_only_returns_empty(self):
++        assert parse_paste_text("   \n\n   ") == []
++
++    def test_garbage_string_does_not_raise(self):
++        """Garbage input must not raise; parsed count is implementation-defined."""
++        result = parse_paste_text("%%% NOT A VALID PASTE %%%\n????\n====")
++        assert isinstance(result, list)  # no crash, returns a list
++
++    def test_single_candidate_no_terminator(self):
++        """A block with no terminator at EOF is still returned."""
++        text = textwrap.dedent("""\
++            Viewing 1 - 1 of 1
++            Candidates
++            Show:
++            1 per page
++            Sort by:
++            Last Login Date (Des)
++            Solo Candidate
++            Junior Analyst
++            Reston, VA
++            Today
++            Secret
++            Entry Level
++        """)
++        contacts = parse_paste_text(text)
++        assert len(contacts) == 1
++        assert contacts[0].name == "Solo Candidate"
++
++
++class TestUserAvatarVsInitialTerminator:
++    """Terminator style coverage."""
++
++    def test_user_avatar_terminator(self):
++        text = textwrap.dedent("""\
++            Sort by:
++            Last Login Date (Des)
++            Eric Vance
++            Security Architect
++            Tampa, FL
++            Today
++            TS/SCI
++            10+ yrs exp
++            user avatar
++            Frank Jones
++            Systems Engineer
++            Reston, VA
++            Yesterday
++            Secret
++            5+ yrs exp
++            F
++        """)
++        contacts = parse_paste_text(text)
++        assert len(contacts) == 2
++        assert contacts[0].name == "Eric Vance"
++        assert contacts[1].name == "Frank Jones"
++
++    def test_mixed_terminators(self):
++        """Some blocks use lone-initial, some use user avatar — both work."""
++        text = textwrap.dedent("""\
++            Sort by:
++            Date (Desc)
++            Alpha User
++            ISSO
++            McLean, VA
++            Today
++            TS/SCI
++            10+ yrs exp
++            A
++            Beta User
++            Pen Tester
++            Denver, CO
++            Yesterday
++            Secret
++            5+ yrs exp
++            user avatar
++        """)
++        contacts = parse_paste_text(text)
++        assert len(contacts) == 2
++        names = [c.name for c in contacts]
++        assert "Alpha User" in names
++        assert "Beta User" in names
+diff --git a/clearancejobs_pipeline/tests/test_resume.py b/clearancejobs_pipeline/tests/test_resume.py
+new file mode 100644
+index 000000000..652c2f1fb
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_resume.py
+@@ -0,0 +1,225 @@
++"""Tests for clearancejobs_pipeline.lanes.resume (deterministic path only).
++
++All fixtures are SYNTHETIC text — no real PII is read from disk.
++Ollama is NOT required; all tests exercise the deterministic extract_fields()
++path only.
++"""
++import pytest
++
++from clearancejobs_pipeline.lanes.resume import extract_fields
++
++
++# ---------------------------------------------------------------------------
++# Helpers
++# ---------------------------------------------------------------------------
++
++_SYNTHETIC_FULL = """\
++Jane Doe
++1234 Main Street, Arlington, VA 22201
++Email: jane.doe@example.com
++Phone: 703-555-1234
++LinkedIn: https://www.linkedin.com/in/janedoe
++
++Security Clearance:
++TS/SCI (active)
++
++Professional Experience
++Insight Global                                    Jan 2020 – Present
++Senior Systems Engineer
++
++Skills: Python, Java, AWS, Docker, Kubernetes, Linux
++
++Education
++B.S. Computer Science, George Mason University
++"""
++
++_SYNTHETIC_ANONYMISED = """\
++WORK HISTORY
++Company A   2018-2022
++Lead Software Engineer
++
++DoD Secret clearance required.
++"""
++
++_SYNTHETIC_SECRET_ONLY = """\
++Bob Smith
++bob.smith@corp.com  |  555-867-5309
++https://www.linkedin.com/in/bobsmith
++Dallas, TX
++
++Clearance: Secret
++
++Experience
++Kforce  2021-present
++Software Developer
++"""
++
++
++# ---------------------------------------------------------------------------
++# Tests
++# ---------------------------------------------------------------------------
++
++class TestFullSyntheticResume:
++    """Fixture has name, email, phone, LinkedIn, City/State, TS/SCI, Insight Global."""
++
++    def setup_method(self):
++        self.fields = extract_fields(_SYNTHETIC_FULL, "jane-doe-1234567.pdf")
++
++    def test_email_extracted(self):
++        assert self.fields["email"] == "jane.doe@example.com"
++
++    def test_phone_extracted(self):
++        assert self.fields["phone"] == "703-555-1234"
++
++    def test_linkedin_extracted(self):
++        assert "linkedin.com/in/janedoe" in self.fields["linkedin_url"]
++
++    def test_city_state_extracted(self):
++        assert self.fields["city"] == "Arlington"
++        assert self.fields["state"] == "VA"
++
++    def test_clearance_tssci(self):
++        assert self.fields["clearance_level"] == "TS/SCI"
++        assert "TS/SCI" in self.fields["clearances"]
++
++    def test_company_canonical(self):
++        # "Insight Global" appears in text → should be canonicalised
++        assert self.fields["company"] == "Insight Global"
++
++    def test_confidence_A(self):
++        # email + (phone or linkedin) + company all present
++        assert self.fields["confidence"] == "A"
++
++    def test_needs_review_false(self):
++        assert self.fields["needs_review"] is False
++
++    def test_cj_id_from_filename(self):
++        assert self.fields["cj_id"] == "1234567"
++
++    def test_name_from_filename(self):
++        # filename "jane-doe-1234567.pdf" → slug "jane-doe" → "Jane Doe"
++        assert self.fields["name"] == "Jane Doe"
++
++
++class TestAnonymisedResume:
++    """Filename is anonymous; resume text has no name header."""
++
++    def setup_method(self):
++        self.fields = extract_fields(_SYNTHETIC_ANONYMISED, "anonymous19032-2466200.docx")
++
++    def test_cj_id_is_trailing(self):
++        assert self.fields["cj_id"] == "2466200"
++
++    def test_name_empty_for_anonymous(self):
++        # slug is "anonymous" — should NOT produce a fake name
++        assert self.fields["name"] == ""
++
++    def test_no_email(self):
++        assert self.fields["email"] == ""
++
++    def test_secret_clearance(self):
++        # "DoD Secret" in text but also plain "Secret"
++        assert self.fields["clearance_level"] in ("DoD Secret", "Secret")
++
++    def test_confidence_B_when_no_contact_info(self):
++        assert self.fields["confidence"] == "B"
++
++    def test_needs_review_true(self):
++        assert self.fields["needs_review"] is True
++
++
++class TestSecretClearanceOnly:
++    """Resume mentions only a plain Secret clearance."""
++
++    def setup_method(self):
++        self.fields = extract_fields(_SYNTHETIC_SECRET_ONLY, "bob-smith-9999999.pdf")
++
++    def test_clearance_level_is_secret(self):
++        assert self.fields["clearance_level"] == "Secret"
++
++    def test_clearances_list_contains_secret(self):
++        assert "Secret" in self.fields["clearances"]
++
++    def test_no_tssci(self):
++        assert "TS/SCI" not in self.fields["clearances"]
++
++    def test_email_present(self):
++        assert self.fields["email"] == "bob.smith@corp.com"
++
++    def test_city_state(self):
++        assert self.fields["city"] == "Dallas"
++        assert self.fields["state"] == "TX"
++
++    def test_kforce_canonical(self):
++        assert self.fields["company"] == "Kforce"
++
++    def test_confidence_A_has_email_phone_and_company(self):
++        assert self.fields["confidence"] == "A"
++
++
++class TestClearanceRanking:
++    """When multiple clearance levels appear, the highest should win."""
++
++    def test_tssci_beats_secret(self):
++        text = "Secret clearance. Also holds TS/SCI with polygraph."
++        f = extract_fields(text, "test-1111111.pdf")
++        assert f["clearance_level"] == "TS/SCI w/ Poly"
++
++    def test_tssci_poly_is_highest(self):
++        text = "TS/SCI w/ Poly and previously held a Secret."
++        f = extract_fields(text, "test-2222222.pdf")
++        assert f["clearance_level"] == "TS/SCI w/ Poly"
++        assert len(f["clearances"]) >= 2
++
++    def test_top_secret_beats_secret(self):
++        text = "Active Top Secret. Previous employer required Secret."
++        f = extract_fields(text, "test-3333333.pdf")
++        assert f["clearance_level"] == "Top Secret"
++
++
++class TestNameExtraction:
++    """Name logic: slug preferred unless anonymous."""
++
++    def test_slug_name_used_when_not_anonymous(self):
++        f = extract_fields("some resume text", "john-smith-5556789.pdf")
++        assert f["name"] == "John Smith"
++
++    def test_anonymous_slug_suppressed(self):
++        f = extract_fields("some resume text", "anonymous-2345678.docx")
++        assert f["name"] == ""
++
++    def test_cjresumes_slug_empty_returns_empty_name(self):
++        # clearancejobs.com_resumes_701487_resume.pdf → slug is ""
++        f = extract_fields("some text", "clearancejobs.com_resumes_701487_resume.pdf")
++        assert f["cj_id"] == "701487"
++        assert f["name"] == ""
++
++
++class TestSkillsExtraction:
++    """Skills section is parsed into a list."""
++
++    def test_skills_from_section(self):
++        text = "Skills: Python, Java, AWS, Docker, Kubernetes"
++        f = extract_fields(text, "test-0000001.pdf")
++        assert "Python" in f["skills"]
++        assert "Java" in f["skills"]
++
++    def test_skills_capped_at_20(self):
++        big_skills = ", ".join(f"Skill{i}" for i in range(50))
++        text = f"Technical Skills:\n{big_skills}"
++        f = extract_fields(text, "test-0000002.pdf")
++        assert len(f["skills"]) <= 20
++
++
++class TestNoCrashOnEmptyText:
++    """extract_fields must not crash on empty/whitespace text."""
++
++    def test_empty_text(self):
++        f = extract_fields("", "test-0000003.pdf")
++        assert f["email"] == ""
++        assert f["clearance_level"] == ""
++        assert f["confidence"] == "B"
++
++    def test_whitespace_only(self):
++        f = extract_fields("   \n  \t  ", "test-0000004.pdf")
++        assert isinstance(f, dict)
+-- 
+2.35.1.windows.2
+

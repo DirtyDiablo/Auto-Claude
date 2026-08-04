@@ -1,0 +1,3283 @@
+diff --git a/clearancejobs_pipeline/INDEX.md b/clearancejobs_pipeline/INDEX.md
+new file mode 100644
+index 000000000..27063a2df
+--- /dev/null
++++ b/clearancejobs_pipeline/INDEX.md
+@@ -0,0 +1,75 @@
++# clearancejobs_pipeline/INDEX.md
++
++## Purpose
++
++Turns **downloaded ClearanceJobs artifacts** (result-list `.txt` pastes + resume PDFs/DOCX/DOC)
++into canonical **Contact-entity** profiles, matches them to target federal programs, and emits
++per-program **HUMINT call sheets**. Two ingest lanes converge on one map → dedup → match → emit
++spine. 100% local; cleared-personnel PII never leaves the machine and never enters git.
++
++Sits *after* program targeting (`outputs/booz_target_ranking/`) — it adds the **people layer**
++(actual cleared candidates to call) on top of the program/competitor intelligence already built.
++
++## Trigger phrases
++
++- "turn these ClearanceJobs resumes/pastes into contacts / call lists"
++- "build HUMINT call sheets for the Booz programs"
++- "parse the CJ result-list paste", "process the downloaded resumes"
++- "match these candidates to programs", "who can we call for <PIID>"
++- "rerun the contact pipeline", "enrich resumes with Ollama"
++
++## Files / Tools
++
++| File | Purpose | When to use |
++|---|---|---|
++| `run.py` | Orchestrator Stage 0→D. `python3 -m clearancejobs_pipeline.run [--ollama] [--skip-intake] [--config P] [--out D]` | Run the whole pipeline |
++| `intake.py` | Stage 0 — allow-list copy from Downloads → `intake/` (the ONLY Downloads-touching module) | Add/refresh source files |
++| `intake_allowlist.json` | The explicit named-file allow-list (privacy contract). `base_dir` = sole Downloads reference | Add a new resume/paste |
++| `models.py` | `RawContact` dataclass + `build_contact()` → 50-prop Contact schema | The data contract |
++| `lib/classify.py` | `tier_for()` — 6-tier title regex | tiering |
++| `lib/geo.py` | `city_key()`, `config_city_keys()`, `display_location()` | location matching |
++| `lib/companies.py` | `canonical_company()`, `company_in()` — Booz + competitor subs | employer matching |
++| `lib/cj_id.py` | `extract_cj_id()` from filename | candidate id / dedup key |
++| `lanes/paste.py` | Lane 1 — deterministic block-split + regex classify | parse a `.txt` paste |
++| `lanes/resume.py` | Lane 2 — liteparse/mammoth + deterministic + optional Ollama | parse a resume file |
++| `spine/map_contact.py` | Stage A — RawContact → Contact dict | — |
++| `spine/resolve.py` | Stage B — dedup (resume>paste) + vs-7,339 collision flag | — |
++| `spine/match_programs.py` | Stage C — company/PoP/title/clearance scoring + `program_hint` | tune match weights |
++| `spine/call_sheet.py` | Stage D — per-PIID MD+CSV + `HUMINT_SUMMARY.md` | output format |
++| `tests/` | pytest, synthetic fixtures only (no PII) | `python3 -m pytest clearancejobs_pipeline/tests/ -q` |
++
++**Outputs** (both GITIGNORED — PII): `intake/clearancejobs/contacts/<key>.json` (canonical) ·
++`outputs/booz_target_ranking/humint/<PIID>_callsheet.{md,csv}` + `HUMINT_SUMMARY.md` ·
++`intake/clearancejobs/_run_report.json`.
++
++## Decision tree
++
++- New ClearanceJobs files to add? → edit `intake_allowlist.json` (named entries only), then run.
++- Different prime/program set? → swap `--config <_contract_config.json>` + update allowlist; no code change.
++- Resume titles look noisy / want better matching? → add `--ollama` (local `llama3.2:3b`, memory-safe).
++- Ollama returns "unavailable"? → free RAM (needs ~3-4 GiB for the bounded-ctx 3B); pipeline degrades to
++  deterministic automatically (contacts flagged `needs_review`).
++- Candidate in unmatched bucket but clearly relevant? → matcher requires a BD reason (employer∈prime/subs,
++  or PoP-city+title, or program_hint). Review `HUMINT_SUMMARY.md` unmatched list.
++
++## Cross-references
++
++- Program-match basis: `outputs/booz_target_ranking/contacts/_contract_config.json`
++- Prior contact builder (search-plan generator, reused primitives): `outputs/booz_target_ranking/contacts/build_contacts.py`
++- Existing CRM for dedup (read-only): `data/dashboard/contacts_classified.json` (7,339 contacts)
++- Spec: `docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md`
++- Plan: `docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md`
++- Contact entity schema (50 props): the `entity_contact.txt` reference card
++
++## Maintenance notes
++
++- **PRIVACY (non-negotiable):** never glob/trawl `C:\Users\gtmar\Downloads`. Only `intake.py` (via the
++  allow-list) reads Downloads. `intake/` and `humint/` are gitignored — never `git add` them.
++- `C:\pg-pts` is READ-ONLY — graph sync (deferred Phase 6) must target a LOCAL graph only.
++- `lib/` primitives are copied from `build_contacts.py` (provenance noted). If you change tiering or
++  geo logic, keep both in sync (a future refactor could have `build_contacts.py` import `lib/`).
++- Paste parser handles the clean SEC-style result list well; messier pastes (left filter sidebar,
++  multi-page concatenation) are scrubbed by the `_is_junk_paste` filter in `run.py` — extend that
++  regex if new CJ-UI chrome leaks through.
++- Old binary `.doc` needs LibreOffice for liteparse; without it those degrade to filename-only
++  (`needs_review`). Only affects a couple files.
+diff --git a/clearancejobs_pipeline/__init__.py b/clearancejobs_pipeline/__init__.py
+new file mode 100644
+index 000000000..25a753abb
+--- /dev/null
++++ b/clearancejobs_pipeline/__init__.py
+@@ -0,0 +1,13 @@
++"""ClearanceJobs -> Contact entity pipeline.
++
++Two-lane local pipeline that turns downloaded ClearanceJobs result-list pastes and
++resumes into canonical Contact-entity profiles, matches them to target programs, and
++emits per-program HUMINT call sheets.
++
++Spec: docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
++Plan: docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
++
++PRIVACY: cleared-personnel PII. `intake/` and `outputs/.../humint/` are gitignored.
++Only `intake.py` ever touches a Downloads path (allow-list copy). Extraction is 100% local.
++"""
++__all__ = ["models", "lib", "lanes", "spine", "intake"]
+diff --git a/clearancejobs_pipeline/intake.py b/clearancejobs_pipeline/intake.py
+new file mode 100644
+index 000000000..cf095e625
+--- /dev/null
++++ b/clearancejobs_pipeline/intake.py
+@@ -0,0 +1,90 @@
++"""Stage 0 — allow-list intake.
++
++The ONLY module that copies files out of the Downloads area, and it does so strictly
++from the explicit named-file allow-list (`intake_allowlist.json`). It NEVER globs or
++trawls Downloads. Idempotent: a file whose destination already matches by sha256 is skipped.
++
++Run: python3 -m clearancejobs_pipeline.intake
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import shutil
++from datetime import datetime, timezone
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++REPO = os.path.dirname(HERE)
++ALLOWLIST = os.path.join(HERE, "intake_allowlist.json")
++INTAKE_ROOT = os.path.join(REPO, "intake", "clearancejobs")
++
++
++def _sha256(path: str) -> str:
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        for chunk in iter(lambda: f.read(65536), b""):
++            h.update(chunk)
++    return h.hexdigest()
++
++
++def run_intake(allowlist_path: str = ALLOWLIST, intake_root: str = INTAKE_ROOT) -> list:
++    from .lib.cj_id import extract_cj_id
++
++    spec = json.load(open(allowlist_path, encoding="utf-8"))
++    base_dir = spec["base_dir"]
++    entries = spec.get("files", [])
++
++    pastes_dir = os.path.join(intake_root, "pastes")
++    resumes_dir = os.path.join(intake_root, "resumes")
++    for d in (pastes_dir, resumes_dir, os.path.join(intake_root, "contacts")):
++        os.makedirs(d, exist_ok=True)
++
++    manifest = []
++    copied = skipped = missing = 0
++    for e in entries:
++        name = e["name"]
++        lane = e["lane"]
++        src = os.path.join(base_dir, name)
++        dest_dir = pastes_dir if lane == "paste" else resumes_dir
++        if not os.path.exists(src):
++            manifest.append({"name": name, "lane": lane, "status": "missing"})
++            missing += 1
++            continue
++        dest = os.path.join(dest_dir, name)
++        sha = _sha256(src)
++        if os.path.exists(dest) and _sha256(dest) == sha:
++            status = "skipped(identical)"
++            skipped += 1
++        else:
++            shutil.copy2(src, dest)
++            status = "copied"
++            copied += 1
++        manifest.append({
++            "name": name,
++            "dest": os.path.relpath(dest, REPO).replace("\\", "/"),
++            "lane": lane,
++            "cj_id": extract_cj_id(name),
++            "program_hint": e.get("program_hint"),
++            "sha256": sha,
++            "status": status,
++            "copied_at": datetime.now(timezone.utc).isoformat(),
++        })
++
++    json.dump(
++        {
++            "generated_at": datetime.now(timezone.utc).isoformat(),
++            "counts": {"copied": copied, "skipped": skipped, "missing": missing,
++                       "total": len(entries)},
++            "files": manifest,
++        },
++        open(os.path.join(intake_root, "_manifest.json"), "w", encoding="utf-8"),
++        indent=2,
++    )
++    print(f"intake: copied={copied} skipped={skipped} missing={missing} "
++          f"total={len(entries)} -> {intake_root}")
++    return manifest
++
++
++if __name__ == "__main__":
++    run_intake()
+diff --git a/clearancejobs_pipeline/intake_allowlist.json b/clearancejobs_pipeline/intake_allowlist.json
+new file mode 100644
+index 000000000..89095efef
+--- /dev/null
++++ b/clearancejobs_pipeline/intake_allowlist.json
+@@ -0,0 +1,53 @@
++{
++  "_doc": "EXPLICIT allow-list — the ONLY files the pipeline copies out of base_dir. This is the privacy contract (spec P1/P2): never glob/trawl Downloads. To add a person, add a named entry here. base_dir is the single Downloads reference in the whole codebase.",
++  "base_dir": "C:\\Users\\gtmar\\Downloads",
++  "files": [
++    {"name": "2. SEC IT Test & Compliance 50310220F0017 #1.txt", "lane": "paste", "program_hint": "50310220F0017"},
++    {"name": "2. SEC IT Test & Compliance 50310220F0017 #2.txt", "lane": "paste", "program_hint": "50310220F0017"},
++    {"name": "3. GSA Cyber_Incident Response 47QFRA24F0006.txt", "lane": "paste", "program_hint": "47QFRA24F0006"},
++    {"name": "Jalen Pestillo.txt", "lane": "paste"},
++    {"name": "jalen-pestillo-2032428.pdf", "lane": "resume"},
++    {"name": "brian-lathrop-2292159.pdf", "lane": "resume"},
++    {"name": "ben-ausdenmoore-1998995.docx", "lane": "resume"},
++    {"name": "m-katea-hammond-2034059.pdf", "lane": "resume"},
++    {"name": "stephen-lebb-pmp-cism-2475540.docx", "lane": "resume"},
++    {"name": "chelsey-oboyle-2520359.pdf", "lane": "resume"},
++    {"name": "terry-munson-2388707.pdf", "lane": "resume"},
++    {"name": "tony-pottakkal-2497038.pdf", "lane": "resume"},
++    {"name": "michael-romig-2332557.pdf", "lane": "resume"},
++    {"name": "karen-kraybill-2537684.docx", "lane": "resume"},
++    {"name": "siri-lerum-2009810.docx", "lane": "resume"},
++    {"name": "shawn-hough-2138163.docx", "lane": "resume"},
++    {"name": "carlos-bernard-1851028.pdf", "lane": "resume"},
++    {"name": "Charles Dunkin.pdf", "lane": "resume"},
++    {"name": "tim-cullipher-2513827.docx", "lane": "resume"},
++    {"name": "piotr-ozdzynski-2301831.pdf", "lane": "resume"},
++    {"name": "Charles Burks.pdf", "lane": "resume"},
++    {"name": "bradley-miller-2575004.pdf", "lane": "resume"},
++    {"name": "Sara Vosberg.pdf", "lane": "resume"},
++    {"name": "matthew-coburn-2183901.pdf", "lane": "resume"},
++    {"name": "anonymous19032-2466200.docx", "lane": "resume"},
++    {"name": "shane-sullivan-2603228.docx", "lane": "resume"},
++    {"name": "david-weiding-1244949.pdf", "lane": "resume"},
++    {"name": "clearancejobs.com_resumes_701487_resume.pdf", "lane": "resume"},
++    {"name": "alyssa-foland-2608203.docx", "lane": "resume"},
++    {"name": "lorraine-romleski-842320.docx", "lane": "resume"},
++    {"name": "luis-mariani-2317239.pdf", "lane": "resume"},
++    {"name": "Kenneth Polando.pdf", "lane": "resume"},
++    {"name": "terry-davis-2021550.docx", "lane": "resume"},
++    {"name": "anonymous1239799-2581233.docx", "lane": "resume"},
++    {"name": "anson-sokoloff-2247364.docx", "lane": "resume"},
++    {"name": "joel-machen-2612432.docx", "lane": "resume"},
++    {"name": "stephanie-spence-2602806.docx", "lane": "resume"},
++    {"name": "kelvin-flowers-2498049.pdf", "lane": "resume"},
++    {"name": "jerry-lester-1803431.doc", "lane": "resume"},
++    {"name": "brian-woolley-2239962.pdf", "lane": "resume"},
++    {"name": "victor-manzueta-2225974.docx", "lane": "resume"},
++    {"name": "joe-davisson-2473053.docx", "lane": "resume"},
++    {"name": "caleb-rupracht-418821.doc", "lane": "resume"},
++    {"name": "william-caplan-2521729.docx", "lane": "resume"},
++    {"name": "william-murray-2353177.docx", "lane": "resume"},
++    {"name": "anonymous1279428-2635656.docx", "lane": "resume"},
++    {"name": "garrett-aziz-2639762.pdf", "lane": "resume"}
++  ]
++}
+diff --git a/clearancejobs_pipeline/lanes/__init__.py b/clearancejobs_pipeline/lanes/__init__.py
+new file mode 100644
+index 000000000..1cb9ef5c8
+--- /dev/null
++++ b/clearancejobs_pipeline/lanes/__init__.py
+@@ -0,0 +1 @@
++"""Ingest lanes. Each lane parses raw intake files into models.RawContact records."""
+diff --git a/clearancejobs_pipeline/lanes/paste.py b/clearancejobs_pipeline/lanes/paste.py
+new file mode 100644
+index 000000000..cb63278e2
+--- /dev/null
++++ b/clearancejobs_pipeline/lanes/paste.py
+@@ -0,0 +1,341 @@
++"""ClearanceJobs result-list paste parser.
++
++Parses plain-text pastes exported from the ClearanceJobs candidate search results page.
++Each paste begins with a short header section and then a sequence of candidate blocks,
++each terminated by a lone uppercase initial letter OR the literal "user avatar".
++
++Public API
++----------
++parse_paste(path, program_hint=None)  -> list[RawContact]
++parse_paste_text(text, source_file="", program_hint=None) -> list[RawContact]
++"""
++from __future__ import annotations
++
++import re
++from typing import Optional
++
++from clearancejobs_pipeline.models import LANE_PASTE, RawContact
++from clearancejobs_pipeline.lib.companies import canonical_company
++
++# ---------------------------------------------------------------------------
++# Compiled patterns (module-level — compiled once)
++# ---------------------------------------------------------------------------
++
++# Header-sentinel: skip everything up to and including the sort-field line
++_RE_VIEWING = re.compile(r"^Viewing\s+\d", re.I)
++_RE_CANDIDATES = re.compile(r"^Candidates\s*$", re.I)
++_RE_SHOW = re.compile(r"^\d+\s+per\s+page\s*$", re.I)
++_RE_SORT_BY = re.compile(r"^Sort\s+by:\s*$", re.I)
++
++# Block terminator: a lone uppercase letter or "user avatar"
++_RE_AVATAR_TERM = re.compile(r"^user\s+avatar\s*$", re.I)
++_RE_INITIAL = re.compile(r"^[A-Z]$")
++
++# Classifier patterns
++_RE_CLEARANCE = re.compile(
++    r"TS/SCI(\s+w\s+Poly)?|Top\s+Secret|Secret|Public\s+Trust|Confidential", re.I
++)
++_RE_SENIORITY = re.compile(
++    r"^(\d+\+\s+yrs?\s+exp|Mgr/Director|Entry[- ]Level|Junior\b|Senior\b)\s*$", re.I
++)
++_RE_RELO = re.compile(r"^(Yes|No)\s+-\s+(Open\s+to\s+relo|Not\s+open\s+to\s+relo)\s*$", re.I)
++_RE_SALARY = re.compile(r"^\$[\d,]+\s*$")
++# Date-like: "Today", "Yesterday", "May 20", "Jun 19, 2025", "Mar 10", "Feb 24"
++_RE_DATE = re.compile(
++    r"^(Today|Yesterday|[A-Z][a-z]{2}\s+\d{1,2}(,\s*\d{4})?)\s*$"
++)
++# City/State: "Baltimore, MD"  "Port Huron Township, MI"
++_RE_CITY_STATE = re.compile(
++    r"^(?P<city>[A-Za-z][A-Za-z .,''\-]+),\s*(?P<state>[A-Z]{2})\s*$"
++)
++
++
++# ---------------------------------------------------------------------------
++# Header stripping
++# ---------------------------------------------------------------------------
++
++def _strip_header(lines: list[str]) -> list[str]:
++    """Remove the boilerplate header lines that precede the first candidate.
++
++    The header pattern is:
++        Viewing N - M of K
++        Candidates
++        Show:
++        N per page
++        Sort by:
++        <sort field value, e.g. "Last Login Date (Des)">
++
++    We walk forward and drop each matching line. Once we've seen the "Sort by:"
++    marker we also drop the very next line (the sort field value) then return
++    the rest. If no header markers are found the original list is returned
++    unchanged.
++    """
++    result = list(lines)
++    drop_next = False  # True after "Sort by:" line is consumed
++    out = []
++    header_done = False
++    saw_sort_by = False
++
++    for line in result:
++        stripped = line.strip()
++        if header_done:
++            out.append(line)
++            continue
++
++        if drop_next:
++            # This is the sort field value — drop it and close header
++            drop_next = False
++            header_done = True
++            continue
++
++        if _RE_VIEWING.match(stripped):
++            continue
++        if _RE_CANDIDATES.match(stripped):
++            continue
++        # "Show:" bare label — drop
++        if stripped.lower() == "show:":
++            continue
++        if _RE_SHOW.match(stripped):
++            continue
++        if _RE_SORT_BY.match(stripped):
++            saw_sort_by = True
++            drop_next = True
++            continue
++
++        # A line that doesn't match any header pattern and we haven't seen
++        # the Sort-by marker yet — treat header as absent, keep everything.
++        if not saw_sort_by:
++            return result  # no header detected; return full list unchanged
++        out.append(line)
++
++    if not header_done and not drop_next:
++        # Fell off the end without closing — return everything after removing
++        # the header lines we did match
++        return out
++    return out
++
++
++# ---------------------------------------------------------------------------
++# Block splitter
++# ---------------------------------------------------------------------------
++
++def _split_blocks(lines: list[str]) -> list[list[str]]:
++    """Split line list into candidate blocks.
++
++    A block ends when a TERMINATOR line is encountered (lone uppercase initial
++    OR "user avatar"). The terminator itself is not included in the block.
++    A trailing block (no terminator at EOF) is included.
++    """
++    blocks: list[list[str]] = []
++    current: list[str] = []
++
++    for line in lines:
++        stripped = line.strip()
++        if not stripped:
++            # blank lines inside a block are ignored
++            continue
++        if _RE_AVATAR_TERM.match(stripped) or _RE_INITIAL.match(stripped):
++            if current:
++                blocks.append(current)
++                current = []
++        else:
++            current.append(stripped)
++
++    if current:
++        blocks.append(current)
++
++    return blocks
++
++
++# ---------------------------------------------------------------------------
++# Per-block classifier
++# ---------------------------------------------------------------------------
++
++def _classify_line(line: str) -> str:
++    """Return the classifier label for a single line."""
++    if _RE_CLEARANCE.search(line):
++        return "clearance"
++    if _RE_SENIORITY.match(line):
++        return "seniority"
++    if _RE_RELO.match(line):
++        return "relo"
++    if _RE_SALARY.match(line):
++        return "salary"
++    if _RE_DATE.match(line):
++        return "date"
++    if _RE_CITY_STATE.match(line):
++        return "city_state"
++    return "text"
++
++
++def _parse_block(
++    block: list[str],
++    source_file: str,
++    program_hint: Optional[str],
++) -> Optional[RawContact]:
++    """Parse a single candidate block into a RawContact.
++
++    Returns None if the block is too short to produce a valid contact (no name).
++    Raises nothing — errors are logged by the caller; see parse_paste_text.
++    """
++    if len(block) < 1:
++        return None
++
++    name = block[0].strip()
++    if not name:
++        return None
++
++    title = block[1].strip() if len(block) > 1 else ""
++    rest = block[2:]
++
++    clearance_level = ""
++    clearances: list[str] = []
++    seniority_band = ""
++    relo: Optional[bool] = None
++    salary_expectation = ""
++    cj_last_login = ""
++    city = ""
++    state = ""
++    text_lines: list[str] = []
++
++    date_count = 0  # only first date line = cj_last_login; subsequent = profile updated
++
++    for line in rest:
++        label = _classify_line(line)
++
++        if label == "clearance":
++            # Grab the first clearance mention as clearance_level
++            m = _RE_CLEARANCE.search(line)
++            if m:
++                matched = m.group(0)
++                # Normalise partial-match fragments like "TS/SCI" (already good)
++                if not clearance_level:
++                    clearance_level = matched
++                clearances.append(matched)
++            # The whole line may also contain text; don't add to text_lines here
++            # since it might be a keyword-thumbnail line that ALSO has a clearance term —
++            # keep it as text if it's not a bare clearance-only line.
++            # Heuristic: if the line has > 6 tokens, treat it as a keyword-thumbnail
++            # too, otherwise classify as clearance-only.
++            if len(line.split()) > 4:
++                text_lines.append(line)
++
++        elif label == "seniority":
++            if not seniority_band:
++                seniority_band = line
++
++        elif label == "relo":
++            relo = line.lower().startswith("yes")
++
++        elif label == "salary":
++            if not salary_expectation:
++                salary_expectation = line.strip()
++
++        elif label == "date":
++            date_count += 1
++            if date_count == 1:
++                cj_last_login = line.strip()
++            # subsequent date lines are ignored
++
++        elif label == "city_state":
++            if not city:
++                m = _RE_CITY_STATE.match(line)
++                if m:
++                    city = m.group("city").strip()
++                    state = m.group("state").strip()
++
++        else:
++            # label == "text" — keyword/thumbnail freeform lines
++            text_lines.append(line)
++
++    keyword_thumbnail = " ".join(text_lines).strip()
++
++    # Employer canonicalization
++    company_raw = keyword_thumbnail
++    company = canonical_company(keyword_thumbnail) or ""
++
++    cj_last_login_hot = cj_last_login.lower() == "today"
++
++    return RawContact(
++        lane=LANE_PASTE,
++        source_file=source_file,
++        name=name,
++        title=title,
++        city=city,
++        state=state,
++        clearance_level=clearance_level,
++        clearances=clearances,
++        seniority_band=seniority_band,
++        relo=relo,
++        salary_expectation=salary_expectation,
++        cj_last_login=cj_last_login,
++        cj_last_login_hot=cj_last_login_hot,
++        keyword_thumbnail=keyword_thumbnail,
++        company_raw=company_raw,
++        company=company,
++        program_hint=program_hint,
++        confidence="C",
++        needs_review=True,
++    )
++
++
++# ---------------------------------------------------------------------------
++# Public API
++# ---------------------------------------------------------------------------
++
++def parse_paste_text(
++    text: str,
++    source_file: str = "",
++    program_hint: Optional[str] = None,
++) -> list[RawContact]:
++    """Parse raw paste text into a list of RawContact records.
++
++    Parameters
++    ----------
++    text:
++        Full text of a ClearanceJobs result-list paste.
++    source_file:
++        Filename/path to record in source_file field (no PII read here).
++    program_hint:
++        Optional contract PIID or program name sourced from the paste context.
++
++    Returns
++    -------
++    list[RawContact] — one per detected candidate block (empty on failure).
++    """
++    if not text or not text.strip():
++        return []
++
++    lines = text.splitlines()
++    lines = _strip_header(lines)
++    blocks = _split_blocks(lines)
++
++    contacts: list[RawContact] = []
++    for block in blocks:
++        try:
++            rc = _parse_block(block, source_file, program_hint)
++            if rc is not None:
++                contacts.append(rc)
++        except Exception:  # noqa: BLE001
++            # Malformed block: skip without crashing the whole parse
++            continue
++
++    return contacts
++
++
++def parse_paste(
++    path: str,
++    program_hint: Optional[str] = None,
++) -> list[RawContact]:
++    """Read a paste file and return parsed RawContacts.
++
++    Parameters
++    ----------
++    path:
++        Absolute or relative path to the .txt paste file.
++    program_hint:
++        Optional PIID / program hint forwarded to each RawContact.
++    """
++    with open(path, encoding="utf-8", errors="replace") as fh:
++        text = fh.read()
++    return parse_paste_text(text, source_file=path, program_hint=program_hint)
+diff --git a/clearancejobs_pipeline/lanes/resume.py b/clearancejobs_pipeline/lanes/resume.py
+new file mode 100644
+index 000000000..d0dd7e35b
+--- /dev/null
++++ b/clearancejobs_pipeline/lanes/resume.py
+@@ -0,0 +1,527 @@
++"""Resume lane — parse a resume file (PDF/DOCX/DOC) into a single RawContact.
++
++Privacy constraint: ALL parsing is 100% local. No cloud endpoints are called
++unless `use_ollama=True`, which routes to localhost:11434 only.
++
++Public API
++----------
++parse_resume(path, *, program_hint, use_ollama, ollama_model) -> RawContact
++extract_fields(text, filename) -> dict   # pure, testable without a real file
++"""
++from __future__ import annotations
++
++import json
++import os
++import re
++from typing import Optional
++
++from clearancejobs_pipeline.models import LANE_RESUME, RawContact
++from clearancejobs_pipeline.lib.cj_id import extract_cj_id, name_slug_from_filename
++from clearancejobs_pipeline.lib.companies import canonical_company, COMPANY_PATS
++
++# ---------------------------------------------------------------------------
++# Clearance hierarchy for ranking
++# ---------------------------------------------------------------------------
++_CLEARANCE_RANK = {
++    "TS/SCI w/ Poly": 5,
++    "TS/SCI w/Poly":  5,
++    "TS/SCI":         4,
++    "Top Secret":     3,
++    "Secret":         2,
++    "DoD Secret":     2,
++    "Interim Secret": 1,
++    "Public Trust":   0,
++}
++
++_CLEARANCE_RE = re.compile(
++    r"TS/SCI\s*(?:w/?[\s]?Poly|with\s+poly(?:graph)?)"
++    r"|TS/SCI"
++    r"|Top\s+Secret"
++    r"|DoD\s+Secret"
++    r"|Interim\s+Secret"
++    r"|Public\s+Trust"
++    r"|\bSecret\b",
++    re.I,
++)
++
++# Normalise matched text -> canonical label
++def _normalise_clearance(raw: str) -> str:
++    s = raw.strip()
++    if re.search(r"TS/SCI\s*(?:w/?[\s]?Poly|with\s+poly(?:graph)?)", s, re.I):
++        return "TS/SCI w/ Poly"
++    if re.search(r"TS/SCI", s, re.I):
++        return "TS/SCI"
++    if re.search(r"Top\s+Secret", s, re.I):
++        return "Top Secret"
++    if re.search(r"DoD\s+Secret", s, re.I):
++        return "DoD Secret"
++    if re.search(r"Interim\s+Secret", s, re.I):
++        return "Interim Secret"
++    if re.search(r"Public\s+Trust", s, re.I):
++        return "Public Trust"
++    if re.search(r"\bSecret\b", s, re.I):
++        return "Secret"
++    return s
++
++
++# ---------------------------------------------------------------------------
++# Local file → text
++# ---------------------------------------------------------------------------
++
++def _parse_pdf(path: str) -> tuple[str, str]:
++    """Return (text, engine_name). Tries liteparse → pdfplumber → fitz."""
++    text = ""
++
++    # 1. liteparse (preferred – Rust-based, fastest). OCR disabled: Tesseract is not
++    # installed here, so OCR would only spam stderr and add no text.
++    try:
++        from liteparse import LiteParse, ParseError
++        parser = LiteParse(quiet=True, ocr_enabled=False)
++        result = parser.parse(path)
++        text = result.text or ""
++        if text.strip():
++            return text, "liteparse"
++    except Exception:
++        pass
++
++    # 2. pdfplumber
++    try:
++        import pdfplumber
++        with pdfplumber.open(path) as pdf:
++            text = "\n".join(page.extract_text() or "" for page in pdf.pages)
++        if text.strip():
++            return text, "pdfplumber"
++    except Exception:
++        pass
++
++    # 3. fitz / PyMuPDF
++    try:
++        import fitz
++        doc = fitz.open(path)
++        text = "\n".join(page.get_text() for page in doc)
++        if text.strip():
++            return text, "fitz"
++    except Exception:
++        pass
++
++    return "", "none"
++
++
++def _parse_docx(path: str) -> tuple[str, str]:
++    """Return (text, engine_name). Tries mammoth → python-docx."""
++    # 1. mammoth
++    try:
++        import mammoth
++        with open(path, "rb") as fh:
++            result = mammoth.extract_raw_text(fh)
++        text = result.value or ""
++        if text.strip():
++            return text, "mammoth"
++    except Exception:
++        pass
++
++    # 2. python-docx
++    try:
++        import docx
++        doc = docx.Document(path)
++        text = "\n".join(p.text for p in doc.paragraphs)
++        if text.strip():
++            return text, "python-docx"
++    except Exception:
++        pass
++
++    return "", "none"
++
++
++def _parse_doc(path: str) -> tuple[str, str]:
++    """Return (text, engine_name) for old binary .doc files.
++
++    Tries liteparse (needs LibreOffice) only; on failure returns empty string
++    so the caller can build a minimal RawContact from the filename.
++    """
++    try:
++        from liteparse import LiteParse
++        parser = LiteParse(quiet=True, ocr_enabled=False)
++        result = parser.parse(path)
++        text = result.text or ""
++        if text.strip():
++            return text, "liteparse"
++    except Exception:
++        pass
++
++    return "", "unsupported"
++
++
++def _extract_text(path: str) -> tuple[str, str, str]:
++    """Return (text, engine, ext). Never raises — bad files return empty text."""
++    ext = os.path.splitext(path)[1].lower()
++    try:
++        if ext == ".pdf":
++            text, engine = _parse_pdf(path)
++        elif ext == ".docx":
++            text, engine = _parse_docx(path)
++        elif ext == ".doc":
++            text, engine = _parse_doc(path)
++        else:
++            # Unsupported extension — try PDF stack then docx stack
++            text, engine = _parse_pdf(path)
++            if not text.strip():
++                text, engine = _parse_docx(path)
++    except Exception:
++        text, engine = "", "error"
++    return text, engine, ext
++
++
++# ---------------------------------------------------------------------------
++# Deterministic field extraction (pure — testable on a string)
++# ---------------------------------------------------------------------------
++
++_EMAIL_RE = re.compile(r"[\w.+\-]+@[\w\-]+\.[\w.\-]+")
++_PHONE_RE = re.compile(
++    r"(?:\+?1[\s.\-]?)?"
++    r"(?:\(?\d{3}\)?[\s.\-]?)?"
++    r"\d{3}[\s.\-]\d{4}"
++)
++_LINKEDIN_RE = re.compile(
++    r"https?://(?:www\.)?linkedin\.com/in/[\w%\-/]+",
++    re.I,
++)
++_CITY_STATE_RE = re.compile(
++    r"\b([A-Z][A-Za-z .'\-]{1,30}),\s*([A-Z]{2})\b"
++)
++_SKILLS_SECTION_RE = re.compile(
++    r"(?:Technical\s+Skills?|Skills?|Core\s+Competencies|Expertise)"
++    r"\s*[:\n]+\s*([^\n]{10,}(?:\n[^\n]{5,}){0,8})",
++    re.I,
++)
++
++
++_NAME_STOPWORDS = frozenset({
++    "engineer", "engineer", "engineering", "developer", "analyst", "manager",
++    "director", "senior", "junior", "lead", "principal", "staff", "associate",
++    "specialist", "scientist", "architect", "consultant", "advisor", "contractor",
++    "professional", "coordinator", "technician", "administrator", "officer",
++    "software", "systems", "system", "network", "cyber", "security", "cloud",
++    "data", "information", "technical", "technology", "program", "project",
++    "experience", "summary", "objective", "education", "skills", "history",
++    "work", "employment", "profile", "overview", "qualifications",
++})
++
++
++def _best_name_from_text(text: str) -> str:
++    """Look for a capitalised 2-3 word person name in the first ~10 non-empty lines.
++
++    Rejects lines that contain job-title stopwords (e.g. 'Lead Software Engineer').
++    Only matches lines that look like personal names: capitalised words, no digits,
++    no slashes, no special chars.
++    """
++    lines = [l.strip() for l in text.splitlines() if l.strip()]
++    # Two or three capitalised words on a line by itself
++    name_re = re.compile(r"^([A-Z][a-z]+(?:\s+[A-Z]\.?)?\s+[A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)$")
++    for line in lines[:10]:
++        m = name_re.match(line)
++        if not m:
++            continue
++        # Reject if any word is a known title/role stopword
++        words_lower = set(line.lower().split())
++        if words_lower & _NAME_STOPWORDS:
++            continue
++        # Reject lines with digits or special chars beyond hyphens
++        if re.search(r"[0-9/\\@#$%^&*()+=\[\]{}<>]", line):
++            continue
++        return m.group(1)
++    return ""
++
++
++def extract_fields(text: str, filename: str) -> dict:
++    """Pure extraction from resume text + filename. No file I/O.
++
++    Returns a dict with keys matching RawContact fields. The caller assembles
++    the RawContact so unit tests can work on plain strings.
++    """
++    result: dict = {}
++
++    # --- identity from filename (reliable even for anonymised resumes) ---
++    cj_id = extract_cj_id(filename)
++    slug = name_slug_from_filename(filename)
++    # title-case slug parts as a fallback name
++    slug_name = " ".join(p.capitalize() for p in slug.split("-") if p and not p.isdigit())
++    slug_name = slug_name.strip()
++
++    # prefer explicit name from top of resume if not anonymised
++    doc_name = _best_name_from_text(text)
++    # suppress anonymous/generic slugs
++    if slug.startswith("anonymous") or not slug or slug in ("resume",):
++        name = doc_name or ""
++    else:
++        name = slug_name if slug_name else doc_name
++
++    result["cj_id"] = cj_id
++    result["name"] = name
++
++    # --- contact info ---
++    email_m = _EMAIL_RE.search(text)
++    result["email"] = email_m.group(0) if email_m else ""
++
++    phone_m = _PHONE_RE.search(text)
++    result["phone"] = phone_m.group(0).strip() if phone_m else ""
++
++    li_m = _LINKEDIN_RE.search(text)
++    result["linkedin_url"] = li_m.group(0).strip("/") if li_m else ""
++
++    # --- location (look for City, ST near top first, else anywhere) ---
++    city, state = "", ""
++    top_text = "\n".join(text.splitlines()[:30])
++    cs_m = _CITY_STATE_RE.search(top_text)
++    if not cs_m:
++        cs_m = _CITY_STATE_RE.search(text)
++    if cs_m:
++        city = cs_m.group(1).strip()
++        state = cs_m.group(2).strip()
++    result["city"] = city
++    result["state"] = state
++
++    # --- clearances ---
++    found_clearances = []
++    for m in _CLEARANCE_RE.finditer(text):
++        label = _normalise_clearance(m.group(0))
++        if label not in found_clearances:
++            found_clearances.append(label)
++
++    # pick highest ranked
++    clearance_level = ""
++    if found_clearances:
++        clearance_level = max(found_clearances, key=lambda c: _CLEARANCE_RANK.get(c, -1))
++
++    result["clearances"] = found_clearances
++    result["clearance_level"] = clearance_level
++
++    # --- employer / company ---
++    # Try canonical match across full text
++    canon = canonical_company(text)
++    # Also scan for all canonical hits to build prior_companies list
++    all_canon: list[str] = []
++    for cname in COMPANY_PATS:
++        pat = COMPANY_PATS[cname]
++        if pat.search(text):
++            all_canon.append(cname)
++
++    # Best raw employer from experience section (look for first job-header line)
++    # Pattern: lines like "Title – Company" or "Title, Company" or just "Company" near experience header
++    employer_raw = ""
++    exp_re = re.compile(
++        r"(?:experience|work\s+history|employment)",
++        re.I,
++    )
++    exp_m = exp_re.search(text)
++    if exp_m:
++        window = text[exp_m.end(): exp_m.end() + 800]
++        # Look for a line that looks like employer/title
++        for line in window.splitlines():
++            line = line.strip()
++            if len(line) > 5 and not re.match(r"^\d", line):
++                # skip bullet lines
++                if not line.startswith(("•", "-", "–", "*", "◆", "▸")):
++                    employer_raw = line
++                    break
++
++    company = canon if canon else ""
++    company_raw = employer_raw or canon or ""
++
++    # prior companies = all canonical hits except the primary
++    prior = [c for c in all_canon if c != canon]
++    if canon and canon not in all_canon:
++        pass  # canon came from general scan
++
++    result["company"] = company
++    result["company_raw"] = company_raw
++    result["prior_companies"] = prior
++
++    # --- skills (light keyword pull from Skills section) ---
++    skills: list[str] = []
++    sm = _SKILLS_SECTION_RE.search(text)
++    if sm:
++        raw_skills = sm.group(1)
++        # Split on commas, bullets, semicolons, newlines
++        items = re.split(r"[,\n;•\|]+", raw_skills)
++        for item in items:
++            s = item.strip().strip("-–•*▸◆").strip()
++            if 2 < len(s) < 50 and not re.match(r"^\d+$", s):
++                skills.append(s)
++                if len(skills) >= 20:
++                    break
++    result["skills"] = skills
++
++    # --- title (look for title/role near the top or in first experience entry) ---
++    title = ""
++    # first experience line after date pattern often contains Title – Company
++    title_re = re.compile(
++        r"(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*\d{4}"
++        r"|\d{4})\s*[-–]\s*(?:(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)[a-z]*\.?\s*\d{4}"
++        r"|present|current|now)",
++        re.I,
++    )
++    date_m = title_re.search(text)
++    if date_m:
++        # look at the line before/after the date for role
++        before_date = text[max(0, date_m.start() - 200): date_m.start()]
++        lines_before = [l.strip() for l in before_date.splitlines() if l.strip()]
++        if lines_before:
++            candidate = lines_before[-1]
++            if len(candidate) < 80 and not re.match(r"^\d", candidate):
++                title = candidate
++
++    result["title"] = title
++
++    # --- confidence ---
++    has_email = bool(result["email"])
++    has_phone_or_li = bool(result["phone"]) or bool(result["linkedin_url"])
++    has_company = bool(result["company"] or result["company_raw"])
++    confidence = "A" if (has_email and has_phone_or_li and has_company) else "B"
++    result["confidence"] = confidence
++    result["needs_review"] = (confidence != "A")
++
++    return result
++
++
++# ---------------------------------------------------------------------------
++# Optional Ollama enrichment
++# ---------------------------------------------------------------------------
++
++def _enrich_ollama(text: str, fields: dict, model: str) -> dict:
++    """Call local Ollama and merge results. Graceful degrade on any failure."""
++    import requests  # stdlib-like, safe
++
++    prompt = (
++        "You are a resume parser. Extract ONLY these fields from the resume text below.\n"
++        "Return STRICT JSON only (no markdown, no explanation):\n"
++        '{"normalized_title": "<job title>", "role_family": "<e.g. Software Engineer>", '
++        '"skills": ["<skill1>", ...], "summary": "<one sentence summary>"}\n\n'
++        f"RESUME TEXT (first 3500 chars):\n{text[:3500]}"
++    )
++
++    try:
++        resp = requests.post(
++            "http://127.0.0.1:11434/api/generate",
++            # Bounded num_ctx keeps the memory estimate small (the default 128k context
++            # is what makes Ollama demand 11-16 GiB). 2048 fits a ~3.5k-char resume + output.
++            json={"model": model, "prompt": prompt, "stream": False,
++                  "options": {"num_ctx": 2048, "num_predict": 400, "temperature": 0}},
++            timeout=180,
++        )
++        resp.raise_for_status()
++        raw = resp.json().get("response", "")
++        # Extract JSON block (model may wrap in text)
++        json_m = re.search(r"\{.*\}", raw, re.DOTALL)
++        if not json_m:
++            raise ValueError("no JSON in ollama response")
++        parsed = json.loads(json_m.group(0))
++    except Exception:
++        fields["extra"] = {**fields.get("extra", {}), "ollama": "unavailable"}
++        return fields
++
++    # Prefer the LLM-normalized title over the regex heuristic (which often grabs a noisy
++    # date-adjacent line); fall back to the deterministic title only when the LLM gave nothing.
++    if parsed.get("normalized_title"):
++        fields["title"] = parsed["normalized_title"]
++
++    # Extend skills (deduplicated)
++    existing_skills = list(fields.get("skills", []))
++    for s in parsed.get("skills", []):
++        if s and s not in existing_skills:
++            existing_skills.append(s)
++    fields["skills"] = existing_skills[:30]
++
++    # Summary → extra["pain_points"]
++    summary = parsed.get("summary", "").strip()
++    if summary:
++        extra = fields.get("extra", {})
++        extra["pain_points"] = [summary]
++        fields["extra"] = extra
++
++    return fields
++
++
++# ---------------------------------------------------------------------------
++# Public entry-point
++# ---------------------------------------------------------------------------
++
++def parse_resume(
++    path: str,
++    *,
++    program_hint: Optional[str] = None,
++    use_ollama: bool = False,
++    ollama_model: str = "llama3.2:3b",
++) -> RawContact:
++    """Parse a resume file into a RawContact.
++
++    Parameters
++    ----------
++    path : str
++        Absolute or relative path to a PDF / DOCX / DOC file.
++    program_hint : str | None
++        Optional PIID / program the resume was sourced under.
++    use_ollama : bool
++        Whether to call local Ollama for LLM enrichment (title, skills, summary).
++    ollama_model : str
++        Ollama model tag (default: llama3.1:8b).
++    """
++    filename = os.path.basename(path)
++
++    # 1. Parse file to text
++    text, parse_engine, ext = _extract_text(path)
++
++    # Build base extra dict
++    extra: dict = {"parse_engine": parse_engine}
++
++    # DOC files that failed to parse → minimal RawContact from filename
++    if ext == ".doc" and not text.strip():
++        extra["parse_status"] = "doc_unsupported"
++        cj_id = extract_cj_id(filename)
++        slug = name_slug_from_filename(filename)
++        name = " ".join(p.capitalize() for p in slug.split("-") if p and not p.isdigit()).strip()
++        return RawContact(
++            lane=LANE_RESUME,
++            source_file=path,
++            cj_id=cj_id,
++            name=name,
++            program_hint=program_hint,
++            confidence="C",
++            needs_review=True,
++            extra=extra,
++        )
++
++    # 2. Deterministic extraction
++    fields = extract_fields(text, filename)
++    fields.setdefault("extra", {})
++    fields["extra"].update(extra)
++
++    # 3. Optional Ollama enrichment
++    if use_ollama and text.strip():
++        fields = _enrich_ollama(text, fields, ollama_model)
++
++    # 4. Assemble RawContact
++    name = fields.get("name", "")
++    rc = RawContact(
++        lane=LANE_RESUME,
++        source_file=path,
++        cj_id=fields.get("cj_id"),
++        name=name,
++        title=fields.get("title", ""),
++        company=fields.get("company", ""),
++        company_raw=fields.get("company_raw", ""),
++        city=fields.get("city", ""),
++        state=fields.get("state", ""),
++        clearance_level=fields.get("clearance_level", ""),
++        clearances=fields.get("clearances", []),
++        email=fields.get("email", ""),
++        phone=fields.get("phone", ""),
++        linkedin_url=fields.get("linkedin_url", ""),
++        prior_companies=fields.get("prior_companies", []),
++        skills=fields.get("skills", []),
++        program_hint=program_hint,
++        confidence=fields.get("confidence", "C"),
++        needs_review=fields.get("needs_review", True),
++        extra=fields.get("extra", {}),
++    )
++    return rc
+diff --git a/clearancejobs_pipeline/lib/__init__.py b/clearancejobs_pipeline/lib/__init__.py
+new file mode 100644
+index 000000000..0ab39aa06
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/__init__.py
+@@ -0,0 +1,5 @@
++"""Reusable primitives (provenance: outputs/booz_target_ranking/contacts/build_contacts.py).
++
++These are the single source of truth for tier classification, location normalization,
++company canonicalization, and CJ-id extraction used across the pipeline.
++"""
+diff --git a/clearancejobs_pipeline/lib/cj_id.py b/clearancejobs_pipeline/lib/cj_id.py
+new file mode 100644
+index 000000000..4acdf526d
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/cj_id.py
+@@ -0,0 +1,40 @@
++"""Extract the ClearanceJobs candidate ID (and a name slug) from a resume filename.
++
++Observed filename shapes:
++  jalen-pestillo-2032428.pdf                 -> 2032428
++  clearancejobs.com_resumes_701487_resume.pdf-> 701487
++  anonymous19032-2466200.docx                -> 2466200
++  anonymous1239799-2581233.docx              -> 2581233
++  Charles Dunkin.pdf                         -> None (name-only)
++"""
++from __future__ import annotations
++
++import os
++import re
++
++_RESUMES = re.compile(r"_resumes_(\d{4,})_", re.I)
++_TRAILING = re.compile(r"-(\d{4,})(?:\.[A-Za-z0-9]+)?$")
++
++
++def extract_cj_id(filename: str) -> str | None:
++    """Return the CJ candidate id string, or None when the filename has none."""
++    base = os.path.basename(filename or "")
++    stem = os.path.splitext(base)[0]
++    m = _RESUMES.search(base)
++    if m:
++        return m.group(1)
++    m = _TRAILING.search(stem)
++    if m:
++        return m.group(1)
++    return None
++
++
++def name_slug_from_filename(filename: str) -> str:
++    """Best-effort person slug from filename (fallback dedup key when no CJ id)."""
++    base = os.path.basename(filename or "")
++    stem = os.path.splitext(base)[0]
++    stem = re.sub(r"clearancejobs\.com_resumes_\d+_?", "", stem, flags=re.I)
++    stem = re.sub(r"_?resume$", "", stem, flags=re.I)
++    stem = re.sub(r"-?\d{4,}$", "", stem)          # drop trailing CJ id
++    stem = re.sub(r"^anonymous\d*", "anonymous", stem, flags=re.I)
++    return re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
+diff --git a/clearancejobs_pipeline/lib/classify.py b/clearancejobs_pipeline/lib/classify.py
+new file mode 100644
+index 000000000..a448f18f8
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/classify.py
+@@ -0,0 +1,25 @@
++"""6-tier BD contact classification by job title.
++
++Provenance: bd-contact-classification skill / build_contacts.py TIER_PATTERNS.
++Tier 1 = decision makers ... Tier 6 = general network.
++"""
++from __future__ import annotations
++
++import re
++
++TIER_PATTERNS = [
++    (1, re.compile(r"(CEO|CTO|CFO|CIO|\bVP\b|Vice President|President|Director|Partner|Managing|Principal|Chief|Head of)", re.I)),
++    (2, re.compile(r"(Architect|Senior Engineer|Principal Engineer|Fellow|Lead Engineer|Tech Lead|Staff Engineer)", re.I)),
++    (3, re.compile(r"(Program Manager|Project Manager|\bPMO\b|\bCOR\b|\bGTL\b|COTR|Contracting Officer|Capture|Scrum Master|Product Owner)", re.I)),
++    (4, re.compile(r"(Speaker|Board|Chair|Advisory|Former|Retired|Liaison|Small Business)", re.I)),
++    (5, re.compile(r"(Analyst|Consultant|Advisor|Research|Journalist)", re.I)),
++]
++
++
++def tier_for(title: str) -> int:
++    """Return BD tier 1-6 for a job title (6 = no pattern matched)."""
++    t = title or ""
++    for tier, pat in TIER_PATTERNS:
++        if pat.search(t):
++            return tier
++    return 6
+diff --git a/clearancejobs_pipeline/lib/companies.py b/clearancejobs_pipeline/lib/companies.py
+new file mode 100644
+index 000000000..c18c99a15
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/companies.py
+@@ -0,0 +1,48 @@
++"""Company canonicalization for the recruit-from competitor set.
++
++Provenance: build_contacts.py COMPANY_PATS. `canonical_company` maps a free-text
++employer blob (e.g. a ClearanceJobs keyword-thumbnail line like 'INSIGHT GLOBAL, LLC')
++to a canonical company name, or None if no known competitor/prime matched.
++
++These are the BD-relevant companies (Booz Allen prime + its staffing competitor subs).
++For a generic employer not in this set, callers keep the raw string.
++"""
++from __future__ import annotations
++
++import re
++
++COMPANY_PATS = {
++    "Booz Allen Hamilton": re.compile(r"booz\s*allen|@bah\.com|\bbah\b", re.I),
++    "Take2": re.compile(r"take\s*2\b|take2consulting", re.I),
++    "ECS Federal": re.compile(r"\becs federal\b|@ecstech|ecstech\.com", re.I),
++    "Insight Global": re.compile(r"insight\s*global|insightglobal", re.I),
++    "Kforce": re.compile(r"\bkforce\b", re.I),
++    "Beacon Hill": re.compile(r"beacon\s*hill", re.I),
++}
++
++
++def canonical_company(text: str) -> str | None:
++    """First canonical company whose pattern hits `text`, else None."""
++    blob = text or ""
++    for name, pat in COMPANY_PATS.items():
++        if pat.search(blob):
++            return name
++    return None
++
++
++def company_in(text: str, wanted: list[str]) -> str | None:
++    """Return the first company in `wanted` whose pattern hits `text`, else None.
++
++    `wanted` are canonical names (e.g. from _contract_config.json prime + competitor_subs).
++    Falls back to a loose token match for wanted names not in COMPANY_PATS.
++    """
++    blob = text or ""
++    for name in wanted or []:
++        pat = COMPANY_PATS.get(name)
++        if pat and pat.search(blob):
++            return name
++        # loose fallback for companies not in the curated pattern set
++        tok = re.sub(r"[^a-z0-9]+", r"\\s*", name.lower()).strip()
++        if tok and re.search(tok, blob, re.I):
++            return name
++    return None
+diff --git a/clearancejobs_pipeline/lib/geo.py b/clearancejobs_pipeline/lib/geo.py
+new file mode 100644
+index 000000000..9835a9530
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/geo.py
+@@ -0,0 +1,61 @@
++"""Location normalization.
++
++Provenance: build_contacts.py (ABBR2FULL, city_key, config_city_keys).
++`city_key` collapses 'McLean'/'Mc Lean' + state -> 'mclean|virginia' and folds the
++Washington D.C. variants so PoP-city comparisons are robust.
++"""
++from __future__ import annotations
++
++import re
++
++ABBR2FULL = {
++    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
++    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
++    "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
++    "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
++    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
++    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
++    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska",
++    "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
++    "NM": "New Mexico", "NY": "New York", "NC": "North Carolina",
++    "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon",
++    "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
++    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
++    "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
++    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
++    "DC": "District of Columbia", "PR": "Puerto Rico",
++}
++FULL2ABBR = {v.lower(): k for k, v in ABBR2FULL.items()}
++
++
++def city_key(city: str, state: str) -> str:
++    """Normalize (city, state) -> 'city|state' comparable key. DC variants folded."""
++    c = re.sub(r"[^a-z]", "", (city or "").lower())
++    c = re.sub(r"(districtofcolumbia|dc)$", "", c)
++    s = (state or "").strip()
++    if len(s) == 2 and s.upper() in ABBR2FULL:
++        s = ABBR2FULL[s.upper()]
++    s = re.sub(r"[^a-z]", "", s.lower())
++    return f"{c}|{s}"
++
++
++def config_city_keys(pop_cities: list[str]) -> set[str]:
++    """Program PoP-city strings ('City, State') -> set of comparable city_keys."""
++    keys = set()
++    for pc in pop_cities or []:
++        parts = [p.strip() for p in pc.split(",")]
++        city = parts[0] if parts else ""
++        state = parts[-1] if len(parts) > 1 else ""
++        keys.add(city_key(city, state))
++    return keys
++
++
++def display_location(city: str, state: str) -> str:
++    """'City, ST' display form (empty string if no city)."""
++    city = (city or "").strip()
++    state = (state or "").strip()
++    if not city and not state:
++        return ""
++    if state and len(state) > 2:
++        state = FULL2ABBR.get(state.lower(), state)
++    return f"{city}, {state}".strip(", ").strip()
+diff --git a/clearancejobs_pipeline/models.py b/clearancejobs_pipeline/models.py
+new file mode 100644
+index 000000000..e01768126
+--- /dev/null
++++ b/clearancejobs_pipeline/models.py
+@@ -0,0 +1,177 @@
++"""Shared data contracts.
++
++`RawContact` is the lane-agnostic intermediate every lane (paste/resume) emits.
++`build_contact()` maps a RawContact onto the canonical 50-prop Contact schema
++(see spec 6.4). programs/primes/composite_score/score_breakdown are filled later by
++spine.match_programs; tier is filled here from the title.
++"""
++from __future__ import annotations
++
++import re
++from dataclasses import dataclass, field
++from datetime import datetime, timezone
++from typing import Optional
++
++LANE_PASTE = "paste"
++LANE_RESUME = "resume"
++
++
++def utcnow_iso() -> str:
++    return datetime.now(timezone.utc).isoformat()
++
++
++def slug(name: str) -> str:
++    return re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-")
++
++
++def split_name(full: str) -> tuple[str, str]:
++    parts = [p for p in re.split(r"\s+", (full or "").strip()) if p]
++    if not parts:
++        return "", ""
++    if len(parts) == 1:
++        return parts[0], ""
++    return parts[0], parts[-1]
++
++
++@dataclass
++class RawContact:
++    """Lane-agnostic intermediate. Lanes return List[RawContact]."""
++    lane: str
++    source_file: str
++    cj_id: Optional[str] = None
++    name: str = ""
++    first_name: str = ""
++    last_name: str = ""
++    title: str = ""
++    company: str = ""            # canonical current employer (if matched)
++    company_raw: str = ""        # raw employer string as observed
++    city: str = ""
++    state: str = ""
++    clearance_level: str = ""
++    clearances: list = field(default_factory=list)
++    email: str = ""
++    phone: str = ""
++    linkedin_url: str = ""
++    relo: Optional[bool] = None
++    salary_expectation: str = ""
++    seniority_band: str = ""
++    cj_last_login: str = ""
++    cj_last_login_hot: bool = False
++    keyword_thumbnail: str = ""
++    prior_companies: list = field(default_factory=list)
++    skills: list = field(default_factory=list)
++    program_hint: Optional[str] = None   # PIID the paste/resume was sourced under
++    confidence: str = "C"                # A/B/C
++    needs_review: bool = True
++    extra: dict = field(default_factory=dict)
++
++    def __post_init__(self):
++        if not self.name and (self.first_name or self.last_name):
++            self.name = f"{self.first_name} {self.last_name}".strip()
++        if self.name and not (self.first_name or self.last_name):
++            self.first_name, self.last_name = split_name(self.name)
++
++    def local_key(self) -> str:
++        """Primary dedup key: cj_id when present, else name+location."""
++        from .lib.geo import city_key
++        if self.cj_id:
++            return f"cj:{self.cj_id}"
++        return f"nk:{slug(self.name)}|{city_key(self.city, self.state)}"
++
++
++# canonical 50-prop key order (mirrors entity_contact.txt)
++CONTACT_KEYS = [
++    "id", "bullhorn_candidate_id", "first_name", "last_name", "name", "email", "phone",
++    "mobile", "title", "occupation", "company", "company_name", "status", "address",
++    "city", "state", "zip_code", "location", "clearance_level", "clearances",
++    "linkedin_url", "owner", "tier", "tier_confidence", "programs", "primes",
++    "pain_points", "date_added", "date_modified", "last_activity_date", "note_count",
++    "interaction_history", "outreach_recommendation", "best_channel", "authors",
++    "inferred_locations", "location_confidence", "sources", "source_metadata",
++    "source_provenance", "composite_score", "score_breakdown", "raw_relevance_score",
++    "needs_review", "custom_text1", "custom_text2", "custom_text3", "source_file",
++    "created_at", "updated_at",
++]
++
++
++def build_contact(raw: RawContact, contact_id: Optional[int] = None) -> dict:
++    """Map a RawContact onto the canonical Contact dict (50 schema props + _local_key)."""
++    from .lib.classify import tier_for
++    from .lib.geo import display_location
++
++    first = raw.first_name or split_name(raw.name)[0]
++    last = raw.last_name or split_name(raw.name)[1]
++    now = utcnow_iso()
++    loc = display_location(raw.city, raw.state)
++    src = "ClearanceJobs paste" if raw.lane == LANE_PASTE else "ClearanceJobs resume"
++    clearances = raw.clearances or ([raw.clearance_level] if raw.clearance_level else [])
++    best_channel = "LinkedIn" if raw.linkedin_url else ("Email" if raw.email else "Phone")
++
++    c = {
++        "id": contact_id,
++        "bullhorn_candidate_id": None,
++        "first_name": first,
++        "last_name": last,
++        "name": raw.name or f"{first} {last}".strip(),
++        "email": raw.email or None,
++        "phone": raw.phone or None,
++        "mobile": None,
++        "title": raw.title or None,
++        "occupation": None,
++        "company": raw.company or None,          # canonical only — raw blob stays in source_metadata
++        "company_name": raw.company or None,
++        "status": "new",
++        "address": None,
++        "city": raw.city or None,
++        "state": raw.state or None,
++        "zip_code": None,
++        "location": loc or None,
++        "clearance_level": raw.clearance_level or None,
++        "clearances": clearances,
++        "linkedin_url": raw.linkedin_url or None,
++        "owner": None,
++        "tier": tier_for(raw.title),
++        "tier_confidence": raw.confidence,
++        "programs": [],
++        "primes": [],
++        "pain_points": list(raw.extra.get("pain_points", [])),
++        "date_added": now,
++        "date_modified": now,
++        "last_activity_date": None,
++        "note_count": 0,
++        "interaction_history": "",
++        "outreach_recommendation": "",
++        "best_channel": best_channel,
++        "authors": [],
++        "inferred_locations": [loc] if loc else [],
++        "location_confidence": "C" if raw.lane == LANE_PASTE else raw.confidence,
++        "sources": [src],
++        "source_metadata": {
++            "cj_id": raw.cj_id,
++            "cj_last_login": raw.cj_last_login,
++            "cj_last_login_hot": raw.cj_last_login_hot,
++            "salary_expectation": raw.salary_expectation,
++            "seniority_band": raw.seniority_band,
++            "relo": raw.relo,
++            "keyword_thumbnail": raw.keyword_thumbnail,
++            "skills": list(raw.skills),
++            "prior_companies": list(raw.prior_companies),
++            "company_raw": raw.company_raw or None,
++            "program_hint": raw.program_hint,
++            "lane": raw.lane,
++            **dict(raw.extra.get("source_metadata", {})),
++        },
++        "source_provenance": {src: raw.source_file},
++        "composite_score": None,
++        "score_breakdown": {},
++        "raw_relevance_score": None,
++        "needs_review": raw.needs_review,
++        "custom_text1": None,
++        "custom_text2": None,
++        "custom_text3": None,
++        "source_file": raw.source_file,
++        "created_at": now,
++        "updated_at": now,
++        "_local_key": raw.local_key(),
++    }
++    return c
+diff --git a/clearancejobs_pipeline/run.py b/clearancejobs_pipeline/run.py
+new file mode 100644
+index 000000000..4f8a46ac5
+--- /dev/null
++++ b/clearancejobs_pipeline/run.py
+@@ -0,0 +1,131 @@
++"""Orchestrate Stage 0 -> D.
++
++  python3 -m clearancejobs_pipeline.run                 # deterministic (default, fast)
++  python3 -m clearancejobs_pipeline.run --ollama        # + local Ollama resume enrichment
++  python3 -m clearancejobs_pipeline.run --skip-intake   # reuse already-copied intake/
++  python3 -m clearancejobs_pipeline.run --config <path> --out <dir>   # reuse for another prime
++
++Writes canonical per-contact JSON to intake/clearancejobs/contacts/ (gitignored) and
++per-program call sheets to --out (gitignored). A run report lands at
++intake/clearancejobs/_run_report.json.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import os
++import re
++from datetime import datetime, timezone
++
++# CJ result-list chrome that can leak into a block when a paste concatenates multiple
++# result pages or includes the left filter sidebar (pagination headers, "Boolean search",
++# clearance-filter labels, etc.). Checked against both the parsed name AND title.
++_JUNK_RE = re.compile(
++    r"viewing\s+\d+\s*-|\bshow:|sort by|^\s*candidates\s*$|\d+\s+per page"
++    r"|boolean search|last login date",
++    re.I,
++)
++
++
++def _is_junk_paste(rc) -> bool:
++    if not rc.name:
++        return True
++    return bool(_JUNK_RE.search(rc.name) or _JUNK_RE.search(rc.title or ""))
++
++from .intake import INTAKE_ROOT, REPO, run_intake
++from .spine.call_sheet import write_call_sheets
++from .spine.map_contact import map_contacts
++from .spine.match_programs import DEFAULT_CONFIG, load_config, match_all
++from .spine.resolve import dedupe, flag_against_existing
++
++
++def _collect_raws(manifest: list, use_ollama: bool):
++    from .lanes.paste import parse_paste
++    from .lanes.resume import parse_resume
++
++    raws = []
++    errors = []
++    for m in manifest:
++        if m.get("status") == "missing":
++            continue
++        dest = os.path.join(REPO, m["dest"])
++        lane = m.get("lane")
++        hint = m.get("program_hint")
++        try:
++            if lane == "paste":
++                for rc in (parse_paste(dest, program_hint=hint) or []):
++                    if not _is_junk_paste(rc):
++                        raws.append(rc)
++            else:
++                rc = parse_resume(dest, program_hint=hint, use_ollama=use_ollama)
++                if rc:
++                    raws.append(rc)
++        except Exception as e:  # per-file isolation — never abort the batch
++            errors.append({"file": m.get("name"), "lane": lane, "error": repr(e)})
++    return raws, errors
++
++
++def run_pipeline(use_ollama=False, config_path=DEFAULT_CONFIG,
++                 out_dir=None, skip_intake=False, existing_check=True):
++    out_dir = out_dir or os.path.join(REPO, "outputs", "booz_target_ranking", "humint")
++    if not skip_intake:
++        run_intake()
++    manifest = json.load(open(os.path.join(INTAKE_ROOT, "_manifest.json"), encoding="utf-8"))["files"]
++
++    raws, errors = _collect_raws(manifest, use_ollama)
++    contacts = map_contacts(raws)
++    contacts = dedupe(contacts)
++    if existing_check:
++        contacts = flag_against_existing(contacts)
++    cfg = load_config(config_path)
++    contacts = match_all(contacts, cfg)
++
++    cdir = os.path.join(INTAKE_ROOT, "contacts")
++    os.makedirs(cdir, exist_ok=True)
++    for c in contacts:
++        key = (c.get("_local_key") or "unknown").replace(":", "_").replace("|", "_").replace("/", "_")
++        with open(os.path.join(cdir, f"{key}.json"), "w", encoding="utf-8") as fh:
++            json.dump(c, fh, indent=2, ensure_ascii=False)
++
++    paths = write_call_sheets(contacts, cfg, out_dir)
++
++    report = {
++        "generated_at": datetime.now(timezone.utc).isoformat(),
++        "n_raw": len(raws),
++        "n_contacts": len(contacts),
++        "n_matched": sum(1 for c in contacts if c.get("programs")),
++        "n_hot": sum(1 for c in contacts if (c.get("source_metadata") or {}).get("cj_last_login_hot")),
++        "ollama": use_ollama,
++        "errors": errors,
++        "call_sheets": [os.path.relpath(p, REPO).replace("\\", "/") for p in paths],
++    }
++    with open(os.path.join(INTAKE_ROOT, "_run_report.json"), "w", encoding="utf-8") as fh:
++        json.dump(report, fh, indent=2)
++    return report
++
++
++def main():
++    ap = argparse.ArgumentParser(description="ClearanceJobs -> Contact -> call sheets")
++    ap.add_argument("--ollama", action="store_true", help="enable local Ollama resume enrichment")
++    ap.add_argument("--config", default=DEFAULT_CONFIG)
++    ap.add_argument("--out", default=None)
++    ap.add_argument("--skip-intake", action="store_true")
++    ap.add_argument("--no-existing-check", action="store_true")
++    args = ap.parse_args()
++
++    rep = run_pipeline(
++        use_ollama=args.ollama,
++        config_path=args.config,
++        out_dir=args.out,
++        skip_intake=args.skip_intake,
++        existing_check=not args.no_existing_check,
++    )
++    print(f"raws={rep['n_raw']} contacts={rep['n_contacts']} matched={rep['n_matched']} "
++          f"hot={rep['n_hot']} errors={len(rep['errors'])}")
++    for e in rep["errors"][:10]:
++        print("  ERR", e)
++    print("call sheets:", len(rep["call_sheets"]))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/clearancejobs_pipeline/spine/__init__.py b/clearancejobs_pipeline/spine/__init__.py
+new file mode 100644
+index 000000000..e805dbdac
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/__init__.py
+@@ -0,0 +1 @@
++"""Lane-agnostic spine: map -> resolve -> match -> call sheets."""
+diff --git a/clearancejobs_pipeline/spine/call_sheet.py b/clearancejobs_pipeline/spine/call_sheet.py
+new file mode 100644
+index 000000000..ae770aa89
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/call_sheet.py
+@@ -0,0 +1,134 @@
++"""Stage D — per-program HUMINT call sheets (Markdown + CSV) + HUMINT_SUMMARY.md.
++
++Output dir defaults to outputs/booz_target_ranking/humint/ which is GITIGNORED (PII).
++A contact appears on every program it matched (recruiters for each program want them).
++"""
++from __future__ import annotations
++
++import csv
++import io
++import os
++from collections import defaultdict
++from datetime import datetime, timezone
++
++from .match_programs import load_config
++
++CSV_COLS = ["rank", "name", "title", "company", "tier", "composite_score",
++            "clearance_level", "city", "state", "relo", "hot", "cj_id",
++            "sources", "needs_review", "programs"]
++
++
++def _row(c: dict, rank: int) -> dict:
++    sm = c.get("source_metadata") or {}
++    return {
++        "rank": rank,
++        "name": c.get("name") or "",
++        "title": c.get("title") or "",
++        "company": c.get("company") or "",
++        "tier": c.get("tier") if c.get("tier") is not None else "",
++        "composite_score": c.get("composite_score") if c.get("composite_score") is not None else "",
++        "clearance_level": c.get("clearance_level") or "",
++        "city": c.get("city") or "",
++        "state": c.get("state") or "",
++        "relo": "Yes" if sm.get("relo") else ("No" if sm.get("relo") is False else ""),
++        "hot": "HOT" if sm.get("cj_last_login_hot") else "",
++        "cj_id": sm.get("cj_id") or "",
++        "sources": "; ".join(c.get("sources") or []),
++        "needs_review": c.get("needs_review"),
++        "programs": "; ".join(c.get("programs") or []),
++    }
++
++
++def _render_csv(rows: list[dict]) -> str:
++    buf = io.StringIO()
++    w = csv.DictWriter(buf, fieldnames=CSV_COLS)
++    w.writeheader()
++    for i, c in enumerate(rows, 1):
++        w.writerow(_row(c, i))
++    return buf.getvalue()
++
++
++def _render_md(piid: str, prog: dict, rows: list[dict]) -> str:
++    subs = ", ".join(prog.get("competitor_subs", [])) or "-"
++    pop = ", ".join(prog.get("pop_cities", [])) or "-"
++    hot_n = sum(1 for c in rows if (c.get("source_metadata") or {}).get("cj_last_login_hot"))
++    out = []
++    out.append(f"# HUMINT Call Sheet — {prog.get('program','?')} (`{piid}`)\n")
++    out.append(f"- **Prime:** {prog.get('prime','?')}  ·  **Agency:** {prog.get('agency','?')}")
++    out.append(f"- **Value:** ${prog.get('value_$M','?')}M  ·  **PoP end:** {prog.get('pop_end','?')}")
++    out.append(f"- **Recruit-from competitor subs:** {subs}")
++    out.append(f"- **Clearance:** {prog.get('clearance','?')}")
++    out.append(f"- **PoP metros:** {pop}")
++    out.append(f"- **Candidates:** {len(rows)}  ·  **🔥 hot (logged in today):** {hot_n}\n")
++    out.append("| # | Name | Title | Company | Tier | Score | Clearance | Location | Relo | Hot | CJ id | Source | Review |")
++    out.append("|---|------|-------|---------|------|-------|-----------|----------|------|-----|-------|--------|--------|")
++    for i, c in enumerate(rows, 1):
++        r = _row(c, i)
++        loc = f"{r['city']}, {r['state']}".strip(", ")
++        src = "resume" if "ClearanceJobs resume" in (c.get("sources") or []) else "paste"
++        review = "⚠" if c.get("needs_review") else ""
++        out.append(f"| {i} | {r['name']} | {r['title']} | {r['company']} | {r['tier']} | "
++                   f"{r['composite_score']} | {r['clearance_level']} | {loc} | {r['relo']} | "
++                   f"{'🔥' if r['hot'] else ''} | {r['cj_id']} | {src} | {review} |")
++    out.append("\n> ⚠ = needs review (paste-lane stub or collides with an existing CRM contact). "
++               "🔥 = last ClearanceJobs login was today.\n")
++    return "\n".join(out)
++
++
++def _render_summary(cfg: dict, by_piid: dict, unmatched: list, contacts: list) -> str:
++    hot_total = sum(1 for c in contacts if (c.get("source_metadata") or {}).get("cj_last_login_hot"))
++    out = []
++    out.append("# HUMINT Pipeline Summary\n")
++    out.append(f"- Generated: {datetime.now(timezone.utc).isoformat()}")
++    out.append(f"- Total resolved contacts: **{len(contacts)}**")
++    out.append(f"- Matched to >=1 program: **{sum(1 for c in contacts if c.get('programs'))}**")
++    out.append(f"- Unmatched: **{len(unmatched)}**")
++    out.append(f"- 🔥 Hot (logged in today): **{hot_total}**\n")
++    out.append("| Program | PIID | Candidates | Hot | Top score |")
++    out.append("|---------|------|-----------|-----|-----------|")
++    for piid, prog in cfg.items():
++        rows = by_piid.get(piid, [])
++        if not rows:
++            continue
++        hot = sum(1 for c in rows if (c.get("source_metadata") or {}).get("cj_last_login_hot"))
++        top = max((c.get("composite_score") or 0) for c in rows)
++        out.append(f"| {prog.get('program','?')} | `{piid}` | {len(rows)} | {hot} | {top} |")
++    if unmatched:
++        out.append(f"\n## Unmatched ({len(unmatched)})\n")
++        out.append("Persisted with `programs=[]` — review for off-program relevance.\n")
++        for c in unmatched[:50]:
++            loc = f"{c.get('city') or ''}, {c.get('state') or ''}".strip(", ")
++            out.append(f"- {c.get('name')} — {c.get('title') or '?'} — {c.get('company') or '?'} — {loc}")
++    return "\n".join(out)
++
++
++def write_call_sheets(contacts: list[dict], config: dict | None = None,
++                      out_dir: str = "outputs/booz_target_ranking/humint") -> list[str]:
++    cfg = config if config is not None else load_config()
++    os.makedirs(out_dir, exist_ok=True)
++    by_piid: dict[str, list] = defaultdict(list)
++    unmatched: list = []
++    for c in contacts:
++        if c.get("programs"):
++            for piid in c["programs"]:
++                by_piid[piid].append(c)
++        else:
++            unmatched.append(c)
++    written: list[str] = []
++    for piid, prog in cfg.items():
++        rows = by_piid.get(piid, [])
++        if not rows:
++            continue
++        rows = sorted(rows, key=lambda c: (-(c.get("composite_score") or 0), c.get("tier") or 6))
++        mp = os.path.join(out_dir, f"{piid}_callsheet.md")
++        cp = os.path.join(out_dir, f"{piid}_callsheet.csv")
++        with open(mp, "w", encoding="utf-8") as fh:
++            fh.write(_render_md(piid, prog, rows))
++        with open(cp, "w", newline="", encoding="utf-8-sig") as fh:
++            fh.write(_render_csv(rows))
++        written += [mp, cp]
++    sp = os.path.join(out_dir, "HUMINT_SUMMARY.md")
++    with open(sp, "w", encoding="utf-8") as fh:
++        fh.write(_render_summary(cfg, by_piid, unmatched, contacts))
++    written.append(sp)
++    return written
+diff --git a/clearancejobs_pipeline/spine/map_contact.py b/clearancejobs_pipeline/spine/map_contact.py
+new file mode 100644
+index 000000000..96772a8a9
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/map_contact.py
+@@ -0,0 +1,17 @@
++"""Stage A — map RawContacts onto canonical Contact dicts.
++
++Thin batch driver over models.build_contact (which owns the 50-prop mapping).
++"""
++from __future__ import annotations
++
++from ..models import CONTACT_KEYS, RawContact, build_contact
++
++
++def map_contacts(raws: list[RawContact]) -> list[dict]:
++    """RawContact list -> canonical Contact dict list."""
++    return [build_contact(r) for r in raws]
++
++
++def validate_contact(contact: dict) -> list[str]:
++    """Return a list of missing canonical schema keys (empty = valid)."""
++    return [k for k in CONTACT_KEYS if k not in contact]
+diff --git a/clearancejobs_pipeline/spine/match_programs.py b/clearancejobs_pipeline/spine/match_programs.py
+new file mode 100644
+index 000000000..5d0c85f1a
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/match_programs.py
+@@ -0,0 +1,131 @@
++"""Stage C — score each contact against the target programs.
++
++Inverse of build_contacts.py: we HAVE the people, match them TO programs using the same
++dimensions (company / PoP-location / title-skills / clearance) reversed. Config basis =
++outputs/booz_target_ranking/contacts/_contract_config.json (prime, competitor_subs,
++clearance, pop_cities, role_families, title_keywords).
++
++A contact matches a program only when composite >= THRESHOLD AND there is a real BD reason
++(employer is the prime/a competitor sub, OR PoP-city + title both hit, OR the contact was
++sourced under that program). This prevents 'cleared person in DC' from matching every DC
++program.
++"""
++from __future__ import annotations
++
++import json
++import re
++
++from ..lib.companies import company_in
++from ..lib.geo import city_key, config_city_keys
++
++DEFAULT_CONFIG = "outputs/booz_target_ranking/contacts/_contract_config.json"
++
++WEIGHTS = {"company": 35, "location": 30, "title": 20, "clearance": 15}
++# program_hint = the candidate was curated under this program's own CJ search (strong prior).
++# Sized so hint + clearance alone clears THRESHOLD, keeping pre-qualified leads on the sheet.
++HINT_BONUS = 35
++THRESHOLD = 45
++
++_CLEAR_RANK = [
++    (re.compile(r"sci.*poly|ts/sci.*poly|poly", re.I), 5),
++    (re.compile(r"ts/sci", re.I), 4),
++    (re.compile(r"top secret|\bts\b", re.I), 3),
++    (re.compile(r"secret", re.I), 2),
++    (re.compile(r"public trust", re.I), 1),
++]
++
++
++def clearance_rank(s: str) -> int:
++    s = s or ""
++    best = 0
++    for pat, r in _CLEAR_RANK:
++        if pat.search(s):
++            best = max(best, r)
++    return best
++
++
++def load_config(path: str = DEFAULT_CONFIG) -> dict:
++    return json.load(open(path, encoding="utf-8"))["contracts"]
++
++
++def _title_re(title_keywords: list[str]):
++    return re.compile("|".join(re.escape(k) for k in title_keywords), re.I) if title_keywords else None
++
++
++def score_contact_program(contact: dict, piid: str, prog: dict) -> tuple[float, dict, bool, bool, bool]:
++    bd: dict = {}
++    sm = contact.get("source_metadata") or {}
++
++    # --- company (recruit-from prime or competitor sub) ---
++    wanted = [prog.get("prime", "")] + list(prog.get("competitor_subs", []))
++    comp_blob = " ".join(str(contact.get(f) or "") for f in ["company", "company_name"])
++    comp_blob += " " + " ".join(sm.get("prior_companies", []) or [])
++    hit_company = company_in(comp_blob, [w for w in wanted if w])
++    bd["company"] = WEIGHTS["company"] if hit_company else 0
++
++    # --- location (PoP city is load-bearing; relo widens partially) ---
++    ckeys = config_city_keys(prog.get("pop_cities", []))
++    ck = city_key(contact.get("city") or "", contact.get("state") or "")
++    loc_hit = bool(contact.get("city")) and ck in ckeys
++    if loc_hit:
++        bd["location"] = WEIGHTS["location"]
++    elif sm.get("relo"):
++        bd["location"] = round(WEIGHTS["location"] * 0.4, 1)
++    else:
++        bd["location"] = 0
++
++    # --- title / skills vs role families ---
++    tre = _title_re(prog.get("title_keywords", []))
++    title = contact.get("title") or ""
++    skills = " ".join(sm.get("skills", []) or [])
++    title_hit = bool(tre and (tre.search(title) or tre.search(skills)))
++    bd["title"] = WEIGHTS["title"] if title_hit else 0
++
++    # --- clearance ---
++    creq = clearance_rank(prog.get("clearance", ""))
++    chave = clearance_rank(contact.get("clearance_level") or " ".join(contact.get("clearances") or []))
++    if creq == 0:
++        bd["clearance"] = WEIGHTS["clearance"]
++    elif chave >= creq:
++        bd["clearance"] = WEIGHTS["clearance"]
++    elif chave > 0:
++        bd["clearance"] = round(WEIGHTS["clearance"] * 0.5, 1)
++    else:
++        bd["clearance"] = 0
++
++    # --- sourced-under-this-program prior ---
++    if sm.get("program_hint") == piid:
++        bd["program_hint"] = HINT_BONUS
++
++    composite = float(sum(bd.values()))
++    return composite, bd, hit_company, loc_hit, title_hit
++
++
++def match_all(contacts: list[dict], config: dict | None = None) -> list[dict]:
++    cfg = config if config is not None else load_config()
++    for contact in contacts:
++        best = None
++        matched: list[str] = []
++        primes: set[str] = set()
++        for piid, prog in cfg.items():
++            comp, bd, hit_company, loc_hit, title_hit = score_contact_program(contact, piid, prog)
++            has_reason = hit_company or (loc_hit and title_hit) or ("program_hint" in bd)
++            if comp >= THRESHOLD and has_reason:
++                matched.append(piid)
++                if prog.get("prime"):
++                    primes.add(prog["prime"])
++                if best is None or comp > best[1]:
++                    best = (piid, comp, bd)
++        contact["programs"] = matched
++        contact["primes"] = sorted(primes)
++        if best:
++            contact["composite_score"] = round(best[1], 1)
++            sb = dict(best[2])
++            sb["_best_piid"] = best[0]
++            contact["score_breakdown"] = sb
++            contact["raw_relevance_score"] = round(best[1], 1)
++        else:
++            contact["composite_score"] = 0.0
++            contact["score_breakdown"] = {}
++            contact["raw_relevance_score"] = 0.0
++    return contacts
+diff --git a/clearancejobs_pipeline/spine/resolve.py b/clearancejobs_pipeline/spine/resolve.py
+new file mode 100644
+index 000000000..3041e1969
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/resolve.py
+@@ -0,0 +1,130 @@
++"""Stage B — entity resolution / dedup.
++
++1. Within-intake dedup by `_local_key` (cj_id -> name+location). Resume beats paste on
++   field conflicts; paste's hot/last-login signal is preserved; sources are unioned.
++2. flag_against_existing: collision vs the existing 7,339-contact CRM
++   (data/dashboard/contacts_classified.json, read-only) by email / linkedin / normalized
++   name -> set needs_review + merge_candidate_ids. Never overwrites existing data.
++"""
++from __future__ import annotations
++
++import json
++import re
++
++EXISTING_DEFAULT = "data/dashboard/contacts_classified.json"
++
++_SCALAR_SKIP = {
++    "sources", "source_provenance", "source_metadata", "clearances", "programs",
++    "primes", "inferred_locations", "score_breakdown", "_local_key",
++    "needs_review", "tier", "composite_score", "raw_relevance_score", "note_count",
++    "authors", "pain_points",
++}
++
++
++def _empty(v) -> bool:
++    return v is None or v == "" or v == [] or v == {}
++
++
++def _is_resume(c: dict) -> bool:
++    return "ClearanceJobs resume" in (c.get("sources") or [])
++
++
++def _norm_name(rec: dict) -> str:
++    full = f"{rec.get('first_name') or ''} {rec.get('last_name') or ''}".strip()
++    if not full:
++        full = rec.get("name") or ""
++    return re.sub(r"[^a-z]", "", full.lower())
++
++
++def _norm_li(url) -> str:
++    if not url:
++        return ""
++    m = re.search(r"linkedin\.com/in/([\w\-%]+)", str(url), re.I)
++    return m.group(1).lower() if m else ""
++
++
++def _merge_into(base: dict, other: dict) -> None:
++    for k, v in other.items():
++        if k in _SCALAR_SKIP:
++            continue
++        if _empty(base.get(k)) and not _empty(v):
++            base[k] = v
++    base["sources"] = sorted(set((base.get("sources") or []) + (other.get("sources") or [])))
++    base["clearances"] = sorted({x for x in (base.get("clearances") or []) + (other.get("clearances") or []) if x})
++    base["inferred_locations"] = sorted({x for x in (base.get("inferred_locations") or []) + (other.get("inferred_locations") or []) if x})
++    sp = dict(other.get("source_provenance") or {})
++    sp.update(base.get("source_provenance") or {})
++    base["source_provenance"] = sp
++    bm = dict(base.get("source_metadata") or {})
++    om = dict(other.get("source_metadata") or {})
++    merged = {**om, **{k: v for k, v in bm.items() if not _empty(v) and v is not False}}
++    merged["cj_last_login_hot"] = bool(bm.get("cj_last_login_hot") or om.get("cj_last_login_hot"))
++    merged["cj_last_login"] = bm.get("cj_last_login") or om.get("cj_last_login") or ""
++    merged["cj_id"] = bm.get("cj_id") or om.get("cj_id")
++    base["source_metadata"] = merged
++    # keep the richer (resume) needs_review when resume is base; else OR
++    if not _is_resume(base):
++        base["needs_review"] = bool(base.get("needs_review") or other.get("needs_review"))
++
++
++def dedupe(contacts: list[dict]) -> list[dict]:
++    groups: dict[str, list[dict]] = {}
++    order: list[str] = []
++    for c in contacts:
++        k = c.get("_local_key")
++        if k not in groups:
++            groups[k] = []
++            order.append(k)
++        groups[k].append(c)
++    out = []
++    for k in order:
++        grp = groups[k]
++        if len(grp) == 1:
++            out.append(grp[0])
++            continue
++        base = next((c for c in grp if _is_resume(c)), grp[0])
++        for other in grp:
++            if other is base:
++                continue
++            _merge_into(base, other)
++        out.append(base)
++    return out
++
++
++def flag_against_existing(contacts: list[dict], existing_path: str = EXISTING_DEFAULT) -> list[dict]:
++    try:
++        data = json.load(open(existing_path, encoding="utf-8"))
++    except Exception:
++        for c in contacts:
++            c.setdefault("source_metadata", {})["existing_check"] = "unavailable"
++        return contacts
++    existing = data.get("contacts", data) if isinstance(data, dict) else data
++    by_email: dict[str, list] = {}
++    by_name: dict[str, list] = {}
++    by_li: dict[str, list] = {}
++    for e in existing:
++        eid = e.get("id")
++        em = (e.get("email") or "").strip().lower()
++        if em:
++            by_email.setdefault(em, []).append(eid)
++        nm = _norm_name(e)
++        if nm:
++            by_name.setdefault(nm, []).append(eid)
++        li = _norm_li(e.get("linkedin"))
++        if li:
++            by_li.setdefault(li, []).append(eid)
++    for c in contacts:
++        hits = set()
++        em = (c.get("email") or "").strip().lower()
++        if em and em in by_email:
++            hits.update(by_email[em])
++        li = _norm_li(c.get("linkedin_url"))
++        if li and li in by_li:
++            hits.update(by_li[li])
++        nm = _norm_name(c)
++        if nm and nm in by_name:
++            hits.update(by_name[nm])
++        if hits:
++            c["needs_review"] = True
++            c.setdefault("source_metadata", {})["merge_candidate_ids"] = [h for h in sorted(map(str, hits))][:5]
++    return contacts
+diff --git a/clearancejobs_pipeline/tests/test_cj_id.py b/clearancejobs_pipeline/tests/test_cj_id.py
+new file mode 100644
+index 000000000..2d398cf05
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_cj_id.py
+@@ -0,0 +1,29 @@
++from clearancejobs_pipeline.lib.cj_id import extract_cj_id, name_slug_from_filename
++
++
++def test_trailing_id():
++    assert extract_cj_id("jalen-pestillo-2032428.pdf") == "2032428"
++
++
++def test_resumes_pattern():
++    assert extract_cj_id("clearancejobs.com_resumes_701487_resume.pdf") == "701487"
++
++
++def test_anonymous_two_numbers_takes_trailing():
++    assert extract_cj_id("anonymous19032-2466200.docx") == "2466200"
++    assert extract_cj_id("anonymous1239799-2581233.docx") == "2581233"
++
++
++def test_doc_extension():
++    assert extract_cj_id("caleb-rupracht-418821.doc") == "418821"
++
++
++def test_name_only_is_none():
++    assert extract_cj_id("Charles Dunkin.pdf") is None
++    assert extract_cj_id("Sara Vosberg.pdf") is None
++
++
++def test_name_slug():
++    assert name_slug_from_filename("jalen-pestillo-2032428.pdf") == "jalen-pestillo"
++    assert name_slug_from_filename("Charles Dunkin.pdf") == "charles-dunkin"
++    assert name_slug_from_filename("clearancejobs.com_resumes_701487_resume.pdf") == ""
+diff --git a/clearancejobs_pipeline/tests/test_classify.py b/clearancejobs_pipeline/tests/test_classify.py
+new file mode 100644
+index 000000000..acd3d50be
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_classify.py
+@@ -0,0 +1,24 @@
++from clearancejobs_pipeline.lib.classify import tier_for
++
++
++def test_tier1_director():
++    assert tier_for("Director of Engineering") == 1
++    assert tier_for("VP, Cyber") == 1
++
++
++def test_tier2_architect():
++    assert tier_for("Cloud Solutions Architect") == 2
++
++
++def test_tier3_program_manager():
++    assert tier_for("Program Manager") == 3
++    assert tier_for("Scrum Master") == 3
++
++
++def test_tier5_analyst():
++    assert tier_for("Intelligence Analyst") == 5
++
++
++def test_tier6_default():
++    assert tier_for("Systems Administrator") == 6
++    assert tier_for("") == 6
+diff --git a/clearancejobs_pipeline/tests/test_geo.py b/clearancejobs_pipeline/tests/test_geo.py
+new file mode 100644
+index 000000000..4763152dc
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_geo.py
+@@ -0,0 +1,21 @@
++from clearancejobs_pipeline.lib.geo import city_key, config_city_keys, display_location
++
++
++def test_city_key_abbr_equals_full():
++    assert city_key("McLean", "VA") == city_key("Mc Lean", "Virginia")
++
++
++def test_dc_variants_fold_together():
++    assert city_key("Washington", "DC") == city_key("Washington, D.C.", "District of Columbia")
++
++
++def test_config_city_keys_contains_member():
++    ks = config_city_keys(["McLean, Virginia", "Washington, D.C., District of Columbia"])
++    assert city_key("McLean", "VA") in ks
++    assert city_key("Washington", "DC") in ks
++
++
++def test_display_location():
++    assert display_location("McLean", "Virginia") == "McLean, VA"
++    assert display_location("Austin", "TX") == "Austin, TX"
++    assert display_location("", "") == ""
+diff --git a/clearancejobs_pipeline/tests/test_match.py b/clearancejobs_pipeline/tests/test_match.py
+new file mode 100644
+index 000000000..04878e12a
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_match.py
+@@ -0,0 +1,44 @@
++from clearancejobs_pipeline.models import RawContact, build_contact
++from clearancejobs_pipeline.spine.match_programs import match_all
++
++CONFIG = {
++    "50310220F0017": {
++        "program": "SEC IT Testing & Compliance", "agency": "SEC",
++        "prime": "Booz Allen Hamilton",
++        "competitor_subs": ["Take2", "Insight Global", "Kforce"],
++        "clearance": "Public Trust / Secret",
++        "pop_cities": ["Washington, D.C., District of Columbia", "Arlington, Virginia",
++                       "Alexandria, Virginia"],
++        "role_families": ["ISSO"],
++        "title_keywords": ["ISSO", "Security Assessor", "RMF", "Compliance"],
++    }
++}
++
++
++def test_competitor_sub_in_pop_with_title_matches():
++    c = build_contact(RawContact(
++        lane="paste", source_file="x", name="Jane Doe", title="ISSO",
++        city="Arlington", state="VA", clearance_level="Secret", company="Insight Global"))
++    match_all([c], CONFIG)
++    assert "50310220F0017" in c["programs"]
++    assert c["composite_score"] >= 45
++    assert "Booz Allen Hamilton" in c["primes"]
++    assert c["score_breakdown"]["company"] == 35
++
++
++def test_program_hint_alone_qualifies():
++    c = build_contact(RawContact(
++        lane="paste", source_file="x", name="Hot Lead", title="Systems Administrator",
++        city="Dayton", state="MD", clearance_level="TS/SCI",
++        program_hint="50310220F0017"))
++    match_all([c], CONFIG)
++    assert "50310220F0017" in c["programs"]
++
++
++def test_irrelevant_contact_no_match():
++    c = build_contact(RawContact(
++        lane="paste", source_file="x", name="Bob Smith", title="Line Cook",
++        city="Miami", state="FL", clearance_level=""))
++    match_all([c], CONFIG)
++    assert c["programs"] == []
++    assert c["composite_score"] == 0.0
+diff --git a/clearancejobs_pipeline/tests/test_models.py b/clearancejobs_pipeline/tests/test_models.py
+new file mode 100644
+index 000000000..167caa22a
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_models.py
+@@ -0,0 +1,32 @@
++from clearancejobs_pipeline.models import RawContact, build_contact, CONTACT_KEYS
++
++
++def test_build_contact_has_all_schema_keys():
++    rc = RawContact(lane="paste", source_file="x.txt", name="Jane Doe",
++                    title="Program Manager", city="McLean", state="VA",
++                    clearance_level="TS/SCI", company="Insight Global")
++    c = build_contact(rc)
++    for k in CONTACT_KEYS:
++        assert k in c, f"missing schema key {k}"
++    assert c["tier"] == 3
++    assert c["location"] == "McLean, VA"
++    assert c["first_name"] == "Jane" and c["last_name"] == "Doe"
++    assert c["sources"] == ["ClearanceJobs paste"]
++    assert c["clearances"] == ["TS/SCI"]
++    assert c["location_confidence"] == "C"
++    assert c["_local_key"].startswith("nk:")
++
++
++def test_resume_lane_and_cj_local_key():
++    rc = RawContact(lane="resume", source_file="r.pdf", cj_id="2032428",
++                    name="Jalen Pestillo", confidence="A", needs_review=False)
++    assert rc.local_key() == "cj:2032428"
++    c = build_contact(rc)
++    assert c["sources"] == ["ClearanceJobs resume"]
++    assert c["needs_review"] is False
++    assert c["tier_confidence"] == "A"
++
++
++def test_name_autosplit():
++    rc = RawContact(lane="paste", source_file="x", name="Mary Jane Watson")
++    assert rc.first_name == "Mary" and rc.last_name == "Watson"
+diff --git a/clearancejobs_pipeline/tests/test_paste.py b/clearancejobs_pipeline/tests/test_paste.py
+new file mode 100644
+index 000000000..4665a20ec
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_paste.py
+@@ -0,0 +1,251 @@
++"""Tests for clearancejobs_pipeline.lanes.paste.
++
++All fixtures are SYNTHETIC — no real PII files are read.
++"""
++from __future__ import annotations
++
++import textwrap
++
++import pytest
++
++from clearancejobs_pipeline.lanes.paste import parse_paste_text
++
++
++# ---------------------------------------------------------------------------
++# Synthetic fixture text
++# ---------------------------------------------------------------------------
++
++# A realistic-looking paste with 4 synthetic candidates:
++#   1. Alice Norwood — relo + salary, terminated by lone initial
++#   2. Bob Carver    — no relo/salary, terminated by lone initial
++#   3. Carol Brandt  — second date line present (should be ignored for cj_last_login), user-avatar terminator
++#   4. Dan Halloway  — Insight Global in thumbnail (employer canonicalization test), user-avatar terminator
++SYNTHETIC_PASTE = textwrap.dedent("""\
++    Viewing 1 - 50 of 200
++    Candidates
++    Show:
++    50 per page
++    Sort by:
++    Last Login Date (Des)
++    Alice Norwood
++    Systems Security Engineer
++    Arlington, VA
++    Today
++    TS/SCI
++    10+ yrs exp
++    Yes - Open to relo
++    $175,000
++    Experienced ISSO supporting RMF and NIST SP 800-53 controls
++    A
++    Bob Carver
++    Cybersecurity Analyst
++    San Diego, CA
++    Yesterday
++    Secret
++    5+ yrs exp
++    Worked on DISA STIG compliance and vulnerability management
++    B
++    Carol Brandt
++    Software Security Engineer
++    Herndon, VA
++    Today
++    TS/SCI w Poly
++    Mgr/Director
++    May 15
++    No - Not open to relo
++    $220,000
++    Provided cyber engineering support at NSA for 12 years
++    user avatar
++    Dan Halloway
++    Network Engineer
++    Chantilly, VA
++    May 20
++    TS/SCI
++    10+ yrs exp
++    Yes - Open to relo
++    INSIGHT GLOBAL, LLC - Senior Network Admin supporting DHS programs
++    Configured enterprise routers and switches
++    user avatar
++""")
++
++# Paste without any header section
++HEADERLESS_PASTE = textwrap.dedent("""\
++    Jane Smith
++    Senior ISSO
++    Bethesda, MD
++    Today
++    TS/SCI
++    10+ yrs exp
++    No - Not open to relo
++    $200,000
++    Supporting RMF across multiple DoD programs
++    J
++""")
++
++
++# ---------------------------------------------------------------------------
++# Tests
++# ---------------------------------------------------------------------------
++
++class TestSyntheticPaste:
++    """Multi-block fixture: correctness tests."""
++
++    def _contacts(self):
++        return parse_paste_text(SYNTHETIC_PASTE, source_file="test_synthetic.txt",
++                                program_hint="TEST-PIID-001")
++
++    def test_count(self):
++        contacts = self._contacts()
++        assert len(contacts) == 4, f"Expected 4 contacts, got {len(contacts)}"
++
++    def test_alice_norwood(self):
++        c = self._contacts()[0]
++        assert c.name == "Alice Norwood"
++        assert c.title == "Systems Security Engineer"
++        assert c.city == "Arlington"
++        assert c.state == "VA"
++        assert c.clearance_level.startswith("TS/SCI")
++        assert c.cj_last_login == "Today"
++        assert c.cj_last_login_hot is True
++        assert c.relo is True
++        assert c.salary_expectation == "$175,000"
++        assert c.seniority_band == "10+ yrs exp"
++
++    def test_bob_carver_no_relo_no_salary(self):
++        c = self._contacts()[1]
++        assert c.name == "Bob Carver"
++        assert c.city == "San Diego"
++        assert c.state == "CA"
++        assert c.clearance_level.lower().startswith("secret") or "Secret" in c.clearance_level
++        assert c.relo is None      # no relo line
++        assert c.salary_expectation == ""
++        assert c.cj_last_login == "Yesterday"
++        assert c.cj_last_login_hot is False
++
++    def test_carol_brandt_second_date_ignored(self):
++        """May 15 is a second date line; cj_last_login must be 'Today', not 'May 15'."""
++        c = self._contacts()[2]
++        assert c.name == "Carol Brandt"
++        assert c.cj_last_login == "Today"
++        assert c.cj_last_login_hot is True
++        assert c.relo is False
++        assert c.salary_expectation == "$220,000"
++        assert c.seniority_band in ("Mgr/Director",)
++
++    def test_dan_halloway_company_canonicalized(self):
++        """Insight Global in thumbnail → company canonicalized to 'Insight Global'."""
++        c = self._contacts()[3]
++        assert c.name == "Dan Halloway"
++        assert c.company == "Insight Global"
++        assert "INSIGHT GLOBAL" in c.company_raw.upper()
++
++    def test_lane_source_program_hint(self):
++        for c in self._contacts():
++            assert c.lane == "paste"
++            assert c.source_file == "test_synthetic.txt"
++            assert c.program_hint == "TEST-PIID-001"
++            assert c.confidence == "C"
++            assert c.needs_review is True
++
++    def test_clearances_list_populated(self):
++        """clearances list should contain at least one entry per contact."""
++        contacts = self._contacts()
++        for c in contacts:
++            assert len(c.clearances) >= 1, f"{c.name}: clearances list is empty"
++
++
++class TestHeaderlessAndEdgeCases:
++    """Edge-case robustness tests."""
++
++    def test_headerless_paste_parses(self):
++        contacts = parse_paste_text(HEADERLESS_PASTE, source_file="headerless.txt")
++        assert len(contacts) == 1
++        c = contacts[0]
++        assert c.name == "Jane Smith"
++        assert c.city == "Bethesda"
++        assert c.state == "MD"
++
++    def test_empty_string_returns_empty(self):
++        assert parse_paste_text("") == []
++
++    def test_whitespace_only_returns_empty(self):
++        assert parse_paste_text("   \n\n   ") == []
++
++    def test_garbage_string_does_not_raise(self):
++        """Garbage input must not raise; parsed count is implementation-defined."""
++        result = parse_paste_text("%%% NOT A VALID PASTE %%%\n????\n====")
++        assert isinstance(result, list)  # no crash, returns a list
++
++    def test_single_candidate_no_terminator(self):
++        """A block with no terminator at EOF is still returned."""
++        text = textwrap.dedent("""\
++            Viewing 1 - 1 of 1
++            Candidates
++            Show:
++            1 per page
++            Sort by:
++            Last Login Date (Des)
++            Solo Candidate
++            Junior Analyst
++            Reston, VA
++            Today
++            Secret
++            Entry Level
++        """)
++        contacts = parse_paste_text(text)
++        assert len(contacts) == 1
++        assert contacts[0].name == "Solo Candidate"
++
++
++class TestUserAvatarVsInitialTerminator:
++    """Terminator style coverage."""
++
++    def test_user_avatar_terminator(self):
++        text = textwrap.dedent("""\
++            Sort by:
++            Last Login Date (Des)
++            Eric Vance
++            Security Architect
++            Tampa, FL
++            Today
++            TS/SCI
++            10+ yrs exp
++            user avatar
++            Frank Jones
++            Systems Engineer
++            Reston, VA
++            Yesterday
++            Secret
++            5+ yrs exp
++            F
++        """)
++        contacts = parse_paste_text(text)
++        assert len(contacts) == 2
++        assert contacts[0].name == "Eric Vance"
++        assert contacts[1].name == "Frank Jones"
++
++    def test_mixed_terminators(self):
++        """Some blocks use lone-initial, some use user avatar — both work."""
++        text = textwrap.dedent("""\
++            Sort by:
++            Date (Desc)
++            Alpha User
++            ISSO
++            McLean, VA
++            Today
++            TS/SCI
++            10+ yrs exp
++            A
++            Beta User
++            Pen Tester
++            Denver, CO
++            Yesterday
++            Secret
++            5+ yrs exp
++            user avatar
++        """)
++        contacts = parse_paste_text(text)
++        assert len(contacts) == 2
++        names = [c.name for c in contacts]
++        assert "Alpha User" in names
++        assert "Beta User" in names
+diff --git a/clearancejobs_pipeline/tests/test_resolve.py b/clearancejobs_pipeline/tests/test_resolve.py
+new file mode 100644
+index 000000000..8c0d4d413
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_resolve.py
+@@ -0,0 +1,33 @@
++from clearancejobs_pipeline.models import RawContact, build_contact
++from clearancejobs_pipeline.spine.resolve import dedupe
++
++
++def test_resume_wins_over_paste_same_cjid():
++    paste = build_contact(RawContact(
++        lane="paste", source_file="p.txt", cj_id="2032428", name="Jalen Pestillo",
++        title="Engineer", cj_last_login="Today", cj_last_login_hot=True))
++    resume = build_contact(RawContact(
++        lane="resume", source_file="r.pdf", cj_id="2032428", name="Jalen Pestillo",
++        title="Senior Cyber Engineer", email="j@example.com", confidence="A",
++        needs_review=False))
++    merged = dedupe([paste, resume])
++    assert len(merged) == 1
++    m = merged[0]
++    assert m["email"] == "j@example.com"                      # resume field won
++    assert m["title"] == "Senior Cyber Engineer"
++    assert m["source_metadata"]["cj_last_login_hot"] is True  # paste signal preserved
++    assert set(m["sources"]) == {"ClearanceJobs paste", "ClearanceJobs resume"}
++
++
++def test_distinct_contacts_not_merged():
++    a = build_contact(RawContact(lane="paste", source_file="p", name="Alice Adams", city="Reston", state="VA"))
++    b = build_contact(RawContact(lane="paste", source_file="p", name="Carl Dean", city="Reston", state="VA"))
++    assert len(dedupe([a, b])) == 2
++
++
++def test_name_location_key_merges_without_cjid():
++    a = build_contact(RawContact(lane="paste", source_file="p", name="Sam Vale", city="Austin", state="TX"))
++    b = build_contact(RawContact(lane="resume", source_file="r", name="Sam Vale", city="Austin", state="TX", email="s@x.com"))
++    merged = dedupe([a, b])
++    assert len(merged) == 1
++    assert merged[0]["email"] == "s@x.com"
+diff --git a/clearancejobs_pipeline/tests/test_resume.py b/clearancejobs_pipeline/tests/test_resume.py
+new file mode 100644
+index 000000000..652c2f1fb
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_resume.py
+@@ -0,0 +1,225 @@
++"""Tests for clearancejobs_pipeline.lanes.resume (deterministic path only).
++
++All fixtures are SYNTHETIC text — no real PII is read from disk.
++Ollama is NOT required; all tests exercise the deterministic extract_fields()
++path only.
++"""
++import pytest
++
++from clearancejobs_pipeline.lanes.resume import extract_fields
++
++
++# ---------------------------------------------------------------------------
++# Helpers
++# ---------------------------------------------------------------------------
++
++_SYNTHETIC_FULL = """\
++Jane Doe
++1234 Main Street, Arlington, VA 22201
++Email: jane.doe@example.com
++Phone: 703-555-1234
++LinkedIn: https://www.linkedin.com/in/janedoe
++
++Security Clearance:
++TS/SCI (active)
++
++Professional Experience
++Insight Global                                    Jan 2020 – Present
++Senior Systems Engineer
++
++Skills: Python, Java, AWS, Docker, Kubernetes, Linux
++
++Education
++B.S. Computer Science, George Mason University
++"""
++
++_SYNTHETIC_ANONYMISED = """\
++WORK HISTORY
++Company A   2018-2022
++Lead Software Engineer
++
++DoD Secret clearance required.
++"""
++
++_SYNTHETIC_SECRET_ONLY = """\
++Bob Smith
++bob.smith@corp.com  |  555-867-5309
++https://www.linkedin.com/in/bobsmith
++Dallas, TX
++
++Clearance: Secret
++
++Experience
++Kforce  2021-present
++Software Developer
++"""
++
++
++# ---------------------------------------------------------------------------
++# Tests
++# ---------------------------------------------------------------------------
++
++class TestFullSyntheticResume:
++    """Fixture has name, email, phone, LinkedIn, City/State, TS/SCI, Insight Global."""
++
++    def setup_method(self):
++        self.fields = extract_fields(_SYNTHETIC_FULL, "jane-doe-1234567.pdf")
++
++    def test_email_extracted(self):
++        assert self.fields["email"] == "jane.doe@example.com"
++
++    def test_phone_extracted(self):
++        assert self.fields["phone"] == "703-555-1234"
++
++    def test_linkedin_extracted(self):
++        assert "linkedin.com/in/janedoe" in self.fields["linkedin_url"]
++
++    def test_city_state_extracted(self):
++        assert self.fields["city"] == "Arlington"
++        assert self.fields["state"] == "VA"
++
++    def test_clearance_tssci(self):
++        assert self.fields["clearance_level"] == "TS/SCI"
++        assert "TS/SCI" in self.fields["clearances"]
++
++    def test_company_canonical(self):
++        # "Insight Global" appears in text → should be canonicalised
++        assert self.fields["company"] == "Insight Global"
++
++    def test_confidence_A(self):
++        # email + (phone or linkedin) + company all present
++        assert self.fields["confidence"] == "A"
++
++    def test_needs_review_false(self):
++        assert self.fields["needs_review"] is False
++
++    def test_cj_id_from_filename(self):
++        assert self.fields["cj_id"] == "1234567"
++
++    def test_name_from_filename(self):
++        # filename "jane-doe-1234567.pdf" → slug "jane-doe" → "Jane Doe"
++        assert self.fields["name"] == "Jane Doe"
++
++
++class TestAnonymisedResume:
++    """Filename is anonymous; resume text has no name header."""
++
++    def setup_method(self):
++        self.fields = extract_fields(_SYNTHETIC_ANONYMISED, "anonymous19032-2466200.docx")
++
++    def test_cj_id_is_trailing(self):
++        assert self.fields["cj_id"] == "2466200"
++
++    def test_name_empty_for_anonymous(self):
++        # slug is "anonymous" — should NOT produce a fake name
++        assert self.fields["name"] == ""
++
++    def test_no_email(self):
++        assert self.fields["email"] == ""
++
++    def test_secret_clearance(self):
++        # "DoD Secret" in text but also plain "Secret"
++        assert self.fields["clearance_level"] in ("DoD Secret", "Secret")
++
++    def test_confidence_B_when_no_contact_info(self):
++        assert self.fields["confidence"] == "B"
++
++    def test_needs_review_true(self):
++        assert self.fields["needs_review"] is True
++
++
++class TestSecretClearanceOnly:
++    """Resume mentions only a plain Secret clearance."""
++
++    def setup_method(self):
++        self.fields = extract_fields(_SYNTHETIC_SECRET_ONLY, "bob-smith-9999999.pdf")
++
++    def test_clearance_level_is_secret(self):
++        assert self.fields["clearance_level"] == "Secret"
++
++    def test_clearances_list_contains_secret(self):
++        assert "Secret" in self.fields["clearances"]
++
++    def test_no_tssci(self):
++        assert "TS/SCI" not in self.fields["clearances"]
++
++    def test_email_present(self):
++        assert self.fields["email"] == "bob.smith@corp.com"
++
++    def test_city_state(self):
++        assert self.fields["city"] == "Dallas"
++        assert self.fields["state"] == "TX"
++
++    def test_kforce_canonical(self):
++        assert self.fields["company"] == "Kforce"
++
++    def test_confidence_A_has_email_phone_and_company(self):
++        assert self.fields["confidence"] == "A"
++
++
++class TestClearanceRanking:
++    """When multiple clearance levels appear, the highest should win."""
++
++    def test_tssci_beats_secret(self):
++        text = "Secret clearance. Also holds TS/SCI with polygraph."
++        f = extract_fields(text, "test-1111111.pdf")
++        assert f["clearance_level"] == "TS/SCI w/ Poly"
++
++    def test_tssci_poly_is_highest(self):
++        text = "TS/SCI w/ Poly and previously held a Secret."
++        f = extract_fields(text, "test-2222222.pdf")
++        assert f["clearance_level"] == "TS/SCI w/ Poly"
++        assert len(f["clearances"]) >= 2
++
++    def test_top_secret_beats_secret(self):
++        text = "Active Top Secret. Previous employer required Secret."
++        f = extract_fields(text, "test-3333333.pdf")
++        assert f["clearance_level"] == "Top Secret"
++
++
++class TestNameExtraction:
++    """Name logic: slug preferred unless anonymous."""
++
++    def test_slug_name_used_when_not_anonymous(self):
++        f = extract_fields("some resume text", "john-smith-5556789.pdf")
++        assert f["name"] == "John Smith"
++
++    def test_anonymous_slug_suppressed(self):
++        f = extract_fields("some resume text", "anonymous-2345678.docx")
++        assert f["name"] == ""
++
++    def test_cjresumes_slug_empty_returns_empty_name(self):
++        # clearancejobs.com_resumes_701487_resume.pdf → slug is ""
++        f = extract_fields("some text", "clearancejobs.com_resumes_701487_resume.pdf")
++        assert f["cj_id"] == "701487"
++        assert f["name"] == ""
++
++
++class TestSkillsExtraction:
++    """Skills section is parsed into a list."""
++
++    def test_skills_from_section(self):
++        text = "Skills: Python, Java, AWS, Docker, Kubernetes"
++        f = extract_fields(text, "test-0000001.pdf")
++        assert "Python" in f["skills"]
++        assert "Java" in f["skills"]
++
++    def test_skills_capped_at_20(self):
++        big_skills = ", ".join(f"Skill{i}" for i in range(50))
++        text = f"Technical Skills:\n{big_skills}"
++        f = extract_fields(text, "test-0000002.pdf")
++        assert len(f["skills"]) <= 20
++
++
++class TestNoCrashOnEmptyText:
++    """extract_fields must not crash on empty/whitespace text."""
++
++    def test_empty_text(self):
++        f = extract_fields("", "test-0000003.pdf")
++        assert f["email"] == ""
++        assert f["clearance_level"] == ""
++        assert f["confidence"] == "B"
++
++    def test_whitespace_only(self):
++        f = extract_fields("   \n  \t  ", "test-0000004.pdf")
++        assert isinstance(f, dict)
+diff --git a/docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md b/docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
+new file mode 100644
+index 000000000..e7e622e32
+--- /dev/null
++++ b/docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
+@@ -0,0 +1,88 @@
++# ClearanceJobs → Contact Pipeline — Implementation Plan
++
++> **For agentic workers:** Spec = `docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md`.
++> Execution mode: **autonomous to completion** (user away ~45 min, authorized full build).
++> Orchestrator builds foundation + spine; two background subagents build the lanes. Atomic commits throughout.
++
++**Goal:** Turn the downloaded ClearanceJobs pastes + resumes into canonical Contact JSON, match them to the Booz programs, emit per-program HUMINT call sheets — fully local, PII gitignored.
++
++**Architecture:** Two ingest lanes (deterministic paste parser; liteparse+deterministic+Ollama resume parser) → shared `models.RawContact` → Stage A map → Stage B dedup → Stage C program match → Stage D call sheets. `lib/` reuses the primitives already in `build_contacts.py`.
++
++**Tech Stack:** Python 3.12, stdlib + pdfplumber/fitz/python-docx/mammoth (local parse), liteparse 2.0.0, Ollama `llama3.1:8b` (local HTTP `:11434`), pytest. No cloud.
++
++**Environment (probed 2026-06-02):** all parse libs present; Ollama running (`llama3.1:8b`, `qwen3.5`); `contacts_classified.json` = 9.5 MB / 7,339 contacts; `.gitignore` needs `intake/`+`humint/`.
++
++---
++
++## File Structure
++
++```
++clearancejobs_pipeline/
++  __init__.py
++  models.py              # RawContact dataclass + canonical Contact builder (THE CONTRACT)
++  intake.py              # Stage 0: allow-list copy Downloads -> intake/ (only Downloads-touching module)
++  intake_allowlist.json  # explicit named files + lane
++  lib/
++    __init__.py
++    classify.py          # tier_for() — 6-tier title regex (from build_contacts.py)
++    geo.py               # ABBR2FULL, city_key(), config_city_keys()
++    companies.py         # COMPANY_PATS + canonical_company()
++    cj_id.py             # filename -> (cj_id|None, name_slug)
++  lanes/
++    __init__.py
++    paste.py             # Lane 1 — deterministic block-split + regex classify   [AGENT A]
++    resume.py            # Lane 2 — liteparse/local parse + deterministic + Ollama [AGENT B]
++  spine/
++    __init__.py
++    map_contact.py       # Stage A — RawContact -> canonical Contact (50 props)
++    resolve.py           # Stage B — dedup (cj_id -> name+loc) incl. vs 7,339
++    match_programs.py     # Stage C — score contact vs _contract_config.json programs
++    call_sheet.py        # Stage D — per-PIID MD + CSV + HUMINT_SUMMARY
++  run.py                 # orchestrate Stage 0->D; flags: --no-ollama (default), --ollama
++  tests/                 # pytest, fixtures only (NO real PII committed)
++    test_cj_id.py test_geo.py test_classify.py test_paste.py
++    test_resume.py test_map.py test_resolve.py test_match.py
++
++intake/clearancejobs/{pastes,resumes,contacts}/   # GITIGNORED (PII)
++outputs/booz_target_ranking/humint/               # GITIGNORED (PII call sheets)
++```
++
++## Data contract (models.py — every module imports this)
++
++- `RawContact` dataclass: `lane`, `source_file`, `cj_id`, `name`, `first_name`, `last_name`,
++  `title`, `company`, `city`, `state`, `clearance_level`, `clearances[]`, `email`, `phone`,
++  `linkedin_url`, `relo`(bool|None), `salary_expectation`, `seniority_band`, `cj_last_login`,
++  `cj_last_login_hot`(bool), `keyword_thumbnail`, `prior_companies[]`, `skills[]`,
++  `confidence`("A"/"B"/"C"), `extra`(dict). Lanes return `List[RawContact]`.
++- `build_contact(raw) -> dict`: maps RawContact -> the 50-prop Contact schema (see spec §6.4),
++  filling `programs/primes/scores` later (Stage C). Local key = `cj_id or f"{slug(name)}|{city_key}"`.
++
++## Tasks (atomic commits; ✅ = acceptance)
++
++1. **T1 — gitignore guard (FIRST).** Append `intake/`, `outputs/booz_target_ranking/humint/`,
++   `clearancejobs_pipeline/**/__pycache__/`. ✅ `git check-ignore intake/x` passes. **Commit.**
++2. **T2 — foundation: models + lib (refactor primitives out of build_contacts.py, behavior-preserving).**
++   ✅ `test_cj_id/test_geo/test_classify` pass; `build_contacts.py` still imports green. **Commit.**
++3. **T3 — Stage 0 intake + allowlist; run it.** ✅ `intake/clearancejobs/{pastes,resumes}` populated
++   from the 4 pastes + 44 resumes; `_manifest.json` written; nothing staged into git. **Commit (code only).**
++4. **T4 — [AGENT A] Lane 1 paste parser + tests.** ✅ `test_paste` green; parsing the 4 real pastes
++   yields N RawContacts (paste, conf C, needs_review). **Commit.**
++5. **T5 — [AGENT B] Lane 2 resume parser + tests.** ✅ `test_resume` green; parses PDF/DOCX
++   (liteparse PDF / python-docx DOCX); `.doc` best-effort+flag; Ollama optional+graceful-degrade. **Commit.**
++6. **T6 — Stage A mapper + tests.** ✅ RawContact -> valid Contact dict (real schema props only). **Commit.**
++7. **T7 — Stage B resolve/dedup + tests.** ✅ within-intake merge (resume>paste); vs-7,339 collision
++   flags `merge_candidate`, never overwrites. **Commit.**
++8. **T8 — Stage C program matcher + tests.** ✅ seeded Insight-Global/McLean/Cyber → GSA cyber PIID
++   with score_breakdown; reuses lib primitives. **Commit.**
++9. **T9 — Stage D call sheets + run.py orchestrator.** ✅ `python3 -m clearancejobs_pipeline.run`
++   produces `<PIID>_callsheet.md/.csv` + `HUMINT_SUMMARY.md`. **Commit.**
++10. **T10 — End-to-end on REAL data (deterministic) + verify; optional bounded Ollama pass.**
++    ✅ real call sheets exist, counts sane, a sheet spot-checked. **Commit outputs? NO (gitignored) — commit code + a sanitized summary.**
++11. **T11 — Completion report + continuity ledger.** **Commit.**
++
++## Privacy invariants (assert in tests)
++- Only `intake.py` references a Downloads path. Resume extraction never calls a cloud endpoint.
++- `intake/` and `humint/` are gitignored; no PII file ever staged.
++
++## Reusability
++`run.py --config <_contract_config.json> --intake <dir> --out <dir>` → different prime/program set, no code change.
+diff --git a/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md b/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+new file mode 100644
+index 000000000..aa80b25dc
+--- /dev/null
++++ b/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+@@ -0,0 +1,362 @@
++# ClearanceJobs → Contact Entity Pipeline — Design Spec
++
++- **Date:** 2026-06-02
++- **Status:** Draft (awaiting spec-review loop + user review)
++- **Owner session:** Booz Allen BD — HUMINT contact pipeline
++- **Topic:** Turn downloaded ClearanceJobs (CJ) resumes + result-list text pastes into
++  canonical **Contact** entity profiles, match them to the Booz Allen target programs, and
++  emit per-program **HUMINT call sheets**.
++
++---
++
++## 1. Goal & Context
++
++We have profiled **Booz Allen Hamilton** as a prime to sub under (PTS = federal
++staffing / IT / engineering subcontractor). The program-targeting work is complete and lives
++in `outputs/booz_target_ranking/` (spread, runway, competitor subaward rosters, gov POCs,
++competitor profiles, and **per-PIID search plans**). What we are missing is the *people layer*:
++actual cleared candidates we can call.
++
++The user has been manually downloading from ClearanceJobs two kinds of artifact:
++
++1. **Result-list pastes** (`.txt`) — copied straight off a CJ search results page. Rigid,
++   repeating, low-detail (no email/phone), but fast and high-volume.
++2. **Resumes** (`.pdf` / `.docx` / `.doc`) — full candidate resumes. High-detail, may contain
++   email/phone/employment history. The CJ candidate ID is embedded in the filename.
++
++This spec defines a **reusable, fully-local** pipeline that ingests both, normalizes each
++person into the canonical Contact schema, resolves/dedupes them (including against the existing
++7,339-contact graph), scores them against the Booz programs, and produces call sheets.
++
++**This is not a one-off for Booz.** The program-match basis is data (`_contract_config.json`),
++so pointing the pipeline at a different prime / program set is a config swap, not a code change.
++
++---
++
++## 2. Privacy Pillar (HARD constraints)
++
++Cleared-personnel PII is the most sensitive data this repo will ever touch. These constraints
++are non-negotiable and are baked into the architecture, not bolted on:
++
++| # | Constraint |
++|---|---|
++| P1 | **NEVER trawl `C:\Users\gtmar\Downloads`.** It holds the user's personal SSN/W2/medical/legal files. The pipeline only ever touches an **explicit allow-list** of named CJ files. No globbing of Downloads, ever. |
++| P2 | **Copy-in, don't read-in-place.** Stage 0 copies the allow-listed files into `intake/clearancejobs/`. All downstream stages read only from `intake/`. The pipeline has no code path that reads Downloads directly after Stage 0. |
++| P3 | **`intake/` and all canonical contact JSON are gitignored.** Raw resumes and derived per-contact JSON are cleared-personnel PII and must never enter git history. |
++| P4 | **Resume field-extraction stays offline.** Parse (liteparse) and extract (deterministic + **Ollama-local**) both run on-machine. No resume text is sent to any cloud LLM. (Resolved open question — see §8.) |
++| P5 | **Graph sync targets a LOCAL graph only.** Never write to `C:\pg-pts` (READ-ONLY reference). PII edges land in the project's local graph (localhost), or not at all. |
++
++---
++
++## 3. Scope
++
++**In scope (v1):**
++- Two-lane ingest (pastes + resumes), fully local.
++- Canonical per-contact JSON conforming to the Contact entity schema.
++- Entity resolution / dedup (within-intake + vs existing CRM/graph).
++- Program match against the existing Booz `_contract_config.json`.
++- Per-program HUMINT call sheets (markdown + CSV).
++- Reusability: config-driven program basis; allow-list-driven intake.
++
++**Out of scope (YAGNI for v1):**
++- Live CJ scraping / API. (Input is *already-downloaded* files. We do not automate the download.)
++- Cloud enrichment (ZoomInfo/LinkedIn API calls). The existing `build_contacts.py` already
++  emits search plans for those; we do not duplicate that here.
++- Bullhorn write-back. We populate `bullhorn_candidate_id = null` and leave CRM loading to the
++  existing `pts-bullhorn-loader` skill as a downstream, opt-in step.
++- Outreach message generation. Call sheets carry the *facts*; messaging is a separate skill.
++
++**Deferred (phase 2, additive — does not block v1 value):**
++- Graph sync into the local Contact graph (§6.9). The MVP delivers JSON + call sheets without
++  requiring a running graph.
++
++---
++
++## 4. Architecture
++
++Two ingest lanes converge on one normalization + match + emit spine. Everything is local.
++
++```
++                C:\Users\gtmar\Downloads  (allow-list ONLY — P1/P2)
++                          │  Stage 0: copy named files
++                          ▼
++        intake/clearancejobs/{pastes/, resumes/}        (gitignored — P3)
++              │                              │
++   Lane 1 (pastes, rigid)        Lane 2 (resumes, rich)
++   block-split + regex            liteparse → deterministic
++   field-classify                 + Ollama-local extract (§8)
++              │                              │
++              ▼                              ▼
++        RawContact records  (lane-tagged, confidence-tagged)
++                          │  Stage A: map → canonical Contact (50-prop schema)
++                          ▼
++        per-contact Contact JSON  (intake/clearancejobs/contacts/<key>.json — gitignored)
++                          │  Stage B: entity-resolve / dedup
++                          │   (CJ id ▸ name+location ▸ vs existing 7,339)
++                          ▼
++        deduped Contact set  (+ merge_candidates flagged)
++                          │  Stage C: program match (reuse _contract_config.json
++                          │   + tier_for/city_key/COMPANY_PATS from build_contacts.py)
++                          ▼
++        scored Contacts  (programs[], primes[], tier, composite_score, score_breakdown)
++              │                              │
++   Stage D: call sheets          Stage E (phase 2): graph sync
++   per-program MD + CSV           → LOCAL Contact graph only (P5)
++   outputs/booz_target_ranking/
++     humint/<PIID>_callsheet.*
++```
++
++**Design principle — small, single-purpose units with clear interfaces.** Each stage is an
++independently testable module with a typed input and output. The lanes differ only in how they
++produce a `RawContact`; from Stage A onward the spine is lane-agnostic.
++
++---
++
++## 5. Reusable primitives (do NOT re-implement)
++
++These already exist in `outputs/booz_target_ranking/contacts/build_contacts.py` and MUST be
++factored out into a shared module the new pipeline imports (rather than copy-pasted):
++
++| Primitive | What it does | New home |
++|---|---|---|
++| `tier_for(title)` | bd-contact-classification 6-tier title regex → tier 1–6 | `clearancejobs_pipeline/lib/classify.py` |
++| `city_key(city,state)` + `ABBR2FULL` | normalize `McLean`/`Mc Lean` + state → `mclean\|virginia`; collapses DC variants | `clearancejobs_pipeline/lib/geo.py` |
++| `config_city_keys(pop_cities)` | program PoP cities → comparable key set | `clearancejobs_pipeline/lib/geo.py` |
++| `COMPANY_PATS` | employer-string → canonical company (Booz/Take2/ECS/Insight Global/Kforce/Beacon Hill) | `clearancejobs_pipeline/lib/companies.py` |
++
++`build_contacts.py` is refactored to import these (behavior-preserving) so there is one source
++of truth. This is the only change to existing code; no unrelated refactoring.
++
++---
++
++## 6. Components
++
++### 6.0 Stage 0 — Intake (allow-list copy)
++- **Input:** a hard-coded **allow-list** of exact named paths (the files the user provided).
++  Stored as `clearancejobs_pipeline/intake_allowlist.json` (paths + lane tag).
++- **Behavior:** for each path, verify existence (`Test-Path`/`os.path.exists`, no glob), copy
++  into `intake/clearancejobs/pastes/` or `…/resumes/` by lane. Idempotent (skip if hash-identical).
++- **Output:** populated `intake/` tree. Emits `intake/_manifest.json` (filename → lane → CJ id →
++  sha256 → copied_at).
++- **Privacy:** this is the ONLY module that names a Downloads path. Enforces P1/P2.
++
++### 6.1 CJ ID extractor (`lib/cj_id.py`)
++- Filename → CJ candidate ID. Patterns observed:
++  - `jalen-pestillo-2032428.pdf` → `2032428` (trailing `-(\d{4,})\.`)
++  - `clearancejobs.com_resumes_701487_resume.pdf` → `701487` (`_resumes_(\d+)_`)
++  - `anonymous19032-2466200.docx` → `2466200`
++  - `Charles Dunkin.pdf` → no numeric ID → fallback key = `slug(name)`
++- Returns `(cj_id | None, name_slug)`. `cj_id` is the **primary dedup key** when present.
++
++### 6.2 Lane 1 — Paste parser (`lanes/paste.py`)
++- **Input:** a `.txt` paste from `intake/.../pastes/`.
++- **Algorithm (deterministic, no LLM):**
++  1. Strip the 6-line header (`Viewing … of …` / `Candidates` / `Show:` / `N per page` /
++     `Sort by:` / `<sort field>`).
++  2. **Block-split FIRST, classify second.** Cut the candidate list into blocks on the avatar
++     terminator: a line that is a lone uppercase initial (`^[A-Z]$`) **or** the literal
++     `user avatar`. Do NOT try to match the initial to the block's name — that is circular at
++     split time (the name is only known *after* classification); the generic terminator suffices.
++  3. Within each block, **classify lines by regex** (NOT by position — relo/salary/second-date
++     are optional):
++     - `clearance`  → `/TS\/SCI( w Poly)?|Top Secret|Secret|Public Trust|Confidential/i`
++     - `seniority`  → `/\d+\+ yrs exp|Mgr\/Director|Entry|Senior|Junior/i`
++     - `relo`       → `/(Yes|No) - (Open to relo|Not open to relo)/i`
++     - `salary`     → `/^\$[\d,]+$/`
++     - `last_login` / dates → `Today|Yesterday|^[A-Z][a-z]{2} \d{1,2}(, \d{4})?$`
++     - `city,ST`    → `/^[A-Za-z .,'-]+,\s*[A-Z]{2}$/`
++     - first non-classified line = **name**, next = **title**
++     - remaining free-text lines = **keyword_thumbnail** (carries current employer + program signals)
++     - *Field-regexes are intentionally greedy, first-match-wins.* A thumbnail line containing a
++       field token (e.g. the word "Secret" in a skills blurb) may be misrouted; the paste lane's
++       `confidence="C"` + `needs_review=true` is the intended safety net, not a perfect parse.
++  4. **Employer from thumbnail:** run `COMPANY_PATS` over `keyword_thumbnail`; first hit = `company`.
++  5. **Hot signal:** `last_login == "Today"` → `cj_last_login_hot = true`.
++- **Output:** `RawContact(lane="paste", confidence="C", needs_review=true, …)`.
++  Pastes never carry email/phone → `location_confidence="C"` per approved design.
++
++### 6.3 Lane 2 — Resume parser (`lanes/resume.py`)
++- **Input:** a `.pdf`/`.docx`/`.doc` from `intake/.../resumes/`.
++- **Parse:** **liteparse** (local, no cloud) → clean markdown/text. liteparse is the parse step;
++  its clean output materially improves downstream extraction accuracy.
++- **Extract (text → 50-prop fields):** two-tier, fully local (§8):
++  - **Deterministic first:** regex/rules for the *regular* fields — name (filename + header),
++    email (`/[\w.+-]+@[\w-]+\.\w+/`), phone, city/ST, clearance tokens, current employer
++    (most-recent dated employment block + `COMPANY_PATS`), prior employers (→ `previously_at`).
++  - **Ollama-local fallback:** for *messy/free-text* fields the rules can't reliably get —
++    skills synthesis, role-family inference, normalized title, short summary → `pain_points`.
++- **Output:** `RawContact(lane="resume", confidence="A"|"B", needs_review=false|true, …)`.
++  A = email/phone/employer all cleanly extracted; B = partial.
++
++### 6.4 Stage A — Contact entity mapper (`spine/map_contact.py`)
++Maps a `RawContact` → canonical Contact JSON conforming to `entity_contact.txt` (50 props).
++Mapping table (populated vs null vs deferred):
++
++| Contact prop | Source | Notes |
++|---|---|---|
++| `first_name`,`last_name`,`name` | parse | |
++| `title` | parse / Ollama-normalized | |
++| `company` | employer (thumbnail or resume most-recent) | canonicalized via `COMPANY_PATS` |
++| `city`,`state`,`location` | parse | `location` via `city_key` display form |
++| `clearance_level`,`clearances[]` | parse | level = highest; array = all tokens |
++| `email`,`phone`,`mobile`,`linkedin_url` | resume only | null for paste lane |
++| `tier`,`tier_confidence` | `tier_for(title)`; conf by lane (resume=A/B, paste=C) | |
++| `programs[]`,`primes[]` | **Stage C** (filled after match) | |
++| `inferred_locations[]`,`location_confidence` | city + relo flag | paste=C, resume=A/B |
++| `pain_points[]` | Ollama (resume) | empty for paste; YAGNI-bounded |
++| `sources[]` | `["ClearanceJobs paste"]` / `["ClearanceJobs resume"]` | |
++| `source_metadata`,`source_provenance` | CJ id, last_login(+hot), salary, seniority, relo, thumbnail, liteparse meta | CJ-specific fields live here |
++| `composite_score`,`score_breakdown`,`raw_relevance_score` | **Stage C** | |
++| `needs_review` | lane confidence | paste=true |
++| `source_file` | intake filename | |
++| `bullhorn_candidate_id` | null | Bullhorn load is downstream/opt-in |
++| `created_at`,`updated_at`,`date_added` | `datetime.now(timezone.utc)` | per project datetime rule |
++| `id` | assigned at graph/CRM load | local key = `cj_id` or `slug(name)+city_key` |
++
++### 6.5 Stage B — Entity resolution / dedup (`spine/resolve.py`)
++- **Within-intake dedup:** key priority `cj_id` → `slug(name)+city_key`. A person appearing in
++  both a paste and a resume merges into one record; **resume wins** field conflicts (richer),
++  paste contributes the `last_login`/hot signal. Both sources recorded in `sources[]`.
++- **Against existing 7,339 Contacts:** load `data/dashboard/contacts_classified.json` (read-only,
++  the qdrant-contacts source) and match by `name + city_key` (and email/linkedin when present).
++  On hit → set `needs_review=true`, add `merge_candidate_id`, do **not** silently overwrite.
++- **Output:** deduped set + `intake/clearancejobs/_resolution_report.json` (collisions, merges).
++
++### 6.6 Stage C — Program matcher (`spine/match_programs.py`)
++Inverse of `build_contacts.py`: we *have* the people, we match them *to* programs. Reuse the
++exact dimensions, reversed:
++- **Company signal:** contact `company` (or any `previously_at`) ∈ {prime, `competitor_subs`} for
++  the program → strong. (Recruit-from-competitor is the core BD play.)
++- **Location signal (load-bearing):** `city_key(contact) ∈ config_city_keys(program.pop_cities)`
++  → strong; `relo=Yes` widens to same-program metros.
++- **Title/skills signal:** title/skills ∈ `role_families`/`title_keywords` → match; `tier_for`
++  prioritizes within matched set (city+title > city-only, mirroring existing logic).
++- **Clearance signal:** contact clearance ≥ program required clearance (`TS/SCI > TS > Secret >
++  Public Trust`).
++- **Composite:** weighted 0–100 with `score_breakdown` per signal. A contact can match multiple
++  programs → `programs[]`, `primes[]` populated; best program drives sheet placement.
++
++### 6.7 Storage — canonical JSON (source of truth)
++- `intake/clearancejobs/contacts/<key>.json` — one file per resolved contact (gitignored).
++- This is the **durable artifact**; graph + call sheets are projections of it. Re-runnable.
++
++### 6.8 Stage D — Call-sheet generator (`spine/call_sheet.py`)
++- **Per program (PIID):** `outputs/booz_target_ranking/humint/<PIID>_callsheet.md` + `.csv`.
++- Contents: program header (prime, competitor subs, clearance, PoP, runway from existing
++  `DURATION_RUNWAY.md`), then ranked contacts (tier, composite_score, company, current/relo,
++  clearance, **hot** flag if `last_login=Today`, CJ id, source). Markdown for reading, CSV for dialing.
++- **Privacy note:** call sheets under `outputs/` contain PII → the `humint/` subtree is gitignored.
++
++### 6.9 Stage E — Graph sync (phase 2, optional, LOCAL only)
++- Thin adapter: canonical JSON → upsert `Contact` nodes + edges (`works_at→Prime`,
++  `previously_at→Prime`, `works_on/affiliated_with→Program`, `located_in→Location`) into the
++  **local** project graph only (P5; never `pg-pts`).
++- **Build-time confirmation:** exact local graph target (project Neo4j `:7687` vs local AGE) and
++  whether the `Contact` label/schema pre-exists or must be created. MVP ships without this.
++
++---
++
++## 7. Directory layout
++
++```
++clearancejobs_pipeline/                 # new code (committed; no PII)
++  __init__.py
++  run.py                                # orchestrates Stage 0 → D
++  intake_allowlist.json                 # the explicit named-file allow-list (paths, not content)
++  lib/   classify.py  geo.py  companies.py  cj_id.py
++  lanes/ paste.py  resume.py
++  spine/ map_contact.py  resolve.py  match_programs.py  call_sheet.py  graph_sync.py
++  tests/ test_paste.py test_resume.py test_resolve.py test_match.py test_cj_id.py …
++
++intake/clearancejobs/                   # GITIGNORED — PII
++  pastes/  resumes/  contacts/  _manifest.json  _resolution_report.json
++
++outputs/booz_target_ranking/humint/     # GITIGNORED — PII call sheets
++  <PIID>_callsheet.md  <PIID>_callsheet.csv  HUMINT_SUMMARY.md
++```
++
++`.gitignore` additions: `intake/`, `outputs/booz_target_ranking/humint/`,
++`clearancejobs_pipeline/**/__pycache__/`.
++
++---
++
++## 8. Resolved open question — extraction engine
++
++**Decision:** **liteparse (parse, local) → deterministic rules (regular fields) → Ollama-local
++(messy fields).** No cloud LLM touches resume text (P4).
++
++- liteparse and Ollama are **complementary, not either/or**: liteparse converts the document to
++  clean text; the extractor turns clean text into the 50 fields.
++- Most fields (CJ id, name, email, phone, city/ST, clearance, current/prior employers) are
++  **regex-reliable** off liteparse output → deterministic, zero LLM cost, fully auditable.
++- Only genuinely unstructured fields (skills synthesis, role-family inference, normalized title)
++  use **Ollama-local**.
++- **Accuracy bake-off at build time:** on 2–3 sample resumes, compare *deterministic-only* vs
++  *deterministic + Ollama* per field against an eyeballed ground truth; keep whichever wins per
++  field. This is how we honor "whichever gives better accuracy." Ollama model chosen at build
++  after probing availability (`ollama list`); lean `qwen2.5` / `llama3.1` instruct class.
++- **Confirm path:** `intake/clearancejobs/{resumes,pastes}/`, gitignored — **confirmed**.
++
++---
++
++## 9. Error handling
++
++- **Per-file isolation:** a parse failure on one resume/paste is logged to `_manifest.json`
++  (`status: failed`, reason) and skipped — never aborts the batch.
++- **Ollama unavailable:** degrade gracefully to deterministic-only; flag affected contacts
++  `needs_review=true`, `source_metadata.ollama="unavailable"`. Pipeline still completes.
++- **Missing CJ id:** fall back to `slug(name)+city_key` dedup key; flag for review.
++- **Ambiguous employer (no `COMPANY_PATS` hit):** store raw thumbnail/employer string, leave
++  `company` best-effort, `needs_review=true`.
++- **No program match:** contact still persisted (`programs=[]`), surfaced in `HUMINT_SUMMARY.md`
++  unmatched bucket — never dropped.
++
++---
++
++## 10. Testing strategy
++
++- **Unit (fixtures, no PII committed):** synthetic paste blocks (incl. optional-field
++  permutations + both terminator styles), synthetic resume text → assert field extraction;
++  `cj_id` patterns (all 4 filename shapes incl. name-only); `city_key`/`tier_for` parity vs
++  `build_contacts.py`.
++- **Resolution:** same person in paste+resume → one record, resume wins; collision vs a seeded
++  existing-contact → `merge_candidate` flagged not overwritten.
++- **Match:** seeded contact (Insight Global, McLean VA, Cyber) → matches GSA cyber PIID with
++  expected `score_breakdown`.
++- **Privacy guard test:** assert no module except `intake.py` references a Downloads path; assert
++  `intake/` + `humint/` are gitignored.
++- Run: `python3 -m pytest clearancejobs_pipeline/tests/ -q`.
++
++---
++
++## 11. Build phases (MVP-first, atomic commits)
++
++1. **Phase 1 — shared lib + Lane 1 (paste) + Stage A + call sheet (paste-only MVP).**
++   Refactor primitives out of `build_contacts.py`; deterministic paste lane; map → JSON;
++   minimal call sheet. *Delivers dialable hot-list from the 4 pastes with zero LLM dependency.*
++2. **Phase 2 — Lane 2 (resume): liteparse + deterministic extract.** Adds the resume corpus.
++3. **Phase 3 — Ollama-local extract + bake-off.** Fill messy fields; tune.
++4. **Phase 4 — Stage B resolve/dedup (incl. vs 7,339) + Stage C program match scoring.**
++5. **Phase 5 — full call sheets + HUMINT_SUMMARY + reusability doc.**
++6. **Phase 6 (deferred) — graph sync (local only).**
++
++Phase 1 alone is shippable BD value; each later phase is additive.
++
++---
++
++## 12. Reusability
++
++To target a different prime/program set: (a) drop a new `_contract_config.json` (same schema),
++(b) update `intake_allowlist.json` with the new CJ files, (c) run `clearancejobs_pipeline/run.py
++--config <path> --out <dir>`. No code changes. The Booz run is just the first instantiation.
++
++---
++
++## 13. Build-time confirmations (not blockers)
++
++- Ollama installed + model pick (probe at Phase 3).
++- Exact local graph target for Phase 6 (Neo4j `:7687` vs local AGE; create vs reuse `Contact`).
++- Existing-contact source path: confirm **`data/dashboard/contacts_classified.json`** (the
++  qdrant-contacts source, ~7,339 contacts) at Phase 4 — NOT the different gitignored copy at
++  `dashboard/public/data/contacts_classified.json`. The pipeline only ever **reads** this file.
++```

@@ -1,0 +1,96 @@
+From aa3a17d0a7a82a6d4999584b172b273ca19ed19b Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:32:06 -0400
+Subject: [PATCH 08/10] docs(cj-pipeline): INDEX.md - purpose, files, decision
+ tree, privacy + reuse notes
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ clearancejobs_pipeline/INDEX.md | 75 +++++++++++++++++++++++++++++++++
+ 1 file changed, 75 insertions(+)
+ create mode 100644 clearancejobs_pipeline/INDEX.md
+
+diff --git a/clearancejobs_pipeline/INDEX.md b/clearancejobs_pipeline/INDEX.md
+new file mode 100644
+index 000000000..27063a2df
+--- /dev/null
++++ b/clearancejobs_pipeline/INDEX.md
+@@ -0,0 +1,75 @@
++# clearancejobs_pipeline/INDEX.md
++
++## Purpose
++
++Turns **downloaded ClearanceJobs artifacts** (result-list `.txt` pastes + resume PDFs/DOCX/DOC)
++into canonical **Contact-entity** profiles, matches them to target federal programs, and emits
++per-program **HUMINT call sheets**. Two ingest lanes converge on one map → dedup → match → emit
++spine. 100% local; cleared-personnel PII never leaves the machine and never enters git.
++
++Sits *after* program targeting (`outputs/booz_target_ranking/`) — it adds the **people layer**
++(actual cleared candidates to call) on top of the program/competitor intelligence already built.
++
++## Trigger phrases
++
++- "turn these ClearanceJobs resumes/pastes into contacts / call lists"
++- "build HUMINT call sheets for the Booz programs"
++- "parse the CJ result-list paste", "process the downloaded resumes"
++- "match these candidates to programs", "who can we call for <PIID>"
++- "rerun the contact pipeline", "enrich resumes with Ollama"
++
++## Files / Tools
++
++| File | Purpose | When to use |
++|---|---|---|
++| `run.py` | Orchestrator Stage 0→D. `python3 -m clearancejobs_pipeline.run [--ollama] [--skip-intake] [--config P] [--out D]` | Run the whole pipeline |
++| `intake.py` | Stage 0 — allow-list copy from Downloads → `intake/` (the ONLY Downloads-touching module) | Add/refresh source files |
++| `intake_allowlist.json` | The explicit named-file allow-list (privacy contract). `base_dir` = sole Downloads reference | Add a new resume/paste |
++| `models.py` | `RawContact` dataclass + `build_contact()` → 50-prop Contact schema | The data contract |
++| `lib/classify.py` | `tier_for()` — 6-tier title regex | tiering |
++| `lib/geo.py` | `city_key()`, `config_city_keys()`, `display_location()` | location matching |
++| `lib/companies.py` | `canonical_company()`, `company_in()` — Booz + competitor subs | employer matching |
++| `lib/cj_id.py` | `extract_cj_id()` from filename | candidate id / dedup key |
++| `lanes/paste.py` | Lane 1 — deterministic block-split + regex classify | parse a `.txt` paste |
++| `lanes/resume.py` | Lane 2 — liteparse/mammoth + deterministic + optional Ollama | parse a resume file |
++| `spine/map_contact.py` | Stage A — RawContact → Contact dict | — |
++| `spine/resolve.py` | Stage B — dedup (resume>paste) + vs-7,339 collision flag | — |
++| `spine/match_programs.py` | Stage C — company/PoP/title/clearance scoring + `program_hint` | tune match weights |
++| `spine/call_sheet.py` | Stage D — per-PIID MD+CSV + `HUMINT_SUMMARY.md` | output format |
++| `tests/` | pytest, synthetic fixtures only (no PII) | `python3 -m pytest clearancejobs_pipeline/tests/ -q` |
++
++**Outputs** (both GITIGNORED — PII): `intake/clearancejobs/contacts/<key>.json` (canonical) ·
++`outputs/booz_target_ranking/humint/<PIID>_callsheet.{md,csv}` + `HUMINT_SUMMARY.md` ·
++`intake/clearancejobs/_run_report.json`.
++
++## Decision tree
++
++- New ClearanceJobs files to add? → edit `intake_allowlist.json` (named entries only), then run.
++- Different prime/program set? → swap `--config <_contract_config.json>` + update allowlist; no code change.
++- Resume titles look noisy / want better matching? → add `--ollama` (local `llama3.2:3b`, memory-safe).
++- Ollama returns "unavailable"? → free RAM (needs ~3-4 GiB for the bounded-ctx 3B); pipeline degrades to
++  deterministic automatically (contacts flagged `needs_review`).
++- Candidate in unmatched bucket but clearly relevant? → matcher requires a BD reason (employer∈prime/subs,
++  or PoP-city+title, or program_hint). Review `HUMINT_SUMMARY.md` unmatched list.
++
++## Cross-references
++
++- Program-match basis: `outputs/booz_target_ranking/contacts/_contract_config.json`
++- Prior contact builder (search-plan generator, reused primitives): `outputs/booz_target_ranking/contacts/build_contacts.py`
++- Existing CRM for dedup (read-only): `data/dashboard/contacts_classified.json` (7,339 contacts)
++- Spec: `docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md`
++- Plan: `docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md`
++- Contact entity schema (50 props): the `entity_contact.txt` reference card
++
++## Maintenance notes
++
++- **PRIVACY (non-negotiable):** never glob/trawl `C:\Users\gtmar\Downloads`. Only `intake.py` (via the
++  allow-list) reads Downloads. `intake/` and `humint/` are gitignored — never `git add` them.
++- `C:\pg-pts` is READ-ONLY — graph sync (deferred Phase 6) must target a LOCAL graph only.
++- `lib/` primitives are copied from `build_contacts.py` (provenance noted). If you change tiering or
++  geo logic, keep both in sync (a future refactor could have `build_contacts.py` import `lib/`).
++- Paste parser handles the clean SEC-style result list well; messier pastes (left filter sidebar,
++  multi-page concatenation) are scrubbed by the `_is_junk_paste` filter in `run.py` — extend that
++  regex if new CJ-UI chrome leaks through.
++- Old binary `.doc` needs LibreOffice for liteparse; without it those degrade to filename-only
++  (`needs_review`). Only affects a couple files.
+-- 
+2.35.1.windows.2
+

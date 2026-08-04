@@ -1,0 +1,404 @@
+From b53520044d6243ba16e535c24c07b3aa3b550740 Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 11:57:07 -0400
+Subject: [PATCH 03/10] feat(linkedin): enrichment harness for 448 Booz Allen
+ ZoomInfo contacts
+
+Resumable scrape-orchestration harness. Script owns all file IO (work-order
+build, dedupe by linkedin_url, CSV+JSONL+per-contact MD emit, state.json
+checkpoint); the agent feeds structured records via `record`. Subcommands:
+plan / next N / record FILE / status. Outputs write to the pg-pts vault
+_analysis/ dir (separate from this repo).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+---
+ scripts/linkedin_enrich.py | 377 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 377 insertions(+)
+ create mode 100644 scripts/linkedin_enrich.py
+
+diff --git a/scripts/linkedin_enrich.py b/scripts/linkedin_enrich.py
+new file mode 100644
+index 000000000..b7f8d962c
+--- /dev/null
++++ b/scripts/linkedin_enrich.py
+@@ -0,0 +1,377 @@
++#!/usr/bin/env python3
++"""LinkedIn enrichment harness for the 449 Booz Allen ZoomInfo contacts.
++
++Separation of concerns:
++  - This script owns all file IO: read source CSV, build a prioritized work
++    order, dedupe by linkedin_url, append results, maintain a resumable
++    checkpoint (state.json). It does NOT scrape — the agent (Claude) calls the
++    LinkedIn MCP per slug and feeds structured records back via `record`.
++
++Subcommands:
++  plan            Build/refresh work order + state.json. Prints summary.
++  next N          Print next N pending contacts as JSON (priority first).
++  record FILE     Append the JSON list of scraped records in FILE to CSV+JSONL,
++                  mark each contact done in state.json. Dedupes by linkedin_url.
++  status          Print progress counts.
++
++The agent loop: `next 5` -> scrape each via MCP -> write a results JSON ->
++`record results.json` -> repeat. Resumable: re-run `next` after any crash.
++"""
++from __future__ import annotations
++
++import csv
++import json
++import os
++import re
++import sys
++from datetime import datetime, timezone
++
++# --- Paths -------------------------------------------------------------------
++REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
++INPUT_CSV = os.path.join(REPO, "Booz_allen_zoominfo_Export.csv")
++
++OUT_DIR = r"C:\pg-pts\pg-pts-vault\30-primes\Booz Allen Playbook\_analysis"
++CSV_OUT = os.path.join(OUT_DIR, "linkedin_enriched.csv")
++JSONL_OUT = os.path.join(OUT_DIR, "linkedin_enriched.jsonl")
++STATE = os.path.join(OUT_DIR, "linkedin_enrich_state.json")
++# Per-contact raw profile markdown for the Obsidian vault (signal corpus).
++MD_DIR = os.path.join(OUT_DIR, "linkedin_profiles")
++
++# --- Prioritization rules (from the matcher's low-confidence signal set) -----
++HUB_CITIES = {
++    "mclean", "mc lean", "arlington", "washington", "reston", "herndon",
++    "springfield", "annapolis junction", "chantilly",
++}
++GENERIC_TITLE_TOKENS = {
++    "consultant", "engineer", "analyst", "manager", "lead", "senior",
++    "specialist",
++}
++
++# Output schema: source join keys (verbatim) + LinkedIn-derived fields.
++JOIN_KEYS = ["First Name", "Last Name", "Company Name", "Email Address",
++             "ZoomInfo Contact ID"]
++LINKEDIN_FIELDS = [
++    "linkedin_url", "current_employer", "is_still_booz", "current_title",
++    "current_city", "current_state", "current_country", "headline",
++    "about_text", "experience", "programs", "skills", "certifications",
++    "clearance_mentions", "education", "match_status",
++]
++META_FIELDS = ["priority", "slug", "scraped_at"]
++CSV_COLUMNS = JOIN_KEYS + LINKEDIN_FIELDS + META_FIELDS
++JSON_AS_STRING = {"experience", "programs", "skills", "certifications",
++                  "education"}
++# Fields used only to build the markdown corpus; never written to CSV/JSONL.
++MD_ONLY_FIELDS = {"raw_profile"}
++
++
++def slug_from_url(url: str) -> str:
++    """linkedin.com/in/<slug>[/?...] -> <slug>. '' if not a /in/ profile URL."""
++    if not url:
++        return ""
++    m = re.search(r"/in/([^/?#]+)", url.strip())
++    return m.group(1) if m else ""
++
++
++def is_priority(city: str, title: str) -> bool:
++    c = (city or "").strip().lower()
++    if c in HUB_CITIES:
++        return True
++    t = (title or "").lower()
++    return any(tok in t for tok in GENERIC_TITLE_TOKENS)
++
++
++def load_source() -> list[dict]:
++    with open(INPUT_CSV, encoding="utf-8-sig") as f:
++        return list(csv.DictReader(f))
++
++
++def build_work_order() -> list[dict]:
++    """One entry per contact, priority contacts first, stable within tier."""
++    rows = load_source()
++    work = []
++    for i, r in enumerate(rows):
++        url = r.get("LinkedIn Contact Profile URL", "").strip()
++        city = r.get("Person City", "").strip()
++        title = r.get("Job Title", "").strip()
++        work.append({
++            "idx": i,
++            "slug": slug_from_url(url),
++            "url": url,
++            "first": r.get("First Name", "").strip(),
++            "last": r.get("Last Name", "").strip(),
++            "company": r.get("Company Name", "").strip(),
++            "email": r.get("Email Address", "").strip(),
++            "zoom_id": r.get("ZoomInfo Contact ID", "").strip(),
++            "title": title,
++            "city": city,
++            "state": r.get("Person State", "").strip(),
++            "priority": is_priority(city, title),
++            "has_url": bool(url),
++        })
++    # priority first; within each tier keep source order (deterministic)
++    work.sort(key=lambda w: (not w["priority"], w["idx"]))
++    return work
++
++
++def load_state() -> dict:
++    if os.path.exists(STATE):
++        with open(STATE, encoding="utf-8") as f:
++            return json.load(f)
++    return {"done": {}, "created_at": datetime.now(timezone.utc).isoformat()}
++
++
++def save_state(state: dict) -> None:
++    os.makedirs(OUT_DIR, exist_ok=True)
++    state["updated_at"] = datetime.now(timezone.utc).isoformat()
++    tmp = STATE + ".tmp"
++    with open(tmp, "w", encoding="utf-8") as f:
++        json.dump(state, f, indent=2)
++    os.replace(tmp, STATE)
++
++
++def done_keys(state: dict) -> set[str]:
++    """A contact is keyed by zoom_id (stable, unique per ZoomInfo row)."""
++    return set(state.get("done", {}).keys())
++
++
++def cmd_plan() -> None:
++    work = build_work_order()
++    state = load_state()
++    save_state(state)
++    os.makedirs(OUT_DIR, exist_ok=True)
++    prio = sum(1 for w in work if w["priority"])
++    no_url = sum(1 for w in work if not w["has_url"])
++    done = len(done_keys(state))
++    print(json.dumps({
++        "total": len(work),
++        "priority": prio,
++        "non_priority": len(work) - prio,
++        "no_url": no_url,
++        "already_done": done,
++        "pending": len(work) - done,
++        "out_dir": OUT_DIR,
++        "csv": CSV_OUT,
++        "jsonl": JSONL_OUT,
++        "state": STATE,
++    }, indent=2))
++
++
++def cmd_next(n: int) -> None:
++    work = build_work_order()
++    state = load_state()
++    done = done_keys(state)
++    pending = [w for w in work if w["zoom_id"] not in done]
++    batch = pending[:n]
++    # trim to fields the agent needs to scrape + echo as join keys
++    out = [{
++        "zoom_id": w["zoom_id"], "slug": w["slug"], "url": w["url"],
++        "first": w["first"], "last": w["last"], "company": w["company"],
++        "email": w["email"], "title": w["title"], "city": w["city"],
++        "state": w["state"], "priority": w["priority"], "has_url": w["has_url"],
++    } for w in batch]
++    print(json.dumps(out, indent=2, ensure_ascii=False))
++
++
++def _existing_urls() -> set[str]:
++    urls = set()
++    if os.path.exists(JSONL_OUT):
++        with open(JSONL_OUT, encoding="utf-8") as f:
++            for line in f:
++                line = line.strip()
++                if not line:
++                    continue
++                try:
++                    u = json.loads(line).get("linkedin_url", "")
++                    if u:
++                        urls.add(u.rstrip("/"))
++                except json.JSONDecodeError:
++                    pass
++    return urls
++
++
++_ILLEGAL = re.compile(r'[<>:"/\\|?*\x00-\x1f]')
++
++
++def _safe_filename(name: str) -> str:
++    name = _ILLEGAL.sub("", name).strip().strip(".")
++    return name or "unknown"
++
++
++def _yaml_escape(v) -> str:
++    if isinstance(v, bool):
++        return "true" if v else "false"
++    s = str(v).replace('"', '\\"')
++    return f'"{s}"'
++
++
++def write_md(rec: dict) -> str:
++    """Write one Obsidian-friendly markdown note with YAML frontmatter +
++    verbatim raw profile sections. Returns the path written."""
++    os.makedirs(MD_DIR, exist_ok=True)
++    name = f"{rec.get('First Name', '')} {rec.get('Last Name', '')}".strip()
++    base = _safe_filename(name) or _safe_filename(rec.get("slug", ""))
++    path = os.path.join(MD_DIR, f"{base}.md")
++    # collision with a *different* person -> disambiguate by zoom_id
++    if os.path.exists(path):
++        with open(path, encoding="utf-8") as f:
++            head = f.read(2000)
++        if f'zoom_id: {_yaml_escape(rec.get("zoom_id", ""))}' not in head:
++            path = os.path.join(MD_DIR, f"{base} ({rec.get('zoom_id', 'x')}).md")
++
++    fm = {
++        "name": name, "first": rec.get("First Name", ""),
++        "last": rec.get("Last Name", ""), "company": rec.get("Company Name", ""),
++        "email": rec.get("Email Address", ""), "zoom_id": rec.get("zoom_id", ""),
++        "linkedin_url": rec.get("linkedin_url", ""), "slug": rec.get("slug", ""),
++        "current_employer": rec.get("current_employer", ""),
++        "is_still_booz": rec.get("is_still_booz", ""),
++        "current_title": rec.get("current_title", ""),
++        "current_city": rec.get("current_city", ""),
++        "current_state": rec.get("current_state", ""),
++        "match_status": rec.get("match_status", ""),
++        "priority": rec.get("priority", ""),
++        "scraped_at": rec.get("scraped_at", ""),
++    }
++    lines = ["---"]
++    for k, v in fm.items():
++        lines.append(f"{k}: {_yaml_escape(v)}")
++    # list fields rendered as YAML lists for Obsidian Dataview queries
++    for lk in ("programs", "clearance_mentions"):
++        vals = rec.get(lk) or []
++        if isinstance(vals, str):
++            vals = [vals] if vals.strip() else []
++        lines.append(f"{lk}:")
++        for item in vals:
++            lines.append(f"  - {_yaml_escape(item)}")
++    lines.append("tags: [booz-allen, linkedin-enriched]")
++    lines.append("---\n")
++    lines.append(f"# {name}\n")
++    if rec.get("headline"):
++        lines.append(f"> {rec['headline']}\n")
++
++    raw = rec.get("raw_profile") or {}
++    if isinstance(raw, str):
++        lines.append(raw)
++    elif isinstance(raw, dict):
++        order = ["main_profile", "about", "experience", "education",
++                 "certifications", "skills", "honors", "languages",
++                 "projects", "contact_info", "activity"]
++        keys = [k for k in order if k in raw] + \
++               [k for k in raw if k not in order]
++        for k in keys:
++            val = raw[k]
++            if not val:
++                continue
++            lines.append(f"## {k.replace('_', ' ').title()}\n")
++            lines.append(str(val).strip() + "\n")
++
++    content = "\n".join(lines)
++    with open(path, "w", encoding="utf-8") as f:
++        f.write(content)
++    return path
++
++
++def cmd_record(path: str) -> None:
++    with open(path, encoding="utf-8") as f:
++        records = json.load(f)
++    if isinstance(records, dict):
++        records = [records]
++
++    os.makedirs(OUT_DIR, exist_ok=True)
++    state = load_state()
++    state.setdefault("done", {})
++    seen_urls = _existing_urls()
++
++    csv_exists = os.path.exists(CSV_OUT)
++    written = 0
++    skipped_dupe = 0
++    md_written = 0
++    with open(CSV_OUT, "a", newline="", encoding="utf-8") as cf, \
++            open(JSONL_OUT, "a", encoding="utf-8") as jf:
++        writer = csv.DictWriter(cf, fieldnames=CSV_COLUMNS, extrasaction="ignore")
++        if not csv_exists:
++            writer.writeheader()
++        stamp = datetime.now(timezone.utc).isoformat()
++        for rec in records:
++            rec.setdefault("scraped_at", stamp)
++            url = (rec.get("linkedin_url") or "").rstrip("/")
++            # dedupe by linkedin_url, but never drop not_found rows (no url)
++            if url and url in seen_urls:
++                skipped_dupe += 1
++                # still mark done so we don't re-scrape
++                if rec.get("zoom_id"):
++                    state["done"][rec["zoom_id"]] = rec.get("match_status", "duplicate")
++                continue
++            if url:
++                seen_urls.add(url)
++
++            # per-contact markdown corpus for Obsidian (uses raw_profile)
++            if rec.get("raw_profile") is not None:
++                write_md(rec)
++                md_written += 1
++
++            # JSONL: nested structures intact, but drop the bulky raw_profile
++            slim = {k: v for k, v in rec.items() if k not in MD_ONLY_FIELDS}
++            jf.write(json.dumps(slim, ensure_ascii=False) + "\n")
++
++            # CSV: nested structures as JSON strings
++            flat = {}
++            for col in CSV_COLUMNS:
++                v = rec.get(col, "")
++                if col in JSON_AS_STRING and not isinstance(v, str):
++                    v = json.dumps(v, ensure_ascii=False)
++                if isinstance(v, bool):
++                    v = str(v).lower()
++                flat[col] = v
++            writer.writerow(flat)
++
++            if rec.get("zoom_id"):
++                state["done"][rec["zoom_id"]] = rec.get("match_status", "done")
++            written += 1
++
++    save_state(state)
++    counts = {}
++    for st in state["done"].values():
++        counts[st] = counts.get(st, 0) + 1
++    print(json.dumps({
++        "written": written, "md_written": md_written,
++        "skipped_dupe": skipped_dupe,
++        "total_done": len(state["done"]), "by_status": counts,
++    }, indent=2))
++
++
++def cmd_status() -> None:
++    work = build_work_order()
++    state = load_state()
++    done = state.get("done", {})
++    counts = {}
++    for st in done.values():
++        counts[st] = counts.get(st, 0) + 1
++    print(json.dumps({
++        "total": len(work),
++        "done": len(done),
++        "pending": len(work) - len(done),
++        "by_status": counts,
++    }, indent=2))
++
++
++def main() -> None:
++    if len(sys.argv) < 2:
++        print(__doc__)
++        sys.exit(1)
++    cmd = sys.argv[1]
++    if cmd == "plan":
++        cmd_plan()
++    elif cmd == "next":
++        cmd_next(int(sys.argv[2]) if len(sys.argv) > 2 else 5)
++    elif cmd == "record":
++        cmd_record(sys.argv[2])
++    elif cmd == "status":
++        cmd_status()
++    else:
++        print(f"unknown command: {cmd}")
++        sys.exit(1)
++
++
++if __name__ == "__main__":
++    main()
+-- 
+2.35.1.windows.2
+

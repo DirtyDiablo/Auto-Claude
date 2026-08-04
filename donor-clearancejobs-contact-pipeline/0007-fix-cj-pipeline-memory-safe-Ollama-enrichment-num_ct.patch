@@ -1,0 +1,51 @@
+From 9f9bc9350e94cb64deca818cb25fb86291e1d2a4 Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:30:38 -0400
+Subject: [PATCH 07/10] fix(cj-pipeline): memory-safe Ollama enrichment
+ (num_ctx=2048, llama3.2:3b)
+
+Ollama 500d because its default 128k-context estimate demanded 11-16 GiB vs 5.7 GiB free. Bounding num_ctx to 2048 + using the 3B model loads fine and enriches resume title/role-family/skills (validated: empty det.title -> real title; GEOINT/MASINT skills surfaced). Graceful-degrade path unchanged.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ clearancejobs_pipeline/lanes/resume.py | 13 ++++++++-----
+ 1 file changed, 8 insertions(+), 5 deletions(-)
+
+diff --git a/clearancejobs_pipeline/lanes/resume.py b/clearancejobs_pipeline/lanes/resume.py
+index eb85fb5a1..aeba1575f 100644
+--- a/clearancejobs_pipeline/lanes/resume.py
++++ b/clearancejobs_pipeline/lanes/resume.py
+@@ -397,14 +397,17 @@ def _enrich_ollama(text: str, fields: dict, model: str) -> dict:
+         "Return STRICT JSON only (no markdown, no explanation):\n"
+         '{"normalized_title": "<job title>", "role_family": "<e.g. Software Engineer>", '
+         '"skills": ["<skill1>", ...], "summary": "<one sentence summary>"}\n\n'
+-        f"RESUME TEXT (first 6000 chars):\n{text[:6000]}"
++        f"RESUME TEXT (first 3500 chars):\n{text[:3500]}"
+     )
+ 
+     try:
+         resp = requests.post(
+-            "http://localhost:11434/api/generate",
+-            json={"model": model, "prompt": prompt, "stream": False},
+-            timeout=120,
++            "http://127.0.0.1:11434/api/generate",
++            # Bounded num_ctx keeps the memory estimate small (the default 128k context
++            # is what makes Ollama demand 11-16 GiB). 2048 fits a ~3.5k-char resume + output.
++            json={"model": model, "prompt": prompt, "stream": False,
++                  "options": {"num_ctx": 2048, "num_predict": 400, "temperature": 0}},
++            timeout=180,
+         )
+         resp.raise_for_status()
+         raw = resp.json().get("response", "")
+@@ -447,7 +450,7 @@ def parse_resume(
+     *,
+     program_hint: Optional[str] = None,
+     use_ollama: bool = False,
+-    ollama_model: str = "llama3.1:8b",
++    ollama_model: str = "llama3.2:3b",
+ ) -> RawContact:
+     """Parse a resume file into a RawContact.
+ 
+-- 
+2.35.1.windows.2
+

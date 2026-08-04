@@ -1,0 +1,95 @@
+From e9c79df787452846958cbc921de85e3d1254840d Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:36:01 -0400
+Subject: [PATCH 10/10] docs(cj-pipeline): completion + continuity ledger
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ ...02-1233-clearancejobs-pipeline-complete.md | 75 +++++++++++++++++++
+ 1 file changed, 75 insertions(+)
+ create mode 100644 .claude/continuity/2026-06-02-1233-clearancejobs-pipeline-complete.md
+
+diff --git a/.claude/continuity/2026-06-02-1233-clearancejobs-pipeline-complete.md b/.claude/continuity/2026-06-02-1233-clearancejobs-pipeline-complete.md
+new file mode 100644
+index 000000000..1a9242fa3
+--- /dev/null
++++ b/.claude/continuity/2026-06-02-1233-clearancejobs-pipeline-complete.md
+@@ -0,0 +1,75 @@
++# ClearanceJobs → Contact Pipeline — COMPLETE (build ledger)
++
++**Status:** ✅ Built, tested, and run end-to-end on real data. Reusable. All PII gitignored.
++**Date:** 2026-06-02  ·  **Branch:** master
++
++## Where we are RIGHT NOW
++- The full two-lane pipeline is implemented, 71/71 tests pass, and it has produced real
++  per-program HUMINT call sheets from the 4 pastes + 43 resumes.
++- An Ollama-enriched re-run (clean titles) was the last action — see `_run_report.json`.
++
++## What's DONE (commit hashes, newest first)
++- `fix(cj-pipeline): prefer LLM-normalized resume title …` — title quality
++- `fix(cj-pipeline): memory-safe Ollama enrichment (num_ctx=2048, llama3.2:3b)` (`9f9bc9350`)
++- `docs(cj-pipeline): INDEX.md …` (`aa3a17d0a`)
++- `feat(cj-pipeline): paste + resume lanes + quality fixes` (`5177ff1c1`)
++- `feat(cj-pipeline): spine - map/dedup/match/call-sheets + orchestrator` (`7f8f00956`)
++- `feat(cj-pipeline): foundation - models/lib, Stage 0 intake, privacy gitignore, tests` (`1a15e787e`)
++- `docs(bd): cj-pipeline spec + review refinements` (`53f855e15`, `1f969a24b`)
++- Plan: `docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md`
++
++## Verified results (deterministic; Ollama enrich = same counts, richer fields)
++- 47 files in (4 pastes + 43 resumes) → **388 RawContacts → 334 deduped Contacts**
++- **252 matched** across all 7 programs · **82 unmatched** (listed in summary) · **6 hot** · **0 errors**
++- 15 call sheets: `outputs/booz_target_ranking/humint/<PIID>_callsheet.{md,csv}` + `HUMINT_SUMMARY.md`
++- Per program: SEC `50310220F0017`=159 · GSA cyber `47QFRA24F0006`=165 · NIMBUS `FA875025FB015`=89 ·
++  GSA cloud `47QDCB22F0006`=63 · VA EHRM `36C10B22N10070023`=65 · VA Benefits `36C10B21N10070021`=64 ·
++  VA Modernization `36C10B21N10150057`=69
++
++## What I learned that the next session needs
++- **Ollama memory:** the box had ~5.7 GiB free; Ollama's default 128k-context estimate demands 11-16 GiB
++  → HTTP 500. Fix = `options.num_ctx=2048` + `llama3.2:3b`. With that it enriches fine (~2-5s/resume warm).
++  8B won't fit until more RAM is free. Graceful degrade (→deterministic, needs_review) works when it can't load.
++- **liteparse:** Python pkg v2.0.0, `LiteParse(quiet=True, ocr_enabled=False).parse(path).text`. OCR disabled
++  on purpose (no Tesseract installed → only stderr noise). PDF=liteparse, DOCX=mammoth, old `.doc`=needs
++  LibreOffice (2 files degrade to filename-only).
++- **Paste messiness:** SEC pastes are clean result lists; the GSA paste includes the left filter sidebar
++  ("Boolean search", clearance-filter labels) and multi-page headers → scrubbed by `_is_junk_paste` in run.py.
++- **Current-vs-prior employer:** `canonical_company` scans whole resume text, so a *prior* Booz stint can set
++  `company`. Acceptable (matcher also reads `prior_companies`); `company` shows canonical-only (raw → source_metadata).
++- **Matcher gate (the key tuning decision):** a contact matches a program only with a BD reason —
++  employer ∈ {prime, competitor subs}, OR PoP-city + title both hit, OR `program_hint`. This keeps the ~290
++  bulk paste results tight, but it parks skill-relevant **resumes** (AFRL/ISR/GEOINT people not at a competitor
++  and not in a PoP metro) in the *unmatched* bucket. They ARE listed in `HUMINT_SUMMARY.md` with full context.
++
++## Open follow-up decisions for the user (NOT done — need a call)
++1. **Resume matcher gate:** loosen for the resume lane so strong title/skills + clearance can qualify a
++   curated resume even without employer/PoP? (Trade-off: surfaces ISR/AFRL resume leads onto sheets vs.
++   risks cyber-people matching every cyber program.) Could be lane-aware + a "skills-match" signal.
++2. **Per-resume program intent:** resumes have no `program_hint`. If the user tagged each downloaded resume
++   with the program they pulled it for, matching gets much sharper. Add a `program_hint` column to the
++   resume entries in `intake_allowlist.json`.
++3. **Graph sync (spec Phase 6, deferred):** upsert Contacts/edges into a LOCAL graph (Neo4j :7687 / local AGE,
++   NEVER pg-pts). Not built yet.
++4. **Bullhorn load:** `bullhorn_candidate_id` is null; downstream `pts-bullhorn-loader` can ingest the
++   canonical JSON when desired.
++
++## How to run
++```
++python3 -m clearancejobs_pipeline.run                 # deterministic, fast
++python3 -m clearancejobs_pipeline.run --ollama        # + local llama3.2:3b enrichment
++python3 -m clearancejobs_pipeline.run --skip-intake   # reuse already-copied intake/
++python3 -m clearancejobs_pipeline.run --config <_contract_config.json> --out <dir>   # different prime
++python3 -m pytest clearancejobs_pipeline/tests/ -q    # 71 tests
++```
++Add a person: add a named entry to `clearancejobs_pipeline/intake_allowlist.json` (NEVER glob Downloads).
++
++## Files to read first (in order)
++1. `clearancejobs_pipeline/INDEX.md`
++2. `docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md`
++3. `outputs/booz_target_ranking/humint/HUMINT_SUMMARY.md` (gitignored — local only)
++4. `clearancejobs_pipeline/spine/match_programs.py` (the gate to tune, decision #1 above)
++
++## Privacy invariants (hold the line)
++- Only `intake.py` (via the allow-list) touches Downloads. `intake/` + `humint/` gitignored — verified
++  `git check-ignore`. No cloud LLM on resume text (Ollama is localhost). `C:\pg-pts` stays READ-ONLY.
+-- 
+2.35.1.windows.2
+

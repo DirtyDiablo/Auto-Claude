@@ -1,0 +1,87 @@
+From 1f969a24b35c6e003a80b5822ccb68c0dfcdd0b6 Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 11:48:46 -0400
+Subject: [PATCH 02/10] docs(bd): refine cj-pipeline spec per spec-review
+
+Count 7337 to 7339; paste split-then-classify ordering (no circular name-initial match); existing-contact path disambiguation; greedy-regex safety-net note. Spec-document-reviewer verdict: Approved, no blocking issues.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ ...2-clearancejobs-contact-pipeline-design.md | 21 ++++++++++++-------
+ 1 file changed, 14 insertions(+), 7 deletions(-)
+
+diff --git a/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md b/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+index f94f1f10d..aa80b25dc 100644
+--- a/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
++++ b/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+@@ -26,7 +26,7 @@ The user has been manually downloading from ClearanceJobs two kinds of artifact:
+ 
+ This spec defines a **reusable, fully-local** pipeline that ingests both, normalizes each
+ person into the canonical Contact schema, resolves/dedupes them (including against the existing
+-7,337-contact graph), scores them against the Booz programs, and produces call sheets.
++7,339-contact graph), scores them against the Booz programs, and produces call sheets.
+ 
+ **This is not a one-off for Booz.** The program-match basis is data (`_contract_config.json`),
+ so pointing the pipeline at a different prime / program set is a config swap, not a code change.
+@@ -92,7 +92,7 @@ Two ingest lanes converge on one normalization + match + emit spine. Everything
+                           ▼
+         per-contact Contact JSON  (intake/clearancejobs/contacts/<key>.json — gitignored)
+                           │  Stage B: entity-resolve / dedup
+-                          │   (CJ id ▸ name+location ▸ vs existing 7,337)
++                          │   (CJ id ▸ name+location ▸ vs existing 7,339)
+                           ▼
+         deduped Contact set  (+ merge_candidates flagged)
+                           │  Stage C: program match (reuse _contract_config.json
+@@ -153,8 +153,10 @@ of truth. This is the only change to existing code; no unrelated refactoring.
+ - **Algorithm (deterministic, no LLM):**
+   1. Strip the 6-line header (`Viewing … of …` / `Candidates` / `Show:` / `N per page` /
+      `Sort by:` / `<sort field>`).
+-  2. **Block-split** on the avatar terminator: a line that is a single uppercase initial
+-     (matching the block's first name) **or** the literal `user avatar`.
++  2. **Block-split FIRST, classify second.** Cut the candidate list into blocks on the avatar
++     terminator: a line that is a lone uppercase initial (`^[A-Z]$`) **or** the literal
++     `user avatar`. Do NOT try to match the initial to the block's name — that is circular at
++     split time (the name is only known *after* classification); the generic terminator suffices.
+   3. Within each block, **classify lines by regex** (NOT by position — relo/salary/second-date
+      are optional):
+      - `clearance`  → `/TS\/SCI( w Poly)?|Top Secret|Secret|Public Trust|Confidential/i`
+@@ -165,6 +167,9 @@ of truth. This is the only change to existing code; no unrelated refactoring.
+      - `city,ST`    → `/^[A-Za-z .,'-]+,\s*[A-Z]{2}$/`
+      - first non-classified line = **name**, next = **title**
+      - remaining free-text lines = **keyword_thumbnail** (carries current employer + program signals)
++     - *Field-regexes are intentionally greedy, first-match-wins.* A thumbnail line containing a
++       field token (e.g. the word "Secret" in a skills blurb) may be misrouted; the paste lane's
++       `confidence="C"` + `needs_review=true` is the intended safety net, not a perfect parse.
+   4. **Employer from thumbnail:** run `COMPANY_PATS` over `keyword_thumbnail`; first hit = `company`.
+   5. **Hot signal:** `last_login == "Today"` → `cj_last_login_hot = true`.
+ - **Output:** `RawContact(lane="paste", confidence="C", needs_review=true, …)`.
+@@ -212,7 +217,7 @@ Mapping table (populated vs null vs deferred):
+ - **Within-intake dedup:** key priority `cj_id` → `slug(name)+city_key`. A person appearing in
+   both a paste and a resume merges into one record; **resume wins** field conflicts (richer),
+   paste contributes the `last_login`/hot signal. Both sources recorded in `sources[]`.
+-- **Against existing 7,337 Contacts:** load `data/dashboard/contacts_classified.json` (read-only,
++- **Against existing 7,339 Contacts:** load `data/dashboard/contacts_classified.json` (read-only,
+   the qdrant-contacts source) and match by `name + city_key` (and email/linkedin when present).
+   On hit → set `needs_review=true`, add `merge_candidate_id`, do **not** silently overwrite.
+ - **Output:** deduped set + `intake/clearancejobs/_resolution_report.json` (collisions, merges).
+@@ -331,7 +336,7 @@ outputs/booz_target_ranking/humint/     # GITIGNORED — PII call sheets
+    minimal call sheet. *Delivers dialable hot-list from the 4 pastes with zero LLM dependency.*
+ 2. **Phase 2 — Lane 2 (resume): liteparse + deterministic extract.** Adds the resume corpus.
+ 3. **Phase 3 — Ollama-local extract + bake-off.** Fill messy fields; tune.
+-4. **Phase 4 — Stage B resolve/dedup (incl. vs 7,337) + Stage C program match scoring.**
++4. **Phase 4 — Stage B resolve/dedup (incl. vs 7,339) + Stage C program match scoring.**
+ 5. **Phase 5 — full call sheets + HUMINT_SUMMARY + reusability doc.**
+ 6. **Phase 6 (deferred) — graph sync (local only).**
+ 
+@@ -351,5 +356,7 @@ To target a different prime/program set: (a) drop a new `_contract_config.json`
+ 
+ - Ollama installed + model pick (probe at Phase 3).
+ - Exact local graph target for Phase 6 (Neo4j `:7687` vs local AGE; create vs reuse `Contact`).
+-- Existing-contact source path (`data/dashboard/contacts_classified.json`) re-confirmed at Phase 4.
++- Existing-contact source path: confirm **`data/dashboard/contacts_classified.json`** (the
++  qdrant-contacts source, ~7,339 contacts) at Phase 4 — NOT the different gitignored copy at
++  `dashboard/public/data/contacts_classified.json`. The pipeline only ever **reads** this file.
+ ```
+-- 
+2.35.1.windows.2
+

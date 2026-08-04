@@ -1,0 +1,673 @@
+From 7f8f00956a3c93c2a9a5222d39c3df2abd9d914b Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:14:49 -0400
+Subject: [PATCH 05/10] feat(cj-pipeline): spine - Stage A map, B dedup, C
+ program-match, D call sheets + orchestrator
+
+map_contact (RawContact->50-prop), resolve (within-intake dedup resume>paste + vs-7339 collision flagging), match_programs (company/PoP/title/clearance scoring reusing _contract_config.json + program_hint prior), call_sheet (per-PIID MD+CSV + HUMINT_SUMMARY), run.py orchestrator with --ollama/--skip-intake/--config. 6 spine tests green.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ clearancejobs_pipeline/run.py                 | 113 +++++++++++++++
+ clearancejobs_pipeline/spine/call_sheet.py    | 134 ++++++++++++++++++
+ clearancejobs_pipeline/spine/map_contact.py   |  17 +++
+ .../spine/match_programs.py                   | 131 +++++++++++++++++
+ clearancejobs_pipeline/spine/resolve.py       | 130 +++++++++++++++++
+ clearancejobs_pipeline/tests/test_match.py    |  44 ++++++
+ clearancejobs_pipeline/tests/test_resolve.py  |  33 +++++
+ 7 files changed, 602 insertions(+)
+ create mode 100644 clearancejobs_pipeline/run.py
+ create mode 100644 clearancejobs_pipeline/spine/call_sheet.py
+ create mode 100644 clearancejobs_pipeline/spine/map_contact.py
+ create mode 100644 clearancejobs_pipeline/spine/match_programs.py
+ create mode 100644 clearancejobs_pipeline/spine/resolve.py
+ create mode 100644 clearancejobs_pipeline/tests/test_match.py
+ create mode 100644 clearancejobs_pipeline/tests/test_resolve.py
+
+diff --git a/clearancejobs_pipeline/run.py b/clearancejobs_pipeline/run.py
+new file mode 100644
+index 000000000..25128b9d3
+--- /dev/null
++++ b/clearancejobs_pipeline/run.py
+@@ -0,0 +1,113 @@
++"""Orchestrate Stage 0 -> D.
++
++  python3 -m clearancejobs_pipeline.run                 # deterministic (default, fast)
++  python3 -m clearancejobs_pipeline.run --ollama        # + local Ollama resume enrichment
++  python3 -m clearancejobs_pipeline.run --skip-intake   # reuse already-copied intake/
++  python3 -m clearancejobs_pipeline.run --config <path> --out <dir>   # reuse for another prime
++
++Writes canonical per-contact JSON to intake/clearancejobs/contacts/ (gitignored) and
++per-program call sheets to --out (gitignored). A run report lands at
++intake/clearancejobs/_run_report.json.
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import os
++from datetime import datetime, timezone
++
++from .intake import INTAKE_ROOT, REPO, run_intake
++from .spine.call_sheet import write_call_sheets
++from .spine.map_contact import map_contacts
++from .spine.match_programs import DEFAULT_CONFIG, load_config, match_all
++from .spine.resolve import dedupe, flag_against_existing
++
++
++def _collect_raws(manifest: list, use_ollama: bool):
++    from .lanes.paste import parse_paste
++    from .lanes.resume import parse_resume
++
++    raws = []
++    errors = []
++    for m in manifest:
++        if m.get("status") == "missing":
++            continue
++        dest = os.path.join(REPO, m["dest"])
++        lane = m.get("lane")
++        hint = m.get("program_hint")
++        try:
++            if lane == "paste":
++                raws.extend(parse_paste(dest, program_hint=hint) or [])
++            else:
++                rc = parse_resume(dest, program_hint=hint, use_ollama=use_ollama)
++                if rc:
++                    raws.append(rc)
++        except Exception as e:  # per-file isolation — never abort the batch
++            errors.append({"file": m.get("name"), "lane": lane, "error": repr(e)})
++    return raws, errors
++
++
++def run_pipeline(use_ollama=False, config_path=DEFAULT_CONFIG,
++                 out_dir=None, skip_intake=False, existing_check=True):
++    out_dir = out_dir or os.path.join(REPO, "outputs", "booz_target_ranking", "humint")
++    if not skip_intake:
++        run_intake()
++    manifest = json.load(open(os.path.join(INTAKE_ROOT, "_manifest.json"), encoding="utf-8"))["files"]
++
++    raws, errors = _collect_raws(manifest, use_ollama)
++    contacts = map_contacts(raws)
++    contacts = dedupe(contacts)
++    if existing_check:
++        contacts = flag_against_existing(contacts)
++    cfg = load_config(config_path)
++    contacts = match_all(contacts, cfg)
++
++    cdir = os.path.join(INTAKE_ROOT, "contacts")
++    os.makedirs(cdir, exist_ok=True)
++    for c in contacts:
++        key = (c.get("_local_key") or "unknown").replace(":", "_").replace("|", "_").replace("/", "_")
++        with open(os.path.join(cdir, f"{key}.json"), "w", encoding="utf-8") as fh:
++            json.dump(c, fh, indent=2, ensure_ascii=False)
++
++    paths = write_call_sheets(contacts, cfg, out_dir)
++
++    report = {
++        "generated_at": datetime.now(timezone.utc).isoformat(),
++        "n_raw": len(raws),
++        "n_contacts": len(contacts),
++        "n_matched": sum(1 for c in contacts if c.get("programs")),
++        "n_hot": sum(1 for c in contacts if (c.get("source_metadata") or {}).get("cj_last_login_hot")),
++        "ollama": use_ollama,
++        "errors": errors,
++        "call_sheets": [os.path.relpath(p, REPO).replace("\\", "/") for p in paths],
++    }
++    with open(os.path.join(INTAKE_ROOT, "_run_report.json"), "w", encoding="utf-8") as fh:
++        json.dump(report, fh, indent=2)
++    return report
++
++
++def main():
++    ap = argparse.ArgumentParser(description="ClearanceJobs -> Contact -> call sheets")
++    ap.add_argument("--ollama", action="store_true", help="enable local Ollama resume enrichment")
++    ap.add_argument("--config", default=DEFAULT_CONFIG)
++    ap.add_argument("--out", default=None)
++    ap.add_argument("--skip-intake", action="store_true")
++    ap.add_argument("--no-existing-check", action="store_true")
++    args = ap.parse_args()
++
++    rep = run_pipeline(
++        use_ollama=args.ollama,
++        config_path=args.config,
++        out_dir=args.out,
++        skip_intake=args.skip_intake,
++        existing_check=not args.no_existing_check,
++    )
++    print(f"raws={rep['n_raw']} contacts={rep['n_contacts']} matched={rep['n_matched']} "
++          f"hot={rep['n_hot']} errors={len(rep['errors'])}")
++    for e in rep["errors"][:10]:
++        print("  ERR", e)
++    print("call sheets:", len(rep["call_sheets"]))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/clearancejobs_pipeline/spine/call_sheet.py b/clearancejobs_pipeline/spine/call_sheet.py
+new file mode 100644
+index 000000000..ae770aa89
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/call_sheet.py
+@@ -0,0 +1,134 @@
++"""Stage D — per-program HUMINT call sheets (Markdown + CSV) + HUMINT_SUMMARY.md.
++
++Output dir defaults to outputs/booz_target_ranking/humint/ which is GITIGNORED (PII).
++A contact appears on every program it matched (recruiters for each program want them).
++"""
++from __future__ import annotations
++
++import csv
++import io
++import os
++from collections import defaultdict
++from datetime import datetime, timezone
++
++from .match_programs import load_config
++
++CSV_COLS = ["rank", "name", "title", "company", "tier", "composite_score",
++            "clearance_level", "city", "state", "relo", "hot", "cj_id",
++            "sources", "needs_review", "programs"]
++
++
++def _row(c: dict, rank: int) -> dict:
++    sm = c.get("source_metadata") or {}
++    return {
++        "rank": rank,
++        "name": c.get("name") or "",
++        "title": c.get("title") or "",
++        "company": c.get("company") or "",
++        "tier": c.get("tier") if c.get("tier") is not None else "",
++        "composite_score": c.get("composite_score") if c.get("composite_score") is not None else "",
++        "clearance_level": c.get("clearance_level") or "",
++        "city": c.get("city") or "",
++        "state": c.get("state") or "",
++        "relo": "Yes" if sm.get("relo") else ("No" if sm.get("relo") is False else ""),
++        "hot": "HOT" if sm.get("cj_last_login_hot") else "",
++        "cj_id": sm.get("cj_id") or "",
++        "sources": "; ".join(c.get("sources") or []),
++        "needs_review": c.get("needs_review"),
++        "programs": "; ".join(c.get("programs") or []),
++    }
++
++
++def _render_csv(rows: list[dict]) -> str:
++    buf = io.StringIO()
++    w = csv.DictWriter(buf, fieldnames=CSV_COLS)
++    w.writeheader()
++    for i, c in enumerate(rows, 1):
++        w.writerow(_row(c, i))
++    return buf.getvalue()
++
++
++def _render_md(piid: str, prog: dict, rows: list[dict]) -> str:
++    subs = ", ".join(prog.get("competitor_subs", [])) or "-"
++    pop = ", ".join(prog.get("pop_cities", [])) or "-"
++    hot_n = sum(1 for c in rows if (c.get("source_metadata") or {}).get("cj_last_login_hot"))
++    out = []
++    out.append(f"# HUMINT Call Sheet — {prog.get('program','?')} (`{piid}`)\n")
++    out.append(f"- **Prime:** {prog.get('prime','?')}  ·  **Agency:** {prog.get('agency','?')}")
++    out.append(f"- **Value:** ${prog.get('value_$M','?')}M  ·  **PoP end:** {prog.get('pop_end','?')}")
++    out.append(f"- **Recruit-from competitor subs:** {subs}")
++    out.append(f"- **Clearance:** {prog.get('clearance','?')}")
++    out.append(f"- **PoP metros:** {pop}")
++    out.append(f"- **Candidates:** {len(rows)}  ·  **🔥 hot (logged in today):** {hot_n}\n")
++    out.append("| # | Name | Title | Company | Tier | Score | Clearance | Location | Relo | Hot | CJ id | Source | Review |")
++    out.append("|---|------|-------|---------|------|-------|-----------|----------|------|-----|-------|--------|--------|")
++    for i, c in enumerate(rows, 1):
++        r = _row(c, i)
++        loc = f"{r['city']}, {r['state']}".strip(", ")
++        src = "resume" if "ClearanceJobs resume" in (c.get("sources") or []) else "paste"
++        review = "⚠" if c.get("needs_review") else ""
++        out.append(f"| {i} | {r['name']} | {r['title']} | {r['company']} | {r['tier']} | "
++                   f"{r['composite_score']} | {r['clearance_level']} | {loc} | {r['relo']} | "
++                   f"{'🔥' if r['hot'] else ''} | {r['cj_id']} | {src} | {review} |")
++    out.append("\n> ⚠ = needs review (paste-lane stub or collides with an existing CRM contact). "
++               "🔥 = last ClearanceJobs login was today.\n")
++    return "\n".join(out)
++
++
++def _render_summary(cfg: dict, by_piid: dict, unmatched: list, contacts: list) -> str:
++    hot_total = sum(1 for c in contacts if (c.get("source_metadata") or {}).get("cj_last_login_hot"))
++    out = []
++    out.append("# HUMINT Pipeline Summary\n")
++    out.append(f"- Generated: {datetime.now(timezone.utc).isoformat()}")
++    out.append(f"- Total resolved contacts: **{len(contacts)}**")
++    out.append(f"- Matched to >=1 program: **{sum(1 for c in contacts if c.get('programs'))}**")
++    out.append(f"- Unmatched: **{len(unmatched)}**")
++    out.append(f"- 🔥 Hot (logged in today): **{hot_total}**\n")
++    out.append("| Program | PIID | Candidates | Hot | Top score |")
++    out.append("|---------|------|-----------|-----|-----------|")
++    for piid, prog in cfg.items():
++        rows = by_piid.get(piid, [])
++        if not rows:
++            continue
++        hot = sum(1 for c in rows if (c.get("source_metadata") or {}).get("cj_last_login_hot"))
++        top = max((c.get("composite_score") or 0) for c in rows)
++        out.append(f"| {prog.get('program','?')} | `{piid}` | {len(rows)} | {hot} | {top} |")
++    if unmatched:
++        out.append(f"\n## Unmatched ({len(unmatched)})\n")
++        out.append("Persisted with `programs=[]` — review for off-program relevance.\n")
++        for c in unmatched[:50]:
++            loc = f"{c.get('city') or ''}, {c.get('state') or ''}".strip(", ")
++            out.append(f"- {c.get('name')} — {c.get('title') or '?'} — {c.get('company') or '?'} — {loc}")
++    return "\n".join(out)
++
++
++def write_call_sheets(contacts: list[dict], config: dict | None = None,
++                      out_dir: str = "outputs/booz_target_ranking/humint") -> list[str]:
++    cfg = config if config is not None else load_config()
++    os.makedirs(out_dir, exist_ok=True)
++    by_piid: dict[str, list] = defaultdict(list)
++    unmatched: list = []
++    for c in contacts:
++        if c.get("programs"):
++            for piid in c["programs"]:
++                by_piid[piid].append(c)
++        else:
++            unmatched.append(c)
++    written: list[str] = []
++    for piid, prog in cfg.items():
++        rows = by_piid.get(piid, [])
++        if not rows:
++            continue
++        rows = sorted(rows, key=lambda c: (-(c.get("composite_score") or 0), c.get("tier") or 6))
++        mp = os.path.join(out_dir, f"{piid}_callsheet.md")
++        cp = os.path.join(out_dir, f"{piid}_callsheet.csv")
++        with open(mp, "w", encoding="utf-8") as fh:
++            fh.write(_render_md(piid, prog, rows))
++        with open(cp, "w", newline="", encoding="utf-8-sig") as fh:
++            fh.write(_render_csv(rows))
++        written += [mp, cp]
++    sp = os.path.join(out_dir, "HUMINT_SUMMARY.md")
++    with open(sp, "w", encoding="utf-8") as fh:
++        fh.write(_render_summary(cfg, by_piid, unmatched, contacts))
++    written.append(sp)
++    return written
+diff --git a/clearancejobs_pipeline/spine/map_contact.py b/clearancejobs_pipeline/spine/map_contact.py
+new file mode 100644
+index 000000000..96772a8a9
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/map_contact.py
+@@ -0,0 +1,17 @@
++"""Stage A — map RawContacts onto canonical Contact dicts.
++
++Thin batch driver over models.build_contact (which owns the 50-prop mapping).
++"""
++from __future__ import annotations
++
++from ..models import CONTACT_KEYS, RawContact, build_contact
++
++
++def map_contacts(raws: list[RawContact]) -> list[dict]:
++    """RawContact list -> canonical Contact dict list."""
++    return [build_contact(r) for r in raws]
++
++
++def validate_contact(contact: dict) -> list[str]:
++    """Return a list of missing canonical schema keys (empty = valid)."""
++    return [k for k in CONTACT_KEYS if k not in contact]
+diff --git a/clearancejobs_pipeline/spine/match_programs.py b/clearancejobs_pipeline/spine/match_programs.py
+new file mode 100644
+index 000000000..5d0c85f1a
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/match_programs.py
+@@ -0,0 +1,131 @@
++"""Stage C — score each contact against the target programs.
++
++Inverse of build_contacts.py: we HAVE the people, match them TO programs using the same
++dimensions (company / PoP-location / title-skills / clearance) reversed. Config basis =
++outputs/booz_target_ranking/contacts/_contract_config.json (prime, competitor_subs,
++clearance, pop_cities, role_families, title_keywords).
++
++A contact matches a program only when composite >= THRESHOLD AND there is a real BD reason
++(employer is the prime/a competitor sub, OR PoP-city + title both hit, OR the contact was
++sourced under that program). This prevents 'cleared person in DC' from matching every DC
++program.
++"""
++from __future__ import annotations
++
++import json
++import re
++
++from ..lib.companies import company_in
++from ..lib.geo import city_key, config_city_keys
++
++DEFAULT_CONFIG = "outputs/booz_target_ranking/contacts/_contract_config.json"
++
++WEIGHTS = {"company": 35, "location": 30, "title": 20, "clearance": 15}
++# program_hint = the candidate was curated under this program's own CJ search (strong prior).
++# Sized so hint + clearance alone clears THRESHOLD, keeping pre-qualified leads on the sheet.
++HINT_BONUS = 35
++THRESHOLD = 45
++
++_CLEAR_RANK = [
++    (re.compile(r"sci.*poly|ts/sci.*poly|poly", re.I), 5),
++    (re.compile(r"ts/sci", re.I), 4),
++    (re.compile(r"top secret|\bts\b", re.I), 3),
++    (re.compile(r"secret", re.I), 2),
++    (re.compile(r"public trust", re.I), 1),
++]
++
++
++def clearance_rank(s: str) -> int:
++    s = s or ""
++    best = 0
++    for pat, r in _CLEAR_RANK:
++        if pat.search(s):
++            best = max(best, r)
++    return best
++
++
++def load_config(path: str = DEFAULT_CONFIG) -> dict:
++    return json.load(open(path, encoding="utf-8"))["contracts"]
++
++
++def _title_re(title_keywords: list[str]):
++    return re.compile("|".join(re.escape(k) for k in title_keywords), re.I) if title_keywords else None
++
++
++def score_contact_program(contact: dict, piid: str, prog: dict) -> tuple[float, dict, bool, bool, bool]:
++    bd: dict = {}
++    sm = contact.get("source_metadata") or {}
++
++    # --- company (recruit-from prime or competitor sub) ---
++    wanted = [prog.get("prime", "")] + list(prog.get("competitor_subs", []))
++    comp_blob = " ".join(str(contact.get(f) or "") for f in ["company", "company_name"])
++    comp_blob += " " + " ".join(sm.get("prior_companies", []) or [])
++    hit_company = company_in(comp_blob, [w for w in wanted if w])
++    bd["company"] = WEIGHTS["company"] if hit_company else 0
++
++    # --- location (PoP city is load-bearing; relo widens partially) ---
++    ckeys = config_city_keys(prog.get("pop_cities", []))
++    ck = city_key(contact.get("city") or "", contact.get("state") or "")
++    loc_hit = bool(contact.get("city")) and ck in ckeys
++    if loc_hit:
++        bd["location"] = WEIGHTS["location"]
++    elif sm.get("relo"):
++        bd["location"] = round(WEIGHTS["location"] * 0.4, 1)
++    else:
++        bd["location"] = 0
++
++    # --- title / skills vs role families ---
++    tre = _title_re(prog.get("title_keywords", []))
++    title = contact.get("title") or ""
++    skills = " ".join(sm.get("skills", []) or [])
++    title_hit = bool(tre and (tre.search(title) or tre.search(skills)))
++    bd["title"] = WEIGHTS["title"] if title_hit else 0
++
++    # --- clearance ---
++    creq = clearance_rank(prog.get("clearance", ""))
++    chave = clearance_rank(contact.get("clearance_level") or " ".join(contact.get("clearances") or []))
++    if creq == 0:
++        bd["clearance"] = WEIGHTS["clearance"]
++    elif chave >= creq:
++        bd["clearance"] = WEIGHTS["clearance"]
++    elif chave > 0:
++        bd["clearance"] = round(WEIGHTS["clearance"] * 0.5, 1)
++    else:
++        bd["clearance"] = 0
++
++    # --- sourced-under-this-program prior ---
++    if sm.get("program_hint") == piid:
++        bd["program_hint"] = HINT_BONUS
++
++    composite = float(sum(bd.values()))
++    return composite, bd, hit_company, loc_hit, title_hit
++
++
++def match_all(contacts: list[dict], config: dict | None = None) -> list[dict]:
++    cfg = config if config is not None else load_config()
++    for contact in contacts:
++        best = None
++        matched: list[str] = []
++        primes: set[str] = set()
++        for piid, prog in cfg.items():
++            comp, bd, hit_company, loc_hit, title_hit = score_contact_program(contact, piid, prog)
++            has_reason = hit_company or (loc_hit and title_hit) or ("program_hint" in bd)
++            if comp >= THRESHOLD and has_reason:
++                matched.append(piid)
++                if prog.get("prime"):
++                    primes.add(prog["prime"])
++                if best is None or comp > best[1]:
++                    best = (piid, comp, bd)
++        contact["programs"] = matched
++        contact["primes"] = sorted(primes)
++        if best:
++            contact["composite_score"] = round(best[1], 1)
++            sb = dict(best[2])
++            sb["_best_piid"] = best[0]
++            contact["score_breakdown"] = sb
++            contact["raw_relevance_score"] = round(best[1], 1)
++        else:
++            contact["composite_score"] = 0.0
++            contact["score_breakdown"] = {}
++            contact["raw_relevance_score"] = 0.0
++    return contacts
+diff --git a/clearancejobs_pipeline/spine/resolve.py b/clearancejobs_pipeline/spine/resolve.py
+new file mode 100644
+index 000000000..3041e1969
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/resolve.py
+@@ -0,0 +1,130 @@
++"""Stage B — entity resolution / dedup.
++
++1. Within-intake dedup by `_local_key` (cj_id -> name+location). Resume beats paste on
++   field conflicts; paste's hot/last-login signal is preserved; sources are unioned.
++2. flag_against_existing: collision vs the existing 7,339-contact CRM
++   (data/dashboard/contacts_classified.json, read-only) by email / linkedin / normalized
++   name -> set needs_review + merge_candidate_ids. Never overwrites existing data.
++"""
++from __future__ import annotations
++
++import json
++import re
++
++EXISTING_DEFAULT = "data/dashboard/contacts_classified.json"
++
++_SCALAR_SKIP = {
++    "sources", "source_provenance", "source_metadata", "clearances", "programs",
++    "primes", "inferred_locations", "score_breakdown", "_local_key",
++    "needs_review", "tier", "composite_score", "raw_relevance_score", "note_count",
++    "authors", "pain_points",
++}
++
++
++def _empty(v) -> bool:
++    return v is None or v == "" or v == [] or v == {}
++
++
++def _is_resume(c: dict) -> bool:
++    return "ClearanceJobs resume" in (c.get("sources") or [])
++
++
++def _norm_name(rec: dict) -> str:
++    full = f"{rec.get('first_name') or ''} {rec.get('last_name') or ''}".strip()
++    if not full:
++        full = rec.get("name") or ""
++    return re.sub(r"[^a-z]", "", full.lower())
++
++
++def _norm_li(url) -> str:
++    if not url:
++        return ""
++    m = re.search(r"linkedin\.com/in/([\w\-%]+)", str(url), re.I)
++    return m.group(1).lower() if m else ""
++
++
++def _merge_into(base: dict, other: dict) -> None:
++    for k, v in other.items():
++        if k in _SCALAR_SKIP:
++            continue
++        if _empty(base.get(k)) and not _empty(v):
++            base[k] = v
++    base["sources"] = sorted(set((base.get("sources") or []) + (other.get("sources") or [])))
++    base["clearances"] = sorted({x for x in (base.get("clearances") or []) + (other.get("clearances") or []) if x})
++    base["inferred_locations"] = sorted({x for x in (base.get("inferred_locations") or []) + (other.get("inferred_locations") or []) if x})
++    sp = dict(other.get("source_provenance") or {})
++    sp.update(base.get("source_provenance") or {})
++    base["source_provenance"] = sp
++    bm = dict(base.get("source_metadata") or {})
++    om = dict(other.get("source_metadata") or {})
++    merged = {**om, **{k: v for k, v in bm.items() if not _empty(v) and v is not False}}
++    merged["cj_last_login_hot"] = bool(bm.get("cj_last_login_hot") or om.get("cj_last_login_hot"))
++    merged["cj_last_login"] = bm.get("cj_last_login") or om.get("cj_last_login") or ""
++    merged["cj_id"] = bm.get("cj_id") or om.get("cj_id")
++    base["source_metadata"] = merged
++    # keep the richer (resume) needs_review when resume is base; else OR
++    if not _is_resume(base):
++        base["needs_review"] = bool(base.get("needs_review") or other.get("needs_review"))
++
++
++def dedupe(contacts: list[dict]) -> list[dict]:
++    groups: dict[str, list[dict]] = {}
++    order: list[str] = []
++    for c in contacts:
++        k = c.get("_local_key")
++        if k not in groups:
++            groups[k] = []
++            order.append(k)
++        groups[k].append(c)
++    out = []
++    for k in order:
++        grp = groups[k]
++        if len(grp) == 1:
++            out.append(grp[0])
++            continue
++        base = next((c for c in grp if _is_resume(c)), grp[0])
++        for other in grp:
++            if other is base:
++                continue
++            _merge_into(base, other)
++        out.append(base)
++    return out
++
++
++def flag_against_existing(contacts: list[dict], existing_path: str = EXISTING_DEFAULT) -> list[dict]:
++    try:
++        data = json.load(open(existing_path, encoding="utf-8"))
++    except Exception:
++        for c in contacts:
++            c.setdefault("source_metadata", {})["existing_check"] = "unavailable"
++        return contacts
++    existing = data.get("contacts", data) if isinstance(data, dict) else data
++    by_email: dict[str, list] = {}
++    by_name: dict[str, list] = {}
++    by_li: dict[str, list] = {}
++    for e in existing:
++        eid = e.get("id")
++        em = (e.get("email") or "").strip().lower()
++        if em:
++            by_email.setdefault(em, []).append(eid)
++        nm = _norm_name(e)
++        if nm:
++            by_name.setdefault(nm, []).append(eid)
++        li = _norm_li(e.get("linkedin"))
++        if li:
++            by_li.setdefault(li, []).append(eid)
++    for c in contacts:
++        hits = set()
++        em = (c.get("email") or "").strip().lower()
++        if em and em in by_email:
++            hits.update(by_email[em])
++        li = _norm_li(c.get("linkedin_url"))
++        if li and li in by_li:
++            hits.update(by_li[li])
++        nm = _norm_name(c)
++        if nm and nm in by_name:
++            hits.update(by_name[nm])
++        if hits:
++            c["needs_review"] = True
++            c.setdefault("source_metadata", {})["merge_candidate_ids"] = [h for h in sorted(map(str, hits))][:5]
++    return contacts
+diff --git a/clearancejobs_pipeline/tests/test_match.py b/clearancejobs_pipeline/tests/test_match.py
+new file mode 100644
+index 000000000..04878e12a
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_match.py
+@@ -0,0 +1,44 @@
++from clearancejobs_pipeline.models import RawContact, build_contact
++from clearancejobs_pipeline.spine.match_programs import match_all
++
++CONFIG = {
++    "50310220F0017": {
++        "program": "SEC IT Testing & Compliance", "agency": "SEC",
++        "prime": "Booz Allen Hamilton",
++        "competitor_subs": ["Take2", "Insight Global", "Kforce"],
++        "clearance": "Public Trust / Secret",
++        "pop_cities": ["Washington, D.C., District of Columbia", "Arlington, Virginia",
++                       "Alexandria, Virginia"],
++        "role_families": ["ISSO"],
++        "title_keywords": ["ISSO", "Security Assessor", "RMF", "Compliance"],
++    }
++}
++
++
++def test_competitor_sub_in_pop_with_title_matches():
++    c = build_contact(RawContact(
++        lane="paste", source_file="x", name="Jane Doe", title="ISSO",
++        city="Arlington", state="VA", clearance_level="Secret", company="Insight Global"))
++    match_all([c], CONFIG)
++    assert "50310220F0017" in c["programs"]
++    assert c["composite_score"] >= 45
++    assert "Booz Allen Hamilton" in c["primes"]
++    assert c["score_breakdown"]["company"] == 35
++
++
++def test_program_hint_alone_qualifies():
++    c = build_contact(RawContact(
++        lane="paste", source_file="x", name="Hot Lead", title="Systems Administrator",
++        city="Dayton", state="MD", clearance_level="TS/SCI",
++        program_hint="50310220F0017"))
++    match_all([c], CONFIG)
++    assert "50310220F0017" in c["programs"]
++
++
++def test_irrelevant_contact_no_match():
++    c = build_contact(RawContact(
++        lane="paste", source_file="x", name="Bob Smith", title="Line Cook",
++        city="Miami", state="FL", clearance_level=""))
++    match_all([c], CONFIG)
++    assert c["programs"] == []
++    assert c["composite_score"] == 0.0
+diff --git a/clearancejobs_pipeline/tests/test_resolve.py b/clearancejobs_pipeline/tests/test_resolve.py
+new file mode 100644
+index 000000000..8c0d4d413
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_resolve.py
+@@ -0,0 +1,33 @@
++from clearancejobs_pipeline.models import RawContact, build_contact
++from clearancejobs_pipeline.spine.resolve import dedupe
++
++
++def test_resume_wins_over_paste_same_cjid():
++    paste = build_contact(RawContact(
++        lane="paste", source_file="p.txt", cj_id="2032428", name="Jalen Pestillo",
++        title="Engineer", cj_last_login="Today", cj_last_login_hot=True))
++    resume = build_contact(RawContact(
++        lane="resume", source_file="r.pdf", cj_id="2032428", name="Jalen Pestillo",
++        title="Senior Cyber Engineer", email="j@example.com", confidence="A",
++        needs_review=False))
++    merged = dedupe([paste, resume])
++    assert len(merged) == 1
++    m = merged[0]
++    assert m["email"] == "j@example.com"                      # resume field won
++    assert m["title"] == "Senior Cyber Engineer"
++    assert m["source_metadata"]["cj_last_login_hot"] is True  # paste signal preserved
++    assert set(m["sources"]) == {"ClearanceJobs paste", "ClearanceJobs resume"}
++
++
++def test_distinct_contacts_not_merged():
++    a = build_contact(RawContact(lane="paste", source_file="p", name="Alice Adams", city="Reston", state="VA"))
++    b = build_contact(RawContact(lane="paste", source_file="p", name="Carl Dean", city="Reston", state="VA"))
++    assert len(dedupe([a, b])) == 2
++
++
++def test_name_location_key_merges_without_cjid():
++    a = build_contact(RawContact(lane="paste", source_file="p", name="Sam Vale", city="Austin", state="TX"))
++    b = build_contact(RawContact(lane="resume", source_file="r", name="Sam Vale", city="Austin", state="TX", email="s@x.com"))
++    merged = dedupe([a, b])
++    assert len(merged) == 1
++    assert merged[0]["email"] == "s@x.com"
+-- 
+2.35.1.windows.2
+

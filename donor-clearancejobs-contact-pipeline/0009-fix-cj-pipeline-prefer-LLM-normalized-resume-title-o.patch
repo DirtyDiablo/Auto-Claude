@@ -1,0 +1,32 @@
+From 8c831f2f9adb006f8a883f36758ce82b1c5aa8e5 Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:35:13 -0400
+Subject: [PATCH 09/10] fix(cj-pipeline): prefer LLM-normalized resume title
+ over regex-noise heuristic
+
+When Ollama runs, use its normalized_title (clean) instead of the date-adjacent regex line (noisy). Falls back to deterministic when the LLM returns nothing.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ clearancejobs_pipeline/lanes/resume.py | 5 +++--
+ 1 file changed, 3 insertions(+), 2 deletions(-)
+
+diff --git a/clearancejobs_pipeline/lanes/resume.py b/clearancejobs_pipeline/lanes/resume.py
+index aeba1575f..d0dd7e35b 100644
+--- a/clearancejobs_pipeline/lanes/resume.py
++++ b/clearancejobs_pipeline/lanes/resume.py
+@@ -420,8 +420,9 @@ def _enrich_ollama(text: str, fields: dict, model: str) -> dict:
+         fields["extra"] = {**fields.get("extra", {}), "ollama": "unavailable"}
+         return fields
+ 
+-    # Merge: prefer ollama title when deterministic title is weak/empty
+-    if parsed.get("normalized_title") and not fields.get("title"):
++    # Prefer the LLM-normalized title over the regex heuristic (which often grabs a noisy
++    # date-adjacent line); fall back to the deterministic title only when the LLM gave nothing.
++    if parsed.get("normalized_title"):
+         fields["title"] = parsed["normalized_title"]
+ 
+     # Extend skills (deduplicated)
+-- 
+2.35.1.windows.2
+

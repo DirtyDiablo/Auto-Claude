@@ -1,0 +1,867 @@
+From 1a15e787e1ecf98956c30129fe02f33030a785cd Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 12:06:21 -0400
+Subject: [PATCH 04/10] feat(cj-pipeline): foundation - models/lib contracts,
+ Stage 0 intake, privacy gitignore, tests
+
+Two-lane CJ->Contact pipeline scaffold. lib/ reuses build_contacts.py primitives (tier_for, city_key, COMPANY_PATS, cj_id). models.RawContact + build_contact map to the 50-prop Contact schema. intake.py = sole Downloads-touching module (allow-list copy, gitignored). 18 foundation tests green.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ .gitignore                                    |   5 +
+ clearancejobs_pipeline/__init__.py            |  13 ++
+ clearancejobs_pipeline/intake.py              |  90 +++++++++
+ clearancejobs_pipeline/intake_allowlist.json  |  53 ++++++
+ clearancejobs_pipeline/lanes/__init__.py      |   1 +
+ clearancejobs_pipeline/lib/__init__.py        |   5 +
+ clearancejobs_pipeline/lib/cj_id.py           |  40 ++++
+ clearancejobs_pipeline/lib/classify.py        |  25 +++
+ clearancejobs_pipeline/lib/companies.py       |  48 +++++
+ clearancejobs_pipeline/lib/geo.py             |  61 ++++++
+ clearancejobs_pipeline/models.py              | 176 ++++++++++++++++++
+ clearancejobs_pipeline/spine/__init__.py      |   1 +
+ clearancejobs_pipeline/tests/test_cj_id.py    |  29 +++
+ clearancejobs_pipeline/tests/test_classify.py |  24 +++
+ clearancejobs_pipeline/tests/test_geo.py      |  21 +++
+ clearancejobs_pipeline/tests/test_models.py   |  32 ++++
+ ...26-06-02-clearancejobs-contact-pipeline.md |  88 +++++++++
+ 17 files changed, 712 insertions(+)
+ create mode 100644 clearancejobs_pipeline/__init__.py
+ create mode 100644 clearancejobs_pipeline/intake.py
+ create mode 100644 clearancejobs_pipeline/intake_allowlist.json
+ create mode 100644 clearancejobs_pipeline/lanes/__init__.py
+ create mode 100644 clearancejobs_pipeline/lib/__init__.py
+ create mode 100644 clearancejobs_pipeline/lib/cj_id.py
+ create mode 100644 clearancejobs_pipeline/lib/classify.py
+ create mode 100644 clearancejobs_pipeline/lib/companies.py
+ create mode 100644 clearancejobs_pipeline/lib/geo.py
+ create mode 100644 clearancejobs_pipeline/models.py
+ create mode 100644 clearancejobs_pipeline/spine/__init__.py
+ create mode 100644 clearancejobs_pipeline/tests/test_cj_id.py
+ create mode 100644 clearancejobs_pipeline/tests/test_classify.py
+ create mode 100644 clearancejobs_pipeline/tests/test_geo.py
+ create mode 100644 clearancejobs_pipeline/tests/test_models.py
+ create mode 100644 docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
+
+diff --git a/.gitignore b/.gitignore
+index c39c59fa7..5fc936693 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -15,6 +15,11 @@ __pycache__/
+ *.pyc
+ .venv/
+ 
++# ClearanceJobs pipeline — cleared-personnel PII (NEVER commit)
++intake/
++/outputs/booz_target_ranking/humint/
++clearancejobs_pipeline/**/__pycache__/
++
+ # Node
+ node_modules/
+ dist/
+diff --git a/clearancejobs_pipeline/__init__.py b/clearancejobs_pipeline/__init__.py
+new file mode 100644
+index 000000000..25a753abb
+--- /dev/null
++++ b/clearancejobs_pipeline/__init__.py
+@@ -0,0 +1,13 @@
++"""ClearanceJobs -> Contact entity pipeline.
++
++Two-lane local pipeline that turns downloaded ClearanceJobs result-list pastes and
++resumes into canonical Contact-entity profiles, matches them to target programs, and
++emits per-program HUMINT call sheets.
++
++Spec: docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
++Plan: docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
++
++PRIVACY: cleared-personnel PII. `intake/` and `outputs/.../humint/` are gitignored.
++Only `intake.py` ever touches a Downloads path (allow-list copy). Extraction is 100% local.
++"""
++__all__ = ["models", "lib", "lanes", "spine", "intake"]
+diff --git a/clearancejobs_pipeline/intake.py b/clearancejobs_pipeline/intake.py
+new file mode 100644
+index 000000000..cf095e625
+--- /dev/null
++++ b/clearancejobs_pipeline/intake.py
+@@ -0,0 +1,90 @@
++"""Stage 0 — allow-list intake.
++
++The ONLY module that copies files out of the Downloads area, and it does so strictly
++from the explicit named-file allow-list (`intake_allowlist.json`). It NEVER globs or
++trawls Downloads. Idempotent: a file whose destination already matches by sha256 is skipped.
++
++Run: python3 -m clearancejobs_pipeline.intake
++"""
++from __future__ import annotations
++
++import hashlib
++import json
++import os
++import shutil
++from datetime import datetime, timezone
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++REPO = os.path.dirname(HERE)
++ALLOWLIST = os.path.join(HERE, "intake_allowlist.json")
++INTAKE_ROOT = os.path.join(REPO, "intake", "clearancejobs")
++
++
++def _sha256(path: str) -> str:
++    h = hashlib.sha256()
++    with open(path, "rb") as f:
++        for chunk in iter(lambda: f.read(65536), b""):
++            h.update(chunk)
++    return h.hexdigest()
++
++
++def run_intake(allowlist_path: str = ALLOWLIST, intake_root: str = INTAKE_ROOT) -> list:
++    from .lib.cj_id import extract_cj_id
++
++    spec = json.load(open(allowlist_path, encoding="utf-8"))
++    base_dir = spec["base_dir"]
++    entries = spec.get("files", [])
++
++    pastes_dir = os.path.join(intake_root, "pastes")
++    resumes_dir = os.path.join(intake_root, "resumes")
++    for d in (pastes_dir, resumes_dir, os.path.join(intake_root, "contacts")):
++        os.makedirs(d, exist_ok=True)
++
++    manifest = []
++    copied = skipped = missing = 0
++    for e in entries:
++        name = e["name"]
++        lane = e["lane"]
++        src = os.path.join(base_dir, name)
++        dest_dir = pastes_dir if lane == "paste" else resumes_dir
++        if not os.path.exists(src):
++            manifest.append({"name": name, "lane": lane, "status": "missing"})
++            missing += 1
++            continue
++        dest = os.path.join(dest_dir, name)
++        sha = _sha256(src)
++        if os.path.exists(dest) and _sha256(dest) == sha:
++            status = "skipped(identical)"
++            skipped += 1
++        else:
++            shutil.copy2(src, dest)
++            status = "copied"
++            copied += 1
++        manifest.append({
++            "name": name,
++            "dest": os.path.relpath(dest, REPO).replace("\\", "/"),
++            "lane": lane,
++            "cj_id": extract_cj_id(name),
++            "program_hint": e.get("program_hint"),
++            "sha256": sha,
++            "status": status,
++            "copied_at": datetime.now(timezone.utc).isoformat(),
++        })
++
++    json.dump(
++        {
++            "generated_at": datetime.now(timezone.utc).isoformat(),
++            "counts": {"copied": copied, "skipped": skipped, "missing": missing,
++                       "total": len(entries)},
++            "files": manifest,
++        },
++        open(os.path.join(intake_root, "_manifest.json"), "w", encoding="utf-8"),
++        indent=2,
++    )
++    print(f"intake: copied={copied} skipped={skipped} missing={missing} "
++          f"total={len(entries)} -> {intake_root}")
++    return manifest
++
++
++if __name__ == "__main__":
++    run_intake()
+diff --git a/clearancejobs_pipeline/intake_allowlist.json b/clearancejobs_pipeline/intake_allowlist.json
+new file mode 100644
+index 000000000..89095efef
+--- /dev/null
++++ b/clearancejobs_pipeline/intake_allowlist.json
+@@ -0,0 +1,53 @@
++{
++  "_doc": "EXPLICIT allow-list — the ONLY files the pipeline copies out of base_dir. This is the privacy contract (spec P1/P2): never glob/trawl Downloads. To add a person, add a named entry here. base_dir is the single Downloads reference in the whole codebase.",
++  "base_dir": "C:\\Users\\gtmar\\Downloads",
++  "files": [
++    {"name": "2. SEC IT Test & Compliance 50310220F0017 #1.txt", "lane": "paste", "program_hint": "50310220F0017"},
++    {"name": "2. SEC IT Test & Compliance 50310220F0017 #2.txt", "lane": "paste", "program_hint": "50310220F0017"},
++    {"name": "3. GSA Cyber_Incident Response 47QFRA24F0006.txt", "lane": "paste", "program_hint": "47QFRA24F0006"},
++    {"name": "Jalen Pestillo.txt", "lane": "paste"},
++    {"name": "jalen-pestillo-2032428.pdf", "lane": "resume"},
++    {"name": "brian-lathrop-2292159.pdf", "lane": "resume"},
++    {"name": "ben-ausdenmoore-1998995.docx", "lane": "resume"},
++    {"name": "m-katea-hammond-2034059.pdf", "lane": "resume"},
++    {"name": "stephen-lebb-pmp-cism-2475540.docx", "lane": "resume"},
++    {"name": "chelsey-oboyle-2520359.pdf", "lane": "resume"},
++    {"name": "terry-munson-2388707.pdf", "lane": "resume"},
++    {"name": "tony-pottakkal-2497038.pdf", "lane": "resume"},
++    {"name": "michael-romig-2332557.pdf", "lane": "resume"},
++    {"name": "karen-kraybill-2537684.docx", "lane": "resume"},
++    {"name": "siri-lerum-2009810.docx", "lane": "resume"},
++    {"name": "shawn-hough-2138163.docx", "lane": "resume"},
++    {"name": "carlos-bernard-1851028.pdf", "lane": "resume"},
++    {"name": "Charles Dunkin.pdf", "lane": "resume"},
++    {"name": "tim-cullipher-2513827.docx", "lane": "resume"},
++    {"name": "piotr-ozdzynski-2301831.pdf", "lane": "resume"},
++    {"name": "Charles Burks.pdf", "lane": "resume"},
++    {"name": "bradley-miller-2575004.pdf", "lane": "resume"},
++    {"name": "Sara Vosberg.pdf", "lane": "resume"},
++    {"name": "matthew-coburn-2183901.pdf", "lane": "resume"},
++    {"name": "anonymous19032-2466200.docx", "lane": "resume"},
++    {"name": "shane-sullivan-2603228.docx", "lane": "resume"},
++    {"name": "david-weiding-1244949.pdf", "lane": "resume"},
++    {"name": "clearancejobs.com_resumes_701487_resume.pdf", "lane": "resume"},
++    {"name": "alyssa-foland-2608203.docx", "lane": "resume"},
++    {"name": "lorraine-romleski-842320.docx", "lane": "resume"},
++    {"name": "luis-mariani-2317239.pdf", "lane": "resume"},
++    {"name": "Kenneth Polando.pdf", "lane": "resume"},
++    {"name": "terry-davis-2021550.docx", "lane": "resume"},
++    {"name": "anonymous1239799-2581233.docx", "lane": "resume"},
++    {"name": "anson-sokoloff-2247364.docx", "lane": "resume"},
++    {"name": "joel-machen-2612432.docx", "lane": "resume"},
++    {"name": "stephanie-spence-2602806.docx", "lane": "resume"},
++    {"name": "kelvin-flowers-2498049.pdf", "lane": "resume"},
++    {"name": "jerry-lester-1803431.doc", "lane": "resume"},
++    {"name": "brian-woolley-2239962.pdf", "lane": "resume"},
++    {"name": "victor-manzueta-2225974.docx", "lane": "resume"},
++    {"name": "joe-davisson-2473053.docx", "lane": "resume"},
++    {"name": "caleb-rupracht-418821.doc", "lane": "resume"},
++    {"name": "william-caplan-2521729.docx", "lane": "resume"},
++    {"name": "william-murray-2353177.docx", "lane": "resume"},
++    {"name": "anonymous1279428-2635656.docx", "lane": "resume"},
++    {"name": "garrett-aziz-2639762.pdf", "lane": "resume"}
++  ]
++}
+diff --git a/clearancejobs_pipeline/lanes/__init__.py b/clearancejobs_pipeline/lanes/__init__.py
+new file mode 100644
+index 000000000..1cb9ef5c8
+--- /dev/null
++++ b/clearancejobs_pipeline/lanes/__init__.py
+@@ -0,0 +1 @@
++"""Ingest lanes. Each lane parses raw intake files into models.RawContact records."""
+diff --git a/clearancejobs_pipeline/lib/__init__.py b/clearancejobs_pipeline/lib/__init__.py
+new file mode 100644
+index 000000000..0ab39aa06
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/__init__.py
+@@ -0,0 +1,5 @@
++"""Reusable primitives (provenance: outputs/booz_target_ranking/contacts/build_contacts.py).
++
++These are the single source of truth for tier classification, location normalization,
++company canonicalization, and CJ-id extraction used across the pipeline.
++"""
+diff --git a/clearancejobs_pipeline/lib/cj_id.py b/clearancejobs_pipeline/lib/cj_id.py
+new file mode 100644
+index 000000000..4acdf526d
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/cj_id.py
+@@ -0,0 +1,40 @@
++"""Extract the ClearanceJobs candidate ID (and a name slug) from a resume filename.
++
++Observed filename shapes:
++  jalen-pestillo-2032428.pdf                 -> 2032428
++  clearancejobs.com_resumes_701487_resume.pdf-> 701487
++  anonymous19032-2466200.docx                -> 2466200
++  anonymous1239799-2581233.docx              -> 2581233
++  Charles Dunkin.pdf                         -> None (name-only)
++"""
++from __future__ import annotations
++
++import os
++import re
++
++_RESUMES = re.compile(r"_resumes_(\d{4,})_", re.I)
++_TRAILING = re.compile(r"-(\d{4,})(?:\.[A-Za-z0-9]+)?$")
++
++
++def extract_cj_id(filename: str) -> str | None:
++    """Return the CJ candidate id string, or None when the filename has none."""
++    base = os.path.basename(filename or "")
++    stem = os.path.splitext(base)[0]
++    m = _RESUMES.search(base)
++    if m:
++        return m.group(1)
++    m = _TRAILING.search(stem)
++    if m:
++        return m.group(1)
++    return None
++
++
++def name_slug_from_filename(filename: str) -> str:
++    """Best-effort person slug from filename (fallback dedup key when no CJ id)."""
++    base = os.path.basename(filename or "")
++    stem = os.path.splitext(base)[0]
++    stem = re.sub(r"clearancejobs\.com_resumes_\d+_?", "", stem, flags=re.I)
++    stem = re.sub(r"_?resume$", "", stem, flags=re.I)
++    stem = re.sub(r"-?\d{4,}$", "", stem)          # drop trailing CJ id
++    stem = re.sub(r"^anonymous\d*", "anonymous", stem, flags=re.I)
++    return re.sub(r"[^a-z0-9]+", "-", stem.lower()).strip("-")
+diff --git a/clearancejobs_pipeline/lib/classify.py b/clearancejobs_pipeline/lib/classify.py
+new file mode 100644
+index 000000000..a448f18f8
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/classify.py
+@@ -0,0 +1,25 @@
++"""6-tier BD contact classification by job title.
++
++Provenance: bd-contact-classification skill / build_contacts.py TIER_PATTERNS.
++Tier 1 = decision makers ... Tier 6 = general network.
++"""
++from __future__ import annotations
++
++import re
++
++TIER_PATTERNS = [
++    (1, re.compile(r"(CEO|CTO|CFO|CIO|\bVP\b|Vice President|President|Director|Partner|Managing|Principal|Chief|Head of)", re.I)),
++    (2, re.compile(r"(Architect|Senior Engineer|Principal Engineer|Fellow|Lead Engineer|Tech Lead|Staff Engineer)", re.I)),
++    (3, re.compile(r"(Program Manager|Project Manager|\bPMO\b|\bCOR\b|\bGTL\b|COTR|Contracting Officer|Capture|Scrum Master|Product Owner)", re.I)),
++    (4, re.compile(r"(Speaker|Board|Chair|Advisory|Former|Retired|Liaison|Small Business)", re.I)),
++    (5, re.compile(r"(Analyst|Consultant|Advisor|Research|Journalist)", re.I)),
++]
++
++
++def tier_for(title: str) -> int:
++    """Return BD tier 1-6 for a job title (6 = no pattern matched)."""
++    t = title or ""
++    for tier, pat in TIER_PATTERNS:
++        if pat.search(t):
++            return tier
++    return 6
+diff --git a/clearancejobs_pipeline/lib/companies.py b/clearancejobs_pipeline/lib/companies.py
+new file mode 100644
+index 000000000..c18c99a15
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/companies.py
+@@ -0,0 +1,48 @@
++"""Company canonicalization for the recruit-from competitor set.
++
++Provenance: build_contacts.py COMPANY_PATS. `canonical_company` maps a free-text
++employer blob (e.g. a ClearanceJobs keyword-thumbnail line like 'INSIGHT GLOBAL, LLC')
++to a canonical company name, or None if no known competitor/prime matched.
++
++These are the BD-relevant companies (Booz Allen prime + its staffing competitor subs).
++For a generic employer not in this set, callers keep the raw string.
++"""
++from __future__ import annotations
++
++import re
++
++COMPANY_PATS = {
++    "Booz Allen Hamilton": re.compile(r"booz\s*allen|@bah\.com|\bbah\b", re.I),
++    "Take2": re.compile(r"take\s*2\b|take2consulting", re.I),
++    "ECS Federal": re.compile(r"\becs federal\b|@ecstech|ecstech\.com", re.I),
++    "Insight Global": re.compile(r"insight\s*global|insightglobal", re.I),
++    "Kforce": re.compile(r"\bkforce\b", re.I),
++    "Beacon Hill": re.compile(r"beacon\s*hill", re.I),
++}
++
++
++def canonical_company(text: str) -> str | None:
++    """First canonical company whose pattern hits `text`, else None."""
++    blob = text or ""
++    for name, pat in COMPANY_PATS.items():
++        if pat.search(blob):
++            return name
++    return None
++
++
++def company_in(text: str, wanted: list[str]) -> str | None:
++    """Return the first company in `wanted` whose pattern hits `text`, else None.
++
++    `wanted` are canonical names (e.g. from _contract_config.json prime + competitor_subs).
++    Falls back to a loose token match for wanted names not in COMPANY_PATS.
++    """
++    blob = text or ""
++    for name in wanted or []:
++        pat = COMPANY_PATS.get(name)
++        if pat and pat.search(blob):
++            return name
++        # loose fallback for companies not in the curated pattern set
++        tok = re.sub(r"[^a-z0-9]+", r"\\s*", name.lower()).strip()
++        if tok and re.search(tok, blob, re.I):
++            return name
++    return None
+diff --git a/clearancejobs_pipeline/lib/geo.py b/clearancejobs_pipeline/lib/geo.py
+new file mode 100644
+index 000000000..9835a9530
+--- /dev/null
++++ b/clearancejobs_pipeline/lib/geo.py
+@@ -0,0 +1,61 @@
++"""Location normalization.
++
++Provenance: build_contacts.py (ABBR2FULL, city_key, config_city_keys).
++`city_key` collapses 'McLean'/'Mc Lean' + state -> 'mclean|virginia' and folds the
++Washington D.C. variants so PoP-city comparisons are robust.
++"""
++from __future__ import annotations
++
++import re
++
++ABBR2FULL = {
++    "AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas",
++    "CA": "California", "CO": "Colorado", "CT": "Connecticut", "DE": "Delaware",
++    "FL": "Florida", "GA": "Georgia", "HI": "Hawaii", "ID": "Idaho",
++    "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas",
++    "KY": "Kentucky", "LA": "Louisiana", "ME": "Maine", "MD": "Maryland",
++    "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota",
++    "MS": "Mississippi", "MO": "Missouri", "MT": "Montana", "NE": "Nebraska",
++    "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
++    "NM": "New Mexico", "NY": "New York", "NC": "North Carolina",
++    "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma", "OR": "Oregon",
++    "PA": "Pennsylvania", "RI": "Rhode Island", "SC": "South Carolina",
++    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah",
++    "VT": "Vermont", "VA": "Virginia", "WA": "Washington",
++    "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming",
++    "DC": "District of Columbia", "PR": "Puerto Rico",
++}
++FULL2ABBR = {v.lower(): k for k, v in ABBR2FULL.items()}
++
++
++def city_key(city: str, state: str) -> str:
++    """Normalize (city, state) -> 'city|state' comparable key. DC variants folded."""
++    c = re.sub(r"[^a-z]", "", (city or "").lower())
++    c = re.sub(r"(districtofcolumbia|dc)$", "", c)
++    s = (state or "").strip()
++    if len(s) == 2 and s.upper() in ABBR2FULL:
++        s = ABBR2FULL[s.upper()]
++    s = re.sub(r"[^a-z]", "", s.lower())
++    return f"{c}|{s}"
++
++
++def config_city_keys(pop_cities: list[str]) -> set[str]:
++    """Program PoP-city strings ('City, State') -> set of comparable city_keys."""
++    keys = set()
++    for pc in pop_cities or []:
++        parts = [p.strip() for p in pc.split(",")]
++        city = parts[0] if parts else ""
++        state = parts[-1] if len(parts) > 1 else ""
++        keys.add(city_key(city, state))
++    return keys
++
++
++def display_location(city: str, state: str) -> str:
++    """'City, ST' display form (empty string if no city)."""
++    city = (city or "").strip()
++    state = (state or "").strip()
++    if not city and not state:
++        return ""
++    if state and len(state) > 2:
++        state = FULL2ABBR.get(state.lower(), state)
++    return f"{city}, {state}".strip(", ").strip()
+diff --git a/clearancejobs_pipeline/models.py b/clearancejobs_pipeline/models.py
+new file mode 100644
+index 000000000..ae732eb68
+--- /dev/null
++++ b/clearancejobs_pipeline/models.py
+@@ -0,0 +1,176 @@
++"""Shared data contracts.
++
++`RawContact` is the lane-agnostic intermediate every lane (paste/resume) emits.
++`build_contact()` maps a RawContact onto the canonical 50-prop Contact schema
++(see spec 6.4). programs/primes/composite_score/score_breakdown are filled later by
++spine.match_programs; tier is filled here from the title.
++"""
++from __future__ import annotations
++
++import re
++from dataclasses import dataclass, field
++from datetime import datetime, timezone
++from typing import Optional
++
++LANE_PASTE = "paste"
++LANE_RESUME = "resume"
++
++
++def utcnow_iso() -> str:
++    return datetime.now(timezone.utc).isoformat()
++
++
++def slug(name: str) -> str:
++    return re.sub(r"[^a-z0-9]+", "-", (name or "").lower()).strip("-")
++
++
++def split_name(full: str) -> tuple[str, str]:
++    parts = [p for p in re.split(r"\s+", (full or "").strip()) if p]
++    if not parts:
++        return "", ""
++    if len(parts) == 1:
++        return parts[0], ""
++    return parts[0], parts[-1]
++
++
++@dataclass
++class RawContact:
++    """Lane-agnostic intermediate. Lanes return List[RawContact]."""
++    lane: str
++    source_file: str
++    cj_id: Optional[str] = None
++    name: str = ""
++    first_name: str = ""
++    last_name: str = ""
++    title: str = ""
++    company: str = ""            # canonical current employer (if matched)
++    company_raw: str = ""        # raw employer string as observed
++    city: str = ""
++    state: str = ""
++    clearance_level: str = ""
++    clearances: list = field(default_factory=list)
++    email: str = ""
++    phone: str = ""
++    linkedin_url: str = ""
++    relo: Optional[bool] = None
++    salary_expectation: str = ""
++    seniority_band: str = ""
++    cj_last_login: str = ""
++    cj_last_login_hot: bool = False
++    keyword_thumbnail: str = ""
++    prior_companies: list = field(default_factory=list)
++    skills: list = field(default_factory=list)
++    program_hint: Optional[str] = None   # PIID the paste/resume was sourced under
++    confidence: str = "C"                # A/B/C
++    needs_review: bool = True
++    extra: dict = field(default_factory=dict)
++
++    def __post_init__(self):
++        if not self.name and (self.first_name or self.last_name):
++            self.name = f"{self.first_name} {self.last_name}".strip()
++        if self.name and not (self.first_name or self.last_name):
++            self.first_name, self.last_name = split_name(self.name)
++
++    def local_key(self) -> str:
++        """Primary dedup key: cj_id when present, else name+location."""
++        from .lib.geo import city_key
++        if self.cj_id:
++            return f"cj:{self.cj_id}"
++        return f"nk:{slug(self.name)}|{city_key(self.city, self.state)}"
++
++
++# canonical 50-prop key order (mirrors entity_contact.txt)
++CONTACT_KEYS = [
++    "id", "bullhorn_candidate_id", "first_name", "last_name", "name", "email", "phone",
++    "mobile", "title", "occupation", "company", "company_name", "status", "address",
++    "city", "state", "zip_code", "location", "clearance_level", "clearances",
++    "linkedin_url", "owner", "tier", "tier_confidence", "programs", "primes",
++    "pain_points", "date_added", "date_modified", "last_activity_date", "note_count",
++    "interaction_history", "outreach_recommendation", "best_channel", "authors",
++    "inferred_locations", "location_confidence", "sources", "source_metadata",
++    "source_provenance", "composite_score", "score_breakdown", "raw_relevance_score",
++    "needs_review", "custom_text1", "custom_text2", "custom_text3", "source_file",
++    "created_at", "updated_at",
++]
++
++
++def build_contact(raw: RawContact, contact_id: Optional[int] = None) -> dict:
++    """Map a RawContact onto the canonical Contact dict (50 schema props + _local_key)."""
++    from .lib.classify import tier_for
++    from .lib.geo import display_location
++
++    first = raw.first_name or split_name(raw.name)[0]
++    last = raw.last_name or split_name(raw.name)[1]
++    now = utcnow_iso()
++    loc = display_location(raw.city, raw.state)
++    src = "ClearanceJobs paste" if raw.lane == LANE_PASTE else "ClearanceJobs resume"
++    clearances = raw.clearances or ([raw.clearance_level] if raw.clearance_level else [])
++    best_channel = "LinkedIn" if raw.linkedin_url else ("Email" if raw.email else "Phone")
++
++    c = {
++        "id": contact_id,
++        "bullhorn_candidate_id": None,
++        "first_name": first,
++        "last_name": last,
++        "name": raw.name or f"{first} {last}".strip(),
++        "email": raw.email or None,
++        "phone": raw.phone or None,
++        "mobile": None,
++        "title": raw.title or None,
++        "occupation": None,
++        "company": raw.company or raw.company_raw or None,
++        "company_name": raw.company or None,
++        "status": "new",
++        "address": None,
++        "city": raw.city or None,
++        "state": raw.state or None,
++        "zip_code": None,
++        "location": loc or None,
++        "clearance_level": raw.clearance_level or None,
++        "clearances": clearances,
++        "linkedin_url": raw.linkedin_url or None,
++        "owner": None,
++        "tier": tier_for(raw.title),
++        "tier_confidence": raw.confidence,
++        "programs": [],
++        "primes": [],
++        "pain_points": list(raw.extra.get("pain_points", [])),
++        "date_added": now,
++        "date_modified": now,
++        "last_activity_date": None,
++        "note_count": 0,
++        "interaction_history": "",
++        "outreach_recommendation": "",
++        "best_channel": best_channel,
++        "authors": [],
++        "inferred_locations": [loc] if loc else [],
++        "location_confidence": "C" if raw.lane == LANE_PASTE else raw.confidence,
++        "sources": [src],
++        "source_metadata": {
++            "cj_id": raw.cj_id,
++            "cj_last_login": raw.cj_last_login,
++            "cj_last_login_hot": raw.cj_last_login_hot,
++            "salary_expectation": raw.salary_expectation,
++            "seniority_band": raw.seniority_band,
++            "relo": raw.relo,
++            "keyword_thumbnail": raw.keyword_thumbnail,
++            "skills": list(raw.skills),
++            "prior_companies": list(raw.prior_companies),
++            "program_hint": raw.program_hint,
++            "lane": raw.lane,
++            **dict(raw.extra.get("source_metadata", {})),
++        },
++        "source_provenance": {src: raw.source_file},
++        "composite_score": None,
++        "score_breakdown": {},
++        "raw_relevance_score": None,
++        "needs_review": raw.needs_review,
++        "custom_text1": None,
++        "custom_text2": None,
++        "custom_text3": None,
++        "source_file": raw.source_file,
++        "created_at": now,
++        "updated_at": now,
++        "_local_key": raw.local_key(),
++    }
++    return c
+diff --git a/clearancejobs_pipeline/spine/__init__.py b/clearancejobs_pipeline/spine/__init__.py
+new file mode 100644
+index 000000000..e805dbdac
+--- /dev/null
++++ b/clearancejobs_pipeline/spine/__init__.py
+@@ -0,0 +1 @@
++"""Lane-agnostic spine: map -> resolve -> match -> call sheets."""
+diff --git a/clearancejobs_pipeline/tests/test_cj_id.py b/clearancejobs_pipeline/tests/test_cj_id.py
+new file mode 100644
+index 000000000..2d398cf05
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_cj_id.py
+@@ -0,0 +1,29 @@
++from clearancejobs_pipeline.lib.cj_id import extract_cj_id, name_slug_from_filename
++
++
++def test_trailing_id():
++    assert extract_cj_id("jalen-pestillo-2032428.pdf") == "2032428"
++
++
++def test_resumes_pattern():
++    assert extract_cj_id("clearancejobs.com_resumes_701487_resume.pdf") == "701487"
++
++
++def test_anonymous_two_numbers_takes_trailing():
++    assert extract_cj_id("anonymous19032-2466200.docx") == "2466200"
++    assert extract_cj_id("anonymous1239799-2581233.docx") == "2581233"
++
++
++def test_doc_extension():
++    assert extract_cj_id("caleb-rupracht-418821.doc") == "418821"
++
++
++def test_name_only_is_none():
++    assert extract_cj_id("Charles Dunkin.pdf") is None
++    assert extract_cj_id("Sara Vosberg.pdf") is None
++
++
++def test_name_slug():
++    assert name_slug_from_filename("jalen-pestillo-2032428.pdf") == "jalen-pestillo"
++    assert name_slug_from_filename("Charles Dunkin.pdf") == "charles-dunkin"
++    assert name_slug_from_filename("clearancejobs.com_resumes_701487_resume.pdf") == ""
+diff --git a/clearancejobs_pipeline/tests/test_classify.py b/clearancejobs_pipeline/tests/test_classify.py
+new file mode 100644
+index 000000000..acd3d50be
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_classify.py
+@@ -0,0 +1,24 @@
++from clearancejobs_pipeline.lib.classify import tier_for
++
++
++def test_tier1_director():
++    assert tier_for("Director of Engineering") == 1
++    assert tier_for("VP, Cyber") == 1
++
++
++def test_tier2_architect():
++    assert tier_for("Cloud Solutions Architect") == 2
++
++
++def test_tier3_program_manager():
++    assert tier_for("Program Manager") == 3
++    assert tier_for("Scrum Master") == 3
++
++
++def test_tier5_analyst():
++    assert tier_for("Intelligence Analyst") == 5
++
++
++def test_tier6_default():
++    assert tier_for("Systems Administrator") == 6
++    assert tier_for("") == 6
+diff --git a/clearancejobs_pipeline/tests/test_geo.py b/clearancejobs_pipeline/tests/test_geo.py
+new file mode 100644
+index 000000000..4763152dc
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_geo.py
+@@ -0,0 +1,21 @@
++from clearancejobs_pipeline.lib.geo import city_key, config_city_keys, display_location
++
++
++def test_city_key_abbr_equals_full():
++    assert city_key("McLean", "VA") == city_key("Mc Lean", "Virginia")
++
++
++def test_dc_variants_fold_together():
++    assert city_key("Washington", "DC") == city_key("Washington, D.C.", "District of Columbia")
++
++
++def test_config_city_keys_contains_member():
++    ks = config_city_keys(["McLean, Virginia", "Washington, D.C., District of Columbia"])
++    assert city_key("McLean", "VA") in ks
++    assert city_key("Washington", "DC") in ks
++
++
++def test_display_location():
++    assert display_location("McLean", "Virginia") == "McLean, VA"
++    assert display_location("Austin", "TX") == "Austin, TX"
++    assert display_location("", "") == ""
+diff --git a/clearancejobs_pipeline/tests/test_models.py b/clearancejobs_pipeline/tests/test_models.py
+new file mode 100644
+index 000000000..167caa22a
+--- /dev/null
++++ b/clearancejobs_pipeline/tests/test_models.py
+@@ -0,0 +1,32 @@
++from clearancejobs_pipeline.models import RawContact, build_contact, CONTACT_KEYS
++
++
++def test_build_contact_has_all_schema_keys():
++    rc = RawContact(lane="paste", source_file="x.txt", name="Jane Doe",
++                    title="Program Manager", city="McLean", state="VA",
++                    clearance_level="TS/SCI", company="Insight Global")
++    c = build_contact(rc)
++    for k in CONTACT_KEYS:
++        assert k in c, f"missing schema key {k}"
++    assert c["tier"] == 3
++    assert c["location"] == "McLean, VA"
++    assert c["first_name"] == "Jane" and c["last_name"] == "Doe"
++    assert c["sources"] == ["ClearanceJobs paste"]
++    assert c["clearances"] == ["TS/SCI"]
++    assert c["location_confidence"] == "C"
++    assert c["_local_key"].startswith("nk:")
++
++
++def test_resume_lane_and_cj_local_key():
++    rc = RawContact(lane="resume", source_file="r.pdf", cj_id="2032428",
++                    name="Jalen Pestillo", confidence="A", needs_review=False)
++    assert rc.local_key() == "cj:2032428"
++    c = build_contact(rc)
++    assert c["sources"] == ["ClearanceJobs resume"]
++    assert c["needs_review"] is False
++    assert c["tier_confidence"] == "A"
++
++
++def test_name_autosplit():
++    rc = RawContact(lane="paste", source_file="x", name="Mary Jane Watson")
++    assert rc.first_name == "Mary" and rc.last_name == "Watson"
+diff --git a/docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md b/docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
+new file mode 100644
+index 000000000..e7e622e32
+--- /dev/null
++++ b/docs/superpowers/plans/2026-06-02-clearancejobs-contact-pipeline.md
+@@ -0,0 +1,88 @@
++# ClearanceJobs → Contact Pipeline — Implementation Plan
++
++> **For agentic workers:** Spec = `docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md`.
++> Execution mode: **autonomous to completion** (user away ~45 min, authorized full build).
++> Orchestrator builds foundation + spine; two background subagents build the lanes. Atomic commits throughout.
++
++**Goal:** Turn the downloaded ClearanceJobs pastes + resumes into canonical Contact JSON, match them to the Booz programs, emit per-program HUMINT call sheets — fully local, PII gitignored.
++
++**Architecture:** Two ingest lanes (deterministic paste parser; liteparse+deterministic+Ollama resume parser) → shared `models.RawContact` → Stage A map → Stage B dedup → Stage C program match → Stage D call sheets. `lib/` reuses the primitives already in `build_contacts.py`.
++
++**Tech Stack:** Python 3.12, stdlib + pdfplumber/fitz/python-docx/mammoth (local parse), liteparse 2.0.0, Ollama `llama3.1:8b` (local HTTP `:11434`), pytest. No cloud.
++
++**Environment (probed 2026-06-02):** all parse libs present; Ollama running (`llama3.1:8b`, `qwen3.5`); `contacts_classified.json` = 9.5 MB / 7,339 contacts; `.gitignore` needs `intake/`+`humint/`.
++
++---
++
++## File Structure
++
++```
++clearancejobs_pipeline/
++  __init__.py
++  models.py              # RawContact dataclass + canonical Contact builder (THE CONTRACT)
++  intake.py              # Stage 0: allow-list copy Downloads -> intake/ (only Downloads-touching module)
++  intake_allowlist.json  # explicit named files + lane
++  lib/
++    __init__.py
++    classify.py          # tier_for() — 6-tier title regex (from build_contacts.py)
++    geo.py               # ABBR2FULL, city_key(), config_city_keys()
++    companies.py         # COMPANY_PATS + canonical_company()
++    cj_id.py             # filename -> (cj_id|None, name_slug)
++  lanes/
++    __init__.py
++    paste.py             # Lane 1 — deterministic block-split + regex classify   [AGENT A]
++    resume.py            # Lane 2 — liteparse/local parse + deterministic + Ollama [AGENT B]
++  spine/
++    __init__.py
++    map_contact.py       # Stage A — RawContact -> canonical Contact (50 props)
++    resolve.py           # Stage B — dedup (cj_id -> name+loc) incl. vs 7,339
++    match_programs.py     # Stage C — score contact vs _contract_config.json programs
++    call_sheet.py        # Stage D — per-PIID MD + CSV + HUMINT_SUMMARY
++  run.py                 # orchestrate Stage 0->D; flags: --no-ollama (default), --ollama
++  tests/                 # pytest, fixtures only (NO real PII committed)
++    test_cj_id.py test_geo.py test_classify.py test_paste.py
++    test_resume.py test_map.py test_resolve.py test_match.py
++
++intake/clearancejobs/{pastes,resumes,contacts}/   # GITIGNORED (PII)
++outputs/booz_target_ranking/humint/               # GITIGNORED (PII call sheets)
++```
++
++## Data contract (models.py — every module imports this)
++
++- `RawContact` dataclass: `lane`, `source_file`, `cj_id`, `name`, `first_name`, `last_name`,
++  `title`, `company`, `city`, `state`, `clearance_level`, `clearances[]`, `email`, `phone`,
++  `linkedin_url`, `relo`(bool|None), `salary_expectation`, `seniority_band`, `cj_last_login`,
++  `cj_last_login_hot`(bool), `keyword_thumbnail`, `prior_companies[]`, `skills[]`,
++  `confidence`("A"/"B"/"C"), `extra`(dict). Lanes return `List[RawContact]`.
++- `build_contact(raw) -> dict`: maps RawContact -> the 50-prop Contact schema (see spec §6.4),
++  filling `programs/primes/scores` later (Stage C). Local key = `cj_id or f"{slug(name)}|{city_key}"`.
++
++## Tasks (atomic commits; ✅ = acceptance)
++
++1. **T1 — gitignore guard (FIRST).** Append `intake/`, `outputs/booz_target_ranking/humint/`,
++   `clearancejobs_pipeline/**/__pycache__/`. ✅ `git check-ignore intake/x` passes. **Commit.**
++2. **T2 — foundation: models + lib (refactor primitives out of build_contacts.py, behavior-preserving).**
++   ✅ `test_cj_id/test_geo/test_classify` pass; `build_contacts.py` still imports green. **Commit.**
++3. **T3 — Stage 0 intake + allowlist; run it.** ✅ `intake/clearancejobs/{pastes,resumes}` populated
++   from the 4 pastes + 44 resumes; `_manifest.json` written; nothing staged into git. **Commit (code only).**
++4. **T4 — [AGENT A] Lane 1 paste parser + tests.** ✅ `test_paste` green; parsing the 4 real pastes
++   yields N RawContacts (paste, conf C, needs_review). **Commit.**
++5. **T5 — [AGENT B] Lane 2 resume parser + tests.** ✅ `test_resume` green; parses PDF/DOCX
++   (liteparse PDF / python-docx DOCX); `.doc` best-effort+flag; Ollama optional+graceful-degrade. **Commit.**
++6. **T6 — Stage A mapper + tests.** ✅ RawContact -> valid Contact dict (real schema props only). **Commit.**
++7. **T7 — Stage B resolve/dedup + tests.** ✅ within-intake merge (resume>paste); vs-7,339 collision
++   flags `merge_candidate`, never overwrites. **Commit.**
++8. **T8 — Stage C program matcher + tests.** ✅ seeded Insight-Global/McLean/Cyber → GSA cyber PIID
++   with score_breakdown; reuses lib primitives. **Commit.**
++9. **T9 — Stage D call sheets + run.py orchestrator.** ✅ `python3 -m clearancejobs_pipeline.run`
++   produces `<PIID>_callsheet.md/.csv` + `HUMINT_SUMMARY.md`. **Commit.**
++10. **T10 — End-to-end on REAL data (deterministic) + verify; optional bounded Ollama pass.**
++    ✅ real call sheets exist, counts sane, a sheet spot-checked. **Commit outputs? NO (gitignored) — commit code + a sanitized summary.**
++11. **T11 — Completion report + continuity ledger.** **Commit.**
++
++## Privacy invariants (assert in tests)
++- Only `intake.py` references a Downloads path. Resume extraction never calls a cloud endpoint.
++- `intake/` and `humint/` are gitignored; no PII file ever staged.
++
++## Reusability
++`run.py --config <_contract_config.json> --intake <dir> --out <dir>` → different prime/program set, no code change.
+-- 
+2.35.1.windows.2
+

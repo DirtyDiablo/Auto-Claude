@@ -1,0 +1,380 @@
+From 53f855e15839e32e5a25e0171517395fbe261130 Mon Sep 17 00:00:00 2001
+From: DirtyDiablo <gtmaranville@gmail.com>
+Date: Tue, 2 Jun 2026 11:44:03 -0400
+Subject: [PATCH 01/10] docs(bd): ClearanceJobs->Contact pipeline design spec
+
+Two-lane local pipeline (paste + resume) -> canonical Contact entity ->
+program match (reuse _contract_config.json) -> per-program HUMINT call sheets.
+Privacy pillar: allow-list intake, gitignored PII, offline extraction
+(liteparse + Ollama-local). Awaiting spec-review loop + user review.
+
+Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>
+---
+ ...2-clearancejobs-contact-pipeline-design.md | 355 ++++++++++++++++++
+ 1 file changed, 355 insertions(+)
+ create mode 100644 docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+
+diff --git a/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md b/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+new file mode 100644
+index 000000000..f94f1f10d
+--- /dev/null
++++ b/docs/superpowers/specs/2026-06-02-clearancejobs-contact-pipeline-design.md
+@@ -0,0 +1,355 @@
++# ClearanceJobs → Contact Entity Pipeline — Design Spec
++
++- **Date:** 2026-06-02
++- **Status:** Draft (awaiting spec-review loop + user review)
++- **Owner session:** Booz Allen BD — HUMINT contact pipeline
++- **Topic:** Turn downloaded ClearanceJobs (CJ) resumes + result-list text pastes into
++  canonical **Contact** entity profiles, match them to the Booz Allen target programs, and
++  emit per-program **HUMINT call sheets**.
++
++---
++
++## 1. Goal & Context
++
++We have profiled **Booz Allen Hamilton** as a prime to sub under (PTS = federal
++staffing / IT / engineering subcontractor). The program-targeting work is complete and lives
++in `outputs/booz_target_ranking/` (spread, runway, competitor subaward rosters, gov POCs,
++competitor profiles, and **per-PIID search plans**). What we are missing is the *people layer*:
++actual cleared candidates we can call.
++
++The user has been manually downloading from ClearanceJobs two kinds of artifact:
++
++1. **Result-list pastes** (`.txt`) — copied straight off a CJ search results page. Rigid,
++   repeating, low-detail (no email/phone), but fast and high-volume.
++2. **Resumes** (`.pdf` / `.docx` / `.doc`) — full candidate resumes. High-detail, may contain
++   email/phone/employment history. The CJ candidate ID is embedded in the filename.
++
++This spec defines a **reusable, fully-local** pipeline that ingests both, normalizes each
++person into the canonical Contact schema, resolves/dedupes them (including against the existing
++7,337-contact graph), scores them against the Booz programs, and produces call sheets.
++
++**This is not a one-off for Booz.** The program-match basis is data (`_contract_config.json`),
++so pointing the pipeline at a different prime / program set is a config swap, not a code change.
++
++---
++
++## 2. Privacy Pillar (HARD constraints)
++
++Cleared-personnel PII is the most sensitive data this repo will ever touch. These constraints
++are non-negotiable and are baked into the architecture, not bolted on:
++
++| # | Constraint |
++|---|---|
++| P1 | **NEVER trawl `C:\Users\gtmar\Downloads`.** It holds the user's personal SSN/W2/medical/legal files. The pipeline only ever touches an **explicit allow-list** of named CJ files. No globbing of Downloads, ever. |
++| P2 | **Copy-in, don't read-in-place.** Stage 0 copies the allow-listed files into `intake/clearancejobs/`. All downstream stages read only from `intake/`. The pipeline has no code path that reads Downloads directly after Stage 0. |
++| P3 | **`intake/` and all canonical contact JSON are gitignored.** Raw resumes and derived per-contact JSON are cleared-personnel PII and must never enter git history. |
++| P4 | **Resume field-extraction stays offline.** Parse (liteparse) and extract (deterministic + **Ollama-local**) both run on-machine. No resume text is sent to any cloud LLM. (Resolved open question — see §8.) |
++| P5 | **Graph sync targets a LOCAL graph only.** Never write to `C:\pg-pts` (READ-ONLY reference). PII edges land in the project's local graph (localhost), or not at all. |
++
++---
++
++## 3. Scope
++
++**In scope (v1):**
++- Two-lane ingest (pastes + resumes), fully local.
++- Canonical per-contact JSON conforming to the Contact entity schema.
++- Entity resolution / dedup (within-intake + vs existing CRM/graph).
++- Program match against the existing Booz `_contract_config.json`.
++- Per-program HUMINT call sheets (markdown + CSV).
++- Reusability: config-driven program basis; allow-list-driven intake.
++
++**Out of scope (YAGNI for v1):**
++- Live CJ scraping / API. (Input is *already-downloaded* files. We do not automate the download.)
++- Cloud enrichment (ZoomInfo/LinkedIn API calls). The existing `build_contacts.py` already
++  emits search plans for those; we do not duplicate that here.
++- Bullhorn write-back. We populate `bullhorn_candidate_id = null` and leave CRM loading to the
++  existing `pts-bullhorn-loader` skill as a downstream, opt-in step.
++- Outreach message generation. Call sheets carry the *facts*; messaging is a separate skill.
++
++**Deferred (phase 2, additive — does not block v1 value):**
++- Graph sync into the local Contact graph (§6.9). The MVP delivers JSON + call sheets without
++  requiring a running graph.
++
++---
++
++## 4. Architecture
++
++Two ingest lanes converge on one normalization + match + emit spine. Everything is local.
++
++```
++                C:\Users\gtmar\Downloads  (allow-list ONLY — P1/P2)
++                          │  Stage 0: copy named files
++                          ▼
++        intake/clearancejobs/{pastes/, resumes/}        (gitignored — P3)
++              │                              │
++   Lane 1 (pastes, rigid)        Lane 2 (resumes, rich)
++   block-split + regex            liteparse → deterministic
++   field-classify                 + Ollama-local extract (§8)
++              │                              │
++              ▼                              ▼
++        RawContact records  (lane-tagged, confidence-tagged)
++                          │  Stage A: map → canonical Contact (50-prop schema)
++                          ▼
++        per-contact Contact JSON  (intake/clearancejobs/contacts/<key>.json — gitignored)
++                          │  Stage B: entity-resolve / dedup
++                          │   (CJ id ▸ name+location ▸ vs existing 7,337)
++                          ▼
++        deduped Contact set  (+ merge_candidates flagged)
++                          │  Stage C: program match (reuse _contract_config.json
++                          │   + tier_for/city_key/COMPANY_PATS from build_contacts.py)
++                          ▼
++        scored Contacts  (programs[], primes[], tier, composite_score, score_breakdown)
++              │                              │
++   Stage D: call sheets          Stage E (phase 2): graph sync
++   per-program MD + CSV           → LOCAL Contact graph only (P5)
++   outputs/booz_target_ranking/
++     humint/<PIID>_callsheet.*
++```
++
++**Design principle — small, single-purpose units with clear interfaces.** Each stage is an
++independently testable module with a typed input and output. The lanes differ only in how they
++produce a `RawContact`; from Stage A onward the spine is lane-agnostic.
++
++---
++
++## 5. Reusable primitives (do NOT re-implement)
++
++These already exist in `outputs/booz_target_ranking/contacts/build_contacts.py` and MUST be
++factored out into a shared module the new pipeline imports (rather than copy-pasted):
++
++| Primitive | What it does | New home |
++|---|---|---|
++| `tier_for(title)` | bd-contact-classification 6-tier title regex → tier 1–6 | `clearancejobs_pipeline/lib/classify.py` |
++| `city_key(city,state)` + `ABBR2FULL` | normalize `McLean`/`Mc Lean` + state → `mclean\|virginia`; collapses DC variants | `clearancejobs_pipeline/lib/geo.py` |
++| `config_city_keys(pop_cities)` | program PoP cities → comparable key set | `clearancejobs_pipeline/lib/geo.py` |
++| `COMPANY_PATS` | employer-string → canonical company (Booz/Take2/ECS/Insight Global/Kforce/Beacon Hill) | `clearancejobs_pipeline/lib/companies.py` |
++
++`build_contacts.py` is refactored to import these (behavior-preserving) so there is one source
++of truth. This is the only change to existing code; no unrelated refactoring.
++
++---
++
++## 6. Components
++
++### 6.0 Stage 0 — Intake (allow-list copy)
++- **Input:** a hard-coded **allow-list** of exact named paths (the files the user provided).
++  Stored as `clearancejobs_pipeline/intake_allowlist.json` (paths + lane tag).
++- **Behavior:** for each path, verify existence (`Test-Path`/`os.path.exists`, no glob), copy
++  into `intake/clearancejobs/pastes/` or `…/resumes/` by lane. Idempotent (skip if hash-identical).
++- **Output:** populated `intake/` tree. Emits `intake/_manifest.json` (filename → lane → CJ id →
++  sha256 → copied_at).
++- **Privacy:** this is the ONLY module that names a Downloads path. Enforces P1/P2.
++
++### 6.1 CJ ID extractor (`lib/cj_id.py`)
++- Filename → CJ candidate ID. Patterns observed:
++  - `jalen-pestillo-2032428.pdf` → `2032428` (trailing `-(\d{4,})\.`)
++  - `clearancejobs.com_resumes_701487_resume.pdf` → `701487` (`_resumes_(\d+)_`)
++  - `anonymous19032-2466200.docx` → `2466200`
++  - `Charles Dunkin.pdf` → no numeric ID → fallback key = `slug(name)`
++- Returns `(cj_id | None, name_slug)`. `cj_id` is the **primary dedup key** when present.
++
++### 6.2 Lane 1 — Paste parser (`lanes/paste.py`)
++- **Input:** a `.txt` paste from `intake/.../pastes/`.
++- **Algorithm (deterministic, no LLM):**
++  1. Strip the 6-line header (`Viewing … of …` / `Candidates` / `Show:` / `N per page` /
++     `Sort by:` / `<sort field>`).
++  2. **Block-split** on the avatar terminator: a line that is a single uppercase initial
++     (matching the block's first name) **or** the literal `user avatar`.
++  3. Within each block, **classify lines by regex** (NOT by position — relo/salary/second-date
++     are optional):
++     - `clearance`  → `/TS\/SCI( w Poly)?|Top Secret|Secret|Public Trust|Confidential/i`
++     - `seniority`  → `/\d+\+ yrs exp|Mgr\/Director|Entry|Senior|Junior/i`
++     - `relo`       → `/(Yes|No) - (Open to relo|Not open to relo)/i`
++     - `salary`     → `/^\$[\d,]+$/`
++     - `last_login` / dates → `Today|Yesterday|^[A-Z][a-z]{2} \d{1,2}(, \d{4})?$`
++     - `city,ST`    → `/^[A-Za-z .,'-]+,\s*[A-Z]{2}$/`
++     - first non-classified line = **name**, next = **title**
++     - remaining free-text lines = **keyword_thumbnail** (carries current employer + program signals)
++  4. **Employer from thumbnail:** run `COMPANY_PATS` over `keyword_thumbnail`; first hit = `company`.
++  5. **Hot signal:** `last_login == "Today"` → `cj_last_login_hot = true`.
++- **Output:** `RawContact(lane="paste", confidence="C", needs_review=true, …)`.
++  Pastes never carry email/phone → `location_confidence="C"` per approved design.
++
++### 6.3 Lane 2 — Resume parser (`lanes/resume.py`)
++- **Input:** a `.pdf`/`.docx`/`.doc` from `intake/.../resumes/`.
++- **Parse:** **liteparse** (local, no cloud) → clean markdown/text. liteparse is the parse step;
++  its clean output materially improves downstream extraction accuracy.
++- **Extract (text → 50-prop fields):** two-tier, fully local (§8):
++  - **Deterministic first:** regex/rules for the *regular* fields — name (filename + header),
++    email (`/[\w.+-]+@[\w-]+\.\w+/`), phone, city/ST, clearance tokens, current employer
++    (most-recent dated employment block + `COMPANY_PATS`), prior employers (→ `previously_at`).
++  - **Ollama-local fallback:** for *messy/free-text* fields the rules can't reliably get —
++    skills synthesis, role-family inference, normalized title, short summary → `pain_points`.
++- **Output:** `RawContact(lane="resume", confidence="A"|"B", needs_review=false|true, …)`.
++  A = email/phone/employer all cleanly extracted; B = partial.
++
++### 6.4 Stage A — Contact entity mapper (`spine/map_contact.py`)
++Maps a `RawContact` → canonical Contact JSON conforming to `entity_contact.txt` (50 props).
++Mapping table (populated vs null vs deferred):
++
++| Contact prop | Source | Notes |
++|---|---|---|
++| `first_name`,`last_name`,`name` | parse | |
++| `title` | parse / Ollama-normalized | |
++| `company` | employer (thumbnail or resume most-recent) | canonicalized via `COMPANY_PATS` |
++| `city`,`state`,`location` | parse | `location` via `city_key` display form |
++| `clearance_level`,`clearances[]` | parse | level = highest; array = all tokens |
++| `email`,`phone`,`mobile`,`linkedin_url` | resume only | null for paste lane |
++| `tier`,`tier_confidence` | `tier_for(title)`; conf by lane (resume=A/B, paste=C) | |
++| `programs[]`,`primes[]` | **Stage C** (filled after match) | |
++| `inferred_locations[]`,`location_confidence` | city + relo flag | paste=C, resume=A/B |
++| `pain_points[]` | Ollama (resume) | empty for paste; YAGNI-bounded |
++| `sources[]` | `["ClearanceJobs paste"]` / `["ClearanceJobs resume"]` | |
++| `source_metadata`,`source_provenance` | CJ id, last_login(+hot), salary, seniority, relo, thumbnail, liteparse meta | CJ-specific fields live here |
++| `composite_score`,`score_breakdown`,`raw_relevance_score` | **Stage C** | |
++| `needs_review` | lane confidence | paste=true |
++| `source_file` | intake filename | |
++| `bullhorn_candidate_id` | null | Bullhorn load is downstream/opt-in |
++| `created_at`,`updated_at`,`date_added` | `datetime.now(timezone.utc)` | per project datetime rule |
++| `id` | assigned at graph/CRM load | local key = `cj_id` or `slug(name)+city_key` |
++
++### 6.5 Stage B — Entity resolution / dedup (`spine/resolve.py`)
++- **Within-intake dedup:** key priority `cj_id` → `slug(name)+city_key`. A person appearing in
++  both a paste and a resume merges into one record; **resume wins** field conflicts (richer),
++  paste contributes the `last_login`/hot signal. Both sources recorded in `sources[]`.
++- **Against existing 7,337 Contacts:** load `data/dashboard/contacts_classified.json` (read-only,
++  the qdrant-contacts source) and match by `name + city_key` (and email/linkedin when present).
++  On hit → set `needs_review=true`, add `merge_candidate_id`, do **not** silently overwrite.
++- **Output:** deduped set + `intake/clearancejobs/_resolution_report.json` (collisions, merges).
++
++### 6.6 Stage C — Program matcher (`spine/match_programs.py`)
++Inverse of `build_contacts.py`: we *have* the people, we match them *to* programs. Reuse the
++exact dimensions, reversed:
++- **Company signal:** contact `company` (or any `previously_at`) ∈ {prime, `competitor_subs`} for
++  the program → strong. (Recruit-from-competitor is the core BD play.)
++- **Location signal (load-bearing):** `city_key(contact) ∈ config_city_keys(program.pop_cities)`
++  → strong; `relo=Yes` widens to same-program metros.
++- **Title/skills signal:** title/skills ∈ `role_families`/`title_keywords` → match; `tier_for`
++  prioritizes within matched set (city+title > city-only, mirroring existing logic).
++- **Clearance signal:** contact clearance ≥ program required clearance (`TS/SCI > TS > Secret >
++  Public Trust`).
++- **Composite:** weighted 0–100 with `score_breakdown` per signal. A contact can match multiple
++  programs → `programs[]`, `primes[]` populated; best program drives sheet placement.
++
++### 6.7 Storage — canonical JSON (source of truth)
++- `intake/clearancejobs/contacts/<key>.json` — one file per resolved contact (gitignored).
++- This is the **durable artifact**; graph + call sheets are projections of it. Re-runnable.
++
++### 6.8 Stage D — Call-sheet generator (`spine/call_sheet.py`)
++- **Per program (PIID):** `outputs/booz_target_ranking/humint/<PIID>_callsheet.md` + `.csv`.
++- Contents: program header (prime, competitor subs, clearance, PoP, runway from existing
++  `DURATION_RUNWAY.md`), then ranked contacts (tier, composite_score, company, current/relo,
++  clearance, **hot** flag if `last_login=Today`, CJ id, source). Markdown for reading, CSV for dialing.
++- **Privacy note:** call sheets under `outputs/` contain PII → the `humint/` subtree is gitignored.
++
++### 6.9 Stage E — Graph sync (phase 2, optional, LOCAL only)
++- Thin adapter: canonical JSON → upsert `Contact` nodes + edges (`works_at→Prime`,
++  `previously_at→Prime`, `works_on/affiliated_with→Program`, `located_in→Location`) into the
++  **local** project graph only (P5; never `pg-pts`).
++- **Build-time confirmation:** exact local graph target (project Neo4j `:7687` vs local AGE) and
++  whether the `Contact` label/schema pre-exists or must be created. MVP ships without this.
++
++---
++
++## 7. Directory layout
++
++```
++clearancejobs_pipeline/                 # new code (committed; no PII)
++  __init__.py
++  run.py                                # orchestrates Stage 0 → D
++  intake_allowlist.json                 # the explicit named-file allow-list (paths, not content)
++  lib/   classify.py  geo.py  companies.py  cj_id.py
++  lanes/ paste.py  resume.py
++  spine/ map_contact.py  resolve.py  match_programs.py  call_sheet.py  graph_sync.py
++  tests/ test_paste.py test_resume.py test_resolve.py test_match.py test_cj_id.py …
++
++intake/clearancejobs/                   # GITIGNORED — PII
++  pastes/  resumes/  contacts/  _manifest.json  _resolution_report.json
++
++outputs/booz_target_ranking/humint/     # GITIGNORED — PII call sheets
++  <PIID>_callsheet.md  <PIID>_callsheet.csv  HUMINT_SUMMARY.md
++```
++
++`.gitignore` additions: `intake/`, `outputs/booz_target_ranking/humint/`,
++`clearancejobs_pipeline/**/__pycache__/`.
++
++---
++
++## 8. Resolved open question — extraction engine
++
++**Decision:** **liteparse (parse, local) → deterministic rules (regular fields) → Ollama-local
++(messy fields).** No cloud LLM touches resume text (P4).
++
++- liteparse and Ollama are **complementary, not either/or**: liteparse converts the document to
++  clean text; the extractor turns clean text into the 50 fields.
++- Most fields (CJ id, name, email, phone, city/ST, clearance, current/prior employers) are
++  **regex-reliable** off liteparse output → deterministic, zero LLM cost, fully auditable.
++- Only genuinely unstructured fields (skills synthesis, role-family inference, normalized title)
++  use **Ollama-local**.
++- **Accuracy bake-off at build time:** on 2–3 sample resumes, compare *deterministic-only* vs
++  *deterministic + Ollama* per field against an eyeballed ground truth; keep whichever wins per
++  field. This is how we honor "whichever gives better accuracy." Ollama model chosen at build
++  after probing availability (`ollama list`); lean `qwen2.5` / `llama3.1` instruct class.
++- **Confirm path:** `intake/clearancejobs/{resumes,pastes}/`, gitignored — **confirmed**.
++
++---
++
++## 9. Error handling
++
++- **Per-file isolation:** a parse failure on one resume/paste is logged to `_manifest.json`
++  (`status: failed`, reason) and skipped — never aborts the batch.
++- **Ollama unavailable:** degrade gracefully to deterministic-only; flag affected contacts
++  `needs_review=true`, `source_metadata.ollama="unavailable"`. Pipeline still completes.
++- **Missing CJ id:** fall back to `slug(name)+city_key` dedup key; flag for review.
++- **Ambiguous employer (no `COMPANY_PATS` hit):** store raw thumbnail/employer string, leave
++  `company` best-effort, `needs_review=true`.
++- **No program match:** contact still persisted (`programs=[]`), surfaced in `HUMINT_SUMMARY.md`
++  unmatched bucket — never dropped.
++
++---
++
++## 10. Testing strategy
++
++- **Unit (fixtures, no PII committed):** synthetic paste blocks (incl. optional-field
++  permutations + both terminator styles), synthetic resume text → assert field extraction;
++  `cj_id` patterns (all 4 filename shapes incl. name-only); `city_key`/`tier_for` parity vs
++  `build_contacts.py`.
++- **Resolution:** same person in paste+resume → one record, resume wins; collision vs a seeded
++  existing-contact → `merge_candidate` flagged not overwritten.
++- **Match:** seeded contact (Insight Global, McLean VA, Cyber) → matches GSA cyber PIID with
++  expected `score_breakdown`.
++- **Privacy guard test:** assert no module except `intake.py` references a Downloads path; assert
++  `intake/` + `humint/` are gitignored.
++- Run: `python3 -m pytest clearancejobs_pipeline/tests/ -q`.
++
++---
++
++## 11. Build phases (MVP-first, atomic commits)
++
++1. **Phase 1 — shared lib + Lane 1 (paste) + Stage A + call sheet (paste-only MVP).**
++   Refactor primitives out of `build_contacts.py`; deterministic paste lane; map → JSON;
++   minimal call sheet. *Delivers dialable hot-list from the 4 pastes with zero LLM dependency.*
++2. **Phase 2 — Lane 2 (resume): liteparse + deterministic extract.** Adds the resume corpus.
++3. **Phase 3 — Ollama-local extract + bake-off.** Fill messy fields; tune.
++4. **Phase 4 — Stage B resolve/dedup (incl. vs 7,337) + Stage C program match scoring.**
++5. **Phase 5 — full call sheets + HUMINT_SUMMARY + reusability doc.**
++6. **Phase 6 (deferred) — graph sync (local only).**
++
++Phase 1 alone is shippable BD value; each later phase is additive.
++
++---
++
++## 12. Reusability
++
++To target a different prime/program set: (a) drop a new `_contract_config.json` (same schema),
++(b) update `intake_allowlist.json` with the new CJ files, (c) run `clearancejobs_pipeline/run.py
++--config <path> --out <dir>`. No code changes. The Booz run is just the first instantiation.
++
++---
++
++## 13. Build-time confirmations (not blockers)
++
++- Ollama installed + model pick (probe at Phase 3).
++- Exact local graph target for Phase 6 (Neo4j `:7687` vs local AGE; create vs reuse `Contact`).
++- Existing-contact source path (`data/dashboard/contacts_classified.json`) re-confirmed at Phase 4.
++```
+-- 
+2.35.1.windows.2
+
