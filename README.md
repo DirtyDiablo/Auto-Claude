@@ -36,18 +36,18 @@
 > ⚠️ Beta releases may contain bugs and breaking changes. [View all releases](https://github.com/AndyMik90/Auto-Claude/releases)
 
 <!-- BETA_VERSION_BADGE -->
-[![Beta](https://img.shields.io/badge/beta-2.7.6--beta.6-orange?style=flat-square)](https://github.com/AndyMik90/Auto-Claude/releases/tag/v2.7.6-beta.6)
+[![Beta](https://img.shields.io/badge/beta-2.8.0--beta.1-orange?style=flat-square)](https://github.com/AndyMik90/Auto-Claude/releases/tag/v2.8.0-beta.4)
 <!-- BETA_VERSION_BADGE_END -->
 
 <!-- BETA_DOWNLOADS -->
 | Platform | Download |
 |----------|----------|
-| **Windows** | [Auto-Claude-2.7.6-beta.6-win32-x64.exe](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.7.6-beta.6/Auto-Claude-2.7.6-beta.6-win32-x64.exe) |
-| **macOS (Apple Silicon)** | [Auto-Claude-2.7.6-beta.6-darwin-arm64.dmg](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.7.6-beta.6/Auto-Claude-2.7.6-beta.6-darwin-arm64.dmg) |
-| **macOS (Intel)** | [Auto-Claude-2.7.6-beta.6-darwin-x64.dmg](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.7.6-beta.6/Auto-Claude-2.7.6-beta.6-darwin-x64.dmg) |
-| **Linux** | [Auto-Claude-2.7.6-beta.6-linux-x86_64.AppImage](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.7.6-beta.6/Auto-Claude-2.7.6-beta.6-linux-x86_64.AppImage) |
-| **Linux (Debian)** | [Auto-Claude-2.7.6-beta.6-linux-amd64.deb](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.7.6-beta.6/Auto-Claude-2.7.6-beta.6-linux-amd64.deb) |
-| **Linux (Flatpak)** | [Auto-Claude-2.7.6-beta.6-linux-x86_64.flatpak](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.7.6-beta.6/Auto-Claude-2.7.6-beta.6-linux-x86_64.flatpak) |
+| **Windows** | [Auto-Claude-2.8.0-beta.4-win32-x64.exe](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.8.0-beta.4/Auto-Claude-2.8.0-beta.4-win32-x64.exe) |
+| **macOS (Apple Silicon)** | [Auto-Claude-2.8.0-beta.4-darwin-arm64.dmg](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.8.0-beta.4/Auto-Claude-2.8.0-beta.4-darwin-arm64.dmg) |
+| **macOS (Intel)** | [Auto-Claude-2.8.0-beta.4-darwin-x64.dmg](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.8.0-beta.4/Auto-Claude-2.8.0-beta.4-darwin-x64.dmg) |
+| **Linux** | [Auto-Claude-2.8.0-beta.4-linux-x86_64.AppImage](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.8.0-beta.4/Auto-Claude-2.8.0-beta.4-linux-x86_64.AppImage) |
+| **Linux (Debian)** | [Auto-Claude-2.8.0-beta.4-linux-amd64.deb](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.8.0-beta.4/Auto-Claude-2.8.0-beta.4-linux-amd64.deb) |
+| **Linux (Flatpak)** | [Auto-Claude-2.8.0-beta.4-linux-x86_64.flatpak](https://github.com/AndyMik90/Auto-Claude/releases/download/v2.8.0-beta.4/Auto-Claude-2.8.0-beta.4-linux-x86_64.flatpak) |
 <!-- BETA_DOWNLOADS_END -->
 
 > All releases include SHA256 checksums and VirusTotal scan results for security verification.
@@ -116,34 +116,10 @@ AI-assisted feature planning with competitor analysis and audience targeting.
 ```
 Aperant/
 ├── apps/
-│   ├── backend/     # Python agents, specs, QA pipeline
-│   └── frontend/    # Electron desktop application
+│   └── desktop/     # Electron desktop application (TypeScript AI agent layer + UI)
 ├── guides/          # Additional documentation
-├── tests/           # Test suite
 └── scripts/         # Build utilities
 ```
-
----
-
-## CLI Usage
-
-For headless operation, CI/CD integration, or terminal-only workflows:
-
-```bash
-cd apps/backend
-
-# Create a spec interactively
-python spec_runner.py --interactive
-
-# Run autonomous build
-python run.py --spec 001
-
-# Review and merge
-python run.py --spec 001 --review
-python run.py --spec 001 --merge
-```
-
-See [guides/CLI-USAGE.md](guides/CLI-USAGE.md) for complete CLI documentation.
 
 ---
 
@@ -174,7 +150,7 @@ All releases are:
 
 | Command | Description |
 |---------|-------------|
-| `npm run install:all` | Install backend and frontend dependencies |
+| `npm run install:all` | Install all dependencies |
 | `npm start` | Build and run the desktop app |
 | `npm run dev` | Run in development mode with hot reload |
 | `npm run package` | Package for current platform |
@@ -184,7 +160,6 @@ All releases are:
 | `npm run package:flatpak` | Package as Flatpak (see [guides/linux.md](guides/linux.md)) |
 | `npm run lint` | Run linter |
 | `npm test` | Run frontend tests |
-| `npm run test:backend` | Run backend tests |
 
 ---
 
