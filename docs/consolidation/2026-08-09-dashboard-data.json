@@ -1,0 +1,531 @@
+{
+  "repo": "D:\\Auto-Claud\\Auto-Claude",
+  "name": "Auto-Claude",
+  "date": "2026-08-09",
+  "workstreams": [
+    {
+      "id": "WS-SDK-MIGRATION",
+      "name": "Vercel AI SDK v6 migration & Python agent layer retirement",
+      "status": "DONE",
+      "pct_complete": 100,
+      "built": "Full TypeScript-first agent layer (ai/providers/factory.ts, ai/tools/, ai/session/runAgentSession(), ai/orchestration/ pipeline) replacing Python claude-agent-sdk. Vercel AI SDK v6 integrated with multi-provider support (Anthropic, OpenAI, Google, Bedrock, Azure, Mistral, Groq, xAI, Ollama). Worker-thread execution via ai/agent/WorkerBridge. 9 conflict files resolved in reconcile merge de3c9360 (2026-08-05): 6 Python deletions, electron.vite.config.ts union, prompts/qa_fixer.md union, log-service.ts import fix. All Vercel SDK docs/patterns applied.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\apps\\desktop\\src\\main\\ai\\providers\\factory.ts",
+        "D:\\Auto-Claud\\Auto-Claude\\apps\\desktop\\src\\main\\ai\\session\\index.ts",
+        "D:\\Auto-Claud\\Auto-Claude\\apps\\desktop\\src\\main\\ai\\orchestration\\index.ts",
+        "D:\\Auto-Claud\\Auto-Claude\\apps\\desktop\\src\\main\\ai\\tools",
+        "D:\\Auto-Claud\\Auto-Claude\\apps\\desktop\\src\\main\\ai\\config"
+      ],
+      "remaining": "One upstream-baseline test flake (github-error-parser.test.ts, time-dependent; not a merge regression). Vitest: 4,196/4,205 pass. Typecheck clean. Lint: 822 upstream-baseline warnings.",
+      "next_action": "Run npm test on Precision to verify results persist (currently shows transient worker timeout on ProfileList.test.tsx + ReviewStatusTree.test.tsx; may be environment-specific). Target: zero new regressions vs baseline.",
+      "evidence": "Commit 75869f7e (feat: migrate from Python Claude Agent SDK to Vercel AI SDK v6 #1891); merge commit de3c9360 (2026-08-05); reconcile report cfe94e78; RECONCILE-2026-08-05-develop-510x6.md (repo root) records 9 conflict-file resolutions, 49 net files changed (7-file overlap with migration's 1,974), tests 4196/4205 at reconcile — not re-run since."
+    },
+    {
+      "id": "WS-DONOR-PIPELINE",
+      "name": "ClearanceJobs candidate contact pipeline (donor patches)",
+      "status": "STALLED",
+      "pct_complete": 5,
+      "built": "11 files, ~332 KB (measured 2026-08-09): 10 numbered donor patches (0001-0010) covering design spec, LinkedIn enrichment, pipeline foundation, spine (Stage A-C), paste-resume lanes, quality fixes, memory-safe Ollama, INDEX.md documentation, and completion ledger, plus combined clearancejobs-contact-pipeline.mine.patch. Patches applied to local-develop-2026-08-04 pre-migration (commit 02428faf 2026-08-04). Untracked directory created post-reconcile with all patches intact.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\donor-clearancejobs-contact-pipeline\\0001-docs-bd-ClearanceJobs-Contact-pipeline-design-spec.patch",
+        "D:\\Auto-Claud\\Auto-Claude\\donor-clearancejobs-contact-pipeline\\0010-docs-cj-pipeline-completion-continuity-ledger.patch",
+        "D:\\Auto-Claud\\Auto-Claude\\donor-clearancejobs-contact-pipeline\\clearancejobs-contact-pipeline.mine.patch"
+      ],
+      "remaining": "Decision gate: (a) audit patches for PII content per MIGRATION-MANUAL Part 6, then commit as subdirectory, OR (b) move to separate repo, OR (c) keep untracked as reference. No commit-ready disposition exists yet.",
+      "next_action": "George: Inspect patches for PII (ClearanceJobs is sensitive); if clean, git add donor-clearancejobs-contact-pipeline/ and commit; if PII-bearing, move to private repo or archive.",
+      "evidence": "Commit 02428faf (chore(donor): ClearanceJobs contact-pipeline donor patches 0001-0006); MIGRATION-MANUAL Part 6 flags NFR-2 hook concern; git status shows donor-clearancejobs-contact-pipeline/ untracked; 10 patches verified."
+    },
+    {
+      "id": "WS-KNIP-XSTATE-UPDATE",
+      "name": "Dead-code analyzer (knip) + xstate dependency version bump",
+      "status": "STALLED",
+      "pct_complete": 0,
+      "built": "knip.json configuration file added locally (commit 260148b3, 2026-08-04, pre-migration). xstate version bump to 5.28 attempted but not re-applied post-reconcile. File sits untracked; no integration into package.json or build pipeline yet.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\knip.json (untracked)"
+      ],
+      "remaining": "Decision: is knip tooling a repo-wide linting requirement (commit to develop) or local-only dev tool (keep untracked)? Currently stranded post-merge; xstate version bump decision deferred.",
+      "next_action": "Check origin/develop for knip.json presence; if absent, decide: (a) commit as repo tooling + integrate into lint script, OR (b) leave untracked for local builds only.",
+      "evidence": "Commit 260148b3 (chore(tooling): add knip dead-code analyzer + xstate 5.28 bump); git status shows knip.json untracked; RECONCILE report: knip.json left untracked post-merge."
+    },
+    {
+      "id": "WS-SPEC-025-JOB-INGESTION",
+      "name": "Job ingestion pipeline (spec-025 feature branch)",
+      "status": "UNKNOWN",
+      "pct_complete": 85,
+      "built": "Full Python job ingestion pipeline (5 phases: parse, enrich AI, relational match, hiring-leader lookup, PTS past-performance, Notion upload). Commit 52f4505a added spec-025-job-ingestion-pipeline/ with 7 Python modules, source data (3 JSON files, 268 jobs), and 8 output JSON files. README documents 243 processed jobs, 94.7% prime match, 100% program/hiring-leader match. Scripts fully functional.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\spec-025-job-ingestion-pipeline\\scripts\\job_ingestion\\*.py",
+        "D:\\Auto-Claud\\Auto-Claude\\spec-025-job-ingestion-pipeline\\outputs\\*.json",
+        "D:\\Auto-Claud\\Auto-Claude\\spec-025-job-ingestion-pipeline\\README.md"
+      ],
+      "remaining": "Status clarity: (a) completed feature ready to merge/ship?, (b) stalled WIP awaiting approval?, or (c) parked idea/reference? README and code suggest DONE-state. No blocking issues documented. Awaits characterization + disposition decision.",
+      "next_action": "George: Review spec-025/README.md results + commit 52f4505a to assess completeness. Decide: (a) merge feature branch to develop, (b) keep as-is for reference, or (c) move to archived docs/examples/.",
+      "evidence": "Commit 52f4505a (feat: Add job ingestion pipeline, 2026-01-26); directory survived reconcile untouched; 22 files, 91.5K additions; outputs show 243 jobs processed; emit notes UNKNOWN status due to pre-reconcile timing."
+    },
+    {
+      "id": "WS-APP-RENAME",
+      "name": "Rebrand 'Auto Claude' to 'Aperant' in documentation",
+      "status": "DONE",
+      "pct_complete": 100,
+      "built": "README rebranded from 'Auto Claude' to 'Aperant' (commit 96ea7d36). Product name updated in top-level docs; reconcile merge detected rename automatically and carried forward.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\README.md",
+        "D:\\Auto-Claud\\Auto-Claude\\docs\\consolidation\\RECONCILE-2026-08-05-develop-510x6.md"
+      ],
+      "remaining": "None. Rebrand complete and consistent across repo.",
+      "next_action": "None. Closed.",
+      "evidence": "Commit 96ea7d36 (docs: rebrand Auto Claude to Aperant in README); present on both local-develop-2026-08-04 and origin/develop; merge de3c9360 carried via rename detection."
+    },
+    {
+      "id": "WS-PROFILE-PRIMARY-POLICIES",
+      "name": "Restoration of policy-limits.json and execution rules",
+      "status": "DONE",
+      "pct_complete": 100,
+      "built": "policy-limits.json restored to C:\\Users\\gtmar\\.claude-profiles\\primary (separate profile repo). Email draft + never-send hard gate rules (CLAUDE.md rules 7-8) documented and enforced. Rules: 'Draft it, save it, hand him the path, and stop. Never send without explicit per-email approval every time.'",
+      "key_files": [
+        "C:\\Users\\gtmar\\.claude-profiles\\primary\\CLAUDE.md (rules 7-8)",
+        "C:\\Users\\gtmar\\.claude-profiles\\primary\\policy-limits.json"
+      ],
+      "remaining": "None. Policies restored and enforced.",
+      "next_action": "None. Closed.",
+      "evidence": "MIGRATION-MANUAL Part 4 profile-primary section; CLAUDE.md rules 7-8 reference global profile; Decision 13: policy-limits.json restored, deletion not ratified."
+    },
+    {
+      "id": "WS-INFRASTRUCTURE-RECONCILE-STAGING",
+      "name": "Precision machine staging & git quiesce (Phase A/B/C)",
+      "status": "DONE",
+      "pct_complete": 100,
+      "built": "Precision machine staged pre-reconcile: 510-commit develop backlog secured to origin/local-develop-2026-08-04 (base 5ce33a34). Phase A/B completed: stash exports, side branches secured, 0 dirty files on reconcile. Reconcile merge executed 2026-08-05 (commit de3c9360), reconcile-report cfe94e78.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\.git\\refs\\remotes\\origin\\local-develop-2026-08-04",
+        "D:\\Auto-Claud\\Auto-Claude\\docs\\consolidation\\RECONCILE-2026-08-05-develop-510x6.md"
+      ],
+      "remaining": "None. Precision staged and quiesced as planned.",
+      "next_action": "None for this phase. Refer to X-1 (cross-repo migration endgame) for Tier-3 restore and post-sign-off cleanup.",
+      "evidence": "MIGRATION-MANUAL Part 4: 510-commit backlog secured as local-develop-2026-08-04 + local-2026-08-04; PRECISION-MERGE-PLAN line 117 confirms completion; reconcile cfe94e78 verifies."
+    },
+    {
+      "id": "WS-BD-AUTOMATION-ENGINE-NESTED",
+      "name": "BD-Automation-Engine (nested repo, pointer to separate session)",
+      "status": "UNKNOWN",
+      "pct_complete": 50,
+      "built": "BD-Automation-Engine is a separate git repository, nested and gitignored. 5 git bundles (data-scraper, n8n-builder, voice-mcp, tango-python, getshitdone) secured pre-migration. Docker volumes exported. RESTORE-MAP.md committed.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\BD-Automation-Engine\\ (nested, gitignored)",
+        "D:\\repos\\BD-Automation-Engine (primary repo)"
+      ],
+      "remaining": "This workstream is out of scope; covered by BD-Automation-Engine's own emit. Disposition of BD-Engine-v2 (untracked, 4.4 GB measured 2026-08-09) unclear: backup, duplicate, or abandoned?",
+      "next_action": "Refer to BD-Automation-Engine emit. Clarify BD-Engine-v2 status (untracked, README present, .git exists).",
+      "evidence": "RECONCILE-2026-08-05-develop-510x6.md: BD-Automation-Engine out of scope, gitignored; git status shows BD-Engine-v2 untracked."
+    },
+    {
+      "id": "WS-SCHEDULER-OPERATIONS",
+      "name": "Nightly scheduler (outputs generation) & PII data lifecycle",
+      "status": "STALLED",
+      "pct_complete": 0,
+      "built": "Scheduler framework present in codebase (not re-enabled yet). Outputs directory exists with untracked PII files: daily_call_list.html, daily_call_list.json, daily_call_list.md (generated by scheduler pre-migration, never committed).",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\outputs\\ (PII, untracked)"
+      ],
+      "remaining": "Decision 18 (pre-existing): Scheduler disabled during migration due to stale-pid crash-loop. Re-enable decision pending (a) Database reconcile completion (X-1 scope), (b) Verification that held groups in pts-reporting committed. PII outputs must never bulk-git-add per MIGRATION-MANUAL Part 6.",
+      "next_action": "George: After X-1 sign-off, review Decision 18 context + verify pts-reporting dependencies committed. Then re-enable scheduler with monitoring. Ensure .gitignore covers outputs/.",
+      "evidence": "PRECISION-MERGE-PLAN Phase 9: scheduler disabled (Decision 18, stale-pid crash-loop); git status shows outputs/*.* untracked; MIGRATION-MANUAL Part 6: PII never through remote."
+    },
+    {
+      "id": "WS-TEST-SUITE-FLAKES",
+      "name": "Test suite flake (time-dependent github-error-parser test)",
+      "status": "STALLED",
+      "pct_complete": 95,
+      "built": "Test suite passing 4,196 of 4,205 tests (99.8% pass rate). One known upstream baseline failure: github-error-parser.test.ts, time-dependent. Failure confirmed identical to origin/develop (not a merge regression).",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\apps\\desktop\\src\\renderer\\components\\github-issues\\utils\\__tests__\\github-error-parser.test.ts"
+      ],
+      "remaining": "Upstream-baseline test flake is not a merge regression. Transient worker-pool timeouts on ProfileList/ReviewStatusTree tests may indicate environment resource contention (vitest parallelism). Monitor for consistency.",
+      "next_action": "Run npm test again on Precision to verify baseline stability. If timeouts persist, investigate vitest pool configuration. For upstream flake: monitor; file Vercel/AI SDK issue if critical (low priority).",
+      "evidence": "RECONCILE report: npm test results, one consistent failure github-error-parser.test.ts (upstream flake); Vitest 4,196/4,205; background test: 9 worker timeout errors."
+    },
+    {
+      "id": "WS-UNTRACKED-DIRECTORIES",
+      "name": "Disposition of untracked directories (BD-Engine-v2, getshitdone)",
+      "status": "UNKNOWN",
+      "pct_complete": 0,
+      "built": "Two untracked directories: (1) BD-Engine-v2 (4.4 GB measured 2026-08-09, README present as fork/copy of BD-Automation-Engine), (2) getshitdone (554 KB, contains .git + .planning). Both are nested repos with unclear purpose.",
+      "key_files": [
+        "D:\\Auto-Claud\\Auto-Claude\\BD-Engine-v2 (untracked)",
+        "D:\\Auto-Claud\\Auto-Claude\\getshitdone (untracked)"
+      ],
+      "remaining": "No clarity on purpose: temporary worktrees, abandoned experiments, parallel tracking, or garbage? No recent commits reference them. Both sit untracked post-reconcile.",
+      "next_action": "George: Inspect BD-Engine-v2/README + getshitdone/.planning to determine if active or archived. If archived, rm -rf or move to docs/archived. Update .gitignore to clarify exclusions.",
+      "evidence": "git status shows both untracked; BD-Engine-v2/README.md auto-detected; getshitdone has .git/.planning subdirs; no recent commit history; not covered by emit."
+    }
+  ],
+  "timeline_key_dates": [
+    {
+      "date": "2025-12-04",
+      "event": "Auto-Claude repository birth; Initial commit 'Claude Code Auto Build framework'"
+    },
+    {
+      "date": "2025-12-10",
+      "event": "Auto-Build v2 launched; Graphiti unit tests + new memory layer integrated"
+    },
+    {
+      "date": "2026-01-01",
+      "event": "SDK foundations for spec-to-task conversion infrastructure"
+    },
+    {
+      "date": "2026-02-05",
+      "event": "Feature merge wave begins (GitHub PR #1814–1880 from AndyMik90 upstream forks)"
+    },
+    {
+      "date": "2026-02-14",
+      "event": "Peak activity day: 234 commits (git log --all date histogram), upstream PR merge wave"
+    },
+    {
+      "date": "2026-02-20",
+      "event": "Final upstream merge batch; v2.7.6 version bump (e8c47403)"
+    },
+    {
+      "date": "2026-03-13",
+      "event": "Secondary peak (97 commits); test coverage hardening, integration test suite expansion"
+    },
+    {
+      "date": "2026-03-15",
+      "event": "Aperant rebrand sprint begins (auto-claude → aperant, .auto-claude/ → .aperant/)"
+    },
+    {
+      "date": "2026-03-23",
+      "event": "Version 2.8.0-beta.6 bump on the upstream fork only (cba7a027, reachable from upstream/develop not local develop; local apps/desktop/package.json reads 2.8.0-beta.1)"
+    },
+    {
+      "date": "2026-06-14",
+      "event": "Aperant 3.0 rebuild pause announced (official feature freeze)"
+    },
+    {
+      "date": "2026-08-04",
+      "event": "Pre-migration checkpoint on Precision: ClearanceJobs donor patches + knip.json staged"
+    },
+    {
+      "date": "2026-08-05",
+      "event": "Two-machine migration merge: de3c9360 (conflict resolution), cfe94e78 (reconciliation report), f66e37d8 (workstream emit)"
+    }
+  ],
+  "modules": [
+    {
+      "path": "apps/desktop/src/main/ai",
+      "purpose": "Vercel AI SDK v6 orchestration layer (replaces Python Claude Agent SDK). Manages agent sessions, tool execution, multi-provider LLM routing, and all AI-powered features.",
+      "workstreams": [
+        "WS-SDK-MIGRATION",
+        "WS-CORE-DESKTOP-APP",
+        "WS-AGENT-PIPELINE",
+        "WS-SPEC-PIPELINE"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/agent",
+      "purpose": "Agent lifecycle management: queue routing, worker thread spawning, state tracking, and event dispatch for task execution.",
+      "workstreams": [
+        "WS-AGENT-PIPELINE"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ipc-handlers",
+      "purpose": "40+ Electron IPC endpoints: agent events, settings, project ops, GitHub/GitLab, terminal, memory, insights, changelog, and more. Main↔Renderer bridge.",
+      "workstreams": [
+        "WS-IPC-COMMUNICATION",
+        "WS-CORE-DESKTOP-APP",
+        "WS-GITHUB-INTEGRATION",
+        "WS-GITLAB-INTEGRATION"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/terminal",
+      "purpose": "PTY daemon + lifecycle management. Full terminal integration with Claude agent support and xterm.js renderer bridge.",
+      "workstreams": [
+        "WS-TERMINAL-SYSTEM"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/platform",
+      "purpose": "Cross-platform abstraction: OS detection, executable lookup, path resolution, shell detection. Enforces portable code patterns.",
+      "workstreams": [
+        "WS-CORE-DESKTOP-APP"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/claude-profile",
+      "purpose": "Multi-account credential management: OAuth token refresh, usage monitoring, rate-limit-aware profile switching, OS keychain integration.",
+      "workstreams": [
+        "WS-PROFILE-MANAGEMENT"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/renderer",
+      "purpose": "React 19 UI: components, Zustand stores (24+ types), hooks, styles (7 themes with light/dark), and contexts for desktop app.",
+      "workstreams": [
+        "WS-CORE-DESKTOP-APP",
+        "WS-SETTINGS"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/renderer/components/github-issues",
+      "purpose": "GitHub integration UI, including issue analyzer, PR review orchestrator, and error parser utilities.",
+      "workstreams": [
+        "WS-GITHUB-INTEGRATION"
+      ],
+      "health": "stable"
+    },
+    {
+      "path": "apps/desktop/src/shared",
+      "purpose": "Shared types (19+ files), i18n locales (en/fr), constants, and utility functions for cross-cutting concerns.",
+      "workstreams": [
+        "WS-SETTINGS"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/prompts",
+      "purpose": "Agent system prompts: planner, coder (+ recovery), QA reviewer/fixer, spec pipeline (gather/assess/write/critic), GitHub/GitLab specialized agents (15+ PR/issue prompts).",
+      "workstreams": [
+        "WS-AGENT-PIPELINE",
+        "WS-SPEC-PIPELINE",
+        "WS-GITHUB-INTEGRATION",
+        "WS-GITLAB-INTEGRATION"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ai/providers",
+      "purpose": "Multi-provider adapter registry: Anthropic (primary), OpenAI, Google, Bedrock, Azure, Mistral, Groq, xAI, Ollama. Token normalization, thinking budget mgmt, prompt caching.",
+      "workstreams": [
+        "WS-SDK-MIGRATION"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ai/orchestration",
+      "purpose": "Build pipeline orchestration: planner → coder → QA with recovery paths, parallel subagent spawning, and task context injection.",
+      "workstreams": [
+        "WS-AGENT-PIPELINE"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ai/runners/github",
+      "purpose": "Specialized agents for GitHub: PR review, issue triage, codebase fit analysis, finding validation, followup resolution, logic checks.",
+      "workstreams": [
+        "WS-GITHUB-INTEGRATION"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ai/spec",
+      "purpose": "Specification creation pipeline: researcher → assessor → writer → critic. AI-driven complexity assessment and requirement gathering.",
+      "workstreams": [
+        "WS-SPEC-PIPELINE"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ai/tools",
+      "purpose": "8 builtin tools (Read, Write, Edit, Bash, Glob, Grep, WebFetch, WebSearch) with Zod schemas via AI SDK tool() API.",
+      "workstreams": [
+        "WS-SDK-MIGRATION"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/ai/security",
+      "purpose": "Bash command validator, command parser, and path containment. Ported from Python with identical allowlist behavior.",
+      "workstreams": [
+        "WS-SECURITY"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/mcp",
+      "purpose": "Model Context Protocol client integration via @ai-sdk/mcp. MCP server lifecycle and tool discovery.",
+      "workstreams": [
+        "WS-MCP-INTEGRATION"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/src/main/memory",
+      "purpose": "Graphiti-based semantic memory: graph-based knowledge retention via Python MCP sidecar, configured through settings UI.",
+      "workstreams": [
+        "WS-MEMORY-SYSTEM"
+      ],
+      "health": "stable"
+    },
+    {
+      "path": "apps/desktop/src/main/changelog",
+      "purpose": "Release notes generation from completed tasks and git history. Markdown-to-HTML rendering.",
+      "workstreams": [
+        "WS-CHANGELOG"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "apps/desktop/e2e",
+      "purpose": "Playwright E2E tests for desktop app. Can run in debug mode via Electron MCP for AI self-validation.",
+      "workstreams": [
+        "WS-CORE-DESKTOP-APP"
+      ],
+      "health": "active"
+    },
+    {
+      "path": ".github/workflows",
+      "purpose": "CI/CD automation: build, test, package for macOS/Windows/Linux, release on PR merge to main.",
+      "workstreams": [
+        "WS-CORE-DESKTOP-APP"
+      ],
+      "health": "active"
+    },
+    {
+      "path": "spec-025-job-ingestion-pipeline",
+      "purpose": "Job ingestion pipeline feature (Python tests: test_pipeline, test_job_standardizer, test_exporters, test_program_mapper). Status unknown: ready-to-ship, WIP, or parked?",
+      "workstreams": [
+        "WS-SPEC-025-JOB-INGESTION"
+      ],
+      "health": "unknown"
+    },
+    {
+      "path": "donor-clearancejobs-contact-pipeline",
+      "purpose": "10 patch files (0001-0010) for ClearanceJobs contact pipeline. Untracked; PII concerns pending audit → decision (commit/split/ignore).",
+      "workstreams": [
+        "WS-DONOR-PIPELINE"
+      ],
+      "health": "stalled"
+    },
+    {
+      "path": "BD-Automation-Engine",
+      "purpose": "Nested git repo (own reconcile, own emit). Out of scope for this repo's mapping; covered by separate WS-BD-AUTOMATION-ENGINE-NESTED workstream emit.",
+      "workstreams": [
+        "WS-BD-AUTOMATION-ENGINE-NESTED"
+      ],
+      "health": "stable"
+    }
+  ],
+  "orphans": [
+    {
+      "path": "apps/frontend",
+      "note": "Dead code: empty directory except node_modules. Previous web UI entirely replaced by Electron desktop app (apps/desktop). No active consumers. Candidate for deletion."
+    },
+    {
+      "path": "apps/backend",
+      "note": "Dead code: empty except .env stub. Backend logic migrated to AI agent layer (apps/desktop/src/main/ai). No active consumers. Candidate for deletion."
+    },
+    {
+      "path": ".design-system",
+      "note": "Stale stub: pre-Vercel SDK migration component reference. No active Electron app consumers. Component library work now done in apps/desktop/src/renderer/components. Candidate for archival."
+    },
+    {
+      "path": "BD-Engine-v2",
+      "note": "Dead code: 4.4 GB untracked duplicate of BD automation engine (measured 2026-08-09). Superseded by BD-Automation-Engine nested repo (own git, own remote). Candidate for deletion (on-disk junk)."
+    },
+    {
+      "path": "getshitdone",
+      "note": "Unknown utility: untracked, minimal. Purpose unclear. No evidence of active consumption. Investigate and either document its role or delete."
+    },
+    {
+      "path": "outputs/daily_call_list.*",
+      "note": "PII junk: scheduler-generated artifacts (HTML/JSON/MD). Never commit PII. Untracked correctly. Clean before git operations."
+    },
+    {
+      "path": "knip.json",
+      "note": "Dead-code analyzer config, untracked. Decision pending: commit as development tooling or keep local-only. Currently neither in origin/develop nor consistently used."
+    },
+    {
+      "path": "tests/ (Python)",
+      "note": "Python test files from pre-SDK-migration era. Superseded by Vitest (apps/desktop). Candidate for archival or deletion after verification they don't cover spec-025 or other live features."
+    },
+    {
+      "path": "run.py",
+      "note": "Python script from pre-SDK-migration. Likely stale. All agent execution now via Vercel AI SDK v6 (TypeScript). Candidate for deletion."
+    }
+  ],
+  "integration_gaps": [
+    {
+      "built_a": "apps/desktop/src/main/ai/config/agent-configs.ts (declares mcp__auto-claude__* tools for planner/coder/QA at lines 44, 254, 271, 282) + apps/desktop/src/main/ai/tools/auto-claude/index.ts (7 tool definitions)",
+      "built_b": "auto-claude-mcp-server.js (does not exist yet) — spawn target declared at apps/desktop/src/main/ai/mcp/registry.ts:115",
+      "why_connect": "Agents declare dependency on 'auto-claude' MCP server in config, but server doesn't exist. Session introspection tools (recordDiscovery, recordGotcha, updateSubtaskStatus, getBuildProgress) cannot execute.",
+      "effort": "L",
+      "payoff": "Session memory recording, discovery logging, progress tracking, gotcha capture for coder and QA phases—core features for multi-session learning",
+      "evidence": "apps/desktop/src/main/ai/mcp/registry.ts creates Auto-Claude MCP server config targeting non-existent auto-claude-mcp-server.js; agent-configs.ts lists 'auto-claude' in mcpServers for coder/planner/qa roles; tools exist (apps/desktop/src/main/ai/tools/auto-claude/) but never instantiated"
+    },
+    {
+      "built_a": "apps/desktop/src/main/ai/tools/auto-claude/record-discovery.ts + apps/desktop/src/main/ai/tools/auto-claude/record-gotcha.ts",
+      "built_b": "instantiation wiring in apps/desktop/src/main/ai/session/index.ts or the MCP server entry auto-claude-mcp-server.js (does not exist yet) — no file outside tools/auto-claude/ imports these tools (verified 2026-08-09)",
+      "why_connect": "Tools are defined and listed in coder/qa agent configs but have no execution path. MCP server that would invoke them is unimplemented.",
+      "effort": "S",
+      "payoff": "Unblock coder/QA agents from recording codebase discoveries and pitfalls to session memory; currently dead code",
+      "evidence": "apps/desktop/src/main/ai/tools/auto-claude/record-discovery.ts and record-gotcha.ts defined with Zod schemas; TOOL_RECORD_DISCOVERY constant in agent-configs.ts; no tool-instantiation code or MCP handler exists"
+    },
+    {
+      "built_a": "spec-025-job-ingestion-pipeline/scripts/job_ingestion/ingestion_pipeline.py (+ 6 sibling modules, outputs in spec-025-job-ingestion-pipeline/outputs/)",
+      "built_b": ".auto-claude/specs/025-job-ingestion/spec.md and requirements.json (do not exist yet) — the spec-pipeline entry point apps/desktop/src/main/ai/spec/ and orchestrator apps/desktop/src/main/ai/orchestration/index.ts never reference the pipeline",
+      "why_connect": "Pipeline was built and outputs generated successfully but never formalized as a spec or integrated into the auto-build orchestration",
+      "effort": "M",
+      "payoff": "Job ingestion becomes part of automated BD workflow; can be retrained on new data; outputs feed downstream programs/contractor matching",
+      "evidence": "spec-025-job-ingestion-pipeline/ directory with README, Python scripts, and 7 successful JSON outputs; commit 52f4505a (2026-01-26); no spec.md, no requirements.json, no acceptance criteria; not referenced in any orchestration code"
+    },
+    {
+      "built_a": "donor-clearancejobs-contact-pipeline/0001-docs-bd-ClearanceJobs-Contact-pipeline-design-spec.patch through 0010-docs-cj-pipeline-completion-continuity-ledger.patch + clearancejobs-contact-pipeline.mine.patch (11 files, ~332 KB, untracked)",
+      "built_b": "docs/consolidation/donor-pii-audit.md (does not exist yet) — no audit record or applied-patch target exists in the tracked tree",
+      "why_connect": "Patches were authored and secured but never audited for PII content or applied to develop. Workflow incomplete.",
+      "effort": "S",
+      "payoff": "ClearanceJobs pipeline capability available to team; can re-enable candidate contact enrichment",
+      "evidence": "donor-clearancejobs-contact-pipeline/ untracked directory with 0001-0010 patches totaling ~280 KB; 02428faf secured pre-migration; MIGRATION-MANUAL Part 6 §7 flags PII concern; no audit completed, decision pending"
+    },
+    {
+      "built_a": "knip.json (repo root, untracked)",
+      "built_b": "apps/desktop/package.json (no knip devDependency/script yet; knip.json absent from origin/develop per git ls-tree 2026-08-09; xstate 5.28 bump also not re-applied there)",
+      "why_connect": "knip.json and xstate 5.28 bump authored but not on develop; decision pending on tooling ownership (local vs. team)",
+      "effort": "S",
+      "payoff": "Team gains automated dead-code detection; codebase stays clean",
+      "evidence": "knip.json untracked on Precision; 260148b3 shows both changes committed pre-migration; no verification of origin/develop state post-reconcile"
+    },
+    {
+      "built_a": "apps/desktop/src/renderer/components/github-issues/utils/github-error-parser.ts (parser implementation)",
+      "built_b": "apps/desktop/src/renderer/components/github-issues/utils/__tests__/github-error-parser.test.ts (1 time-dependent flaky test)",
+      "why_connect": "Parser fully implemented and tested; 1 upstream time-dependent test flakes intermittently (known baseline issue)",
+      "effort": "S",
+      "payoff": "Fix or accept baseline flake; no payoff to integration (already working)",
+      "evidence": "apps/desktop/src/renderer/components/github-issues/utils/__tests__/github-error-parser.test.ts fails when reset time has passed (time-dependent); test suite 4196/4205 pass at reconcile (1 flaky); known upstream issue per RECONCILE-2026-08-05-develop-510x6.md (repo root)"
+    }
+  ],
+  "near_done": [
+    {
+      "workstream": "Spec-025: Job Ingestion Pipeline",
+      "pct": 85,
+      "what_remains": "Characterize completion status (ship vs. archive decision); if shipping, formalize as spec (move to .auto-claude/specs/025-*/), port Python to TypeScript or wrap execution, write acceptance criteria and test suite",
+      "effort": "M"
+    },
+    {
+      "workstream": "ClearanceJobs Contact Pipeline (Donor patches)",
+      "pct": 70,
+      "what_remains": "PII audit of 10 patch files; decide commit vs. archive; if committing, test patch application and integrate into donor-automation workflows",
+      "effort": "M"
+    },
+    {
+      "workstream": "Knip Tooling + XState Bump",
+      "pct": 95,
+      "what_remains": "Verify knip.json presence on origin/develop; decide local-only vs. develop; if develop, re-apply xstate bump and test build",
+      "effort": "S"
+    },
+    {
+      "workstream": "Test Suite: GitHub Error Parser",
+      "pct": 99,
+      "what_remains": "Fix or accept 1 flaky time-dependent test (upstream baseline issue); no blocker to shipping",
+      "effort": "S"
+    }
+  ]
+}
