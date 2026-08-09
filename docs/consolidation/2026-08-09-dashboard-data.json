@@ -24,7 +24,7 @@
       "id": "WS-DONOR-PIPELINE",
       "name": "ClearanceJobs candidate contact pipeline (donor patches)",
       "status": "STALLED",
-      "pct_complete": 5,
+      "pct_complete": 70,
       "built": "11 files, ~332 KB (measured 2026-08-09): 10 numbered donor patches (0001-0010) covering design spec, LinkedIn enrichment, pipeline foundation, spine (Stage A-C), paste-resume lanes, quality fixes, memory-safe Ollama, INDEX.md documentation, and completion ledger, plus combined clearancejobs-contact-pipeline.mine.patch. Patches applied to local-develop-2026-08-04 pre-migration (commit 02428faf 2026-08-04). Untracked directory created post-reconcile with all patches intact.",
       "key_files": [
         "D:\\Auto-Claud\\Auto-Claude\\donor-clearancejobs-contact-pipeline\\0001-docs-bd-ClearanceJobs-Contact-pipeline-design-spec.patch",
@@ -39,7 +39,7 @@
       "id": "WS-KNIP-XSTATE-UPDATE",
       "name": "Dead-code analyzer (knip) + xstate dependency version bump",
       "status": "STALLED",
-      "pct_complete": 0,
+      "pct_complete": 95,
       "built": "knip.json configuration file added locally (commit 260148b3, 2026-08-04, pre-migration). xstate version bump to 5.28 attempted but not re-applied post-reconcile. File sits untracked; no integration into package.json or build pipeline yet.",
       "key_files": [
         "D:\\Auto-Claud\\Auto-Claude\\knip.json (untracked)"

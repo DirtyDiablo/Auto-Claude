@@ -206,7 +206,8 @@ MCP integration is resilient to server startup failures; agent session logs indi
 **Risk if deferred:** Coder/QA agents operate without session discovery logging; multi-session insights unavailable.  
 **Risk if built now:** 5–10 days delay to shipping; context overhead.  
 **Suggested:** Defer to **Wave 1 post-launch** (iterate with real agent telemetry).  
-**Unblocks:** Clarity on Phase 9 go-live scope.
+**Unblocks:** Clarity on Phase 9 go-live scope.  
+**Suggested timeline:** Rule it at the same sitting as D1–D3; execution deferred to Wave 1 regardless.
 
 ---
 

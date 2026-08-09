@@ -92,8 +92,8 @@ gantt
 | ID | Name | Status | % | Next Action | Evidence |
 |----|------|--------|---|-------------|----------|
 | **WS-SDK-MIGRATION** | Vercel AI SDK v6 + Python agent layer retirement | ✅ DONE | 100 | Run npm test on Precision to verify baseline | Merge commit de3c9360; reconcile cfe94e78 (4,196/4,205 pass) |
-| **WS-DONOR-PIPELINE** | ClearanceJobs contact pipeline patches | 🟡 STALLED | 5 | Audit patches for PII; if clean, commit; else archive | Untracked dir; 02428faf pre-merge; MIGRATION-MANUAL Part 6 flags NFR-2 |
-| **WS-KNIP-XSTATE-UPDATE** | Dead-code analyzer (knip) + xstate 5.28 bump | 🟡 STALLED | 0 | Check origin/develop for knip.json; decide commit vs. local-only | Untracked knip.json; commit 260148b3 pre-merge |
+| **WS-DONOR-PIPELINE** | ClearanceJobs contact pipeline patches | 🟡 STALLED | 70 | Audit patches for PII; if clean, commit; else archive | Untracked dir; 02428faf pre-merge; MIGRATION-MANUAL Part 6 flags NFR-2 |
+| **WS-KNIP-XSTATE-UPDATE** | Dead-code analyzer (knip) + xstate 5.28 bump | 🟡 STALLED | 95 | Check origin/develop for knip.json; decide commit vs. local-only | Untracked knip.json; commit 260148b3 pre-merge |
 | **WS-SPEC-025-JOB-INGESTION** | Job ingestion pipeline (spec-025 feature branch) | ❓ UNKNOWN | 85 | Characterize completion status; formalize spec or archive | Commit 52f4505a (2026-01-26); 243 jobs processed, 100% upload success |
 | **WS-APP-RENAME** | Rebrand 'Auto Claude' to 'Aperant' in documentation | ✅ DONE | 100 | Closed | Commit 96ea7d36 |
 | **WS-PROFILE-PRIMARY-POLICIES** | Restoration of policy-limits.json & email rules | ✅ DONE | 100 | Closed | CLAUDE.md rules 7–8 enforced; policy-limits.json restored |
@@ -126,7 +126,7 @@ Run `npm test` on Precision to verify results persist. Target: zero new regressi
 
 ---
 
-### 🟡 WS-DONOR-PIPELINE (STALLED, 5%)
+### 🟡 WS-DONOR-PIPELINE (STALLED, 70%)
 
 **What was built:**  
 11 files, ~332 KB measured 2026-08-09: 10 numbered donor patches (0001–0010) covering ClearanceJobs pipeline design, LinkedIn enrichment, pipeline spine (Stage A–C), paste-resume lanes, quality fixes, memory-safe Ollama, INDEX.md — plus the combined `clearancejobs-contact-pipeline.mine.patch`. Secured pre-migration via commit 02428faf (emit's message says patches 0001–0006; the on-disk directory now holds 0001–0010).
@@ -143,7 +143,7 @@ George: Inspect patches for PII (ClearanceJobs is sensitive). If clean, `git add
 
 ---
 
-### 🟡 WS-KNIP-XSTATE-UPDATE (STALLED, 0%)
+### 🟡 WS-KNIP-XSTATE-UPDATE (STALLED, 95%)
 
 **What was built:**  
 `knip.json` configuration file (dead-code analyzer) + xstate 5.28 version bump. Committed pre-migration (260148b3).
